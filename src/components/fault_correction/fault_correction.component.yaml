@@ -1,0 +1,32 @@
+---
+description: |
+  The Fault Correction component receives faults asynchronously. When it processes a fault, it determines the correct command correction to send and sends it.
+execution: active
+init:
+  description: The component is initialized by providing an access to a list of fault response configuration records.
+  parameters:
+    - name: Fault_Response_Configurations
+      type: Fault_Correction_Types.Fault_Response_Config_List
+      description: "An access to a list of fault response configurations."
+connectors:
+  - description: This is the command recieve connector.
+    type: Command.T
+    kind: recv_async
+  - description: This connector is used to send command responses.
+    type: Command_Response.T
+    kind: send
+  - description: Faults are received asynchronously on this connector.
+    type: Fault.T
+    kind: recv_async
+  - description: The command send connector, for sending correction commands for faults.
+    type: Command.T
+    kind: send
+  - description: Data products are sent out of this connector.
+    type: Data_Product.T
+    kind: send
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get

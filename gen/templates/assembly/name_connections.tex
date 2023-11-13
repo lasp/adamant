@@ -1,0 +1,34 @@
+%- if connections
+\captionof{table}{\VAR{prettyname|e} Connections}
+{\renewcommand{\arraystretch}{2.2} %<- modify value to suit your needs
+\begin{xltabular}{\textwidth}{ | c | X | X | c | }
+  \hline
+  \textbf{Number} & \textbf{From} & \textbf{To} & \textbf{Kind} \\ \hline
+%- for connection in connections
+  \texttt{\VAR{loop.index}} &
+  \texttt{\url{\VAR{connection.from_component.instance_name}.\VAR{connection.from_connector.name}}}
+%- if connection.from_connector.count != 1
+  \texttt{[\VAR{connection.from_index}]}
+%- endif
+  &
+  \texttt{\url{\VAR{connection.to_component.instance_name}.\VAR{connection.to_connector.name}}}
+  &
+  \texttt{\url{\VAR{connection.from_connector.kind}-\VAR{connection.to_connector.kind}}}
+  \\ \hline
+%- endfor
+\end{xltabular}}
+\vspace{5mm} %5mm vertical space
+
+Connection Descriptions:
+\begin{spaceditemize}
+%- for connection in connections
+  \item \textbf{\texttt{\url{\VAR{connection.name}}}} - 
+%- if connection.description
+    \VAR{connection.description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+%- endif

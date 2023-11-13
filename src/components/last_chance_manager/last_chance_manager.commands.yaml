@@ -1,0 +1,7 @@
+---
+description: Commands for the Last Chance Manager component.
+commands:
+  - name: Dump_Last_Chance_Handler_Region
+    description: Dump the last chance handler memory region into a packet for downlink.
+  - name: Clear_Last_Chance_Handler_Region
+    description: Clear the last chance handler memory region by writing all zeros to it.

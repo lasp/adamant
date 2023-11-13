@@ -1,0 +1,191 @@
+Below are details on how the component should be initialized in an assembly.
+
+%- if generic
+\subsubsection{Generic Component Instantiation}
+%- if generic.description
+\VAR{generic.description|e}
+%- endif
+This component contains generic formal types. These generic formal types must be instantiated with a valid actual type prior to component initialization. This is done by specifying types for the following generic formal parameters:
+
+\captionof{table}{\VAR{prettyname|e} Generic Formal Types}
+\begin{xltabular}{\textwidth}{ | l | X | }
+  \hline
+  \textbf{Name} & \textbf{Formal Type Definition} \\ \hline
+%- for par in generic.formal_parameters
+  \texttt{\VAR{par.name|e}} & \texttt{\VAR{par.formal_type|e}}  \\ \hline
+%- endfor
+\end{xltabular}
+\vspace{5mm} %5mm vertical space
+
+Generic Formal Type Descriptions:
+\begin{spaceditemize}
+%- for par in generic.formal_parameters
+  \item \textbf{\texttt{\VAR{par.name|e}}} - \VAR{par.description|e}
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+
+%- endif
+%- if tasks.has_subtasks
+\subsubsection{Component Subtask Instantiation}
+
+This component contains subtasks. Subtasks are distinct from the component's standard active or passive configuration. Subtasks must be initialized with their own stack, secondary stack, and execution priority during initialization. This component contains the following subtasks.
+\vspace{5mm} %5mm vertical space
+
+Component Subtasks:
+\begin{spaceditemize}
+%- for subtask in tasks.subtask_list
+  \item \textbf{\texttt{\VAR{subtask.name|e}}} - \VAR{subtask.description|e}
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+
+%- endif
+\subsubsection{Component Instantiation}
+%- if discriminant.description
+\VAR{discriminant.description|e}
+%- endif
+%- if discriminant.parameters
+This component contains the following instantiation parameters in its discriminant:
+
+\captionof{table}{\VAR{prettyname|e} Instantiation Parameters}
+\begin{xltabular}{\textwidth}{ | l | X | }
+  \hline
+  \textbf{Name} & \textbf{Type} \\ \hline
+%- for par in discriminant.parameters
+  \texttt{\VAR{par.name|e}} & \texttt{\url{\VAR{par.type}}}  \\ \hline
+%- endfor
+\end{xltabular}
+\vspace{5mm} %5mm vertical space
+
+Parameter Descriptions:
+\begin{spaceditemize}
+%- for par in discriminant.parameters
+  \item \textbf{\texttt{\VAR{par.name|e}}} - \VAR{par.description|e}
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+%- else
+This component contains no instantiation parameters in its discriminant.
+%- endif
+
+\subsubsection{Component Base Initialization}
+%- if init_base
+This component achieves base class initialization using the \texttt{init\_Base} subprogram. This subprogram requires the following parameters:
+
+\captionof{table}{\VAR{prettyname|e} Base Initialization Parameters}
+\begin{xltabular}{\textwidth}{ | l | X | }
+  \hline
+  \textbf{Name} & \textbf{Type} \\ \hline
+%- for parameter in init_base.parameters
+  \texttt{\VAR{parameter.name|e}} & \texttt{\url{\VAR{parameter.type}}}  \\ \hline
+%- endfor
+\end{xltabular}
+\vspace{5mm} %5mm vertical space
+
+Parameter Descriptions:
+\begin{spaceditemize}
+%- for parameter in init_base.parameters
+  \item \textbf{\texttt{\VAR{parameter.name|e}}} - \VAR{parameter.description|e}
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+%- else
+This component contains no base class initialization, meaning there is no \texttt{init\_Base} subprogram for this component.
+%- endif
+
+\subsubsection{Component Set ID Bases}
+%- if set_id_bases
+This component contains commands, events, packets, faults, or data products that require a base identifier to be set at initialization. The \texttt{set\_Id\_Bases} procedure must be called with the following parameters:
+
+\captionof{table}{\VAR{prettyname|e} Set Id Bases Parameters}
+\begin{xltabular}{\textwidth}{ | l | X | }
+  \hline
+  \textbf{Name} & \textbf{Type} \\ \hline
+%- for parameter in set_id_bases.parameters
+  \texttt{\VAR{parameter.name|e}} & \texttt{\url{\VAR{parameter.type}}}  \\ \hline
+%- endfor
+\end{xltabular}
+\vspace{5mm} %5mm vertical space
+
+Parameter Descriptions:
+\begin{spaceditemize}
+%- for parameter in set_id_bases.parameters
+  \item \textbf{\texttt{\VAR{parameter.name|e}}} - \VAR{parameter.description|e}
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+%- else
+This component contains no commands, events, packets, faults or data products that need base indentifiers.
+%- endif
+
+\subsubsection{Component Map Data Dependencies}
+%- if map_data_dependencies
+This component contains data dependencies that need their IDs mapped to valid data product IDs at initialization. Each data dependency also needs a stale limit provided in microseconds. If the timestamp of the data dependency is older than the reference time (usually the current time) minus the stale limit then the data dependency is considered too old to safely use. The \texttt{map\_Data\_Dependencies} procedure must be called with the following parameters:
+
+\captionof{table}{\VAR{prettyname|e} Map Data Dependencies Parameters}
+\begin{xltabular}{\textwidth}{ | l | X | }
+  \hline
+  \textbf{Name} & \textbf{Type} \\ \hline
+%- for parameter in map_data_dependencies.parameters
+  \texttt{\VAR{parameter.name|e}} & \texttt{\url{\VAR{parameter.type}}}  \\ \hline
+%- endfor
+\end{xltabular}
+\vspace{5mm} %5mm vertical space
+
+Parameter Descriptions:
+\begin{spaceditemize}
+%- for parameter in map_data_dependencies.parameters
+  \item \textbf{\texttt{\VAR{parameter.name|e}}} - \VAR{parameter.description|e}
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+%- else
+This component contains no data dependencies.
+%- endif
+
+\subsubsection{Component Implementation Initialization}
+%- if init
+The calling of this implementation class initialization procedure is mandatory.
+%- if init.description
+\VAR{init.description|e}
+%- else
+The component achieves implementation class initialization using the \texttt{init} subprogram.
+%- endif
+%- if init.parameters
+The \texttt{init} subprogram requires the following parameters:
+
+\captionof{table}{\VAR{prettyname|e} Implementation Initialization Parameters}
+\begin{xltabular}{\textwidth}{ | l | X | X | }
+  \hline
+  \textbf{Name} & \textbf{Type} & \textbf{Default Value} \\ \hline
+%- for parameter in init.parameters
+  \texttt{\VAR{parameter.name|e}} & \texttt{\url{\VAR{parameter.type}}} &
+%- if parameter.default_value
+  \texttt{\url{\VAR{parameter.default_value}}}
+%- else
+  \textit{None provided}
+%- endif
+  \\ \hline
+%- endfor
+\end{xltabular}
+\vspace{5mm} %5mm vertical space
+
+Parameter Descriptions:
+\begin{spaceditemize}
+%- for parameter in init.parameters
+  \item \textbf{\texttt{\VAR{parameter.name|e}}} - 
+%- if parameter.description
+    \VAR{parameter.description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+%- else
+The  \texttt{init} subprogram takes no parameters.
+%- endif
+%- else
+This component contains no implementation class initialization, meaning there is no \texttt{init} subprogram for this component.
+%- endif

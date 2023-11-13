@@ -1,0 +1,85 @@
+seq lots_args_19
+  ; Lots of arguments test:
+  argument arg1 u32
+  argument arg2 u16
+  argument arg3 u8
+  argument arg4 i32
+  argument arg5 i16
+  argument arg6 i8
+  argument arg7 f32
+  argument arg8 f32
+  argument arg9 f32
+  argument arg10 f32
+  argument arg11 u32
+  argument arg12 u32
+  argument arg13 u32
+  argument arg14 u32
+  argument arg15 u32
+  argument arg16 u32
+
+  if $arg1 != 1
+    set $arg1 = $arg1 / 0
+  endif
+
+  if $arg2 != 2
+    set $arg1 = $arg1 / 0
+  endif
+  
+  if $arg3 != 3
+    set $arg1 = $arg1 / 0
+  endif
+  
+  if $arg4 != -4
+    set $arg1 = $arg1 / 0
+  endif
+  
+  if $arg5 != 5
+    set $arg1 = $arg1 / 0
+  endif
+  
+  if $arg6 != -6
+    set $arg1 = $arg1 / 0
+  endif
+  
+  if $arg7 != 1.1
+    set $arg1 = $arg1 / 0
+  endif
+  
+  if $arg8 != -1.2
+    set $arg1 = $arg1 / 0
+  endif
+  
+  if $arg9 != 1.5
+    set $arg1 = $arg1 / 0
+  endif
+  
+  if $arg10 != -1.6
+    set $arg1 = $arg1 / 0
+  endif
+
+  if $arg11 != 7
+    set $arg1 = $arg1 / 0
+  endif
+
+  if $arg12 != 8
+    set $arg1 = $arg1 / 0
+  endif
+
+  if $arg13 != 9
+    set $arg1 = $arg1 / 0
+  endif
+
+  if $arg14 != 10
+    set $arg1 = $arg1 / 0
+  endif
+
+  if $arg15 != 11
+    set $arg1 = $arg1 / 0
+  endif
+
+  if $arg16 != 12
+    set $arg1 = $arg1 / 0
+  endif
+
+  cmd Component_A.Command_3 Value 19
+endseq

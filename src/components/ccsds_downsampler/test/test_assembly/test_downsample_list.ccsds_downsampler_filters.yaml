@@ -1,0 +1,19 @@
+---
+description: Data products for the ccsds downsampler component.
+downsampled_packets:
+  - apid: 100
+    filter_factor: 0
+    packet_name: First_Packet
+    description: The first filter packet
+  - apid: 200
+    filter_factor: 3
+    packet_name: Second_Packet
+    description: The second filter packet
+  - apid: 300
+    filter_factor: 1
+    description: The unnamed filter packet
+  - apid: 400
+    filter_factor: 4
+    packet_name: Last_Packet
+  - apid: 500
+    filter_factor: 2

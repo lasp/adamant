@@ -1,0 +1,30 @@
+---
+description: These are enumerations used for data product handling.
+enums:
+  - name: Fetch_Status
+    description: This status denotes whether a data product fetch was successful.
+    literals:
+      - name: Success
+        value: 0
+        description: The data product was returned successfully.
+      - name: Not_Available
+        value: 1
+        description: No data product is yet available for the provided id.
+      - name: Id_Out_Of_Range
+        value: 2
+        description: The data product id was out of range.
+  - name: Data_Dependency_Status
+    description: This status denotes whether or not parsing a data dependency was successful.
+    literals:
+      - name: Success
+        value: 0
+        description: The data dependency was parsed successfully.
+      - name: Not_Available
+        value: 1
+        description: The data dependency is not available.
+      - name: Error
+        value: 2
+        description: An unpexpected error was encountered when parsing the data dependency. This indicates an assembly level synchronization error. The ID or Length of the fetched data product did not match the expected ID or Length of the data dependency.
+      - name: Stale
+        value: 3
+        description: The data dependency is too old to be considered valid for use.

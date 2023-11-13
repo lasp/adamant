@@ -1,0 +1,28 @@
+abstract project a_bareboard_debug extends all "a_bareboard_base.gpr" is
+
+   -- Turn on no optimization and debug flags. This is common configuration
+   -- for targets Debug and under
+   package Compiler is
+      -- Add preprocessor definitions and configuration pragma switches:
+      for Switches ("Ada") use a_bareboard_base.Compiler'Switches ("Ada") &
+         -- optimization
+         ("-O0") &
+         -- Turn on assertions and numeric overflow checking:
+         -- -gnato - enable numeric overflow checking
+         -- -gnata - assertions are enabled
+         ("-gnato", "-gnata") &
+         -- Turn on ALL validity checking, not just that which is specified in the Ada Reference Manual.
+         -- This combined with Initialize_Scalars, below, greatly aids in discovering uninitializated 
+         -- variable bugs.
+         ("-gnatVa");
+
+      for Switches ("C") use a_bareboard_base.Compiler'Switches ("C") &
+         -- optimization
+         ("-O0");
+
+      for Switches ("Asm_Cpp") use a_bareboard_base.Compiler'Switches ("Asm_Cpp") &
+         -- optimization
+         ("-O0");
+   end Compiler;
+
+end a_bareboard_debug;

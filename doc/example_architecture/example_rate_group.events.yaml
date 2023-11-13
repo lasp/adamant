@@ -1,0 +1,8 @@
+---
+events:
+  - name: Cycle_Slip
+    description: Execution ran long on this cycle.
+    param_type: Cycle_Slip_Param.T
+  - name: Incoming_Tick_Dropped
+    description: The rate group component's queue is full, so it cannot store the tick coming in. This usually means the rate group is cycle slipping and not running as fast as it needs to.
+    param_type: Tick.T

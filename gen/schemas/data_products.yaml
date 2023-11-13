@@ -1,0 +1,30 @@
+---
+# This schema describes the yaml format for a data_products suite.
+type: map
+mapping:
+  # Description of the data_products suite.
+  description:
+    type: str
+    required: False
+  # List of data_products items to include in the suite.
+  data_products:
+    seq:
+      - type: map
+        mapping:
+          # Name of the data_products item.
+          name:
+            type: str
+            required: True
+          # Description of the data_products item.
+          description:
+            type: str
+            required: False
+          # The type of the data_products item. Using a packed record or packed
+          # array type is recommended here.
+          type:
+            type: str
+            required: True
+    # A data_products suite must have at least one data_products item.
+    range:
+      min: 1
+    required: True

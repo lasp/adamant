@@ -1,0 +1,32 @@
+The table below shows the data products for the \VAR{prettyname|e} assembly.
+
+%- if data_products
+\captionof{table}{\VAR{prettyname|e} Data Products}
+{\renewcommand{\arraystretch}{2.2} %<- modify value to suit your needs
+\begin{xltabular}{\textwidth}{ | l | X | X | }
+  \hline
+  \textbf{Data Product ID} & \textbf{Data Product Name} & \textbf{Type} \\ \hline
+%- for id, dp in data_products.items()
+  \texttt{0x\VAR{"%04x" % id } (\VAR{ dp.id })} &
+  \texttt{\url{\VAR{dp.suite.component.instance_name}.\VAR{dp.name}}} &
+  \texttt{\url{\VAR{dp.type}}}
+  \\ \hline
+%- endfor
+\end{xltabular}}
+\vspace{5mm} %5mm vertical space
+
+Data Product Descriptions:
+\begin{spaceditemize}
+%- for id, dp in data_products.items()
+  \item \textbf{\texttt{\url{\VAR{dp.suite.component.instance_name}.\VAR{dp.name}}}} -
+%- if dp.description
+    \VAR{dp.description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+%- else 
+\par The \VAR{prettyname|e} assembly has no data products.
+%- endif

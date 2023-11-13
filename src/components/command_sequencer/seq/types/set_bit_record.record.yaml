@@ -1,0 +1,15 @@
+---
+description: A packed record for seq's set bit pattern instruction. Opcode 0.
+fields:
+  - name: Opcode
+    description: Instruction code
+    type: Basic_Types.Byte
+    format: U8
+  - name: Pad
+    description: Padding
+    type: Basic_Types.Byte
+    format: U8
+  - name: Length
+    description: The length of the encoded command and it's argument buffer.
+    type: Interfaces.Unsigned_16
+    format: U16

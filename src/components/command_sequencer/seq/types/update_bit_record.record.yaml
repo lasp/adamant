@@ -1,0 +1,28 @@
+---
+description: A packed record for the seq update bit pattern instruction. Opcode 2.
+with:
+  - Command_Header
+  - Command_Types
+preamble: |
+  -- Offset starts at beginning of command, so an offset type for an argument must be at
+  -- least the size of the header.
+  subtype Offset_Type is Natural range Command_Header.Size .. 65535;
+  -- Size of argument cannot be larger than command argument buffer.
+  subtype Size_Type is Positive range Positive'First .. 8 * Command_Types.Command_Arg_Buffer_Type'Length;
+fields:
+  - name: Opcode
+    description: Instruction code
+    type: Basic_Types.Byte
+    format: U8
+  - name: Pad1
+    description: Padding
+    type: Basic_Types.Byte
+    format: U8
+  - name: Offset
+    description: The offset in the command argument buffer.
+    type: Offset_Type
+    format: U16
+  - name: Length
+    description: The length of the region to be written.
+    type: Size_Type
+    format: U32

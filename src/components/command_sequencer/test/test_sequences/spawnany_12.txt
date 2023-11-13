@@ -1,0 +1,8 @@
+seq spawnany_12
+  cmd Component_A.Command_2 Seconds 22 Subseconds 88
+  ; Fill up engines:
+  spawn on 1 commands_01;   Engine 1
+  spawn on any commands_01; Engine 2
+  spawn on any commands_01; Does not exist, should create error.
+  cmd Component_A.Command_2 Seconds 33 Subseconds 99
+endseq

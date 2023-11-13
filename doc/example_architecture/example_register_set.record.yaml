@@ -1,0 +1,14 @@
+---
+description: This is an example register set.
+# The list of registers. In this case, each register
+# has the same bit layout.
+fields:
+  - name: Reg_1
+    description: The first register.
+    type: Example_Register.Register_T_Le
+  - name: Reg_2
+    description: The second register.
+    type: Example_Register.Register_T_Le
+  - name: Reg_3
+    description: The third register.
+    type: Example_Register.Register_T

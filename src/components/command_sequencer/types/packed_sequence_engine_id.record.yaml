@@ -1,0 +1,7 @@
+---
+description: A packed record which holds a sequence engine identifier.
+fields:
+  - name: Engine_Id
+    description: The sequence engine.
+    type: Seq_Types.Sequence_Engine_Id
+    format: U8

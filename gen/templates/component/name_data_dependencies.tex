@@ -1,0 +1,34 @@
+%- if data_dependencies
+%- if data_dependencies.description
+\VAR{data_dependencies.description} \\
+%- else
+\par Below is a list of the data dependencies for the \VAR{prettyname|e} component.
+%- endif
+
+\captionof{table}{\VAR{prettyname|e} Data Dependencies}
+\begin{xltabular}{\textwidth}{ | l | X | }
+  \hline
+  \textbf{Data Dependency Name} & \textbf{Type} \\ \hline
+%- for dd in data_dependencies
+  \texttt{\url{\VAR{dd.name}}} &
+  \texttt{\url{\VAR{dd.type}}}
+  \\ \hline
+%- endfor
+\end{xltabular}
+\vspace{5mm} %5mm vertical space
+
+Data Dependency Descriptions:
+\begin{spaceditemize}
+%- for dd in data_dependencies
+  \item \textbf{\texttt{\VAR{dd.name|e}}} - 
+%- if dd.description
+    \VAR{dd.description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+%- else 
+\par The \VAR{prettyname|e} component has no data dependencies.
+%- endif

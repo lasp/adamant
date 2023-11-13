@@ -1,0 +1,28 @@
+seq return_val_20
+  ; Get the argument
+  argument myArg u32
+
+  ; Add 1 to the argument
+  set $myArg = $myArg + 1
+
+  ; Send out command
+  cmd Component_A.Command_3 Value $myArg
+
+  ; Call this function again. This will recurse to a depth of 3 and each sequence
+  ; will check the return value of the one below it.
+  if $myArg < 3
+    call return_val_20 $myArg
+
+    ; Send out command
+    cmd Component_B.Command_3 Value $RETURN_VAL
+
+    ; Check the return value
+    set $myArg = $myArg + 1
+    if $RETURN_VAL != $myArg
+      set $myArg = $myArg / 0
+    endif
+    set $myArg = $myArg - 1
+  endif
+  
+  return $myArg
+endseq

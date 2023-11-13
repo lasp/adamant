@@ -1,0 +1,5 @@
+---
+description: Packets for the stack monitor.
+packets:
+  - name: Stack_Usage_Packet
+    description: This packet contains stack and secondary stack usage numbers for tasks in the system.

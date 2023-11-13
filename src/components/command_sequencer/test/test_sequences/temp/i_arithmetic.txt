@@ -1,0 +1,256 @@
+seq i_arithmetic
+    declare iVar1 i32
+    declare iVar2 i32
+
+    ;addition
+    set $iVar1 = 4
+    set $iVar2 = $iVar1 + 7
+    if $iVar2 != 11
+        set $iVar2 = $iVar1 / 0
+    endif
+
+    ;negative addition
+    set $iVar1 = 4
+    set $iVar2 = -2
+    set $iVar2 = $iVar1 + $iVar2
+    if $iVar2 != 2
+        set $iVar2 = $iVar1 / 0
+    endif
+
+    ;subtraction
+    set $iVar1 = 20
+    set $iVar2 = $iVar1 - 22
+    if $iVar2 != -2
+        set $iVar2 = $iVar1 / 0
+    endif
+
+    ;Multi
+    set $iVar1 = 2
+    set $iVar2 = $iVar1 * 12
+    if $iVar2 != 24
+        set $iVar2 = $iVar1 / 0
+    endif
+
+    ;Multi
+    set $iVar1 = 2
+    set $iVar2 = $iVar1 * -1
+    if $iVar2 != -2
+        set $iVar2 = $iVar1 / 0
+    endif
+
+    ;Div
+    set $iVar1 = 1
+    set $iVar2 = $iVar1 / 2
+    if $iVar2 != 0
+        set $iVar2 = $iVar1 / 0
+    endif
+
+    ;Mod
+    set $iVar1 = 10
+    set $iVar2 = $iVar1 % 3
+    if $iVar2 != 1
+        set $iVar2 = $iVar1 / 0
+    endif
+ 
+    ;LogicOr false false
+    set $iVar1 = 0
+    set $iVar2 = 0
+    if $iVar2 || $iVar1
+        set $iVar2 = $iVar1 / 0
+    endif
+
+    ;LogicOr true false
+    set $iVar1 = 1
+    set $iVar2 = 0
+    if $iVar2 || $iVar1
+        ;do nothing
+    else
+        set $iVar2 = $iVar1 / 0
+    endif
+
+    ;LogicOr true false
+    set $iVar1 = 1
+    set $iVar2 = 1
+    if $iVar2 || $iVar1
+        ;do nothing
+    else
+        set $iVar2 = $iVar1 / 0
+    endif
+
+    ;LogicAnd
+    set $iVar1 = 0
+    set $iVar2 = 0
+    if $iVar2 && $iVar1
+        set $iVar2 = $iVar1 / 0
+    endif
+
+    ;LogicAnd
+    set $iVar1 = 1
+    set $iVar2 = 0
+    if $iVar2 && $iVar1
+        set $iVar2 = $iVar1 / 0
+    endif
+
+    ;LogicAnd
+    set $iVar1 = 1
+    set $iVar2 = 1
+    if $iVar2 && $iVar1
+        ;do nothing
+    else
+        set $iVar2 = $iVar1 / 0
+    endif
+
+    ;Equals
+    set $iVar1 = 45
+    set $iVar2 = 45
+    if $iVar2 == $iVar1
+        ;do nothing    
+    else
+        set $iVar2 = $iVar1 / 0
+    endif
+
+    ;Equals
+    set $iVar1 = 46
+    set $iVar2 = 45
+    if $iVar2 == $iVar1
+        set $iVar2 = $iVar1 / 0
+    endif
+
+    ;Not Equals
+    set $iVar1 = 45
+    set $iVar2 = 45
+    if $iVar2 != $iVar1
+        set $iVar2 = $iVar1 / 0    
+    endif
+
+    ;Not Equals
+    set $iVar1 = 46
+    set $iVar2 = 45
+    if $iVar2 != $iVar1
+        ;do nothing   
+    else
+        set $iVar2 = $iVar1 / 0   
+    endif
+
+    ;Greater than
+    set $iVar1 = 44
+    set $iVar2 = 45
+    if $iVar1 > $iVar2
+        set $iVar2 = $iVar1 / 0   
+    endif
+
+    ;Greater than
+    set $iVar1 = 46
+    set $iVar2 = 45
+    if $iVar1 > $iVar2
+        ;do nothing   
+    else
+        set $iVar2 = $iVar1 / 0   
+    endif
+
+    ;Greater than
+    set $iVar1 = 45
+    set $iVar2 = 45
+    if $iVar1 > $iVar2
+        set $iVar2 = $iVar1 / 0     
+    endif
+
+    ;Less than
+    set $iVar1 = 46
+    set $iVar2 = 45
+    if $iVar1 < $iVar2
+        set $iVar2 = $iVar1 / 0   
+    endif
+
+    ;Less than
+    set $iVar1 = 44
+    set $iVar2 = 45
+    if $iVar1 < $iVar2
+        ;do nothing   
+    else
+        set $iVar2 = $iVar1 / 0   
+    endif
+
+    ;Less than
+    set $iVar1 = 45
+    set $iVar2 = 45
+    if $iVar1 < $iVar2
+        set $iVar2 = $iVar1 / 0     
+    endif
+    
+    ;Greater equal than
+    set $iVar1 = 44
+    set $iVar2 = 45
+    if $iVar1 >= $iVar2
+        set $iVar2 = $iVar1 / 0   
+    endif
+
+    ;Greater equal than
+    set $iVar1 = 46
+    set $iVar2 = 45
+    if $iVar1 >= $iVar2
+        ;do nothing   
+    else
+        set $iVar2 = $iVar1 / 0   
+    endif
+
+    ;Greater equal than
+    set $iVar1 = 45
+    set $iVar2 = 45
+    if $iVar1 >= $iVar2
+        ;do nothing
+    else 
+        set $iVar2 = $iVar1 / 0     
+    endif
+
+    ;Less equal than
+    set $iVar1 = 46
+    set $iVar2 = 45
+    if $iVar1 <= $iVar2
+        set $iVar2 = $iVar1 / 0   
+    endif
+
+    ;Less equal than
+    set $iVar1 = 44
+    set $iVar2 = 45
+    if $iVar1 <= $iVar2
+        ;do nothing   
+    else
+        set $iVar2 = $iVar1 / 0   
+    endif
+
+    ;Less equal than
+    set $iVar1 = 45
+    set $iVar2 = 45
+    if $iVar1 <= $iVar2
+        ;do nothing
+    else
+        set $iVar2 = $iVar1 / 0     
+    endif
+
+    declare bitres i32
+
+    ;bitwise or
+    set $iVar1 = 12 ;1100
+    set $iVar2 = 10 ;1010
+    set $bitres = $iVar1 | $iVar2 ; 1110 or 14
+    if $bitres != 14
+        set $iVar2 = $iVar1 / 0
+    endif
+
+    ;bitwise and
+    set $iVar1 = 12 ;1100
+    set $iVar2 = 10 ;1010
+    set $bitres = $iVar1 & $iVar2 ; 1000 or 8
+    if $bitres != 8
+        set $iVar2 = $iVar1 / 0
+    endif
+
+    ;bitwise xor
+    set $iVar1 = 12 ;1100
+    set $iVar2 = 10 ;1010
+    set $bitres = $iVar1 ^ $iVar2 ; 0110 or 6
+    if $bitres != 6
+        set $iVar2 = $iVar1 / 0
+    endif
+endseq

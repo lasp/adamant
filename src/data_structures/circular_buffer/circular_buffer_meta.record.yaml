@@ -1,0 +1,15 @@
+---
+description: This record holds meta data associated with a circular buffer data structure.
+fields:
+  - name: Head
+    description: The head index of the buffer.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Count
+    description: The number of bytes currently used in the buffer.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Size
+    description: The total size of the buffer in bytes.
+    type: Interfaces.Unsigned_32
+    format: U32

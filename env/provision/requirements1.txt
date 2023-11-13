@@ -1,0 +1,17 @@
+wheel
+ruamel.yaml
+pykwalify[ruamel]
+Jinja2
+latex
+cython
+gitpython
+yamllint
+filelock
+pyparsing
+bitstring
+gcovr
+pyinstaller
+Pygments
+matplotlib
+flake8
+black

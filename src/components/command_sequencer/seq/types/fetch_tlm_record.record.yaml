@@ -1,0 +1,22 @@
+---
+description: A packed record for both fetch tlm A and B instructions. Opcode's 11 and 12.
+fields:
+  - name: Opcode
+    description: Instruction code
+    type: Basic_Types.Byte
+    format: U8
+  - name: Pad1
+    description: padding
+    type: Basic_Types.Byte
+    format: U8
+  - name: Pad2
+    description: Padding
+    type: Basic_Types.Byte
+    format: U8
+  - name: waitOn
+    description: A flag that signifies if we should fetch telemetry immediately, or if we need to setup a timeout first.
+    type: Boolean
+    format: E8
+  - name: Tlm_Info
+    description: A packed record that contains information about the telemetry item that needs to be retrieved.
+    type: Telemetry_Record.T

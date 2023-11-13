@@ -1,0 +1,18 @@
+---
+description: These are enumerations that are used for implementing the precision time protocol.
+enums:
+  - name: Ptp_Message_Type
+    description: This is the message type enumeration for the Precision Time Protocol.
+    literals:
+      - name: Sync
+        value: 0
+        description: The Sync message is sent from the master to the slave and initiates a PTP transaction.
+      - name: Follow_Up
+        value: 1
+        description: The Follow_Up message is sent from the master to the slave and provides a more accurate timestamp for the Sync message transmission time.
+      - name: Delay_Request
+        value: 2
+        description: The Delay_Request message is sent from the slave to the master to request the master send a Delay_Response message.
+      - name: Delay_Response
+        value: 3
+        description: The Delay_Response message is sent from the master to the slave and provides enough information for the slave to know it's clock offset from the master.

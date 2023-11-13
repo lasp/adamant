@@ -1,0 +1,19 @@
+---
+description: This is a unit test suite for the Precision Time Protocol Master component.
+tests:
+  - name: Test_Time_Sync
+    description: This test ensures that time syncing messages are sent out appropriately when Ticks are sent to the component.
+  - name: Test_Follow_Up
+    description: This test ensures that the Follow_Up message is sent out appropriately.
+  - name: Test_Delay_Request
+    description: This test ensures that the Delay_Response message is sent out when a Delay_Request is received.
+  - name: Test_Unexpected_Message_Received
+    description: This test ensures that the unexpected received messages are reported and not processed.
+  - name: Test_Enable_Disable
+    description: This test ensures that the enable/disable commands work as intended.
+  - name: Test_Sync_Once
+    description: This test ensures that the Sync_Once command works.
+  - name: Test_Invalid_Command
+    description: This test ensures that an invalid command is rejected and reported.
+  - name: Test_Queue_Overflow
+    description: This test ensures that a queue overflow is reported.

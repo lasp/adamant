@@ -1,0 +1,127 @@
+abstract project a_adamant is
+
+   -- Grab external variables. These are used to communicate between the
+   -- Adamant build system and GPRBuild.
+   ADAMANT_DIR := external("ADAMANT_DIR", "");
+   ADAMANT_ENV_DIR := external("ADAMANT_ENV_DIR", "");
+   SOURCE_DIRS := external_as_list("SOURCE_DIRS", ",");
+   OBJECT_DIR := external("OBJECT_DIR");
+   EXEC_DIR := external("EXEC_DIR", "");
+   CHECK_STYLE := external("CHECK_STYLE", "False");
+
+   -- Basic Adamant definitions:
+   for Languages use ("Ada", "C", "C++", "ASM_CPP");
+   for Create_Missing_Dirs use "True";
+
+   -- Define default naming for C++:
+   package Naming is
+     for Spec_Suffix ("C++") use ".hpp";
+     for Body_Suffix ("C++") use ".cpp";
+   end Naming;
+
+   -- Produce executables with .elf suffix:
+   package Builder is
+      for Executable_Suffix use ".elf";
+      -- Use multiple cores to compile. -j0 spawns threads equal to the number
+      -- of cores available on the system.
+      for Switches (others) use ("-j0");
+   end Builder;
+
+   -- Compiler definition:
+   package Compiler is
+      -- Define some basic compiler flags for use on all Adamant projects:
+      -- For more information see: https://gcc.gnu.org/onlinedocs/gcc-4.6.2/gnat_ugn_unw/Switches-for-gcc.html
+      -- Warnings information: https://gcc.gnu.org/onlinedocs/gcc-4.6.2/gnat_ugn_unw/Warning-Message-Control.html#Warning-Message-Control
+      --
+      -- -gnatf - full errors
+      -- -gnatwa - enable all warnings
+      -- -gnatwh - warn on hiding
+      -- -gnatwl - elaboration pragma warnings
+      -- -gnatw.o - modified but unreferenced out parameters warnings
+      -- -gnatwt - deleted conditional code
+      -- -gnatw.X - disable warnings for No_Exception_Propagation mode, since this is usable in Linux
+      -- -gnat2022 - use gnat2022 Ada features
+      --
+      -- Note: I did not turn on gnatwd, because writing "all" all the time makes things
+      -- less readable.
+      --
+      ADA_FLAGS := ("-gnatf", "-gnatwa", "-gnatwh", "-gnatwl", "-gnatw.o", "-gnatwt", "-gnatw.X");
+      COMMON_C_FLAGS := ("-Wall", "-Wextra", "-pedantic");
+      C_FLAGS := COMMON_C_FLAGS & ("-std=gnu99");
+      CPP_FLAGS := COMMON_C_FLAGS & ("-std=c++0x");
+
+      -- Define configuration file usage:
+      ADA_CONFIG_FLAGS := ("-gnatec=" & ADAMANT_DIR & "/redo/targets/configuration_pragmas/ignore_warnings.adc");
+
+      -- Define Ada style flags
+      -- Adamant source code adheres to the following style checking switches provided
+      -- by GNAT. See: https://gcc.gnu.org/onlinedocs/gnat_ugn/Style-Checking.html
+      --
+      -- gnaty3 - indention of 3 spaces
+      -- gnatya - casing of attributes
+      -- gnatyA - use of 'Length must use index for multi-dimensional arrays
+      -- gnatyb - blanks not allowed at end
+      -- gnatyB - no and/or except for bitwise operations, use and then and or else instead
+      -- gnatyd - no DOS line endings
+      -- gnatyD - identifiers in mixed case
+      -- gnatye - labels must be present on "end" statements
+      -- gnatyf - no form feeds or vertical tabs
+      -- gnatyh - no horizontal tabs, use spaces
+      -- gnatyi - if-then layout checks
+      -- gnatyk - keywords must be lower case
+      -- gnatyl - check layout against RM
+      -- X gnatyL - max nesting level
+      -- X gnatym - max line length
+      -- X gnatyM - set max line length
+      -- gnatyn - casing of Standard must match RM
+      -- gnatyO - overriding subprograms must be marked as such
+      -- gnatyp - pragma casing
+      -- gnatyr - references must be cased identical to declarations
+      -- gnatyS - no statements allowed on same line as then or else
+      -- gnatyt - token spacing
+      -- gnatyu - unnecessary blank lines
+      -- gnatyx - no unnecessary parens
+      -- X gnatwe - treat style warnings as errors
+      --
+      -- The Ada standard style options are "gnaty3aAbcefhiklmnprst".
+      --
+      -- Adamant does not include the following that appear in the standard:
+      --
+      -- gnatyc - Adamant is more accepting of comment formatting
+      -- gnatym - Adamant is more accepting of maximum line length
+      -- gnatys - Adamant does not enforce separate specs
+      --
+      ADA_STYLE_FLAGS := ("-gnaty3aABbdDefhiklL12nOprStux");
+
+      -- If check style is engaged then we will add the style checking flags to the
+      -- Ada compilation
+      case CHECK_STYLE is
+         when "False" =>
+            for Switches ("Ada") use ADA_FLAGS & ADA_CONFIG_FLAGS ;
+         when others =>
+            for Switches ("Ada") use ADA_FLAGS & ADA_CONFIG_FLAGS & ADA_STYLE_FLAGS;
+      end case;
+
+      for Switches ("C") use C_FLAGS;
+      for Switches ("C++") use CPP_FLAGS;
+      for Switches ("ASM_CPP") use CPP_FLAGS;
+   end Compiler;
+
+   -- Binder definition:
+   package Binder is
+      -- Redo handles compilation consistancy, so ignore errors based on timestamp consistancy
+      -- that GPRBuild produces.
+      for Switches ("Ada") use ("-t");
+   end Binder;
+
+   -- Linker definition:
+   package Linker is
+   end Linker;
+
+   -- CodePeer definition:
+   package CodePeer is
+      for Additional_Patterns use ADAMANT_DIR & "/redo/targets/codepeer/AdamantMessagePatterns.xml";
+      for CWE use "true";
+   end CodePeer;
+
+end a_adamant;

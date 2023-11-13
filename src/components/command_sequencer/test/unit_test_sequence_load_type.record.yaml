@@ -1,0 +1,15 @@
+---
+description: A packed record which holds information about a sequence to load and run.
+fields:
+  - name: Id
+    description: The ID of the sequence to load and run.
+    type: Sequence_Types.Sequence_Id
+    format: U16
+  - name: Engine_Number
+    description: The sequence engine to load the sequence into.
+    type: Seq_Types.Sequence_Engine_Id
+    format: U8
+  - name: Engine_Request
+    description: Load the sequence into any available engine or a specific engine.
+    type: Command_Sequencer_Enums.Sequence_Load_Engine_Request_Type.E
+    format: E8

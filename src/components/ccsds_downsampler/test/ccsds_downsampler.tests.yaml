@@ -1,0 +1,9 @@
+---
+description: This is a unit test suite for the Event Filter component
+tests:
+  - name: Test_Downsample_Packet
+    description: This unit test is to test the cases when the component will downsample an APID and permutations related to the filter factor.
+  - name: Test_Modify_Filter_Factor
+    description: This unit test sends the command to modify a filter factor for both valid ids and invalid ids.
+  - name: Test_Invalid_Command
+    description: This unit test exercises that an invalid command throws the appropriate event.

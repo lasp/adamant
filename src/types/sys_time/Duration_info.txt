@@ -1,0 +1,5 @@
+Duration'Size =  64
+Float: Duration'Small =  1.00000E-09
+Duration: Duration'Small =  0.000000001
+Duration'First = -9223372036.854775808
+Duration'Last =  9223372036.854775807

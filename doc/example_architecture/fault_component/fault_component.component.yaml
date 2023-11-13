@@ -1,0 +1,13 @@
+---
+execution: passive
+description: This is the fault component, which sends faults.
+connectors:
+  - type: Tick.T
+    kind: recv_sync
+    description: This connector provides the schedule tick for the component.
+  - return_type: Sys_Time.T
+    kind: get
+    description: This connector is used to fetch the current system time.
+  - type: Fault.T
+    kind: send
+    description: This connector is used to send out a fault.

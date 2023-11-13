@@ -1,0 +1,7 @@
+---
+description: This record contains the definition for a packed persistence type
+fields:
+  - name: persistence
+    description: The persistence that is used when limiting events.
+    type: Two_Counter_Entry.persistence_type
+    format: U8

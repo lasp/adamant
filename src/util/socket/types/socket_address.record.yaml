@@ -1,0 +1,13 @@
+---
+description: This is a type that contains the IP address (host) and port number of a socket connection.
+fields:
+  - name: Ip_Address
+    description: "The host or IP address number."
+    type: GNAT.Sockets.Inet_Addr_V4_Type
+    format: U8x4
+    byte_image: True
+    skip_validation: True
+  - name: Port
+    description: "The port number for the connection."
+    type: GNAT.Sockets.Port_Type
+    format: U32

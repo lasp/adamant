@@ -1,0 +1,14 @@
+The Interrupt Listener has two functions: 1) to run a custom interrupt handler every time an interrupt is received and 2) to pass data captured during that interrupt to an external component(s) when requested. The component has a single connector, \texttt{Interrupt\_Data\_Type\_Return} which returns data captured from the most recent interrupt to the caller.
+
+The following diagram shows an example of how the Interrupt Listener component might operate in the context of an assembly.
+
+\begin{figure}[H]
+  \includegraphics[width=0.5\textwidth,center]{assembly/build/eps/context_reversed.eps}
+  \caption{Example usage of the Interrupt Listener in an assembly. The Main Loop component asks the Interrupt Listener if an interrupt has been received before continuing execution.}
+\end{figure}
+
+In this example, a Main Loop component is executing and periodically asks the Interrupt Listener if an interrupt has occurred via the \texttt{Interrupt\_Count.T} data type. If an interrupt has occurred, then the Main Loop component may perform a different function that iteration.
+
+This use of the Interrupt Listener is ideal for letting connected active components know if an interrupt has occurred during their normal execution without a context switch. This makes the Interrupt Listener most useful in cases where the timing of response to an interrupt is not critical. The Interrupt Listener is also useful in single threaded systems where the Main Loop may poll on the Interrupt Listener continuously, waiting for an interrupt, before continuing execution. 
+
+Note, it is acceptable to connect many components up to the same Interrupt Listener \texttt{Interrupt\_Data\_Type\_Return} connector, as this is a thread safe operation.

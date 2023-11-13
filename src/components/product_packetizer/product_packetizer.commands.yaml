@@ -1,0 +1,15 @@
+---
+description: These are the commands for the product packetizer component.
+commands:
+  - name: Set_Packet_Period
+    description: Command to change the period of packet generation for a given packet id.
+    arg_type: Packet_Period.T
+  - name: Enable_Packet
+    description: Command to enable the emission of a packet from the packetizer.
+    arg_type: Packet_Id.T
+  - name: Disable_Packet
+    description: Command to disable the emission of a packet from the packetizer.
+    arg_type: Packet_Id.T
+  - name: Send_Packet
+    description: Command to build specific packet and send it out on the next available tick. The packet is built and sent regardless of the packet being enabled or disabled.
+    arg_type: Packet_Id.T

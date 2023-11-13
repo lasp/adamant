@@ -1,0 +1,10 @@
+---
+description: The requirements for the Product Database component are specified below.
+requirements:
+  - text: The component shall store a single, latest copy of each data product in the system.
+  - text: The component shall update a data product upon request.
+  - text: The component shall return a data product upon request.
+  - text: The component shall reject update or return requests with unrecognized data product IDs.
+  - text: The component shall provide a status upon data product return that indicates whether or not the data product is valid.
+  - text: The component shall provide a command to dump any stored data product by ID.
+  - text: The component shall provide a command to override the value of a stored data product with a commanded value.

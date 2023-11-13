@@ -1,0 +1,6 @@
+---
+description: These are the commands for the Queue Monitor component.
+commands:
+  - name: Set_Packet_Period
+    description: Set the period of the packet. A period of zero disables the sending of the packet.
+    arg_type: Packed_U16.T

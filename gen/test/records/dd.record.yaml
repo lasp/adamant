@@ -1,0 +1,19 @@
+---
+description: This is a record that contains a byte array, word array, and field that uses "byte_image"
+with:
+  - Basic_Types
+preamble: |
+  subtype Array_Type is Basic_Types.Byte_Array (0 .. 5);
+  subtype Word is Natural range 1 .. 50530;
+  type Word_Array_Type is array (0 .. 3) of Word;
+fields:
+  - name: bytes
+    type: Array_Type
+    format: U8x6
+  - name: words
+    type: Word_Array_Type
+    format: U32x4
+  - name: odd_ball
+    type: Natural
+    format: U32
+    byte_image: True

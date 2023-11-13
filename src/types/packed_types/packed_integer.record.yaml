@@ -1,0 +1,7 @@
+---
+description: Single component record for holding packed Integer value.
+fields:
+  - name: Value
+    description: The 32-bit Signed Integer.
+    type: Integer
+    format: I32

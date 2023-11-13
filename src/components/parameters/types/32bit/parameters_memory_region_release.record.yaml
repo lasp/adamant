@@ -1,0 +1,10 @@
+---
+description: A packed record which holds the parameter memory region to release as well as the status returned from the parameter update operation.
+fields:
+  - name: Region
+    description: The memory region.
+    type: Memory_Region.T
+  - name: Status
+    description: The return status from the parameter update operation.
+    type: Parameter_Enums.Parameter_Table_Update_Status.E
+    format: E8

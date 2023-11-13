@@ -1,0 +1,46 @@
+---
+description: "This component is initialized with a list of protected commands. A protected command is a command that could be potentially hazardous to the system or its environment. These commands should only be sent with the utmost care, and should never be executed by accident. This component implements a protection mechanism to prevent inadvertent execution of these commands.
+
+The component receives commands on the Command_T_To_Forward_Recv_Sync connector, and checks their IDs against the protected command list. If a command is found in the list, then it is only forwarded if the component has been first `armed', otherwise the command is dropped and an error packet is produced with the rejected command data. Commands that are not found in the protected command list are always forwarded. To `arm' the component, a special `arm' command must be sent to the component to transition it to the `armed' state. At this point, a protected command may be successfully forwarded. Note that after the receipt of any command, the component will transition back to the `unarmed' state, rejecting any subsequently received protected commands until another `arm' command is received. The component will also transition back to the `unarmed' state after a timeout expires, which is set as an argument in the `arm' command itself.
+
+The protected command list is stored internally as a binary tree data structure that can determine if a command is protected or not in O(log(n)) time, where n is the number of protected commands. Since most systems only manage a handful of protected commands, the performance of this component should be acceptable for most missions."
+with:
+  - Command_Types
+preamble: |
+  type Command_Id_List is array (Natural range <>) of Command_Types.Command_Id;
+execution: passive
+init:
+  description: This component requires a list of protected command IDs at initialization.
+  parameters:
+    - name: protected_Command_Id_List
+      type: Command_Id_List
+      description: The list of command IDs to consider as protected commands.
+connectors:
+  - description: This tick is used to keep track of the armed state timeout and send the data product relating the current timeout value.
+    type: Tick.T
+    kind: recv_sync
+  - description: Commands received on this connector will be checked against the protected command list and rejected if the system is `unarmed'. Commands not found in the protected command list will be forwarded.
+    type: Command.T
+    kind: recv_sync
+    name: Command_T_To_Forward_Recv_Sync
+  - description: The command receive connector for this component's specific commands.
+    type: Command.T
+    kind: recv_sync
+  - description: Commands that are received on the Command_T_To_Forward_Recv_Sync connector are forwarded out this connector.
+    type: Command.T
+    kind: send
+  - description: This connector is used to register and respond to the component's specific commands.
+    type: Command_Response.T
+    kind: send
+  - description: Data products are sent out of this connector.
+    type: Data_Product.T
+    kind: send
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send
+  - description: The packet send connector, used for sending error packets filled with protected commands that are rejected.
+    type: Packet.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get

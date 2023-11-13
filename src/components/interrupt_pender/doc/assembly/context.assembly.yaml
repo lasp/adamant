@@ -1,0 +1,20 @@
+---
+description: This is an assembly for creating a context diagram.
+components:
+  - type: Periodic_Component
+    priority: 1
+    stack_size: 2000
+    secondary_stack_size: 2000
+  - type: Interrupt_Pender
+    generic_types:
+      - "Interrupt_Data_Type => Tick.T"
+      - "Set_Interrupt_Data_Time => Tick_Interrupt_Handler.Set_Tick_Time"
+    discriminant:
+      - "interrupt_Priority => System.Interrupt_Priority'Last"
+      - "interrupt_Id => Ada.Interrupts.Names.SIGUSR1"
+      - "custom_Interrupt_Procedure => Tick_Interrupt_Handler.Handler'Access"
+connections:
+  - from_component: Periodic_Component_Instance
+    from_connector: Tick_T_Get
+    to_component: Interrupt_Pender_Instance
+    to_connector: Wait_On_Interrupt_Data_Type_Return

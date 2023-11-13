@@ -1,0 +1,49 @@
+---
+# Optional - description of the packed record
+description: This is an example packed record.
+# Optional - preamble which provides "in-line" Ada code
+preamble: |
+  type Four_Bit_Integer is mod 2**4;
+  type Five_Bit_Integer is mod 2**5;
+  subtype Three_Bit_Signed_Integer is Integer range -3 .. 2;
+  type My_Color is (Red, Green, Blue, Purple, Pink, Chartreuse);
+# Optional - Include any dependencies we might need
+# * In this case we don't have any... but here is what it might
+# look like:
+# with:
+#   - Basic_Types
+# List the record fields
+fields:
+    # Required - the name of the field
+  - name: Value_1
+    # Optional - description of the field
+    description: This is the first value.
+    # Required - the type of the field
+    type: Five_Bit_Integer
+    # Required (most of the time) - provide the number of bits
+    # that this type will consume when packed. This field is
+    # required unless the type is itself another packed record
+    format: U5
+    # Optional - provide a default value
+    default: "0"
+  - name: Value_2
+    description: This is the second value.
+    type: Three_Bit_Signed_Integer
+    format: U3
+  - name: Value_3
+    type: My_Color
+    format: E8
+  - name: Value_4
+    description: This is the fourth value.
+    type: Short_Float
+    format: F32
+  - name: Value_5
+    description: This is the fifth value it and contains an Adamant-modeled enumeration type.
+    type: Example_Enums.Second_Enum.E
+    default: Example_Enums.Second_Enum.Spaceship
+    format: E4
+  - name: Reserved
+    description: Reserved bits to make sure we end on a byte boundary.
+    type: Four_Bit_Integer
+    format: U4
+

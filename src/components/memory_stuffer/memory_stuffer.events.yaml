@@ -1,0 +1,33 @@
+---
+events:
+  - name: Invalid_Memory_Region
+    description: A command was sent to access a memory region with an invalid address and/or length.
+    param_type: Memory_Region.T
+  - name: Invalid_Copy_Destination
+    description: A copy request was received with an invalid destination address and length.
+    param_type: Memory_Region.T
+  - name: Protected_Write_Enabled
+    description: An arm command was received and the protected write state is enabled.
+    param_type: Packed_Arm_Timeout.T
+  - name: Protected_Write_Disabled
+    description: The protected write state was disabled either by timeout or receiving a subsequent command.
+  - name: Writing_Memory
+    description: The component is currently writing the memory location for the following region.
+    param_type: Memory_Region.T
+  - name: Memory_Written
+    description: The component has finished writing the memory location for the following region.
+    param_type: Memory_Region.T
+  - name: Copying_Memory
+    description: The component is currently copying memory from one address to another.
+    param_type: Memory_Region_Copy.T
+  - name: Memory_Copied
+    description: The component has finished copying memory from one address to another.
+    param_type: Memory_Region_Copy.T
+  - name: Protected_Write_Denied
+    description: A command was received to write to a protected region, but the component was not armed so the command is being rejected.
+    param_type: Memory_Region.T
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T
+  - name: Protected_Write_Disabled_Timeout
+    description: The component armed state timed out and is now unarmed.

@@ -1,0 +1,8 @@
+seq commands_01
+  ; Simple sequence that just sends a series of commands, one after the other.
+  cmd Component_A.Command_1
+  cmd Component_A.Command_2 Seconds 11 Subseconds 15
+  cmd Component_A.Command_3 Value 99
+  cmd Component_B.Command_1
+  cmd Component_B.Command_2 Seconds 22 Subseconds 16
+endseq

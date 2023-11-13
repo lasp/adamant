@@ -1,0 +1,16 @@
+--
+-- This file includes warnings we always want to ignore in Adamant source code
+--
+
+-- Commonly used Index and Length variables conflict with something in the Ada
+-- runtime. We don't want to see this warning, and we want to be able to define
+-- variables with these names.
+pragma Warnings (Off, "declaration hides ""Index""");
+pragma Warnings (Off, "declaration hides ""Length""");
+pragma Warnings (Off, "declaration hides ""Count""");
+
+-- Adamant makes use of overlays for performance, especially overlaying byte arrays and
+-- packed types. It is understood that an overlay may have a different storage order.
+-- This does not really apply to byte arrays, since a byte has no endianness. All overlays
+-- should be looked at in code reviews. This warnings is just a nuisance and is not helpful.
+pragma Warnings (Off, "overlay changes scalar storage order");

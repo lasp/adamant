@@ -1,0 +1,8 @@
+---
+events:
+  - name: Invalid_Extracted_Product_Data
+    description: Event that is issued when the defined extracted product does not match the data that was read.
+    param_type: Invalid_Product_Data.T
+  - name: Invalid_Extracted_Product_Length
+    description: The length and offset of the extracted product exceeded the length of the incoming packet.
+    param_type: Invalid_Product_Length.T

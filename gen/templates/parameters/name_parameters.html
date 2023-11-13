@@ -1,0 +1,20 @@
+{% extends "/base/table.html" %}
+{% block title %}<b>{{ formatType(model_name) }}</b> Parameter Suite{% endblock %}
+{% block head %}
+      <tr>
+          <th scope="col">Parameter Name</th>
+          <th scope="col">Type</th>
+          <th scope="col">Default Value</th>
+          <th scope="col">Description</th>
+      </tr>
+{% endblock %}
+{% block body %}
+{% for param in parameters %}
+      <tr>
+        <td style='font-family: "Courier New", Courier, monospace;'><b>{{ param.name }}</b></td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{% if param.type_model %}<a class="record_link" href="../../{{ param.type_model.get_src_dir_from(get_src_dir(full_filename)) }}/build/html/{{ param.type_package.lower() }}.html">{% endif %}{{ param.type }}{% if param.type_model %}</a>{% endif %}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{% if param.default_value %}{{ param.default_value }}{% else %}<i>None</i>{% endif %}</td>
+        <td>{% if param.description %}{{ printMultiLine(param.description, '') }}{% endif %}</td>
+      </tr>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,11 @@
+---
+description: This is a unit test suite for the Memory Dumper component
+tests:
+  - name: Test_Nominal_Dumping
+    description: This unit test excersizes dumping a valid region of memory managed by the component
+  - name: Test_Memory_Crc
+    description: This unit test excersizes CRCing from a valid region of memory
+  - name: Test_Invalid_Address
+    description: This unit test excersizes dumping and CRCing from an invalid region of memory
+  - name: Test_Invalid_Command
+    description: This unit test makes sure an invalid command is reported and ignored.

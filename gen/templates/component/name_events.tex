@@ -1,0 +1,39 @@
+%- if events
+%- if events.description
+\VAR{events.description} \\
+%- else
+\par Below is a list of the events for the \VAR{prettyname|e} component.
+%- endif
+
+\captionof{table}{\VAR{prettyname|e} Events}
+\begin{xltabular}{\textwidth}{ | c | l | X | }
+  \hline
+  \textbf{Local ID} & \textbf{Event Name} & \textbf{Parameter Type} \\ \hline
+%- for event in events
+  \texttt{\VAR{loop.index0}} &
+  \texttt{\url{\VAR{event.name}}} &
+%- if event.type
+  \texttt{\url{\VAR{event.type}}}
+%- else
+  \texttt{-}
+%- endif
+  \\ \hline
+%- endfor
+\end{xltabular}
+\vspace{5mm} %5mm vertical space
+
+Event Descriptions:
+\begin{spaceditemize}
+%- for event in events
+  \item \textbf{\texttt{\VAR{event.name|e}}} - 
+%- if event.description
+    \VAR{event.description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+%- else 
+\par The \VAR{prettyname|e} component has no events.
+%- endif

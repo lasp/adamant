@@ -1,0 +1,9 @@
+---
+description: This is the sequence header (including the slot meta data) contained at the beginning of each sequence store slot.
+fields:
+  - name: Slot_Info
+    description: The slot metadata.
+    type: Sequence_Store_Slot_Metadata.T
+  - name: Seq_Header
+    description: The header for the command sequence.
+    type: Sequence_Header.T

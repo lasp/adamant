@@ -1,0 +1,6 @@
+---
+description: These are the commands for the ccsds downsampler component.
+commands:
+  - name: Modify_Filter_Factor
+    description: Modifiy the filter factor of a specified APID. A value of 0 will filter all packets of that ID.
+    arg_type: Filter_Factor_Cmd_Type.T

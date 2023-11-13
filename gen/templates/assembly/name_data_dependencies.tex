@@ -1,0 +1,34 @@
+The table below shows the data dependencies for the \VAR{prettyname|e} assembly.
+
+%- if data_dependencies
+\captionof{table}{\VAR{prettyname|e} Data Dependencies}
+{\renewcommand{\arraystretch}{2.2} %<- modify value to suit your needs
+\begin{xltabular}{\textwidth}{ | X | r | X | c | X | }
+  \hline
+  \textbf{Data Dependency Name} & \textbf{Data Product ID} & \textbf{Data Product Name} & \vtop{\hbox{\strut \textbf{Stale}}\hbox{\strut \textbf{Limit (us)}}} & \textbf{Type} \\ \hline
+%- for id, dd in data_dependencies.items()
+  \texttt{\url{\VAR{dd.suite.component.instance_name}.\VAR{dd.name}}} &
+  \texttt{0x\VAR{"%04x" % id } (\VAR{ dd.id })} &
+  \texttt{\url{\VAR{dd.data_product.suite.component.instance_name}.\VAR{dd.data_product.name}}} &
+  \texttt{\url{\VAR{dd.stale_limit}}} &
+  \texttt{\url{\VAR{dd.type}}}
+  \\ \hline
+%- endfor
+\end{xltabular}}
+\vspace{5mm} %5mm vertical space
+
+Data Dependency Descriptions:
+\begin{spaceditemize}
+%- for id, dd in data_dependencies.items()
+  \item \textbf{\texttt{\url{\VAR{dd.suite.component.instance_name}.\VAR{dd.name}}}} -
+%- if dd.description
+    \VAR{dd.description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+%- else 
+\par The \VAR{prettyname|e} assembly has no data dependencies.
+%- endif

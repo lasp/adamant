@@ -1,0 +1,7 @@
+---
+description: A packed record which holds the length of a command's argument buffer.
+fields:
+  - name: Arg_Buffer_Length
+    description: The number of bytes used in the command argument buffer
+    type: Command_Types.Command_Arg_Buffer_Length_Type
+    format: U16

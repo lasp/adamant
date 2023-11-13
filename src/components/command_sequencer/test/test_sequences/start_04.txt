@@ -1,0 +1,9 @@
+seq start_04
+  ; Simple sequence that just sends a command, and then starts another sequence.
+  cmd Component_A.Command_2 Seconds 16 Subseconds 19
+  start args_08 77 88 99
+
+  ; Should never get here since we started another sequence above that will
+  ; replace this one.
+  cmd Component_A.Command_2 Seconds 19 Subseconds 88
+endseq

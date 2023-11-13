@@ -1,0 +1,9 @@
+---
+description: Record which holds wall time and execution time to describe the runtime performance some piece of code.
+fields:
+  - name: Wall_Time
+    description: The wall time associated with the measurement.
+    type: Delta_Time.T
+  - name: Execution_Time
+    description: The time the task spent executing on the CPU.
+    type: Delta_Time.T

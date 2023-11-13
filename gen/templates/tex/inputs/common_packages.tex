@@ -1,0 +1,104 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage{enumerate}
+\usepackage{courier}
+\usepackage{graphicx}
+% \usepackage{tabularx}
+% \usepackage{longtable}
+%^ using xltabular instead as it includes the capabilities of both of the above
+\usepackage{xltabular}
+\usepackage[export]{adjustbox}
+\usepackage{float}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[english]{isodate}
+\usepackage[parfill]{parskip}
+\usepackage[margin=1.1in]{geometry}
+\usepackage[titletoc,title]{appendix}
+\usepackage{caption}
+\usepackage{listings}
+\usepackage{url}
+\usepackage{pbox}
+\usepackage{makecell}
+\usepackage[T1]{fontenc}
+
+\captionsetup{justification=raggedright, singlelinecheck=false}
+
+% Fix for weird errors when quotes are in a string
+\let\textquotedbl=" 
+
+\newenvironment{spaceditemize}
+{ \begin{itemize}
+    \setlength{\itemsep}{5pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}     }
+{ \end{itemize}                  } 
+
+\newenvironment{spacedenumerate}
+{ \begin{enumerate}
+    \setlength{\itemsep}{5pt}
+    \setlength{\parskip}{0pt}
+    \setlength{\parsep}{0pt}     }
+{ \end{enumerate}                } 
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+% Commandline stuff
+%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{color}
+
+\lstset{frame=leftline,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=2
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+% YAML stuff
+%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[dvipsnames]{xcolor}
+
+\newcommand\YAMLcolonstyle{\color{black}\mdseries\small}
+\newcommand\YAMLkeystyle{\color{black}\bfseries\ttfamily\small}
+\newcommand\YAMLvaluestyle{\color{black}\mdseries\small}
+
+\makeatletter
+
+% here is a macro expanding to the name of the language
+% (handy if you decide to change it further down the road)
+\newcommand\language@yaml{yaml}
+
+\expandafter\expandafter\expandafter\lstdefinelanguage
+\expandafter{\language@yaml}
+{
+  keywords={true,false,null,y,n},
+  keywordstyle=\color{black}\bfseries\ttfamily,
+  basicstyle=\YAMLkeystyle,                                 % assuming a key comes first
+  sensitive=false,
+  comment=[l]{\#},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\ttfamily\mdseries\textit,
+  stringstyle=\YAMLvaluestyle\ttfamily,
+  moredelim=[l]{\&},
+  moredelim=[l]{*},
+  moredelim=**[il][\YAMLcolonstyle{:}\YAMLvaluestyle]{:},   % switch to value style at :
+  morestring=[b]',
+  morestring=[b]",
+  literate =    %{---}{{\ProcessThreeDashes}}3
+                {>}{{\textgreater}}1     
+                {|}{{\textbar}}1 
+                {\ -\ }{{\mdseries\ -\ }}3,
+}
+
+% switch to key style at EOL
+\lst@AddToHook{EveryLine}{\ifx\lst@language\language@yaml\YAMLkeystyle\fi}
+\makeatother
+
+%\newcommand\ProcessThreeDashes{\llap{\color{black}\mdseries-{-}-}}
+%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%
+\input{code_style.tex}

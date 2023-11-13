@@ -1,0 +1,32 @@
+---
+execution: passive
+# Optional - description of component
+description: This is the example component.
+# Required - List of Connectors
+connectors:
+  ######################
+  # Invokee Connectors
+  ######################
+    # Required - the datatype to be passed along connector
+  - type: Tick.T
+    # Required - the kind of connector
+    kind: recv_sync
+    # Optional - name of connector
+    name: Tick_T_Recv_Sync
+    # Optional - description of connector
+    description: This connector provides the schedule tick for the component.
+  ######################
+  # Invoker Connectors
+  ######################
+  - return_type: Sys_Time.T
+    kind: get
+    description: This connector is used to fetch the current system time.
+  - type: Packet.T
+    kind: send
+    # Optional - define the size of an arrayed invoker connector, a value
+    # of 0 signifies that the connector array size is unconstrained, and
+    # will be constrained by the assembly. By default, if this is not
+    # specified, then count is set to 1, and the connector will not be
+    # arrayed.
+    count: 0
+    description: This connector is used to send out a telemetry packet.

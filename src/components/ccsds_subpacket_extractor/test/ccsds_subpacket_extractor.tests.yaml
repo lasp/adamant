@@ -1,0 +1,17 @@
+---
+description: This is a unit test suite for the CCSDS Subpacket Extractor.
+tests:
+  - name: Nominal_Extraction
+    description: This unit test tests the nominal subpacket extraction from a larger CCSDS packet.
+  - name: Test_Invalid_Length
+    description: This unit test tests that the proper events are sent out when a CCSDS packet with an incorrect size is received by the component.
+  - name: Test_Invalid_Subpacket_Length
+    description: This unit test tests that the proper events are sent out when a CCSDS packet with an incorrect size is extracted by the component.
+  - name: Test_Remaining_Bytes
+    description: This unit test tests that the proper events are sent out when a CCSDS packet with left over bytes is encountered.
+  - name: Test_Dropped_Packet
+    description: This unit test tests that the proper events are sent out when a packet is dropped due to an overflowed queue.
+  - name: Test_Offsets
+    description: This unit test tests the component with nonzero start and stop offsets for CCSDS extraction.
+  - name: Test_Max_Subpackets_To_Extract
+    description: This unit test tests the component with a zero and positive max_Subpackets_To_Extract configuration and looks for appropriate behavior.

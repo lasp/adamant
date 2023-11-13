@@ -1,0 +1,22 @@
+---
+description: This is a unit test suite for the Pid Controller component
+tests:
+  - name: Test_Diagnostic_Packet
+    description: This unit test exercises starting the diagnostic packet after being commanded.
+  - name: Test_Update_Data_Products
+    description: This unit test exercises updating the Data products appropriately.
+  - name: Test_Database_Update_Period
+    description: This unit test exercises the data product update period command.
+  - name: Test_Pid_Controller
+    description: This test is a basic test to make sure that the controller
+  - name: Test_Invalid_Command
+    description: This unit test exercises that an invalid command throws the appropriate event.
+  - name: Test_Invalid_Parameter
+    description: This unit test exercises that an invalid parameter throws the appropriate event.
+  - name: Test_Start_Diagnostics_Command
+    description: This unit test exercises updating a the diagnostic samples by command.
+  - name: Test_Set_Controller_Statistic_Duration_Command
+    description: This unit test exercises updating the length of the array used to calculate statistics and thus the duration of the statistic period.
+  - name: Test_Moving_Average_Unused
+    description: This test makes sure that if the moving_average object is unused, that no statistics come out and nothing breaks.
+

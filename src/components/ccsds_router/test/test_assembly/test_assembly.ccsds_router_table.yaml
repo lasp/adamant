@@ -1,0 +1,82 @@
+---
+# Set the router table description.
+description: This is an example router table for the CCSDS Router unit test.
+# Below, we specify the name of the CCSDS Router component in the
+# assembly that we want to associate this table with. This allows
+# the generator to check out routing connections to make sure
+# they actually exist.
+ccsds_router_instance_name: Ccsds_Router_Instance
+# Below is the actual router table as specified by the user. We
+# map CCSDS packet APIDs to a list of corresponding destinations.
+# In this table, we also specify the sequence check mode of each
+# APID. Sequence check mode options are as follows:
+#
+#  no_check   - CCSDS packets of this APID will not be checked for sequence count
+#      warn   - CCSDS packets of this APID will produce a warning event if a packet
+#               is received with an unexpected (non-incrementing) sequence count
+#  drop_dupes - the second CCSDS packet of this APID will be dropped if two packets
+#               in a row are seen with the same APID. Note that 'drop_dupes' also
+#               implies the same behavior as 'warn' listed above.
+table:
+  # For APID 1 we only want to route it to Component_A and nowhere else.
+  # By default, if we do not specify a "sequence_check" then it will be
+  # assumed that we want "no_check" on this APID.
+  - apid: 1
+    destinations:
+      - Component_A
+  # For APID 2 we want to route to two components, Component_A and
+  # Component_C. Here we specifically specify that we don't want
+  # the CCSDS Router to keep track of sequence numbers for packets
+  # of this APID
+  - apid: 2
+    destinations:
+      - Component_A
+      - Component_C
+    sequence_check: no_check
+  # The following 2 APIDs specify 'warn' for sequence check so that
+  # an error event is produced when a non-subsequent sequence number is
+  # received. Note, when this happens, the CCSDS packets are still routed
+  # according to the table. They are NOT dropped.
+  - apid: 3
+    destinations:
+      - Component_A
+    sequence_check: warn
+  - apid: 4
+    destinations:
+      - Component_B
+    sequence_check: warn
+  # The following 2 APIDs specify 'drop_dupes' for sequence check so
+  # that if two packets are received in a row with identical sequence
+  # counts, the second packet is dropped and an error is produced.
+  # Note that 'drop_dupes' also implies the behavior found in 'warn'.
+  - apid: 5
+    destinations:
+      - Component_B
+    sequence_check: drop_dupes
+  - apid: 6
+    destinations:
+      # Because Component_D is attached to the CCSDS router twice, on two different connectors,
+      # we need to specify which connector to route this APID to. Otherwise a modeling error will result.
+      - Component_D.Ccsds_Space_Packet_T_Recv_Sync
+    sequence_check: drop_dupes
+  # The following 2 APID's use "ignore" as a destination for the CCSDS
+  # packet. "ignore" is a special keyword that tells the autocoder to
+  # still recognize the CCSDS packet (ie. not drop it as an unrecognized
+  # packet) but do not route it. This can be useful if you still want to
+  # check sequence counts for a certain packet, without actually routing
+  # it to a destination.
+  - apid: 7
+    destinations:
+      - ignore
+      - Component_A
+      # Because Component_D is attached to the CCSDS router twice, on two different connectors,
+      # we need to specify which connector to route this APID to. Otherwise a modeling error will result.
+      - Component_D.Ccsds_Space_Packet_T_Recv_Sync_2
+    sequence_check: no_check
+  # The tactic used here is to check the sequence counts of CCSDS packets
+  # with APID 8, and produce warnings when necessary, but to not route
+  # them to any destination. "ignore" is used to achieve this.
+  - apid: 8
+    destinations:
+      - ignore
+    sequence_check: warn

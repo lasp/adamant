@@ -1,0 +1,16 @@
+---
+description: A variable sized record.
+with:
+  - Interfaces
+preamble: |
+  subtype Limited_Byte is Interfaces.Unsigned_8 range 0 .. 250;
+  type Buffer_Type is array (Integer range -15 .. 4) of Limited_Byte;
+fields:
+  - name: Length
+    type: Interfaces.Unsigned_8
+    format: U8
+  - name: Buffer
+    type: Buffer_Type
+    format: U8x20
+    default: (others => 0)
+    variable_length: Length

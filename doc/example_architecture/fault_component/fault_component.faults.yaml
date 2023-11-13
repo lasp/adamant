@@ -1,0 +1,23 @@
+---
+# Optional - description of fault suite
+description: A set of faults for the Fault Component.
+# Required - list of faults included in the fault suite
+faults:
+    # Required - the name of the fault
+  - name: Discontinuous_Time_Fault
+    # Optional - a description of the fault
+    description: A discontinous time was detected by the component.
+    # Optional - the parameter type to include with the fault
+    param_type: Packed_U32.T
+    # Optional - a statically defined ID for the fault
+    # If this is specified, then IDs must be specified for
+    # EVERY fault in this fault suite. The Set_Id_Base
+    # procedure will then NOT be used to set the fault IDs.
+    #
+    # If this is not specified, then NO faults in this fault
+    # suite may specify an ID. In this case the Set_Id_Base
+    # procedure will be used to set the packed IDs.
+    # id: 17
+    # ^ Note: We are not specifying global IDs in this example
+  - name: Zero_Time_Fault
+    description: A time restart at zero seconds epoc was detected by the component.

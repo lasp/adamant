@@ -1,0 +1,6 @@
+---
+description: A passive component which needs to be called with control data to do control.
+execution: passive
+connectors:
+  - type: Control_Data.T
+    kind: recv_sync

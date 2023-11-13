@@ -1,0 +1,14 @@
+---
+description: This is the memory layout for an example set of variables for a mission.
+start_address: 0x0600000
+length: 2097152 # 2MB
+items:
+  - name: Time
+    description: An important timestamp.
+    type: Sys_Time.T
+  - name: Counter
+    description: An important counter.
+    type: Packed_U32.T
+  - name: Another_Counter
+    description: An equally important counter.
+    type: Packed_U16.T

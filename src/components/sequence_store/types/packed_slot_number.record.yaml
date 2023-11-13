@@ -1,0 +1,7 @@
+---
+description: This is a packed record that holds a slot number.
+fields:
+  - name: Slot
+    description: The slot number.
+    type: Sequence_Store_Types.Slot_Number
+    format: U16

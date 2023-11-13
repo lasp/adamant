@@ -1,0 +1,20 @@
+{% extends "/base/table.html" %}
+{% block title %}<b>{{ name }}</b> Priorities{% endblock %}
+{% block head %}
+      <tr>
+          <th scope="col">Task Number</th>
+          <th scope="col">Task Name</th>
+          <th scope="col">Priority Rank</th>
+          <th scope="col">Priority Value</th>
+      </tr>
+{% endblock %}
+{% block body %}
+{% for task in task_list %}
+      <tr>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ task.number }}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ task.component_name }}.{{ task.name }}_Task</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ task.priority_rank }}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ task.priority }}</td>
+      </tr>
+{% endfor %}
+{% endblock %}

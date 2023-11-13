@@ -1,0 +1,31 @@
+{% extends "/base/table.html" %}
+{% block title %}<b>{{ name }}</b> Data Dependencies{% endblock %}
+{% block info %}
+      <b>Summary:</b>
+      <ul>
+        <li><b>Number of Components with Data Dependencies:</b> {{ component_kind_dict['data_dependencies']|length }}</li>
+        <li><b>Number of Data Dependencies:</b> {{ data_dependencies|length }}</li>
+      </ul>
+{% endblock %}
+{% block head %}
+      <tr>
+          <th scope="col">Data Dependency Name</th>
+          <th scope="col">Data Product Id</th>
+          <th scope="col">Data Product Name</th>
+          <th scope="col">Stale Limit (us)</th>
+          <th scope="col">Type</th>
+          <th scope="col">Description</th>
+      </tr>
+{% endblock %}
+{% block body %}
+{% for id, dd in data_dependencies.items() %}
+      <tr>
+        <td style='font-family: "Courier New", Courier, monospace;'><b>{{ dd.suite.component.instance_name }}.{{ dd.name }}</b></td>
+        <td style='font-family: "Courier New", Courier, monospace;'>0x{{ '%04x' % id }} ({{ dd.id }})</b></td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ dd.data_product.suite.component.instance_name }}.{{ dd.data_product.name }}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ dd.stale_limit }}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{% if dd.type_model %}<a class="record_link" href="../../{{ dd.type_model.get_src_dir_from(get_src_dir(full_filename)) }}/build/html/{{ dd.type_package.lower() }}.html">{% endif %}{{ dd.type }}{% if dd.type_model %}</a>{% endif %}</td>
+        <td>{% if dd.description %}{{ printMultiLine(dd.description, '') }}{% endif %}</td>
+      </tr>
+{% endfor %}
+{% endblock %}

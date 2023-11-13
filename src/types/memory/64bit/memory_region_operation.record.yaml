@@ -1,0 +1,10 @@
+---
+description: A packed record which holds the memory region to operate on as well as an enumeration specifying the operation to perform.
+fields:
+  - name: Region
+    description: The memory region.
+    type: Memory_Region.T
+  - name: Operation
+    description: The memory operation to perform.
+    type: Memory_Enums.Memory_Operation_Type.E
+    format: E8

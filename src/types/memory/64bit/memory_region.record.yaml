@@ -1,0 +1,13 @@
+---
+description: A memory region described by a system address and length (in bytes).
+fields:
+  - name: Address
+    description: The starting address of the memory region.
+    type: System.Address
+    format: U64
+    skip_validation: True
+    byte_image: True
+  - name: Length
+    description: The number of bytes at the given address to associate with this memory region.
+    type: Natural
+    format: U32

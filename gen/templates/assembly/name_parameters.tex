@@ -1,0 +1,37 @@
+The table below shows the parameters for the \VAR{prettyname|e} assembly.
+
+%- if parameters 
+\captionof{table}{\VAR{prettyname|e} Parameters}
+{\renewcommand{\arraystretch}{2.2} %<- modify value to suit your needs
+\begin{xltabular}{\textwidth}{ | l | X | X | X | }
+  \hline
+  \textbf{Parameter ID} & \textbf{Parameter Name} & \textbf{Type} & \textbf{Default Value} \\ \hline
+%- for id, param in parameters.items()
+  \texttt{0x\VAR{"%04x" % id } (\VAR{ param.id })} &
+  \texttt{\url{\VAR{param.suite.component.instance_name}.\VAR{param.name}}} &
+  \texttt{\url{\VAR{param.type}}} &
+%- if param.default_value
+  \texttt{\url{\VAR{param.default_value}}}
+%- else
+  \textit{None}
+%- endif
+  \\ \hline
+%- endfor
+\end{xltabular}}
+\vspace{5mm} %5mm vertical space
+
+Parameter Descriptions:
+\begin{spaceditemize}
+%- for id, param in parameters.items()
+  \item \textbf{\texttt{\url{\VAR{param.suite.component.instance_name}.\VAR{param.name}}}} -
+%- if param.description
+    \VAR{param.description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+%- else 
+\par The \VAR{prettyname|e} assembly has no parameters.
+%- endif

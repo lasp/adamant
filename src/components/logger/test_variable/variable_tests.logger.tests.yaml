@@ -1,0 +1,9 @@
+---
+description: This is a unit test suite for the Logger component which logs a variable sized log type onto a log instantiated statically, not on the heap.
+tests:
+  - name: Test_Log_And_Dump
+    description: This unit test tests the storing of variable length log data and subsequent dumping by command.
+  - name: Test_Logger_Error
+    description: This unit test tests the behavior when the logger receives a poorly formatted variable type.
+  - name: Test_Invalid_Command
+    description: This unit test makes sure an invalid command is reported and ignored.

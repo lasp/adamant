@@ -1,0 +1,87 @@
+<!-- ####################################################################### -->
+<!-- {{ formatType(model_name) }} {{ formatType(model_type) }} -->
+<!-- Generated from {{ filename }} on {{ time }}. -->
+<!-- ####################################################################### -->
+
+<hydraDef>
+
+{% if ccsds_space_packet_model or ccsds_primary_header_model %}
+  <!-- CCSDS Types: -->
+{% if ccsds_primary_header_model %}
+  <frameDef name="{{ ccsds_primary_header_model.name }}">
+{% if ccsds_primary_header_model.description %}
+    <description text="{{ ccsds_primary_header_model.description }}"/>
+{% endif %}
+    <field>
+{% set ns = namespace(prefix=ccsds_primary_header_model.name) %}
+{% for field in ccsds_primary_header_model.fields.values() recursive %}
+{% if field.type_model %}
+{% set ns.prefix = ns.prefix + "-" + field.name %}
+      <!-- Items for frame: {{ field.type_package }} -->
+{% if field.description %}
+      <!-- Description: {{ field.description }} -->
+{% endif %}
+{{ loop(field.type_model.fields.values()) }}{% set ns.prefix = '-'.join(ns.prefix.split('-')[:-1]) %}{% else %}
+      <itemDef name="{{ ns.prefix }}-{{ field.name }}" type="{{ field.format.type }}"{% if field.variable_length %} subfield="length" control="{{ ns.prefix }}-{{ '-'.join(field.variable_length.split('.')) }}" offset="{{ field.variable_length_offset }}"{% else %}{% if field.format.length and field.format.length %} num="{{ field.format.length }}"{% endif %}{% endif %}>
+{% if field.description %}
+        <description text="{{ field.description }}"/>
+{% endif %}
+      </itemDef>
+{% endif %}
+{% endfor %}
+    </field>
+  </frameDef>
+{% endif %}
+{% if ccsds_space_packet_model %}
+  <frameDef name="{{ ccsds_space_packet_model.name }}">
+{% if ccsds_space_packet_model.description %}
+    <description text="{{ ccsds_space_packet_model.description }}"/>
+{% endif %}
+    <field>
+{% set ns = namespace(prefix=ccsds_space_packet_model.name) %}
+{% for field in ccsds_space_packet_model.fields.values() recursive %}
+{% if field.type_model %}
+{% set ns.prefix = ns.prefix + "-" + field.name %}
+      <!-- Items for frame: {{ field.type_package }} -->
+{% if field.description %}
+      <!-- Description: {{ field.description }} -->
+{% endif %}
+{{ loop(field.type_model.fields.values()) }}{% set ns.prefix = '-'.join(ns.prefix.split('-')[:-1]) %}{% else %}
+      <itemDef name="{{ ns.prefix }}-{{ field.name }}" type="{{ field.format.type }}"{% if field.variable_length %} subfield="length" control="{{ ns.prefix }}-{{ '-'.join(field.variable_length.split('.')) }}" offset="{{ field.variable_length_offset }}"{% else %}{% if field.format.length and field.format.length %} num="{{ field.format.length }}"{% endif %}{% endif %}>
+{% if field.description %}
+        <description text="{{ field.description }}"/>
+{% endif %}
+      </itemDef>
+{% endif %}
+{% endfor %}
+    </field>
+  </frameDef>
+{% endif %}
+
+{% endif %}
+  <!-- CCSDS Packets produced from CCSDS Packetizer Component: -->
+{% for id, packet in packets.items() %}
+  <frameDef name="Ccsds-{{ packet.full_name|replace(".","-") }}" id="{{ packet.id }}" group="555">
+{% if packet.description %}
+    <description text="{{ packet.description }}"/>
+{% endif %}
+    <field>
+      <frameCopy name="Ccsds_Primary_Header" prefix="Ccsds-{{ packet.full_name|replace(".","-") }}-"/>
+      <frameCopy name="Sys_Time" prefix="Ccsds-{{ packet.full_name|replace(".","-") }}-"/>
+{% if packet.items %}
+{% for item_name,item in packet.items.items() %}
+      <itemDef name="Ccsds-{{ item.full_name|replace(".","-") }}" type="{% if item.is_enum or item.literals %}{{ item.full_name|replace(".","-") }}-Enum{% else %}{{ item.format.type}}{% endif %}"{% if item.format.length and item.format.length > 1 %} num="{{ item.format.length }}"{% endif%}>
+{% if item.flattened_description %}
+        <description text="{{ item.flattened_description }}"/>
+{% endif %}
+      </itemDef>
+{% endfor %}
+{% else %}
+      <itemDef name="Ccsds-{{ packet.full_name|replace(".","-") }}-Buffer" type="U8" num="{{ ((complex_types['Ccsds_Space_Packet'].size - complex_types['Ccsds_Space_Packet'].min_size - complex_types['Sys_Time'].size)/8)|int }}"/>
+{% endif %}
+      <itemDef name="Ccsds-{{ packet.full_name|replace(".","-") }}-crc" type="U16"/>
+    </field>
+  </frameDef>
+{% endfor %}
+
+</hydraDef>

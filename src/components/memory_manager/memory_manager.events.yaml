@@ -1,0 +1,36 @@
+---
+events:
+  - name: Memory_Unavailable
+    description: The memory region was requested, but the memory is currently in use.
+  - name: Unexpected_Memory_Id
+    description: Cannot release a memory region with an unexpected ID.
+    param_type: Ided_Memory_Region.T
+  - name: Memory_Already_Released
+    description: Cannot release a memory region when the memory region is currently available (ie. already released).
+    param_type: Ided_Memory_Region.T
+  - name: Dumping_Memory
+    description: The component is currently dumping the virtual memory location for the following region.
+    param_type: Virtual_Memory_Region_Positive.T
+  - name: Invalid_Memory_Region
+    description: The operation could not be performed on the requested virtual memory region, since the address and length fall outside the memory region managed by the component.
+    param_type: Invalid_Virtual_Memory_Region.T
+  - name: Crcing_Memory
+    description: The component is currently CRCing the virtual memory location for the following region.
+    param_type: Virtual_Memory_Region_Positive.T
+  - name: Memory_Crc
+    description: The virtual memory region CRC has been calculated.
+    param_type: Virtual_Memory_Region_Crc.T
+  - name: Writing_Memory
+    description: The component is currently writing to the virtual memory location for the following region.
+    param_type: Virtual_Memory_Region.T
+  - name: Memory_Written
+    description: The virtual memory region has been written.
+    param_type: Virtual_Memory_Region.T
+  - name: Memory_Force_Released
+    description: The virtual memory region was force released.
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T
+  - name: Dropped_Command
+    description: A command was dropped because the component queue overflowed.
+    param_type: Command_Header.T

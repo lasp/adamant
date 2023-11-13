@@ -1,0 +1,29 @@
+---
+events:
+  - name: Invalid_Packet_Id_Commanded
+    description: An invalid packet id was commanded for a given command.
+    param_type: Invalid_Packet_Id.T
+  - name: Packet_Enabled
+    description: An packet was enabled.
+    param_type: Packet_Period.T
+  - name: Packet_Disabled
+    description: An packet was disabled.
+    param_type: Packet_Period.T
+  - name: Packet_Period_Set
+    description: An packet period was set.
+    param_type: Packet_Period.T
+  - name: Data_Product_Missing_On_Fetch
+    description: A data product was missing when fetched for packet insertion.
+    param_type: Packet_Data_Product_Ids.T
+  - name: Packet_Period_Item_Bad_Id
+    description: A packet period packet item could not be formed because the ID is invalid.
+    param_type: Packet_Data_Product_Ids.T
+  - name: Data_Product_Length_Mismatch
+    description: A data product was fetched but contained an unexpected length.
+    param_type: Invalid_Data_Product_Length.T
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T
+  - name: Dropped_Command
+    description: A command was dropped due to a full queue.
+    param_type: Command_Header.T

@@ -1,0 +1,6 @@
+---
+description: An active component which waits for an interrupt before executing.
+execution: active
+connectors:
+  - return_type: Interrupt_Count.T
+    kind: get

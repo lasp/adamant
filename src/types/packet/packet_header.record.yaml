@@ -1,0 +1,18 @@
+---
+description: Generic packet header for holding arbitrary data
+fields:
+  - name: Time
+    description: The timestamp for the packet item.
+    type: Sys_Time.T
+  - name: Id
+    description: The packet identifier
+    type: Packet_Types.Packet_Id
+    format: U16
+  - name: Sequence_Count
+    description: Packet Sequence Count
+    type: Packet_Types.Sequence_Count_Mod_Type
+    format: U16
+  - name: Buffer_Length
+    description: The number of bytes used in the packet buffer
+    type: Packet_Types.Packet_Buffer_Length_Type
+    format: U16

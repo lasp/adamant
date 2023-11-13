@@ -1,0 +1,18 @@
+---
+description: A record for testing the serializer class.
+preamble: |
+  type Myfloat is digits 10 range 0.0 .. 1.0;
+  subtype Myint is Natural range 0 .. 1000;
+fields:
+  - name: Id
+    description: The identifier
+    type: Myint
+    format: U16
+  - name: Value
+    description: The value
+    type: Natural
+    format: U32
+  - name: Fvalue
+    description: The value
+    type: Myfloat
+    format: F64

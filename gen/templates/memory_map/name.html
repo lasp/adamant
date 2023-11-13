@@ -1,0 +1,22 @@
+{% extends "/base/table.html" %}
+{% block title %}<b>{{ name }}</b> Memory Map (0x{{ '%08X' % start_address }} - 0x{{ '%08X' % (start_address + length - 1) }}) : Using {{ last_used_address - start_address + 1 }} of {{ length }} bytes{% endblock %}
+{% block head %}
+      <tr>
+          <th scope="col">Address</th>
+          <th scope="col">Name</th>
+          <th scope="col">Type</th>
+          <th scope="col">Size (Bytes)</th>
+          <th scope="col">Description</th>
+      </tr>
+{% endblock %}
+{% block body %}
+{% for item in items.values() %}
+      <tr>
+        <td style='font-family: "Courier New", Courier, monospace;'>0x{{'%08X' % item.address}} - 0x{{'%08X' % (item.address + item.size - 1)}}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ item.name }}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{% if item.type_model %}<a class="record_link" href="../../{{ item.type_model.get_src_dir_from(get_src_dir(full_filename)) }}/build/html/{{ item.type_package.lower() }}.html">{% endif %}{{ item.type }}{% if item.type_model %}</a>{% endif %}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ item.size }}</td>
+        <td>{% if item.description %}{{ printMultiLine(item.description, '') }}{% endif %}</td>
+      </tr>
+{% endfor %}
+{% endblock %}

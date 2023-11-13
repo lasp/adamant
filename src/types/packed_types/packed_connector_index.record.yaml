@@ -1,0 +1,7 @@
+---
+description: Single component record for holding packed connector index.
+fields:
+  - name: Index
+    description: The 16-bit connector index.
+    type: Connector_Types.Connector_Index_Type
+    format: U16

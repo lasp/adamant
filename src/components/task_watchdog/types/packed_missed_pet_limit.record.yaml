@@ -1,0 +1,7 @@
+---
+description: Limit value packed for the task watchdog data products
+fields:
+  - name: Limit
+    description: The limit value
+    type: Task_Watchdog_Types.Missed_Pet_Limit_Type
+    format: U16

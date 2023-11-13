@@ -1,0 +1,58 @@
+---
+description: |
+  The Logger component receives data of generic statically-sized, or variable-sized type. This data is synchronously added to an internal circular buffer. By default, the logging of this data can be disabled at component start and can be enabled via command. Various commands also exist to dump the internal circular buffer. The circular buffer of the logger can either be declared on the heap or in a static memory location, via the component's Init subprogram.
+execution: passive
+with:
+  - Circular_Buffer_Meta
+  - Serializer_Types
+  - Logger_Enums
+generic:
+  description: The component is parameterized by the type that is stores in its internal log. To support variable length packed records, a subprogram is also provided which determines the length (in bytes) of the incoming type.
+  parameters:
+    - name: T
+      description: The generic type of data passed in to be logged.
+    - name: Serialized_Length
+      description: A method that returns the serialized length of an item of type T. This is useful for serializing variable length packed types onto the log.
+      formal_type: "with function Serialized_Length (Src : in T; Num_Bytes_Serialized : out Natural) return Serializer_Types.Serialization_Status;"
+init:
+  description: "This init function provides memory allocation for the logger's internal memory. Preallocated memory can be provided via the \"bytes\" access type, in which case \"size\" must be negative and will be ignored. If you would like to allocate the internal memory on the heap then \"bytes\" must be set to null, and \"size\" must be a positive number representing the number of bytes you would like to allocate."
+  parameters:
+    - name: bytes
+      type: Basic_Types.Byte_Array_Access
+      default: "null"
+      description: "A pointer to an allocation of bytes to be used for storing log data. If this is set to null, then memory will be allocated on the heap using the \"size\" parameter instead. Note: This must be set to null if the \"size\" parameter is positive below."
+    - name: meta_Data
+      type: Circular_Buffer_Meta.T_Access
+      default: "null"
+      description: "A pointer to an allocation of a meta data record for storing the log meta data. This can be used to place the meta data where desired in memory. This item must be set to null if \"size\" is positive, and non-null if \"bytes\" is non-null."
+    - name: size
+      type: Integer
+      default: "-1"
+      description: "The number of bytes to allocate on the heap for memory storage. Note: This must be set to a negative value if the \"bytes\" parameters is not null."
+    - name: initial_Mode
+      type: Logger_Enums.Logger_Mode.E
+      default: "Logger_Enums.Logger_Mode.Disabled"
+      description: "The initial mode of the logger (enabled/disabled) upon initialization"
+connectors:
+  - description: The generic log data connector.
+    type: T # Generic type from above.
+    kind: recv_sync
+  - description: The memory dump connector.
+    name: Memory_Dump_Send
+    type: Memory_Packetizer_Types.Memory_Dump
+    kind: send
+  - description: This is the command receive connector.
+    type: Command.T
+    kind: recv_sync
+  - description: This connector is used to register and respond to the component's commands.
+    type: Command_Response.T
+    kind: send
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send
+  - description: Data products are sent out of this connector.
+    type: Data_Product.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get

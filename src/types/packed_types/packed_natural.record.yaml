@@ -1,0 +1,7 @@
+---
+description: Single component record for holding packed Natural value.
+fields:
+  - name: Value
+    description: The 32-bit Natural Integer.
+    type: Natural
+    format: U32

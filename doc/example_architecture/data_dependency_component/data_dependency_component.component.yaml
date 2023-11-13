@@ -1,0 +1,14 @@
+---
+execution: passive
+description: This is the data dependency component, which fetches data dependencies.
+connectors:
+  - type: Tick.T
+    kind: recv_sync
+    description: This connector provides the schedule tick for the component.
+  - return_type: Sys_Time.T
+    kind: get
+    description: This connector is used to fetch the current system time.
+  - description: Fetch a data product item from the database. This is used to grab the component's data dependencies.
+    type: Data_Product_Fetch.T
+    return_type: Data_Product_Return.T
+    kind: request

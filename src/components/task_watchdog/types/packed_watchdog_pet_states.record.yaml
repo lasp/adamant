@@ -1,0 +1,19 @@
+---
+description: Status information for 4 fault response entries.
+fields:
+  - name: State_0
+    description: The state of the enable/disable pet checking of a watchdog connector entry.
+    type: Task_Watchdog_Enums.Watchdog_Action_State.E
+    format: E2
+  - name: State_1
+    description: The state of the enable/disable pet checking of a watchdog connector entry.
+    type: Task_Watchdog_Enums.Watchdog_Action_State.E
+    format: E2
+  - name: State_2
+    description: The state of the enable/disable pet checking of a watchdog connector entry.
+    type: Task_Watchdog_Enums.Watchdog_Action_State.E
+    format: E2
+  - name: State_3
+    description: The state of the enable/disable pet checking of a watchdog connector entry.
+    type: Task_Watchdog_Enums.Watchdog_Action_State.E
+    format: E2

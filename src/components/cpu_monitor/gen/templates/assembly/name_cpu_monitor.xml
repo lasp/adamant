@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pageDef>
+  <updateRate ms="1000"/>
+  <page title="CPU Monitor">
+    <column>
+      <section name="Cpu Usage Packet Header:">
+        <row label="Apid:" item="Ccsds-Cpu_Monitor_Instance-Cpu_Usage_Packet-Ccsds_Primary_Header-Apid"/>
+        <row label="Packet Length:" item="Ccsds-Cpu_Monitor_Instance-Cpu_Usage_Packet-Ccsds_Primary_Header-Packet_Length"/>
+        <row label="Sequence Count:" item="Ccsds-Cpu_Monitor_Instance-Cpu_Usage_Packet-Ccsds_Primary_Header-Sequence_Count"/>
+        <row label="Timestamp (sec):" item="Ccsds-Cpu_Monitor_Instance-Cpu_Usage_Packet-Sys_Time-Seconds"/>
+        <row label="Timestamp (subsec):" item="Ccsds-Cpu_Monitor_Instance-Cpu_Usage_Packet-Sys_Time-Subseconds"/>
+      </section>
+      <table>
+        <tableTitle name="Task CPU Usage %:"/>
+        <tableHeading>
+          <label name="Rate #1     "/>
+          <label name="Rate #2     "/>
+          <label name="Rate #3     "/>
+        </tableHeading>
+{% set count = namespace(index=0) %}
+{% for task in task_list %}
+        <tableRow>
+          <label name="{{ task.component_name }}.{{ task.name }}"/>
+          <item name="Ccsds-Cpu_Monitor_Instance-Cpu_Usage_Packet-{{ task.component_name }}_{{ task.name }}_Usage_1"/>
+          <item name="Ccsds-Cpu_Monitor_Instance-Cpu_Usage_Packet-{{ task.component_name }}_{{ task.name }}_Usage_2"/>
+          <item name="Ccsds-Cpu_Monitor_Instance-Cpu_Usage_Packet-{{ task.component_name }}_{{ task.name }}_Usage_3"/>
+        </tableRow>
+{% set count.index = count.index + 3 %}
+{% endfor %}
+      </table>
+{% set start_inter = count.index %}
+      <table>
+        <tableTitle name="Interrupt CPU Usage %:"/>
+        <tableHeading>
+          <label name="Rate #1     "/>
+          <label name="Rate #2     "/>
+          <label name="Rate #3     "/>
+        </tableHeading>>
+{% for interrupt in interrupt_list %}
+        <tableRow>
+          <label name="{{ interrupt.component_name }}"/>
+          <item name="Ccsds-Cpu_Monitor_Instance-Cpu_Usage_Packet-{{ interrupt.component_name }}_Usage_1"/>
+          <item name="Ccsds-Cpu_Monitor_Instance-Cpu_Usage_Packet-{{ interrupt.component_name }}_Usage_2"/>
+          <item name="Ccsds-Cpu_Monitor_Instance-Cpu_Usage_Packet-{{ interrupt.component_name }}_Usage_3"/>
+        </tableRow>
+{% set count.index = count.index + 3 %}
+{% endfor %}
+      </table>
+    </column>
+  </page>
+</pageDef>

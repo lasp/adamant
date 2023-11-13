@@ -1,0 +1,27 @@
+---
+# Optional - Description of the enumeration suite
+description: This is a simple set of useless enumerations
+enums:
+  - name: First_Enum
+    description: This is the first enumeration type.
+    literals:
+        # Required - The name of the first literal
+      - name: Yellow
+        # Optional - The integral value of the first literal
+        value: 10
+        # Optional - A description of what the first state means.
+        description: The yellow state.
+      - name: Green
+        description: The green state.
+      - name: Blue
+        description: The blue state.
+      - name: Purple
+        value: 0
+        description: The purple state.
+  - name: Second_Enum
+    description: This is the second enumeration type.
+    literals:
+      - name: Car
+      - name: Boat
+      - name: House
+      - name: Spaceship

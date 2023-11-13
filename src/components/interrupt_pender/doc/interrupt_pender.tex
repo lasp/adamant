@@ -1,0 +1,52 @@
+\input{common_packages.tex}
+
+\begin{document}
+
+\title{\textbf{Interrupt Pender} \\
+\large\textit{Component Design Document}}
+\date{}
+\maketitle
+
+\section{Description}
+\input{build/tex/interrupt_pender_description.tex}
+
+\section{Requirements}
+\input{build/tex/interrupt_pender_requirements.tex}
+
+\section{Design}
+
+\subsection{At a Glance}
+\input{build/tex/interrupt_pender_stats.tex}
+
+\subsection{Diagram}
+\begin{figure}[H]
+  \includegraphics[width=1.0\textwidth,center]{../build/eps/interrupt_pender.eps}
+  \caption{Interrupt Pender component diagram.}
+\end{figure}
+
+\input{interrupt_pender_context.tex}
+
+\subsection{Connectors}
+\input{build/tex/interrupt_pender_connectors.tex}
+
+\subsection{Interrupts}
+
+\input{build/tex/interrupt_pender_interrupts.tex}
+
+\subsection{Initialization}
+\input{build/tex/interrupt_pender_init.tex}
+
+\section{Unit Tests}
+
+\input{build/tex/interrupt_pender_unit_test.tex}
+
+\section{Appendix}
+\subsection{Preamble}
+
+\input{build/tex/interrupt_pender_preamble.tex}
+
+\subsection{Packed Types}
+
+\input{build/tex/interrupt_pender_types.tex}
+
+\end{document}

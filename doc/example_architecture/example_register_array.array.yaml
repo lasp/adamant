@@ -1,0 +1,5 @@
+---
+description: This is an array of 10 32-bit unsigned registers.
+type: Interfaces.Unsigned_32
+format: U32
+length: 10

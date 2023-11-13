@@ -1,0 +1,11 @@
+---
+description: This is a packed record including Aa and Bb and an enumeration type.
+fields:
+  - name: C
+    description: The element
+    type: Test_Enums.Second_Enum.E
+    format: U32
+  - name: A
+    type: Aa.T
+  - name: B
+    type: Bb.T

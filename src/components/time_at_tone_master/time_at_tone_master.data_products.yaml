@@ -1,0 +1,9 @@
+---
+description: Data products for the Time at Tone Master component.
+data_products:
+  - name: Tone_Messages_Sent
+    description: The number of tone messages sent.
+    type: Packed_U32.T
+  - name: Time_At_Tone_State
+    description: The disable/enable state of the time at tone component.
+    type: Tat_State.T

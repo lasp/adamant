@@ -1,0 +1,16 @@
+%- if requirements 
+%- if requirements.description
+\VAR{requirements.description} \\
+%- else
+\par Below is a list of the requirements for the \VAR{prettyname|e} component.
+%- endif
+
+\begin{spacedenumerate}
+%- for requirement in requirements.requirements
+  \item \VAR{requirement["text"]}
+%- endfor
+\end{spacedenumerate}
+\vspace{5mm} %5mm vertical space
+%- else
+No requirements have been specified for this component.
+%- endif

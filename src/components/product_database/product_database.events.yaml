@@ -1,0 +1,55 @@
+---
+events:
+  - name: Data_Product_Update_Id_Out_Of_Range
+    description: A data product update was received with an ID that was out of range.
+    param_type: Data_Product_Id.T
+  - name: Data_Product_Fetch_Id_Out_Of_Range
+    description: A data product fetch was received with an ID that was out of range.
+    param_type: Data_Product_Id.T
+  - name: Data_Product_Fetch_Id_Not_Available
+    description: A data product fetch was received with an ID that has not yet been stored in the database.
+    param_type: Data_Product_Id.T
+  - name: Override_Cleared
+    description: Override condition cleared for the data product of the provided ID.
+    param_type: Data_Product_Id.T
+  - name: Override_Cleared_For_All
+    description: Override condition cleared for all data productd.
+  - name: Data_Product_Overridden
+    description: Data product overridden by command.
+    param_type: Data_Product_Header.T
+  - name: Data_Product_Override_Serialization_Failure
+    description: Data product override could not be completed due to a serialization error.
+    param_type: Data_Product_Header.T
+  - name: Data_Product_Override_Id_Out_Of_Range
+    description: A data product override command was received with an ID that was out of range.
+    param_type: Data_Product_Id.T
+  - name: Data_Product_Clear_Override_Id_Out_Of_Range
+    description: A data product clear override command was received with an ID that was out of range.
+    param_type: Data_Product_Id.T
+  - name: Data_Product_Dump_Id_Not_Available
+    description: A data product dump command was received with an ID that has not yet been stored in the database.
+    param_type: Data_Product_Id.T
+  - name: Data_Product_Dump_Id_Out_Of_Range
+    description: A data product dump command was received with an ID that was out of range.
+    param_type: Data_Product_Id.T
+  - name: Data_Product_Dumped
+    description: Data product dumped into a packet by command.
+    param_type: Data_Product_Header.T
+  - name: Dumping_Data_Product_Poly_Type
+    description: Data product poly type dumped into a packet by command.
+    param_type: Data_Product_Poly_Extract.T
+  - name: Dumped_Data_Product_Poly_Type
+    description: Data product poly type dumped into a packet by command.
+    param_type: Data_Product_Poly_Event.T
+  - name: Data_Product_Dump_Poly_Id_Not_Available
+    description: A data product dump poly command was received with an ID that has not yet been stored in the database.
+    param_type: Data_Product_Id.T
+  - name: Data_Product_Dump_Poly_Id_Out_Of_Range
+    description: A data product dump poly command was received with an ID that was out of range.
+    param_type: Data_Product_Id.T
+  - name: Data_Product_Poly_Type_Extraction_Failed
+    description: A data product dump poly command failed because the extraction could not succeed with the provided parameters.
+    param_type: Data_Product_Header.T
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T

@@ -1,0 +1,27 @@
+---
+execution: passive
+description: This is the example component, with an Init procedure.
+# Optional - init declaration
+init:
+  # Optional - init description
+  description: This is the component's init procedure. It initializes parameters during initialization.
+  # Optional - list of parameters to pass to component's init
+  parameters:
+      # Required - parameter name
+    - name: Packets_Per_Tick
+      # Required - parameter type
+      type: Natural
+      # Optional - parameter description
+      description: The number of packets to send every time the Tick_T_Recv_Sync connector is invoked.
+    - name: Enabled_At_Startup
+      type: Boolean
+      description: If True, packets will be produced for every call to Tick_T_Recv_Sync. If False, no packets will be produced.
+      # Optional - default value
+      default: "True"
+connectors:
+  - type: Tick.T
+    kind: recv_sync
+    description: This connector provides the schedule tick for the component.
+  - type: Packet.T
+    kind: send
+    description: This connector is used to send out a telemetry packet.

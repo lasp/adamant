@@ -1,0 +1,4 @@
+---
+description: This is the assembly view.
+show_component_priority: False
+postamble: "{ rank=sink; Parameters_Instance, Time_Instance, Logger_Instance }"

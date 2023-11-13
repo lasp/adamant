@@ -1,0 +1,9 @@
+---
+description: Data products for the Product Database component.
+data_products:
+  - name: Data_Product_Poly_Type_Dump
+    description: Data product poly type dumped into a data product by command.
+    type: Data_Product_Poly_Type.T
+  - name: Database_Override
+    description: If set to Enabled then the database contains at least one data product that has been overridden by command.
+    type: Packed_Enable_Disable_type.T

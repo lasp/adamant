@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>{{ name }}</title>
+<style>
+
+body
+{
+  margin: 45px;
+}
+h1
+{
+  font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+  font-weight: normal;
+  font-size: 26px;
+  padding: 12px 15px;
+  color: #52527a;
+}
+h2
+{
+  font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+  font-weight: normal;
+  font-size: 20px;
+  padding: 12px 15px;
+  color: #52527a;
+}
+p, div
+{
+  font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+  font-size: 12px;
+  padding: 0px 15px;
+  color: #52527a;
+}
+ul
+{
+  font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+  font-size: 12px;
+  color: #52527a;
+}
+ol
+{
+  font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+  font-size: 12px;
+  color: #52527a;
+}
+
+#one-column-emphasis
+{
+  font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+  font-size: 14px;
+  text-align: left;
+  border-collapse: collapse;
+}
+#one-column-emphasis th
+{
+  font-size: 16px;
+  font-weight: bold;
+  padding: 12px 15px;
+  color: #52527a;
+}
+#one-column-emphasis td
+{
+  padding: 10px 15px;
+  color: #669;
+  border-top: 1px solid #e8edff;
+}
+#one-column-emphasis tr:hover td
+{
+  color: #339;
+  background: #eff2ff;
+}
+</style>
+</head>
+
+<body>
+
+<left>
+<h1>{% block title %}{% endblock %}</h1>
+
+{% if description %}
+<p>
+<b>Description:</b> {{ printMultiLine(description, '') }}
+</p>
+{% if preamble %}
+<p>
+<b>Preamble:</b>
+<span style="white-space: pre-wrap; font-family: monospace;">
+{{ preamble }}
+</span>
+</p>
+{% endif %}
+<p>
+{% block info %}
+{% endblock %}
+</p>
+{% endif %}
+
+<table id="one-column-emphasis">
+    <thead>
+      {% block head %}
+      <tr>
+          <th scope="col">One</th>
+          <th scope="col">Two</th>
+          <th scope="col">Three</th>
+      </tr>
+      {% endblock %}
+    </thead>
+    <tbody>
+      {% block body %}
+      <tr>
+        <td style='font-family: "Courier New", Courier, monospace;'><b>yay!</b></td>
+        <td style='font-family: "Courier New", Courier, monospace;'>1</td>
+        <td>2</td>
+      </tr>
+      {% endblock %}
+    </tbody>
+</table>
+</left>
+
+
+<center>
+<p>
+<br/>
+<i>Generated from {{ filename }} on {{ time }}.</i>
+</p>
+</center>
+
+</body>
+
+</html>

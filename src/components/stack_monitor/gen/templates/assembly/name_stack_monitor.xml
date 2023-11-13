@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pageDef>
+  <updateRate ms="1000"/>
+  <page title="Stack Monitor">
+    <column>
+      <section name="Stack Usage Packet Header:">
+        <row label="Apid:" item="Ccsds-Stack_Monitor_Instance-Stack_Usage_Packet-Ccsds_Primary_Header-Apid"/>
+        <row label="Packet Length:" item="Ccsds-Stack_Monitor_Instance-Stack_Usage_Packet-Ccsds_Primary_Header-Packet_Length"/>
+        <row label="Sequence Count:" item="Ccsds-Stack_Monitor_Instance-Stack_Usage_Packet-Ccsds_Primary_Header-Sequence_Count"/>
+        <row label="Timestamp (sec):" item="Ccsds-Stack_Monitor_Instance-Stack_Usage_Packet-Sys_Time-Seconds"/>
+        <row label="Timestamp (subsec):" item="Ccsds-Stack_Monitor_Instance-Stack_Usage_Packet-Sys_Time-Subseconds"/>
+      </section>
+      <table>
+        <tableTitle name="Task Stack Usage %:"/>
+        <tableHeading>
+          <label name="Primary Stack  "/>
+          <label name="Secondary Stack"/>
+        </tableHeading>
+{% set count = namespace(index=0) %}
+{% for task in task_list %}
+        <tableRow>
+          <label name="{{ task.component_name }}.{{ task.name }}"/>
+          <item name="Ccsds-Stack_Monitor_Instance-Stack_Usage_Packet-{{ task.component_name }}_{{ task.name }}_Primary_Stack_Usage"/>
+          <item name="Ccsds-Stack_Monitor_Instance-Stack_Usage_Packet-{{ task.component_name }}_{{ task.name }}_Secondary_Stack_Usage"/>
+        </tableRow>
+{% set count.index = count.index + 3 %}
+{% endfor %}
+      </table>
+    </column>
+  </page>
+</pageDef>

@@ -1,0 +1,16 @@
+---
+description: These are the commands for the Memory Manager component.
+commands:
+  - name: Dump_Memory_Region
+    description: Dump the entire memory region.
+  - name: Dump_Memory_Region_Bytes
+    description: Dump the memory region at the provided virtual address and length.
+    arg_type: Virtual_Memory_Region_Positive.T
+  - name: Crc_Memory_Region_Bytes
+    description: Perform a CRC on the region with the provided virtual address and length. The CRC will be reported via event and data product, if those connectors are connected.
+    arg_type: Virtual_Memory_Region_Positive.T
+  - name: Write_Memory_Region
+    description: Perform a write to the memory region at the provided address. If the memory is not available an error event will be produced.
+    arg_type: Virtual_Memory_Region_Write.T
+  - name: Force_Release
+    description: Forces the release of the memory region if it is currently allocated. This command can be used to recover from an anomolous condition.

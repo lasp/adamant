@@ -1,0 +1,17 @@
+---
+description: Sequence store slot metadata, included at the beginning of each slot before the sequence.
+preamble: |
+  type Five_Bit_Pad_Type is mod 2**5;
+fields:
+  - name: Reserved
+    description: Unused bits.
+    type: Five_Bit_Pad_Type
+    format: U5
+  - name: State
+    description: The state of the slot.
+    type: Sequence_Store_Enums.Slot_State_Type.E
+    format: E1
+  - name: Validity
+    description: The validity of the slot, based on a CRC computation against the CRC in the sequence's header.
+    type: Sequence_Store_Enums.Slot_Valid_Type.E
+    format: E2

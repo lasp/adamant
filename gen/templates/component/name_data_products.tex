@@ -1,0 +1,35 @@
+%- if data_products
+%- if data_products.description
+\VAR{data_products.description} \\
+%- else
+\par Below is a list of the data products products by the \VAR{prettyname|e} component.
+%- endif
+
+\captionof{table}{\VAR{prettyname|e} Data Products}
+\begin{xltabular}{\textwidth}{ | c | l | X | }
+  \hline
+  \textbf{Local ID} & \textbf{Data Product Name} & \textbf{Type} \\ \hline
+%- for dp in data_products
+  \texttt{0x\VAR{"%04x" % loop.index0 } (\VAR{ loop.index0 })} &
+  \texttt{\url{\VAR{dp.name}}} &
+  \texttt{\url{\VAR{dp.type}}}
+  \\ \hline
+%- endfor
+\end{xltabular}
+\vspace{5mm} %5mm vertical space
+
+Data Product Descriptions:
+\begin{spaceditemize}
+%- for dp in data_products
+  \item \textbf{\texttt{\VAR{dp.name|e}}} - 
+%- if dp.description
+    \VAR{dp.description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+%- else 
+\par The \VAR{prettyname|e} component has no data products.
+%- endif

@@ -1,0 +1,56 @@
+---
+# This schema describes the yaml format for the Adamant configuration file.
+type: map
+# Key value pairs ARE allowed that are not found in this schema. However anything
+# listing in this schema MUST appear in the configuration file if required is
+# set to True.
+allowempty: True
+mapping:
+  # An optional description for this configuration file.
+  description:
+    type: str
+    required: False
+  # The size of the buffer within data product type (in bytes). This buffer is
+  # used to serialize the data product type. Choose a size that fits the largest
+  # data product type in your system:
+  data_product_buffer_size:
+    type: int
+    required: True
+  # The size of the buffer within command type (in bytes). This buffer is
+  # used to serialize the command arguments. Choose a size that fits the largest
+  # command argument in your system:
+  command_buffer_size:
+    type: int
+    required: True
+  # The size of the buffer within event type (in bytes). This buffer is
+  # used to serialize the event parameters. Choose a size that fits the largest
+  # event parameter in your system:
+  event_buffer_size:
+    type: int
+    required: True
+  # The size of the buffer within parameter type (in bytes). This buffer is
+  # used to serialize the parameter type. Choose a size that fits the largest
+  # parameter type in your system:
+  parameter_buffer_size:
+    type: int
+    required: True
+  # The size of the buffer within a packet type (in bytes).
+  packet_buffer_size:
+    type: int
+    required: True
+  # The size of the buffer within a CCSDS space packet type (in bytes).
+  ccsds_packet_buffer_size:
+    type: int
+    required: True
+  # The stack margin in bytes. This value is used in src/core/task/task_util.adb to
+  # define the amount of "usable" stack used by the Stack Monitor component. You should
+  # size this value as small as possible, but the value MUST be larger than the amount
+  # of stack that a task uses prior to calling the Cycle procedure the first time, and MUST
+  # be smaller than that smallest task stack efined in the system. When in doubt, leave
+  # this value at the default.
+  #
+  # Note, this value only affects bareboard runtimes. Linux uses a predefined stack margin
+  # of 12KB defined in src/core/task/linux/stack_margin.ads.
+  stack_margin:
+    type: int
+    required: True

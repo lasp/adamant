@@ -1,0 +1,11 @@
+---
+description: This component stores system state variables and collected sensor measurements as data products within a database.
+execution: passive
+connectors:
+  - type: Data_Product.T
+    kind: recv_sync
+    description: Store a data product item in the database.
+  - type: Data_Product_Fetch.T
+    return_type: Data_Product_Return.T
+    kind: service
+    description: Fetch a data product item from the database.

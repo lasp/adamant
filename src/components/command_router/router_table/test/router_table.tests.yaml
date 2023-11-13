@@ -1,0 +1,5 @@
+---
+description: This is a unit test suite for the router_table object
+tests:
+  - name: Add_To_Table
+    description: This unit test adds registration elements to the router table and asserts for correct table size and searching

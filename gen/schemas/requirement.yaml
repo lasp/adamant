@@ -1,0 +1,25 @@
+---
+# This schema describes the yaml format for a requirement
+type: map
+mapping:
+  project:
+    type: str
+    required: False
+  description:
+    type: str
+    required: True
+  requirements:
+    seq:
+      - type: map
+        mapping:
+          # Text, the requirement text
+          text:
+            type: str
+            required: True
+          # Description of the requirement
+          description:
+            type: str
+            required: False
+    range:
+      min: 1
+    required: True

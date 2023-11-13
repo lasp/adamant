@@ -1,0 +1,71 @@
+---
+description: This is a unit test suite for the Command Sequencer component.
+tests:
+  - name: Test_Nominal_Load_And_Run_Sequence
+    description: This unit test tests loading and running a simple sequence.
+  - name: Test_Nominal_Subsequence_Load
+    description: This unit test tests loading and running a sequence that loads a subsequence.
+  - name: Test_Nominal_Sequence_Spawn
+    description: This unit test tests loading and running a sequence that loads a sequence in another engine.
+  - name: Test_Nominal_Sequence_Replace
+    description: This unit test tests loading and running a sequence that loads a sequence into the same engine.
+  - name: Test_Nominal_Sequence_Telemetry_Compare
+    description: This unit test tests loading and running a sequence that executes a conditional on a data product.
+  - name: Test_Nominal_Sequence_Wait_New_Value
+    description: This unit test tests loading and running a sequence that executes a conditional on a data product with the waitnewvalue keyword.
+  - name: Test_Nominal_Fetch_Data_Product
+    description: This unit test tests loading and running a sequence that grabs a data product and sets it as a local variable.
+  - name: Test_Sequence_Telemetry_Compare_Error
+    description: This unit test tests loading and running a sequence that executes a conditional on a data product that is malformed.
+  - name: Test_Sequence_Telemetry_Compare_Corner_Cases
+    description: This unit test tests tests a few corner cases related to telemetry comparisons and makes sure they behave as intended.
+  - name: Test_Sequence_Spawn_Invalid_Engine
+    description: This unit test tests loading and running a sequence that loads a sequence into another engine that does not exist.
+  - name: Test_Sequence_Spawn_Unavailable_Engine
+    description: This unit test tests loading and running a sequence that loads a sequence into an engine that is currently busy.
+  - name: Test_Sequence_Spawn_Any_Unavailable
+    description: This unit test tests loading and running a sequence that loads a sequence into any engine when no engines are available.
+  - name: Test_Data_Product_Fetch_Error
+    description: This unit test tests loading and running a sequence that executes a conditional on a data product that is not available or has an unknown ID.
+  - name: Test_Relative_And_Absolute_Wait_Sequence
+    description: This unit test tests loading and running a simple sequence with relative and absolute waits.
+  - name: Test_Sequence_Load_Error
+    description: This unit test tests all the error conditions associated with a bad sequence load.
+  - name: Test_Sequence_Execution_Error
+    description: This unit test tests how the component responds to a sequence that has a failed command.
+  - name: Test_Sequence_Timeouts
+    description: This unit test tests sequence command and subsequence load timeouts.
+  - name: Test_Issue_Details_Packet
+    description: This unit test tests issueing the details packet by command.
+  - name: Test_Set_Summary_Packet_Period
+    description: This unit test tests changing the summary packet period by command.
+  - name: Test_Command_Invalid_Engine
+    description: This unit test exercises commands send to invalid engine IDs and makes sure they do not execute.
+  - name: Test_Invalid_Command
+    description: This unit test exercises that an invalid command throws the appropriate event.
+  - name: Test_Queue_Overflow
+    description: This unit test exercises that a queue overflow results in the appropriate event.
+  - name: Test_Sequence_Internal_Execution_Error
+    description: This unit test tests how the component responds to a sequence that is corrupted and fails internally.
+  - name: Test_Kill_Engine_Command
+    description: This unit test tests the kill engine command.
+  - name: Test_Kill_Opcode
+    description: This unit test tests the kill engine sequence opcode.
+  - name: Test_Recursion_Error
+    description: This unit test tests the sequence recursion error, where the execute recursion limit is exceeded.
+  - name: Test_Print
+    description: This unit test tests the sequencer print opcode which produces an event from the command sequencer.
+  - name: Test_Set_Engine_Arguments
+    description: This unit test tests the set engine arguments command.
+  - name: Test_Return_Val
+    description: This unit test tests the return value feature.
+  - name: Test_Bad_Float
+    description: This unit test tests what happens when a floating point sequence variable overflows.
+  - name: Test_Complex_Command
+    description: This unit test tests to make sure commands with complex arguments are formed correctly by the sequencer.
+  - name: Test_Signed_Integer_Handling
+    description: This unit test tests a signed integer corner case that needs to be handled.
+  - name: Test_Set_Telemetry_Timeout
+    description: This unit test tests a telemetry fetch when the telemetry item never becomes available.
+  - name: Test_Sub_Seq_Load_Timeout
+    description: This unit test tests when a sub sequence load fails due to timeout.

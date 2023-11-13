@@ -1,0 +1,195 @@
+<!-- ####################################################################### -->
+<!-- {{ formatType(model_name) }} {{ formatType(model_type) }} -->
+<!-- Generated from {{ filename }} on {{ time }}. -->
+<!-- ####################################################################### -->
+
+<hydraDef>
+
+  <!-- Enumeration Dictionaries: -->
+{% for name, model in enums.items() %}
+{% if model.description %}
+  <!-- {{ model.description }} -->
+{% endif %}
+  <dictionary name="{{ name.replace('.', '-') }}_Dict">
+{% for literal in model.literals %}
+{% if literal.description %}
+    <!-- {{ literal.description }} -->
+{% endif %}
+    <pair key="{{ literal.value }}" str="{{ literal.name }} ({{ literal.value }})"/>
+{% endfor %}
+  </dictionary>
+{% endfor %}
+
+  <!-- Enumeration Types: -->
+{% for type, model in complex_types.items() %}
+{% set ns = namespace(prefix=model.name) %}
+{% for field in model.fields.values() recursive %}
+{% if field.is_packed_type %}
+{% set ns.prefix = ns.prefix + "-" + field.name %}
+{{ loop(field.type_model.fields.values()) }}{% set ns.prefix = '-'.join(ns.prefix.split('-')[:-1]) %}{% else %}
+{% if field.is_enum %}
+  <typeState name="{{ ns.prefix }}-{{ field.name }}_Enum" size="{{ field.size }}" dict="{{ field.type_model.suite.name }}-{{ field.type_model.name }}_Dict"/>
+{% endif %}
+{% endif %}
+{% endfor %}
+{% endfor %}
+
+  <!-- Dictionary Types for Packets: -->
+{% for id, packet in packets.items() %}
+{% if packet.items %}
+{% for item_name,item in packet.items.items() %}
+{% if item.is_enum %}
+  <dictionary name="{{ item.full_name|replace(".","-") }}-Dict">
+{% for literal in item.type_model.literals %}
+{% if literal.description %}
+    <!-- {{ literal.description }} -->
+{% endif %}
+    <pair key="{{ literal.value }}" str="{{ literal.name }} ({{ literal.value }})"/>
+{% endfor %}
+  </dictionary>
+{% elif item.literals %}
+  <dictionary name="{{ item.full_name|replace(".","-") }}-Dict">
+{% for literal in item.literals %}
+{% if literal.description %}
+    <!-- {{ literal.description }} -->
+{% endif %}
+    <pair key="{{ literal.value }}" str="{{ literal.name }} ({{ literal.value }})"/>
+{% endfor %}
+  </dictionary>
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+
+  <!-- Enum Types for Packets: -->
+{% for id, packet in packets.items() %}
+{% if packet.items %}
+{% for item_name,item in packet.items.items() %}
+{% if item.is_enum or item.literals %}
+  <typeState name="{{ item.full_name|replace(".","-") }}-Enum" size="{{ item.size }}" dict="{{ item.full_name|replace(".","-") }}-Dict"/>
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+
+  <!-- Complex Types: -->
+{% for type, model in complex_types.items() %}
+  <frameDef name="{{ model.name }}">
+{% if model.description %}
+    <description text="{{ model.description }}"/>
+{% endif %}
+    <field>
+{% set ns = namespace(prefix=model.name) %}
+{% for field_name, field in model.fields.items() recursive %}
+{% if field.is_packed_type %}
+{% set ns.prefix = ns.prefix + "-" + field_name %}
+      <!-- Items for frame: {{ field.type_package }} -->
+{% if field.description %}
+      <!-- Description: {{ field.description }} -->
+{% endif %}
+{{ loop(field.type_model.fields.items()) }}{% set ns.prefix = '-'.join(ns.prefix.split('-')[:-1]) %}{% else %}
+{% if model.name in ["Ccsds_Primary_Header", "Ccsds_Space_Packet"] and field_name == "Sequence_Count" %}
+      <!-- Special item counter for CCSDS sequence count: -->
+      <itemCounter name="{{ ns.prefix }}-{{ field_name }}" type="{{ field.format.type }}" value="0" incr="1" min="0" max="16384">
+{% if field.description %}
+        <description text="{{ field.description }}"/>
+{% endif %}
+      </itemCounter>
+{% else %}
+      <itemDef name="{{ ns.prefix }}-{{ field_name }}" type="{% if field.is_enum %}{{ ns.prefix }}-{{ field_name }}_Enum{% else %}{{ field.format.type }}{% endif %}"{% if field.variable_length %} subfield="length" control="{{ ns.prefix }}-{{ '-'.join(field.variable_length.split('.')) }}" offset="{{ field.variable_length_offset }}"{% else %}{% if field.format.length and field.format.length %} num="{{ field.format.length }}"{% endif %}{% endif %}>
+{% if field.description %}
+        <description text="{{ field.description }}"/>
+{% endif %}
+      </itemDef>
+{% endif %}
+{% endif %}
+{% endfor %}
+    </field>
+  </frameDef>
+{% endfor %}
+
+  <!-- Data Products: -->
+{% for id, dp in data_products.items() %}
+  <frameDef name="{{ dp.suite.component.instance_name }}-{{ dp.name }}" id="{{ dp.id }}" group="1">
+{% if dp.description %}
+    <description text="{{ dp.description }}"/>
+{% endif %}
+    <field>
+      <frameCopy name="Data_Product_Header" prefix="{{ dp.suite.component.instance_name }}-{{ dp.name }}-"/>
+{% if dp.type_model %}
+      <frameCopy name="{{ dp.type_package }}" prefix="{{ dp.suite.component.instance_name }}-{{ dp.name }}-"/>
+{% else %}
+      <itemDef name="{{ dp.suite.component.instance_name }}-{{ dp.name }}-{{ dp.type }}" type="{{ dp.type }}"/>
+{% endif %}
+    </field>
+  </frameDef>
+{% endfor %}
+
+  <!-- Events: -->
+{% for id, event in events.items() %}
+  <frameDef name="{{ event.suite.component.instance_name }}-{{ event.name }}" id="{{ event.id }}" group="2">
+{% if event.description %}
+    <description text="{{ event.description }}"/>
+{% endif %}
+    <field>
+      <frameCopy name="Event_Header" prefix="{{ event.suite.component.instance_name }}-{{ event.name }}-"/>
+{% if event.type %}
+{% if event.type_model %}
+      <frameCopy name="{{ event.type_package }}" prefix="{{ event.suite.component.instance_name }}-{{ event.name }}-"/>
+{% else %}
+      <itemDef name="{{ event.suite.component.instance_name }}-{{ event.name }}-{{ event.type }}" type="{{ event.type }}"/>
+{% endif %}
+{% endif %}
+    </field>
+  </frameDef>
+{% endfor %}
+
+  <!-- Packets: -->
+{% for id, packet in packets.items() %}
+  <frameDef name="{{ packet.full_name|replace(".","-") }}" id="{{ packet.id }}" group="3">
+{% if packet.description %}
+    <description text="{{ packet.description }}"/>
+{% endif %}
+    <field>
+      <frameCopy name="Packet_Header" prefix="{{ packet.full_name|replace(".","-") }}-"/>
+{% if packet.items %}
+{% for item_name,item in packet.items.items() %}
+      <itemDef name="{{ item.full_name|replace(".","-") }}" type="{% if item.is_enum or item.literals %}{{ item.full_name|replace(".","-") }}-Enum{% else %}{{ item.format.type}}{% endif %}"{% if item.format.length and item.format.length > 1 %} num="{{ item.format.length }}"{% endif%}>
+{% if item.flattened_description %}
+        <description text="{{ item.flattened_description }}"/>
+{% endif %}
+      </itemDef>
+{% endfor %}
+{% else %}
+      <itemDef name="{{ packet.full_name|replace(".","-") }}-Buffer" type="U8" num="{{ ((complex_types['Ccsds_Space_Packet'].size - complex_types['Ccsds_Space_Packet'].min_size - complex_types['Sys_Time'].size)/8)|int }}"/>
+{% endif %}
+    </field>
+  </frameDef>
+{% endfor %}
+
+  <!-- Event message dictionary: -->
+  <dictionary name="eventDictionary">
+{% for id, event in events.items() %}
+    <pair key="{{ event.id }}" str=" (0x{{ '%04x' % event.id }}){% if event.type %} : ({% if event.type_model %}{{ complex_types[event.type_package].format_string }}{% else %}{{ type_format_dictionary[event.type] }}{% endif %}){% endif %}"/>
+{% endfor %}
+  </dictionary>
+
+  <!-- Event message mappings: -->
+{% for id, event in events.items() %}
+  <msgDef name="{{ event.suite.component.instance_name }}->{{ event.name }}" frame="{{ event.suite.component.instance_name }}-{{ event.name }}" mainWindow="true">
+    <archiveMsg enabled="true" prefix="event_packetizer_downlink"/>
+    <item name="{{ event.suite.component.instance_name }}-{{ event.name }}-Event_Header-Id" conversion="eventDictionary">
+{% if event.type %}
+{% if event.type_model %}
+{% for string,ignore,ignore in complex_types[event.type_package].hydra_field_strings %}
+      <param>{{ event.suite.component.instance_name }}-{{ event.name }}-{{ event.type_package }}{{ string }}</param>
+{% endfor %}
+{% else %}
+      <param>{{ event.suite.component.instance_name }}-{{ event.name }}-{{ event.type }}-{{ event.type }}</param>
+{% endif %}
+{% endif %}
+    </item>
+  </msgDef>
+{% endfor %}
+
+</hydraDef>

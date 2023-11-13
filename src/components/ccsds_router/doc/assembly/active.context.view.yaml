@@ -1,0 +1,10 @@
+---
+description: This view shows the passive context.
+layout: left-to-right
+filters:
+  - name: rm_component
+    type: component_name
+    exclude:
+      - ccsds_High_Priority_Sender
+      - ccsds_Sync_Sender
+      - passive_Ccsds_Router

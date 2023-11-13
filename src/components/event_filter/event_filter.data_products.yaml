@@ -1,0 +1,12 @@
+---
+description: Data products for the event filter component.
+data_products:
+  - name: Total_Events_Filtered
+    description: The total number of events that have been filtered for the components lifetime.
+    type: Packed_U32.T
+  - name: Total_Events_Unfiltered
+    description: The total number of events that have been passed through for the components lifetime. Does not include out of range IDs.
+    type: Packed_U32.T
+  - name: Component_Filter_State
+    description: The state of the master switch for filtering events.
+    type: Event_Component_State_Type.T

@@ -1,0 +1,10 @@
+---
+events:
+  - name: Command_Received
+    description: A command was received by the command router to be routed.
+    param_type: Command_Header.T
+  - name: Noop_Received
+    description: A Noop command was received.
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T

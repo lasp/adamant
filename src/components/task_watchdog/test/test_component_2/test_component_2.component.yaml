@@ -1,0 +1,15 @@
+---
+description: A simple component which has a pet send connector.
+execution: passive
+connectors:
+  - description: Need a tick to enable an update on the pet connector
+    type: Tick.T
+    kind: recv_sync
+  - description: Pet updates are sent on this connector.
+    type: Pet.T
+    kind: send
+    name: Pet_1_T_Send
+  - description: Pet updates are sent on this connector.
+    type: Pet.T
+    kind: send
+    name: Pet_2_T_Send

@@ -1,0 +1,20 @@
+---
+description: This is a unit test suite for the Pid Controller component
+tests:
+  - name: Test_Received_Event
+    description: This unit test is to test incrementing counters for the range events as they come in with both enabled and disabled states.
+  - name: Test_Decrement_Event_Count
+    description: This unit test is to test the decrement of all the event counters in the tick and the contruction of the event if events were limited.
+  - name: Test_Issue_State_Packet
+    description: This unit test sends the issue command and test that the appropriate values are received in that packet.
+  - name: Test_Command_Single_State_Change
+    description: This unit test is used to test enabling and disabling a single event and testing if the packet is sent if issued by the command.
+  - name: Test_Command_Range_State_Change
+    description: This unit test is used to test enabling and disabling a range of events and testing if the packet is sent if issued by the command.
+  - name: Test_Command_Component_State_Change
+    description: This unit test is used to test enabling and disabling all events and testing if the packet is sent if issued by the command.
+  - name: Test_Persistence_Change
+    description: This unit test exercises updating the persistence and ensures it was set correctly.
+  - name: Test_Invalid_Command
+    description: This unit test exercises that an invalid command throws the appropriate event.
+

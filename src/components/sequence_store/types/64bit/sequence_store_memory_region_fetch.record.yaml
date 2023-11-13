@@ -1,0 +1,10 @@
+---
+description: A packed record which holds a sequence fetch return.
+fields:
+  - name: Sequence_Region
+    description: The memory region that holds the sequence.
+    type: Memory_Region.T
+  - name: Status
+    type: Sequence_Store_Enums.Sequence_Fetch_Status.E
+    description: The return status for the memory region fetch operation.
+    format: E8

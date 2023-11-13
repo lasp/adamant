@@ -1,0 +1,10 @@
+---
+execution: passive
+description: This is the parameter component, which is configured via parameters.
+connectors:
+  - type: Tick.T
+    kind: recv_sync
+    description: This connector provides the schedule tick for the component.
+  - type: Parameter_Update.T
+    kind: modify
+    description: The parameter update connector.

@@ -1,0 +1,26 @@
+---
+# This schema describes the yaml format for a parameter table.
+type: map
+mapping:
+  # Description of the parameter table.
+  description:
+    type: str
+    required: False
+  # The name of the component that this parameter table is being constructed for. This component
+  # must exist in the assembly specified by this file's name otherwise an error will be thrown.
+  # The component's name must be specified so that the generator can verify that any routed
+  # parameters in the table actually exist in the assembly.
+  parameters_instance_name:
+    type: str
+    required: True
+  # List of parameters to include in the suite.
+  parameters:
+    seq:
+      # Each parameter name must be in the format "Component_Instance_Name"."Parameter_Name" or
+      # simpy "Component_Instance_Name" to use all of the component's parameters.
+      - type: str
+        required: False
+    # A parameter table must have at least one parameter.
+    range:
+      min: 1
+    required: True

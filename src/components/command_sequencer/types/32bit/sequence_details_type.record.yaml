@@ -1,0 +1,25 @@
+---
+description: A packed record which holds a summary of the state for a particular sequence engine.
+fields:
+  - name: Header
+    description: The sequence header of the running sequence.
+    type: Sequence_Header.T
+  - name: Sequence_State
+    description: The running sequence state.
+    type: Seq_Enums.Seq_Runtime_State.E
+    format: E8
+  - name: Sequence_Address
+    description: The starting absolute memory address of running sequence
+    type: Packed_Address.T
+  - name: Program_Counter
+    description: The current program counter (relative address pointing to the current sequence instruction) of the sequence.
+    type: Seq_Types.Seq_Position
+    format: U16
+  - name: Start_Time
+    description: The absolute time (in seconds) when this sequence was started.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Last_Executed_Time
+    description: The last time (in seconds) when this sequence was executed.
+    type: Interfaces.Unsigned_32
+    format: U32

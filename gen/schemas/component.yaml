@@ -1,0 +1,231 @@
+---
+# This schema describes the yaml format for a component.
+type: map
+mapping:
+  # The component "execution" which describes how the component is run:
+  #   active  - the component includes an internal task
+  #   passive - the component does not include an internal task and is only executed by its connector invokers.
+  #   either  - the component is designed to be executed with its own task or not. Whether the component is
+  #             active or passive is decided as the assembly level.
+  execution:
+    type: str
+    enum: ['active', 'passive', 'either']
+    required: True
+  # Textual description of the component
+  description:
+    type: str
+    required: False
+  # Many "with" dependencies are automatically deduced and included by
+  # the generator. If you want to manually add a "with" statement, you
+  # can list the names of the packages here.
+  with:
+    seq:
+      - type: str
+    required: False
+  # Many "with" dependencies are automatically deduced and included by
+  # the generator. If you want to manually remove a "with" statement, you
+  # can list the names of the packages here.
+  without:
+    seq:
+      - type: str
+    required: False
+  # Any useful handcode to include in the .ads file can be included here.
+  # You can think of this as inline Ada, which might be useful for declaring
+  # custom enum types and the like. The code here is copied immediately after
+  # the package spec definition.
+  preamble:
+    type: str
+    required: False
+  # If the component is parameterized by some generic types or generic subprograms
+  # they should be listed here. The name of the generic type must be provided. The
+  # generic formal type will be included in the base package for the component. By
+  # default, the generic formal type will be "Type T is private;" where "T" is the
+  # name of the generic type. If you would like to use a different generic formal
+  # type definition, then use the "formal_type:" field.
+  generic:
+    type: map
+    mapping:
+      # Description of the generic set of parameters:
+      description:
+        type: str
+        required: False
+      parameters:
+        seq:
+          - type: map
+            mapping:
+              # Name of the generic type:
+              name:
+                type: str
+                required: True
+              # Declaration of the generic formal type. By default if this is not specified
+              # then the generic formal type will be "Type T is private;" where "T" is the
+              # name of the generic type.
+              formal_type:
+                type: str
+                required: False
+              # Description of the generic type.
+              description:
+                type: str
+                required: False
+              # Is the formal type optional? Only set this to true if you have provided a default
+              # in the "formal_type" field above.
+              optional:
+                type: bool
+                required: False
+        required: True
+    required: False
+  # User defined discriminant parameters. This should be used to initialize the component
+  # with any parameters needed for its functioning.
+  discriminant:
+    type: map
+    mapping:
+      # Description of the user initialization function.
+      description:
+        type: str
+        required: False
+      # A list of the arguments to be passed to the init function:
+      parameters:
+        seq:
+          - type: map
+            mapping:
+              # Description of the initialization parameter.
+              description:
+                type: str
+                required: False
+              # Name of the initialization parameter.
+              name:
+                type: str
+                required: True
+              # Type of the initialization parameter.
+              type:
+                type: str
+                required: True
+        required: False
+    required: False
+  # User defined initialization method. This method should allocate any memory on the heap
+  # that is necessary for the component's functioning.
+  init:
+    type: map
+    mapping:
+      # Description of the user initialization function.
+      description:
+        type: str
+        required: False
+      # A list of the arguments to be passed to the init function:
+      parameters:
+        seq:
+          - type: map
+            mapping:
+              # Description of the initialization parameter.
+              description:
+                type: str
+                required: False
+              # Name of the initialization parameter.
+              name:
+                type: str
+                required: True
+              # Type of the initialization parameter.
+              type:
+                type: str
+                required: True
+              # The default value for the parameter.
+              default:
+                type: str
+                required: False
+        required: False
+    required: False
+  # If the component services an interrupt, it should be documented here.
+  interrupts:
+    seq:
+      - type: map
+        mapping:
+          # The interrupt name, required.
+          name:
+            type: str
+            required: True
+          # Description of the interrupt.
+          description:
+            type: str
+            required: False
+    # At least one interrupt required in list.
+    range:
+      min: 1
+    required: False
+  # If a component uses an internal subtask, other than the primary component task,
+  # then its name should be listed here. This allows the assembly to ensure that the
+  # component subtask is properly created at initialization.
+  subtasks:
+    seq:
+      - type: map
+        mapping:
+          # The name of the subtask.
+          name:
+            type: str
+            required: True
+          # The description for the subtask
+          description:
+            type: str
+            required: False
+    required: False
+  # A list of connectors that the component should have.
+  connectors:
+    seq:
+      - type: map
+        mapping:
+          # The connector name. This should usually be omitted, since the autogenerated
+          # names are very descriptive and follow a common pattern.
+          name:
+            type: str
+            required: False
+          # Description of the connector.
+          description:
+            type: str
+            required: False
+          # The type of data that is passed along the connector call. Using a packed record or
+          # packed array type is recommended here.
+          type:
+            type: str
+            required: False
+          # The type of data that is returned from the connector call.
+          return_type:
+            type: str
+            required: False
+          # The connector "kind" which describes how data is passed along the connector.
+          #   recv_sync - type is received synchronously
+          #   recv_async - type is received asynchronously and queued.
+          #   send - type is sent synchronously
+          #   request - type is sent synchronously and return_type is returned back synchronously
+          #   service - type is received synchronously and return_type is sent back synchronously to the invoker
+          #   get - no type is set with this synchronous message, but return_type is expected synchronously
+          #   return - return_type is sent back to caller synchronously
+          #   provide - type is sent synchronously, and could be modified before being returned back to the invoker synchronously
+          #   modify - type is received synchronously and can be modified before being returned back to the invoker synchronously
+          kind:
+            type: str
+            enum: ['recv_sync', 'recv_async', 'send', 'request', 'service', 'get', 'return', 'provide', 'modify']
+            required: True
+          # Is this connector an arrayed connector? If so, a value greater than 1 should be
+          # provided here. A value of 0 assumes an unconstrained arrayed connector, whose size
+          # is determined by the assembly the component is part of.
+          count:
+            type: int
+            range:
+              min: 0
+              max: 65535
+            required: False
+          # Does this connector have a priority? If so, a value can be supplied here. The larger
+          # the value, the greater the priority. This only applies to asynchronous receive connectors,
+          # and an error will be thrown if the connector kind is not async_recv. If the component's
+          # async_recv connectors have different priorities then the component will be instantiated
+          # with a priority queue. If the async_recv connectors all have the same priority (unspecified
+          # priorities default to 0) then the component will be instantiated with a standard FIFO queue.
+          priority:
+            type: int
+            range:
+              min: 0
+              max: 255
+            required: False
+    # At least one connector is required per component.
+    range:
+      min: 1
+    required: True

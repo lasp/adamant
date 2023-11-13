@@ -1,0 +1,7 @@
+---
+description: These are the commands Example Science Component
+commands:
+  - name: Enable_Science
+    description: Start collecting science.
+  - name: Disable_Science
+    description: Stop collecting science.

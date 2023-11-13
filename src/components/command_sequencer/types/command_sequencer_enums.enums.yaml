@@ -1,0 +1,42 @@
+---
+description: These are enumerations that are used to interact with the Command Sequencer component.
+enums:
+  - name: Sequence_Load_Engine_Request_Type
+    description: This enumeration provides the sequence load to any available engine or the specified engine.
+    literals:
+      - name: Specific_Engine
+        value: 0
+        description: The sequence must be loaded to a specific engine number.
+      - name: Any_Engine
+        value: 1
+        description: The sequence can be loaded to any available engine.
+  - name: Sequence_Load_Status
+    description: This status enumerations provides information on the success/failure of a sequence load and run operation.
+    literals:
+      - name: Success
+        value: 0
+        description: Sequence was successfully loaded into an engine and started running.
+      - name: Engine_Uninitialized
+        value: 1
+        description: The destination engine has not yet been initialized.
+      - name: Invalid_Engine_Number
+        value: 2
+        description: The engine number does not exist within the component.
+      - name: Engine_In_Use
+        value: 3
+        description: The destination engine is currently busy and not able to run a new sequence in its current state.
+      - name: Unexpected_Sequence_Id
+        value: 4
+        description: The sequence could not be run because the ID does not match the expected sequence ID to be loaded.
+      - name: Crc_Error
+        value: 5
+        description: The computed CRC of the sequence does not match the stored CRC in its header so cannot be run.
+      - name: Length_Error
+        value: 6
+        description: The received sequence memory region is too small to hold the size of the sequence specified in the header.
+      - name: Load_Error
+        value: 7
+        description: The load of the sequence into the engine failed. This is a generic error that is clarified by an error type provided by the engine.
+      - name: Dropped
+        value: 8
+        description: The operation could not be performed because it was dropped from a full queue.

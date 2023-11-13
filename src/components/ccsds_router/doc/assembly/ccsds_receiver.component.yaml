@@ -1,0 +1,8 @@
+---
+description: A passive component which receives ccsds
+execution: passive
+connectors:
+  - type: Ccsds_Space_Packet.T
+    kind: recv_sync
+  - type: Ccsds_Space_Packet.T
+    kind: recv_async

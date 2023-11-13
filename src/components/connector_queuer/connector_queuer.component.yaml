@@ -1,0 +1,26 @@
+---
+description: This is a generic component that can be used to queue (as in recv_async) the call to an input connector. The component allows a queue to be added in front of a synchronous connector in any component. Adding a queue to a component not designed with thread-safety in mind can serve as a multi-tasking safe synchronization point for multiple callers. When the T_Recv_Async connector is called, the data is queued. Based on the priority of this component, the data will be safely dequeued in the future and the T_Send connector will be called. The queue is implemented using the standard Adamant queue, and thus calls are serviced in FIFO order. The queue protection mechanism effectively makes all downstream connector calls of this component thread-safe. The advantage of this component is that deploying it appropriately in an assembly can provide thread-safety and priority-tuned FIFO execution to components which are not designed to be thread-safe in and of themselves.
+execution: passive
+with:
+  - Serializer_Types
+generic:
+  description: The is generic component in that it can be instantiated to protect a connector of any type at compile time.
+  parameters:
+    - name: T
+      description: The generic type of data passed in and out of the component.
+    - name: Serialized_Length
+      description: A method that returns the serialized length of an item of type T. This is useful for serializing variable length packed types onto the queue.
+      formal_type: "with function Serialized_Length (Src : in T; Num_Bytes_Serialized : out Natural) return Serializer_Types.Serialization_Status;"
+connectors:
+  - description: The generic invokee connector.
+    type: T
+    kind: recv_async
+  - description: The generic invoker connector. Calls originating from this connector are serviced from the component's queue and thus will be executed in FIFO order in a thread-safe, atomic manner.
+    type: T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send

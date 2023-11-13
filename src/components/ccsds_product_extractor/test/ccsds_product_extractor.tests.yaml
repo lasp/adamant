@@ -1,0 +1,5 @@
+---
+description: This is a unit test suite for the Ccsds Product Extractor component
+tests:
+  - name: Test_Received_Data_Product_Packet
+    description: This unit test is used to test the logic of receiving a packet that contains a data product that needs to be extracted

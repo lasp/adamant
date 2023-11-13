@@ -1,0 +1,6 @@
+---
+description: Data products for the Limiter component.
+data_products:
+  - name: Max_Packet_Sends_Per_Tick
+    description: The current maximum packet sends per tick.
+    type: Packed_U16.T

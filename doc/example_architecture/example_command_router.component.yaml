@@ -1,0 +1,11 @@
+---
+description: This component routes commands to components in the assembly.
+execution: active
+connectors:
+  - type: Command.T
+    kind: recv_async
+    description: Commands to route are received on this connector.
+  - type: Command.T
+    kind: send
+    count: 0
+    description: Commands are routed out of this arrayed connector to their destination.

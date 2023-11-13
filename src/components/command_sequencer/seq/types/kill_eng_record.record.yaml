@@ -1,0 +1,19 @@
+---
+description: A packed record for seq instructions kill engine. Opcode 23.
+fields:
+  - name: Opcode
+    description: Instruction code
+    type: Basic_Types.Byte
+    format: U8
+  - name: Engine_Start
+    description: The engine Id that starts the range of engines to kill.
+    type: Seq_Types.Sequence_Engine_Id
+    format: U8
+  - name: Num_To_Kill
+    description: The number of engines to kill from Engine_Start (including Engine_Start)
+    type: Seq_Types.Sequence_Engine_Id
+    format: U8
+  - name: Pad
+    description: Padding
+    type: Basic_Types.Byte
+    format: U8

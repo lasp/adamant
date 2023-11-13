@@ -1,0 +1,6 @@
+---
+description: Data products for the Command Rejector.
+data_products:
+  - name: Rejected_Command_Count
+    description: The number of received commands rejected because they were on the reject list.
+    type: Packed_U16.T

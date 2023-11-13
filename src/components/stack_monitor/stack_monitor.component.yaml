@@ -1,0 +1,36 @@
+---
+description: |
+  This component produces a packet holding the stack and secondary stack usage for all tasks configured for a particular assembly. It is provided an autocoded data structure upon initialization that contains the tasks which it is to monitor. The packet produced contains a byte representing the percent usage of the stack and secondary stack for each task. Task usage is recalculated on every tick.
+execution: passive
+init:
+  description: This component requires a list of tasks to monitor.
+  parameters:
+    - name: task_List
+      type: Task_Types.Task_Info_List_Access
+      description: A list of task info records to monitor.
+    - name: packet_Period
+      type: Interfaces.Unsigned_16
+      description: The period (in ticks) of how often to calculate value for and send out the packet. A period of zero disables sending of the packet.
+      default: "1"
+connectors:
+  - description: This is the base tick for the component.
+    type: Tick.T
+    kind: recv_sync
+  - description: Send a packet of cpu execution times.
+    type: Packet.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get
+  - description: This is the command recieve connector.
+    type: Command.T
+    kind: recv_sync
+  - description: This connector is used to register and respond to the component's commands.
+    type: Command_Response.T
+    kind: send
+  - description: Data products are sent out of this connector.
+    type: Data_Product.T
+    kind: send
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send

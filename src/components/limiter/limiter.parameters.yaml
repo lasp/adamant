@@ -1,0 +1,7 @@
+---
+description: Parameters for the Limiter component.
+parameters:
+  - name: Max_Sends_Per_Tick
+    description: The maximum number of packets to send out in one tick.
+    type: Packed_U16.T
+    default: "(Value => 1)"

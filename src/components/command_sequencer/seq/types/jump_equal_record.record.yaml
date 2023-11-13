@@ -1,0 +1,19 @@
+---
+description: A packed record for seq instructions jump if equal and jump not equal. Opcode's 18 & 19.
+fields:
+  - name: Opcode
+    description: Instruction code
+    type: Basic_Types.Byte
+    format: U8
+  - name: Pad
+    description: Padding
+    type: Basic_Types.Byte
+    format: U8
+  - name: Position
+    description: Absolute position in the sequence to jump to.
+    type: Interfaces.Unsigned_16
+    format: U16
+  - name: To_Compare
+    description: Value to compare to internal variable A.
+    type: Interfaces.Unsigned_32
+    format: U32

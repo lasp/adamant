@@ -1,0 +1,48 @@
+---
+description: This is an assembly for creating a context diagram.
+components:
+  - type: Ccsds_Subpacket_Extractor
+    name: Passive_Ccsds_Subpacket_Extractor
+    execution: passive
+    init:
+    init_base:
+      - "queue_Size => 0"
+  - type: Ccsds_Subpacket_Extractor
+    name: Active_Ccsds_Subpacket_Extractor
+    execution: active
+    stack_size: 2000
+    secondary_stack_size: 1
+    priority: 1
+    init:
+    init_base:
+      - "queue_Size => 0"
+  - type: Ccsds_Sender
+    name: Ccsds_Sync_Sender
+  - type: Ccsds_Sender
+    name: Ccsds_Async_Sender
+  - type: Ccsds_Sender
+    name: Ccsds_High_Priority_Sender
+  - type: Ccsds_Receiver
+    init_base:
+      - "queue_Size => 0"
+connections:
+  - from_component: Ccsds_Sync_Sender
+    from_connector: Ccsds_Space_Packet_T_Send
+    to_component: Passive_Ccsds_Subpacket_Extractor
+    to_connector: Ccsds_Space_Packet_T_Recv_Sync
+  - from_component: Ccsds_High_Priority_Sender
+    from_connector: Ccsds_Space_Packet_T_Send
+    to_component: Active_Ccsds_Subpacket_Extractor
+    to_connector: Ccsds_Space_Packet_T_Recv_Sync
+  - from_component: Ccsds_Async_Sender
+    from_connector: Ccsds_Space_Packet_T_Send
+    to_component: Active_Ccsds_Subpacket_Extractor
+    to_connector: Ccsds_Space_Packet_T_Recv_Async
+  - from_component: Active_Ccsds_Subpacket_Extractor
+    from_connector: Ccsds_Space_Packet_T_Send
+    to_component: Ccsds_Receiver_Instance
+    to_connector: Ccsds_Space_Packet_T_Recv_Sync
+  - from_component: Passive_Ccsds_Subpacket_Extractor
+    from_connector: Ccsds_Space_Packet_T_Send
+    to_component: Ccsds_Receiver_Instance
+    to_connector: Ccsds_Space_Packet_T_Recv_Sync

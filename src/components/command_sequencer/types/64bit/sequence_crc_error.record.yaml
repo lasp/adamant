@@ -1,0 +1,15 @@
+---
+description: This is a packed record that holds information about sequence with bad CRC.
+fields:
+  - name: Load
+    description: The sequence load info.
+    type: Sequence_Load.T
+  - name: Header
+    description: The header of the sequence.
+    type: Sequence_Header.T
+  - name: Computed_Crc
+    description: The computed CRC of the sequence.
+    type: Crc_16.Crc_16_Type
+    format: U16
+    skip_validation: True
+    byte_image: True

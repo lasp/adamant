@@ -1,0 +1,12 @@
+---
+description: These are the commands for the Register Stuffer component.
+commands:
+  - name: Write_Register
+    description: Write the value of a register.
+    arg_type: Register_Value.T
+  - name: Read_Register
+    description: Read the value of a register and reflect it in a data product.
+    arg_type: Packed_Address.T
+  - name: Arm_Protected_Write
+    description: An arm command which enables the next write command to a register to be accepted. The armed state of the component will expire on the next command to this component no matter what it is or after the configurable timeout.
+    arg_type: Packed_Arm_Timeout.T

@@ -1,0 +1,22 @@
+{% extends "/base/table.html" %}
+{% block title %}<b>{{ name }}</b> Interrupts{% endblock %}
+{% block head %}
+      <tr>
+          <th scope="col">Component Name</th>
+<!--      <th scope="col">Interrupt Name</th>-->
+<!--      <th scope="col">Interrupt Id</th>-->
+          <th scope="col">Priority Rank</th>
+          <th scope="col">Priority Value</th>
+      </tr>
+{% endblock %}
+{% block body %}
+{% for interrupt in interrupt_list %}
+      <tr>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ interrupt.component_name }}</td>
+<!--    <td style='font-family: "Courier New", Courier, monospace;'>{{ interrupt.name }}</td>-->
+<!--    <td style='font-family: "Courier New", Courier, monospace;'>{{ interrupt.id }}</td>-->
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ interrupt.priority_rank }}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ interrupt.priority }}</td>
+      </tr>
+{% endfor %}
+{% endblock %}

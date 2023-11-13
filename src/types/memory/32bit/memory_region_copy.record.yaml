@@ -1,0 +1,12 @@
+---
+description: A memory region copy record.
+fields:
+  - name: Source_Region
+    description: The source address and length to copy from.
+    type: Memory_Region.T
+  - name: Destination_Address
+    description: The destination address of the memory region copy.
+    type: System.Address
+    format: U32
+    skip_validation: True
+    byte_image: True

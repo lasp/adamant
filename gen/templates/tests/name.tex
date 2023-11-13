@@ -1,0 +1,18 @@
+
+%- if description
+\VAR{description|e} \\
+%- else
+Below is a description of the indivitual tests in the \VAR{name|e} unit test suite. \\
+%- endif
+\vspace{5mm} %5mm vertical space
+\begin{spaceditemize}
+%- for test in tests.values()
+  \item \textbf{\texttt{\VAR{test.name|e}}} -
+%- if test.description
+    \VAR{test.description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space

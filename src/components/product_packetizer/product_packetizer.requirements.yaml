@@ -1,0 +1,7 @@
+---
+description: The requirements for the Product Packetizer component are specified below.
+requirements:
+  - text: The component shall produce packets that contain a statically defined list of data product values and data product timestamps.
+  - text: The component shall produce packets at a periodic rate.
+  - text: The component shall modify packet rates by command.
+  - text: The component shall provide a command that produces a packet of a given ID upon request.

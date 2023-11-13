@@ -1,0 +1,12 @@
+---
+description: This an enumeration defined for the event limiter state of each particular ID.
+enums:
+  - name: Event_State_Type
+    description: This is a single bit identifying if the event limiter is enabled for a particular ID.
+    literals:
+      - name: Disabled
+        value: 0
+        description: Event will not be limited
+      - name: Enabled
+        value: 1
+        description: Event will be limited

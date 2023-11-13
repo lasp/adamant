@@ -1,0 +1,10 @@
+---
+description: This is also a view without commands or parameters.
+show_component_priority: False
+rule: ~include_parameter_command
+filters:
+  - name: include_parameter_command
+    type: component_name
+    include:
+      - command_Router_Instance
+      - parameters_Instance

@@ -1,0 +1,7 @@
+---
+description: A packed record which holds information for a data product request.
+fields:
+  - name: Id
+    description: The data product identifier
+    type: Data_Product_Types.Data_Product_Id
+    format: U16

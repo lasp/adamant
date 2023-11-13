@@ -1,0 +1,7 @@
+---
+description: Single component record for holding an enable/disable enumeration.
+fields:
+  - name: State
+    description: The 8-bit enable disable enumeration.
+    type: Basic_Enums.Enable_Disable_Type.E
+    format: E8

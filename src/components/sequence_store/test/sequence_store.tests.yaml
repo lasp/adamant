@@ -1,0 +1,25 @@
+---
+description: This is a unit test suite for the Sequence Store.
+tests:
+  - name: Test_Initialization
+    description: This unit test tests all permutations of initializing the component and makes sure improper initialization results in a runtime assertion.
+  - name: Test_Dump_Summary
+    description: This unit test tests the dump summary packet and command.
+  - name: Test_Nominal_Activate_Deactivate_Slot
+    description: This unit test tests the slot activate/deactivate commands.
+  - name: Test_Activate_Deactivate_Slot_Fail
+    description: This unit test tests the slot activate/deactivate command failure conditions.
+  - name: Test_Check_Slot
+    description: This unit test tests the check slot command.
+  - name: Test_Check_All_Slots
+    description: This unit test tests the check all slots command.
+  - name: Test_Nominal_Write_Sequence
+    description: This unit test tests writing a sequence to a slot in the nominal case.
+  - name: Test_Write_Sequence_Fail
+    description: This unit test tests writing a sequence to a slot when the operation fails for different reasons.
+  - name: Test_Sequence_Fetch
+    description: This unit test tests fetching a sequence by ID when it exists in the store, when it does not exist in the store, and when it is in the store but marked inactive.
+  - name: Test_Full_Queue
+    description: This unit test tests that appropriate actions are taken when items are dropped off a full queue.
+  - name: Test_Invalid_Command
+    description: This unit test makes sure that an invalid command is handled gracefully.

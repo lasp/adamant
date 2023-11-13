@@ -1,0 +1,12 @@
+---
+description: Data products for the pid controller component.
+data_products:
+  - name: Limited_Events_Since_Tick
+    description: The number of events that were limited since the last tick.
+    type: Packed_U16.T
+  - name: Total_Events_Limited
+    description: The total number of events that have been limited for the components lifetime.
+    type: Packed_U32.T
+  - name: Component_Limiting_Enabled_Status
+    description: The current state of the component master switch.
+    type: Event_Enable_State_Type.T

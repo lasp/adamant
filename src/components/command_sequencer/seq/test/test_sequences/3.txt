@@ -1,0 +1,43 @@
+seq 3
+	argument arg1 u32
+	argument arg2 u32
+	argument arg3 u32
+	argument arg4 u32
+	argument arg5 u32
+	argument arg6 u32
+	argument arg7 u32
+	argument arg8 u32
+	argument arg9 u32
+	argument arg10 u32
+
+	if $arg1 == 1
+		cmd seq_noop
+	endif
+	if $arg2 == 2
+		cmd seq_noop
+	endif
+	if $arg3 == 3
+		cmd seq_noop
+	endif
+	if $arg4 == 4
+		cmd seq_noop
+	endif
+	if $arg5 == 5
+		cmd seq_noop
+	endif
+	if $arg6 == 6
+		cmd seq_noop
+	endif
+	if $arg7 == 7
+		cmd seq_noop
+	endif
+	if $arg8 == 8
+		cmd seq_noop
+	endif
+	if $arg9 == 9
+		cmd seq_noop
+	endif
+	if $arg10 == 10
+		cmd seq_noop
+	endif
+endseq

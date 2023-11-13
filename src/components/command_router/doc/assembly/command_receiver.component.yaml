@@ -1,0 +1,10 @@
+---
+description: A passive component which receives commands
+execution: either
+connectors:
+  - type: Command.T
+    kind: recv_async
+  - type: Command.T
+    kind: recv_sync
+  - type: Command_Response.T
+    kind: send

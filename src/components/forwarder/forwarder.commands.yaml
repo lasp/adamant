@@ -1,0 +1,7 @@
+---
+description: These are the commands for the Forwarder component.
+commands:
+  - name: Enable_Forwarding
+    description: Enable the flow of data.
+  - name: Disable_Forwarding
+    description: Disable the flow of data.

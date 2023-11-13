@@ -1,0 +1,6 @@
+---
+description: Data products for the Command Sequencer component.
+data_products:
+  - name: Summary_Packet_Period
+    description: The current packet period for the summary packet.
+    type: Packed_U16.T

@@ -1,0 +1,26 @@
+abstract project a_bareboard_production extends all "a_bareboard_base.gpr" is
+
+   -- Turn on no optimization and debug flags. This is common configuration
+   -- for targets Debug and under
+   package Compiler is
+      -- Add preprocessor definitions and configuration pragma switches:
+      for Switches ("Ada") use a_bareboard_base.Compiler'Switches ("Ada") &
+         -- Turn on assertions and numeric overflow checking:
+         -- -gnato - enable numeric overflow checking
+         -- -gnata - assertions are enabled
+         ("-gnato", "-gnata") &
+         -- optimization
+         ("-O2") &
+         -- -gnatn - activate back end inlining
+         ("-gnatn");
+
+      for Switches ("C") use a_bareboard_base.Compiler'Switches ("C") &
+         -- optimization
+         ("-O2");
+
+      for Switches ("Asm_Cpp") use a_bareboard_base.Compiler'Switches ("Asm_Cpp") &
+         -- optimization
+         ("-O2");
+   end Compiler;
+
+end a_bareboard_production;

@@ -1,0 +1,57 @@
+---
+description: These are enumerations that are used to interact with the Sequence Store component.
+enums:
+  - name: Sequence_Store_Status
+    description: This status enumerations provides information on the success/failure of a sequence store operation.
+    literals:
+      - name: Success
+        value: 0
+        description: Sequence was successfully stored.
+      - name: Invalid_Slot_Number
+        value: 1
+        description: The slot number does not exist within the component.
+      - name: Slot_In_Use
+        value: 2
+        description: The operation could not be completed because the destination slot is currently active.
+      - name: Crc_Error
+        value: 3
+        description: The computed CRC of the sequence does not match the stored CRC.
+      - name: Length_Error
+        value: 4
+        description: The sequence length was too large to store in the selected slot.
+      - name: Dropped
+        value: 5
+        description: The operation could not be performed because it was dropped from a full queue.
+  - name: Sequence_Fetch_Status
+    description: This status enumerations provides information on the success/failure of a sequence fetch operation.
+    literals:
+      - name: Success
+        value: 0
+        description: Sequence was successfully returned.
+      - name: Id_Not_Found
+        value: 1
+        description: A sequence with the provided ID was not found in the store.
+  - name: Slot_State_Type
+    description: This enumeration determines the state of a sequence slot in the store.
+    literals:
+      - name: Inactive
+        value: 0
+        description: The slot is inactive and the contained sequence can not be fetched.
+      - name: Active
+        value: 1
+        description: The slot is active and the contained sequence can be fetched.
+  - name: Slot_Valid_Type
+    description: This enumeration determines the valid state of a sequence slot in the store based on a calculated CRC of the sequence.
+    literals:
+      - name: Unchecked
+        value: 0
+        description: The CRC of the sequence in the slot has not been checked for validity.
+      - name: Valid
+        value: 1
+        description: The CRC of the sequence in the slot has been checked for validity and matches the stored CRC in the sequence header.
+      - name: Invalid
+        value: 2
+        description: The CRC of the sequence in the slot has been checked for validity and does not match the stored CRC in the sequence header.
+      - name: Undefined
+        value: 3
+        description: This is an invalid enumeration value. However, since this is represented in 2-bits and read from MRAM, it is possible that this could occur should the memory be corrupted, or never properly initialized. To keep the type unconstrained we need to include this value.

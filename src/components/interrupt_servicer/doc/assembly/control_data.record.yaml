@@ -1,0 +1,7 @@
+---
+description: Example control data
+with:
+fields:
+  - name: Data
+    type: Natural
+    format: U32

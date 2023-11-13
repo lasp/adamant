@@ -1,0 +1,24 @@
+---
+description: This is an example packed register.
+preamble: |
+  type Enable_Disable_Type is (Disabl, Enable);
+  for Enable_Disable_Type use (Disabl => 0, Enable => 1);
+  type Fourteen_Bit_Uint is mod 2**14;
+# List the record fields. The whole register must be 32-bits in size.
+fields:
+  - name: Hw_1_Enabled
+    description: Single bit to represent if some fictional hardware 1 is enabled or disabled.
+    type: Enable_Disable_Type
+    format: E1
+  - name: Hw_2_Enabled
+    description: Single bit to represent if some fictional hardware 2 is enabled or disabled.
+    type: Enable_Disable_Type
+    format: E1
+  - name: Threshold
+    description: This is a 14-bit unsigned integer.
+    type: Fourteen_Bit_Uint
+    format: U14
+  - name: Unused
+    description: The second half of the register is not used, but must be defined since registers are 32-bits in size.
+    type: Interfaces.Unsigned_16
+    format: U16

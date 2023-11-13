@@ -1,0 +1,10 @@
+---
+description: This is a simple test component which has a get and return kind connector.
+execution: passive
+connectors:
+  - description: The get connector
+    kind: get
+    return_type: Bb.T
+  - description: The return connector
+    kind: return
+    return_type: Aa.T

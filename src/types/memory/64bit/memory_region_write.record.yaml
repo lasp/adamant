@@ -1,0 +1,29 @@
+---
+description: A memory region CRC report.
+with:
+  - Command_Types
+  - Basic_Types
+  - System
+preamble: |
+  use Command_Types;
+  subtype Byte_Buffer_Index_Type is Command_Arg_Buffer_Index_Type range Command_Arg_Buffer_Index_Type'First .. Command_Arg_Buffer_Index_Type'Last - 8 - 2;
+  subtype Byte_Buffer_Type is Basic_Types.Byte_Array (Byte_Buffer_Index_Type);
+  subtype Region_Length_Type is Natural range 0 .. Byte_Buffer_Type'Length;
+fields:
+  - name: Address
+    description: The starting address of the memory region.
+    type: System.Address
+    format: U64
+    skip_validation: True
+    byte_image: True
+    default: "System.Null_Address"
+  - name: Length
+    description: The number of bytes at the given address to associate with this memory region.
+    type: Region_Length_Type
+    format: U16
+    default: "0"
+  - name: Data
+    description: The bytes to write to the memory region
+    type: Byte_Buffer_Type
+    format: U8x{{ command_buffer_size - 8 - 2 }}
+    variable_length: Length

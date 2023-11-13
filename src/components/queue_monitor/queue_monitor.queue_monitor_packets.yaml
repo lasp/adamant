@@ -1,0 +1,5 @@
+---
+description: Packets for the queue monitor.
+packets:
+  - name: Queue_Usage_Packet
+    description: This packet contains queue usage numbers for queued components in the system.

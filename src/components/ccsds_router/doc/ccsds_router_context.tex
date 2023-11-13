@@ -1,0 +1,28 @@
+The CCSDS Router can be used in a variety of different ways, each of which supports a different execution context.
+
+The following diagram shows the most common way that the CCSDS Router component might operate in the context of an assembly.
+
+\begin{figure}[H]
+  \includegraphics[width=0.9\textwidth,center]{assembly/build/eps/context_passive.eps}
+  \caption{Example usage of a passive CCSDS Router which routes packets on the thread of its caller.}
+\end{figure}
+
+In the above context diagram the CCSDS Router is made passive. This means that any CCSDS packet passed to it will be routed on the thread of the calling component, since the calling component uses the \texttt{Ccsds\_Space\_Packet\_Recv\_Sync} connector.
+
+Sometimes it is desireable to do the routing on a different thread of execution to decouple this processing from work going on upstream of the component. The most obvious way to accomplish this is to make the CCSDS Router component active, so it has its own thread of execution. The context diagram below shows this setup.
+
+\begin{figure}[H]
+  \includegraphics[width=0.9\textwidth,center]{assembly/build/eps/context_active.eps}
+  \caption{Example usage of an active CCSDS Router which routes any packets found on its queue using its own internal thread of execution.}
+\end{figure}
+
+In this case, the calling component passes CCSDS packets to the CCSDS Router via the \texttt{Ccsds\_Space\_Packet\_Recv\_Async} connector, which puts the CCSDS packets on the CCSDS Router's internal queue. When the CCSDS Router is given execution time, it pops the CCSDS packets off of the queue and routes them downstream.
+
+It is also possible to achieve both synchronous and asynchronous routing using the same CCSDS Router component (and thus the same internal routing table data structure). This might be useful if you have a normal data path which takes the asynchronous path, but a time critical data path which requires synchronous routing. This might be the case when routing time critical packets related to control or fault protection. The following context diagram shows this case.
+
+\begin{figure}[H]
+  \includegraphics[width=0.9\textwidth,center]{assembly/build/eps/context_mixed.eps}
+  \caption{Example usage of a passive CCSDS Router which routes packets on the thread of its caller.}
+\end{figure}
+
+Note, there is a limitation with this use case. A CCSDS packet with the same APID should not be sent through both the synchronous and asyncronous invokee connectors at the same time if sequence number checking is enabled. Since the router table is not a protected object this could produce errant warnings about sequence number tracking, since it is expected that two updates to the sequence numbers tracked in this table will not occur to the same APID at the same time. There has been no real world use case identified which would require that the internal table become a protected object. If a use case is identified, this issue can be revisited.

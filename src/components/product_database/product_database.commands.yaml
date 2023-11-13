@@ -1,0 +1,17 @@
+---
+description: These are the commands for the Product Database.
+commands:
+  - name: Clear_Override
+    description: Clear the override condition for the data product of the provided ID.
+    arg_type: Data_Product_Id.T
+  - name: Clear_Override_For_All
+    description: Clear the override condition for all data products in the product store.
+  - name: Override
+    description: Override the value of a data product in the data product store. The value of this data product will be fixed to the commanded value, ignoring all other updates, until the override is cleared.
+    arg_type: Data_Product.T
+  - name: Dump
+    description: Dump the data product of the provided ID in a packet.
+    arg_type: Data_Product_Id.T
+  - name: Dump_Poly_Type
+    description: Dump the data product of the provided ID into a poly type based on the provided offset and length.
+    arg_type: Data_Product_Poly_Extract.T

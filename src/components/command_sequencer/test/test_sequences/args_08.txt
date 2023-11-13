@@ -1,0 +1,13 @@
+seq args_08
+  argument myArg1 u32
+  argument myArg2 u32
+  argument myArg3 u32
+
+  ; Simple sequence that just sends a series of commands, one after the other, but uses
+  ; values passed in as input.
+  cmd Component_A.Command_1
+  cmd Component_A.Command_2 Seconds $myArg1 Subseconds $myArg2
+  cmd Component_A.Command_3 Value $myArg3
+  cmd Component_B.Command_1
+  cmd Component_B.Command_2 Seconds $myArg3 Subseconds $myArg2
+endseq

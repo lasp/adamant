@@ -1,0 +1,9 @@
+---
+description: Record for a LASP-specific CCSDS command header.
+fields:
+  - name: Primary_Header
+    description: The CCSDS primary header
+    type: Ccsds_Primary_Header.T
+  - name: Secondary_Header
+    description: The command secondary header
+    type: Ccsds_Command_Secondary_Header.T

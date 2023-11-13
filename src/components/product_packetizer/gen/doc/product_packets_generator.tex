@@ -1,0 +1,40 @@
+\input{common_packages.tex}
+
+\begin{document}
+
+\title{\textbf{Product Packets Generator} \\
+\large\textit{Autocoder User Guide}}
+\date{}
+\maketitle
+
+\section{Description}
+
+The purpose of this generator is to provide a user friendly way of creating packets formed from a list of data products. The generator takes a YAML model file as input which specifies the packets to produce, the data products to put in each packet, the period that the packet will be emitted at, and whether the packet is enabled or disabled on startup. From this information, the generator autocodes an Ada specification file which contains a data structure that should be passed to the Product Packetizer component upon initialization.
+
+Note the example shown in this documentation is used in the unit test of this component so that the reader of this document can see it being used in context. Please refer to the unit test code for more details on how this generator can be used.
+
+\section{Schema}
+
+The following pykwalify schema is used to validate the input YAML model. Model files must be named in the form \textit{optional\_name.assembly\_name.product\_packets.yaml} where \textit{optional\_name} is the specific name of this set of packets and is only necessary if there is more than one Product Packetizer component instance in an assembly. The \textit{assembly\_name} is the assembly which these product packets will be used in, and the rest of the model file name must remain as shown. Generally this file is created in the same directory or near to the assembly model file. The schema is commented to show what each of the available YAML keys are and what they accomplish. Even without knowing the specifics of pykwalify schemas, you should be able to gleam some knowledge from the file below.
+
+\yamlcodef{../schemas/product_packets.yaml}
+
+\section{Example Input}
+
+The following is an example product packet input yaml file. Model files must be named in the form \textit{optional\_name.assembly\_name.product\_packets.yaml} where \textit{optional\_name} is the specific name of the product packets and is only necessary if there is more than one Product Packetizer component instance in an assembly. The \textit{assemble\_name} is the assembly which these packets will be used in, and the rest of the model file name must remain as shown. Generally this file is created in the same directory or near to the assembly model file. This example adheres to the schema shown in the previous section, and is commented to give clarification.
+
+\yamlcodef{../../test/test_assembly/test_packets.test_assembly.product_packets.yaml}
+
+\section{Example Output}
+
+The example input shown in the previous section produces the following Ada output. The \texttt{Packet\_List} variable should be passed into the Product Packetizer component's discriminant during assembly initialization.
+
+The main job of the generator in this case was to verify the input YAML packets for validity and then to translate the data to an Ada data structure for use by the component.
+
+\adacodef{../../test/test_assembly/build/src/test_assembly_product_packets_test_packets.ads}
+
+\section{Special Items}
+
+The Product Packetizer allows you to specify ``special" items to include in a packet that reflect internal data of the Product Packetizer component itself. Currently, the only supported ``special" items are packet periods of the packets produced by the Product Packetizer. Packet 5, specified above, includes these items by specifying a data product within the Product Packetizer, ie. \texttt{Product\_Packetizer\_Instance.Packet\_4\_Period}. The Product Packetizer doesn't actually have any data products, so this nomenclature instead denotes a special item. In this case, we want to include the current packet period value (a 4 byte unsigned integer) for Packet 4 into the packet. A period can be specified for any packet included in the YAML model using this pattern. Error checking at the modeling level will prevent you from specifying a packet period for a packet that does not exist.
+
+\end{document}

@@ -1,0 +1,15 @@
+---
+description: This is a packed record that holds information about a sequence to store with invalid CRC.
+fields:
+  - name: Store
+    description: The to-store info.
+    type: Sequence_Store_Memory_Region_Store.T
+  - name: Header
+    description: The sequence header.
+    type: Sequence_Header.T
+  - name: Computed_Crc
+    description: The FSW computed CRC of the parameter table stored in the memory region.
+    type: Crc_16.Crc_16_Type
+    format: U16
+    skip_validation: True
+    byte_image: True

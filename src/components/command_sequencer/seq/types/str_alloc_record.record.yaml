@@ -1,0 +1,19 @@
+---
+description: A packed record for seq's str alloc instruction
+fields:
+  - name: Opcode
+    description: Instruction code
+    type: Basic_Types.Byte
+    format: U8
+  - name: Id
+    description: Local var Id to store allocated index
+    type: Basic_Types.Byte
+    format: U8
+  - name: Pad1
+    description: Padding
+    type: Basic_Types.Byte
+    format: U8
+  - name: Pad2
+    description: Padding
+    type: Basic_Types.Byte
+    format: U8

@@ -1,0 +1,11 @@
+---
+description: A packed record that holds a string to be printed.
+fields:
+  - name: Print_Type
+    description: The type of print message (debug, info, critical, error).
+    type: Seq_Enums.Print_Type.E
+    format: E8
+  - name: Encoded_String
+    description: A 64-byte string buffer, that contains an encoded string literal.
+    type: Seq_Types.Seq_String
+    format: U8x64

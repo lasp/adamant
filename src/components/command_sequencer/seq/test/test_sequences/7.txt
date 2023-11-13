@@ -1,0 +1,32 @@
+seq 7
+    declare x u32
+    declare y u32
+    declare r2 u32
+    declare r3 u32
+    declare r4 u32
+ 
+    ;underflow and overflow should throw an eval error
+
+    ;overflows - 2 EVAL error's
+    set $x = 4294967295
+    set $y = 2
+    set $r2 = $x + $y
+    set $r3 = $x * $y
+
+    ;underflows - EVAL error
+    set $x = 0
+    set $y = 2
+    set $r4 = $x - $y
+
+    ;attempt to use negative values - CAST error
+    set $x = 0
+    set $y = -2
+    set $r3 = $x + $y
+
+    ;divide by 0 - EVAL error
+    set $x = 1
+    set $y = 0
+    set $r2 = $x / $y
+
+    ; All of these lines should throw the sequence into an error state	
+endseq

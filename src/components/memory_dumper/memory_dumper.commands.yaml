@@ -1,0 +1,9 @@
+---
+description: These are the commands for the Memory Dumper component.
+commands:
+  - name: Dump_Memory
+    description: Dump a region of memory starting at a given address and of a given length.
+    arg_type: Memory_Region_Positive.T
+  - name: Crc_Memory
+    description: Perform a CRC on a region of memory starting at a given address and of a given length. The CRC will be reported via event and data product, if those connectors are connected.
+    arg_type: Memory_Region_Positive.T

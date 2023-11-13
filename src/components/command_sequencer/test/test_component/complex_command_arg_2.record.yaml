@@ -1,0 +1,17 @@
+---
+description: A packed record which holds a complex argument layout for a command.
+preamble: |
+  type A_Type is (False, True);
+  for A_Type use (False => 0, True => 1);
+  subtype B_Type is Integer range -16 .. 15;
+  type C_Type is mod 2**10;
+fields:
+  - name: A
+    type: A_Type
+    format: E1
+  - name: B
+    type: B_Type
+    format: I5
+  - name: C
+    type: C_Type
+    format: U10

@@ -1,0 +1,5 @@
+---
+description: The requirements for the Zero Divider component.
+requirements:
+  - text: The component shall provide a command, that when executed, causes an unhandled exception to be thrown.
+  - text: The component shall provide a protection mechanism that protects the command from being executed accidentally.

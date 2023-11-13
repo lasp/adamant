@@ -1,0 +1,6 @@
+---
+description: The requirements for the CCSDS Router component are specified below.
+requirements:
+  - text: The component shall route CCSDS packets to zero or many predetermined output connectors based on the packet's APID.
+  - text: The component shall be able to produce a warning event when a CCSDS packet with the same APID is received with a non-incrementing sequence identifier.
+  - text: The component shall be able to drop duplicate CCSDS packets which contain the same APID and sequence identifier.

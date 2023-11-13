@@ -1,0 +1,19 @@
+---
+description: A packed record for seq cast instructions. Opcode's 28, 29, 31, 32, 33, 34.
+fields:
+  - name: Opcode
+    description: Instruction code
+    type: Basic_Types.Byte
+    format: U8
+  - name: Id
+    description: Which internal variable should this operation occur on. 2 is internal A, 3 is internal B.
+    type: Seq_Enums.Seq_Internal.E
+    format: E8
+  - name: Pad1
+    description: Padding.
+    type: Basic_Types.Byte
+    format: U8
+  - name: Pad2
+    description: Padding.
+    type: Basic_Types.Byte
+    format: U8

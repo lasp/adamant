@@ -1,0 +1,6 @@
+---
+description: Data products for the Forwarder component.
+data_products:
+  - name: Forwarding_State
+    description: Is data forwarding enabled or disabled?
+    type: Packed_Enable_Disable_Type.T

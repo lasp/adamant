@@ -1,0 +1,13 @@
+---
+# Optional - description of command suite
+description: A set of commands for the Command Component.
+# Required - list of commands included in the command suite
+commands:
+    # Required - the name of the command
+  - name: Hello_World
+    # Optional - a description of the command
+    description: Prints Hello World when received.
+  - name: Was_Five_Sent
+    description: A command that when received checks to see if the commanded argument is equal to 5. If so the command succeeds, otherwise it fails.
+    # Optional - the argument type included with the command
+    arg_type: Packed_U16.T

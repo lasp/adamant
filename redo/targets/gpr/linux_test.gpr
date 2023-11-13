@@ -1,0 +1,26 @@
+-- Include aunit in compilation:
+with "aunit.gpr";
+
+project linux_test extends all "a_linux_debug_base.gpr" is
+
+   -----------------------------------------------
+   -- These lines of code must be included at the
+   -- top of every Adamant based .gpr file. They
+   -- are used to connect the Adamant build system
+   -- to GPRBuild.
+   -----------------------------------------------
+   for Source_Dirs use a_adamant.SOURCE_DIRS;
+   for Object_Dir use a_adamant.OBJECT_DIR;
+   for Exec_Dir use a_adamant.EXEC_DIR;
+
+   package Compiler is
+      -- Add preprocessor definitions and configuration pragma switches:
+      for Switches ("Ada") use a_linux_debug_base.Compiler'Switches ("Ada") &
+         -- Add support for gnat2022 for unit test logging, but
+         -- ignore warnings like:
+         --    warning: array aggregate using () is an obsolescent syntax, use [] instead [-gnatwj]
+         -- until gnat2022 becomes standard.
+         ("-gnat2022", "-gnatwJ");
+   end Compiler;
+
+end linux_test;

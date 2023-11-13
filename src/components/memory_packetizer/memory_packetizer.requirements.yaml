@@ -1,0 +1,7 @@
+---
+description: The requirements for the Memory Packetizer are specified below.
+requirements:
+  - text: The component shall receive pointers to contiguous data regions in memory and create packets containing the data stored at this region.
+  - text: The component shall receive packet identifiers with each pointer and emit packets with this identifier when sending the pointer data.
+  - text: The component shall produce packets with increasing sequence numbers for each unique packet identifier it receives, up to a configurable maximum.
+  - text: The component shall be able to meter the production of packets to not exceed a commandable maximum rate.

@@ -1,0 +1,14 @@
+---
+description: This is an assembly for testing the CCSDS product extractor component.
+with:
+  - Test_Products
+########################################
+components:
+########################################
+  - type: Ccsds_Product_Extractor
+    init:
+      - "Data_Product_Extraction_List => Test_Products.Data_Product_Extraction_List'Access"
+    priority: 1
+    stack_size: 5000
+    secondary_stack_size: 5000
+    # Leave connector 4 unconnected to test unconnected connectors.

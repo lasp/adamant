@@ -1,0 +1,7 @@
+---
+description: A packed record which holds the length of a parameter's buffer.
+fields:
+  - name: Buffer_Length
+    description: The number of bytes used in the parameter buffer
+    type: Parameter_Types.Parameter_Buffer_Length_Type
+    format: U16

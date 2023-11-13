@@ -1,0 +1,17 @@
+---
+description: This component logs data products to a file.
+execution: active
+init:
+  description: An initialization function for the logger.
+  parameters:
+    - name: is_Enabled
+      type: Boolean
+      default: "True"
+      description: Should the logger log to a file by default on startup?
+connectors:
+  - type: Data_Product.T
+    kind: recv_async
+    description: Data products are received on this connector
+  - type: Command.T
+    kind: recv_async
+    description: Commands to enable/disable the logger are received on this connector.

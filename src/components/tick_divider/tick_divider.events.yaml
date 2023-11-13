@@ -1,0 +1,5 @@
+---
+events:
+  - name: Component_Has_Full_Queue
+    description: The tick divider tried to put a Tick on a component's queue, but the queue was full, so the Tick was dropped.
+    param_type: Td_Full_Queue_Param.T

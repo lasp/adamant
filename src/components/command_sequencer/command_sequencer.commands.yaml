@@ -1,0 +1,17 @@
+---
+description: These are the commands for the Command Sequencer.
+commands:
+  - name: Kill_All_Engines
+    description: This command halts all currently running engines.
+  - name: Kill_Engine
+    description: This command halts an engine with the provided engine number.
+    arg_type: Packed_Sequence_Engine_Id.T
+  - name: Set_Summary_Packet_Period
+    description: Set the period of the summary packet. A period of zero disables the sending of the packet.
+    arg_type: Packed_U16.T
+  - name: Issue_Details_Packet
+    description: The sequence details packet for a particular engine is issued when this command is received.
+    arg_type: Packed_Sequence_Engine_Id.T
+  - name: Set_Engine_Arguments
+    description: If a sequence requires arguments to be run correctly at the parent level, this command can be used to set the arguments into the engine prior to loading the sequence. This command will only be executed if there is no other sequence loaded in this engine. Arguments can only be set for a sequence that is going to be loaded into the parent stack position. If this command is not run prior to running a sequence in an engine, then the arguments will default to values of zero. If a sequence does not require some or all of the 16 arguments, then those arguments will never be read, and thus do not need to be set by this command.
+    arg_type: Packed_Variable_Array.T

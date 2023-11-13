@@ -1,0 +1,8 @@
+---
+events:
+  - name: Packet_Period_Set
+    description: A command was received to change the packet period.
+    param_type: Packed_U16.T
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T

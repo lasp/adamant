@@ -1,0 +1,11 @@
+---
+description: A memory region described by a virtual memory address (an index into a zero-addressed memory region) and length (in bytes) that cannot be less than 1.
+fields:
+  - name: Address
+    description: The virtual memory address (an index into a zero-addressed memory region).
+    type: Natural
+    format: U32
+  - name: Length
+    description: The number of bytes at the given address to associate with this memory region.
+    type: Positive
+    format: U32

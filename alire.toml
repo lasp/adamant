@@ -1,0 +1,29 @@
+#
+# This alire.toml is used to download the Ada crate dependencies for Adamant.
+# The Adamant build system then uses these dependencies via the `alr printenv`
+# GPR_BUILD_PATH to compile targets within this repository using `redo`. This
+# alire.toml itself only points to a simple hello world program that is compiled
+# when using `alire build`.
+#
+
+name = "adamant"
+description = "The Adamant component-based, model-driven software framework."
+version = "1.0.0"
+licenses = "Apache-2.0"
+# Project file lives with the hello world program:
+project-files = ["redo/test/hello_world/hello_world.gpr"]
+
+tags = ["embedded", "framework"]
+website = "https://github.com/lasp/adamant"
+
+[[depends-on]]
+gnat_native = "12.2.1"
+gprbuild = "22.0.1"
+gnatprove = "12.1.1"
+aunit = "23.0.0"
+
+# This crate provides gnatpp & gnatmetric. However this
+# takes a very long time to compile. We will do this
+# in a Docker build and provide the binaries in the
+# Docker prebuilt image to save space and time.
+# libadalang_tools = "23.0.0"

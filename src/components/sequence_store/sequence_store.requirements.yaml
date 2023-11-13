@@ -1,0 +1,11 @@
+---
+description: The requirements for the Sequence Store component are specified below.
+requirements:
+  - text: The component shall manage regions of memory (slots) for sequence storage.
+  - text: The component shall write slots with sequence data upon sequence upload.
+  - text: The component shall return pointers to sequences when sequence is requested for loading or running.
+  - text: The component shall produce a packet reflecting the sequence IDs stored in the sequence slots.
+  - text: The component shall produce a sequence store packet upon command.
+  - text: The component shall produce a sequence store packet whenever a new sequence has been uploaded.
+  - text: The component shall reject storing a new sequence if is has an invalid length.
+  - text: The component shall reject storing a new sequence if it has an invalid CRC.

@@ -1,0 +1,10 @@
+---
+description: This is a type that contains useful information about a component full queue.
+fields:
+  - name: Dropped_Tick
+    description: "The tick during which the component's queue was found to be full."
+    type: Tick.T
+  - name: Index
+    description: "The tick divider index number of the component that had a full queue."
+    type: Connector_Types.Connector_Index_Type
+    format: U16

@@ -1,0 +1,14 @@
+---
+description: Generic fault header.
+fields:
+  - name: Time
+    description: The timestamp for the fault.
+    type: Sys_Time.T
+  - name: Id
+    description: The fault identifier
+    type: Fault_Types.Fault_Id
+    format: U16
+  - name: Param_Buffer_Length
+    description: The number of bytes used in the param buffer
+    type: Fault_Types.Parameter_Buffer_Length_Type
+    format: U8

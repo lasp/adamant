@@ -1,0 +1,21 @@
+---
+petters:
+  - name: Second_Component_First_Connection
+    connector_name: Component_B.Pet_1_T_Send
+    description: A test pet connector from a component that has two connections (1 of 2)
+    limit: 3
+    action: error_fault
+    fault_id: 5
+    critical: True
+  - connector_name: Component_B.Pet_2_T_Send
+    description: A test pet connector from a component that has two connections (2 of 2)
+    limit: 1
+    action: disabled
+    fault_id: 2
+    critical: False
+  - name: First_Component
+    connector_name: Component_A.Pet_T_Send
+    description: A test connector for the task watchdog component
+    limit: 2
+    action: warn
+    critical: False

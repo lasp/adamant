@@ -1,0 +1,23 @@
+---
+description: A packed record for the seq wait instruction. Opcode 14.
+fields:
+  - name: Opcode
+    description: Instruction code
+    type: Basic_Types.Byte
+    format: U8
+  - name: Wait_Type
+    description: Absolute or relative wait type.
+    type: Seq_Enums.Seq_Wait_Type.E
+    format: E8
+  - name: Pad1
+    description: Padding
+    type: Basic_Types.Byte
+    format: U8
+  - name: Pad2
+    description: Padding
+    type: Basic_Types.Byte
+    format: U8
+  - name: Wait_Time
+    description: The amount of time to wait for.
+    type: Interfaces.Unsigned_32
+    format: U32

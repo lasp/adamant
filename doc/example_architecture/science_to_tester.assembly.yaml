@@ -1,0 +1,32 @@
+---
+description: This is the example assembly.
+components:
+  - type: example_science_component
+    name: science_instance
+    execution: passive
+    init_base:
+      - "queue_Size => 10"
+  - type: example_science_tester
+    name: science_tester_instance
+    execution: passive
+connections:
+  - from_component: Science_Tester_Instance
+    from_connector: Tick_T_Send
+    to_component: Science_Instance
+    to_connector: Tick_T_Recv_Sync
+  - from_component: Science_Tester_Instance
+    from_connector: Command_T_Send
+    to_component: Science_Instance
+    to_connector: Command_T_Recv_Async
+  - from_component: Science_Instance
+    from_connector: Sys_Time_T_Get
+    to_component: Science_Tester_Instance
+    to_connector: Sys_Time_T_Return
+  - from_component: Science_Tester_Instance
+    from_connector: Parameter_Update_T_Provide
+    to_component: Science_Instance
+    to_connector: Parameter_Update_T_Modify
+  - from_component: Science_Instance
+    from_connector: Data_Product_T_Send
+    to_component: Science_Tester_Instance
+    to_connector: Data_Product_T_Recv_Sync

@@ -1,0 +1,5 @@
+---
+description: This is a unit test suite for the Interrupt Servicer component. It tests the component in a Linux environment, responding to signals.
+tests:
+  - name: Test_Interrupt_Handling
+    description: This unit test sends many interrupts to the Interrupt Servicer component and expects it to produce ticks.

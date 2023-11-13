@@ -1,0 +1,51 @@
+---
+description:
+  The Event Filter component is used to filter out event IDs. The component takes in a range of IDs valid for filtering and an initial list of event IDs to filter.
+  The filter utilizes a specific package to hold all of the ID and associated states. The package will determine if a ID needs to be filtered or not and return that to the component.
+  The component will then either forward the event or perform no action if it is a filtered event. The component also has the capability to change the state of a single event ID, a range of event IDs, and a global state for turning off filtering all together.
+  In this case the state of filtering for each ID will be maintained for when the master state is set back to enabled. Lastly, there is a packet that contains all the bit information of each ID's state and can be dumped by command.
+execution: passive
+with:
+  - Event_Types
+init:
+  description:
+  parameters:
+    - name: event_Id_Start_Range
+      type: Event_Types.Event_Id
+      description: The event ID that begins the range of ids that the component will include for filtering of events.
+    - name: event_Id_End_Range
+      type: Event_Types.Event_Id
+      description: The event ID that ends the range of ids that the component will include for filtering of events.
+    - name: event_Filter_List
+      type: Event_Filter_Entry.Event_Id_List
+      description: A list of event IDs that are filtered by default
+      default: "(1 .. 0 => 0)"
+connectors:
+  - description: This is the base tick for the component. Upon reception the component will record the number of events that have been filtered and send the state packet if it was requested.
+    type: Tick.T
+    kind: recv_sync
+  - description: Events are received synchronously on this connector and are passed along or filtered.
+    type: Event.T
+    kind: recv_sync
+  - description: This is the command receive connector.
+    type: Command.T
+    kind: recv_sync
+  - description: The Event connector to forward on events when the filtering is disabled, or if unknown events come in.
+    type: Event.T
+    kind: send
+    name: Event_Forward_T_Send
+  - description: The Event connector to send the events specifc to the component.
+    type: Event.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get
+  - description: This connector is used to register and respond to the component's commands.
+    type: Command_Response.T
+    kind: send
+  - description: The connector for data products
+    type: Data_Product.T
+    kind: send
+  - description: Packet for sending a packet for all the event states.
+    type: Packet.T
+    kind: send

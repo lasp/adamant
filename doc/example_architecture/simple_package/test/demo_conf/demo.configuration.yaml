@@ -1,0 +1,103 @@
+# adamant.configuration.yaml
+#
+# This file provides global definitions for Adamant. These variables are
+# used to configure Adamant for a specific project. Changeable entities
+# include the sizing of different core data types, etc.
+#
+# Note: This file is not meant to be checked into a version control system
+# in this location, as it will be different for every usage of Adamant.
+# Instead consider version controlling it inside of your project repository
+# and copying it into this location on startup. Alternatively, the Adamant
+# build system looks for the location of this file using the environment
+# variable ADAMANT_CONFIGURATION_YAML. If you set that variable to a configuration
+# file stored in your project repository, then Adamant will load your desired
+# variables.
+#
+# Variables defined below should be simple YAML maps, mapping a string key to a
+# numeral value.
+#
+# To reference these variables within an Adamant YAML file you need to use Jinja
+# format for variable reference: https://jinja.palletsprojects.com/en/2.11.x/
+# For example to use value of the data_product_buffer_size variable within your YAML
+# you would write {{ data_product_buffer_size }} in the location you wish the
+# substitution to occur.
+#
+# To reference these variables within an Ada file you need to "with" the package
+# Configuration
+---
+# Description of this configuration file.
+description: This is the default Adamant configuration.
+#################################################################################
+# REQUIRED - Adamant Configuration Values
+#################################################################################
+#
+# Type Sizing Variables - The following are used to size core types within Adamant
+# for your project.
+#
+# The size of the buffer within the data product type (in bytes). This buffer is
+# used to serialize the data product type. Choose a size that fits the largest
+# data product type in your system:
+data_product_buffer_size: 32
+
+# The size of the buffer within the command type (in bytes). This buffer is
+# used to serialize the command arguments. Choose a size that fits the largest
+# command argument in your system:
+command_buffer_size: 255
+
+# The size of the buffer within the event type (in bytes). This buffer is
+# used to serialize the event parameters. Choose a size that fits the largest
+# event parameters in your system:
+event_buffer_size: 32
+
+# The size of the buffer within the parameter type (in bytes). This buffer is
+# used to serialize the parameter type. Choose a size that fits the largest
+# parameter type in your system:
+parameter_buffer_size: 32
+
+# The size of the buffer within the packet type (in bytes).
+packet_buffer_size: 1246
+
+# The size of the buffer within the fault type (in bytes). This buffer is
+# used to serialize the fault parameters. Choose a size that fits the largest
+# fault parameters in your system:
+fault_buffer_size: 8
+
+# The size of the buffer within the CCSDS space packet type. If you are not
+# using CCSDS then you can leave this value as the default.
+ccsds_packet_buffer_size: 1274
+
+#
+# Other Variables - Various configurations that do not have to do with core types
+#
+
+# The stack margin in bytes. This value is used in src/core/task/task_util.adb to
+# define the amount of "usable" stack used by the Stack Monitor component. You should
+# size this value as small as possible, but the value MUST be larger than the amount
+# of stack that a task uses prior to calling the Cycle procedure the first time, and MUST
+# be smaller than that smallest task stack efined in the system. When in doubt, leave
+# this value at the default.
+#
+# Note, this value only affects bareboard runtimes. Linux uses a predefined stack margin
+# of 12KB defined in src/core/task/linux/stack_margin.ads.
+stack_margin: 1000
+
+# The command registration delay in microseconds. This value is used by each commandable component
+# when registering commands. After sending out the command registration, the component will sleep
+# for this many microseconds before registering its next command. The purpose of this delay is to
+# reduce the stress on the queue of the component who is receiving the command registrations,
+# usually the Command Router. By sleeping, it allows time for the command router to process the
+# registration before a new item is put on its queue. If registration items are falling off the
+# Command Router's queue at initialization you can increase this sleep time, or increase the
+# queue size of the Command Router depending on which is more suitable for your mission.
+command_registration_delay: 250 # microseconds
+
+#################################################################################
+# OPTIONAL - Custom Project Specific Configuration Values
+#################################################################################
+# Define your own key value pairs below. You will be able to use these
+# within your own YAML or Ada files using the methods described at the
+# top of this file.
+#
+# Examples of a project specific variables:
+project_specific_variable: 17
+project_specific_string: "This project rocks!"

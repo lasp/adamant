@@ -1,0 +1,14 @@
+---
+# Optional - description of data product suite
+description: A set of data products for the Data Product Component.
+# Required - list of data products included in the data product suite
+data_products:
+    # Required - the name of the data product
+  - name: Counter
+    # Optional - a description of the data product
+    description: A 16-bit counter.
+    # Required - the type of the data product
+    type: Packed_U16.T
+  - name: Last_Tick_Received
+    description: A last tick that was received by the component.
+    type: Tick.T

@@ -1,0 +1,40 @@
+---
+description: |
+  The Task Watchdog component receives pets from components that execute in a periodic manner throughout the assembly. The receipt of a pet indicates that the component is running well and is what is refered to as a watchdog. If it detects that the component has stopped executing for some configurable time, called a limit, it will either ignore the fault, throw a warning event, or throw a fault and possibly stop servicing an downstream watchdog (usually a hardware watchdog) based on the component's configuration. The configuration is dependent on the input list generated from a yaml model for this component. The input requires a connector name, a limit for the number of ticks without a pet, the criticality of the component, and the action to take if the limit is exceeded which is one of the three described before.
+  In addition, the criticality of the task is also defined in the yaml model which determines if the watchdog component stops petting the downstream watchdog.
+execution: passive
+init:
+  description:
+  parameters:
+    - name: Task_Watchdog_Entry_Init_List
+      type: Task_Watchdog_Types.Task_Watchdog_Init_List
+      description: The list of components that have a watchdog to pet that need to be tracked by the task watchdog.
+connectors:
+  - description: The schedule invokee connector.
+    type: Tick.T
+    kind: recv_sync
+  - description: The arrayed pet receive connector. Upstream components call this connector to let the Task Watchdog know they are running OK.
+    type: Pet.T
+    kind: recv_sync
+    count: 0 # Length defined at runtime
+  - description: The pet send connector. This is used to service an downstream watchdog component, usually a component which services a hardware-based watchdog.
+    type: Pet.T
+    kind: send
+  - description: The command receive connector
+    type: Command.T
+    kind: recv_sync
+  - description: This connector is used to register the components commands with the command router component.
+    type: Command_Response.T
+    kind: send
+  - description: Faults are sent on this connector.
+    type: Fault.T
+    kind: send
+  - description: The post mortum log can be dumped using packets.
+    type: Event.T
+    kind: send
+  - description: Data products for limit values and states.
+    type: Data_Product.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get

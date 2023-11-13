@@ -1,0 +1,9 @@
+---
+description: Data products for the ccsds downsampler component.
+data_products:
+  - name: Total_Packets_Filtered
+    description: The total number of packets that have been filtered and not passed on.
+    type: Packed_U16.T
+  - name: Total_Packets_Passed
+    description: The total number of packets that were not filtered and passed on.
+    type: Packed_U16.T

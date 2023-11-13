@@ -1,0 +1,43 @@
+---
+description: A packed record which holds a summary of the state for a particular sequence engine.
+fields:
+  - name: Engine_State
+    description: The sequence engine state.
+    type: Seq_Enums.Seq_Engine_State.E
+    format: E3
+  - name: Sequence_State
+    description: The running sequence state.
+    type: Seq_Enums.Seq_Runtime_State.E
+    format: E5
+  - name: Sequence_Error_Code
+    description: The error code of the last encountered sequence error.
+    type: Seq_Enums.Seq_Error.E
+    format: E8
+  - name: Stack_Level
+    description: How deep is the current stack usage? This reports the stack level of the currently running sequence.
+    type: Seq_Types.Max_Seq_Num
+    format: U8
+  - name: Parent_Sequence_Id
+    description: The sequence ID of the highest stack level parent sequence.
+    type: Sequence_Types.Sequence_Id
+    format: U16
+  - name: Parent_Program_Counter
+    description: The current program counter (relative address pointing to the current sequence instruction) of the parent sequence.
+    type: Seq_Types.Seq_Position
+    format: U16
+  - name: Lowest_Child_Id
+    description: The sequence ID of the lowest stack level child sequence.
+    type: Sequence_Types.Sequence_Id
+    format: U16
+  - name: Lowest_Child_Program_Counter
+    description: The current program counter (relative address pointing to the current sequence instruction) of the lowest level child sequence.
+    type: Seq_Types.Seq_Position
+    format: U16
+  - name: Wakeup_Time
+    description: The absolute time (in seconds) of the next wake up if the component is in a relative or absolute wait state.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Command_Error_Counter
+    description: The number of commands the engine has sent that have not executed properly since startup.
+    type: Interfaces.Unsigned_16
+    format: U16

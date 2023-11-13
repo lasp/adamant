@@ -1,0 +1,35 @@
+---
+execution: passive
+connectors:
+  - type: send
+    kind: send
+    name: send
+  - type: send
+    kind: send
+    name: send2
+  - return_type: get
+    kind: get
+    name: get
+  - type: request
+    return_type: request
+    kind: request
+    name: request
+  - type: recv_sync
+    kind: recv_sync
+    name: recv_sync
+  - type: recv_async
+    kind: recv_async
+    name: recv_async
+  - return_type: return
+    kind: return
+    name: return
+  - type: service
+    return_type: service
+    kind: service
+    name: service
+  - type: provide
+    kind: provide
+    name: provide
+  - type: modify
+    kind: modify
+    name: modify

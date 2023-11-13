@@ -1,0 +1,28 @@
+---
+description: This component services a commands to stuff and dump registers. This component is different than the memory stuffer/dumper in that it atomically sets 32-bit little endian registers, which is a requirement on some hardware. It rejects commands to stuff or dump addresses that are not on a 4-byte boundary. Note that this component assumes all registers it accesses are little endian. Another version of this component needs to be used to access registers as that are big endian.
+execution: passive
+init:
+  description: Configuration for the register stuffer component.
+  parameters:
+    - name: Protect_Registers
+      type: Boolean
+      description: If set to True, the arm command will be required before each register write command. This does not affect register reads. If set to False, an arm command is not required before each register write command.
+connectors:
+  - description: This tick is used to keep track of the armed state timeout and send the data product relating the current timeout value.
+    type: Tick.T
+    kind: recv_sync
+  - description: The command receive connector.
+    type: Command.T
+    kind: recv_sync
+  - description: This connector is used to send the command response back to the command router.
+    type: Command_Response.T
+    kind: send
+  - description: Data products are sent out of this connector.
+    type: Data_Product.T
+    kind: send
+  - description: The event send connector.
+    type: Event.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get

@@ -1,0 +1,12 @@
+---
+description: These are the commands for the PID Controller component.
+commands:
+  - name: Start_Diagnostics
+    description: Set the PID controller diagnostic packet's duration to capture samples. Duration is a function of the controller frequency.
+    arg_type: Packed_Natural_Duration.T
+  - name: Set_Database_Update_Period
+    description: Change the database update period, in units of the resolver acquisition period.
+    arg_type: Packed_U16.T
+  - name: Set_Controller_Statistic_Duration
+    description: Resets and changes the duration that the rolling statistics of the controller are measured, up to a max value set at compile time. This command will fail if the desired sample duration is greater than the max number of samples defined at compile time.
+    arg_type: Packed_Positive.T

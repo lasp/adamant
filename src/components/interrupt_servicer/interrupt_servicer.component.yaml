@@ -1,0 +1,32 @@
+---
+description: The Interrupt Servicer provides a task that an attached component executes on when an interrupt is received. The component is attached to an interrupt. When it receives the interrupt, the component's internal task is released, and the component calls the Interrupt_Data_Type_Send connector causing an attached component to execute on its internal task. A user-defined generic data type is passed between the Interrupt Servicer and the connected component. This data type will usually be filled in within a user defined custom interrupt handler, provided to the Interrupt Servicer at instatiation, and called by the Interrupt Servicer every time the specified interrupt is received.
+execution: active
+with:
+  - Interrupt_Handlers
+generic:
+  description: The Interrupt Servicer is parameterized by the Interrupt_Data_Type. The instantiation of this type is often determined by what data needs to be collected during an interrupt and how a connected component intends to process that data. This type a user defined type that is passed into the user's custom interrupt handler as an in-out parameter and then passed to a downstream components out of the Interrupt_Data_Type_Send connector. Usually, this type will be used to capture data related to an interrupt in the interrupt handler. Often, a timestamp, relating when the interrupt occurred, will be included in this custom type. The Interrupt Servicer will automatically insert the timestamp into the custom type if the second generic parameter, the Set_Interrupt_Data_Time procedure, is provided.
+  parameters:
+    - name: Interrupt_Data_Type
+      description: The user's custom datatype that is is set in the custom interrupt handler and then passed to downstream components. If you do not foresee needing to collect specific data in the interrupt handler for the downstream component, consider using the Tick.T type, which includes a timestamp and a count.
+    - name: Set_Interrupt_Data_Time
+      formal_type: "with procedure Set_Interrupt_Data_Time (Interrupt_Data : in out Interrupt_Data_Type; Time : in Sys_Time.T) is null;"
+      optional: True
+      description: This is an optional generic parameter that is used if the Interrupt_Data_Type includes a timestamp which should be filled in when an interrupt occurs. This parameter is a user defined procedure that, given a time, copies that time to the Interrupt_Data_Type. If this parameter is not provided, then time will not be set in the Interrupt_Data_Type. In this case, the user should not connect the Sys_Time_T_Get connector to avoid the CPU overhead of fetching a time that is never used. Note, if you are using Tick.T for the Interrupt_Data_Type, consider using the Handler procedure in the Tick_Interrupt_Handler package to instantiate this parameter.
+preamble: |
+    -- Define the custom interrupt handling package type
+    package Custom_Interrupt_Handler_Package is new Interrupt_Handlers (Interrupt_Data_Type);
+discriminant:
+  parameters:
+    - name: custom_Interrupt_Procedure
+      type: Custom_Interrupt_Handler_Package.Interrupt_Procedure_Type
+      description: A custom procedure to be called within the interrupt handler. The null procedure can be used here if no specific behavior is desired.
+interrupts:
+  - name: interrupt
+    description: This component counts the number of times this interrupt occurs.
+connectors:
+  - description: The data send connection.
+    type: Interrupt_Data_Type
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get

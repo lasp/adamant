@@ -1,0 +1,19 @@
+---
+description: A packed record which holds parameter table header data. This data is asswill be prepended to the table data upon upload.
+preamble: |
+  -- Declare the start index at which to begin calculating the CRC. The
+  -- start index is dependent on this type, and so is declared here so that
+  -- it is easier to keep in sync.
+  Crc_Section_Length : constant Natural := Crc_16.Crc_16_Type'Length;
+  Version_Length : constant Natural := 4;
+fields:
+  - name: Crc_Table
+    description: The CRC of the parameter table, as computed by a ground system, and uplinked with the table.
+    type: Crc_16.Crc_16_Type
+    format: U16
+    skip_validation: True
+    byte_image: True
+  - name: Version
+    description: The current version of the parameter table.
+    type: Short_Float
+    format: F32

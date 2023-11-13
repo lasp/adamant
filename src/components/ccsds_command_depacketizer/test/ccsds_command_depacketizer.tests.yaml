@@ -1,0 +1,22 @@
+---
+description: This is a unit test suite for the CCSDS Command Depacketizer component
+tests:
+  - name: Test_Nominal_Depacketization
+    description: This unit test excersizes the nominal behavior of the ccsds command depacketizer.
+  - name: Test_Invalid_Packet_Checksum
+    description: This unit test makes sure that packets with invalid checsums are reported and dropped.
+  - name: Test_Invalid_Packet_Type
+    description: This unit test makes sure that packets with invalid packet types are reported and dropped.
+  - name: Test_Packet_Too_Small
+    description: This unit test makes sure that packets that are too small to hold a valid command are reported and dropped.
+  - name: Test_Packet_Too_Large
+    description: This unit test makes sure that packets that are too large to hold a valid command are reported and dropped.
+  - name: Test_Packet_Without_Secondary_Header
+    description: This unit test makes sure that packets that do not include a secondary header are are reported and dropped.
+  - name: Test_Pad_Bytes
+    description: This unit test makes use of the function code in the secondary header to denote a different number of pad bytes. It makes sure the component responds appropriately.
+  - name: Test_Reset_Counts
+    description: This unit test tests the reset data products command.
+  - name: Test_Invalid_Command
+    description: This unit test makes sure the component handles an invalid command appropriately.
+

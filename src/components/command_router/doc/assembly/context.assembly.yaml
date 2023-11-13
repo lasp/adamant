@@ -1,0 +1,96 @@
+---
+description: This is an assembly for creating a context diagram.
+components:
+  - type: Command_Router
+    execution: active
+    priority: 1
+    stack_size: 2000
+    secondary_stack_size: 1
+    init:
+      - "max_Number_Of_Commands => 5"
+    init_base:
+      - "queue_Size => 0"
+      - "command_T_Send_Count => 4"
+      - "command_Response_T_To_Forward_Send_Count => 2"
+  - type: Command_Sender
+    name: Low_Pri_Cmd_Sender
+    execution: passive
+    init_base:
+      - "queue_Size => 0"
+  - type: Command_Sender
+    name: Hi_Pri_Cmd_Sender
+    execution: active
+    priority: 1
+    stack_size: 2000
+    secondary_stack_size: 1
+    init_base:
+      - "queue_Size => 0"
+  - type: Command_Receiver
+    name: Cmd_Receiver_1
+    execution: passive
+    init_base:
+      - "queue_Size => 0"
+  - type: Command_Receiver
+    name: Cmd_Receiver_2
+    execution: active
+    priority: 1
+    stack_size: 2000
+    secondary_stack_size: 1
+    init_base:
+      - "queue_Size => 0"
+  - type: Command_Receiver
+    name: Cmd_Receiver_3
+    execution: passive
+    init_base:
+      - "queue_Size => 0"
+connections:
+  - from_component: Low_Pri_Cmd_Sender
+    from_connector: Command_T_Send
+    to_component: Command_Router_Instance
+    to_connector: Command_T_To_Route_Recv_Async
+  - from_component: Hi_Pri_Cmd_Sender
+    from_connector: Command_T_Send
+    to_component: Command_Router_Instance
+    to_connector: Command_T_To_Route_Recv_Sync
+  - from_component: Command_Router_Instance
+    from_connector: Command_Response_T_To_Forward_Send
+    from_index: 1
+    to_component: Command_Router_Instance
+    to_connector: Command_Response_T_Recv_Async
+  - from_component: Command_Router_Instance
+    from_connector: Command_Response_T_To_Forward_Send
+    from_index: 2
+    to_component: Low_Pri_Cmd_Sender
+    to_connector: Command_Response_T_Recv_Async
+  - from_component: Command_Router_Instance
+    from_connector: Command_T_Send
+    from_index: 1
+    to_component: Command_Router_Instance
+    to_connector: Command_T_Recv_Async
+  - from_component: Command_Router_Instance
+    from_connector: Command_T_Send
+    from_index: 2
+    to_component: Cmd_Receiver_1
+    to_connector: Command_T_Recv_Async
+  - from_component: Command_Router_Instance
+    from_connector: Command_T_Send
+    from_index: 3
+    to_component: Cmd_Receiver_2
+    to_connector: Command_T_Recv_Async
+  - from_component: Command_Router_Instance
+    from_connector: Command_T_Send
+    from_index: 4
+    to_component: Cmd_Receiver_3
+    to_connector: Command_T_Recv_Sync
+  - from_component: Cmd_Receiver_1
+    from_connector: Command_Response_T_Send
+    to_component: Command_Router_Instance
+    to_connector: Command_Response_T_Recv_Async
+  - from_component: Cmd_Receiver_2
+    from_connector: Command_Response_T_Send
+    to_component: Command_Router_Instance
+    to_connector: Command_Response_T_Recv_Async
+  - from_component: Cmd_Receiver_3
+    from_connector: Command_Response_T_Send
+    to_component: Command_Router_Instance
+    to_connector: Command_Response_T_Recv_Async

@@ -1,0 +1,6 @@
+---
+description: Data products for the connector counter component.
+data_products:
+  - name: Count
+    description: The number of connector invocations that have passed through the component.
+    type: Packed_Byte.T

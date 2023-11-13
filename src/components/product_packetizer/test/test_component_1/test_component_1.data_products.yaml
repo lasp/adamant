@@ -1,0 +1,7 @@
+---
+description: A test set of data products for the test component 1.
+data_products:
+  - name: Data_Product_A
+    type: Packed_U32.T
+  - name: Data_Product_B
+    type: Tick.T

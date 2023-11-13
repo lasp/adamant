@@ -1,0 +1,10 @@
+---
+description: A packed record which holds data related to an invalid data product length.
+fields:
+  - name: Header
+    description: The packet identifier
+    type: Data_Product_Header.T
+  - name: Expected_Length
+    description: The packet length bound that the length failed to meet.
+    type: Data_Product_Types.Data_Product_Buffer_Length_Type
+    format: U8

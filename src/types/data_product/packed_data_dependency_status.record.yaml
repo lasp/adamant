@@ -1,0 +1,16 @@
+---
+description: A packed record which holds a data dependency status.
+with:
+  - Data_Product_Types
+fields:
+  - name: Id
+    description: The data dependency identifier
+    type: Data_Product_Types.Data_Product_Id
+    format: U16
+  - name: Timestamp
+    description: The timestamp of the returned data product.
+    type: Sys_Time.T
+  - name: Status
+    description: The return status of the data dependency extraction.
+    type: Data_Product_Enums.Data_Dependency_Status.E
+    format: E8

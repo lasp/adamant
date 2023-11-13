@@ -1,0 +1,19 @@
+---
+description: A packed record for all seq eval instructions (Eval, Eval_FLT, Eval_S).
+fields:
+  - name: Opcode
+    description: Instruction code
+    type: Basic_Types.Byte
+    format: U8
+  - name: Operation
+    description: The operation that should be performed.
+    type: Seq_Enums.Seq_Operation.E
+    format: E8
+  - name: Pad1
+    description: Padding
+    type: Basic_Types.Byte
+    format: U8
+  - name: Pad2
+    description: Padding
+    type: Basic_Types.Byte
+    format: U8

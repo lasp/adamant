@@ -1,0 +1,7 @@
+---
+description: Packed record used for holding a status from updating a parameter.
+fields:
+  - name: Status
+    description: The return status from the parameter update procedure.
+    type: Parameter_Enums.Parameter_Update_Status.E
+    format: E8

@@ -1,0 +1,6 @@
+---
+description: A passive component which sends ccsds
+execution: passive
+connectors:
+  - type: Ccsds_Space_Packet.T
+    kind: send

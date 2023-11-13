@@ -1,0 +1,23 @@
+seq waitnew_09
+  ; Wait for data product 3 to be 0.
+  waitnewvalue Component_A.Data_Product_3.Subseconds == 999 ? until 120000 ;absolute wait (VTC)
+  cmd Component_A.Command_3 Value 5
+
+  if $WAIT_TIMEOUT == 1
+    ; Timeout
+    cmd Component_B.Command_3 Value 6
+  else
+    cmd Component_B.Command_3 Value 7
+  endif
+
+  ; Wait for data product 2 to be > 7.
+  waitnewvalue Component_B.Data_Product_2.Value > 7.65 ? for 5 ;relative wait
+  cmd Component_A.Command_3 Value 11
+
+  if $WAIT_TIMEOUT == 1
+    ; Timeout
+    cmd Component_B.Command_3 Value 12
+  else
+    cmd Component_B.Command_3 Value 13
+  endif
+endseq

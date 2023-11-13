@@ -1,0 +1,29 @@
+with "../../../config/adamant_config.gpr";
+
+-- This project simply compiles a hello world to make sure the alire environment
+-- for Adamant is functioning properly.
+project Hello_World is
+
+   -- Add the hello world as source file.
+   for Source_Dirs use (".", "../../../config/");
+   for Object_Dir use "build/alire/obj/" & Adamant_Config.Build_Profile;
+   for Create_Missing_Dirs use "True";
+   for Exec_Dir use "build/alire/bin";
+   for Main use ("main.adb");
+
+   package Compiler is
+      for Default_Switches ("Ada") use Adamant_Config.Ada_Compiler_Switches;
+   end Compiler;
+
+   package Binder is
+      for Switches ("Ada") use ("-Es"); --   Symbolic traceback
+   end Binder;
+
+   package Install is
+      for Artifacts (".") use ("share");
+   end Install;
+
+   package Linker is
+   end Linker;
+
+end Hello_World;

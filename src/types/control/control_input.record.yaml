@@ -1,0 +1,22 @@
+---
+description: Generic control input.
+fields:
+  - name: Time
+    description: Time tag saved when the data was gathered.
+    type: Sys_Time.T
+  - name: Measured_Value
+    description: The current measured value of the control.
+    type: Short_Float
+    format: F32
+  - name: Commanded_Value
+    description: The current commanded value of the control.
+    type: Short_Float
+    format: F32
+  - name: Feed_Forward_Value
+    description: The current feed forward value for the control.
+    type: Short_Float
+    format: F32
+  - name: First_Iteration
+    description: This variable should be set to True if this is the first iteration of a new control run. When set to true, the controller will reset its internal state, setting any accumulated derivative/integral control terms to zero. This should be done whenever the caller has switched between control modes.
+    type: Boolean
+    format: E8

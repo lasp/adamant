@@ -1,0 +1,5 @@
+---
+description: Packets for the cpu monitor.
+packets:
+  - name: Cpu_Usage_Packet
+    description: This packet contains cpu usage numbers for tasks and interrupts in the system.

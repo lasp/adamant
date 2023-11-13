@@ -1,0 +1,83 @@
+---
+description: This is an assembly for creating a context diagram.
+components:
+  - type: Ccsds_Router
+    name: Passive_Ccsds_Router
+    execution: passive
+    init:
+      - "table => null"
+    init_base:
+      - "queue_Size => 0"
+      - "ccsds_Space_Packet_T_Send_Count => 3"
+  - type: Ccsds_Router
+    name: Active_Ccsds_Router
+    execution: active
+    stack_size: 2000
+    secondary_stack_size: 1
+    priority: 1
+    init:
+      - "table => null"
+    init_base:
+      - "queue_Size => 0"
+      - "ccsds_Space_Packet_T_Send_Count => 3"
+  - type: Ccsds_Sender
+    name: Ccsds_Sync_Sender
+  - type: Ccsds_Sender
+    name: Ccsds_Async_Sender
+  - type: Ccsds_Sender
+    name: Ccsds_High_Priority_Sender
+  - type: Ccsds_Receiver
+    name: First_Ccsds_Receiver
+    init_base:
+      - "queue_Size => 0"
+  - type: Ccsds_Receiver
+    name: Second_Ccsds_Receiver
+    init_base:
+      - "queue_Size => 0"
+  - type: Ccsds_Receiver
+    name: Third_Ccsds_Receiver
+    init_base:
+      - "queue_Size => 0"
+connections:
+  - from_component: Ccsds_Sync_Sender
+    from_connector: Ccsds_Space_Packet_T_Send
+    to_component: Passive_Ccsds_Router
+    to_connector: Ccsds_Space_Packet_T_Recv_Sync
+  - from_component: Ccsds_High_Priority_Sender
+    from_connector: Ccsds_Space_Packet_T_Send
+    to_component: Active_Ccsds_Router
+    to_connector: Ccsds_Space_Packet_T_Recv_Sync
+  - from_component: Ccsds_Async_Sender
+    from_connector: Ccsds_Space_Packet_T_Send
+    to_component: Active_Ccsds_Router
+    to_connector: Ccsds_Space_Packet_T_Recv_Async
+  - from_component: Active_Ccsds_Router
+    from_connector: Ccsds_Space_Packet_T_Send
+    from_index: 1
+    to_component: First_Ccsds_Receiver
+    to_connector: Ccsds_Space_Packet_T_Recv_Sync
+  - from_component: Active_Ccsds_Router
+    from_connector: Ccsds_Space_Packet_T_Send
+    from_index: 2
+    to_component: Second_Ccsds_Receiver
+    to_connector: Ccsds_Space_Packet_T_Recv_Async
+  - from_component: Active_Ccsds_Router
+    from_connector: Ccsds_Space_Packet_T_Send
+    from_index: 3
+    to_component: Third_Ccsds_Receiver
+    to_connector: Ccsds_Space_Packet_T_Recv_Sync
+  - from_component: Passive_Ccsds_Router
+    from_connector: Ccsds_Space_Packet_T_Send
+    from_index: 1
+    to_component: First_Ccsds_Receiver
+    to_connector: Ccsds_Space_Packet_T_Recv_Sync
+  - from_component: Passive_Ccsds_Router
+    from_connector: Ccsds_Space_Packet_T_Send
+    from_index: 2
+    to_component: Second_Ccsds_Receiver
+    to_connector: Ccsds_Space_Packet_T_Recv_Async
+  - from_component: Passive_Ccsds_Router
+    from_connector: Ccsds_Space_Packet_T_Send
+    from_index: 3
+    to_component: Third_Ccsds_Receiver
+    to_connector: Ccsds_Space_Packet_T_Recv_Sync

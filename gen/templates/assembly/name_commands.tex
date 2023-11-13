@@ -1,0 +1,36 @@
+The table below shows the commands for the \VAR{prettyname|e} assembly.
+
+%- if commands
+\captionof{table}{\VAR{prettyname|e} Commands}
+{\renewcommand{\arraystretch}{2.2} %<- modify value to suit your needs
+\begin{xltabular}{\textwidth}{ | l | X | X | }
+  \hline
+  \textbf{Command ID} & \textbf{Command Name} & \textbf{Argument Type} \\ \hline
+%- for id, command in commands.items()
+  \texttt{0x\VAR{"%04x" % id } (\VAR{ command.id })} &
+  \texttt{\url{\VAR{command.suite.component.instance_name}.\VAR{command.name}}} &
+%- if command.type
+  \texttt{\url{\VAR{command.type}}}
+%- else
+  \texttt{-}
+%- endif
+  \\ \hline
+%- endfor
+\end{xltabular}}
+\vspace{5mm} %5mm vertical space
+
+Command Descriptions:
+\begin{spaceditemize}
+%- for id, command in commands.items()
+  \item \textbf{\texttt{\VAR{command.suite.component.instance_name|e}.\VAR{command.name|e}}} -
+%- if command.description
+    \VAR{command.description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+%- else 
+\par The \VAR{prettyname|e} assembly has no commands.
+%- endif

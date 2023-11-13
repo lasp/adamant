@@ -1,0 +1,13 @@
+---
+description: A record which holds information on how to set a maximum packet rate.
+fields:
+  - name: Max_Packets
+    description: The maximum number of packets to send out in one time period.
+    type: Natural
+    format: U32
+    default: '5'
+  - name: Period
+    description: The length of a time period, defined in seconds.
+    type: Positive
+    format: U32
+    default: '1'

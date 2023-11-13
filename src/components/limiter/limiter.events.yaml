@@ -1,0 +1,13 @@
+---
+events:
+  - name: Max_Send_Per_Tick_Set
+    description: A new maximum sends per tick rate has been set for the limiter.
+    param_type: Packed_U16.T
+  - name: Data_Dropped
+    description: The queue for data overflowed and an incoming data was dropped.
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T
+  - name: Invalid_Parameter_Received
+    description: A parameter was received with invalid values.
+    param_type: Invalid_Parameter_Info.T

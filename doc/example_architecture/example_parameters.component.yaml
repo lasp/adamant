@@ -1,0 +1,11 @@
+---
+description: This component stores parameters for the assembly and pushes new values out to parameterized components.
+execution: passive
+connectors:
+  - description: The arrayed parameter request connector. Parameters stages, updates, and fetches are sent out this connector and a status is returned.
+    type: Parameter_Update.T
+    kind: provide
+    count: 0
+  - type: Command.T
+    kind: recv_sync
+    description: Commands to upload and change parameters are received on this connector.

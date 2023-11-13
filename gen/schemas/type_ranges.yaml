@@ -1,0 +1,42 @@
+---
+# This schema describes the yaml format for type ranges.
+type: map
+mapping:
+  # A list of the types to be described in the yaml
+  types:
+    seq:
+      - type: map
+        mapping:
+          # The name of the type.
+          name:
+            type: str
+            required: True
+          # The minimum value of the type (only used if its an integer).
+          min:
+            type: number
+            required: False
+          # The maximum value of the type (only used if its an integer).
+          max:
+            type: number
+            required: False
+          # A list of the literals (only used if its an enum).
+          literals:
+            seq:
+              - type: map
+                mapping:
+                  # The name of the literal.
+                  name:
+                    type: str
+                    required: True
+                  # The value of the literal.
+                  value:
+                    type: int
+                    required: True
+            # At least one field must be included in the record.
+            range:
+              min: 1
+            required: False
+    # At least one field must be included in the record.
+    range:
+      min: 1
+    required: False

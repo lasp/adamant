@@ -1,0 +1,16 @@
+---
+description: This is a grouped view.
+show_component_priority: False
+rule: "@science | everything"
+filters:
+  - name: science
+    type: component_name
+    include:
+      - rate_Group_Instance
+      - science_Instance
+      - time_Instance
+      - logger_Instance
+  - name: everything
+    type: component_type_context
+    exclude:
+      - Example_Science

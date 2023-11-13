@@ -1,0 +1,18 @@
+{% extends "/base/table.html" %}
+{% block title %}<b>{{ formatType(model_name) }}</b> Command Suite{% endblock %}
+{% block head %}
+      <tr>
+          <th scope="col">Command Name</th>
+          <th scope="col">Argument Type</th>
+          <th scope="col">Description</th>
+      </tr>
+{% endblock %}
+{% block body %}
+{% for command in commands %}
+      <tr>
+        <td style='font-family: "Courier New", Courier, monospace;'><b>{{ command.name }}</b></td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{% if command.type %}{% if command.type_model %}<a class="record_link" href="../../{{ command.type_model.get_src_dir_from(get_src_dir(full_filename)) }}/build/html/{{ command.type_package.lower() }}.html">{% endif %}{{ command.type }}{% if command.type_model %}</a>{% endif %}{% else %}-{% endif %}</td>
+        <td>{% if command.description %}{{ printMultiLine(command.description, '') }}{% endif %}</td>
+      </tr>
+{% endfor %}
+{% endblock %}

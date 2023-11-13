@@ -1,0 +1,6 @@
+---
+description: These are the commands for the Command Protector component.
+commands:
+  - name: Arm
+    description: Transition the component to the 'arm' state. A timeout is provided, which when expires, will transition the component back to the 'unarmed' state, unless a command is received first. A timeout value of zero implies infinite timeout, meaning the component will only transition to the 'unarmed' when a command is received.
+    arg_type: Packed_Arm_Timeout.T

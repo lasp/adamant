@@ -1,0 +1,21 @@
+---
+description: This is a unit test suite for the Parameter Store component.
+tests:
+  - name: Test_Nominal_Dump_Parameters
+    description: This unit test tests the nominal dumping of the parameter table by command.
+  - name: Test_Nominal_Table_Upload
+    description: This unit test tests the nominal updating of the parameter table by memory region upload.
+  - name: Test_Nominal_Table_Fetch
+    description: This unit test tests the nominal fetching of the parameter table by into a provided memory region.
+  - name: Test_Table_Upload_Length_Error
+    description: This unit test tests the behavior when updating the parameter table with a memory region of invalid length.
+  - name: Test_Table_Upload_Crc_Error
+    description: This unit test tests the behavior when updating the parameter table with a memory region that contains an invalid CRC.
+  - name: Test_Table_Fetch_Length_Error
+    description: This unit test tests the behavior when fetching the parameter table with a memory region of invalid length.
+  - name: Test_No_Dump_On_Change
+    description: This unit test tests the no-dump-on-change configuration for the Init function and makes sure the component behaves as expected.
+  - name: Test_Full_Queue
+    description: This unit test tests a command or memory region being dropped due to a full queue.
+  - name: Test_Invalid_Command
+    description: This unit test exercises that an invalid command throws the appropriate event.

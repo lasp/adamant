@@ -1,0 +1,10 @@
+---
+description: The requirements for the Command Router component are specified below.
+requirements:
+  - text: The component shall route incoming commands to the correct destination component for execution.
+  - text: The component shall drop and report incoming commands that have an unrecognized identifier.
+  - text: The component shall implement a NOOP command.
+  - text: The component shall receive command responses and forward them to the source components who sent the commands.
+  - text: The component shall produce a data product relating the the number of received commands and the identifier of the last received command.
+  - text: The component shall produce a data product relating the the number of successful commands and the identifier of the last successful command.
+  - text: The component shall produce a data product relating the the number of failed commands and the identifier of the last failed command.

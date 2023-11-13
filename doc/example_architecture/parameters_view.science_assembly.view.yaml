@@ -1,0 +1,15 @@
+---
+description: This is a parameters view.
+show_component_priority: False
+rule: include_component_types & exclude_connector
+filters:
+  - name: include_component_types
+    type: component_type
+    include:
+      - Example_Parameters
+      - Example_Science
+      - Example_Command_Router
+  - name: exclude_connector
+    type: connector_name
+    exclude:
+      - Science_Instance.Command_T_Recv_Async

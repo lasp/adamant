@@ -1,0 +1,14 @@
+---
+description: This component collects sensor measurements and outputs them as data products. It executes on a periodic tick.
+execution: passive
+connectors:
+  - type: Tick.T
+    kind: recv_sync
+    name: Tick_T_Recv_Sync
+    description: This connector provides the schedule tick for the component
+  - type: Data_Product.T
+    kind: send
+    description: Data products are sent out of this connector.
+  - return_type: Sys_Time.T
+    kind: get
+    description: Time is fetched on this connector.

@@ -1,0 +1,14 @@
+---
+# Optional - description of data dependency suite
+description: A set of data dependencies for the Data Dependency Component.
+# Required - list of data dependencies included in the data dependency suite
+data_dependencies:
+    # Required - the name of the data dependency
+  - name: Counter
+    # Optional - a description of the data dependency
+    description: A 16-bit counter. The value of this counter is reported every tick.
+    # Required - the type of the data dependency
+    type: Packed_U16.T
+  - name: Temperature
+    description: A temperature produced by an external component that is limit checked.
+    type: Packed_F32.T

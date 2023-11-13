@@ -1,0 +1,6 @@
+---
+description: Packets for the Command Rejector component.
+packets:
+  - name: Error_Packet
+    type: Command.T
+    description: This packet contains a command that was dropped due to being on the reject list.

@@ -1,0 +1,20 @@
+seq recursion_16
+  ;
+  ; This sequence exceeds the execute recursion limit.
+  ;
+
+  ; This should all work fine.
+  kill engine 1 1
+  kill engine 1 1
+  kill engine 2 1
+  kill engine 2 1
+  kill engine 1 1
+  kill engine 1 1
+  kill engine 2 1
+  kill engine 2 1
+  kill engine 1 1
+  kill engine 2 1
+
+  ; Recursion limit exceeded here.
+  kill engine 2 1
+endseq

@@ -1,0 +1,37 @@
+%- if description
+\VAR{description|e}
+%- endif
+
+%- if preamble 
+\\
+\\
+\textit{Preamble (inline Ada definitions):}
+\begin{adacode}
+\VAR{preamble}
+\end{adacode}
+
+%- endif
+\captionof{table}{\VAR{name|e} Packed Array : \VAR{size} bits}
+\begin{xltabular}{\textwidth}{ | X | l | c | c | c | }
+  \hline
+  \textbf{Type} & \textbf{Range} & \thead{\textbf{Element}\\\textbf{Size (Bits)}} & \textbf{Length} & \thead{\textbf{Total Size}\\\textbf{(Bits)}} \\ \hline
+  \textbf{\texttt{\url{\VAR{element.type}}}}
+  &
+%- if element.literals
+  \makecell[l]{
+%- for literal in element.literals
+    \texttt{\VAR{literal.value} => \VAR{literal.name|e}} \\
+%- endfor
+  } &
+%- else
+%- if element.range_min != None and element.range_max != None
+  \texttt{\VAR{element.range_min} to \VAR{element.range_max}} &
+%- else
+  - &
+%- endif
+%- endif
+  \texttt{\VAR{element.size}} &
+  \texttt{\VAR{length}} &
+  \texttt{\VAR{size}} \\ \hline
+\end{xltabular}
+\vspace{5mm} %5mm vertical space

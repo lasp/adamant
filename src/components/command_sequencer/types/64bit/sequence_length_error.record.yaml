@@ -1,0 +1,9 @@
+---
+description: This is a packed record that holds information invalid sequence length.
+fields:
+  - name: Load
+    description: The sequence load info.
+    type: Sequence_Load.T
+  - name: Header
+    description: The header of the sequence.
+    type: Sequence_Header.T

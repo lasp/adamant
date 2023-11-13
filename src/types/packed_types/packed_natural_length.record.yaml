@@ -1,0 +1,7 @@
+---
+description: Single component record for holding packed Natural value that represents a length.
+fields:
+  - name: Length
+    description: The 32-bit Natural Integer that represents a length.
+    type: Natural
+    format: U32

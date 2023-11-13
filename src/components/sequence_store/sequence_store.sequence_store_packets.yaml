@@ -1,0 +1,5 @@
+---
+description: Packets for the Sequence Store component.
+packets:
+  - name: Slot_Summaries
+    description: This packet contains a summary of what is contained in each Sequence Store slot. Since the number of slots the component manages is determined at initialization the type for the FSW is left undefined.

@@ -1,0 +1,18 @@
+%- if interrupts
+\par Below is a list of the interrupts for the \VAR{prettyname|e} component.
+
+Interrupt Descriptions:
+\begin{spaceditemize}
+%- for interrupt in interrupts.list
+  \item \textbf{\texttt{\VAR{interrupt.name|e}}} - 
+%- if interrupt.description
+    \VAR{interrupt.description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+%- else
+This component contains no interrupts.
+%- endif

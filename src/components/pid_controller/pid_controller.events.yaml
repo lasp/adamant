@@ -1,0 +1,20 @@
+---
+events:
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T
+  - name: Invalid_Parameter_Received
+    description: Invalid parameter update
+    param_type: Invalid_Parameter_Info.T
+  - name: Database_Update_Period_Set
+    description: The event to indicate that the database update period was commanded.
+    param_type: Packed_U16.T
+  - name: Diagnostics_Started
+    description: This event indicates that the diagnostic packet request command has been sent.
+    param_type: Packed_Natural_Duration.T
+  - name: Set_Controller_Statistics_Duration
+    description: This event indicates that the command to change the duration that statistics are collected was received and changed.
+    param_type: Packed_Positive.T
+  - name: Set_Controller_Statistics_Duration_Too_Large
+    description: This event indicates that the command to change the duration that statistics are collected was received but failed to change the length.
+    param_type: Packed_Positive.T

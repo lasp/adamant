@@ -1,0 +1,5 @@
+---
+description: These are the commands for the component.
+commands:
+  - name: Reset_Counts
+    description: This command resets the internal counts for the data products.

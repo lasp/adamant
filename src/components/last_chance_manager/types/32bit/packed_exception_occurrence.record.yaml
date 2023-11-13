@@ -1,0 +1,32 @@
+---
+description: Packed record which holds information from an Ada Exception Occurrence type. This is the type passed into the Last Chance Handler when running a full runtime.
+with:
+  - Basic_Types
+preamble: |
+  type Exception_Name_Buffer is new Basic_Types.Byte_Array (0 .. 99)
+    with Size => 100 * 8,
+         Object_Size => 100 * 8;
+  type Exception_Message_Buffer is new Basic_Types.Byte_Array (0 .. 299)
+    with Size => 300 * 8,
+         Object_Size => 300 * 8;
+fields:
+  - name: Exception_Name
+    description: The exception name.
+    type: Exception_Name_Buffer
+    format: U8x100
+    skip_validation: True
+    byte_image: True
+  - name: Exception_Message
+    description: The exception message.
+    type: Exception_Message_Buffer
+    format: U8x300
+    skip_validation: True
+    byte_image: True
+  - name: Stack_Trace_Depth
+    description: The depth of the reported stack trace.
+    type: Interfaces.Unsigned_32
+    format: U32
+    default: "0"
+  - name: Stack_Trace
+    description: The stack trace addresses.
+    type: Stack_Trace_Addresses.T

@@ -1,0 +1,18 @@
+---
+description: Data products for the Precision Time Protocol Master component.
+data_products:
+  - name: Transaction_Number
+    description: The transaction number of the last sent Sync message.
+    type: Packed_U16.T
+  - name: Follow_Up_Messages_Sent
+    description: The number of follow up messages sent.
+    type: Packed_U16.T
+  - name: Delay_Request_Messages_Received
+    description: The number of delay request messages received.
+    type: Packed_U16.T
+  - name: Unexpected_Messages_Received
+    description: The number of received messages that had unexpected transaction numbers or message types.
+    type: Packed_U16.T
+  - name: Precision_Time_Protocol_State
+    description: The disable/enable state of the precision time protocol within the component.
+    type: Ptp_State.T

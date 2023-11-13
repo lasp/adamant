@@ -1,0 +1,9 @@
+---
+description: Data products for the Task Watchdog component.
+data_products:
+  - name: Watchdog_Component_Petter_State
+    description: Data product that tracks the global state to enable or disable all checks on the upstream watchdog pets.
+    type: Packed_Watchdog_Component_State.T
+  - name: Pet_Connector_Action_States
+    description: 2-bit of state for each pet connector indicating the current action that will be taken if there is an error. Note that Packed_U32.T is just a placeholder type for this data product. The actual type of this data product will be autocoded and at assembly model ingest time.
+    type: Packed_U32.T # Will be replaced

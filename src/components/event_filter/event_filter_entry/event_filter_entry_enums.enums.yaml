@@ -1,0 +1,22 @@
+---
+description: This an enumeration defined for the event filter state of each particular ID.
+enums:
+  - name: Event_Filter_State
+    description: This is a single bit identifying if the event filter is enabled for a particular ID.
+    literals:
+      - name: Unfiltered
+        value: 0
+        description: Event will not be filtered
+      - name: Filtered
+        value: 1
+        description: Event will be filtered
+
+  - name: Global_Filter_State
+    description: This is an enumeration indicating if the filter component is enabled/disabled
+    literals:
+      - name: Disabled
+        value: 0
+        description: Individual event states will be ignored and no events will be filtered
+      - name: Enabled
+        value: 1
+        description: Individual event states will be used to determine if the event needs to be filtered

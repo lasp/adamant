@@ -1,0 +1,44 @@
+---
+# This schema describes the yaml format for a packet suite.
+type: map
+mapping:
+  # Description of the packet suite.
+  description:
+    type: str
+    required: False
+  # Many "with" dependencies are automatically deduced and included by
+  # the generator. If you want to manually add a "with" statement, you
+  # can list the names of the packages here.
+  with:
+    seq:
+      - type: str
+    required: False
+  # List of packet items to include in the suite.
+  packets:
+    seq:
+      - type: map
+        mapping:
+          # Name of the packet.
+          name:
+            type: str
+            required: True
+          # Description of the packet.
+          description:
+            type: str
+            required: False
+          # Identifier for the packet (in CCSDS this would be the APID).
+          id:
+            type: int
+            required: False
+          # The type of the packet item. Using a packed record or packed
+          # array type is recommended here. If a type is not provided,
+          # the user must construct the packet themselves without
+          # a helper function. There will also be no generation of
+          # decommutation information for the ground system.
+          type:
+            type: str
+            required: False
+    # A packet suite must have at least one packet item.
+    range:
+      min: 1
+    required: True

@@ -1,0 +1,53 @@
+<!-- ####################################################################### -->
+<!-- {{ formatType(model_name) }} {{ formatType(model_type) }} -->
+<!-- Generated from {{ filename }} on {{ time }}. -->
+<!-- ####################################################################### -->
+
+<hydraDef>
+  <!-- The ccsds command header -->
+  <!-- This header assumed by the Ccsds_Command_Depacketizer component -->
+  <frameDef name="Ccsds_Ground_Command_Secondary_Header">
+    <description text="Record for the LASP-specific command secondary header."/>
+    <field>
+      <itemDef name="Ccsds_Ground_Command_Secondary_Header-Reserved" type="U1">
+        <description text="Reserve bit."/>
+      </itemDef>
+      <itemDef name="Ccsds_Ground_Command_Secondary_Header-Function_Code" type="U7">
+        <description text="The command function code."/>
+      </itemDef>
+      <itemDef name="Ccsds_Ground_Command_Secondary_Header-Checksum" type="U8" value="0">
+        <description text="An 8 bit checksum over the entire command packet"/>
+      </itemDef>
+    </field>
+  </frameDef>
+  <frameDef name="Ccsds_Ground_Command_Header" decoder="commandDecoder">
+    <field>
+      <frameCopy name="Ccsds_Primary_Header" prefix="Ccsds_Ground_Command_Header-"/>
+      <frameCopy name="Ccsds_Ground_Command_Secondary_Header" prefix="Ccsds_Ground_Command_Header-"/>
+      <placeholder/>
+    </field>
+    <length item="Ccsds_Ground_Command_Header-Ccsds_Primary_Header.Ccsds_Ground_Command_Header-Ccsds_Primary_Header-Packet_Length" offset="-56"/>
+    <checksum item="Ccsds_Ground_Command_Header-Ccsds_Ground_Command_Secondary_Header.Ccsds_Ground_Command_Header-Ccsds_Ground_Command_Secondary_Header-Checksum" start="Ccsds_Ground_Command_Header-Ccsds_Primary_Header" stop="END" seed="0xFF" method="xor"/>
+  </frameDef>
+
+  <!-- The command definitions. -->
+{% for id, command in commands.items() %}
+  <command name="{{ command.suite.component.instance_name }}-{{ command.name }}" decoder="commandDecoder">
+    <description text="Args: ({% if command.type %}{% if command.type_model %}{% for string,type,length in complex_types[command.type_package].hydra_field_strings %}{% if loop.index0 != 0 %}, {% endif %}{{ string[1:] }} : {{ type }}{% if length and length > 1 %}x{{ length }}{% endif %}{% endfor %}{% else %}{{ command.type }} : U32{% endif %}{% else %}none{% endif %}){% if command.description %} - Description: {{ command.description }}{% endif %}"/>
+    <header frame="Ccsds_Ground_Command_Header"/>
+    <field>
+      <opcode value="{{ command.id }}" type="U16"/>
+{% if command.type %}
+{% if command.type_model %}
+{% for string,type,length in complex_types[command.type_package].hydra_field_strings %}
+      <argument id="{{ string[1:] }}" type="{{ type }}"{% if length and length > 1 %} num="{{ length }}"{% if command.type_model.variable_length and loop.last %} truncate="true"{% endif %}{% endif %}/>
+{% endfor %}
+{% else %}
+      <argument id="{{ command.type }}" type="U32"/>
+{% endif %}
+{% endif %}
+    </field>
+  </command>
+{% endfor %}
+
+</hydraDef>

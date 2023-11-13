@@ -1,0 +1,42 @@
+---
+description: |
+  The Rate Group component is a queued component which invokes Tick connectors attached to it whenever it receives a Tick in. The tick in is intended to be periodic, allowing the component to control the execution of other components at a periodic rate. All components attached to the invoker connector of this component are said to be in a rate group, since they all excute at the same rate. Components are executed in the order they are attached to the components invoker connector. The execution of all attached connectors is expected to complete before another incoming Tick is put on the Rate Group component's queue. If the execution runs long, a cycle slip event is reported. The component also includes a connector to service (ie. ``pet") a downstream software watchdog during each execution cycle. This connection is optional and may be left unconnected if not used.
+
+  Note that this component is designed to be Active in an assembly. In this way the Rate Group will provide a task on which Passive components can execute.
+execution: active
+init:
+  description: |
+    This initialization function is used to set the number of ticks that the component should wait before producing the timing report data product.
+  parameters:
+    - name: Ticks_Per_Timing_Report
+      type: Interfaces.Unsigned_16
+      default: '1'
+      description: The period (in ticks) that the component should wait before sending a timing report data product. A value of zero prevents the component from sending the data product.
+    - name: Timing_Report_Delay_Ticks
+      type: Interfaces.Unsigned_16
+      default: '3'
+      description: The number of tickes the component waits before calculating and sending a timing report data product. It is common for the first few executions of a rate group to have execution times longer than normal due to startup logic. In this case, it is often desireable to ignore these cycles in the timing report, especially for the maximum values.
+    - name: Issue_Time_Exceeded_Events
+      type: Boolean
+      default: 'False'
+      description: If set to True, an event will be issued any time the maximum execution or wall clock time of the component is exceeded. If set to False, these events will never be issued. The same information is accessible via the component's data products, so enabling the event may become a redundant annoyance.
+connectors:
+  - description: This connector receives a periodic Tick from an external component, usually a Ticker or Tick_Divider component.
+    type: Tick.T
+    kind: recv_async
+  - description: This unconstrained arrayed connector is connected to downstream components which require a Tick to be scheduled. Each index of the array will be called in sequence until all connected components have been called for that cycle.
+    type: Tick.T
+    kind: send
+    count: 0 # size determined by assembly
+  - description: The pet send connector. This is used to service a software watchdog component.
+    type: Pet.T
+    kind: send
+  - description: Data products are sent out of this connector.
+    type: Data_Product.T
+    kind: send
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get

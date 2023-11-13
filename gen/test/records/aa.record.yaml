@@ -1,0 +1,19 @@
+---
+description: This is a packed record named A
+preamble:
+  subtype One_Type is Natural range 0 .. 19;
+  subtype Two_Type is Positive range 19 .. 230;
+  subtype Three_Type is Natural range 5 .. 2056;
+fields:
+  - name: one
+    description: Element 1
+    type: One_Type
+    format: U8
+  - name: two
+    description: Element 2
+    type: Two_Type
+    format: U8
+  - name: three
+    description: Element 3
+    type: Three_Type
+    format: U16

@@ -1,0 +1,36 @@
+\input{common_packages.tex}
+
+\begin{document}
+
+\title{\textbf{Ccsds Router Table Generator} \\
+\large\textit{Autocoder User Guide}}
+\date{}
+\maketitle
+
+\section{Description}
+
+The purpose of this generator is to provide a user friendly way of creating a static CCSDS router table for use within a CCSDS Router component. The generator takes a YAML model file as input which specifies which destination component(s) each CCSDS packet, identified via APID, should be routed to. A CCSDS packet of a single APID can be routed to zero or many destination components. The table also specifies, for each APID, whether or not to track the sequence numbers of that packet, report out of order sequence numbers, and/or drop subsequent packets received with the same sequence number. From this information, the generator autocodes an Ada specification file which contains a data structure that should be passed to the CCSDS Router component upon initialization.
+
+Note the example shown in this documentation is used in the unit test of this component so that the reader of this document can see it being used in context. Please refer to the unit test code for more details on how this generator can be used.
+
+\section{Schema}
+
+The following pykwalify schema is used to validate the input YAML model. Model files must be named in the form \textit{optional\_name.assembly\_name.ccsds\_router\_table.yaml} where \textit{optional\_name} is the specific name of this router table and is only necessary if there is more than one CCSDS Router component instance in an assembly. The \textit{assemble\_name} is the assembly which this router table will be used in, and the rest of the model file name must remain as shown. Generally this file is created in the same directory or near to the assembly model file. The schema is commented to show what each of the available YAML keys are and what they accomplish. Even without knowing the specifics of pykwalify schemas, you should be able to gleam some knowledge from the file below.
+
+\yamlcodef{../schemas/ccsds_router_table.yaml}
+
+\section{Example Input}
+
+The following is an example routing table input yaml file. Model files must be named in the form \textit{optional\_name.assembly\_name.ccsds\_router\_table.yaml} where \textit{optional\_name} is the specific name of this router table and is only necessary if there is more than one CCSDS Router component instance in an assembly. The \textit{assemble\_name} is the assembly which this router table will be used in, and the rest of the model file name must remain as shown. Generally this file is created in the same directory or near to the assembly model file. This example adheres to the schema shown in the previous section, and is commented to give clarification.
+
+\yamlcodef{../../test/test_assembly/test_assembly.ccsds_router_table.yaml}
+
+\section{Example Output}
+
+The example input shown in the previous section produces the following Ada output. The \texttt{Router\_Table} variable should be passed into the CCSDS Router component's \texttt{Init} function during assembly initialization.
+
+The main job of the generator in this case was to verify the input YAML router table for validity and then to translate component names into connector output indexes, which the CCSDS Router then uses directly.
+
+\adacodef{../../test/test_assembly/build/src/test_assembly_ccsds_router_table.ads}
+
+\end{document}

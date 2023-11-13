@@ -1,0 +1,47 @@
+abstract project a_bareboard_base extends all "a_adamant.gpr" is
+
+   -- Common compiler switches:
+   package Compiler is
+      for Switches ("Ada") use a_adamant.Compiler'Switches ("Ada") &
+         -- At -O2 and above, null pointer checks get deleted, which means that
+         -- accessing address 0x0 results in a program crash. Since accessing address
+         -- 0x0 is a valid use case of the FSW, we need to NOT delete these null
+         -- pointer checks.
+         ("-fno-delete-null-pointer-checks") &
+         -- We want debug on by default:
+         ("-g3", "-ggdb") &
+         -- Remove unused code and unused data:
+         -- See: https://docs.adacore.com/gnat_ugx-docs/html/gnat_ugx/gnat_ugx/bareboard_topics.html
+         ("-ffunction-sections", "-fdata-sections") &
+         -- Ravenscar is always enforced on the cortex for Adamant:
+         ("-gnatec=" & a_adamant.ADAMANT_DIR & "/redo/targets/configuration_pragmas/ravenscar.adc") &
+         ("-gnatec=" & a_adamant.ADAMANT_DIR & "/redo/targets/configuration_pragmas/sequential_elaboration.adc");
+
+      for Switches ("C") use a_adamant.Compiler'Switches ("C") &
+         -- debug flags
+         ("-g");
+
+      for Switches ("Asm_Cpp") use a_adamant.Compiler'Switches ("Asm_Cpp") &
+         -- debug flags
+         ("-g");
+   end Compiler;
+
+   -- Common binder switches:
+   package Binder is
+      for Switches ("Ada") use a_adamant.Binder'Switches ("Ada") &
+         -- Set default size of secondary stacks to 10k. This will
+         -- be overridden by and Adamant component tasks.
+         ("-D10k");
+   end Binder;
+
+   -- Common linker switches:
+   package Linker is
+      for Switches ("Ada") use a_adamant.Linker'Switches ("Ada") &
+         -- Remove unused code and unused data, and report usage:
+         -- See: https://docs.adacore.com/gnat_ugx-docs/html/gnat_ugx/gnat_ugx/bareboard_topics.html
+         ("-Wl,--gc-sections", "-Wl,--print-memory-usage") & -- use "--print-gc-sections" if you want a list of removed sections
+         -- Set stack size of environment task to 5000 bytes:
+         ("-Wl,--defsym=__stack_size=5000");
+   end Linker;
+
+end a_bareboard_base;

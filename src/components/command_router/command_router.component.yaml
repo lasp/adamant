@@ -1,0 +1,52 @@
+---
+description: |
+  The Command Router component receives incoming commands and routes them to the appropriate component for execution. Commands IDs are registered by components connected to the command router on initialization. These registrations are used to populate a router table (binary tree) which is used to translate incoming Command IDs to their destination component. When a command is received by the Command Router, its ID is looked up in the table, which returns the connector index on which the destination component is attached. The Command Router will then forward the command out of the appropriate index. Event errors are thrown if a Command ID is not found in the table.
+
+  In addition to routing commands the Command Router also receives command responses from the downstream components who execute commands. These responses are used to report data products on the command success and failure counts. Responses can also be forwarded to the sourcing command components, allowing command sources to check command responses or wait until a command response is received before sending a subsequent command.
+
+  The Command Router also has some of its own internal NOOP commands, to which it responds with Events. These commands can be useful for testing system aliveness.
+
+  It is advised to connect one index of the Command_T_Send connectors to the Command Router's own Command_T_Recv_Async connector in order to utilize the NOOP commands to enable self testing of command routing. Likewise, it is advisable to connect the Command Router's Command_Response_T_Send to the Command_Response_T_Recv_Async connector and one index of the Command_Response_T_To_Forward_Send connector to the Command_Response_T_Recv_Async connector in order to fully utilize the component's ability to self test command response forwarding (see the Noop_Response command).
+execution: active
+init:
+  description: This component requires the maximum number of unique commands that it expects to need to route. This number will be used to size the internal router table on the heap. Any attempted command registrations beyond this limit will be reported as an error event and will not be registered.
+  parameters:
+    - name: max_Number_Of_Commands
+      type: Natural
+      description: The maximum number of unique commands that can be registered with the command router component.
+connectors:
+  - description: On this connector the Command Router recieves incoming commands that need to be routed to the correct destination component.
+    type: Command.T
+    kind: recv_async
+    name: Command_T_To_Route_Recv_Async
+  - description: On this connector the Command Router recieves incoming commands that need to be routed to the correct destination component. This connector is synchronous, and thus bypasses the internal queue that the Command_T_To_Route_Recv_Async uses. It should be used by components that need high priority command execution. It should only be called after command registration has occurred, or a race condition is present.
+    type: Command.T
+    kind: recv_sync
+    name: Command_T_To_Route_Recv_Sync
+  - description: This connector has an unconstrained size that is determined by the assembly in which the Command Router is instantiated. Each index of the connector should connect to different destination component that receives commands. The Command Router will route commands destined for each component on the appropriate index of this connector.
+    type: Command.T
+    kind: send
+    count: 0 # size determined by assembly
+  - description: Command registrations are received on this connector during initialization. Command responses from connected components are recieved on this connector during execution.
+    type: Command_Response.T
+    kind: recv_async
+  - description: Command responses received from command executing components are forwarded back to their command sources using this arrayed connector. One index of this connector can be connected in loopback to the Command_Response_T_Recv_Async connector in order to command forwarding self test capabilities (see the Noop_Response command).
+    name: Command_Response_T_To_Forward_Send
+    type: Command_Response.T
+    kind: send
+    count: 0 # size determined by assembly
+  - description: This is the command recieve connector for the Command Router. The NOOP commands sent on this connector will be executed by the command router. This connector will usually be connected in loopback from the Command_T_Send connector in order to provide aliveness test capabilities, or disconnected completely.
+    type: Command.T
+    kind: recv_async
+  - description: This connector is used to register the Command Router's NOOP commands at initialization, and respond to NOOP commands during ececution. It is usually connected in loopback to the Command_Response_T_Recv_Async connector.
+    type: Command_Response.T
+    kind: send
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send
+  - description: Data products are sent out of this connector.
+    type: Data_Product.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get

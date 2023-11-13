@@ -1,0 +1,7 @@
+---
+description: The requirements for the Limiter component are specified below.
+requirements:
+  - text: The component shall be able to receive and queue a generic data type.
+  - text: The component shall send queued data at a configurable periodic rate.
+  - text: The rate at which queued data is sent shall be configurable by command.
+  - text: The rate at which queued data is sent shall be configurable by parameter.

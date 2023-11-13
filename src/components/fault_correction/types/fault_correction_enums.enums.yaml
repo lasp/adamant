@@ -1,0 +1,36 @@
+---
+description: These are enumerations that are used to interact with the Fault Correction component.
+enums:
+  - name: Latching_Type
+    description: This status enumerations provides information on if the fault response is latching or non-latching.
+    literals:
+      - name: Non_Latching
+        value: 0
+        description: The fault response is non-latching, meaning it will run whenever a fault is received.
+      - name: Latching
+        value: 1
+        description: The fault response is latching, meaning it will only run the first time the fault is received, and not again until unlatched via command.
+  - name: Startup_Status_Type
+    description: This status enumerations provides information on the startup status of a fault response.
+    literals:
+      - name: Disabled
+        value: 0
+        description: The fault response is disabled at startup.
+      - name: Enabled
+        value: 1
+        description: The fault response is enabled at startup.
+  - name: Status_Type
+    description: This status enumerations provides the status of a fault response.
+    literals:
+      - name: Disabled
+        value: 0
+        description: The fault response is disabled.
+      - name: Nominal
+        value: 1
+        description: The fault response is enabled and no fault has been detected.
+      - name: Fault_Detected
+        value: 2
+        description: A fault has been detected and a command response has been issued.
+      - name: Fault_Latched
+        value: 3
+        description: A fault has been detected and a command response has been issued. The fualt has been latched, so any more faults received with this ID will not issue another response until the this fault response has been unlatched.

@@ -1,0 +1,47 @@
+---
+description: This is the limiter component. This component receives a generic type of data and queues that data. It then meters the output of the data through a ``send" connector at a commandable rate. The rate is set upon initialization, can be changed by command, or by parameter. The command or parameter connections may be ommitted if one or both of these features are not used. The packet rate is in units of the periodic tick rate that drives the component.
+execution: passive
+with:
+  - Serializer_Types
+generic:
+  description: The limiter is generic in that it can be instantiated to queue and meter the sending out of any type at compile time.
+  parameters:
+    - name: T
+      description: The generic type of data passed in and out of the limiter.
+    - name: Serialized_Length
+      description: A method that returns the serialized length of an item of type T. This is useful for serializing variable length packed types onto the queue.
+      formal_type: "with function Serialized_Length (Src : in T; Num_Bytes_Serialized : out Natural) return Serializer_Types.Serialization_Status;"
+init:
+  description: This initialization function is used to set a threshold for the maximum number of data sends that the component will produce when a tick is received.
+  parameters:
+    - name: Max_Sends_Per_Tick
+      type: Interfaces.Unsigned_16
+      description: The maximum number of sends that this component will produce when a tick is received. The component will stop producing packets if the threshold is met or when the queue is empty, whichever happens first.
+connectors:
+  - description: This is the base tick for the component.
+    type: Tick.T
+    kind: recv_sync
+  - description: The generic asynchronous invokee connector.
+    type: T
+    kind: recv_async
+  - description: The generic invoker connector.
+    type: T
+    kind: send
+  - description: This is the command receive connector. This does not need to be connected if the command for this component will not be used.
+    type: Command.T
+    kind: recv_sync
+  - description: This connector is used to register and respond to the component's commands. This does not need to be connected if the command for this component will not be used.
+    type: Command_Response.T
+    kind: send
+  - description: The parameter update connector. This does not need to be connected if the parameter for this component will not be used.
+    type: Parameter_Update.T
+    kind: modify
+  - description: Data products are sent out of this connector.
+    type: Data_Product.T
+    kind: send
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get

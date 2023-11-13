@@ -1,0 +1,15 @@
+---
+description: A variable sized record.
+with:
+  - Interfaces
+preamble: |
+  type Buffer_Type is array (Natural range 0 .. 9) of Interfaces.Unsigned_8;
+fields:
+  - name: Length
+    type: Interfaces.Unsigned_8
+    format: U8
+  - name: Buffer
+    type: Buffer_Type
+    format: U8x10
+    default: (others => 0)
+    variable_length: Length

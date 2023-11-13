@@ -1,0 +1,13 @@
+---
+description: This component creates Adamant packets whose data is the CCSDS packets sent to it. The main use of this component is to echo a CCSDS stream from uplink back down as downlink.
+execution: passive
+connectors:
+  - description: The CCSDS receive connector.
+    type: Ccsds_Space_Packet.T
+    kind: recv_sync
+  - description: The packet send connector.
+    type: Packet.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get

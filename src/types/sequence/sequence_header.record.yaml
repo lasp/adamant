@@ -1,0 +1,25 @@
+---
+description: The header for a command sequence.
+fields:
+  - name: Crc
+    description: The CRC of the sequence as computed by the ground.
+    type: Crc_16.Crc_16_Type
+    format: U16
+    skip_validation: True
+    byte_image: True
+  - name: Version
+    description: The version of the compiler that the sequence was compiled with.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Category
+    description: The category for this sequence. This field is currently unused by Adamant.
+    type: Interfaces.Unsigned_16
+    format: U16
+  - name: Id
+    description: The sequence identifier.
+    type: Sequence_Types.Sequence_Id
+    format: U16
+  - name: Length
+    description: The length of the sequence data in bytes (including the header).
+    type: Sequence_Types.Sequence_Length_Type
+    format: U16

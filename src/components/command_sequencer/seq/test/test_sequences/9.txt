@@ -1,0 +1,5 @@
+seq 9
+	declare arg1 u32
+	set $arg1 = 50
+	cmd seq_command_args arg1 $arg1 arg2 40
+endseq

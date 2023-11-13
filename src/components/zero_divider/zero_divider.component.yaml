@@ -1,0 +1,28 @@
+---
+description: The purpose of this component is to provide a safe, commandable way to cause the Ada Last Chance Handler to be called. To accomplish this, this component provides a Divide_By_Zero command which divides an integer by zero, which causes an Ada exception to be thrown, which is purposely not handled. The Divide_By_Zero command must be passed a magic number as an argument. If the magic number does not match the number that this component is instantiated with at initialization, then the Divide_By_Zero is not executed. This feature prevents inadvertant execution of this command. This component also supplies the packet definition for the assembly for a Last Chance Handler (LCH) packet that is created by the last chance handler itself (which is not usually implemented as an Adamant component). This provides the ground system the LCH packet definition so it can be parsed and stored. The component does not contain a Packet.T send connector, so will not send out this packet itself. You Last Chance Handler should produce a packet with this packet definition.
+execution: passive
+preamble: |
+  subtype Magic_Number_Type is Interfaces.Unsigned_32 range 2 .. Interfaces.Unsigned_32'Last;
+init:
+  description: The magic number is provided at instantiation.
+  parameters:
+    - name: Magic_Number
+      type: Magic_Number_Type
+      description: Pick a number that must be provided with the Divide_By_Zero command for it to be executed. If any other number is provided, the command is failed and no divide by zero instruction is executed. Note - The values of 0 and 1 are not accepted as magic numbers.
+    - name: Sleep_Before_Divide_Ms
+      type: Natural
+      description: The number of milliseconds to sleep after receiving the command but before performing the divide by zero. This allows time for any events to be written by the component, if desired.
+      default: "1000"
+connectors:
+  - description: The command receive connector
+    type: Command.T
+    kind: recv_sync
+  - description: This connector is used to register and respond to the component's commands.
+    type: Command_Response.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send

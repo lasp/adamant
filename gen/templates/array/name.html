@@ -1,0 +1,32 @@
+{% extends "/base/table.html" %}
+{% block title %}<b>{{ name }}</b> Packed Array : {{ size }} bits{% endblock %}
+{% block head %}
+      <tr>
+          <th scope="col">Type</th>
+          <th scope="col">Range</th>
+          <th scope="col">Element Size (Bits)</th>
+          <th scope="col">Length</th>
+          <th scope="col">Total Size (Bits)</th>
+      </tr>
+{% endblock %}
+{% block body %}
+      <tr>
+        <td style='font-family: "Courier New", Courier, monospace;'>{% if element.type_model %}<a class="record_link" href="../../{{ element.type_model.get_src_dir_from(get_src_dir(full_filename)) }}/build/html/{{ element.type_package.lower() }}.html">{% endif %}{{ element.type }}{% if element.type_model %}</a>{% endif %}</td>
+{% if element.literals %}
+        <td style='font-family: "Courier New", Courier, monospace;'>
+{% for literal in element.literals %}
+         {{ literal.value }} =&gt; {{ literal.name }}</br>
+{% endfor %}
+        </td>
+{% else %}
+{% if element.range_min != None and element.range_max != None %}
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ element.range_min }} to {{ element.range_max }}</td>
+{% else %}
+        <td style='font-family: "Courier New", Courier, monospace;'>-</td>
+{% endif %}
+{% endif %}
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ element.size }}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ length }}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ size }}</td>
+      </tr>
+{% endblock %}

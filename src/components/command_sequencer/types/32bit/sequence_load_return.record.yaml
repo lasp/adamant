@@ -1,0 +1,10 @@
+---
+description: A packed record which holds a sequence load and the return status of that sequence load.
+fields:
+  - name: Load
+    description: The sequence load record.
+    type: Sequence_Load.T
+  - name: Status
+    description: The status of the sequence load operation.
+    type: Command_Sequencer_Enums.Sequence_Load_Status.E
+    format: E8

@@ -1,0 +1,6 @@
+---
+description: Data products for the Queue Monitor component.
+data_products:
+  - name: Packet_Period
+    description: The current packet period.
+    type: Packed_U16.T

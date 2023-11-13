@@ -1,0 +1,14 @@
+---
+description: A packed record which holds data related to an invalid command packet length.
+fields:
+  - name: Ccsds_Header
+    description: The packet identifier
+    type: Ccsds_Primary_Header.T
+  - name: Length
+    description: The packet length
+    type: Integer
+    format: U32
+  - name: Length_Bound
+    description: The packet length bound that the length failed to meet.
+    type: Integer
+    format: U32

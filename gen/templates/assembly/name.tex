@@ -1,0 +1,83 @@
+\input{common_packages.tex}
+
+\begin{document}
+
+\title{\textbf{\VAR{prettyname|e}} \\
+\large\textit{Assembly Design Document}}
+\date{}
+\maketitle
+
+\section{Description}
+\input{build/tex/\VAR{lowercasename}_description.tex}
+
+\section{Design}
+
+\subsection{At a Glance}
+\input{build/tex/\VAR{lowercasename}_stats.tex}
+
+\subsection{Components}
+\input{build/tex/\VAR{lowercasename}_components.tex}
+
+\subsection{Views}
+\input{build/tex/\VAR{lowercasename}_views.tex}
+
+\subsection{Task Priorities}
+\input{build/tex/\VAR{lowercasename}_priorities.tex}
+
+%- if commands
+\subsection{Commands}
+
+\input{build/tex/\VAR{lowercasename}_commands.tex}
+
+%- endif
+%- if parameters 
+\subsection{Parameters}
+
+\input{build/tex/\VAR{lowercasename}_parameters.tex}
+
+%- endif
+%- if events 
+\subsection{Events}
+
+\input{build/tex/\VAR{lowercasename}_events.tex}
+
+%- endif
+%- if data_products 
+\subsection{Data Products}
+
+\input{build/tex/\VAR{lowercasename}_data_products.tex}
+
+%- endif
+%- if data_dependencies
+\subsection{Data Dependencies}
+
+\input{build/tex/\VAR{lowercasename}_data_dependencies.tex}
+
+%- endif
+%- if packets 
+\subsection{Packets}
+
+\input{build/tex/\VAR{lowercasename}_packets.tex}
+
+%- endif
+%- if faults 
+\subsection{Faults}
+
+\input{build/tex/\VAR{lowercasename}_faults.tex}
+
+%- endif
+\section{Appendix}
+\subsection{Connections}
+\input{build/tex/\VAR{lowercasename}_connections.tex}
+
+\subsection{Packed Types}
+
+\input{build/tex/\VAR{lowercasename}_types.tex}
+
+%- if enums
+\subsection{Enumerations}
+
+\input{build/tex/\VAR{lowercasename}_enums.tex}
+
+%- endif
+\end{document}

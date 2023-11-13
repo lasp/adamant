@@ -1,0 +1,10 @@
+---
+description: A packed record which holds information for an unexpected command response due to unexpected command id.
+fields:
+  - name: Response
+    description: The command response reporting the failure.
+    type: Command_Response.T
+  - name: Last_Sent_Command_Id
+    description: The ID of the command we were expecting to receive a response for.
+    type: Command_Types.Command_Id
+    format: U16

@@ -1,0 +1,152 @@
+Below is a list of useful parameters and statistics that give a quick look into the makeup of the assembly.
+
+\begin{itemize}
+
+  \item \textbf{Number of Components} - 
+%- if components 
+    \VAR{components|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Component Types} - 
+    %- if component_types_dict.keys()
+    \VAR{component_types_dict.keys()|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Active Components} - 
+%- if component_kind_dict['active']
+    \VAR{component_kind_dict['active']|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Passive Components} - 
+%- if component_kind_dict['passive']
+    \VAR{component_kind_dict['passive']|length}
+%- else
+    \textit{None}
+%- endif
+
+   \item \textbf{Number of Components with Queue} - 
+%- if component_kind_dict['queued']
+    \VAR{component_kind_dict['queued']|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Components without Queue} - 
+%- if component_kind_dict['simple']
+    \VAR{component_kind_dict['simple']|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Components with Events} - 
+%- if component_kind_dict['events']
+    \VAR{component_kind_dict['events']|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Components with Data Products} - 
+%- if component_kind_dict['data_products']
+    \VAR{component_kind_dict['data_products']|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Components with Data Dependencies} - 
+%- if component_kind_dict['data_dependencies']
+    \VAR{component_kind_dict['data_dependencies']|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Components with Packets} - 
+%- if component_kind_dict['packets']
+    \VAR{component_kind_dict['packets']|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Components with Commands} - 
+%- if component_kind_dict['commands']
+    \VAR{component_kind_dict['commands']|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Components with Parameters} - 
+%- if component_kind_dict['parameters']
+    \VAR{component_kind_dict['parameters']|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Components with Faults} - 
+%- if component_kind_dict['faults']
+    \VAR{component_kind_dict['faults']|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Connections} - 
+%- if connections 
+    \VAR{connections|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Events} - 
+%- if events 
+    \VAR{events|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Data Products} - 
+%- if data_products 
+    \VAR{data_products|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Data Dependencies} - 
+%- if data_dependencies
+    \VAR{data_dependencies|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Packets} - 
+%- if packets 
+    \VAR{packets|length}
+%- else
+    \textit{None}
+%- endif
+    
+  \item \textbf{Number of Commands} - 
+%- if commands 
+    \VAR{commands|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Parameters} - 
+%- if parameters 
+    \VAR{parameters|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Faults} - 
+%- if faults 
+    \VAR{faults|length}
+%- else
+    \textit{None}
+%- endif
+
+\end{itemize}

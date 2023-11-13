@@ -1,0 +1,23 @@
+---
+description: A representation of the tlmInfo struct from seq source.
+fields:
+  - name: Id
+    description: ID of the telemetry item.
+    type: Interfaces.Unsigned_16
+    format: U16
+  - name: Offset
+    description: Offset of the telemetry item (in bits).
+    type: Interfaces.Unsigned_16
+    format: U16
+  - name: Size
+    description: Size of the telemetry item (in bits).
+    type: Basic_Types.Positive_16
+    format: U16
+  - name: Tlm_Type
+    description: The data format type of the telemetry to fetch, includes endianness details.
+    type: Seq_Enums.Seq_Data_Format.E
+    format: E8
+  - name: New_Value_Required
+    description: Flag for if this telemetry item is required to be
+    type: Boolean
+    format: E8

@@ -1,0 +1,48 @@
+---
+# This schema describes the yaml format for a register_map.
+type: map
+mapping:
+  # Description of the register_map.
+  description:
+    type: str
+    required: False
+  # Any useful handcode to include in the .ads file can be included here.
+  # You can think of this as inline Ada, which might be useful for declaring
+  # custom enum types and the like.
+  preamble:
+    type: str
+    required: False
+  # Many "with" dependencies are automatically deduced and included by
+  # the generator. If you want to manually add a "with" statement, you
+  # can list the names of the packages here.
+  with:
+    seq:
+      - type: str
+    required: False
+  # List of items to include in the register map.
+  items:
+    seq:
+      - type: map
+        mapping:
+          # The address of an item. Items must not overlap or a
+          # modeling error will result.
+          address:
+            type: int
+            required: True
+          # Name of the item.
+          name:
+            type: str
+            required: True
+          # Description of the item.
+          description:
+            type: str
+            required: False
+          # The type of the item. Using a packed record or packed
+          # array type is recommended here.
+          type:
+            type: str
+            required: True
+    # A register_map must have at least one item.
+    range:
+      min: 1
+    required: True

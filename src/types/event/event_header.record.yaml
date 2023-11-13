@@ -1,0 +1,14 @@
+---
+description: Generic event packet for holding arbitrary events
+fields:
+  - name: Time
+    description: The timestamp for the event.
+    type: Sys_Time.T
+  - name: Id
+    description: The event identifier
+    type: Event_Types.Event_Id
+    format: U16
+  - name: Param_Buffer_Length
+    description: The number of bytes used in the param buffer
+    type: Event_Types.Parameter_Buffer_Length_Type
+    format: U8

@@ -1,0 +1,6 @@
+---
+description: Data products for the Last Chance Manager component.
+data_products:
+  - name: Lch_Stack_Trace_Info
+    description: Information on the current stack trace stored in the last chance handler memory store.
+    type: Packed_Stack_Trace_Info.T

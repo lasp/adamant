@@ -1,0 +1,44 @@
+---
+description: |
+  This component routes CCSDS packets to output connectors based on a static table matching APID to the output connector index. Table lookup is done by binary searching against APID. The look up returns a list of indexes which to route that packet. This component can receive packets either synchronously, or asynchronously and can be made either active or passive depending on the desired use case. If a packet is received with an APID not found in the routing table then it is forwarded out a seperate CCSDS connector, if it is connected. In addition to routing, this component can be configured to check the sequence counts on incoming packets, report discontiguous sequence counts, and drop duplicates.
+
+  Note, a race condition exists if packets of the same APID come in simultaneously on both the sync and async CCSDS connectors, and sequence counts are being checked, where the sequence count checking might get corrupted. This use case is not foreseen as actually happening, so complicating the component with protected objects seems unnecessary.
+
+  Note that an autocoder exists to ease the writing of the CCSDS Router input router table. See documentation for this autocoder in the local gen/doc subdirectory.
+execution: either
+with:
+  - Ccsds_Router_Types
+init:
+  description: This component requires a routing table which maps CCSDS packet APIDs to a list of output connector indexes. This is provided as part of the initialization function.
+  parameters:
+    - name: Table
+      type: Ccsds_Router_Types.Router_Table_Entry_Array
+      description: An array of router table entries which include routing and sequence count checking information.
+    - name: Report_Unrecognized_APIDs
+      type: Boolean
+      default: "True"
+      description: Should the component report unrecognized APIDs by sending out an error packet and event, True, or should it not report them at all, False.
+connectors:
+  - description: The synchronous ccsds packet receive connector.
+    type: Ccsds_Space_Packet.T
+    kind: recv_sync
+  - description: The asynchronous ccsds packet receive connector.
+    type: Ccsds_Space_Packet.T
+    kind: recv_async
+  - description: The ccsds packet send connector.
+    type: Ccsds_Space_Packet.T
+    kind: send
+    count: 0 # variable size arrayed output
+  - description: Ccsds packets not found in the routing table are forwarded out this connector if it is connected.
+    name: Unrecognized_Ccsds_Space_Packet_T_Send
+    type: Ccsds_Space_Packet.T
+    kind: send
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send
+  - description: Error packets are sent out of this connector.
+    type: Packet.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get

@@ -1,0 +1,6 @@
+---
+description: The requirements for the CPU Monitor component are specified below.
+requirements:
+  - text: The component shall produce data reporting the CPU usage of every active component in an assembly.
+  - text: The component shall produce data reporting the CPU usage of every interrupt handler in an assembly.
+  - text: The component shall produce CPU usage data at a periodic rate that is configurable by command.

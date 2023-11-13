@@ -1,0 +1,9 @@
+---
+description: The requirements for the Precision Time Protocol Master are specified below.
+requirements:
+  - text: The component shall send the Sync and Follow-Up PTP time messages according to the PTP protocol.
+  - text: The component shall send a Delay-Response PTP time message in response to a received Delay-Request message according to the PTP protocol.
+  - text: The component shall conduct the PTP transactions at a compile-time configurable rate.
+  - text: The component shall send a time PTP Sync message one time on command.
+  - text: The component shall produce data products relating the number times the Sync, Follow-Up, and Delay-Response messages have been sent since startup.
+  - text: The component shall produce a data product relating the number times the Delay-Request message have been received since startup.

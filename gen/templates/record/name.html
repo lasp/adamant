@@ -1,0 +1,52 @@
+{% extends "/base/table.html" %}
+{% block title %}<b>{{ name }}</b> Packed Record : {{ size }} bits{% if variable_length %} <i>(maximum)</i>{% endif %}{% endblock %}
+{% block head %}
+      <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Type</th>
+          <th scope="col">Range</th>
+          <th scope="col">Size (Bits)</th>
+          <th scope="col">Start Bit</th>
+          <th scope="col">End Bit</th>
+{% if variable_length %}
+          <th scope="col">Variable Length</th>
+{% endif %}
+          <th scope="col">Description</th>
+      </tr>
+{% endblock %}
+{% block body %}
+{% for field in fields.values() %}
+      <tr>
+        <td style='font-family: "Courier New", Courier, monospace;'><b>{{ field.name }}</b></td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{% if field.type_model %}<a class="record_link" href="../../{{ field.type_model.get_src_dir_from(get_src_dir(full_filename)) }}/build/html/{{ field.type_package.lower() }}.html">{% endif %}{{ field.type }}{% if field.type_model %}</a>{% endif %}</td>
+{% if field.literals %}
+        <td style='font-family: "Courier New", Courier, monospace;'>
+{% for literal in field.literals %}
+         {{ literal.value }} =&gt; {{ literal.name }}</br>
+{% endfor %}
+        </td>
+{% else %}
+{% if field.range_min != None and field.range_max != None %}
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ field.range_min }} to {{ field.range_max }}</td>
+{% else %}
+        <td style='font-family: "Courier New", Courier, monospace;'>-</td>
+{% endif %}
+{% endif %}
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ field.size }}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ field.start_bit }}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ field.end_bit }}</td>
+{% if variable_length %}
+{% if field.variable_length %}
+{% if field.variable_length_record %}
+        <td style='font-family: "Courier New", Courier, monospace;'><a class="record_link" href="../../{{ field.variable_length_record.get_src_dir_from(get_src_dir(full_filename)) }}/build/html/{{ field.variable_length_record.name.lower() }}.html">{{ field.variable_length }}</a></td>
+{% else %}
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ field.variable_length_record }}</td>
+{% endif %}
+{% else %}
+        <td style='font-family: "Courier New", Courier, monospace;'>-</td>
+{% endif %}
+{% endif %}
+        <td>{% if field.description %}{{ printMultiLine(field.description, '') }}{% endif %}</td>
+      </tr>
+{% endfor %}
+{% endblock %}

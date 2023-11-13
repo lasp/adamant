@@ -1,0 +1,10 @@
+seq call_06
+  ; Simple sequence that just sends a command, and then calls a subsequence, then sends another command.
+  cmd Component_A.Command_2 Seconds 22 Subseconds 88
+
+  ; Call sequence 7 with arguments 10 and 9
+  call subseq_7 10 9
+
+  ; Send a command.
+  cmd Component_A.Command_2 Seconds 7 Subseconds 12
+endseq

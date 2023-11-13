@@ -1,0 +1,6 @@
+---
+description: Data products for the memory dumper component.
+data_products:
+  - name: Crc_Report
+    description: The last computed CRC by the memory dumper component.
+    type: Memory_Region_Crc.T

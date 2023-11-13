@@ -1,0 +1,20 @@
+---
+description: Contains information to extract a poly type from a data product.
+with:
+  - Basic_Types
+preamble:
+  subtype Data_Product_Bit_Offset_Type is Natural range Natural'First .. Data_Product_Types.Data_Product_Buffer_Type'Length * Basic_Types.Byte'Object_Size;
+  subtype Poly_Type_Size_Type is Positive range Positive'First .. 32;
+fields:
+  - name: Id
+    description: ID of the data product.
+    type: Data_Product_Types.Data_Product_Id
+    format: U16
+  - name: Offset
+    description: Offset of the data product item (in bits).
+    type: Data_Product_Bit_Offset_Type
+    format: U16
+  - name: Size
+    description: Size of the data product item (in bits).
+    type: Poly_Type_Size_Type
+    format: U8

@@ -1,0 +1,12 @@
+seq 13
+  ; Test print statements 
+  declare var u32
+  set $var = 1234
+  
+  ; Send some print statements:
+  print info "This is my informational statement"
+  print error "Bad thing is happening!"
+  print debug "The value of 2 + 2 is 4"
+  print critical "Burn it all down"
+  print info $var
+endseq

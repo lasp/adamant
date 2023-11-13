@@ -1,0 +1,12 @@
+---
+description: The requirements for the Parameter Store component are specified below.
+requirements:
+  - text: The component shall manage a region of memory for parameter storage.
+  - text: The component shall update the memory region through a parameter table upload.
+  - text: The component shall return the memory region through a parameter table request.
+  - text: The component shall produce a packet reflecting the current values stored in the memory region.
+  - text: The component shall produce a parameter table packet upon command.
+  - text: The component shall produce a parameter table packet whenever a new table has been uploaded.
+  - text: The component shall reject parameter table requests to a memory region with an invalid length.
+  - text: The component shall reject parameter table updates from a memory region with an invalid length.
+  - text: The component shall reject parameter table updates from a memory region with an invalid CRC.

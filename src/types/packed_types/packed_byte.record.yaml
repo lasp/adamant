@@ -1,0 +1,7 @@
+---
+description: Single component record for holding a byte
+fields:
+  - name: Value
+    description: The byte
+    type: Basic_Types.Byte
+    format: U8

@@ -1,0 +1,5 @@
+seq busy_11
+  cmd Component_A.Command_2 Seconds 22 Subseconds 88
+  spawn on 0 commands_01; Engine 0 is currently busy running this sequence!
+  cmd Component_A.Command_2 Seconds 33 Subseconds 99
+endseq

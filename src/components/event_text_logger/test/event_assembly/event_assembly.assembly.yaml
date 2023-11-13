@@ -1,0 +1,23 @@
+---
+description: This is an assembly for testing the text_to_events component.
+with:
+  - Event_Assembly_Event_To_Text
+########################################
+components:
+########################################
+  - type: Event_Producer
+    execution: passive
+  - type: Event_Text_Logger
+    execution: active
+    priority: 10
+    stack_size: 50000
+    secondary_stack_size: 3000
+    discriminant:
+      - "Event_To_Text => Event_Assembly_Event_To_Text.Event_To_Text'Access"
+    init_base:
+      - "Queue_Size => 1024"
+connections:
+  - from_component: Event_Producer_Instance
+    from_connector: Event_T_Send
+    to_component: Event_Text_Logger_Instance
+    to_connector: Event_T_Recv_Async

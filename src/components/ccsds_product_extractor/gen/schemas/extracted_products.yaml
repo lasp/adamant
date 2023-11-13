@@ -1,0 +1,42 @@
+---
+# This schema describes the yaml format for a product extractor list.
+type: map
+mapping:
+  # Description of the data products from all packets to be extracted.
+  description:
+    type: str
+    required: False
+  # List of data products to include in the suite.
+  data_products:
+    seq:
+      - type: map
+        mapping:
+          # Name of the product.
+          name:
+            type: str
+            required: True
+          # Description of the data_products item.
+          description:
+            type: str
+            required: False
+          # Type of the product.
+          type:
+            type: str
+            required: True
+          # Apid of the product in the associated packet.
+          apid:
+            type: int
+            required: True
+          # Offset of the product in the associated packet.
+          offset:
+            type: int
+            required: True
+          # Time format of the packet.
+          time:
+            type: str
+            enum: ['current_time', 'packet_time']
+            required: True
+    # A data product extractor must have at least one product to extract.
+    range:
+      min: 1
+    required: True

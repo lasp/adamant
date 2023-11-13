@@ -1,0 +1,41 @@
+---
+description: |
+  This active component receives memory pointer information on an asynchronous queue. It then reads the data that these pointers reference into packets, producing multiple maximum sized packets, if necessary, to packetize the entire memory region. Note that it does the packetization process on its own task. The priority of this task can be tuned by the user. Usually, this component will be made low priority, so packetization can happen in the background while nothing more important is running.
+execution: active
+init:
+  description: This initialization function is used to set a threshold for the maximum number of packets that the component will produce in a single time period. A time period is measured in an integer number of seconds. The component also needs to keep track of the sequence counts for each packet ID that is receives. To do this, it needs to allocate internal memory to keep track of the last sequence count for each packet. A maximum number of unique packet ids is provided in this function to allocate the necessary memory to keep track of this information.
+  parameters:
+    - name: Max_Packets_Per_Time_Period
+      type: Natural
+      description: The maximum number of packets that this component will produce in a single second. The component will stop producing packets if the threshold is met, until the end of a second period has elapsed.
+    - name: Time_Period_In_Seconds
+      type: Positive
+      default: "1"
+      description: The time period in seconds over which the measure the number of packets produced.
+    - name: Max_Packet_Ids
+      type: Positive
+      default: "10"
+      description: The maximum number of unique packet ids that this component is expected to receive during operations. This value is used to allocate a small amount of memory at initialization to keep track of the sequence count for each produced packet. If this memory becomes all used up, any new unique packet ids received will trigger an events and will be emitted with a sequence count of zero. This misconfiguration should easily be detectable during test.
+connectors:
+  - description: Send a packet of data.
+    type: Packet.T
+    kind: send
+  - description: A memory dump pointer and id queued up for packetization on this connector.
+    name: Memory_Dump_Recv_Async
+    type: Memory_Packetizer_Types.Memory_Dump
+    kind: recv_async
+  - description: This is the command receive connector.
+    type: Command.T
+    kind: recv_async
+  - description: This connector is used to register and respond to the component's commands.
+    type: Command_Response.T
+    kind: send
+  - description: Data products are sent out of this connector.
+    type: Data_Product.T
+    kind: send
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get

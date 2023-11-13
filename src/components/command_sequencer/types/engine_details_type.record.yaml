@@ -1,0 +1,39 @@
+---
+description: A packed record which holds the detailed state for a particular sequence engine.
+fields:
+  - name: Engine_Id
+    description: The sequence engine identifier.
+    type: Seq_Types.Sequence_Engine_Id
+    format: U8
+  - name: Source_Id
+    description: The command source identifier
+    type: Command_Types.Command_Source_Id
+    format: U16
+  - name: Engine_State
+    description: The sequence engine state.
+    type: Seq_Enums.Seq_Engine_State.E
+    format: E8
+  - name: Last_Command_Id_Sent
+    description: The last command ID sent.
+    type: Command_Types.Command_Id
+    format: U16
+  - name: Engine_Command_Send_Counter
+    description: The number of commands the engine has sent since startup.
+    type: Interfaces.Unsigned_16
+    format: U16
+  - name: Engine_Command_Error_Counter
+    description: The number of commands the engine has sent that have not executed properly since startup.
+    type: Interfaces.Unsigned_16
+    format: U16
+  - name: Sequence_Error_Code
+    description: The error code of the last encountered sequence error.
+    type: Seq_Enums.Seq_Error.E
+    format: E8
+  - name: Wakeup_Time
+    description: The absolute time (in seconds) of the next wake up if the component is in a relative or absolute wait state.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Stack_Level
+    description: How deep is the current stack usage? This reports the stack level of the currently running sequence.
+    type: Seq_Types.Max_Seq_Num
+    format: U8

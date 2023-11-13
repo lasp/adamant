@@ -1,0 +1,12 @@
+---
+events:
+  - name: Last_Chance_Handler_Called
+    description: The component detected that the LCH was called by looking at the data in nonvolatile memory. The lowest level address of the stack trace is reported.
+    param_type: Packed_Stack_Trace_Info.T
+  - name: Dumped_Last_Chance_Handler_Region
+    description: The component dumped the last chance handler memory region into a packet for downlink.
+  - name: Cleared_Last_Chance_Handler_Region
+    description: The component cleared the last chance handler memory region by writing all zeros to it.
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T

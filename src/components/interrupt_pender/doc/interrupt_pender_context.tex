@@ -1,0 +1,12 @@
+The Interrupt Pender has two connectors, one for returning a user defined (generic) data type that is filled in by the interrupt handler, and another for timestamping when the interrupt occurs. The type of the generic \texttt{Wait\_On\_Interrupt\_Data\_Type\_Return} connector is determined by what data needs to be collected in the interrupt, and what data needs to be processed after an interrupt occurs. 
+
+The following diagram shows an example of how the Interrupt Pender component might operate in the context of an assembly.
+
+\begin{figure}[H]
+  \includegraphics[width=0.5\textwidth,center]{assembly/build/eps/context_reversed.eps}
+  \caption{Example usage of the Interrupt Pender in an assembly, blocking a periodic task from executing until an interrupt is received.}
+\end{figure}
+
+The Interrupt Pender is attached to an active component that should be executed periodically. The Periodic Component blocks when invoking the \texttt{Wait\_On\_Interrupt\_Data\_Type\_Return} and is released when the Interrupt Pender receives an interrupt. In this example a \texttt{Tick.T} record is sent between the component. However, since the type of this connector is a user-defined generic, it can be instantiated to be any type. When the Periodic Component finishes its execution cycle, it will call \texttt{Wait\_On\_Interrupt\_Data\_Type\_Return} again, blocking until the next interrupt.
+
+This use of the Interrupt Pender is ideal for this kind of triggering of periodic execution. Note that if an interrupt is received while the Periodic Component is still executing, then the next time that the Periodic Component calls \texttt{Wait\_On\_Interrupt\_Data\_Type\_Return} it will not block, and instead will immediately receive the generic data from that interrupt. If two or more interrupts are received while the Periodic Component is still executing, then all interrupts except the last will be effectively ignored (dropped). To avoid dropping interrupts in this situation, consider using the Interrupt Servicer component with an asynchronous connection (see its documentation).

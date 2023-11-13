@@ -1,0 +1,5 @@
+---
+description: These are the commands for the component.
+commands:
+  - name: Reset_Count
+    description: This command resets the internal count.

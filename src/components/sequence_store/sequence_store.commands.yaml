@@ -1,0 +1,16 @@
+---
+description: These are the commands for the Parameter Store component.
+commands:
+  - name: Activate_Slot
+    description: Activate a sequence slot so that its contents can be fetched.
+    arg_type: Packed_Slot_Number.T
+  - name: Deactivate_Slot
+    description: Deactive a sequence slot so that its contents can no longer be fetched.
+    arg_type: Packed_Slot_Number.T
+  - name: Check_Slot
+    description: Check the CRC of a sequence in a particular slot to see if it matches the CRC found in the header.
+    arg_type: Packed_Slot_Number.T
+  - name: Check_All_Slots
+    description: Check the CRC of sequences in all sequence store slots to see if they match the CRCs found in their headers.
+  - name: Dump_Summary
+    description: Produce a packet with the currently storage slot summary information.

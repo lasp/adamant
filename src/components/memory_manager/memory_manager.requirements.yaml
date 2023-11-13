@@ -1,0 +1,12 @@
+---
+description: The requirements for the Memory Manager component are specified below.
+requirements:
+  - text: The component shall manage access to a single contiguous memory region specified during initialization.
+  - text: The component shall ensure that only one component has access to the memory region at any given time.
+  - text: The component shall include a command to dump parts or all of the memory region.
+  - text: The component shall include a command to CRC parts or all of the memory region.
+  - text: The component shall include a command to write to the memory region.
+  - text: The component shall report the last calculated CRC as a data product.
+  - text: The component shall report the Available/In Use state of the memory as a data product.
+  - text: The component shall include a command to free the memory region for access even if the memory region is currently in use.
+

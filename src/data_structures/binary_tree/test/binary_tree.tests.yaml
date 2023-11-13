@@ -1,0 +1,7 @@
+---
+description: This is a unit test suite for the generic binary tree object.
+tests:
+  - name: Test_Tree
+    description: This unit test tests adding and searching for elements in a binary tree.
+  - name: Test_Tree_Removal
+    description: This unit test tests adding, removing, and searching for elements in a binary tree.

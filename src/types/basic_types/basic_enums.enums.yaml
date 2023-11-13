@@ -1,0 +1,21 @@
+---
+description: These are basic enumerations that are used in Adamant.
+enums:
+  - name: Enable_Disable_Type
+    description: This enumeration includes enable and disable state.
+    literals:
+      - name: Disabled
+        value: 0
+        description: The state is disabled.
+      - name: Enabled
+        value: 1
+        description: The state is enabled.
+  - name: On_Off_Type
+    description: This enumeration includes on and off state.
+    literals:
+      - name: Off
+        value: 0
+        description: The state is off.
+      - name: On
+        value: 1
+        description: The state is on.

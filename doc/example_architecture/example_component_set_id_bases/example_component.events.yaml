@@ -1,0 +1,5 @@
+---
+events:
+  - name: Command_Received
+    description: A command was received by the command router to be routed.
+    param_type: Command_Header.T

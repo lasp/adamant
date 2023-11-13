@@ -1,0 +1,10 @@
+---
+description: The requirements for the Logger component are specified below.
+requirements:
+  - text: The component shall store incoming data of a generic type into a memory buffer.
+  - text: The component shall be enabled or disabled via command.
+    description: The enabled state allows incoming data to be stored into the memory buffer. The disabled state ignores all incoming data.
+  - text: The default state of the component should be disabled upon initialization.
+    description: The disabled state ignores all incoming data, instead of saving it.
+  - text: The component shall be able to dump its memory contents upon command.
+  - text: The component shall publish a data product that includes its enabled/disabled status.

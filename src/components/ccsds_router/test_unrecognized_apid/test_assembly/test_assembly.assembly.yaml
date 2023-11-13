@@ -1,0 +1,53 @@
+---
+description: This is an assembly for testing the CCSDS Router component.
+with:
+  - Test_Assembly_Ccsds_Router_Table
+########################################
+components:
+########################################
+  - type: Test_Component
+    name: Component_A
+    execution: passive
+  - type: Test_Component
+    name: Component_B
+    execution: passive
+  - type: Test_Component
+    name: Component_C
+    execution: passive
+  - type: Test_Component
+    name: Component_D
+    execution: passive
+  - type: Ccsds_Router
+    execution: passive
+    init_base:
+      - "queue_Size => 0"
+      - "ccsds_Space_Packet_T_Send_Count => 6"
+    init:
+      - "table => Test_Assembly_Ccsds_Router_Table.Router_Table"
+connections:
+  - from_component: Ccsds_Router_Instance
+    from_connector: Ccsds_Space_Packet_T_Send
+    from_index: 1
+    to_component: Component_A
+    to_connector: Ccsds_Space_Packet_T_Recv_Sync
+  - from_component: Ccsds_Router_Instance
+    from_connector: Ccsds_Space_Packet_T_Send
+    from_index: 2
+    to_component: Component_B
+    to_connector: Ccsds_Space_Packet_T_Recv_Sync
+  - from_component: Ccsds_Router_Instance
+    from_connector: Ccsds_Space_Packet_T_Send
+    from_index: 3
+    to_component: Component_C
+    to_connector: Ccsds_Space_Packet_T_Recv_Sync
+  # Provide two connections to D.
+  - from_component: Ccsds_Router_Instance
+    from_connector: Ccsds_Space_Packet_T_Send
+    from_index: 4
+    to_component: Component_D
+    to_connector: Ccsds_Space_Packet_T_Recv_Sync
+  - from_component: Ccsds_Router_Instance
+    from_connector: Ccsds_Space_Packet_T_Send
+    from_index: 5
+    to_component: Component_D
+    to_connector: Ccsds_Space_Packet_T_Recv_Sync_2

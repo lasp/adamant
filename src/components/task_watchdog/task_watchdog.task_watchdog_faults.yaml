@@ -1,0 +1,9 @@
+---
+description: Faults for the Task Watchdog component
+faults:
+  - name: Dummy_Fault
+    description: Dummy fault which will be deleted and filled back in from the watchdog list
+    param_type: Packed_U16.T
+    id: 1 # We define a fault ID here, since this component will use statically defined global
+          # fault IDs. This fault will be deleted and replaced with real faults from the
+          # watchdog list.

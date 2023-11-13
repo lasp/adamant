@@ -1,0 +1,14 @@
+---
+description: This record contains the definition for the format of the event for this component that contains up to 10 event IDs of those that were limited.
+fields:
+  - name: Num_Events_Limited
+    description: The number of events limited since last issuing the event.
+    type: Interfaces.Unsigned_16
+    format: U16
+  - name: Num_Event_Ids
+    description: The number of event IDs contained in the event that indicate that event was limited.
+    type: Interfaces.Unsigned_8
+    format: U8
+  - name: Event_Id_Limited_Array
+    description: The Array that list the event IDs that were limited since the last event message.
+    type: Event_Id_Array.T

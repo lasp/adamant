@@ -1,0 +1,5 @@
+/alire/
+.git
+.unison*
+**/build
+**/.tar

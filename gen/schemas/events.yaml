@@ -1,0 +1,31 @@
+---
+# This schema describes the yaml format for an event suite.
+type: map
+mapping:
+  # Description of the event suite.
+  description:
+    type: str
+    required: False
+  # List of events to include in the suite.
+  events:
+    seq:
+      - type: map
+        mapping:
+          # Name of the event.
+          name:
+            type: str
+            required: True
+          # Description of the event.
+          description:
+            type: str
+            required: False
+          # If the event contains parameters, provide a single Ada type
+          # that contains all of the parameters. Using a packed record or packed
+          # array type is recommended here.
+          param_type:
+            type: str
+            required: False
+    # An event suite must have at least one event.
+    range:
+      min: 1
+    required: True

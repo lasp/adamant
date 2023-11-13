@@ -1,0 +1,31 @@
+seq 4
+	argument arg1 u32
+	argument arg2 u32
+	argument arg3 u32
+
+	declare local1 u32
+	declare local2 u32
+	
+	set $local1 = 20
+	set $local2 = 30
+
+	if $arg1 == 10
+		cmd seq_noop
+	endif
+	
+	if $arg2 == 11
+		cmd seq_noop
+	endif
+
+	if $arg3 == 12
+		cmd seq_noop
+	endif
+
+	if $local1 == 20
+		cmd seq_noop
+	endif
+
+	if $local2 == 30
+		cmd seq_noop
+	endif
+endseq

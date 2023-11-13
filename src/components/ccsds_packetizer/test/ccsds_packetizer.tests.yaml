@@ -1,0 +1,9 @@
+---
+description: This is a unit test suite for the CCSDS Packetizer component
+tests:
+  - name: Test_Nominal_Packetization
+    description: This unit test excersizes the nominal behavior of the CCSDS Packetizer, checking all emitted CCSDS packets for correctness.
+  - name: Test_Max_Size_Packetization
+    description: This unit test excersizes the packetization of a maximum sized Adamant packet into a CCSDS packet, which should succeed without issue.
+  - name: Test_Min_Size_Packetization
+    description: This unit test excersizes the packetization of a minimum sized Adamant packet into a CCSDS packet, which should succeed without issue.

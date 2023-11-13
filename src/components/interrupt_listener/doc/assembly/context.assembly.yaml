@@ -1,0 +1,19 @@
+---
+description: This is an assembly for creating a context diagram.
+components:
+  - type: Main_Loop
+    priority: 1
+    stack_size: 2000
+    secondary_stack_size: 2000
+  - type: Interrupt_Listener
+    generic_types:
+      - "Interrupt_Data_Type => Interrupt_Count.T"
+    discriminant:
+      - "interrupt_Priority => System.Interrupt_Priority'Last"
+      - "interrupt_Id => Ada.Interrupts.Names.SIGUSR1"
+      - "custom_Interrupt_Procedure => Tick_Interrupt_Handler.Handler'Access"
+connections:
+  - from_component: Main_Loop_Instance
+    from_connector: Interrupt_Count_T_Get
+    to_component: Interrupt_Listener_Instance
+    to_connector: Interrupt_Data_Type_Return

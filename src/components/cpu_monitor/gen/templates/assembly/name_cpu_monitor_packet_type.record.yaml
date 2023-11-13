@@ -1,0 +1,46 @@
+---
+description: This is the autocoded packet type for the CPU monitor component. It contains CPU utilization information for every task in the assembly.
+fields:
+{% if task_list or interrupt_list %}
+{% for task in task_list %}
+  - name: {{ task.component_name }}_{{ task.name }}_Usage_1
+    description: The period one CPU utilization percentage for the {{ task.component_name }}.{{ task.name }} task.
+    type: Basic_Types.Byte
+    format: U8
+  - name: {{ task.component_name }}_{{ task.name }}_Usage_2
+    description: The period two CPU utilization percentage for the {{ task.component_name }}.{{ task.name }} task.
+    type: Basic_Types.Byte
+    format: U8
+  - name: {{ task.component_name }}_{{ task.name }}_Usage_3
+    description: The period three CPU utilization percentage for the {{ task.component_name }}.{{ task.name }} task.
+    type: Basic_Types.Byte
+    format: U8
+{% endfor %}
+{% for interrupt in interrupt_list %}
+  - name: {{ interrupt.component_name }}_Usage_1
+    description: The period one CPU utilization percentage for the {{ interrupt.component_name }} interrupt.
+    type: Basic_Types.Byte
+    format: U8
+  - name: {{ interrupt.component_name }}_Usage_2
+    description: The period two CPU utilization percentage for the {{ interrupt.component_name }} interrupt.
+    type: Basic_Types.Byte
+    format: U8
+  - name: {{ interrupt.component_name }}_Usage_3
+    description: The period three CPU utilization percentage for the {{ interrupt.component_name }} interrupt.
+    type: Basic_Types.Byte
+    format: U8
+{% endfor %}
+{% else%}
+  - name: Dummy_Usage_1
+    description: Placeholder.
+    type: Basic_Types.Byte
+    format: U8
+  - name: Dummy_Usage_2
+    description: Placeholder.
+    type: Basic_Types.Byte
+    format: U8
+  - name: Dummy_Usage_3
+    description: Placeholder.
+    type: Basic_Types.Byte
+    format: U8
+{% endif %}

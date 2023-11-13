@@ -1,0 +1,10 @@
+---
+description: These are the commands for the Command Router component. They are NOOP commands that produce events to facilitate unit testing and aliveness checks during flight.
+commands:
+  - name: Noop
+    description: Simple NOOP command which produces an event saying that it was triggered. This can be used to self test the command routing system and verify system aliveness.
+  - name: Noop_Arg
+    description: Simple NOOP command which produces an event saying that it was triggered with a certain Arg. This can be used to self test the command argument validation system. Sending a command with an Arg value of 868 will cause the component to Fail the command. Any other value will produce a successfully executed command.
+    arg_type: Command_Router_Arg.T
+  - name: Noop_Response
+    description: A NOOP command which self tests the command response forwarding mechanism. The command handler itself acts as a command sender component, and sends out a NOOP command with a registered Source Id. The Command Router should then send out an event saying that the command response was forwarded and received again by the Command Router.

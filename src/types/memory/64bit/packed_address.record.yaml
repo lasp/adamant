@@ -1,0 +1,9 @@
+---
+description: A packed system address.
+fields:
+  - name: Address
+    description: The starting address of the memory region.
+    type: System.Address
+    format: U64
+    skip_validation: True
+    byte_image: True

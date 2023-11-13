@@ -1,0 +1,7 @@
+---
+description: The requirements for the Fault Correction component are specified below.
+requirements:
+  - text: The component shall send out a predefined command in response to receiving a fault of a particular ID.
+  - text: The component shall be configured with a table of fault IDs and their associated command responses at startup.
+  - text: The component shall accept commands to enable and disable fault responses.
+  - text: The component shall report the status of each fault response in its table in telemetry.

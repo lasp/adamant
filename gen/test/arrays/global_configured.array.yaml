@@ -1,0 +1,5 @@
+---
+description: Packed array of events so that it can be used with the event for which ids were limited
+type: Event_Types.Event_Id
+format: U16
+length: {{ [(event_buffer_size-3)/2, 10]|min }}

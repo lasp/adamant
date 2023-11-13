@@ -1,0 +1,25 @@
+--------------------------------------------------------------------------------
+-- Generated on {{ time }}.
+--------------------------------------------------------------------------------
+
+project {{ name }} is
+
+   for Object_Dir use "{{ obj_dir }}";
+
+   for Source_Dirs use (
+{% for dir in source_path %}
+      "{{ dir }}"{{ "," if not loop.last }}
+{% endfor %}
+   );
+
+   for Main use ("{{ main }}");
+{% if config.codepeer_ide_server %}
+
+   -- Configure a remote CodePeer server to view static
+   -- analysis results:
+   package CodePeer is
+      for Server_URL use "{{ config.codepeer_ide_server }}";
+   end CodePeer;
+{% endif %}
+
+end {{ name }};

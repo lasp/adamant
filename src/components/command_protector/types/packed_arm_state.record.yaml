@@ -1,0 +1,7 @@
+---
+description: Holds the armed state.
+fields:
+  - name: State
+    description: The armed/unarmed status.
+    type: Command_Protector_Enums.Armed_State.E
+    format: E8

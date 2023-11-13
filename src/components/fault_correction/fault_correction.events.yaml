@@ -1,0 +1,34 @@
+---
+description: Events for the Fault Correction component.
+events:
+  - name: Fault_Received
+    description: A fault was received.
+    param_type: Fault_Static.T
+  - name: Fault_Response_Sent
+    description: A fault response was sent with the included command header.
+    param_type: Command_Header.T
+  - name: Fault_Response_Cleared
+    description: A fault response was cleared.
+    param_type: Packed_Fault_Id.T
+  - name: Fault_Response_Disabled
+    description: A fault response has been disabled
+    param_type: Packed_Fault_Id.T
+  - name: Fault_Response_Enabled
+    description: A fault response has been enabled.
+    param_type: Packed_Fault_Id.T
+  - name: All_Fault_Responses_Cleared
+    description: Any latched faults have been unlatched by command.
+  - name: Unrecognized_Fault_Id
+    description: A fault response entry with the included fault ID was not found in the table.
+    param_type: Packed_Fault_Id.T
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T
+  - name: Command_Dropped
+    description: A command was dropped due to a full queue.
+    param_type: Command_Header.T
+  - name: Fault_Dropped
+    description: A fault was dropped due to a full queue.
+    param_type: Fault_Header.T
+  - name: Data_Products_Reset
+    description: The component's data products have been reset to initialization values.

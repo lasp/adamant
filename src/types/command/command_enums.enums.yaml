@@ -1,0 +1,39 @@
+---
+description: These are enumerations that are used in the Adamant command system.
+enums:
+  - name: Command_Execution_Status
+    description: This status enumerations provides information on the success/failure of a command execution, as returned by the command handler.
+    literals:
+      - name: Success
+        value: 0
+        description: Command was successfully executed.
+      - name: Failure
+        value: 1
+        description: Command was not successfully executed.
+  - name: Command_Response_Status
+    description: This status enumerations provides information on the success/failure of a command through the command response connector.
+    literals:
+      - name: Success
+        value: 0
+        description: Command was passed to the handler and successfully executed.
+      - name: Failure
+        value: 1
+        description: Command was passed to the handler not successfully executed.
+      - name: Id_Error
+        value: 2
+        description: Command id was not valid.
+      - name: Validation_Error
+        value: 3
+        description: Command parameters were not successfully validated.
+      - name: Length_Error
+        value: 4
+        description: Command length was not correct.
+      - name: Dropped
+        value: 5
+        description: Command overflowed a component queue and was dropped.
+      - name: Register
+        value: 6
+        description: This status is used to register a command with the command routing system.
+      - name: Register_Source
+        value: 7
+        description: This status is used to register command sender's source id with the command router for command response forwarding.

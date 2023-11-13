@@ -1,0 +1,6 @@
+---
+description: Data products for the pid controller component.
+packets:
+  - name: Pid_Controller_Diagnostic_Packet
+    description: The diagnostic packet that is issued based on the number of samples set by command. Samples are taken at the control rate. Includes error, reference, and current.
+

@@ -1,0 +1,10 @@
+---
+description: The time at tone disable/enable state.
+preamble: |
+  type Tat_State_Type is (Disabled, Enabled);
+  for Tat_State_Type use (Disabled => 0, Enabled => 1);
+fields:
+  - name: State
+    description: Is time at tone enabled or disabled.
+    type: Tat_State_Type
+    format: E8

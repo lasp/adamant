@@ -1,0 +1,10 @@
+---
+description: The requirements for the Memory Stuffer component are specified below.
+requirements:
+  - text: The component shall write to a memory region on command.
+  - text: The component shall reject commands to write to memory in off-limit regions.
+  - text: The component shall reject commands to write to protected memory regions if not armed.
+  - text: The component shall enter an armed state (capable of writing to protected memory regions) if an arm command is received.
+  - text: The component shall exit the armed state upon the receipt of any subsequent command (unless it is another arm command).
+  - text: The component shall exit the armed state after a timeout.
+

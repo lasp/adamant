@@ -1,0 +1,21 @@
+---
+description: These are the commands for the event filter component.
+commands:
+  - name: Filter_Event
+    description: Enable the event filtering for a specific event ID.
+    arg_type: Event_Filter_Single_Event_Cmd_Type.T
+  - name: Unfilter_Event
+    description: Disable the event filtering for a specific event ID.
+    arg_type: Event_Filter_Single_Event_Cmd_Type.T
+  - name: Filter_Event_Range
+    description: Enable the event filtering for a specific range of event IDs.
+    arg_type: Event_Filter_Id_Range.T
+  - name: Unfilter_Event_Range
+    description: Disable the event filtering for a specific range of event IDs.
+    arg_type: Event_Filter_Id_Range.T
+  - name: Enable_Event_Filtering
+    description: Enable the component to filter events that have been set to be filtered.
+  - name: Disable_Event_Filtering
+    description: Disable the component so that all events will not be filtered. The event states will be maintained for when re-enabled.
+  - name: Dump_Event_States
+    description: Dump a packet for the state of all events pertaining to if they are filtered or not.

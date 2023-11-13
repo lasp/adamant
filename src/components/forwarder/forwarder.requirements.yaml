@@ -1,0 +1,5 @@
+---
+description: The requirements for the Forwarder component are specified below.
+requirements:
+  - text: The component shall be able to receive and send a generic data type.
+  - text: The component shall respond to commands to enable and disable data forwarding.

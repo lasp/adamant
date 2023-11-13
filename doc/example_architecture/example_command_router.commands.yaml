@@ -1,0 +1,5 @@
+---
+description: These are the commands for the Example Command Router component.
+commands:
+  - name: Noop
+    description: Simple NOOP command which produces an event saying that it was triggered.

@@ -1,0 +1,24 @@
+---
+description: This is the autocoded packet type for the Queue Monitor component. It contains queue utilization information for queued component in the assembly.
+fields:
+{% if component_kind_dict["queued"] %}
+{% for component in component_kind_dict["queued"] %}
+  - name: {{ component.instance_name }}_Current_Usage
+    description: The current percent usage of the {{ component.instance_name }} internal queue.
+    type: Basic_Types.Byte
+    format: U8
+  - name: {{ component.instance_name }}_Maximum_Usage
+    description: The maximum percent usage (high water mark) of the {{ component.instance_name }} internal queue.
+    type: Basic_Types.Byte
+    format: U8
+{% endfor %}
+{% else%}
+  - name: Dummy_Current_Usage
+    description: Placeholder.
+    type: Basic_Types.Byte
+    format: U8
+  - name: Dummy_Maximum_Usage
+    description: Placeholder.
+    type: Basic_Types.Byte
+    format: U8
+{% endif %}

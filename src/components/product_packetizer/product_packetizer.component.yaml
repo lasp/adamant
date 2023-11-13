@@ -1,0 +1,40 @@
+---
+description: |
+  The product packetizer requests data products from an external component and packetizes them into packets at a configurable rate. The packets that this component produces is configured via an autocoded table provided at instantiation.
+execution: passive
+discriminant:
+  description: This component requires a list of packet descriptions which outline the packets that the component is responsible for building. This list should be provided as an autocoded output from a product_packets.yaml file.
+  parameters:
+    - name: Packet_List
+      type: Product_Packet_Types.Packet_Description_List_Access_Type
+      description: The list of packets to packetize.
+init:
+  description: This initialization function is used to initialize the roll-over value for the packetizer's internal counter. It is calculated as the largest 32-bit multiple of all the provided periods in the packet_List. This ensures that no packets are skipped or sent too often when a rollover occurs. Note, that this only guarantees expected roll-over behavior if the period of the packets are not changed during runtime via command. If this happens, then the user accepts that a rollover may cause unwanted behavior.
+  parameters:
+    - name: Commands_Dispatched_Per_Tick
+      type: Positive
+      default: "3"
+      description: The number of commands executed per tick, if any are in the queue.
+connectors:
+  - description: This is the base tick for the component. It should be received at least as fast as the maximum desired product creation frequency.
+    type: Tick.T
+    kind: recv_sync
+  - description: Fetch a data product item from the database.
+    type: Data_Product_Fetch.T
+    return_type: Data_Product_Return.T
+    kind: request
+  - description: Send a packet of data products.
+    type: Packet.T
+    kind: send
+  - description: This is the command receive connector, used for configuring the packetizer during runtime.
+    type: Command.T
+    kind: recv_async
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get
+  - description: This connector is used to register and respond to the component's commands.
+    type: Command_Response.T
+    kind: send

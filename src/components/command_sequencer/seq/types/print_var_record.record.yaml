@@ -1,0 +1,22 @@
+---
+description: A packed record for seq's print variable instruction
+fields:
+  - name: Opcode
+    description: Instruction code
+    type: Basic_Types.Byte
+    format: U8
+  - name: Print_Type
+    description: The type of print message (debug, info, critical, error).
+    type: Seq_Enums.Print_Type.E
+    format: E8
+  - name: Data_Type
+    description: Data_Type
+    type: Seq_Enums.Seq_Data_Type.E
+    format: E8
+  - name: Pad
+    description: Padding
+    type: Basic_Types.Byte
+    format: U8
+  - name: Var_Info
+    description: An area for information about the encoded variable. See var_record.record.yaml.
+    type: Var_Record.T

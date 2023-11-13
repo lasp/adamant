@@ -1,0 +1,7 @@
+---
+description: This record contains the definition for a two event ID type for ranges in the event limiter commands as well as an issue packet type for issuing packets
+fields:
+  - name: Component_Enable_State
+    description: Flag to indicate if the component is enabled or disabled at a overriding level
+    type: Two_Counter_Entry_Enums.Event_State_Type.E
+    format: E8

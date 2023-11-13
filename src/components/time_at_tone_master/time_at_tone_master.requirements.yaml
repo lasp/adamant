@@ -1,0 +1,7 @@
+---
+description: The requirements for the Time at Tone Master are specified below.
+requirements:
+  - text: The component shall send the time at tone time message at a compile-time configurable rate.
+  - text: The component shall send the time at tone tone message at a compile-time configurable delay after sending the time at tone time message.
+  - text: The component shall send a time at tone transaction one time on command.
+  - text: The component shall produce a data product relating the number time at tone transactions sent since startup.

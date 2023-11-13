@@ -1,0 +1,26 @@
+---
+description: A simple variable sized record.
+with:
+  - Interfaces
+preamble: |
+  -- Define a byte with a restricted range.
+  subtype Limited_Byte is Interfaces.Unsigned_8 range 0 .. 250;
+  -- Define an array with index ranging from -15 to 4.
+  type Buffer_Type is array (Integer range -15 .. 4) of Limited_Byte;
+fields:
+  - name: Length
+    type: Interfaces.Unsigned_8
+    format: U8
+  - name: Buffer
+    type: Buffer_Type
+    # Define the proper array format, 20 unsigned bytes
+    format: U8x20
+    # Define the default value as all zeros.
+    default: (others => 0)
+    # Define the length field that controls the "used" length of this field
+    variable_length: Length
+    # Optional - provide a signed integer that will be added to the length
+    # field to determine the actual value to use as the "used" length
+    # of the variable field. This will almost always be zero, but some
+    # protocols, notably CCSDS, require this value to be 1.
+    variable_length_offset: 0

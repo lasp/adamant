@@ -1,0 +1,10 @@
+---
+description: Generic fault packet for holding arbitrary faults. This is the same as the Fault.T type, except that it is not variable sized, it is always maximum sized. This can be useful for sending events with faults in them.
+fields:
+  - name: Header
+    description: The fault header
+    type: Fault_Header.T
+  - name: Param_Buffer
+    description: A buffer that contains the fault parameters
+    type: Fault_Types.Parameter_Buffer_Type
+    format: U8x{{ fault_buffer_size }}

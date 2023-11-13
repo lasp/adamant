@@ -1,0 +1,20 @@
+---
+description: These are the commands for the Test Component.
+commands:
+  - name: Command_1
+    description: Command 1.
+  - name: Command_2
+    description: Command 2.
+    arg_type: Sys_Time.T
+  - name: Command_3
+    description: Command 3.
+    arg_type: Packed_U32.T
+  - name: Command_4
+    description: Command 4.
+    arg_type: Complex_Command_Arg.T
+  - name: Command_5
+    description: Command 5.
+    arg_type: Complex_Command_Arg_2.T
+  - name: Command_6
+    description: Command 6.
+    arg_type: Packed_I32.T

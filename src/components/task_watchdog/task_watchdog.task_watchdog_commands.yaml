@@ -1,0 +1,13 @@
+---
+description: These are the commands for the Task Watchdog component.
+commands:
+  - name: Enable_Watchdog_Pet_Checks
+    description: Command to enable the watchdog component to check all connected components for incoming pets.
+  - name: Disable_Watchdog_Pet_Checks
+    description: Command to disable the watchdog component to check all connected components for incoming pets.
+  - name: Set_Watchdog_Limit
+    description: Set the limit value for the watchdog given an index and the new index value.
+    arg_type: Watchdog_Limit_Cmd.T
+  - name: Set_Watchdog_Action
+    description: Sets the action of a petter given the index of that petter and the updated action. Note that actions cannot be promoted to fault if they were not provided a fault id.
+    arg_type: Watchdog_Action_Cmd.T

@@ -1,0 +1,15 @@
+---
+description: Data products for the Command Protector.
+data_products:
+  - name: Armed_State
+    description: The current armed/unarmed state of the component.
+    type: Packed_Arm_State.T
+  - name: Armed_State_Timeout
+    description: The time remaining (in ticks) until the armed state expires.
+    type: Packed_Arm_Timeout.T
+  - name: Protected_Command_Reject_Count
+    description: The number of protected commands rejected because the component was unarmed.
+    type: Packed_U16.T
+  - name: Protected_Command_Forward_Count
+    description: The number of protected commands forwarded because the component was armed.
+    type: Packed_U16.T

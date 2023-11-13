@@ -1,0 +1,19 @@
+---
+description: Status information for 4 fault response entries.
+fields:
+  - name: Status_0
+    description: The status of a fault response table entry.
+    type: Fault_Correction_Enums.Status_Type.E
+    format: E2
+  - name: Status_1
+    description: The status of a fault response table entry.
+    type: Fault_Correction_Enums.Status_Type.E
+    format: E2
+  - name: Status_2
+    description: The status of a fault response table entry.
+    type: Fault_Correction_Enums.Status_Type.E
+    format: E2
+  - name: Status_3
+    description: The status of a fault response table entry.
+    type: Fault_Correction_Enums.Status_Type.E
+    format: E2

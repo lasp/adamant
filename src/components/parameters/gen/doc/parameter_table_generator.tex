@@ -1,0 +1,38 @@
+\input{common_packages.tex}
+
+\begin{document}
+
+\title{\textbf{Parameter Table Generator} \\
+\large\textit{Autocoder User Guide}}
+\date{}
+\maketitle
+
+\section{Description}
+
+The purpose of this generator is to provide a user friendly way of defining the layout of a parameter table that will be used within the Parameters component. The generator takes a YAML model file as input which specifies the component instance parameters to include in the table, in the order specified. From this information, the generator autocodes an Ada specification file which contains a data structure that should be passed to the Parameters component upon initialization. This data structure provides the necessary information to the Parameters component to properly decode a parameter table upload and push new parameter values to the correct downstream component where those parameters will be used.
+
+Note the example shown in this documentation is used in the unit test of this component so that the reader of this document can see it being used in context. Please refer to the unit test code for more details on how this generator can be used.
+
+\section{Schema}
+
+The following pykwalify schema is used to validate the input YAML model. The schema is commented to show what each of the available YAML keys are and what they accomplish. Even without knowing the specifics of pykwalify schemas, you should be able to gleam some knowledge from the file below.
+
+\yamlcodef{../schemas/parameter_table.yaml}
+
+\section{Example Input}
+
+The following is an example parameter tabl input yaml file. Model files must be named in the form \textit{optional\_name.assembly\_name.parameter\_table.yaml} where \textit{optional\_name} is the specific name of the parameter table and is only necessary if there is more than one Parameters component instance in an assembly. The \textit{assembly\_name} is the assembly which this table will be used, and the rest of the model file name must remain as shown. Generally this file is created in the same directory or near to the assembly model file. This example adheres to the schema shown in the previous section, and is commented to give clarification.
+
+\yamlcodef{../../test/test_assembly/test_parameter_table.test_assembly.parameter_table.yaml}
+
+As can be seen, specifying the parameter table layout simply consists of listing the parameters to include. You can either list just the component instance name, in which case all the parameters for that component will be included in the table in the order specified within the component's parameter model, or you can list individual component parameters, which provides fine grain control of which parameters are included and in what order.
+
+\section{Example Output}
+
+The example input shown in the previous section produces the following Ada output. The \texttt{parameter\_Table\_Entries} variable should be passed into the Parameters component's \texttt{Init} procedure during assembly initialization.
+
+The main job of the generator in this case was to verify the input YAML for validity and then to translate the data to an Ada data structure for use by the component.
+
+\adacodef{../../test/test_assembly/build/src/test_parameter_table.ads}
+
+\end{document}

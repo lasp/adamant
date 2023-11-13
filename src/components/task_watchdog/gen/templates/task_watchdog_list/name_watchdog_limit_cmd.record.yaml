@@ -1,0 +1,30 @@
+---
+description: This is an autocoded packed enumeration record which contains an enumeration literal for each task that the task watchdog manages. This record contains information for changing the limit of a specific watchdog connector via this enumeration.
+preamble: |
+  type Task_Enum_Type is (
+{% for petter in watchdog_list.values() %}
+{% if petter.name %}
+    {{ petter.name }}{{ "," if not loop.last }}
+{% else %}
+    {{ petter.connector_name | replace(".","_") }}{{ "," if not loop.last }}
+{% endif %}
+{% endfor %}
+  );
+  for Task_Enum_Type use (
+{% for petter in watchdog_list.values() %}
+{% if petter.name %}
+    {{ petter.name }} => {{ petter.connector_id[0] }}{{ "," if not loop.last }}
+{% else %}
+    {{ petter.connector_name  | replace(".","_") }} => {{ petter.connector_id[0] }}{{ "," if not loop.last }}
+{% endif %}
+{% endfor %}
+  );
+fields:
+  - name: Watchdog_Task
+    description: The task watchdog task enumeration.
+    type: Task_Enum_Type
+    format: E16 # Matches size of connector index.
+  - name: New_Limit
+    description: The new value of the limit for the specific associated connector
+    type: Task_Watchdog_Types.Missed_Pet_Limit_Type
+    format: U16

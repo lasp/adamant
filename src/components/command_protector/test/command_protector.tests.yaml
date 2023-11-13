@@ -1,0 +1,15 @@
+---
+description: This is a unit test suite for the Command Protector.
+tests:
+  - name: Test_Initialization
+    description: This unit test tests all permutations of initializing the component and makes sure improper initialization results in a runtime assertion.
+  - name: Test_Unprotected_Command_Accept
+    description: This unit test tests that an unprotected command is passed along no matter the state of the component.
+  - name: Test_Protected_Command_Accept
+    description: This unit test tests that a protected command is accepted if the component is armed.
+  - name: Test_Protected_Command_Reject
+    description: This unit test tests that a protected command is rejected if the component is unarmed.
+  - name: Test_Protected_Command_Reject_Timeout
+    description: This unit test tests that a protected command is rejected if the component is unarmed due to timeout.
+  - name: Test_Invalid_Command
+    description: This unit test makes sure that an invalid command is handled gracefully.

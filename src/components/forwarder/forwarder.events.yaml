@@ -1,0 +1,9 @@
+---
+events:
+  - name: Forwarding_Enabled
+    description: Data forwarding was enabled by command.
+  - name: Forwarding_Disabled
+    description: Data forwarding was disabled by command.
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T

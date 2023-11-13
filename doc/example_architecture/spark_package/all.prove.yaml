@@ -1,0 +1,4 @@
+---
+description: This is the GNATprove configuration for the Spark_Package.
+level: 1
+mode: "silver"

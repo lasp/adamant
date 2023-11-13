@@ -1,0 +1,11 @@
+---
+description: A packed record which holds a sequence engine identifier for an engine that was out of range.
+fields:
+  - name: Engine_Id
+    description: The source sequence engine.
+    type: Seq_Types.Sequence_Engine_Id
+    format: U8
+  - name: Engine_Id_To_Load
+    description: The destination sequence engine.
+    type: Seq_Types.Sequence_Engine_Id
+    format: U8

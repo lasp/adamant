@@ -1,0 +1,17 @@
+---
+description: This is a unit test suite for the Product Database Component
+tests:
+  - name: Test_Nominal_Scenario
+    description: This unit test tests the updating and fetching of data products with no errors.
+  - name: Test_Nominal_Override
+    description: This unit test tests the overriding and fetching of data products with no errors.
+  - name: Test_Nominal_Dump
+    description: This unit test tests the dumping of a data product packet with no errors.
+  - name: Test_Nominal_Dump_Poly
+    description: This unit test tests the sending of a data product poly type.
+  - name: Test_Data_Not_Available
+    description: This unit test tests the fetching of data that has not yet been stored.
+  - name: Test_Id_Out_Of_Range
+    description: This test tries to update and fetch data that has a bad id.
+  - name: Test_Invalid_Command
+    description: This unit test exercises that an invalid command throws the appropriate event.

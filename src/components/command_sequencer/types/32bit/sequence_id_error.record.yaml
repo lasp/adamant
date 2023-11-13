@@ -1,0 +1,13 @@
+---
+description: This is a packed record that holds information about sequence with bad ID.
+fields:
+  - name: Load
+    description: The sequence load info.
+    type: Sequence_Load.T
+  - name: Header
+    description: The header of the sequence.
+    type: Sequence_Header.T
+  - name: Expected_Id
+    description: The expected sequence id.
+    type: Sequence_Types.Sequence_Id
+    format: U16

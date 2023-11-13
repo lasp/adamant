@@ -1,0 +1,15 @@
+---
+description: This is a unit test suite for the Event Packetizer component
+tests:
+  - name: Test_Nominal_Packetization
+    description: This unit test excersizes the nominal behavior of the event packetizer with 3 internal packets.
+  - name: Test_Partial_Packet_Timeout
+    description: This unit test excersizes the partial packet timeout feature.
+  - name: Test_Partial_Packet_Timeout_Of_1
+    description: This unit test excersizes the partial packet timeout feature with value set to 1, which means timeout should always occur.
+  - name: Test_Commanded_Packetization
+    description: This unit test tells the packetizer to packetize a partial packet via command.
+  - name: Test_Dropped_Events
+    description: This unit test excersizes the behavior of the packetizer when it is so full that events begin getting dropped.
+  - name: Uninitialized
+    description: This unit test excersizes the behavior of the packetizer when it is uninitialized.

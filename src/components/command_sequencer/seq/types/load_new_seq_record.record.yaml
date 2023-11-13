@@ -1,0 +1,15 @@
+---
+description: A packed record for seq instructions that load new sequences. Opcodes 3, 4, 5 (Call, Spawn, Start)
+fields:
+  - name: Opcode
+    description: Instruction code
+    type: Basic_Types.Byte
+    format: U8
+  - name: Engine
+    description: This field is used for the spawn instruction to specify a destination engine. Otherwise it is unused.
+    type: Seq_Types.Sequence_Engine_Id
+    format: U8
+  - name: Id
+    description: A 16-bit ID corresponding to another sequence.
+    type: Sequence_Types.Sequence_Id
+    format: U16

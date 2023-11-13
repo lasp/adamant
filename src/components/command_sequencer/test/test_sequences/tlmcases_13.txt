@@ -1,0 +1,43 @@
+seq tlmcases_13
+  ;
+  ; This tests some corner cases related to telemetry comparisons.
+  ;
+
+  ; Test multiple waitvalues in a row to make sure they each block correctly.
+  waitvalue Component_A.Data_Product_1.Value == 0 ? until 120000 ;absolute wait (VTC)
+  waitvalue Component_A.Data_Product_1.Value == 1 ? until 120000 ;absolute wait (VTC)
+  waitvalue Component_B.Data_Product_2.Value > 7.5 ? for 5 ;relative wait
+  waitvalue Component_B.Data_Product_1.Value < 99 ? for 5 ;relative wait
+  cmd Component_A.Command_3 Value 5
+  if $WAIT_TIMEOUT == 1
+    ; Timeout
+    cmd Component_B.Command_3 Value 6
+  else
+    cmd Component_B.Command_3 Value 7
+  endif
+
+  ; Two timeouts in a row to make sure timeout variable reset correctly.
+  waitvalue Component_A.Data_Product_1.Value == 0 ? until 120000 ;absolute wait (VTC)
+  if $WAIT_TIMEOUT == 1
+    ; Timeout
+    cmd Component_B.Command_3 Value 8
+  else
+    cmd Component_B.Command_3 Value 9
+  endif
+
+  waitvalue Component_A.Data_Product_1.Value == 0 ? for 5;relative wait
+  if $WAIT_TIMEOUT == 1
+    ; Timeout
+    cmd Component_B.Command_3 Value 10
+  else
+    cmd Component_B.Command_3 Value 11
+  endif
+
+  waitvalue Component_A.Data_Product_1.Value == 0 ? for 6;relative wait
+  if $WAIT_TIMEOUT == 1
+    ; Timeout
+    cmd Component_B.Command_3 Value 12
+  else
+    cmd Component_B.Command_3 Value 13
+  endif
+endseq

@@ -1,0 +1,27 @@
+{% extends "/base/table.html" %}
+{% block title %}<b>{{ name }}</b> Arrayed Connections{% endblock %}
+{% block info %}
+      <b>Summary:</b>
+      <ul>
+        <li><b>Number of Components:</b> {{ components|length }}</li>
+        <li><b>Number of Connections:</b> {{ connections|length }}</li>
+      </ul>
+{% endblock %}
+{% block head %}
+      <tr>
+          <th scope="col">From</th>
+          <th scope="col">To</th>
+          <th scope="col">Kind</th>
+          <th scope="col">Description</th>
+      </tr>
+{% endblock %}
+{% block body %}
+{% for connection in arrayed_connections %}
+      <tr>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ connection.from_name }}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ connection.to_name }}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ connection.from_connector.kind }}-{{ connection.to_connector.kind }}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{% if connection.description %}{{ connection.description }}{% endif %}</td>
+      </tr>
+{% endfor %}
+{% endblock %}

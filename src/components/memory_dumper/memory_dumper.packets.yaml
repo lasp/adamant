@@ -1,0 +1,5 @@
+---
+description: Packets for the memory dumper.
+packets:
+  - name: Memory_Dump_Packet
+    description: This packet contains memory.

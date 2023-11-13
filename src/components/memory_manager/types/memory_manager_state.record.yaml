@@ -1,0 +1,7 @@
+---
+description: Packed record which holds the memory state of the memory manager.
+fields:
+  - name: State
+    description: The memory state.
+    type: Memory_Manager_Enums.Memory_State.E
+    format: E8

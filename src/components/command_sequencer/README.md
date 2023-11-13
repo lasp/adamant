@@ -1,0 +1,1 @@
+Note that the unit tests for this component have been disabled for continuous integration. The sequence compilation tool that is used to generate the binary sequences used by this component is not yet publicly available, but is planned to be released for use sometime in the future.

@@ -1,0 +1,14 @@
+---
+description: This is a simple test component with generic connectors.
+execution: passive
+generic:
+  parameters:
+    - name: Generic_Type_1
+    - name: Generic_Type_2
+connectors:
+  - description: The output connector
+    type: Generic_Type_1
+    kind: send
+  - description: The input connector
+    type: Generic_Type_2
+    kind: recv_sync

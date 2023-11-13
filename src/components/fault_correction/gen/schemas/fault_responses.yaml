@@ -1,0 +1,59 @@
+---
+# This schema describes the yaml format for a set of fault responses.
+type: map
+mapping:
+  # Many "with" dependencies are automatically deduced and included by
+  # the generator. If you want to manually add a "with" statement, you
+  # can list the names of the packages here. This can be useful if you need
+  # to include a package that declares an enumeration used in a command
+  # argument.
+  with:
+    seq:
+      - type: str
+    required: False
+  # Description of the fault response set.
+  description:
+    type: str
+    required: False
+  # List of fault responses to include
+  fault_responses:
+    seq:
+      - type: map
+        mapping:
+          # The name of the fault in the form Component_Instance_Name.Fault_Name. This gets translated
+          # to a Fault_Id type internally.
+          fault:
+            type: str
+            required: True
+          # Latching flag. When True, an incoming fault will cause a command response to be sent only once
+          # until the latch is cleared via ground command. When False, a command response is sent every time
+          # a fault of this ID is received.
+          latching:
+            type: bool
+            required: True
+          # Startup state. When enabled, the fault response is enabled at startup. When disabled, the fault
+          # response is disabled at startup.
+          startup_state:
+            type: str
+            enum: ['enabled', 'disabled']
+            required: True
+          # The name of the command response in the form Component_Instance_Name.Command_Name. This gets
+          # translated into a Command.T type internally.
+          command_response:
+            type: str
+            required: True
+          # The argument to serialize into the command response. This is required if the command response
+          # includes command arguments. The argument should be supplied in the form:
+          #   "(Name_1 => Value_1, Name_2 => Value_2, etc.)"
+          # Where the names and values fill in the command argument packed record type.
+          command_arg:
+            type: str
+            required: False
+          # Description of the fault response.
+          description:
+            type: str
+            required: False
+    # A  sequence store must have at least one slot.
+    range:
+      min: 1
+    required: True

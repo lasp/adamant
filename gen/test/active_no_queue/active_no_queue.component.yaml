@@ -1,0 +1,10 @@
+---
+description: This is a simple test component.
+execution: active
+connectors:
+  - description: The output connector
+    type: Aa.T
+    kind: send
+  - description: The input connector
+    type: Bb.T
+    kind: recv_sync

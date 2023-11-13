@@ -1,0 +1,8 @@
+---
+description: A 32-bit unsigned integer with range 0 to 999.
+preamble: subtype Value_Type is Natural range 0 .. 999;
+fields:
+  - name: Value
+    description: The 32-bit unsigned integer with range 0 to 999.
+    type: Value_Type
+    format: U32

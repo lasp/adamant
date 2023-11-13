@@ -1,0 +1,10 @@
+---
+description: Component with a queue used for unit testing.
+execution: passive
+connectors:
+  - description: Used to queue up time stamps for testing.
+    type: Sys_Time.T
+    kind: recv_async
+  - description: Used to drain entire queue.
+    type: Tick.T
+    kind: recv_sync

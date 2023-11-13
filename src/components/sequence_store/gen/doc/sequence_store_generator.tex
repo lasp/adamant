@@ -1,0 +1,38 @@
+\input{common_packages.tex}
+
+\begin{document}
+
+\title{\textbf{Sequence Store Generator} \\
+\large\textit{Autocoder User Guide}}
+\date{}
+\maketitle
+
+\section{Description}
+
+The purpose of this generator is to provide a user friendly way of defining the memory slots for the sequence store component. The generator takes a YAML model file as input which specifies the location and size of each memory slot. Each memory slot is intended to hold a single sequence. 
+
+Note the example shown in this documentation is used in the unit test of this component so that the reader of this document can see it being used in context. Please refer to the unit test code for more details on how this generator can be used.
+
+\section{Schema}
+
+The following pykwalify schema is used to validate the input YAML model. The schema is commented to show what each of the available YAML keys are and what they accomplish. Even without knowing the specifics of pykwalify schemas, you should be able to gleam some knowledge from the file below.
+
+\yamlcodef{../schemas/sequence_store.yaml}
+
+\section{Example Input}
+
+The following is an example sequence store input yaml file. Model files must be named in the form \textit{name.sequence\_store.yaml} where \textit{name} is the name of the sequence store to be generated. Generally this file is created in the same directory or near to the assembly model file that includes the instance of the Sequence Store component that will be initialized by the autocoded sequence store. This example adheres to the schema shown in the previous section, and is commented to give clarification.
+
+\yamlcodef{../../test/test_assembly/test_sequence_store.sequence_store.yaml}
+
+As can be seen, specifying the sequence store layout simply consists of listing the addresses and lengths of each slot. The model file specifies start addresses and length for each slot. You can specify these values either as raw integers, or as names of variables defined elsewhere. Be careful to avoid overlapping any of the slot regions, as this will be checked within the component Init function at startup. It is recommended to declare sequence slots using the memory\_map autocoder, which will ensure no overlap. You can then reference the variables produced in the memory\_map autocoder within the sequencer store model. 
+
+\section{Example Output}
+
+The example input shown in the previous section produces the following Ada output. The \texttt{slots\_Access} variable should be passed into the Sequence Store component's \texttt{Init} procedure during assembly initialization.
+
+The main job of the generator in this case was to verify the input YAML for validity and then to translate the data to an Ada data structure for use by the component.
+
+\adacodef{../../test/test_assembly/build/src/test_sequence_store.ads}
+
+\end{document}

@@ -1,0 +1,143 @@
+{% if description %}
+{{ printMultiLine(description, '// ') }}
+{% endif %}
+digraph {{ name }} {
+{% if is_view and preamble %}
+
+{{ printMultiLine(preamble, '  ', 10000) }}
+{% endif %}
+
+  // Graph and node types:
+  graph [rankdir={{ layout }}, overlap=false];
+  node [shape=box, fillcolor="#F0F5F9", style=filled]
+{% if groups %}
+
+  // Subgraph clusters:
+{% for group in groups %}
+  subgraph cluster_{{ loop.index }} {
+    // Graph and node types:
+    graph [rankdir={{ layout }}, overlap=false];
+    node [shape=box, fillcolor="#F0F5F9", style=filled]
+{% if show_switches["hide_group_outline"] %}
+    // Hide cluster outlines:
+    color=transparent
+{% else %}
+    // Show cluster outlines:
+    style=dashed
+    color=gray
+{% endif %}
+
+    // Coponents in cluster_{{ loop.index }}
+{% for name, component in group.items() %}
+    {{ component.instance_name }} [
+{% if component.instance_execution == "active" and show_switches["show_component_execution"] %}
+      penwidth=3, 
+{% endif %}
+      label=<
+        <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+{% if component.tasks.has_active_task and component.tasks.active_task.instantiated and show_switches["show_component_priority"]%}
+          <TR><TD ALIGN="right"><FONT FACE="helvetica" POINT-SIZE="10">{{ component.tasks.active_task.priority }}</FONT></TD></TR>
+{% else %}
+          <TR><TD ALIGN="right"><FONT FACE="helvetica" POINT-SIZE="10"> </FONT></TD></TR>
+{% endif %}
+{% if show_switches["show_component_name"] %}
+          <TR><TD><FONT FACE="helvetica" POINT-SIZE="16">{{ component.instance_name }}</FONT></TD></TR>
+{% endif %}
+{% if show_switches["show_component_type"] %}
+          <TR><TD><FONT FACE="courier" POINT-SIZE="12">{% if show_switches["show_component_type"] %}<I>{{ component.name }}</I>{% endif %}</FONT></TD></TR>
+{% endif %}
+          <TR><TD ALIGN="right"><FONT FACE="helvetica" POINT-SIZE="10"> </FONT></TD></TR>
+        </TABLE>
+      >
+    ];
+
+{% endfor %}
+  }
+
+{% endfor %}
+{% if remaining_components %}
+  // Components not in a cluster:
+{% for component in remaining_components %}
+  {{ component.instance_name }} [
+{% if component.instance_execution == "active" and show_switches["show_component_execution"] %}
+    penwidth=3, 
+{% endif %}
+    label=<
+      <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+{% if component.tasks.has_active_task and component.tasks.active_task.instantiated and show_switches["show_component_priority"]%}
+        <TR><TD ALIGN="right"><FONT FACE="helvetica" POINT-SIZE="10">{{ component.tasks.active_task.priority }}</FONT></TD></TR>
+{% else %}
+        <TR><TD ALIGN="right"><FONT FACE="helvetica" POINT-SIZE="10"> </FONT></TD></TR>
+{% endif %}
+{% if show_switches["show_component_name"] %}
+        <TR><TD><FONT FACE="helvetica" POINT-SIZE="16">{{ component.instance_name }}</FONT></TD></TR>
+{% endif %}
+{% if show_switches["show_component_type"] %}
+        <TR><TD><FONT FACE="courier" POINT-SIZE="12">{% if show_switches["show_component_type"] %}<I>{{ component.name }}</I>{% endif %}</FONT></TD></TR>
+{% endif %}
+        <TR><TD ALIGN="right"><FONT FACE="helvetica" POINT-SIZE="10"> </FONT></TD></TR>
+      </TABLE>
+    >
+  ];
+
+{% endfor %}
+{% endif %}
+{% elif components %}
+
+  // Components:
+{% for component in components.values() %}
+  {{ component.instance_name }} [
+{% if component.instance_execution == "active" and show_switches["show_component_execution"] %}
+    penwidth=3, 
+{% endif %}
+    label=<
+      <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+{% if component.tasks.has_active_task and component.tasks.active_task.instantiated and show_switches["show_component_priority"]%}
+        <TR><TD ALIGN="right"><FONT FACE="helvetica" POINT-SIZE="10">{{ component.tasks.active_task.priority }}</FONT></TD></TR>
+{% else %}
+        <TR><TD ALIGN="right"><FONT FACE="helvetica" POINT-SIZE="10"> </FONT></TD></TR>
+{% endif %}
+{% if show_switches["show_component_name"] %}
+        <TR><TD><FONT FACE="helvetica" POINT-SIZE="16">{{ component.instance_name }}</FONT></TD></TR>
+{% endif %}
+{% if show_switches["show_component_type"] %}
+        <TR><TD><FONT FACE="courier" POINT-SIZE="12">{% if show_switches["show_component_type"] %}<I>{{ component.name }}</I>{% endif %}</FONT></TD></TR>
+{% endif %}
+        <TR><TD ALIGN="right"><FONT FACE="helvetica" POINT-SIZE="10"> </FONT></TD></TR>
+      </TABLE>
+    >
+  ];
+
+{% endfor %}
+{% endif %}
+{% if connections %}
+  // Connections:
+{% for connection in connections %}
+  {{ connection.from_component.instance_name }} -> {{ connection.to_component.instance_name }} [
+    arrowsize=.8,
+{% if show_switches["show_connector_type"] %}
+    label=<
+      <FONT FACE="courier" POINT-SIZE="8"><I>{% if connection.to_connector.type %}{{ connection.to_connector.type }}{% endif %}{% if connection.to_connector.type and connection.to_connector.return_type %} -&gt; {% endif %}{% if connection.to_connector.return_type %}{{ connection.to_connector.return_type }}{% endif %}</I></FONT>
+    >
+{% endif %}
+{% if connection.to_connector.kind == 'recv_async' %}
+    , style=dashed
+{% endif %}
+{% if connection.to_connector.kind == 'service' %}
+    , dir=both, arrowhead=vee, arrowtail=onormal
+{% endif %}
+{% if connection.to_connector.kind == 'modify' %}
+    , dir=both, arrowhead=diamond, arrowtail=odiamond
+{% endif %}
+{% if connection.to_connector.kind == 'return' %}
+    , dir=both, arrowhead=inv, arrowtail=curve
+{% endif %}
+  ];
+
+{% endfor %}
+{% endif %}
+{% if postamble %}
+
+{{ printMultiLine(postamble, '  ') }}
+{% endif %}
+}
