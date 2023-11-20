@@ -10,9 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: dinkelk/adamant:example-latest
-      credentials:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
     env:
       INSTALL_DIR: /home/user/env
       ADAMANT_DIR: ${{ github.workspace }}
