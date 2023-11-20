@@ -1,0 +1,7 @@
+---
+description: A packed record which holds an event identifier.
+fields:
+  - name: Id
+    description: The event identifier
+    type: Event_Types.Event_Id
+    format: U16

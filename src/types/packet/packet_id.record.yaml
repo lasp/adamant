@@ -1,0 +1,7 @@
+---
+description: A packed record which holds a packet identifier.
+fields:
+  - name: Id
+    description: The packet identifier
+    type: Packet_Types.Packet_Id
+    format: U16

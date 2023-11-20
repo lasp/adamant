@@ -1,0 +1,14 @@
+---
+description: Record for holding information about an invalid data dependency.
+fields:
+  - name: Id
+    description: The data product identifier requested.
+    type: Data_Product_Types.Data_Product_Id
+    format: U16
+  - name: Request_Status
+    description: The data product request return status
+    type: Data_Product_Enums.Fetch_Status.E
+    format: E8
+  - name: Header
+    description: The data product header of the returned data product.
+    type: Data_Product_Header.T

@@ -1,0 +1,56 @@
+{% extends "/base/table.html" %}
+{% block title %}<b>{{ name }}</b> Seq Products{% endblock %}
+{% block info %}
+	<b>Summary:</b>
+	<b>Summary:</b>
+	<ul>
+		<li><b>Number of Components with Data Products:</b> {{ component_kind_dict['data_products']|length }}</li>
+		<li><b>Number of Data Products:</b> {{ data_products|length }}</li>
+	</ul>
+{% endblock %}
+{% block head %}
+	<tr>
+		<th scope="col">ID</th>
+		<th scope="col">Data Product Name</th>
+		<th scope="col">Path(s)</th>
+		<th scope="col">Format</th>
+		<th scope="col">Start</th>
+		<th scope="col">End</th>
+	</tr>
+{% endblock %}
+{% block body %}
+{% for id, dp in data_products.items() %}  
+	<tr>
+		<td style='font-family: "Courier New", Courier, monospace;'>0x{{ '%04x' % id }} ({{ dp.id }})</b></td>
+		<td style='font-family: "Courier New", Courier, monospace;'><b>{{ dp.suite.component.instance_name }}.{{ dp.name }}</b></td>
+		<td style='font-family: "Courier New", Courier, monospace;'></td>
+		<td style='font-family: "Courier New", Courier, monospace;'></td>
+		<td style='font-family: "Courier New", Courier, monospace;'>0</td>
+		<td style='font-family: "Courier New", Courier, monospace;'>{{ dp.type_model.size - 1 }}</td>
+	</tr>
+	<!-- this function call below returns a dict that includes a 2D array of paths and dict that serves as a python graph -->
+	<!-- create_record_graph() is defined in models/record.py -->
+	{% set data = dp.type_model.create_record_graph() %}
+	{% set count = namespace(size_counter = 0) %}
+	{% for path in data['paths'] %}
+		<tr>
+			<td style='font-family: "Courier New", Courier, monospace;'></td>
+			<td style='font-family: "Courier New", Courier, monospace;'></td>
+			<td style='font-family: "Courier New", Courier, monospace;'>
+				<span>.{{ '.'.join(path) }}</span>
+			</td>
+			<td style='font-family: "Courier New", Courier, monospace;'>
+				<span>{{ data['graph'][path[-1]]['field'].format }}</span>
+			</td>
+			<td style='font-family: "Courier New", Courier, monospace;'>
+				<span>{{ count.size_counter }}</span>
+			</td>
+			<td style='font-family: "Courier New", Courier, monospace;'>
+				<span>{{ data['graph'][path[-1]]['field'].size + count.size_counter - 1 }}</span>
+			</td>
+		</tr>
+		{% set count.size_counter = count.size_counter + data['graph'][path[-1]]['field'].size %}
+	{% endfor %}
+	  
+{% endfor %}
+{% endblock %}

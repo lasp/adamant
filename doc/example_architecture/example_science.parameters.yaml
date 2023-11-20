@@ -1,0 +1,11 @@
+---
+description: Parameters for the Example Science Component.
+parameters:
+  - name: Calibration_Coefficient_1
+    description: Science calibration coefficient for sensor 1.
+    type: Packed_F32.T
+    default: "(Value => 1.0)"
+  - name: Calibration_Coefficient_2
+    description: Science calibration coefficient for sensor 2.
+    type: Packed_F32.T
+    default: "(Value => 1.0)"

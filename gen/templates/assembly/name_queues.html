@@ -1,0 +1,27 @@
+{% extends "/base/table.html" %}
+{% block title %}<b>{{ name }}</b> Queues{% endblock %}
+{% block info %}
+      <b>Summary:</b>
+      <ul>
+        <li><b>Number of Components with Queue:</b> {{ component_kind_dict['queued']|length }}</li>
+        <li><b>Number of Components without Queue:</b> {{ component_kind_dict['simple']|length }}</li>
+      </ul>
+{% endblock %}
+{% block head %}
+      <tr>
+          <th scope="col">Component Name</th>
+          <th scope="col">Component Type</th>
+          <th scope="col">Queue Size</th>
+      </tr>
+{% endblock %}
+{% block body %}
+{% for component in components.values() %}
+{% if component.connectors.of_kind("recv_async") %}
+      <tr>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ component.instance_name }}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ component.name }}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ component.instance_queue_size }}</td>
+      </tr>
+{% endif %}
+{% endfor %}
+{% endblock %}

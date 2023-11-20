@@ -1,0 +1,11 @@
+seq spawn_05
+  ; Simple sequence that just sends a command, and then spawns another sequence.
+  cmd Component_A.Command_2 Seconds 22 Subseconds 88
+  spawn on 2 commands_01
+
+  ; Send a command between another spawn.
+  cmd Component_A.Command_2 Seconds 7 Subseconds 12
+
+  ; Spawn on 'any' sequence.
+  spawn on any commands_01
+endseq

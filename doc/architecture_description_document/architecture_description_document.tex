@@ -1,0 +1,253 @@
+\input{common_packages.tex}
+
+\begin{document}
+
+\title{\textbf{Architecture Description Document} \\
+\large\textit{Adamant Software Framework}}
+%\author{Author's Name}
+\date{}
+\maketitle
+
+\section{Purpose}
+Adamant is a component-based, model-driven framework designed for constructing reliable and reusable embedded, real-time software systems. The purpose of this document is to discuss the architecture of the Adamant framework. This document is written at a high level, where an in depth knowledge of programming is not required. The intended audience for this document is managers and systems engineers looking to understand what an Adamant system looks like and software engineers interested in using Adamant to develop their own software systems.
+
+\section{Introduction}
+
+The purpose of the Adamant framework is to improve the way embedded software is designed, implemented, tested, and communicated when compared to traditional development practices. The conventional pattern for developing embedded software usually employs a ``clone and own" methodology from one project to another. The use of heritage design and high code reuse is often acclaimed when progressing to a new project from a previous one. However, the process of copying and modifying source for new projects is not only labor intensive, it is error prone. While the code might exhibit some semblance of reuse, it usually needs to be modified to interface with its new execution context, and it always needs to be retested and revalidated against new requirements. Lean development costs are often presented in the early phases of the project, but expenses inevitably increase in the face of changing requirements during the testing and integration of the system as it nears delivery. The Adamant framework addresses these issues by providing mechanisms for direct, unmodified code reuse of common core components from project to project. Project specific requirements can be compartmentalized in a collection of independent \textit{components} with well defined interfaces. Should requirements change on future projects, these non-core components can easily be replaced by components adhering to the same interface, but with different internal behavior. The use of components also eases unit testing and simulation, as the interface for either a test harness or a simulation harness is inherently known.
+
+Historically, embedded software development practices dictate a requirements and design first, implement and test later philosophy. While this top down approach attempts to ensure that implementation does not begin until the design is well understood, changing requirements throughout the life cycle of a project is inevitable. This can result in an implementation that is not reflected in the final design, hampering communication and productive review of the architecture. The Adamant framework enforces consistency between the design and implementation of the system through the use of \textit{models}. The models not only produce a well constructed visual language for viewing the architecture, that can be understood by software engineers and systems engineers alike, they also generate the scaffolding code for the system, ensuring that the visual diagrams are truthfully reflected in the implementation.  
+
+By dividing the architecture into a collection of independent, model-backed components, the Adamant framework aims to improve the reliability, reusability, adaptability, and testability of embedded software development.
+
+\section{Concepts}
+
+At its core, Adamant is a component-based framework. Component-based frameworks approach application design as a set of reusable functional or logical entities called \textit{components}, which expose well-defined interfaces for inter-component communication. The design of components follow some key principles:
+
+\begin{itemize}
+  \item \textbf{Encapsulation} - A component hides the details of its internal behavior and state and only allows other components to access its functionality through the interface it presents. 
+  \item \textbf{Independence} - Components do not depend on other components, they depend only on their interfaces. This means that changes to one component are unlikely to ripple through the entire system. 
+  \item \textbf{Reusability} - Some components may be designed for a project-specific task, however, many components can be designed in a generic way such that they can be reused in similar systems with no modification. In addition, a component can be placed in a variety of execution contexts and be still expected to function as designed.
+  \item \textbf{Replacability} - Because a component is simply represented by its interfaces, it can substituted for another component as long as it adheres to the same interface. 
+\end{itemize}
+
+Components in Adamant communicate with one another through strongly typed \textit{connectors}. Components can have many connectors, of many different types, which can either send or receive data or both. Because connectors are exposed in the design, data flow within an Adamant architecture is not obscured, but rather can be easily inspected by a viewer of the design.
+
+The Adamant framework is also model-driven. Users of Adamant model components and their connections using a simple text language. This language is not only used to generate graphical views of the project architecture, but it also generates the code which makes up the backbone of the architecture. The behavior of these components is then hand-coded by a developer who fills in a set of specific methods, stubbed out by the code generator. Later, when the design needs to change, the developer can modify the model and have these changes immediately reflected in the software. In this way, the design of a project's architecture, as crafted into the model, is explicitly tied to the actual software implementation. This inherent transparency between model and implementation is powerful during all phases of software development from initial design, through integration and test.
+
+The following sections describe key concepts of the Adamant framework.
+
+\subsection{Connectors}
+
+Connectors are the primary means by which components communicate with one another. Their main purpose is to provide a gateway for data transfer while removing any dependencies one component might have on another. In a traditional software system, if one module wants to call a function in another module, it will need to include that other module, thus declaring a dependency on it. This coupling can lead to software maintenance problems down the road. Later, when requirements change or a new project comes along, one of these modules may need to be changed. Depending on how robust the interface is between the two modules, the two pieces of code may need to be manually untangled, carefully modified in concert, or even rewritten from scratch. In order to facilitate robust interfaces while removing dependencies, Adamant uses connectors. In this paradigm, if one module needs to call a function in another module, it does so through a connector. The modules do not depend on one another. Instead, they both depend on the connector between them. Thus, changes to one module will no longer affect the other module, so long as they both agree on the definition of their shared connector.
+
+
+Connectors have a few important properties. The first is the connector's \textit{type}. The type of a connector determines the datatypes that can be passed along it. Data passage along a connector is said to occur when that connector is \textit{invoked}. Upon connector invocation, an associated function is called which implements the \textit{behavior} of the connector, usually acting on the transferred data in some way. The \textit{invoker} of a connector is defined as the component which initiates the behavior, while the \textit{invokee} component is defined as the component which is responsible for performing the behavior. In Adamant, two types can be passed along the connector: the \textit{invocation type}, or simply \textit{type}, and the \textit{return\_type}. A connector's \textit{type} is always passed from the \textit{invoker} to the \textit{invokee}, while the \textit{return\_type} is always passed from the \textit{invokee} to the \textit{invoker}.  Each of these types may be arbitrarily complex using compound datatypes such as arrays or structures. Predefined basic types, such as integers or floats, as well as pointers, are also acceptable connector types.
+
+Making the distinction between \textit{invoker} and \textit{invokee} is important when describing the direction and timing of the data flow between components. Because connectors can specify both a \textit{type} and/or a \textit{return\_type}, the direction of data flow can be in the corresponding or opposite direction of the invocation direction. The relationship between the invocation direction and data flow direction is formalized by the connector's \textit{kind}. Unlike connector \textit{types}, which refer to a connector's datatype, connector \textit{kinds} are used to classify the direction and synchroneity of data flow along a connector. Connector kinds fall into one of four categories, whose names correspond to the direction of the data flow with respect to the \textit{invokee}. 
+
+\begin{enumerate}[{1.}]
+  \item \textbf{In Connectors} - One way connectors which simply send data from the \textit{invoker} component to the \textit{invokee} component. These connectors support both synchronous as well as asynchronous communications.
+  \item \textbf{Return Connectors} - One way connectors in which no data is sent from the \textit{invoker} component to the \textit{invokee} component, however data is synchronously returned from the \textit{invokee} to the \textit{invoker}. Only synchronous communication is possible with this category.
+  \item \textbf{In Return Connectors} - Two way connectors in which data is sent from the \textit{invoker} component to the \textit{invokee} component and separate return data is returned from the \textit{invokee} back to the \textit{invoker}. Only synchronous communication is possible with this category.
+  \item \textbf{In Out Connectors} - Two way connectors in which modifiable data is sent from the \textit{invoker} component to the \textit{invokee} component. The data can be modified by the \textit{invokee} before being synchronously returned to the \textit{invoker}. Only synchronous communication is possible with this category.
+\end{enumerate}
+
+Note that asynchronous communication is not possible with \textit{In Return Connectors}, \textit{Out Connectors}, or \textit{In Out Connectors} because data flows in the opposite direction of the connector invocation. Because data is returned to the \textit{invoker} during the invocation, the communication is, by definition, synchronous. However, two-way, asynchronous data flow is possible between components by using two \textit{In Connectors} invoked in opposite directions.
+
+A name is given to the \textit{invoker} and \textit{invokee} side of each connector category called a \textit{kind}. The connector kind pairs that make up each category are shown below:
+
+\begin{center}
+  \begin{tabular}{ | l | c | c | c | c |}
+    \hline
+    \textbf{Category} & \textbf{Invoker Kind} & \textbf{Invokee Kind} & \textbf{Has \textit{type}?} & \textbf{Has \textit{return\_type}?} \\ \hline
+    In & \texttt{send} & \texttt{recv\_sync} or \texttt{recv\_async} & yes & no \\ \hline
+    Out & \texttt{get} & \texttt{return} & no & yes \\ \hline
+    In Return & \texttt{request} & \texttt{service} & yes & yes \\ \hline
+    In Out & \texttt{provide} & \texttt{modify} & yes & no \\ \hline
+  \end{tabular}
+\end{center}
+
+In this way, compatible connector pairs can be identified. For instance if one component has a \texttt{send} connector of type $T$, this can only be connected to another component if that component exposes a connector of type $T$ with a kind of \texttt{recv\_sync} or \texttt{recv\_async}. Connector kinds from different categories cannot be used together.
+
+Each compatible connector kind has a unique graphical representation to improve the clarity of component diagrams.
+
+\begin{figure}[H]
+  \includegraphics[width=1.0\textwidth,center]{../example_architecture/build/eps/connector_kinds.eps}
+  \caption{Example component diagram to demonstrate different connector \textit{kinds}}
+\end{figure}
+
+The different arrow types follow a few principles. The dark, filled in, portion of the arrow is always connected to the \textit{invokee} component, the component responsible for performing the behavior of that connector invocation. The \textit{invoker} side of the connector has a more ``open" representation. The direction of the arrow in each connector representation signifies the direction of the data flow. For instance, \textit{get-return} connectors use backwards facing arrows to signify that the data flow direction is opposite of the invocation direction, and \textit{provide-modify} connectors use diamonds, instead of arrows, because data is flowing in both directions via a single modifiable type. Note that \texttt{recv\_async} has a dotted line instead of a solid line like the \texttt{recv\_sync} connector, to demonstrate its asynchroneity. A \texttt{send} connector will always have a solid line representation in a component diagram since the \textit{invokee} component is responsible for declaring a compatible connector as either \texttt{recv\_sync} or \texttt{recv\_async}.
+
+Note that connectors have a many-to-one relationship. This means that for any \textit{invokee} connector, many \textit{invoker} connectors can connect to it. For example, if a component has a single \textit{invokee} connector which takes a data item and logs it to disk, many other components can connect and send data items to this single connector. In order to create a one-to-many relationship an arrayed connector can be used, which is a set of connectors of the same type accessible by index. This design might be useful for a command router component, which takes in a single command but must route it to the correct destination component, which is connected to a specific index in the arrayed \textit{invoker} connector. Examples of both types of connections are explained in the \texttt{Components} section of this document.
+
+\subsection{Packed Records}
+
+In general, any datatype can be sent along a connector from one component to another. However, if two components live on different processing units, differences in data representation and endianness can cause compatibility issues. The Adamant framework provides a mechanism for dealing with this called \textit{packed records}.
+
+A packed record is a structure-like data type which can contain an arbitrary number of fields of any type, including arrays or other packed records. Packed records have two representations, a native machine representation, and a packed representation. The packed representation can be thought of as the ``serialized" version of the record. The storage size used for fields in the packed representation can be tailored by a user of the framework. The packed representation is always stored in big endian byte order. A conversion between the packed and unpacked versions of the records is also provided.
+
+Using packed records for component connector types is preferred in order to increase the compatibility of components across distributed systems.
+
+\subsection{Components}
+
+At the core of the Adamant framework is the concept of a \textit{component}. A component is a module of code that encapsulates behavior behind a well defined interface. A component's interface consists of a set of connectors. The use of connectors makes each component independent from other components. In other words, components do not depend on one another, they only depend on their own connectors. This decoupling of components is the primary mechanism by which the Adamant framework aims to improve the reusability, testability, and adaptability of embedded software.
+
+The interworking of components are described in the next few subsections.
+
+\subsubsection{Component Queue}
+
+In Adamant, a component is defined by declaring its interface in a component model, which consists of a list of connectors. If any of these connectors are of kind \texttt{recv\_async} then the component is constructed with an internal queue to store messages for processing at a later time. 
+
+In some situations, asynchronous communication might be advantageous. Consider a component whose task is to log data to disk. In order to allow other components to send data to this logger component without waiting for the entire disk write operation to complete (which might be very slow), an asynchronous connection might be used in order to queue the data in memory. In this way, messages sent from components to the logger component will be immediately queued up, allowing those components to continue their normal operation without waiting for the disk write to complete. When the logger executes at some later time (most likely at a lower priority), it will be able to store these messages to disk.
+
+Components in Adamant are constructed with at most one queue to service all asynchronous messages. This design ensures that the component can only wait on a single message stream, simplifying the ability to reason about its behavior. 
+
+Adamant provides two different queue types which can be chosen by a component designer to best fit their use case. The standard Adamant queue is efficient in both space and time, allowing variable sized messages to be stored without any wasted bytes on the queue. Items are dequeued in the same order that they are enqueued (first-in-first-out). Adamant also offers a priority queue for when it is critical to dequeue certain items before others.
+
+\subsubsection{Component Execution}
+
+Components in Adamant are not necessarily associated with a task. A component can be designed to execute only when its connectors are invoked, or it can be given a dedicated task of execution, or it can be constructed to function in both cases. The different component \textit{execution} types are described below:
+
+\begin{itemize}
+  \item \textbf{Passive} - \texttt{Passive} components do not have a thread of their own and are expected to execute on the thread of their connector invokers.
+  \item \textbf{Active} - \texttt{Active} components contain their own thread on which they execute.
+  \item \textbf{Either} - \texttt{Either} components are designed to function either as \texttt{passive} or \texttt{active} components. Which \textit{execution} type a component will get resolved to is decided at the assembly level.
+\end{itemize}
+
+In this paradigm, not all components have their own thread of execution. This makes the component model and the thread model in Adamant distinct and separate, providing flexibility in the way components can be put together and executed in different systems. 
+
+The combination of component queues and component execution creates a few distinct categories of components, all which excel at accomplishing different tasks. Below is a discussion of each pattern.
+
+\begin{itemize}
+  \item \textbf{Passive without Queue} - This type of component will only execute when a caller invokes one of its connectors. This type of component is typically used to provide a synchronous service to other components, such as getting the system time, or updating a parameter database.
+  \item \textbf{Passive with Queue} - Like the \textit{Passive without Queue} component, this component will also only execute when called. However, because it has a queue, this component is typically used to respond to asynchronous messages at a scheduled time. Execution is commonly invoked through a ``schedule" connector, which tells the component to service its queue and possibly do other periodic work. This design is ideal for components that need to be executed with cyclic real-time deadlines, such as a control loop.
+  \item \textbf{Active with Queue} - The default behavior of components that follow this pattern is to block on their queue and only wake up and do work when a message is received asynchronously. This type of component is ideal for components that run in the background and receive asynchronous messages, such as a logger. This default task behavior can be overridden if necessary by the developer, but this should be avoided if possible, since the component diagram will not give insight into this custom behavior.
+  \item \textbf{Active without Queue} - Unlike \textit{Active with Queue} components, there is no default behavior for the \textit{Active without Queue} task. In this case, the developer must define the code which executes on the component's thread. This component pattern is uncommon, and not recommended, since the component's behavior cannot be readily ascertained from its diagram. However, this design might be useful for components that run in the background, but receive no asynchronous input, such as a memory scrubber.
+\end{itemize}
+
+Further discussion on component \textit{execution} is provided in the section \textit{Assemblies}.
+
+\subsubsection{Component Examples}
+
+The truly defining aspect of a component is its interface of connectors. Below is a set of example components which exhibit some common connector patterns useful in embedded software systems. These diagrams contain a box, representing the component, which includes the \textit{type} of the component. Each connector is labeled with its name and the appropriate symbol representing its connector kind. See the \textit{Connectors} section for details on connector kind symbols. Connectors shown on the left side of each diagram are called \textit{invokee} connectors, meaning the behavior of the connection invocation is implemented within the component itself. Connectors on the right side of each diagram are called \textit{invoker} connectors, meaning they initiate the invocation of behaviors within the outside components to which they connect.
+
+% time component
+\begin{figure}[H]
+  \includegraphics[width=0.7\textwidth,left]{../example_architecture/build/eps/example_time.eps}
+  \caption{\texttt{Example\_Time} component which returns the current time when asked}
+\end{figure}
+
+This \texttt{Example\_Time} component has a single \textit{return} connector, which returns the current time upon request. Note that because of the many-to-one relationship for connectors, many different components can connect to the \texttt{Time\_Return} connector to obtain time. The time component does all its work synchronously so does not need an internal queue.
+
+% background logger component
+\begin{figure}[H]
+  \includegraphics[width=0.7\textwidth,left]{../example_architecture/build/eps/example_logger.eps}
+  \caption{\texttt{Example\_Logger} component which logs telemetry to disk}
+\end{figure}
+
+This \texttt{Example\_Logger} component has two asynchronous \textit{invokee} connectors. For this reason, it is created with an internal queue. The purpose of this component is to log telemetry items to disk. Telemetry items come in asynchronously via the \texttt{Data\_Product\_T\_Recv\_Async} connector, and are logged on demand. This component also includes an asynchronous command \textit{invokee} connector for receiving configuration commands. A component like this would most likely be associated with a low priority task that runs in the background.
+
+% rate group divider component
+\begin{figure}[H]
+  \includegraphics[width=1.0\textwidth,center]{../example_architecture/build/eps/example_rate_group.eps}
+  \caption{\texttt{Example\_Rate\_Group} component which takes a tick in (maybe from a hardware interrupt) and schedules the execution a set of components connected to its \textit{invoker} connectors}
+\end{figure}
+
+The \texttt{Example\_Rate\_Group} is useful for scheduling the activity of other components in a system. It takes a single synchronous connector of type \texttt{Tick.T} in at one rate and schedules the execution of components connected to its arrayed \texttt{Tick\_T\_Send} connectors using its internal task. This component could be used to take a 1 Hz hardware driven interrupt and schedule the execution of components throughout the system that need to execute at a 1 Hz cadence. 
+
+Note that each index in a connector array acts the same as a normal connector. Each index could be connected to connectors on disparate components, or to different connectors on the same component, or even to the same connector on the same component.
+
+% command router component
+\begin{figure}[H]
+  \includegraphics[width=1.0\textwidth,center]{../example_architecture/build/eps/example_command_router.eps}
+  \caption{\texttt{Example\_Command\_Router} component which takes in commands and sends them to the appropriate destination component}
+\end{figure}
+
+This \texttt{Example\_Command\_Router} component's job is to take commands asynchronously from an \textit{invokee} connector, determine where that command should be routed to for execution, and then send that command out the correct \textit{invoker} connector. Note that the \texttt{Command\_T\_Send} connector has an array length of \texttt{<>}. This denotes that the size of the array will be determined during the construction of the assembly. The component itself is made more generic by not having to hard code this connector array length into the component model.
+
+% parameters 
+\begin{figure}[H]
+  \includegraphics[width=1.0\textwidth,center]{../example_architecture/build/eps/example_parameters.eps}
+  \caption{\texttt{Example\_Parameters} component which takes requests for parameter values by identifier, and synchronously returns them to the requestor}
+\end{figure}
+
+The \texttt{Example\_Parameters} component's primary task is to push the current value of parameters to components throughout the system. To accomplish this, it has an arrayed \textit{provide} connector through which it sends parameter updates to destination components. The component also includes a connector which allows parameter values to be changed by command. 
+
+% science
+\begin{figure}[H]
+  \includegraphics[width=1.0\textwidth,center]{../example_architecture/build/eps/example_science_component.eps}
+  \caption{\texttt{Example\_Science} component which is scheduled by a tick, produces telemetry, and can be configured by command}
+\end{figure}
+
+The \texttt{Example\_Science} component is more complicated than the rest, since this component might perform the actual function of the mission. In this case, the component's execution is scheduled via a \texttt{Tick\_T\_Recv\_Sync} connector. The component can be configured asynchronously via command, and is expected to produce telemetry. It receives parameter updates through its \texttt{Parameter\_T\_Service} connector. To time stamp the telemetry, this component also has a connection to get time.
+
+In the \textit{Assemblies} section, we will see how all these components can be combined together to form a functioning executable network.
+
+\subsection{Tester Components}
+
+A vital part in proving that a component is ready for deployment and meets its design requirements is unit testing. Because component interfaces are a well defined set of connectors, the testing interface is known. Adamant automatically assists users by generating a tester component from the component model. The resulting tester component contains connectors of the same \textit{type} as the original component but of opposite \textit{kind}. For instance, if a component has a \texttt{get} connector with \textit{return\_type} \texttt{T}, its tester component would be generated with a \texttt{return} component with \textit{return\_type} \texttt{T}. In this way, the tester component can simulate the component's system context during test, and can be used to drive the component through specific testing scenarios. 
+
+As an example, the generated tester component for the \texttt{Example\_Science} component, discussed in the \textit{Components} section, would look like:
+
+\begin{figure}[H]
+  \includegraphics[width=1.0\textwidth,center]{../example_architecture/build/eps/example_science_tester.eps}
+  \caption{The \texttt{Example\_Science\_Tester} component, which has a reciprocal set of connectors to the \texttt{Example\_Science} component}
+\end{figure}
+
+Notice that for every \textit{invoker} connector in the \texttt{Example\_Science} component, there is a compatible \textit{invokee} connector in the \texttt{Example\_Science\_Tester} component. The analogous is true for the \textit{invokee} connectors on the \texttt{Example\_Science} component. Adamant enforces that all tester components be generated with only synchronous \textit{invokee} connectors, so as to not need an internal queue. This eases the orchestration of the test component by the test suite, which makes writing tests easier.
+
+When unit testing commences, the tester component can be asked by the test suite to connect to the component under test. This is shown in an assembly diagram below. Component assemblies in Adamant are discussed in the following section.
+
+\begin{figure}[H]
+  \includegraphics[width=1.0\textwidth,center]{../example_architecture/build/eps/science_to_tester_simple_view.eps}
+  \caption{An assembly diagram showing how the tester component is connected to the component under test}
+\end{figure}
+
+It is important to understand that the tester component itself does not contain unit tests. Rather, it provides the necessary interface to communicate with a component and simulate its execution context. To actually test the component, a developer would create a unit test suite which instantiates a tester component during execution in order to exercise functionality within the component under test. When a tester component is instantiated, it provides not only methods for exercising the component through connectors, it also exposes the component internals, allowing for full ``white-box" testing. This gives the user the ability to verify component execution at a much finer granularity than invoking connectors alone. To speed up test development, Adamant also provides facilities to assist in the generation of scaffolding code for unit test suites, which is discussed in detail in the \textit{User Guide}.
+
+\subsection{Assemblies}
+
+After components have been modeled, implemented, and tested, they are ready to be integrated into an \textit{assembly}. An assembly model identifies the components to be included in a software deployment and the specific connections between them. An integrated assembly of the example components presented in the \textit{Components} section is shown below.
+
+\begin{figure}[H]
+  \includegraphics[width=1.0\textwidth,center]{../example_architecture/build/eps/science_assembly_science_assembly_view.eps}
+  \caption{An assembly diagram showing how components can be connected together}
+\end{figure}
+
+Components in the assembly are labeled with their \textit{name} first, followed by their component \textit{type} on the subsequent line. In this assembly, we can see that the \texttt{rate\_Group\_Instance} component provides a tick to drive the \texttt{science\_Instance} component's execution. Commands are sent from the router to the \texttt{parameters\_Instance}, \texttt{logger\_Instance}, and \texttt{science\_Instance} components. The \texttt{science\_Instance} component also has visible interactions with the \texttt{parameters\_Instance}, \texttt{time\_Instance}, and \texttt{logger\_Instance} components. Each connection maintains its symbol in order to denote the connector \textit{kind} and is labeled with its \textit{type} and/or \textit{return\_type}.
+
+Note that some components in the assembly diagram are outlined in bold, while others are not. The boldness of the outline designates the component's \textit{execution} property as either \texttt{passive} or \texttt{active}. \texttt{Active} components are given a task in which to execute and are bolded in assembly diagrams. Passive components are not given a task, and are expected to be executed on the thread of calling components. In this assembly, there are 6 components, but only three tasks used to orchestrate their execution.
+
+Whether a component is \texttt{active} or \texttt{passive} greatly effects its behavior within an assembly. For instance, component with an internal queue is also \texttt{active}, by default it will block on its queue, waiting for work. When messages arrive asynchronously, it will execute on those messages when it is given time to run by the runtime or operating system scheduler. This design decision is usually good for tasks that are not real-time critical, and need to get work done on-demand in the background. The \texttt{logger\_Instance} component, shown in the assembly above, demonstrates this pattern. Conversely, if a component without a queue is \texttt{passive} and not given a task in which to execute, it must do work on the thread of a calling component. During this execution, the component might process a maximum number of messages from its queue. This is demonstrated by the \texttt{science\_Instance} component, which is called periodically to do work by the \texttt{rate\_Group\_Instance} component. In this scenario, the work done by the \texttt{science\_Instance} component is actually executed on the thread provided by the \texttt{rate\_Group\_Instance} component. When called, the \texttt{science\_Instance} component would perform a set amount of work, responding to commands in its queue and emitting telemetry from its instrument. This second method of scheduling is better for components that need to be executed in a real-time manner, as their execution times can be synced with other timing events throughout the system, and monitored for deadline overruns. 
+
+Besides using assemblies to model the architecture of the entire embedded system, assemblies can also be tailored to address certain needs during testing. For instance, smaller, more focused assemblies can be used during development to answer specific questions, provide insight into trade studies, or to isolate testing to a single subsystem while not worrying about the complexity of the rest of the system. In this way, assemblies are adaptable to the changing needs of a project through its life cycle.
+
+Moreover, because the interfaces of components are very well defined, swapping real components for simulation components in an assembly can easily be achieved. A common use case might be swapping out the real deployment version of a complex component for a simpler one during initial development. For instance a complicated communication component which talks over a 1553 bus could be swapped with a simpler component that communicates over TCP/IP sockets during testing on a development computer or in the absence of communication hardware. Another example might be replacing a small network of components, say a set of components which interact with a science instrument, with a single component that simulates that science instrument in order to validate the remainder of the system. Finally, different components which perform the same task can be designed specifically for execution on different architectures. The choice of which component to use for a particular test or production deployment depends on the target hardware. The rest of the system can remain unchanged. The swappable nature of components supplies an endless myriad of possible solutions when it comes to developing reliable software in the face of unknown or unavailable hardware, differing interfaces, and evolving requirements.
+
+\subsection{Views}
+
+The assembly diagram shown in the previous section is admittedly complex, even for the very simple network of components presented. In order to provide a more digestible way of consuming the information in an assembly model, the concept of assembly \textit{views} is introduced. A view is a diagram that only shows a subset of the entire assembly model in order to demonstrate a particular point to a set of stakeholders. Because a view is focused, and not cluttered by information that may distract from its main message, it is usually more adept at presenting certain aspects of the architecture. A collection of views can generally communicate architectural ideas much more effectively than an entire assembly diagram, making for more relevant discussions and more valuable design reviews.
+
+For example, a view of the previous assembly model can be created that shows only the command paths of the architecture.
+
+\begin{figure}[H]
+  \includegraphics[width=1.0\textwidth,center]{../example_architecture/build/eps/science_assembly_command_view.eps}
+  \caption{A view diagram isolating the command path of the assembly}
+\end{figure}
+
+This view clearly shows that there are three command paths, all originating from the \texttt{command\_Router\_Instance} and ending in three components responsible for executing commands.
+
+Another example of a view might be one that shows the assembly from the context of a single component. For instance, below is a view that shows the \texttt{parameters\_Instance} component and every other component that interacts with it directly.
+
+\begin{figure}[H]
+  \includegraphics[width=1.0\textwidth,center]{../example_architecture/build/eps/science_assembly_parameters_view.eps}
+  \caption{A view diagram showing all connections made to the \texttt{parameters\_Instance} component}
+\end{figure}
+
+Views can be created to show any subset of information available in the assembly. They are generated by creating a view model, in which a designer specifies which architectural entities they are interested in showing or which entities they wish to exclude.
+
+\section{Conclusion}
+
+The Adamant framework provides many facilities to aid in the development of real-time, embedded systems. Its component-based architecture allows for the encapsulation of behaviors within independent modules. Components can be designed such that they are reusable between projects, and are easily swappable for compatible components when reuse is not possible. All of the component descriptions and the connections between them are documented in textual models which can readily generate diagrams of the system. This visual representation of the architecture is guaranteed to be directly reflected in the actual software implementation through the use of code generation from the same textual models. For these reasons, the component-based, model-backed architecture provided by the Adamant framework provides many advantages over standard embedded software development practices.
+
+\end{document}

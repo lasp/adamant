@@ -1,0 +1,15 @@
+---
+description: This is a packed record named B
+preamble:
+  subtype E2_Type is Natural range 1 .. 1000;
+fields:
+  - name: element
+    description: The element
+    type: Natural
+    default: "0"
+    format: U32
+  - name: element2
+    description: The element
+    type: E2_Type
+    default: "1"
+    format: U32

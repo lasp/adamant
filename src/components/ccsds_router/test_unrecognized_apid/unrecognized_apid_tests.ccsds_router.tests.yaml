@@ -1,0 +1,7 @@
+---
+description: This is a unit test suite for the CCSDS Router, when the unrecognized apid connector is connected.
+tests:
+  - name: Test_Unrecognized_Id
+    description: This unit test makes sure that packets with APIDs not found in the routing table are forwarded and reported appropriately.
+  - name: Test_Unrecognized_Id_No_Report
+    description: This unit test makes sure that packets with APIDs not found in the routing table are forwarded and not reported appropriately.

@@ -1,0 +1,54 @@
+---
+events:
+  - name: Parameter_Update_Success
+    description: A parameter value was updated.
+    param_type: Parameter_Id.T
+  - name: Parameter_Update_Id_Not_Recognized
+    description: A parameter value could not be updated because the ID is not recognized.
+    param_type: Parameter_Id.T
+  - name: Parameter_Stage_Failed
+    description: A parameter value could not be updated.
+    param_type: Parameter_Operation_Status.T
+  - name: Parameter_Update_Failed
+    description: A parameter value could not be updated.
+    param_type: Parameter_Operation_Status.T
+  - name: Parameter_Fetch_Failed
+    description: A parameter value could not be updated.
+    param_type: Parameter_Operation_Status.T
+  - name: Parameter_Fetch_Length_Mismatch
+    description: A parameter was fetched but contained an unexpected length.
+    param_type: Invalid_Parameter_Length.T
+  - name: Parameter_Update_Length_Mismatch
+    description: A parameter command was received to update a parameter but it contained an unexpected length.
+    param_type: Invalid_Parameter_Length.T
+  - name: Memory_Region_Length_Mismatch
+    description: A memory region was received with an invalid length. The length of the region must be the same size as the parameter table.
+    param_type: Invalid_Parameters_Memory_Region_Length.T
+  - name: Memory_Region_Crc_Invalid
+    description: A memory region parameter table was received with an invalid CRC. The computed CRC does not match the CRC found in the header.
+    param_type: Invalid_Parameters_Memory_Region_Crc.T
+  - name: Dumping_Parameters
+    description: Producing a packet with the currently staged parameter values contained within connected components.
+  - name: Finished_Dumping_Parameters
+    description: Done dumping the parameters.
+  - name: Starting_Parameter_Table_Update
+    description: Starting updating of the parameters from a received memory region.
+    param_type: Memory_Region.T
+  - name: Finished_Parameter_Table_Update
+    description: Done updating the parameters from a received memory region with following status.
+    param_type: Parameters_Memory_Region_Release.T
+  - name: Starting_Parameter_Table_Fetch
+    description: Starting updating of the parameters from a received memory region.
+    param_type: Memory_Region.T
+  - name: Finished_Parameter_Table_Fetch
+    description: Done updating the parameters from a received memory region with following status.
+    param_type: Parameters_Memory_Region_Release.T
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T
+  - name: Command_Dropped
+    description: A command was dropped due to a full queue.
+    param_type: Command_Header.T
+  - name: Memory_Region_Dropped
+    description: A memory region was dropped due to a full queue.
+    param_type: Parameters_Memory_Region.T

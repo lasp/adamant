@@ -1,0 +1,8 @@
+seq 15
+  ;
+  ; This sequence kills engines 7 through 10.
+  ;
+
+  ; Send valid kill:
+  kill engine 7 3
+endseq

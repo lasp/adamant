@@ -1,0 +1,23 @@
+---
+# Optional - description of packet suite
+description: A set of packets for the Packet Component.
+# Required - list of packets included in the packet suite
+packets:
+    # Required - the name of the packet
+  - name: Last_Tick_Received
+    # Optional - a description of the packet
+    description: A last tick that was received by the component.
+    # Optional - the type of the packet
+    type: Tick.T
+    # Optional - a statically defined ID for the packet
+    # If this is specified, then IDs must be specified for
+    # EVERY packet in this packet suite. The Set_Id_Base
+    # procedure will then NOT be used to set the packet IDs.
+    #
+    # If this is not specified, then NO packets in this packet
+    # suite may specify an ID. In this case the Set_Id_Base
+    # procedure will be used to set the packed IDs.
+    id: 17
+  - name: Counter
+    description: A packet containing an incrementing 16-bit counter.
+    id: 5

@@ -1,0 +1,17 @@
+---
+events:
+  - name: Invalid_Memory_Region
+    description: A command was sent to access a memory region with an invalid address and/or length.
+    param_type: Memory_Region_Positive.T
+  - name: Dumping_Memory
+    description: The component is currently dumping the memory location for the following region.
+    param_type: Memory_Region_Positive.T
+  - name: Crcing_Memory
+    description: The component is currently CRCing the memory location for the following region.
+    param_type: Memory_Region_Positive.T
+  - name: Memory_Crc
+    description: The memory region CRC has been calculated.
+    param_type: Memory_Region_Crc.T
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T

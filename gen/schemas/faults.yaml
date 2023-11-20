@@ -1,0 +1,38 @@
+---
+# This schema describes the yaml format for a fault suite.
+type: map
+mapping:
+  # Description of the fault suite.
+  description:
+    type: str
+    required: False
+  # List of faults to include in the suite.
+  faults:
+    seq:
+      - type: map
+        mapping:
+          # Name of the fault.
+          name:
+            type: str
+            required: True
+          # Description of the fault.
+          description:
+            type: str
+            required: False
+          # Identifier for the fault. This is optional, but if provided for one
+          # fault, must be provided for all faults. If not provided then faults
+          # IDs will be set via the Set_Id_Base initialization funciton. If IDs
+          # are provided, then fault IDs are static.
+          id:
+            type: int
+            required: False
+          # If the fault contains parameters, provide a single Ada type
+          # that contains all of the parameters. Using a packed record or packed
+          # array type is recommended here.
+          param_type:
+            type: str
+            required: False
+    # A fault suite must have at least one fault.
+    range:
+      min: 1
+    required: True

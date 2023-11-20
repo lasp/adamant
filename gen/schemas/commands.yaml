@@ -1,0 +1,31 @@
+---
+# This schema describes the yaml format for a command suite.
+type: map
+mapping:
+  # Description of the command suite.
+  description:
+    type: str
+    required: False
+  # List of commands to include in the suite.
+  commands:
+    seq:
+      - type: map
+        mapping:
+          # Name (mnemonic) of the command.
+          name:
+            type: str
+            required: True
+          # Description of the command.
+          description:
+            type: str
+            required: False
+          # If the command contains arguments, provide a single Ada type
+          # that contains all of the arguments. Using a packed record or packed
+          # array type is recommended here.
+          arg_type:
+            type: str
+            required: False
+    # A command suite must have at least one command.
+    range:
+      min: 1
+    required: True

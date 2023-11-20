@@ -1,0 +1,36 @@
+---
+description: These are enumerations defined in the CCSDS packet standard.
+enums:
+  - name: Ccsds_Sequence_Flag
+    description: This flag provides a method for defining whether this packet is a first, last, or intermediate component of a higher layer data structure.
+    literals:
+      - name: ContinuationSegment
+        value: 0 # 2#00#
+        description: Continuation component of higher data structure
+      - name: FirstSegment
+        value: 1 # 2#01#
+        description: First component of higher data structure
+      - name: LastSegment
+        value: 2 # 2#10#
+        description: Last component of higher data structure
+      - name: Unsegmented
+        value: 3 # 2#11#
+        description: Standalone packet
+  - name: Ccsds_Packet_Type
+    description: This single bit is used to identify that this is a Telecommand Packet or a Telemetry Packet. A Telemetry Packet has this bit set to value 0; therefore, for all Telecommand Packets Bit 3 shall be set to value 1.
+    literals:
+      - name: Telemetry
+        value: 0
+        description: Indicates a telemetry packet
+      - name: Telecommand
+        value: 1
+        description: Indicates a telecommand packet
+  - name: Ccsds_Secondary_Header_Indicator
+    description: This one bit flag signals the presence (Bit 4 = 1) or absence (Bit 4 = 0) of a Secondary Header data structure within the packet.
+    literals:
+      - name: Secondary_Header_Not_Present
+        value: 0
+        description: Indicates that the secondary header is not present within the packet
+      - name: Secondary_Header_Present
+        value: 1
+        description: Indicates that the secondary header is present within the packet

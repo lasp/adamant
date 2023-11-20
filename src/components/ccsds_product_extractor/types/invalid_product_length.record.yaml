@@ -1,0 +1,15 @@
+---
+description: This record contains information for an event when a product could not be extacted from a packet because the offset and length of the data type exceeded the length of the packet.
+fields:
+  - name: Id
+    description: The data product Id that was attempted to be extracted.
+    type: Data_Product_Types.Data_Product_Id
+    format: U16
+  - name: Apid
+    description: The Apid of the packet that the data product could not be extacted from
+    type: Ccsds_Primary_Header.Ccsds_Apid_Type
+    format: U16
+  - name: Length
+    description: Length of the packet that failed due to the offset exceeding the length of the packet
+    type: Interfaces.Unsigned_16
+    format: U16

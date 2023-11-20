@@ -1,0 +1,10 @@
+---
+description: Packed record which holds summary information about a stored stack trace.
+fields:
+  - name: Stack_Trace_Depth
+    description: The depth of the reported stack trace.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Stack_Trace_Bottom_Address
+    description: The bottom stack trace address.
+    type: Packed_Address.T

@@ -1,0 +1,162 @@
+---
+# Optional - A description for the assembly
+description: This is the example assembly.
+# Required - A list of components included in the assembly
+components:
+    # Required - The component type, this is the name of the
+    # component model.
+  - type: example_rate_group
+    # Optional - The component name. If not specified the
+    # component will be the component type name followed by
+    # "_Instance"
+    name: rate_group_instance
+    # Optional - This is only required when the component
+    # model specifies the execution as "either". If specified,
+    # this must not conflict with the component model's
+    # definition of "execution".
+    execution: active
+    # Required (only for "active" components) - specify the
+    # Ada scheduling priority for this component's task.
+    priority: 3
+    # Required (only for "active" components) - specify the
+    # task primary stack size in bytes.
+    stack_size: 3000
+    # Required (only for "active" components) - specify the
+    # task secondary stack size in bytes.
+    secondary_stack_size: 1000
+    # Required (only for components that have an "init_base"
+    # procedure) - specify the init_base parameter values as
+    # key value pairs.
+    init_base:
+      - "queue_Size => 1000" # in bytes
+  - type: example_command_router
+    name: command_router_instance
+    execution: active
+    priority: 2
+    stack_size: 3000
+    secondary_stack_size: 1000
+    # Required (only for components that have an "init_base"
+    # procedure) - specify the init_base parameter values as
+    # key value pairs.
+    init_base:
+      - "queue_Size => 1000" # in bytes
+      - "command_T_Send_Count => 3"
+  - type: example_science
+    name: science_instance
+    init_base:
+      - "queue_Size => 1000" # in bytes
+    # Optional - declare the base id for an ided entity
+    # suite. If not declared, or a parameter is omitted,
+    # then Adamant will automatically figure out the base
+    # id to use, selectin the lowest remaining ID
+    # avaialable.
+    set_id_bases:
+      - "data_Product_Id_Base => 100"
+    # Required (only for components that have a data_dependencies
+    # model) - specify the data products that map to the data
+    # dependencies
+    map_data_dependencies:
+      - data_dependency: sensor_1_Reading
+        data_product: data_Collector_Instance.Sensor_1_Data
+        stale_limit_us: 1000000
+      - data_dependency: sensor_2_Reading
+        data_product: data_Collector_Instance.Sensor_2_Data
+        stale_limit_us: 1000000
+  - type: example_time
+    name: time_instance
+    discriminant:
+      - "time_Source => Example_Time.Software"
+  - type: example_parameters
+    name: parameters_instance
+    init_base:
+      - "parameter_Update_T_Provide_Count => 1"
+  - type: example_logger
+    name: logger_instance
+    priority: 1
+    stack_size: 3000
+    secondary_stack_size: 1000
+    init_base:
+      - "queue_Size => 1000" # in bytes
+    # Required (only for components that have an "init"
+    # procedure) - specify the init parameter values as
+    # key value pairs.
+    init:
+      - "is_Enabled => True"
+  - type: example_data_collector
+    name: data_collector_instance
+  - type: example_database
+    name: database_instance
+connections:
+    # Required - The invoker component the connection is called
+    # from. This must be the component instance name, not the
+    # component type name.
+  - from_component: Rate_Group_Instance
+    # Required - The invoker connector the connection originates
+    # from.
+    from_connector: Tick_T_Send
+    # Required - The invokee component the connection connects to.
+    # This must be the component instance name, not the component
+    # type name.
+    to_component: Data_Collector_Instance
+    # Required (only for arrayed connectors) - The array index the
+    # connection connects from. This is a number between 1 and the
+    # size of the arrayed connector.
+    from_index: 1
+    # Required - The invokee connector the connection terminates
+    # at.
+    to_connector: Tick_T_Recv_Sync
+    # Optional - a description explaining this connection
+    description: This is the first connection in the model
+  # Science connections:
+  - from_component: Rate_Group_Instance
+    from_connector: Tick_T_Send
+    from_index: 2
+    to_component: Science_Instance
+    to_connector: Tick_T_Recv_Sync
+    description: This is the first connection in the model
+  - from_component: Command_Router_Instance
+    from_connector: Command_T_Send
+    from_index: 1
+    to_component: Science_Instance
+    to_connector: Command_T_Recv_Async
+  - from_component: Science_Instance
+    from_connector: Sys_Time_T_Get
+    to_component: Time_Instance
+    to_connector: Sys_Time_T_Return
+  - from_component: Parameters_Instance
+    from_connector: Parameter_Update_T_Provide
+    to_component: Science_Instance
+    to_connector: Parameter_Update_T_Modify
+  - from_component: Science_Instance
+    from_connector: Data_Product_T_Send
+    to_component: Logger_Instance
+    to_connector: Data_Product_T_Recv_Async
+  - from_component: Science_Instance
+    from_connector: Data_Product_Fetch_T_Request
+    to_component: Database_Instance
+    to_connector: Data_Product_Fetch_T_Service
+  - from_component: Command_Router_Instance
+    from_connector: Command_T_Send
+    from_index: 2
+    to_component: Logger_Instance
+    to_connector: Command_T_Recv_Async
+  - from_component: Command_Router_Instance
+    from_connector: Command_T_Send
+    from_index: 3
+    to_component: Parameters_Instance
+    to_connector: Command_T_Recv_Sync
+  # Data collector connections:
+  - from_component: Data_Collector_Instance
+    from_connector: Sys_Time_T_Get
+    to_component: Time_Instance
+    to_connector: Sys_Time_T_Return
+  - from_component: Data_Collector_Instance
+    from_connector: Data_Product_T_Send
+    to_component: Database_Instance
+    to_connector: Data_Product_T_Recv_Sync
+  # This pattern is used to turn off the Adamant warning for an unconnected
+  # connector:
+  - from_component: ignore
+    from_connector: ignore
+    to_component: command_Router_Instance
+    to_connector: Command_T_Recv_Async

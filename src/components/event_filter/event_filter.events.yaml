@@ -1,0 +1,35 @@
+---
+events:
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T
+  - name: Filtered_Event
+    description: This event indicates that the state of an event was set to enabled for the filter.
+    param_type: Event_Filter_Single_Event_Cmd_Type.T
+  - name: Unfiltered_Event
+    description: This event indicates that the state of an event was set to disabled for the filter.
+    param_type: Event_Filter_Single_Event_Cmd_Type.T
+  - name: Filtered_Event_Range
+    description: This event indicates that the state of a range of events were set to enabled for the filter.
+    param_type: Event_Filter_Id_Range.T
+  - name: Unfiltered_Event_Range
+    description: This event indicates that the state of a range of events were set to disabled for the filter.
+    param_type: Event_Filter_Id_Range.T
+  - name: Enable_Event_Filter
+    description: This event indicates that the state of all events were set to enabled for the filter, but kept the internal state.
+  - name: Disable_Event_Filter
+    description: This event indicates that the state of all events were set to disabled for the filter, but kept the internal state.
+  - name: Filter_Event_Invalid_Id
+    description: This event indicates that the command to change the event state to enabled failed since the event ID was out of range.
+    param_type: Event_Filter_Single_Event_Cmd_Type.T
+  - name: Unfilter_Event_Invalid_Id
+    description: This event indicates that the command to change the event state to disable failed since the event ID was out of range.
+    param_type: Event_Filter_Single_Event_Cmd_Type.T
+  - name: Filter_Event_Range_Invalid_Id
+    description: This event indicates that changing the state for the range to enabled, failed due to an invalid id.
+    param_type: Event_Filter_Id_Range.T
+  - name: Unfilter_Event_Range_Invalid_Id
+    description: This event indicates that changing the state for the range to disabled, failed due to an invalid id.
+    param_type: Event_Filter_Id_Range.T
+  - name: Dump_Event_States_Recieved
+    description: Event that indicates the process of building the packet that stores the event states has started and will send the packet once we go through a decrement cycle.

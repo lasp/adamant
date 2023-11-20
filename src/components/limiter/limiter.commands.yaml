@@ -1,0 +1,6 @@
+---
+description: These are the commands for the limiter component.
+commands:
+  - name: Sends_Per_Tick
+    arg_type: Packed_U16.T
+    description: Set a new value for the maximum number of sends this component will produce per tick.

@@ -1,0 +1,41 @@
+---
+events:
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T
+  - name: Events_Limited_Since_Last_Tick
+    description: An event that indicates how many events have been limited as well as up to the first 10 ids of those events. The event ids listed may not have been dropped, but are at listed since they are at the current max limit.
+    param_type: Event_Limiter_Num_Events_Type.T
+  - name: Event_Limit_Enabled
+    description: This event indicates that the state of an event was set to enabled for the limiter.
+    param_type: Event_Single_State_Cmd_Type.T
+  - name: Event_Limit_Disabled
+    description: This event indicates that the state of an event was set to disabled for the limiter.
+    param_type: Event_Single_State_Cmd_Type.T
+  - name: Event_Limit_Range_Enabled
+    description: This event indicates that the state of a range of events were set to enabled for the limiter.
+    param_type: Event_Limiter_Id_Range.T
+  - name: Event_Limit_Range_Disabled
+    description: This event indicates that the state of a range of events were set to disabled for the limiter.
+    param_type: Event_Limiter_Id_Range.T
+  - name: Event_Limiting_Enabled
+    description: This event indicates that the state of all events were set to enabled for the limiter.
+  - name: Event_Limiting_Disabled
+    description: This event indicates that the state of all events were set to disabled for the limiter.
+  - name: Event_Limit_Enable_Invalid_Id
+    description: This event indicates that the command to change the event state to enabled failed since the event ID was out of range.
+    param_type: Event_Single_State_Cmd_Type.T
+  - name: Event_Limit_Disable_Invalid_Id
+    description: This event indicates that the command to change the event state to disable failed since the event ID was out of range.
+    param_type: Event_Single_State_Cmd_Type.T
+  - name: Event_Limit_Range_Enabled_Invalid_Id
+    description: This event indicates that changing the state for the range to enabled, failed due to an invalid id.
+    param_type: Event_Limiter_Id_Range.T
+  - name: Event_Limit_Range_Disabled_Invalid_Id
+    description: This event indicates that changing the state for the range to disabled, failed due to an invalid id.
+    param_type: Event_Limiter_Id_Range.T
+  - name: Set_New_Persistence
+    description: Indicates that the persistence of the number of events until we limit was changed to a new value between 1 and 7.
+    param_type: Event_Limiter_Persistence_Type.T
+  - name: Dump_Event_States_Recieved
+    description: Event that indicates the process of building the packet that stores the event states has started and will send the packet once we go through a decrement cycle.

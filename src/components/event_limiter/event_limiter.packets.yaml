@@ -1,0 +1,6 @@
+---
+description: Packet to dump the event state of all events. Each event state takes one bit.
+packets:
+  - name: Event_Limiter_State_Packet
+    description: The packet used to dump all the state information for which events are limited and which are not. Each event takes a bit and any extra bits beyond the event range will show as disabled.
+

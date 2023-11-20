@@ -1,0 +1,9 @@
+---
+description: Record which holds timing reports for the all-time maximum and recent maximum of an executing task
+fields:
+  - name: Max
+    description: The maximum recorded timing report since start up.
+    type: Timing_Report.T
+  - name: Recent_Max
+    description: The maximum recorded timing report during some recent time invterval.
+    type: Timing_Report.T

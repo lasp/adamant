@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pageDef>
+  <updateRate ms="1000"/>
+  <page title="Component Queue Monitor">
+    <column>
+      <section name="Queue Usage Packet Header:">
+        <row label="Apid:" item="Ccsds-Queue_Monitor_Instance-Queue_Usage_Packet-Ccsds_Primary_Header-Apid"/>
+        <row label="Packet Length:" item="Ccsds-Queue_Monitor_Instance-Queue_Usage_Packet-Ccsds_Primary_Header-Packet_Length"/>
+        <row label="Sequence Count:" item="Ccsds-Queue_Monitor_Instance-Queue_Usage_Packet-Ccsds_Primary_Header-Sequence_Count"/>
+        <row label="Timestamp (sec):" item="Ccsds-Queue_Monitor_Instance-Queue_Usage_Packet-Sys_Time-Seconds"/>
+        <row label="Timestamp (subsec):" item="Ccsds-Queue_Monitor_Instance-Queue_Usage_Packet-Sys_Time-Subseconds"/>
+      </section>
+      <table>
+        <tableTitle name="Component Queue Usage %:"/>
+        <tableHeading>
+          <label name="Current Usage %     "/>
+          <label name="Maximum Usage %     "/>
+        </tableHeading>
+{% set count = namespace(index=0) %}
+{% for component in component_kind_dict["queued"] %}
+        <tableRow>
+          <label name="{{ component.instance_name }}"/>
+          <item name="Ccsds-Queue_Monitor_Instance-Queue_Usage_Packet-{{ component.instance_name }}_Current_Usage"/>
+          <item name="Ccsds-Queue_Monitor_Instance-Queue_Usage_Packet-{{ component.instance_name }}_Maximum_Usage"/>
+        </tableRow>
+{% set count.index = count.index + 2 %}
+{% endfor %}
+      </table>
+    </column>
+  </page>
+</pageDef>

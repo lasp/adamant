@@ -1,0 +1,55 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; This is the SEQ configuration file generated for the {{ name }} Assembly
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;
+; Adamant-specific Sequencer Config:
+;
+
+maxBufferSize 65536
+maxVariables local 16
+maxVariables global 0
+maxVariables engines 10
+headerFormat adamant
+callFormat adamant
+tlmSubscribe false
+
+;
+; Sequencer Command Definitions for the {{ name }} Assembly:
+;
+
+{% for id, command in commands.items() %}
+; 0x{{ '%04x' % id }} ({{ id }}) - {{ command.suite.component.instance_name }}.{{ command.name }}:
+{% if command.type %}{% set param_size = (((command.type_model.flatten() | sum(attribute='size'))/8) | int) %}{% endif %}
+userCmd {{ command.suite.component.instance_name }}.{{ command.name }} pattern 0000{{ '%04x' % id }}{% if command.type %}{{ '%02x' %  param_size }}{% else %}00{% endif %}{% if command.type %}{% for i in range(0,param_size) %}00{% endfor %}{% endif %}
+
+{% if command.type %}{% set start_bit = namespace(value=40) %}{% for field in command.type_model.flatten() %}
+userCmd {{ command.suite.component.instance_name }}.{{ command.name }} parameter {{ field.name }} {{ field.size }} {{ start_bit.value }} {{ field.format.get_seq_type_string() }}
+{% if field.format.get_seq_type_string() == 'D' %}
+{% for literal in field.literals %}
+userCmd {{ command.suite.component.instance_name }}.{{ command.name }} parameterState {{ field.name }} {{ literal.name }} {{ literal.value }}
+{% endfor %}
+{% endif %}
+{% set start_bit.value = start_bit.value + field.size %}
+{% endfor %}{% endif %}
+
+{% endfor %}
+
+;
+; Sequencer Telemetry Definitions for the {{ name }} Assembly:
+;
+
+{% for id, dp in data_products.items() %}
+; 0x{{ '%04x' % id }} ({{ id }}) - {{ dp.suite.component.instance_name }}.{{ dp.name }}:
+{% set start_bit = namespace(value=0) %}
+{% for field_name, field in dp.type_model.flatten_dict().items() %}
+userTlm {{ dp.suite.component.instance_name }}.{{ dp.name }}.{{ field_name }} details 0x{{ '%04x' % id }} {{ field.size }} {{ start_bit.value }} {{ field.format.get_seq_type_string() }}
+{% if field.format.get_seq_type_string() == 'D' %}
+{% for literal in field.literals %}
+userTlm {{ dp.suite.component.instance_name }}.{{ dp.name }}.{{ field_name }} state {{ literal.name }} {{ literal.value }}
+{% endfor %}
+{% endif %}
+{% set start_bit.value = start_bit.value + field.size %}
+{% endfor %}
+
+{% endfor %}

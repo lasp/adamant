@@ -1,0 +1,7 @@
+---
+description: Packed record holding a boolean type.
+fields:
+  - name: Value
+    description: The boolean value.
+    type: Boolean
+    format: E8

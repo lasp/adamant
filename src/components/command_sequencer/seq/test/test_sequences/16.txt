@@ -1,0 +1,49 @@
+seq 16
+  ;
+  ; This sequence does a variety of things.
+  ;
+
+  declare ui u32
+  declare si i32
+  declare si2 i32
+  declare ui2 u32
+  declare fl f32
+  set $ui = 1234
+  set $si = $ui
+  set $ui = $si
+  set $fl = $si
+  set $fl = $ui
+  set $si2 = 0
+  set $ui2 = 0
+
+  ; Not supported in compiler currently
+  ; set $ui = $fl
+  ; set $si = $fl + $si
+
+  set $si = -5
+  while $si != $si2
+    set $si = $si + 1
+  endwhile
+
+  spawn 5
+  start 6
+
+  switch $ui2
+    case 0
+      set $si = $ui
+      break
+    case 1
+      set $si = 18
+      break
+    default
+      set $si = 33
+      break
+  endswitch
+
+  if $ui != $si
+    return 1
+  else
+    return 2
+  endif
+
+endseq

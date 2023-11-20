@@ -1,0 +1,7 @@
+---
+description: Packed record used for holding a parameter Id.
+fields:
+  - name: Id
+    description: The parameter identifier
+    type: Parameter_Types.Parameter_Id
+    format: U16

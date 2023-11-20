@@ -1,0 +1,14 @@
+---
+description: This is an assembly for testing the CCSDS Downsampler component.
+with:
+  - Test_Downsample_List
+########################################
+components:
+########################################
+  - type: Ccsds_Downsampler
+    init:
+      - "Downsample_List => Test_Downsample_List.Downsample_List'Access"
+    priority: 1
+    stack_size: 5000
+    secondary_stack_size: 5000
+    # Leave connector 4 unconnected to test unconnected connectors.

@@ -1,0 +1,7 @@
+---
+description: This is a unit test suite for the CPU Monitor component. Testing the actual correctness of the produced CPU monitor packet is not easy to do at the unit test level. This will be done at an integrated test level. The unit tests below make sure commanding and packet generation of the component works as expected.
+tests:
+  - name: Test_Packet_Period
+    description: This unit test excersizes the command to change the packet creation rate.
+  - name: Test_Invalid_Command
+    description: This unit test makes sure an invalid command is reported and ignored.

@@ -1,0 +1,9 @@
+---
+description: This is a unit test suite for the Zero Divider component.
+tests:
+  - name: Test_Bad_Magic_Number
+    description: This unit test makes sure the Divide_By_Zero command does not execute if the correct magic number is not provided.
+  - name: Test_Divide_By_Zero
+    description: This unit test makes sure a constraint error is thrown when the divide by zero command executes.
+  - name: Test_Invalid_Command
+    description: This unit test makes sure an invalid command is rejected.

@@ -1,0 +1,9 @@
+---
+description: Data products for the Example Data Collector Component.
+data_products:
+  - name: Sensor_1_Data
+    description: Sensor data value 1.
+    type: Packed_U32.T
+  - name: Sensor_2_Data
+    description: Sensor data value 2.
+    type: Packed_U32.T

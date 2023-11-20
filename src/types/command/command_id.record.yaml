@@ -1,0 +1,9 @@
+---
+description: A packed record which holds a command identifier.
+with:
+  - Command_Types
+fields:
+  - name: Id
+    description: The command identifier
+    type: Command_Types.Command_Id
+    format: U16

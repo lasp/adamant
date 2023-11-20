@@ -1,0 +1,31 @@
+---
+description: This is the example assembly.
+components:
+  - type: example_component
+    init_base:
+      - "packet_T_Send_Count => 3"
+  - type: example_tester
+connections:
+  - from_component: Example_Tester_Instance
+    from_connector: Tick_T_Send
+    to_component: Example_Component_Instance
+    to_connector: Tick_T_Recv_Sync
+  - from_component: Example_Component_Instance
+    from_connector: Sys_Time_T_Get
+    to_component: Example_Tester_Instance
+    to_connector: Sys_Time_T_Return
+  - from_component: Example_Component_Instance
+    from_connector: Packet_T_Send
+    from_index: 1
+    to_component: Example_Tester_Instance
+    to_connector: Packet_T_Recv_Sync
+  - from_component: Example_Component_Instance
+    from_connector: Packet_T_Send
+    from_index: 2
+    to_component: Example_Tester_Instance
+    to_connector: Packet_T_Recv_Sync
+  - from_component: Example_Component_Instance
+    from_connector: Packet_T_Send
+    from_index: 3
+    to_component: Example_Tester_Instance
+    to_connector: Packet_T_Recv_Sync

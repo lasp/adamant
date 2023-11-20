@@ -1,0 +1,8 @@
+---
+events:
+  - name: Event_1
+    param_type: Tick.T
+  - name: Event_2
+    param_type: Tick.T
+  - name: Event_3
+    param_type: Tick.T

@@ -1,0 +1,36 @@
+seq complex_command_22
+  ;
+  ; Simple sequence that just sends a series of commands with complex arguments on after the other.
+  ;
+
+  ; First let's do it with variables.
+  declare a u8
+  set $a = 3; numeric value for Green
+  declare b f32
+  set $b = -3.33
+  declare c i16
+  set $c = 30
+  cmd Component_A.Command_4 A $a B $b C $c
+  cmd Component_A.Command_4 A $a B -3.33 C $c
+  cmd Component_A.Command_4 A Green B $b C $c
+  cmd Component_A.Command_4 A $a B $b C 30
+
+  ; Now let's try it statically.
+  cmd Component_A.Command_4 A Red B 0 C 0
+  cmd Component_A.Command_4 A Red B 2.22 C 17
+  cmd Component_B.Command_4 A Green B -2.22 C 1
+  cmd Component_A.Command_4 A Blue B 0.5 C 12
+
+  ; Try the second command.
+  cmd Component_A.Command_5 A True B -14 C 989
+  cmd Component_A.Command_5 A False B 12 C 0
+  set $a = 1
+  set $c = 44
+  declare d i32
+  set $d = -13
+  cmd Component_A.Command_5 A True B -13 C 44
+  cmd Component_A.Command_5 A True B -13 C $c
+  cmd Component_A.Command_5 A $a B -13 C 44
+  cmd Component_A.Command_5 A True B $d C 44
+  cmd Component_A.Command_5 A $a B $d C $c
+endseq

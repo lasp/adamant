@@ -1,0 +1,22 @@
+---
+description: A packed record for the store var instruction. Opcode 10.
+fields:
+  - name: Opcode
+    description: Instruction code
+    type: Basic_Types.Byte
+    format: U8
+  - name: Pad1
+    description: Padding
+    type: Basic_Types.Byte
+    format: U8
+  - name: Pad2
+    description: Padding
+    type: Basic_Types.Byte
+    format: U8
+  - name: Pad3
+    description: Padding
+    type: Basic_Types.Byte
+    format: U8
+  - name: Var_Info
+    description: An area for information about the encoded variable. See var_record.record.yaml.
+    type: Var_Record.T

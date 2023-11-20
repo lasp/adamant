@@ -1,0 +1,52 @@
+---
+description: This is a simple component with an arrayed invokee connector of every kind.
+execution: passive
+connectors:
+  - description: The arrayed recv sync connector
+    type: Aa.T
+    kind: recv_sync
+    count: 4
+  - description: The arrayed recv async connector
+    type: Aa.T
+    kind: recv_async
+    count: 4
+  - description: The arrayed service connector
+    type: Aa.T
+    return_type: Bb.T
+    kind: service
+    count: 4
+  - description: The arrayed modify connector
+    type: Aa.T
+    kind: modify
+    count: 4
+  - description: The arrayed return connector
+    return_type: Bb.T
+    kind: return
+    count: 4
+  - description: The n arrayed recv sync connector
+    type: Aa.T
+    kind: recv_sync
+    count: 0
+  - description: The n arrayed recv async connector
+    type: Aa.T
+    kind: recv_async
+    count: 0
+  - description: The n arrayed service connector
+    type: Aa.T
+    return_type: Bb.T
+    kind: service
+    count: 0
+  - description: The n arrayed modify connector
+    type: Aa.T
+    kind: modify
+    count: 0
+  - description: The n arrayed return connector
+    return_type: Bb.T
+    kind: return
+    count: 0
+  - description: The send connector 1 for unit testing.
+    type: Packed_Connector_Index.T
+    kind: send
+  - description: The send connector 1 for unit testing.
+    type: Aa.T
+    kind: send

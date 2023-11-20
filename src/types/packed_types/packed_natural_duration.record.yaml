@@ -1,0 +1,7 @@
+---
+description: Single component record for holding packed Natural value that represents a duration.
+fields:
+  - name: Duration
+    description: The 32-bit Natural that represents a duration.
+    type: Natural
+    format: U32

@@ -1,0 +1,28 @@
+---
+description: This component receives CCSDS packets, validates the data within them, and converts them into Adamant commands. Note that the only internal state that this component contains is a packet accept and packet reject count. The component assumes that only a single task is attached to its CCSDS Space Packet invokee connector, and thus these counters are unprotected. If more than one task is attached to the input, a race condition arises around the counters, which may need to become protected.
+execution: passive
+connectors:
+  - description: The ccsds packet receive connector.
+    type: Ccsds_Space_Packet.T
+    kind: recv_sync
+  - description: The packet send connector
+    type: Command.T
+    kind: send
+  - description: Data products are sent out of this connector.
+    type: Data_Product.T
+    kind: send
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send
+  - description: Error packets are sent out of this connector.
+    type: Packet.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get
+  - description: This connector is used to register the components commands with the command router component.
+    type: Command_Response.T
+    kind: send
+  - description: The command receive connector.
+    type: Command.T
+    kind: recv_sync

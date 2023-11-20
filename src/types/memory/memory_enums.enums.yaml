@@ -1,0 +1,21 @@
+---
+description: These are enumerations that are used in the Adamant memory system.
+enums:
+  - name: Memory_Copy_Status
+    description: This status enumerations provides information on the success/failure of a memory copy.
+    literals:
+      - name: Success
+        value: 0
+        description: The copy command succeeded.
+      - name: Failure
+        value: 1
+        description: The copy command failed.
+  - name: Memory_Operation_Type
+    description: This enumeration lists the different memory operations that can be performed.
+    literals:
+      - name: Get
+        value: 0
+        description: Retrieve the value of the destination memory and store in the memory provided.
+      - name: Set
+        value: 1
+        description: Set the destination memory region with the memory provided.

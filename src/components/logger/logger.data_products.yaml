@@ -1,0 +1,6 @@
+---
+description: Data products for the Logger component.
+data_products:
+  - name: Mode
+    description: The current enabled/disabled mode of the component.
+    type: Logger_Status.T

@@ -1,0 +1,15 @@
+---
+description: This is a unit test suite for the CCSDS Router.
+tests:
+  - name: Test_Initialization
+    description: This unit test tests all permutations of initializing the component and makes sure improper initialization results in a runtime assertion.
+  - name: Test_Nominal_Routing
+    description: This unit test tests that CCSDS packets are routed to the expected destination component based on the routing table.
+  - name: Test_Unrecognized_Id
+    description: This unit test makes sure that packets with APIDs not found in the routing table are dropped and reported appropriately.
+  - name: Test_Dropped_Packet
+    description: This unit test tests that when the component's internal queue is overflowed, that the packet is dropped and reported appropriately.
+  - name: Test_Sequence_Count_Warning
+    description: This unit test tests that CCSDS packets of non-contiguous sequence counts produce a warning event.
+  - name: Test_Duplicate_Packet_Drop
+    description: This unit test tests that CCSDS packets of identical subsequent sequence counts get dropped.

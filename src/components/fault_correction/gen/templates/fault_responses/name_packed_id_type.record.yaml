@@ -1,0 +1,7 @@
+---
+description: This is an autocoded packed ID type for the fault correction component based on the fault IDs that it handles.
+fields:
+  - name: Id
+    description: "The fault type identifier."
+    type: {{ name }}_Enums.Fault_Type.E
+    format: E16

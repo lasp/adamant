@@ -1,0 +1,70 @@
+{% extends "/base/table.html" %}
+{% block title %}<b>{{ name }}</b> Components{% endblock %}
+{% block info %}
+      <b>Summary:</b>
+      <ul>
+        <li><b>Number of Components:</b> {{ components|length }}</li>
+        <li><b>Number of Component Types:</b> {{ component_types_dict.keys()|length }}</li>
+        <li><b>Number of Active Components:</b> {{ component_kind_dict['active']|length }}</li>
+        <li><b>Number of Passive Components:</b> {{ component_kind_dict['passive']|length }}</li>
+        <li><b>Number of Components with Queue:</b> {{ component_kind_dict['queued']|length }}</li>
+        <li><b>Number of Components without Queue:</b> {{ component_kind_dict['simple']|length }}</li>
+        <li><b>Number of Components with Events:</b> {{ component_kind_dict['events']|length }}</li>
+        <li><b>Number of Components with Commands:</b> {{ component_kind_dict['commands']|length }}</li>
+        <li><b>Number of Components with Data Products:</b> {{ component_kind_dict['data_products']|length }}</li>
+        <li><b>Number of Components with Data Dependencies:</b> {{ component_kind_dict['data_dependencies']|length }}</li>
+        <li><b>Number of Components with Parameters:</b> {{ component_kind_dict['parameters']|length }}</li>
+        <li><b>Number of Components with Packets:</b> {{ component_kind_dict['packets']|length }}</li>
+        <li><b>Number of Components with Faults:</b> {{ component_kind_dict['faults']|length }}</li>
+        <li><b>Number of Connections:</b> {{ connections|length }}</li>
+        <li><b>Number of Events:</b> {{ events|length }}</li>
+        <li><b>Number of Commands:</b> {{ commands|length }}</li>
+        <li><b>Number of Data Products:</b> {{ data_products|length }}</li>
+        <li><b>Number of Data Dependencies:</b> {{ data_dependencies|length }}</li>
+        <li><b>Number of Parameters:</b> {{ parameters|length }}</li>
+        <li><b>Number of Packets:</b> {{ packets|length }}</li>
+        <li><b>Number of Faults:</b> {{ faults|length }}</li>
+        <li><b>Task Total Stack Size:</b> {{ task_total_stack_size }} bytes</li>
+        <li><b>Task Total Secondary Stack Size:</b> {{ task_total_secondary_stack_size }} bytes</li>
+      </ul>
+{% endblock %}
+{% block head %}
+      <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Type</th>
+          <th scope="col">Has Queue</th>
+          <th scope="col">Execution</th>
+          <th scope="col"># Connectors</th>
+          <th scope="col"># Commands</th>
+          <th scope="col"># Events</th>
+          <th scope="col"># Data Products</th>
+          <th scope="col"># Data Dependencies</th>
+          <th scope="col"># Parameters</th>
+          <th scope="col"># Packets</th>
+          <th scope="col"># Faults</th>
+          <th scope="col">Description</th>
+      </tr>
+{% endblock %}
+{% block body %}
+{% for component in components.values() %}
+      <tr>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ component.instance_name }}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ component.name }}</td>
+{% if component.connectors.of_kind("recv_async") %}
+        <td style='font-family: "Courier New", Courier, monospace;'>yes</td>
+{% else %}
+        <td style='font-family: "Courier New", Courier, monospace;'>no</td>
+{% endif %}
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ component.instance_execution }}</td>
+        <td style='font-family: "Courier New", Courier, monospace;' align="right">{{ component.connectors|length }}</td>
+        <td style='font-family: "Courier New", Courier, monospace;' align="right">{% if component.commands %}{{ component.commands.commands|length }}{% else %}0{% endif %}</td>
+        <td style='font-family: "Courier New", Courier, monospace;' align="right">{% if component.events %}{{ component.events|length }}{% else %}0{% endif %}</td>
+        <td style='font-family: "Courier New", Courier, monospace;' align="right">{% if component.data_products %}{{ component.data_products|length }}{% else %}0{% endif %}</td>
+        <td style='font-family: "Courier New", Courier, monospace;' align="right">{% if component.data_dependencies %}{{ component.data_dependencies|length }}{% else %}0{% endif %}</td>
+        <td style='font-family: "Courier New", Courier, monospace;' align="right">{% if component.parameters %}{{ component.parameters|length }}{% else %}0{% endif %}</td>
+        <td style='font-family: "Courier New", Courier, monospace;' align="right">{% if component.packets %}{{ component.packets|length }}{% else %}0{% endif %}</td>
+        <td style='font-family: "Courier New", Courier, monospace;' align="right">{% if component.faults %}{{ component.faults|length }}{% else %}0{% endif %}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{% if component.instance_description %}{{ component.instance_description }}{% endif %}</td>
+      </tr>
+{% endfor %}
+{% endblock %}

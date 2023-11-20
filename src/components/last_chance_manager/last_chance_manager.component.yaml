@@ -1,0 +1,31 @@
+---
+description: The purpose of this component is to manage a region of non-volatile memory where the last chance handler saves exception information, should one be thrown. This component provides commands to dump this region of memory and reset the contents of the memory to all zeros. The component provides a data product that reports the first address of the stack trace, which can be used as confirmation that the LCH got called (if the value is nonzero).
+execution: passive
+init:
+  description: This component requires the memory region which the last chance handler data will be stored.
+  parameters:
+    - name: Exception_Data
+      type: Packed_Exception_Occurrence.T_Access
+      description: The copy of the exception data that is updated by the last chance handler, presumably in a nonvolatile memory region.
+    - name: Dump_Exception_Data_At_Startup
+      type: Boolean
+      description: "If True, then the exception data will be dumped in packet at startup."
+connectors:
+  - description: The command receive connector
+    type: Command.T
+    kind: recv_sync
+  - description: This connector is used to register and respond to the component's commands.
+    type: Command_Response.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send
+  - description: Send a packet of data products.
+    type: Packet.T
+    kind: send
+  - description: Data products are sent out of this connector.
+    type: Data_Product.T
+    kind: send

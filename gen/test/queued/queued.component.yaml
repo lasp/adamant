@@ -1,0 +1,14 @@
+---
+description: This is a simple test component.
+execution: either
+connectors:
+  - description: The output connector
+    type: Aa.T
+    kind: send
+  - description: The input connector
+    type: Bb.T
+    kind: recv_async
+  - description: Runs the scheduled activity
+    type: Basic_Types.Byte
+    name: Sched_Recv_Sync
+    kind: recv_sync

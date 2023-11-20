@@ -1,0 +1,53 @@
+# Make sure detected text files are stored with LF, since all these
+# files need to work in a Linux VM. Windows users should install a
+# text editor that can work with Unix line endings.
+# Make everything auto that doesn't have a file extension. This ignores
+# LF in binary files and the like that don't have extensions.
+* text=auto
+# Any text file with an extension we want to force UNIX LF.
+*.* text eol=lf
+
+# Make sure that git recognizes the following as
+# text files that should have LFs.
+*.sh     text eol=lf
+*.do     text eol=lf
+*.txt    text eol=lf
+*.c      text eol=lf
+*.h      text eol=lf
+*.cpp    text eol=lf
+*.hpp    text eol=lf
+*.adb    text eol=lf
+*.ads    text eol=lf
+*.md     text eol=lf
+*.py     text eol=lf
+*.html   text eol=lf
+*.htm    text eol=lf
+*.tex    text eol=lf
+*.yaml   text eol=lf
+*.dot    text eol=lf
+*.xml    text eol=lf
+*.csv    text eol=lf
+*.json   text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+Vagrantfile text eol=lf
+
+# These files are binary and should be left untouched
+# (binary is a macro for -text -diff)
+*.pptx binary
+*.ppt binary
+*.doc binary
+*.docx binary
+*.xls binary
+*.xlsx binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.gz binary
+*.zip binary
+*.pyc binary
+*.pdf binary
+*.bin binary
+*.elf binary

@@ -1,0 +1,14 @@
+---
+events:
+  - name: Invalid_Received_Packet_Length
+    description: A packet was received with a length that is too large or too small.
+    param_type: Invalid_Packet_Length.T
+  - name: Invalid_Extracted_Packet_Length
+    description: A packet was extracted with a length that is too large.
+    param_type: Invalid_Packet_Length.T
+  - name: Dropped_Trailing_Bytes
+    description: Some remaining bytes were found at the end of a packet that are too small to be a CCSDS packet.
+    param_type: Packed_Byte.T
+  - name: Dropped_Packet
+    description: The component's queue overflowed and a packet with the following header was dropped.
+    param_type: Ccsds_Primary_Header.T

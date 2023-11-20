@@ -1,0 +1,15 @@
+---
+description: A packed record for seq goto instruction. Opcode 15.
+fields:
+  - name: Opcode
+    description: Instruction code
+    type: Basic_Types.Byte
+    format: U8
+  - name: Pad
+    description: Padding
+    type: Basic_Types.Byte
+    format: U8
+  - name: Position
+    description: Absolute position in the sequence to jump to.
+    type: Interfaces.Unsigned_16
+    format: U16

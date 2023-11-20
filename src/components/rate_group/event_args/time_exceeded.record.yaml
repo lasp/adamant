@@ -1,0 +1,10 @@
+---
+description: Datatype used for reporting time deltas at a particular count number.
+fields:
+  - name: Time_Delta
+    description: The time delta.
+    type: Delta_Time.T
+  - name: Count
+    description: The cycle number of the tick.
+    type: Interfaces.Unsigned_32
+    format: U32

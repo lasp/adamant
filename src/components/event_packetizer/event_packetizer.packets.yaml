@@ -1,0 +1,5 @@
+---
+description: Packets for the event packetizer
+packets:
+  - name: Events_Packet
+    description: This packet contains events as subpackets.

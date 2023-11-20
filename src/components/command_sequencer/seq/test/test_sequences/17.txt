@@ -1,0 +1,18 @@
+seq 17
+  ; Test print statements 
+  declare var u32
+  set $var = 1234
+  declare var2 i16
+  set $var2 = -1234
+  declare var3 f32
+  set $var3 = -13.5
+  
+  ; Send some print statements:
+  print info "This is my informational statement"
+  print error "Bad thing is happening!"
+  print debug "The value of 2 + 2 is 4"
+  print critical "Burn it all down"
+  print info $var
+  print debug $var2
+  print critical $var3
+endseq

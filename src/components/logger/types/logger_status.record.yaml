@@ -1,0 +1,7 @@
+---
+description: A packed record which holds the enabled/disabled state of the logger
+fields:
+  - name: Current_Mode
+    description: Is the log enabled or disabled?
+    type: Logger_Enums.Logger_Mode.E
+    format: E8

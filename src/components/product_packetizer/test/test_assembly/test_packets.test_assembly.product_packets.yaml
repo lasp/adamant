@@ -1,0 +1,66 @@
+---
+description: This is an example set of packets.
+# starting id...
+# assuming 1 hz tick
+packets:
+  - name: Packet_1 # must be unique, enforce by autocoder
+    description: This is packet 1.
+    id: 7
+    data_products:
+      - name: Test_Component_1_Instance.Data_Product_A
+        use_timestamp: False
+        include_timestamp: True
+        event_on_missing: True
+      - name: Test_Component_2_Instance.Data_Product_C
+        event_on_missing: False
+        use_timestamp: False
+        include_timestamp: False
+    period: "3" # create every 3 ticks
+    enabled: True
+  - name: Packet_2
+    id: 9
+    data_products:
+      - name: Test_Component_2_Instance.Data_Product_D
+      - name: Test_Component_1_Instance.Data_Product_B
+        use_timestamp: True
+    period: "1" # create every tick
+    offset: "0"
+    enabled: False
+  - name: Packet_3 # must be unique, enforce by autocoder
+    description: This is packet 1.
+    id: 8
+    use_tick_timestamp: False
+    data_products:
+      - name: Test_Component_1_Instance.Data_Product_A
+        use_timestamp: False
+        include_timestamp: True
+        event_on_missing: True
+      - name: Test_Component_2_Instance.Data_Product_C
+        event_on_missing: False
+        use_timestamp: False
+        include_timestamp: False
+    period: "3" # create every 3 ticks
+    offset: "5" # This should act like an offset of 2, but we are testing that feature here.
+    enabled: False
+  - name: Packet_4
+    description: This packet tests padding
+    id: 12
+    use_tick_timestamp: True
+    data_products:
+      - pad_bytes: 5
+      - name: Test_Component_1_Instance.Data_Product_A
+        use_timestamp: False
+        include_timestamp: False
+        event_on_missing: False
+      - pad_bytes: 3
+    period: "1" # create every tick
+    offset: "0"
+    enabled: False
+  - name: Packet_5
+    id: 15
+    data_products:
+      - name: Product_Packetizer_Instance.Packet_4_Period
+      - name: Product_Packetizer_Instance.Packet_5_Period
+      - name: Product_Packetizer_Instance.Packet_3_Period
+    period: "2"
+    enabled: False

@@ -1,0 +1,7 @@
+---
+description: The requirements for the Command Rejector component are specified below.
+requirements:
+  - text: The component shall be configured with a list of command IDs to reject upon initialization.
+  - text: The component shall reject commands if found in the command reject list.
+  - text: The component shall report the number of commands rejected in telemetry
+

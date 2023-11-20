@@ -1,0 +1,77 @@
+digraph {{ name }} {
+
+    // Graph and node types:
+    graph [rankdir=LR, splines=line, overlap=false];
+    node [shape=plaintext]
+
+    // Component Block:
+    component [label=<
+<TABLE BORDER="{% if execution in ['active', 'either'] %}3{% else %}1{% endif %}" CELLBORDER="0" CELLSPACING="0" BGCOLOR="#F0F5F9" COLOR="{% if execution == 'either' %}#808080{% else %}#000000{% endif %}">
+  <TR>
+    <TD>
+    <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+      <TR><TD ALIGN="center"><FONT FACE="helvetica" POINT-SIZE="10"><U> </U></FONT></TD></TR>
+{% for connector in connectors.max() %}
+      <TR><TD PORT="i{{ loop.index }}"><FONT FACE="courier" POINT-SIZE="12"> </FONT></TD></TR>
+{% endfor %}
+      <TR><TD ALIGN="center"><FONT FACE="helvetica" POINT-SIZE="10"><U> </U></FONT></TD></TR>
+    </TABLE>
+    </TD>
+    <TD>
+    <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" ALIGN="center">
+      <TR><TD> </TD></TR>
+      <TR><TD><FONT FACE="courier" POINT-SIZE="14">{{ name }}</FONT></TD></TR>
+      <TR><TD> </TD></TR>
+    </TABLE>
+    </TD>
+    <TD>
+    <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+      <TR><TD ALIGN="center"><FONT FACE="helvetica" POINT-SIZE="10"><U> </U></FONT></TD></TR>
+{% for connector in connectors.max() %}
+      <TR><TD PORT="o{{ loop.index }}"><FONT FACE="courier" POINT-SIZE="12"> </FONT></TD></TR>
+{% endfor %}
+      <TR><TD ALIGN="center"><FONT FACE="helvetica" POINT-SIZE="10"><U> </U></FONT></TD></TR>
+    </TABLE>
+    </TD>
+  </TR>
+</TABLE>>];
+
+    // Invisible invokee block:
+{% if connectors.invokee() %}
+    invokee [label=<
+<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+  <TR><TD ALIGN="center"><FONT FACE="helvetica" POINT-SIZE="10"><U>Invokee:</U></FONT></TD></TR>
+{% for connector in connectors.invokee() %}
+  <TR><TD PORT="{{ connector.name }}" ALIGN="right"><FONT FACE="courier" POINT-SIZE="12">{{ connector.name }}{% if connector.count > 1 %} [{{ connector.count }}]{% endif %}{% if connector.count == 0 %} [&lt;&gt;]{% endif %}{% if connector.generic %} <I>(generic)</I>{% endif %}</FONT></TD></TR>
+{% endfor %}
+  <TR><TD ALIGN="center"><FONT FACE="helvetica" POINT-SIZE="10"><U> </U></FONT></TD></TR>
+</TABLE>>];
+{% endif %}
+
+    // Invisible invoker block:
+{% if connectors.invoker() %}
+    invoker [label=<
+<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+  <TR><TD ALIGN="center"><FONT FACE="helvetica" POINT-SIZE="10"><U>Invoker:</U></FONT></TD></TR>
+{% for connector in connectors.invoker() %}
+  <TR><TD PORT="{{ connector.name }}" ALIGN="left"><FONT FACE="courier" POINT-SIZE="12">  {{ connector.name }}{% if connector.count > 1 %} [{{ connector.count }}]{% endif %}{% if connector.count == 0 %} [&lt;&gt;]{% endif %}{% if connector.generic %} <I>(generic)</I>{% endif %}</FONT></TD></TR>
+{% endfor %}
+  <TR><TD ALIGN="center"><FONT FACE="helvetica" POINT-SIZE="10"><U> </U></FONT></TD></TR>
+</TABLE>>];
+{% endif %}
+
+    // Invokee Connections:
+{% if connectors.invokee() %}
+{% for connector in connectors.invokee() %}
+    invokee:{{ connector.name }} -> component:i{{ loop.index }}[arrowsize=.8{% if connector.kind == 'recv_async' %}, style=dashed{% endif %}{% if connector.kind == 'modify' %}, dir=both, arrowhead=diamond, arrowtail=odiamond{% endif %}{% if connector.kind == 'return' %}, dir=both, arrowhead=inv, arrowtail=curve{% endif %}{% if connector.kind == 'service' %}, dir=both, arrowhead=vee, arrowtail=onormal{% endif %}{% if connectors.requires_priority_queue() and connector.kind == 'recv_async' %}, label=<<FONT FACE="courier" POINT-SIZE="8">{{ connector.priority }}</FONT>>{% endif %}];
+{% endfor %}
+{% endif %}
+
+    // Invoker Connections:
+{% if connectors.invoker() %}
+{% for connector in connectors.invoker() %}
+    component:o{{ loop.index }} -> invoker:{{ connector.name }}[arrowsize=.8{% if connector.kind == 'provide' %}, dir=both, arrowhead=diamond, arrowtail=odiamond{% endif %}{% if connector.kind == 'get' %}, dir=both, arrowhead=inv, arrowtail=curve{% endif %}{% if connector.kind == 'request' %}, dir=both, arrowhead=vee, arrowtail=onormal{% endif %}];
+{% endfor %}
+{% endif %}
+    
+}

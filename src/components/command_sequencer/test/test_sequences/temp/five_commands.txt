@@ -1,0 +1,7 @@
+seq five_commands 
+  cmd Component_A.Command_1
+  cmd Component_A.Command_2
+  cmd Component_A.Command_3
+  cmd Component_B.Command_1
+  cmd Component_B.Command_2
+endseq

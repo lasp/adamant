@@ -1,0 +1,36 @@
+---
+description: This record contains the definition for the single bit types of the filter states packed into a byte.
+fields:
+  - name: state_0
+    description: Zero bit state of the byte being packed
+    type: Event_Filter_Entry_Enums.Event_Filter_State.E
+    format: E1
+  - name: state_1
+    description: First state of the byte being packed
+    type: Event_Filter_Entry_Enums.Event_Filter_State.E
+    format: E1
+  - name: state_2
+    description: Second state of the byte being packed
+    type: Event_Filter_Entry_Enums.Event_Filter_State.E
+    format: E1
+  - name: state_3
+    description: Third state of the byte being packed
+    type: Event_Filter_Entry_Enums.Event_Filter_State.E
+    format: E1
+  - name: state_4
+    description: Fourth state of the byte being packed
+    type: Event_Filter_Entry_Enums.Event_Filter_State.E
+    format: E1
+  - name: state_5
+    description: Fifth state of the byte being packed
+    type: Event_Filter_Entry_Enums.Event_Filter_State.E
+    format: E1
+  - name: state_6
+    description: Sixth state of the byte being packed
+    type: Event_Filter_Entry_Enums.Event_Filter_State.E
+    format: E1
+  - name: state_7
+    description: Seventh state of the byte being packed
+    type: Event_Filter_Entry_Enums.Event_Filter_State.E
+    format: E1
+

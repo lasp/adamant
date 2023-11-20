@@ -1,0 +1,36 @@
+The table below shows the packets for the \VAR{prettyname|e} assembly.
+
+%- if packets
+\captionof{table}{\VAR{prettyname|e} Packets}
+{\renewcommand{\arraystretch}{2.2} %<- modify value to suit your needs
+\begin{xltabular}{\textwidth}{ | l | X | X | }
+  \hline
+  \textbf{Packet ID} & \textbf{Packet Name} & \textbf{Type} \\ \hline
+%- for id, p in packets.items()
+  \texttt{0x\VAR{"%04x" % id } (\VAR{ p.id })} &
+  \texttt{\url{\VAR{p.full_name}}} &
+%- if p.type
+  \texttt{\url{\VAR{p.type}}}
+%- else
+  \textit{Undefined}
+%- endif
+  \\ \hline
+%- endfor
+\end{xltabular}}
+\vspace{5mm} %5mm vertical space
+
+Packet Descriptions:
+\begin{spaceditemize}
+%- for id, p in packets.items()
+  \item \textbf{\texttt{\url{\VAR{p.full_name}}}} -
+%- if p.description
+    \VAR{p.description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+%- else 
+\par The \VAR{prettyname|e} assembly has no packets.
+%- endif

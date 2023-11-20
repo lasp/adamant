@@ -1,0 +1,51 @@
+---
+# Optional - a description of the view
+description: This is the command view.
+# Optional - layout direction, default is ;left-to-right'.
+# Other options include: 'top-to-bottom', 'right-to-left',
+# and 'bottom-to-top'.
+layout: left-to-right
+#
+# Below is a set of switches that turn items on and off in the
+# view. Providing these is optional. By default all of these
+# are set to "True".
+#
+# Show the component type name inside a component box
+show_component_type: True
+# Shows components outlined in bold for active components and
+# not outlined in bold for passive components
+show_component_execution: True
+# Shows the component's priority number
+show_component_priority: False
+# Shows the component instance name inside a component box
+show_component_name: True
+# Shows the type of the connector next to the arrow
+show_connector_type: True
+# If set to false shows a dotted line around "groups" in the view
+hide_group_outline: True
+# Optional - the "rule" used to determine how the filters are
+# applied to the assembly graph. If not specified, then the rule
+# defaults to "and"-ing all the subgraphs from all the filters
+# together.
+rule: include_commands
+# Optional - A list of filters used to filter components and
+# connections from the assembly graph.
+filters:
+    # Required - The name of the filter. Any name can be used but
+    # it must be unique.
+  - name: include_commands
+    # Required - The filter type. Filter types available are:
+    #   component_name - filter by component names
+    #   component_type - filter by component types
+    #   component_execution - filter by component exucution types (active or passive)
+    #   component_context - filter by component and all it's immediate connections
+    #   connector_name - filter by connector_names
+    #   connecter_type - filter by connector type
+    #   connecter_kind - filter by connector kinds (recv_async, recv_sync, send, request, service, get, return, provide, modify)
+    type: connector_type
+    # Required (unless "exclude" is specified instead) -
+    # Describes which items to INCLUDE in the view using the
+    # filter. If "exclude" was used instead then the list would
+    # described the items to EXCLUDE from the view.
+    include:
+      - Command.T

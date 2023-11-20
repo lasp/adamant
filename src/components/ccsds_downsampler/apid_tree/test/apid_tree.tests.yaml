@@ -1,0 +1,9 @@
+---
+description: This is a unit test suite for the apid_ tree object for help with the ccsds_downsampler
+tests:
+  - name: Test_Init_List
+    description: This test is inteded to test the different permutations of the init of the apid and filter factor type array.
+  - name: Test_Set_Filter_Factor
+    description: This unit test tests changing the value of the filter factor for a given apid.
+  - name: Test_Get_Counters
+    description: This unit test makes sure the counters for the number of packets that should be passed or filtered are correct.

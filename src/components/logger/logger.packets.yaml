@@ -1,0 +1,5 @@
+---
+description: Packets for the logger.
+packets:
+  - name: Log_Packet
+    description: This packet contains log data.

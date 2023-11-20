@@ -1,0 +1,48 @@
+{% extends "/base/table.html" %}
+{% block title %}<b>{{ name }}</b> Packet{% endblock %}
+{% block info %}
+{% if items and items.items() %}
+      <b>Summary:</b>
+      <ul>
+        <li><b>Packet Size (bytes):</b> {{ (size/8)|int }}</li>
+        <li><b>Packet Size (bits):</b> {{ size }}</li>
+        <li><b>Num Items:</b> {{ items.items()|length }}</li>
+      </ul>
+{% endif %}
+{% endblock %}
+{% block head %}
+      <tr>
+          <th scope="col">Start Bit</th>
+          <th scope="col">Stop Bit</th>
+          <th scope="col">Format</th>
+          <th scope="col">Type</th>
+          <th scope="col">Item Name</th>
+          <th scope="col">Description</th>
+      </tr>
+{% endblock %}
+{% block body %}
+{% for item_name,item in items.items() %}
+      <tr>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ item.packet_start_bit }}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ item.packet_end_bit }}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ item.format }}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{{ item.type }}</td>
+        <td style='font-family: "Courier New", Courier, monospace;'><b>{{ item.full_name }}</b></td>
+        <td><span style="white-space: pre-wrap;">{{ item.flattened_description }}</span>{% if item.is_enum %}
+          <br/><br/>
+          <i>Enum States:</i>
+          <br/>
+{% for literal in item.type_model.literals %}
+            {{ literal.value }} - <i>{{ literal.name }}</i> {% if literal.description %} - {{ literal.description }}{% endif %}<br/>
+{% endfor %}
+{% elif item.literals %}
+          <br/><br/>
+          <i>Enum States:</i>
+          <br/>
+{% for literal in item.literals %}
+            {{ literal.value }} - <i>{{ literal.name }}</i> {% if literal.description %} - {{ literal.description }}{% endif %}<br/>
+{% endfor %}{% endif %}
+        </td>
+      </tr>
+{% endfor %}
+{% endblock %}

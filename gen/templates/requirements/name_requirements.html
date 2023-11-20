@@ -1,0 +1,18 @@
+{% extends "/base/table.html" %}
+{% block title %}<b>{{ formatType(model_name) }}</b> Requirements{% endblock %}
+{% block head %}
+      <tr>
+          <th scope="col">Number</th>
+          <th scope="col">Text</th>
+          <th scope="col">Description</th>
+      </tr>
+{% endblock %}
+{% block body %}
+{% for requirement in requirements %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ printMultiLine(requirement["text"], '') }}</td>
+        <td>{% if "description" in requirement %}{{ printMultiLine(requirement["description"], '') }}{% else %}-{% endif %}</td>
+      </tr>
+{% endfor %}
+{% endblock %}

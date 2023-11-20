@@ -1,0 +1,6 @@
+---
+description: Data products for the Memory Packetizer component.
+data_products:
+  - name: Max_Packets_Per_Time_Period
+    description: The current maximum packet sends per time period.
+    type: Packets_Per_Period.T

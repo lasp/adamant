@@ -1,0 +1,8 @@
+seq 14
+  ; While loop forever:
+  declare var u32
+  set $var = 0
+  do
+    set $var = $var + 1
+  when $var >= 0
+endseq

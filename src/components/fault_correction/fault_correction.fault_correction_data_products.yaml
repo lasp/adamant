@@ -1,0 +1,15 @@
+---
+description: Data products for the Fault Correction component.
+data_products:
+  - name: Fault_Counter
+    description: The number of faults received by the component.
+    type: Packed_U16.T
+  - name: Last_Fault_Id_Received
+    description: The ID of the last fault received.
+    type: Packed_Fault_Id.T
+  - name: Time_Of_Last_Fault_Received
+    description: The system time of the last fault received.
+    type: Sys_Time.T
+  - name: Fault_Response_Statuses
+    description: 2-bits of status for each fault response that this component is managing. Note that Packed_U32.T is just a placeholder type for this data product. The actual type of this data product will be autocoded and at assembly model ingest time.
+    type: Packed_U32.T # Will be replaced

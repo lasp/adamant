@@ -1,0 +1,8 @@
+---
+description: An example header record with a length field and embedded packed type.
+fields:
+  - name: B
+    type: Interfaces.Unsigned_8
+    format: U8
+  - name: Secondary_Header
+    type: Header.T

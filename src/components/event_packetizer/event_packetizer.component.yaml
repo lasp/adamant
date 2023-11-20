@@ -1,0 +1,37 @@
+---
+description: |
+  The Event Packetizer component receives events synchronously and places them into a packet. This component receives a periodic tick. A packet is sent out upon receiving a tick if 1) the component has a full packet to send or 2) a partial packet timeout has occurred and the component has a packet with at least one event in it.
+execution: passive
+preamble: |
+  subtype Two_Or_More is Positive range 2 .. Positive'Last;
+init:
+  description:
+  parameters:
+    - name: num_Internal_Packets
+      type: Two_Or_More
+      description: The number of packets that the component contains internally. This is the available buffer that the component has to store events. When all packets are exhausted, then the component begins dropping events. The component needs to be at least double buffered, meaning a minimum of two packets need to be allocated.
+    - name: partial_Packet_Timeout
+      type: Natural
+      description: The number of ticks that can be received before a partial packet timeout occurs. When a partial packet timeout occurs, a packet containing at least one event is sent out, and then the timeout is reset. A value of zero passed for this parameter will disable the partial packet timeout, meaning only full packets are ever sent out of the component.
+connectors:
+  - description: This is the base tick for the component. Upon reception the component will send out one full packet, if a full packet is contained within the component. A partial packet will be sent out if the packet timeout occurs.
+    type: Tick.T
+    kind: recv_sync
+  - description: Events are received synchronously on this connector and stored into an internal packet.
+    type: Event.T
+    kind: recv_sync
+  - description: This is the command receive connector.
+    type: Command.T
+    kind: recv_sync
+  - description: Send a packet of events.
+    type: Packet.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get
+  - description: Data products are sent out of this connector.
+    type: Data_Product.T
+    kind: send
+  - description: This connector is used to register and respond to the component's commands.
+    type: Command_Response.T
+    kind: send

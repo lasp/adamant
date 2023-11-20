@@ -1,0 +1,11 @@
+---
+# Optional - description of unit test suite
+description: This is a set of unit tests for the Example Component.
+# Required - list of tests
+tests:
+    # Required - name of test
+  - name: Test_That_Should_Pass
+    # Optional - description of test
+    description: This test should pass.
+  - name: Test_That_Should_Fail
+    description: This test should not pass.

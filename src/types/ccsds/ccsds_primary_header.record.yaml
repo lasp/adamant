@@ -1,0 +1,41 @@
+---
+description: Record for the CCSDS Packet Primary Header
+preamble: |
+  subtype Three_Bit_Version_Type is Interfaces.Unsigned_8 range 0 .. 7;
+  type Ccsds_Apid_Type is mod 2**11;
+  type Ccsds_Sequence_Count_Type is mod 2**14;
+fields:
+  - name: Version
+    description: Packet Version Number
+    type: Three_Bit_Version_Type
+    format: U3
+    default: '0'
+  - name: Packet_Type
+    description: Packet Type
+    type: Ccsds_Enums.Ccsds_Packet_Type.E
+    format: E1
+    default: "Ccsds_Enums.Ccsds_Packet_Type.Telemetry"
+  - name: Secondary_Header
+    description: Does packet have CCSDS secondary header
+    type: Ccsds_Enums.Ccsds_Secondary_Header_Indicator.E
+    format: E1
+    default: "Ccsds_Enums.Ccsds_Secondary_Header_Indicator.Secondary_Header_Not_Present"
+  - name: Apid
+    description: Application process identifier
+    type: Ccsds_Apid_Type
+    format: U11
+    default: '0'
+  - name: Sequence_Flag
+    description: Sequence Flag
+    type: Ccsds_Enums.Ccsds_Sequence_Flag.E
+    format: E2
+    default: "Ccsds_Enums.Ccsds_Sequence_Flag.Unsegmented"
+  - name: Sequence_Count
+    description: Packet Sequence Count
+    type: Ccsds_Sequence_Count_Type
+    format: U14
+    default: '0'
+  - name: Packet_Length
+    description: This is the packet data length. One added to this number corresponds to the number of bytes included in the data section of the CCSDS Space Packet.
+    type: Interfaces.Unsigned_16
+    format: U16

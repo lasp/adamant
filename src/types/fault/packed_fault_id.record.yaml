@@ -1,0 +1,7 @@
+---
+description: A packed record which holds an fault identifier.
+fields:
+  - name: Id
+    description: The fault identifier
+    type: Fault_Types.Fault_Id
+    format: U16

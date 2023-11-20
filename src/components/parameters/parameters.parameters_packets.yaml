@@ -1,0 +1,5 @@
+---
+description: Packets for the Parameters Component.
+packets:
+  - name: Active_Parameters
+    description: This packet contains a copy of all the active parameters managed by this component.

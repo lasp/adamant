@@ -1,0 +1,31 @@
+---
+description: |
+  The Socket Interface Component is an interface component which connects the rest of the assembly to an outside entity (usually the ground system) via a TCP/IP socket. It spawns an internal task to listen to the socket for incoming data. It also provides an asynchronous receive connector which it services on it's task, sending any data it receives out of the socket. The data send and recieve connectors are CCSDS.
+execution: active
+init:
+  description: This initialization subprogram connects the component to a TCP socket on the given address and port.
+  parameters:
+    - name: Addr
+      type: String
+      default: "\"127.0.0.1\""
+      description: The IP address or hostname that the component should connect to. This could be something like 127.0.0.1 or www.google.com.
+    - name: Port
+      type: Natural
+      default: "2001"
+      description: The port that the component should connect to.
+subtasks:
+  - name: Listener
+    description: This internal task is used to listen on the socket for incomming packets.
+connectors:
+  - description: On this connector the Socket Interface Component receives data and sends it out of the socket.
+    type: Ccsds_Space_Packet.T
+    kind: recv_async
+  - description: On this connector the Socket Interface Component sends any data it received from the socket.
+    type: Ccsds_Space_Packet.T
+    kind: send
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get

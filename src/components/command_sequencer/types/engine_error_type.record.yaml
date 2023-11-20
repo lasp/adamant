@@ -1,0 +1,35 @@
+---
+description: A packed record which holds a summary of the state for a particular sequence engine.
+fields:
+  - name: Engine_Id
+    description: The sequence engine identifier.
+    type: Seq_Types.Sequence_Engine_Id
+    format: U8
+  - name: Sequence_Id
+    description: The sequence ID of the lowest stack level child sequence.
+    type: Sequence_Types.Sequence_Id
+    format: U16
+  - name: Engine_State
+    description: The sequence engine state.
+    type: Seq_Enums.Seq_Engine_State.E
+    format: E3
+  - name: Sequence_State
+    description: The running sequence state.
+    type: Seq_Enums.Seq_Runtime_State.E
+    format: E5
+  - name: Stack_Level
+    description: How deep is the current stack usage? This reports the stack level of the currently running sequence.
+    type: Seq_Types.Max_Seq_Num
+    format: U8
+  - name: Program_Counter
+    description: The current program counter (relative address pointing to the current sequence instruction) of the lowest level child sequence.
+    type: Seq_Types.Seq_Position
+    format: U16
+  - name: Error_Type
+    description: The sequence error type.
+    type: Seq_Enums.Seq_Error.E
+    format: E8
+  - name: Errant_Field_Number
+    description: This indicates which field of a packed record failed validation. The field that was invalid. 1 is the first field, 0 means no invalid field found.
+    type: Interfaces.Unsigned_32
+    format: U32

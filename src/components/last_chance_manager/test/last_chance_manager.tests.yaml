@@ -1,0 +1,9 @@
+---
+description: This is a unit test suite for the Last Chance Manager component.
+tests:
+  - name: Test_Region_Dump
+    description: This unit test makes sure the region dump command executes successfully.
+  - name: Test_Region_Clear
+    description: This unit test makes sure the region clear command executes successfully.
+  - name: Test_Invalid_Command
+    description: This unit test makes sure an invalid command is rejected.

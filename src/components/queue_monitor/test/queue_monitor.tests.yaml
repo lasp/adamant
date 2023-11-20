@@ -1,0 +1,9 @@
+---
+description: This is a unit test suite for the Queue Monitor component.
+tests:
+  - name: Test_Queue_Monitoring
+    description: This unit test excersizes checking a component's queue reporting the values in telemetry.
+  - name: Test_Packet_Period
+    description: This unit test excersizes the command to change the packet creation rate.
+  - name: Test_Invalid_Command
+    description: This unit test makes sure an invalid command is reported and ignored.

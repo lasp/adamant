@@ -1,0 +1,2 @@
+pragma Profile (Ravenscar);
+pragma Restrictions (No_Unchecked_Deallocation);

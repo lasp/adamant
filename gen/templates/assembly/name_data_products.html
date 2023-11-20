@@ -1,0 +1,27 @@
+{% extends "/base/table.html" %}
+{% block title %}<b>{{ name }}</b> Data Products{% endblock %}
+{% block info %}
+      <b>Summary:</b>
+      <ul>
+        <li><b>Number of Components with Data Products:</b> {{ component_kind_dict['data_products']|length }}</li>
+        <li><b>Number of Data Products:</b> {{ data_products|length }}</li>
+      </ul>
+{% endblock %}
+{% block head %}
+      <tr>
+          <th scope="col">Data Product Id</th>
+          <th scope="col">Data Product Name</th>
+          <th scope="col">Type</th>
+          <th scope="col">Description</th>
+      </tr>
+{% endblock %}
+{% block body %}
+{% for id, dp in data_products.items() %}
+      <tr>
+        <td style='font-family: "Courier New", Courier, monospace;'>0x{{ '%04x' % id }} ({{ dp.id }})</b></td>
+        <td style='font-family: "Courier New", Courier, monospace;'><b>{{ dp.suite.component.instance_name }}.{{ dp.name }}</b></td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{% if dp.type_model %}<a class="record_link" href="../../{{ dp.type_model.get_src_dir_from(get_src_dir(full_filename)) }}/build/html/{{ dp.type_package.lower() }}.html">{% endif %}{{ dp.type }}{% if dp.type_model %}</a>{% endif %}</td>
+        <td>{% if dp.description %}{{ printMultiLine(dp.description, '') }}{% endif %}</td>
+      </tr>
+{% endfor %}
+{% endblock %}

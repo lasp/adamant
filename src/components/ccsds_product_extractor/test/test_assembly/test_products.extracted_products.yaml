@@ -1,0 +1,28 @@
+---
+data_products:
+  - name: Test_Product_1
+    type: Packed_U16.T
+    apid: 100
+    offset: 10
+    time: packet_time
+  - name: Test_Product_2
+    type: Packed_Byte.T
+    apid: 100
+    offset: 16
+    time: current_time
+  - name: Test_Product_3
+    type: Packed_U32.T
+    apid: 200
+    offset: 8
+    time: current_time
+  - name: Test_Product_4
+    type: Packed_Natural.T
+    apid: 200
+    offset: 20
+    time: packet_time
+  - name: Test_Product_5
+    description: Test product for the little endian version of a packed type.
+    type: Packed_Natural.T_Le
+    apid: 300
+    offset: 15
+    time: packet_time

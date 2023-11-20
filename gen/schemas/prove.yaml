@@ -1,0 +1,30 @@
+---
+# This schema describes the yaml format for defining how GNATprove should be run within a
+# directory. All files in a directory are run with the same GNATprove configuration.
+type: map
+mapping:
+  # A description for prove file.
+  description:
+    type: str
+    required: False
+  # The GNATprove "level" which configures the --level switch for
+  # GNATprove. 2 is default.
+  #
+  # --level=0 is equivalent to --prover=cvc4 --timeout=1 --memlimit=1000 --steps=0 --counterexamples=off
+  # --level=1 is equivalent to --prover=cvc4,z3,altergo --timeout=1 --memlimit=1000 --steps=0 --counterexamples=off
+  # --level=2 is equivalent to --prover=cvc4,z3,altergo --timeout=5 --memlimit=1000 --steps=0 --counterexamples=on
+  # --level=3 is equivalent to --prover=cvc4,z3,altergo --timeout=20 --memlimit=2000 --steps=0 --counterexamples=on
+  # --level=4 is equivalent to --prover=cvc4,z3,altergo --timeout=60 --memlimit=2000 --steps=0 --counterexamples=on
+  #
+  level:
+    type: int
+    required: False
+    range:
+      min: 0
+      max: 4
+  # The GNATprove "mode" which configures the --mode switch for
+  # GNATprove. "gold" is default.
+  mode:
+    type: str
+    enum: ['check', 'check_all', 'flow', 'prove', 'all', 'stone', 'bronze', 'silver', 'gold']
+    required: False

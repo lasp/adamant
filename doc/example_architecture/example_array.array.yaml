@@ -1,0 +1,13 @@
+---
+# Optional - description of the packed record
+description: This is an example packed array.
+# Optional - preamble which provides "in-line" Ada code
+preamble: subtype Short_Int is Natural range 1 .. 999;
+# Required - the type of an array element
+type: Short_Int
+# Required (most of the time) - provide the number of bits
+# that the element type will consume when packed. This field is
+# required unless the type is itself another packed record
+format: U10
+# Required - the length of the packed array
+length: 8

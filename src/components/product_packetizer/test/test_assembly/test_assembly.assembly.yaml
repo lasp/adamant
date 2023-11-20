@@ -1,0 +1,18 @@
+---
+description: This is an assembly for testing the data product packetizer component.
+with:
+  - Test_Assembly_Product_Packets_Test_Packets
+########################################
+components:
+########################################
+  - type: Test_Component_1
+    execution: passive
+  - type: Test_Component_2
+    execution: passive
+  - type: Product_Packetizer
+    execution: passive
+    init_base:
+      - "queue_Size => 512"
+    discriminant:
+      - "packet_List => Test_Assembly_Product_Packets_Test_Packets.Packet_List'Access"
+    init:

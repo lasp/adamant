@@ -1,0 +1,102 @@
+seq tlm_14
+  ;
+  ; This tests some telemetry fetch operations.
+  ;
+
+  declare myVar u32
+  declare aVar1 u32
+  declare aVar2 f32
+  declare aVar3 u32
+  declare aVar4 f32
+
+  ; Fetch a data product and make sure the value is what is expected
+  set $myVar = Component_A.Data_Product_1.Value
+
+  if $myVar == 17
+    cmd Component_A.Command_3 Value $myVar
+  else
+    cmd Component_B.Command_3 Value $myVar
+  endif
+
+  ; Set many variables in a row and make sure it all gets executed without a tick.
+  set $aVar1 = Component_A.Data_Product_1.Value
+  set $aVar3 = Component_A.Data_Product_1.Value
+  set $aVar2 = Component_B.Data_Product_2.Value
+  set $aVar4 = Component_B.Data_Product_2.Value
+
+  if $aVar4 == 9.9
+    cmd Component_A.Command_3 Value $aVar1
+  else
+    cmd Component_B.Command_3 Value $aVar1
+  endif
+
+  ; Test a series of absolute waits that fall through without tick.
+  waitvalue Component_A.Data_Product_1.Value == 2 ? until 120001 ;absolute wait (VTC)
+  waitvalue Component_A.Data_Product_1.Value == 2 ? until 120001 ;absolute wait (VTC)
+  waitvalue Component_B.Data_Product_2.Value == 8.76 ? until 120001 ;absolute wait (VTC)
+  waitvalue Component_A.Data_Product_1.Value == 2 ? until 120001 ;absolute wait (VTC)
+  waitvalue Component_B.Data_Product_2.Value == 8.76 ? until 120001 ;absolute wait (VTC)
+  waitvalue Component_B.Data_Product_2.Value == 8.76 ? until 120001 ;absolute wait (VTC)
+  waitvalue Component_B.Data_Product_2.Value == 8.76 ? until 120001 ;absolute wait (VTC)
+
+  ; Send command to indicate that we got here.
+  cmd Component_A.Command_3 Value $aVar1
+
+  ; Test a series of relative waits that fall through without tick.
+  waitvalue Component_B.Data_Product_2.Value == 8.76 ? for 12;
+  waitvalue Component_B.Data_Product_2.Value == 8.76 ? for 13;
+  waitvalue Component_B.Data_Product_2.Value == 8.76 ? for 1;
+  waitvalue Component_A.Data_Product_1.Value == 2 ? for 5;
+  waitvalue Component_A.Data_Product_1.Value == 2 ? for 5;
+  waitvalue Component_A.Data_Product_1.Value == 2 ? for 5;
+  waitvalue Component_B.Data_Product_2.Value == 8.76 ? for 10;
+  waitvalue Component_A.Data_Product_1.Value == 2 ? for 11;
+
+  ; Send command to indicate that we got here.
+  cmd Component_A.Command_3 Value $aVar3
+
+  ; Test a series of waits that fall until...
+  waitvalue Component_B.Data_Product_2.Value == 8.76 ? for 12;
+  waitvalue Component_B.Data_Product_2.Value == 8.76 ? for 13;
+  waitvalue Component_A.Data_Product_1.Value == 2 ? until 120001 ;absolute wait (VTC)
+  waitvalue Component_B.Data_Product_2.Value == 8.76 ? for 1;
+  waitvalue Component_A.Data_Product_1.Value == 2 ? for 5;
+  waitvalue Component_A.Data_Product_1.Value == 2 ? for 5;
+  waitvalue Component_A.Data_Product_1.Value == 2 ? for 5;
+  waitvalue Component_B.Data_Product_2.Value == 8.76 ? until 120001 ;absolute wait (VTC)
+  waitvalue Component_B.Data_Product_2.Value == 8.76 ? for 10;
+  waitvalue Component_A.Data_Product_1.Value == 2 ? for 11;
+  waitvalue Component_A.Data_Product_1.Value == 2 ? until 120001 ;absolute wait (VTC)
+  waitvalue Component_B.Data_Product_2.Value == 8.76 ? until 120001 ;absolute wait (VTC)
+  waitvalue Component_A.Data_Product_1.Value == 2 ? until 120001 ;absolute wait (VTC)
+  waitvalue Component_B.Data_Product_2.Value == 8.76 ? until 120001 ;absolute wait (VTC)
+  waitvalue Component_B.Data_Product_2.Value == 8.76 ? until 120001 ;absolute wait (VTC)
+  ; HERE we block.
+  waitvalue Component_B.Data_Product_2.Value == 999.89 ? until 120001 ;absolute wait (VTC)
+  waitvalue Component_B.Data_Product_2.Value == 999.89 ? until 120001 ;absolute wait (VTC)
+  waitvalue Component_B.Data_Product_2.Value == 999.89 ? for 10;
+  waitvalue Component_A.Data_Product_1.Value == 2 ? for 11;
+  waitvalue Component_A.Data_Product_1.Value == 2 ? until 120001 ;absolute wait (VTC)
+  waitvalue Component_B.Data_Product_2.Value == 999.89 ? until 120001 ;absolute wait (VTC)
+  waitvalue Component_A.Data_Product_1.Value == 2 ? until 120001 ;absolute wait (VTC)
+  waitvalue Component_B.Data_Product_2.Value == 999.89 ? until 120001 ;absolute wait (VTC)
+  waitvalue Component_B.Data_Product_2.Value == 999.89 ? until 120001 ;absolute wait (VTC)
+  ; HERE we block.
+  waitvalue Component_A.Data_Product_1.Value == 3 ? until 120001 ;absolute wait (VTC)
+
+  ; Send command to indicate that we got here.
+  cmd Component_A.Command_3 Value $aVar3
+
+  ; Do a series of variable grabs that eventually errors.
+  ; Set many variables in a row and make sure it all gets executed without a tick.
+  set $aVar1 = Component_A.Data_Product_1.Value
+  set $aVar3 = Component_A.Data_Product_1.Value
+  set $aVar2 = Component_B.Data_Product_2.Value
+  set $aVar4 = Component_C.Data_Product_2.Value; THIS SHOULD FAIL
+  set $aVar1 = Component_A.Data_Product_1.Value
+  set $aVar3 = Component_A.Data_Product_1.Value
+  set $aVar2 = Component_B.Data_Product_2.Value
+
+  ; Send command to indicate that we got here. This should never execute.
+  cmd Component_A.Command_3 Value $aVar3
+endseq

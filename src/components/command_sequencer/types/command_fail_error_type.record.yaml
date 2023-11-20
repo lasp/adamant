@@ -1,0 +1,9 @@
+---
+description: A packed record which holds a summary of the state for a particular sequence engine.
+fields:
+  - name: Response
+    description: The command response reporting the failure.
+    type: Command_Response.T
+  - name: Error_Report
+    description: The error report of the engine.
+    type: Engine_Error_Type.T

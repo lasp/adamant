@@ -1,0 +1,15 @@
+---
+description: A packed record which holds data related to an invalid parameter memory region CRC.
+fields:
+  - name: Parameters_Region
+    description: The memory region and operation.
+    type: Parameters_Memory_Region.T
+  - name: Header
+    description: The parameter table header stored in the memory region.
+    type: Parameter_Table_Header.T
+  - name: Computed_Crc
+    description: The FSW computed CRC of the parameter table stored in the memory region.
+    type: Crc_16.Crc_16_Type
+    format: U16
+    skip_validation: True
+    byte_image: True

@@ -1,0 +1,10 @@
+---
+description: A requested memory region that has a unique identifier and return status associated with it.
+fields:
+  - name: Ided_Region
+    description: Unique identifier for the memory region and the region itself.
+    type: Ided_Memory_Region.T
+  - name: Status
+    description: The return status of the memory request.
+    type: Memory_Manager_Enums.Memory_Request_Status.E
+    format: E8

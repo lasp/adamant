@@ -1,0 +1,9 @@
+---
+description: The requirements for the CCSDS Command Depacketizer component are specified below.
+requirements:
+  - text: The component shall convert LASP CCSDS command packets to the Adamant command type.
+  - text: The component shall reject CCSDS packets with an invalid length.
+  - text: The component shall reject CCSDS packets that do not contain a secondary header.
+  - text: The component shall reject CCSDS packets that are not marked as telecommand packets in the secondary header.
+  - text: The component shall reject CCSDS packets that contain an invalid 8-bit command checksum in the secondary header.
+  - text: The component shall calculate the actual command packet length by subtracting the number stored in the secondary header function code from the CCSDS header length.

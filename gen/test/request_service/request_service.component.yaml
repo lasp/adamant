@@ -1,0 +1,12 @@
+---
+description: This is a simple test component which has a request-service connector.
+execution: passive
+connectors:
+  - description: The requestor connector
+    kind: request
+    type: Aa.T
+    return_type: Aa.T
+  - description: The servicer connector
+    kind: service
+    type: Bb.T
+    return_type: Bb.T

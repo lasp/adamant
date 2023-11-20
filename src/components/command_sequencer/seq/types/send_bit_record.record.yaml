@@ -1,0 +1,19 @@
+---
+description: A packed record for seq's send bit pattern instruction. Opcode 1.
+fields:
+  - name: Opcode
+    description: Instruction code
+    type: Basic_Types.Byte
+    format: U8
+  - name: Pad1
+    description: Padding
+    type: Basic_Types.Byte
+    format: U8
+  - name: Pad2
+    description: Padding
+    type: Basic_Types.Byte
+    format: U8
+  - name: Pad3
+    description: Padding
+    type: Basic_Types.Byte
+    format: U8

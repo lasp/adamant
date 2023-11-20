@@ -1,0 +1,10 @@
+---
+description: A packed record which holds data related to an invalid parameter length.
+fields:
+  - name: Header
+    description: The packet identifier
+    type: Parameter_Header.T
+  - name: Expected_Length
+    description: The packet length bound that the length failed to meet.
+    type: Natural
+    format: U32

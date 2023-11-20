@@ -1,0 +1,38 @@
+%- if description
+\VAR{description|e}
+%- endif
+
+%- if preamble 
+\\
+\\
+\textit{Preamble (inline Ada definitions):}
+\begin{adacode}
+\VAR{preamble}
+\end{adacode}
+
+%- endif
+\captionof{table}{\VAR{name|e} Register Map}
+\begin{xltabular}{\textwidth}{ | X | X | X | c | }
+  \hline
+  \textbf{Address} & \textbf{Name} & \textbf{Type} & \textbf{Size} \\ \hline
+%- for item in items.values()
+  \texttt{\url{0x\VAR{'%08X' % item.address} - 0x\VAR{'%08X' % (item.address + item.size - 1)}}} &
+  \texttt{\url{\VAR{item.name}}} &
+  \texttt{\url{\VAR{item.type}}} &
+  \texttt{\VAR{item.size}} \\ \hline
+%- endfor
+\end{xltabular}
+\vspace{5mm} %5mm vertical space
+
+Item Descriptions:
+\begin{spaceditemize}
+%- for item in items.values() 
+  \item \textbf{\texttt{\VAR{item.name|e}}} - 
+%- if item.description
+    \VAR{item.description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space

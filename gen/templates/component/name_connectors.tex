@@ -1,0 +1,186 @@
+%- if connectors
+Below are tables listing the component's connectors.
+
+\subsubsection{Invokee Connectors}
+%- if connectors.invokee()
+The following is a list of the component's \textit{invokee} connectors:
+
+\captionof{table}{\VAR{prettyname|e} Invokee Connectors}
+%- if connectors.requires_priority_queue()
+\begin{xltabular}{\textwidth}{ | X | c | X | X | c | c | }
+  \hline
+  \textbf{Name} & \textbf{Kind} & \textbf{Type} & \textbf{Return\_Type} & \textbf{Count} & \textbf{Priority} \\ \hline
+%- else
+\begin{xltabular}{\textwidth}{ | X | c | X | X | c | }
+  \hline
+  \textbf{Name} & \textbf{Kind} & \textbf{Type} & \textbf{Return\_Type} & \textbf{Count} \\ \hline
+%- endif
+%- for connector in connectors.invokee()
+  \texttt{\url{\VAR{connector.name}}} & 
+  \texttt{\VAR{connector.kind|e}} & 
+%- if connector.type
+  \texttt{\url{\VAR{connector.type}}}
+%- if connector.is_type_generic()
+  (generic)
+%- endif
+%- else
+  -
+%- endif
+  &
+%- if connector.return_type
+  \texttt{\url{\VAR{connector.return_type}}}
+ %- if connector.is_return_type_generic()
+  (generic)
+%- endif
+%- else
+  -
+%- endif
+  &
+%- if connector.count > 0
+  \texttt{\VAR{connector.count}}
+%- else
+  \texttt{<>}
+%- endif
+%- if connectors.requires_priority_queue()
+  &
+%- if connector.kind == "recv_async"
+  \VAR{connector.priority}
+%- else
+  -
+%- endif
+%- endif
+  \\ \hline
+%- endfor
+\end{xltabular}
+\vspace{5mm} %5mm vertical space
+
+Connector Descriptions:
+\begin{spaceditemize}
+%- for connector in connectors.invokee()
+  \item \textbf{\texttt{\VAR{connector.name|e}}} - 
+%- if connector.description
+    \VAR{connector.description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+%- endfor
+\end{spaceditemize}
+%- else
+None
+%- endif
+\vspace{5mm} %5mm vertical space
+
+%- if connectors.of_kind("recv_async")
+%- if connectors.requires_priority_queue()
+\subsubsection{Internal Priority Queue}
+This component contains an internal priority queue to handle asynchronous messages. Items of higher priority will be dequeued by the component prior to dequeuing lower priority items. Items of the same priority will be dequeued in first-in-first-out (FIFO) order. The priority for each asynchronous receive connector is shown in the table below. This queue is sized at initialization with the maximum number of entries it can hold. Each queue entry can only hold a single enqueued element and will be sized to hold the maximum sized element. Size the queue based on how many unique messages you would like to be enqueued before subsequent messages are dropped.
+%- else
+\subsubsection{Internal Queue}
+%- if connectors.arrayed_invokee()
+This component contains an internal first-in-first-out (FIFO) queue to handle asynchronous messages. This queue is sized at initialization as a configurable number of bytes. Determining the size of the component queue can be difficult. The following table lists the connectors that will put asynchronous messages onto the queue, and the maximum sizes of each of those messages on the queue. Note that each message put onto the queue also incurs an overhead on the queue of 7 additional bytes, which is included in the max message size below:
+%- else
+This component contains an internal first-in-first-out (FIFO) queue to handle asynchronous messages. This queue is sized at initialization as a configurable number of bytes. Determining the size of the component queue can be difficult. The following table lists the connectors that will put asynchronous messages onto the queue, and the maximum sizes of each of those messages on the queue. Note that each message put onto the queue also incurs an overhead on the queue of 5 additional bytes, which is included in the max message size below:
+%- endif 
+%- endif 
+
+\captionof{table}{\VAR{prettyname|e} Asynchronous Connectors}
+%- if connectors.requires_priority_queue()
+\begin{xltabular}{\textwidth}{ | X | X | c | c | }
+  \hline
+  \textbf{Name} & \textbf{Type} & \textbf{Max Size (bytes)} & \textbf{Priority} \\ \hline
+%- else
+\begin{xltabular}{\textwidth}{ | X | X | c | }
+  \hline
+  \textbf{Name} & \textbf{Type} & \textbf{Max Size (bytes)} \\ \hline
+%- endif 
+%- for connector in connectors.of_kind("recv_async")
+  \texttt{\url{\VAR{connector.name}}} & 
+%- if connector.type
+  \texttt{\url{\VAR{connector.type}}} 
+%- if connector.is_type_generic()
+  (generic)
+%- endif
+%- else
+  -
+%- endif
+  &
+%- if connector.is_type_generic()
+  \textit{Unconstrained}
+%- elif connector.type_model
+%- if connectors.arrayed_invokee()
+  \texttt{\VAR{(complex_types[connector.type_package].size/8 + 7)|int}}
+%- else
+  \texttt{\VAR{(complex_types[connector.type_package].size/8 + 5)|int}}
+%- endif 
+%- else
+  \textit{Platform Dependent}
+%- endif
+%- if connectors.requires_priority_queue()
+  &
+  \VAR{connector.priority}
+%- endif
+  \\ \hline
+%- endfor
+\end{xltabular}
+\vspace{5mm} %5mm vertical space
+
+%- if not connectors.requires_priority_queue()
+If you are unsure how to size the queue of this component, it is recommended that you make the queue size a multiple of the largest size found above.
+%- endif
+
+%- endif
+
+\subsubsection{Invoker Connectors}
+%- if connectors.invoker()
+The following is a list of the component's \textit{invoker} connectors:
+
+\captionof{table}{\VAR{prettyname|e} Invoker Connectors}
+\begin{xltabular}{\textwidth}{ | X | c | X | X | c | }
+  \hline
+  \textbf{Name} & \textbf{Kind} & \textbf{Type} & \textbf{Return\_Type} & \textbf{Count} \\ \hline
+%- for connector in connectors.invoker()
+  \texttt{\url{\VAR{connector.name}}} & 
+  \texttt{\VAR{connector.kind|e}} & 
+%- if connector.type
+  \texttt{\url{\VAR{connector.type}}} 
+%- if connector.is_type_generic()
+  (generic)
+%- endif
+%- else
+  -
+%- endif
+  &
+%- if connector.return_type
+  \texttt{\url{\VAR{connector.return_type}}}
+%- if connector.is_return_type_generic()
+  (generic)
+%- endif
+%- else
+  -
+%- endif
+  &
+%- if connector.count > 0
+  \texttt{\VAR{connector.count}} \\ \hline
+%- else
+  \texttt{<>} \\ \hline
+%- endif
+%- endfor
+\end{xltabular}
+\vspace{5mm} %5mm vertical space
+
+Connector Descriptions:
+\begin{spaceditemize}
+%- for connector in connectors.invoker()
+  \item \textbf{\texttt{\VAR{connector.name|e}}} -
+%- if connector.description
+    \VAR{connector.description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+%- endfor
+\end{spaceditemize}
+%- else
+None
+%- endif
+\vspace{5mm} %5mm vertical space
+%- endif

@@ -1,0 +1,10 @@
+---
+description: A memory region copy release record. This is returned from a component who has completed a copy operation.
+fields:
+  - name: Region
+    description: The address and length to release.
+    type: Memory_Region.T
+  - name: Status
+    description: The return status from the operation.
+    type: Memory_Enums.Memory_Copy_Status.E
+    format: E8

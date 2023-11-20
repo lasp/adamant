@@ -1,0 +1,13 @@
+---
+description: A packed record which holds a packet identifier and data product identifier
+with:
+  - Packet_Types
+fields:
+  - name: Packet_Id
+    description: The packet identifier
+    type: Packet_Types.Packet_Id
+    format: U16
+  - name: Command_Id
+    description: The command id
+    type: Command_Types.Command_Id
+    format: U16

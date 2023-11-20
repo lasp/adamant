@@ -1,0 +1,12 @@
+---
+description: These are enumerations defined for the Command Protector.
+enums:
+  - name: Armed_State
+    description: This type enumerates the armed state for the component.
+    literals:
+      - name: Unarmed
+        value: 0
+        description: The component is unarmed. Any protected commands received will be rejected.
+      - name: Armed
+        value: 1
+        description: The component is armed. If the next command received is a protected command, it will be forwarded.

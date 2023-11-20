@@ -1,0 +1,10 @@
+---
+description: Record for the PTP Time Sync Message with unexpected transaction count.
+fields:
+  - name: Message
+    description: The PTP message.
+    type: Ptp_Time_Message.T
+  - name: Expected_Transaction_Count
+    description: The expected transaction count.
+    type: Interfaces.Unsigned_16
+    format: U16

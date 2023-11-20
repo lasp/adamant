@@ -1,0 +1,9 @@
+---
+description: This is a unit test suite for the Tick Divider component.
+tests:
+  - name: Nominal
+    description: This unit test exercizes tick dividing with a variety of divisors, including disabled divisors. It runs the component through enough iterations to exercize the count rollover, and checks to make sure this happens.
+  - name: Bad_Setup
+    description: This unit test configures the component with a variety of bad input parameters and checks to make sure exceptions are thrown as expected.
+  - name: Full_Queue
+    description: This unit test makes sure that when a component has a full queue during scheduling the correct event is thrown.

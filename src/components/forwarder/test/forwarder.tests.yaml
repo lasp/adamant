@@ -1,0 +1,9 @@
+---
+description: This is a unit test suite for the Forwarder component.
+tests:
+  - name: Test_Init
+    description: This unit test tests initialization.
+  - name: Test_Enable_Disable_Forwarding
+    description: This unit test sends commands to enable and disable forwarding and make sure it functions correctly.
+  - name: Test_Invalid_Command
+    description: This unit test exercises that an invalid command throws the appropriate event.

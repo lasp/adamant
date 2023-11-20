@@ -1,0 +1,7 @@
+---
+description: Single component record for holding packed Natural_32 value.
+fields:
+  - name: Value
+    description: The 32-bit Natural_32. A Natural_32 is ranged integer type that is the same range as the 32-bit modular unsigned int or Interfaces.Unsigned. Because this is a range type and not a modular type, Ada detects overflow or underflow of the type, which is useful in some situations.
+    type: Basic_Types.Natural_32
+    format: U32

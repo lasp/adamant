@@ -1,0 +1,32 @@
+---
+# This schema describes the yaml format for the ccsds downsampler list of filter factors with the associated APID.
+type: map
+mapping:
+  description:
+    type: str
+    required: False
+  # List of data products to include in the suite.
+  downsampled_packets:
+    seq:
+      - type: map
+        mapping:
+          # APID of the packet that we are setting a filter factor for
+          apid:
+            type: int
+            required: True
+          # Filter factor of the packet
+          filter_factor:
+            type: int
+            required: True
+          # Name of the packet.
+          packet_name:
+            type: str
+            required: False
+          # Description if desired
+          description:
+            type: str
+            required: False
+    # A ccsds downsampler must have at least one packet to downsample.
+    range:
+      min: 1
+    required: True

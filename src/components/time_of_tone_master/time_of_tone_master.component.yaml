@@ -1,0 +1,47 @@
+---
+description: |
+  This is the Time of Tone Master component. It provides an alternate implementation to the Time at Tone Master component also provided within Adamant. This implementation could potentially provide more accurate time syncing if your system has the ability to accurately determine the time at which the tone is sent outside of this component (ie. the time when the tone leaves the serial port).
+
+  TaT is a protocol used to sync a slave clock to a master clock. Two messages are sent from the master to the slave component. First a 'tone' message is sent which signals to the slave clock to save its current time. Next, a 'time' message is sent which provides the master time at which the 'tone' was sent. This time combined with the time the slave recorded when the 'tone' was received can be used to calculate a time delta of the slave clock with respect to the master. This component implements the master side of the protocol. This component outputs the time message and the tone as Tick.T send connectors. This design is intended to be generic enough to implement time at tone in many different manners on the other end of these connectors. For instance, you could convert the time message Tick.T to a CCSDS packet and the tone Tick.T to a GPIO pulse.
+execution: passive
+init:
+  parameters:
+    - name: Sync_Period
+      type: Positive
+      default: "1"
+      description: The number of ticks between sending clock sync messages.
+    - name: Enabled_State
+      type: Tat_State.Tat_State_Type
+      default: "Tat_State.Enabled"
+      description: Is time at tone enabled or disabled by default at startup.
+connectors:
+  - description: Tick used to trigger the sending of tone messages.
+    type: Tick.T
+    kind: recv_sync
+  - description: This connector triggers the sending of the time message. The time received here is assumed to be an accurate time stamp of when the tone message was sent. This time can be provided to this component by a lower level component which actually records the time the tone message leaves the system. If left unconnected, no time messages will be produced by this component. In that case, the slave must use the time passed in the tone message directly, which is a less accurate measure of the master's system time.
+    type: Sys_Time.T
+    name: Tone_Message_Sys_Time_T_Recv_Sync
+    kind: recv_sync
+  - description: Time message send connector, sends a message with the time the tone message will be sent.
+    type: Tick.T
+    name: Time_Message_Send
+    kind: send
+  - description: Tone message send connector.
+    type: Tick.T
+    name: Tone_Message_Send
+    kind: send
+  - description: Used to get system time, used by the master version of the component to get the current time.
+    return_type: Sys_Time.T
+    kind: get
+  - description: The command receive connector.
+    type: Command.T
+    kind: recv_sync
+  - description: This connector is used to register the components commands with the command router component.
+    type: Command_Response.T
+    kind: send
+  - description: The data product invoker connector
+    type: Data_Product.T
+    kind: send
+  - description: The event send connector
+    type: Event.T
+    kind: send

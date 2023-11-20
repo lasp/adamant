@@ -1,0 +1,19 @@
+---
+description: A packed record for seq instruction push. Pushes value in local variable A to an engine.
+fields:
+  - name: Opcode
+    description: Instruction code
+    type: Basic_Types.Byte
+    format: U8
+  - name: Engine
+    description: The engine this argument is supposed to be sent to.
+    type: Basic_Types.Byte
+    format: U8
+  - name: Destination
+    description: The index in the argument array.
+    type: Seq_Types.Seq_Local_Id
+    format: U8
+  - name: Pad
+    description: Padding
+    type: Basic_Types.Byte
+    format: U8

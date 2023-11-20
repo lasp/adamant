@@ -1,0 +1,48 @@
+%- if packets
+%- if packets.description
+\VAR{packets.description} \\
+%- else
+\par Below is a list of the packets by the \VAR{prettyname|e} component.
+%- endif
+
+\captionof{table}{\VAR{prettyname|e} Packets}
+\begin{xltabular}{\textwidth}{ | c | l | X | }
+  \hline
+%- if packets.ids
+  \textbf{Global ID} &
+%- else
+  \textbf{Local ID} &
+%- endif
+  \textbf{Packet Name} & \textbf{Type} \\ \hline
+%- for p in packets
+%- if packets.ids
+  \texttt{0x\VAR{"%04x" % p.id } (\VAR{p.id})} &
+%- else
+  \texttt{0x\VAR{"%04x" % loop.index0} (\VAR{loop.index0})} &
+%- endif
+  \texttt{\url{\VAR{p.name}}} &
+%- if p.type
+  \texttt{\url{\VAR{p.type}}}
+%- else
+  \textit{Undefined}
+%- endif
+  \\ \hline
+%- endfor
+\end{xltabular}
+\vspace{5mm} %5mm vertical space
+
+Packet Descriptions:
+\begin{spaceditemize}
+%- for p in packets
+  \item \textbf{\texttt{\VAR{p.name|e}}} -
+%- if p.description
+    \VAR{p.description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+%- else
+\par The \VAR{prettyname|e} component has no packets.
+%- endif

@@ -1,0 +1,32 @@
+---
+# Set the fault responses description.
+description: This is an example fault response table for the Fault Correction unit test.
+# Below is the set of responses as specified by the user.
+fault_responses:
+  - fault: Component_A.Fault_1
+    latching: False
+    startup_state: enabled
+    command_response: Component_A.Command_1
+    description: The fault response for Component A Fault 1.
+  - fault: Component_A.Fault_2
+    latching: True
+    startup_state: enabled
+    command_response: Component_A.Command_2
+    command_arg: "(0, 0)" # Sys_Time.T
+    description: The fault response for Component A Fault 2.
+  - fault: Component_B.Fault_3
+    latching: True
+    startup_state: enabled
+    command_response: Component_B.Command_3
+    command_arg: "(Value => 18)" # Packed_U32.T
+    description: The fault response for Component B Fault 3.
+  - fault: Component_B.Fault_1
+    latching: False
+    startup_state: disabled
+    command_response: Component_C.Command_1
+    description: The fault response for Component B Fault 1.
+  - fault: Component_C.Fault_1
+    latching: False
+    startup_state: disabled
+    command_response: Component_B.Command_1
+    description: The fault response for Component C Fault 1.

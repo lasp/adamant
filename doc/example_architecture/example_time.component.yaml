@@ -1,0 +1,15 @@
+---
+description: This component provides system time to components in the assembly.
+execution: passive
+preamble: |
+  type Time_Source_Type is (Sofware, Hardware);
+discriminant:
+  description: The discriminant is used to specify the time source.
+  parameters:
+    - name: time_Source
+      type: Time_Source_Type
+      description: Specify whether the source for system time should be driven by the hardware or software.
+connectors:
+  - return_type: Sys_Time.T
+    kind: return
+    description: The current system time is returned on this connector.

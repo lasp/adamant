@@ -1,0 +1,117 @@
+<hydraDef>
+  <!-- Unsigned types -->
+  <typeDN name="U1" size="1"/>
+  <typeDN name="U2" size="2"/>
+  <typeDN name="U3" size="3"/>
+  <typeDN name="U4" size="4"/>
+  <typeDN name="U5" size="5"/>
+  <typeDN name="U6" size="6"/>
+  <typeDN name="U7" size="7"/>
+  <typeDN name="U8" size="8"/>
+  <typeDN name="U9" size="9" endian="BIG"/>
+  <typeDN name="U10" size="10" endian="BIG"/>
+  <typeDN name="U11" size="11" endian="BIG"/>
+  <typeDN name="U12" size="12" endian="BIG"/>
+  <typeDN name="U13" size="13" endian="BIG"/>
+  <typeDN name="U14" size="14" endian="BIG"/>
+  <typeDN name="U15" size="15" endian="BIG"/>
+  <typeDN name="U16" size="16" endian="BIG"/>
+  <typeDN name="U17" size="17" endian="BIG"/>
+  <typeDN name="U18" size="18" endian="BIG"/>
+  <typeDN name="U19" size="19" endian="BIG"/>
+  <typeDN name="U20" size="20" endian="BIG"/>
+  <typeDN name="U21" size="21" endian="BIG"/>
+  <typeDN name="U22" size="22" endian="BIG"/>
+  <typeDN name="U23" size="23" endian="BIG"/>
+  <typeDN name="U24" size="24" endian="BIG"/>
+  <typeDN name="U25" size="25" endian="BIG"/>
+  <typeDN name="U26" size="26" endian="BIG"/>
+  <typeDN name="U27" size="27" endian="BIG"/>
+  <typeDN name="U28" size="28" endian="BIG"/>
+  <typeDN name="U29" size="29" endian="BIG"/>
+  <typeDN name="U30" size="30" endian="BIG"/>
+  <typeDN name="U31" size="31" endian="BIG"/>
+  <typeDN name="U32" size="32" endian="BIG"/>
+  <typeDN name="U64" size="64" endian="BIG"/>
+
+  <!-- Signed types -->
+  <typeSN name="I1" size="1"/>
+  <typeSN name="I2" size="2"/>
+  <typeSN name="I3" size="3"/>
+  <typeSN name="I4" size="4"/>
+  <typeSN name="I5" size="5"/>
+  <typeSN name="I6" size="6"/>
+  <typeSN name="I7" size="7"/>
+  <typeSN name="I8" size="8"/>
+  <typeSN name="I9" size="9" endian="BIG"/>
+  <typeSN name="I10" size="10" endian="BIG"/>
+  <typeSN name="I11" size="11" endian="BIG"/>
+  <typeSN name="I12" size="12" endian="BIG"/>
+  <typeSN name="I13" size="13" endian="BIG"/>
+  <typeSN name="I14" size="14" endian="BIG"/>
+  <typeSN name="I15" size="15" endian="BIG"/>
+  <typeSN name="I16" size="16" endian="BIG"/>
+  <typeSN name="I17" size="17" endian="BIG"/>
+  <typeSN name="I18" size="18" endian="BIG"/>
+  <typeSN name="I19" size="19" endian="BIG"/>
+  <typeSN name="I20" size="20" endian="BIG"/>
+  <typeSN name="I21" size="21" endian="BIG"/>
+  <typeSN name="I22" size="22" endian="BIG"/>
+  <typeSN name="I23" size="23" endian="BIG"/>
+  <typeSN name="I24" size="24" endian="BIG"/>
+  <typeSN name="I25" size="25" endian="BIG"/>
+  <typeSN name="I26" size="26" endian="BIG"/>
+  <typeSN name="I27" size="27" endian="BIG"/>
+  <typeSN name="I28" size="28" endian="BIG"/>
+  <typeSN name="I29" size="29" endian="BIG"/>
+  <typeSN name="I30" size="30" endian="BIG"/>
+  <typeSN name="I31" size="31" endian="BIG"/>
+  <typeSN name="I32" size="32" endian="BIG"/>
+  <typeSN name="I64" size="64" endian="BIG"/>
+
+  <!-- Enumeration types -->
+  <typeDN name="E1" size="1"/>
+  <typeDN name="E2" size="2"/>
+  <typeDN name="E3" size="3"/>
+  <typeDN name="E4" size="4"/>
+  <typeDN name="E5" size="5"/>
+  <typeDN name="E6" size="6"/>
+  <typeDN name="E7" size="7"/>
+  <typeDN name="E8" size="8"/>
+  <typeDN name="E9" size="9" endian="BIG"/>
+  <typeDN name="E10" size="10" endian="BIG"/>
+  <typeDN name="E11" size="11" endian="BIG"/>
+  <typeDN name="E12" size="12" endian="BIG"/>
+  <typeDN name="E13" size="13" endian="BIG"/>
+  <typeDN name="E14" size="14" endian="BIG"/>
+  <typeDN name="E15" size="15" endian="BIG"/>
+  <typeDN name="E16" size="16" endian="BIG"/>
+  <typeDN name="E17" size="17" endian="BIG"/>
+  <typeDN name="E18" size="18" endian="BIG"/>
+  <typeDN name="E19" size="19" endian="BIG"/>
+  <typeDN name="E20" size="20" endian="BIG"/>
+  <typeDN name="E21" size="21" endian="BIG"/>
+  <typeDN name="E22" size="22" endian="BIG"/>
+  <typeDN name="E23" size="23" endian="BIG"/>
+  <typeDN name="E24" size="24" endian="BIG"/>
+  <typeDN name="E25" size="25" endian="BIG"/>
+  <typeDN name="E26" size="26" endian="BIG"/>
+  <typeDN name="E27" size="27" endian="BIG"/>
+  <typeDN name="E28" size="28" endian="BIG"/>
+  <typeDN name="E29" size="29" endian="BIG"/>
+  <typeDN name="E30" size="30" endian="BIG"/>
+  <typeDN name="E31" size="31" endian="BIG"/>
+  <typeDN name="E32" size="32" endian="BIG"/>
+  <typeDN name="E64" size="64" endian="BIG"/>
+
+  <!-- Floating point types -->
+  <typeFloat name="F32"/>
+  <typeDouble name="F64"/>
+
+  <!-- Special types -->
+  <typeChar name="char"/>
+
+  <!-- Ada specific types -->
+  <typeDN name="Natural" size="32" endian="BIG"/>
+  <typeSN name="Integer" size="32" endian="BIG"/>
+</hydraDef>

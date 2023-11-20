@@ -1,0 +1,17 @@
+---
+description: This is the autocoded parameter table type for the {{ parameters_instance_name }} component in the {{ assembly.name }} assembly.
+fields:
+  - name: Crc_Calculated
+    description: The CRC of the parameter table, as computed by the FSW system upon receipt of the uplinked parameter table.
+    type: Crc_16.Crc_16_Type
+    format: U16
+    skip_validation: True
+    byte_image: True
+  - name: Header
+    description: The parameter table header.
+    type: Parameter_Table_Header.T
+{% for table_entry in parameters.values() %}
+  - name: {{ table_entry.component_name }}_{{ table_entry.parameter_name }}
+    description: "(ID: {{ table_entry.parameter.id}}) {% if table_entry.parameter.description %}{{ table_entry.parameter.description }}{% endif %}"
+    type: {{ table_entry.parameter.type }}
+{% endfor %}

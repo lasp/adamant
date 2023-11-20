@@ -1,0 +1,5 @@
+---
+type: Test_Enums.First_Enum.E
+format: U8
+description: An simple array of an enumeration type.
+length: 5

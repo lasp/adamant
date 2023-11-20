@@ -1,0 +1,9 @@
+---
+description: These are the commands for the Memory Stuffer component.
+commands:
+  - name: Write_Memory
+    description: Write bytes to a region in memory.
+    arg_type: Memory_Region_Write.T
+  - name: Arm_Protected_Write
+    description: An arm command which enables the next write command to a protected memory to be accepted. The armed state of the component will expire on the next command to this component no matter what it is or after the configurable timeout.
+    arg_type: Packed_Arm_Timeout.T

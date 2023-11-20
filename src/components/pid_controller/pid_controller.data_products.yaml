@@ -1,0 +1,27 @@
+---
+description: Data products for the pid controller component.
+data_products:
+  - name: P_Output
+    description: The output proportional value of the last control cycle used to help determine how to get to the desired location.
+    type: Packed_F32.T
+  - name: I_Output
+    description: The output integrator value of the last control cycle used to help smoothly get to the desired location as well as determine overshoot and settling time.
+    type: Packed_F32.T
+  - name: D_Output
+    description: The output derivative value of the last control cycle which determines how fast the controller reaches its desired location.
+    type: Packed_F32.T
+  - name: Ff_Output
+    description: The output of the last feed forward value used in the controller to overcome sources of friction.
+    type: Packed_F32.T
+  - name: Pid_Error
+    description: The output of the last control cycle error calculated by the controller.
+    type: Packed_F32.T
+  - name: Pid_Error_Mean
+    description: The mean value of error seen in the controller over a desired, and set data length.
+    type: Packed_F32.T
+  - name: Pid_Error_Variance
+    description: The variance of the error seen in the controller over a desired, and set data length.
+    type: Packed_F32.T
+  - name: Pid_Error_Max
+    description: The max error seen in the controller over a desired, and set data length.
+    type: Packed_F32.T

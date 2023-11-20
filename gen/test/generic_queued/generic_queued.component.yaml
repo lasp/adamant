@@ -1,0 +1,22 @@
+---
+description: This is a queued test component with generic connectors.
+execution: passive
+with:
+  - Serializer_Types
+generic:
+  parameters:
+    - name: Generic_Type_1
+    - name: Generic_Type_2
+    - name: Serialized_Length
+      description: A method that returns the serialized length of an item of type Generic_Type_2. This is useful for serializing variable length packed types onto the queue.
+      formal_type: "with function Serialized_Length (Src : in Generic_Type_2; Num_Bytes_Serialized : out Natural) return Serializer_Types.Serialization_Status;"
+connectors:
+  - description: The output connector
+    type: Generic_Type_1
+    kind: send
+  - description: The input connector
+    type: Generic_Type_2
+    kind: recv_async
+  - description: The sync input connector
+    type: Aa.T
+    kind: recv_sync

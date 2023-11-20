@@ -1,0 +1,16 @@
+---
+description: Generic data_product packet for holding arbitrary data_product types
+with:
+  - Data_Product_Types
+fields:
+  - name: Time
+    description: The timestamp for the data product item.
+    type: Sys_Time.T
+  - name: Id
+    description: The data product identifier
+    type: Data_Product_Types.Data_Product_Id
+    format: U16
+  - name: Buffer_Length
+    description: The number of bytes used in the data product buffer
+    type: Data_Product_Types.Data_Product_Buffer_Length_Type
+    format: U8

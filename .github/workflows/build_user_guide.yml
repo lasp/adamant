@@ -1,0 +1,47 @@
+name: Build the User Guide
+on:
+  push:
+    branches:
+    - master
+  workflow_dispatch:
+jobs:
+  compile_job:
+    name: build_user_guide
+    runs-on: ubuntu-latest
+    container:
+      image: dinkelk/adamant:example-latest
+      credentials:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    env:
+      INSTALL_DIR: /home/user/env
+      ADAMANT_DIR: ${{ github.workspace }}
+      ADAMANT_CONFIGURATION_YAML: ${{ github.workspace }}/config/adamant.configuration.yaml
+    steps:
+      - run: echo "Starting job triggered by a ${{ github.event_name }} event on a ${{ runner.os }} server hosted by GitHub."
+      - run: echo "Checking out ${{ github.repository }} on branch ${{ github.ref }}."
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Mark repository as safe so we can run git commands within it
+        run: git config --global --add safe.directory $ADAMANT_DIR
+      - name: Get alire dependencies
+        run: alr -n build --release && alr -n toolchain --select gnat_native && alr -n toolchain --select gprbuild
+      - name: Set up Adamant configuration file
+        run: cp config/adamant.configuration.yaml.original config/adamant.configuration.yaml
+      - name: Build the user guide
+        run: bash env/github_run.sh "redo doc/user_guide/build_user_guide"
+      - name: Archive user guide PDF
+        uses: actions/upload-artifact@v3
+        with:
+          name: user_guide
+          path: doc/user_guide/build/pdf/user_guide.pdf
+          if-no-files-found: error
+      - name: Build the architecture description document
+        run: bash env/github_run.sh "redo doc/architecture_description_document/build/pdf/architecture_description_document.pdf"
+      - name: Archive user guide PDF
+        uses: actions/upload-artifact@v3
+        with:
+          name: architecture_description_document 
+          path: doc/architecture_description_document/build/pdf/architecture_description_document.pdf
+          if-no-files-found: error
+      - run: echo "Finished with status - ${{ job.status }}."

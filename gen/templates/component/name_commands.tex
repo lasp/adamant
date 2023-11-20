@@ -1,0 +1,39 @@
+%- if commands
+%- if commands.description
+\VAR{commands.description} \\
+%- else
+\par Below is a list of the commands for the \VAR{prettyname|e} component.
+%- endif
+
+\captionof{table}{\VAR{prettyname|e} Commands}
+\begin{xltabular}{\textwidth}{ | c | l | X | }
+  \hline
+  \textbf{Local ID} & \textbf{Command Name} & \textbf{Argument Type} \\ \hline
+%- for command in commands
+  \texttt{\VAR{loop.index0}} &
+  \texttt{\url{\VAR{command.name}}} &
+%- if command.type
+  \texttt{\url{\VAR{command.type}}}
+%- else
+  \texttt{-}
+%- endif
+  \\ \hline
+%- endfor
+\end{xltabular}
+\vspace{5mm} %5mm vertical space
+
+Command Descriptions:
+\begin{spaceditemize}
+%- for command in commands
+  \item \textbf{\texttt{\VAR{command.name|e}}} - 
+%- if command.description
+    \VAR{command.description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+%- else 
+\par The \VAR{prettyname|e} component has no commands.
+%- endif

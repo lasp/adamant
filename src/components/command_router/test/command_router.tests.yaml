@@ -1,0 +1,27 @@
+---
+description: This is a unit test suite for the Command Router component
+tests:
+  - name: Test_Nominal_Routing
+    description: This unit test excersizes command routing via the Command Router internal commands.
+  - name: Test_Nominal_Registration
+    description: This unit test excersizes command registration from the external testing component, and then makes sure the command routing works.
+  - name: Test_Routing_Errors
+    description: This unit test makes sure errors are thrown when unknown commands are sent.
+  - name: Test_Registration_Errors
+    description: This unit test makes sure errors are thrown when command registration goes awry.
+  - name: Test_Full_Queue_Errors
+    description: This unit test makes sure errors are thrown when the command router queue gets full.
+  - name: Test_Invalid_Argument_Length
+    description: This unit test makes sure errors are thrown when a command is received with an invalid argument length.
+  - name: Test_Invalid_Argument_Value
+    description: This unit test makes sure errors are thrown when a command is received with an invalid value.
+  - name: Test_Failed_Command
+    description: This unit test makes sure that a failed command reports the correct data products and events.
+  - name: Test_Synchronous_Command
+    description: This unit test makes sure that the synchronous command connector works as expected, bypassing queue.
+  - name: Test_Command_Response_Forwarding
+    description: This unit test makes sure that the command response forwarding system and registration works as expected.
+  - name: Test_Command_Response_Forwarding_Dropped
+    description: This unit test makes sure that the component reports an event if a command response forward is dropped by a downstream component.
+  - name: Test_Outgoing_Command_Dropped
+    description: This unit test makes sure that the component reports an event if a command is dropped by a downstream component.

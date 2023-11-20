@@ -1,0 +1,24 @@
+---
+description: These are the commands for the event packetizer component.
+commands:
+  - name: Enable_Event_Limit
+    description: Enable the event limiter for a specific event ID.
+    arg_type: Event_Single_State_Cmd_Type.T
+  - name: Disable_Event_Limit
+    description: Disable the event limiter for a specific event ID.
+    arg_type: Event_Single_State_Cmd_Type.T
+  - name: Enable_Event_Limit_Range
+    description: Enable the event limiter for a specific range of event IDs.
+    arg_type: Event_Limiter_Id_Range.T
+  - name: Disable_Event_Limit_Range
+    description: Disable the event limiter for a specific range of event IDs.
+    arg_type: Event_Limiter_Id_Range.T
+  - name: Enable_Event_Limiting
+    description: Enable the component to limit events that have been set to be limited.
+  - name: Disable_Event_Limiting
+    description: Disable the component so that all events will not be limited. The event states and counts will be maintained for when re-enabled.
+  - name: Set_Event_Limit_Persistence
+    description: Change the persistence of the event limiter for all events that are limited. Value must be between 1 and 7.
+    arg_type: Event_Limiter_Persistence_Type.T
+  - name: Dump_Event_States
+    description: Dump a packet for the state of all events on if they are limited or not.

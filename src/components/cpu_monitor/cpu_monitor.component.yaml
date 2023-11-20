@@ -1,0 +1,50 @@
+---
+description: |
+  This component produces a packet holding the CPU execution time for all tasks and interrupts configured for a particular assembly. It is provided an autocoded data structure upon initialization that contains the tasks and interrupts which it is to monitor. The packet produced contains 3 CPU execution numbers (1 bytes in size ranging from 0 - 100) for each task/interrupt, corresponding to different length time periods. The length of these time periods is also specified at initialization as multiples of the master tick driving the component.
+
+  Note that this component monitors CPU utilization by calling the Ada runtime Ada.Execution_Time.Clock subprogram which returns the amount of time since startup that a task or interrupt has been running on the CPU. The input to this subprogram is a Ada.Task_Identification id, which is provided by Adamant in an autocoded global variable for every modeled task which is passed into this component upon initialization. This interface is nonstandard, in that it exchanges information without the use of a connector. However, the use of this nonstandard interface improves efficiency and avoids having to include task identification connectors for every active component, which would be overly cumbersome.
+execution: passive
+preamble: |
+  -- This type holds the number of ticks
+  type Num_Measurement_Periods is range 0 .. 2;
+  type Execution_Periods_Type is array (Num_Measurement_Periods) of Positive;
+init:
+  description: This component requires a list of interrupts and tasks ids to monitor.
+  parameters:
+    - name: task_List
+      type: Task_Types.Task_Info_List_Access
+      description: A list of task info records to monitor.
+    - name: interrupt_List
+      type: Interrupt_Types.Interrupt_Id_List_Access
+      description: A list of task info records to monitor.
+    - name: execution_Periods
+      type: Execution_Periods_Type
+      description: The period (in ticks) that specify the duration of time that each CPU measurement is taken over.
+      # If the primary tick is at 10 seconds this would produce a cpu time measured over 10s, 1 minute, and 5 minutes
+      default: "(1, 6, 30)"
+    - name: packet_Period
+      type: Interfaces.Unsigned_16
+      description: The period (in ticks) of how often to send out the cpu execution packet. A value of zero disable sending of the packet.
+      default: "1"
+connectors:
+  - description: This is the base tick for the component.
+    type: Tick.T
+    kind: recv_sync
+  - description: Send a packet of cpu execution times.
+    type: Packet.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get
+  - description: This is the command recieve connector.
+    type: Command.T
+    kind: recv_sync
+  - description: This connector is used to register and respond to the component's commands.
+    type: Command_Response.T
+    kind: send
+  - description: Data products are sent out of this connector.
+    type: Data_Product.T
+    kind: send
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send

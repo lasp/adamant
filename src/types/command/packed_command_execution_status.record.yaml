@@ -1,0 +1,7 @@
+---
+description: A packed record for holding the command execution status.
+fields:
+  - name: Status
+    description: The command execution status.
+    type: Command_Enums.Command_Execution_Status.E
+    format: E8

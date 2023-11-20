@@ -1,0 +1,18 @@
+---
+description: A packed record which holds data related to an invalid CRC in a CCSDS packet.
+fields:
+  - name: Ccsds_Header
+    description: The CCSDS command header.
+    type: Ccsds_Primary_Header.T
+  - name: Computed_Crc
+    description: The computed CRC of the entire packet minus the CRC bytes
+    type: Crc_16.Crc_16_Type
+    format: U16
+    skip_validation: True
+    byte_image: True
+  - name: Stored_Crc
+    description: The Crc included at the end of the ISS CCSDS packet
+    type: Crc_16.Crc_16_Type
+    format: U16
+    skip_validation: True
+    byte_image: True

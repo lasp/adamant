@@ -1,0 +1,11 @@
+---
+description: These are the requirements for the Event Limiter component.
+requirements:
+  - text: The Event Limiter component shall accept all events from the system and pass then on if not limited.
+  - text: The Event Limiter component shall track the number of each particular event and limit if more than a set persistence, between 1 and 7, is seen in 1 tick.
+  - text: The Event Limiter component shall allow one event through each tick if the event is at the limit and still coming through the system.
+  - text: The Event Limiter component shall not limit event messages if the event is not set to enabled.
+  - text: The Event Limiter component shall have the ability to enable or disable event limiting by command.
+  - text: The Event Limiter component shall not limit and simply pass any events not initialized in the event ID range.
+  - text: The Event Limiter component shall send a packet of all event states when issued by command.
+

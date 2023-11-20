@@ -1,0 +1,34 @@
+---
+# This schema describes the yaml format for a parameters suite.
+type: map
+mapping:
+  # Description of the parameters suite.
+  description:
+    type: str
+    required: False
+  # List of parameters items to include in the suite.
+  parameters:
+    seq:
+      - type: map
+        mapping:
+          # Name of the parameter item.
+          name:
+            type: str
+            required: True
+          # Description of the parameter item.
+          description:
+            type: str
+            required: False
+          # The type of the parameter item. Using a packed record or packed
+          # array type is recommended here.
+          type:
+            type: str
+            required: True
+          # The default value of the parameter. This is required.
+          default:
+            type: str
+            required: True
+    # A parameter suite must have at least one parameter item.
+    range:
+      min: 1
+    required: True

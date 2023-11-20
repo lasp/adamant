@@ -1,0 +1,437 @@
+---
+description:
+enums:
+  - name: Seq_Error
+    description: The set of error states that a single sequence could be in.
+    literals:
+      - name: NONE
+        description: This means that the sequence is currently not in an error state.
+      - name: PARSE
+        description: An instruction parse error occured. This can happen when an instruction has a constrained field (i.e. eval operations, fetch, store, etc.) and the read value does not conform to the constraint.
+      - name: OPCODE
+        description: This occurs when an instruction opcode is read and it is not within the set of valid opcodes. Potential causes include misaligned memory, invalid jumps, compiler versions, bit corruption, etc.
+      - name: COMMAND_PARSE
+        description: This occurs when there is an issue deserializing the bytes of an in-sequence command. If it failed for any reason, or if it read a different number of bytes than the instruction said it should.
+      - name: COMMAND_LENGTH
+        description: This occurs when a sequence attempts to deserialize a command, but reads off the end of the sequence.
+      - name: COMMAND_FAIL
+        description: Something upstream failed to send or resolve a command. Will not receive a command.
+      - name: Update_Bit_Pattern
+        description: Something went wrong while parsing an update bit pattern.
+      - name: Command_Argument
+        description: Something went wrong while updating a command bit pattern argument.
+      - name: TELEMETRY_FAIL
+        description: Something about the requested telemetry failed upstream. Will not receive telemetry.
+      - name: VARIABLE
+        description: This occurs when seq attempts to read or store a variable in an invalid spot. Seq maintains variables in a variable map and four internal variables, either of these could be miss-indexed.
+      - name: JUMP
+        description: This occurs if a sequence position jump is outside of the range of the sequence. All jumps are validated internally before they occur.
+      - name: CAST
+        description: This occurs if a sequence attempts to cast one variable to another and it fails (i.e. Cast_F_To_U -1.0 -> ?).
+      - name: LIMIT
+        description: This occurs when a sequence has executed too many instructions in a row without blocking (instruction limit is mission configurable, and should be relatively high).
+      - name: EVAL
+        description: An exception occured while performing an arithmetic, bitwise, or logical operation on two values.
+      - name: FLOAT_VALUE
+        description: The runtime attempted to read an internal as a float, but the float was read as NaN/inf/-inf/some invalid value.
+      - name: EXECUTE
+        description: The sequence was forced into an error because it finished execution in an invalid state.
+      - name: WAIT
+        description: The sequence is attempting to wait on an absolute value (seconds) that is in the past.
+      - name: LOAD
+        description: The engine encountered an error while trying to load a sequence.
+      - name: SPAWN
+        description: The engine attempted to spawn a sequence on top of itself. Since 'start' exists, this was determined to be erroneous.
+      - name: LOAD_HEADER
+        description: The sequence the was being loaded was not long enough to contain a valid header.
+      - name: LOAD_LENGTH
+        description: The sequence header and the memory region length are in disagreement.
+      - name: INVALID_OP
+        description: The sequence attempted to perform an operation on a type that does not have that operation defined.
+      - name: KILL
+        description: The sequence tried to execute a kill opcode with invalid parameters.
+      - name: Recursion
+        description: The sequence has exceeded its in-component recursion limit and is not executable.
+      - name: Command_Timeout
+        description: A command response was not recieved within the timeout limit.
+      - name: Load_Timeout
+        description: A sequence load was not recieved within the timeout limit.
+      - name: Telemetry_Timeout
+        description: A telemetry value was not recieved within the timeout limit.
+      - name: Unimplemented
+        description: The opcode found has not been implemented in this runtime.
+  - name: Seq_Operation
+    description: An arithmetic operation.
+    literals:
+      - name: Modulus
+        value: 37
+        description: Mods two numbers.
+      - name: Bitwise_And
+        value: 38
+        description: Bitwise AND's two numbers.
+      - name: Multiplication
+        value: 42
+        description: Multiplies two numbers.
+      - name: Addition
+        value: 43
+        description: Adds two numbers.
+      - name: Subtraction
+        value: 45
+        description: Subtracts two numbers.
+      - name: Division
+        value: 47
+        description: Divides two numbers.
+      - name: Less_Than
+        value: 60
+        description: Checks if left is lesser than right.
+      - name: Greater_Than
+        value: 62
+        description: Checks if left is greater than right.
+      - name: Logical_And
+        value: 65
+        description: Logically AND's two numbers.
+      - name: Equals
+        value: 69
+        description: Checks for equality between two numbers.
+      - name: Greater_Than_Equal
+        value: 71
+        description: Checks if left is greater than or equal to right.
+      - name: Less_Than_Equal
+        value: 76
+        description: Checks if left is less than or equal to right.
+      - name: Not_Equals
+        value: 78
+        description: Checks for inequality between two numbers.
+      - name: Logical_Or
+        value: 79
+        description: Logically OR's two numbers.
+      - name: Bitwise_Xor
+        value: 94
+        description: Bitwise XOR's two numbers.
+      - name: Bitwise_Or
+        value: 124
+        description: Bitwise OR's two numbers.
+  - name: Seq_Internal
+    description: Represents one of the two seq registers.
+    literals:
+      - name: Timeout
+        value: 0
+        description: Internal Variable that is simply a timeout flag.
+      - name: Seq_Return
+        value: 1
+        description: Internal Variable that holds a seq return value.
+      - name: A
+        value: 2
+        description: Internal Variable A
+      - name: B
+        value: 3
+        description: Internal Variable B
+  - name: Seq_Opcode
+    description: The opcode of a seq instruction.
+    literals:
+      - name: Set_Bit_Pattern
+        value: 0
+        description: Sets the bit pattern of a command in the engine.
+      - name: Send_Bit_Pattern
+        value: 1
+        description: Sets the engine state to wait for the command to be sent.
+      - name: Update_Bit_Pattern
+        value: 2
+        description: Not implemented yet.
+      - name: Call
+        value: 3
+        description: Requests that a subsequence should be loaded on this engine and that the current sequence will be returned to.
+      - name: Spawn
+        value: 4
+        description: Requests that a sequence should be loaded on a different engine.
+      - name: Start
+        value: 5
+        description: Requests that a sequence should be loaded on this engine, overwritting the current sequence.
+      - name: Push
+        value: 6
+        description: Pushes arguments to the engine running the current sequence, will then be pushed to a newly loaded sequence.
+      - name: Eval
+        value: 7
+        description: Performs an operation (+,-,*,/, etc.) on two unsigned values.
+      - name: Fetch_Var_A
+        value: 8
+        description: Stores a value in internal A. The value can either be a literal or from the local var array.
+      - name: Fetch_Var_B
+        value: 9
+        description: Stores a value in internal B. The value can either be a literal or from the local var array.
+      - name: Store_Var
+        value: 10
+        description: Stores internal A into the correct position in the local var array.
+      - name: Fetch_TLM_A
+        value: 11
+        description: Requests a telemetry item to be sent to internal A.
+      - name: Fetch_TLM_B
+        value: 12
+        description: Requests a telemetry item to be sent to internal B.
+      - name: Invalid
+        value: 13
+        description: No instruction has an opcode of 13, so this is simply an invalid opcode.
+      - name: Wait
+        value: 14
+        description: Sets the engine state to the current wait type and tells the engine how long it must wait for.
+      - name: Seq_Goto
+        value: 15
+        description: Jumps to a new position in the sequence buffer.
+      - name: Jump_If_Zero
+        value: 16
+        description: Jumps to the given position if internal A is equal to 0.
+      - name: Jump_Not_Zero
+        value: 17
+        description: Jumpes to the given position if internal A does not equal 0.
+      - name: Jump_If_Equal
+        value: 18
+        description: If the stored value and the value from internal var A are equal this will perform an absolute jump.
+      - name: Jump_Not_Equal
+        value: 19
+        description: If the stored value and the value from internal var A are NOT equal this will perform an absolute jump.
+      - name: Seq_Return
+        value: 20
+        description: Terminates the current sequence.
+      - name: Wait_If_Zero
+        value: 21
+        description: Waits only if internal A has a value of 0. Can wait relatively, absolutely, or indefinitely for some condition to be true.
+      - name: Kill_Category
+        value: 22
+        description: Terminates all sequences with the given category.
+      - name: Kill_Engine
+        value: 23
+        description: Terminates all engines with the given engine id.
+      - name: Kill_Name
+        value: 24
+        description: Not Implemented Yet.
+      - name: Subscribe
+        value: 25
+        description: Subscribes to a cyclic telemetry packet, not sure this is needed in our flight system.
+      - name: Unsubscribe
+        value: 26
+        description: Unsubscribes from a cyclic telemetry packet, again, not sure this is needed in our flight system.
+      - name: Eval_FLT
+        value: 27
+        description: Performs a mathematical operation on internal A and B as floating point values.
+      - name: Cast_F_To_U
+        value: 28
+        description: Cast's float to unsigned.
+      - name: Cast_U_To_F
+        value: 29
+        description: Cast's unsigned to float.
+      - name: Eval_S
+        value: 30
+        description: Evaluates two signed integer values.
+      - name: Cast_S_To_U
+        value: 31
+        description: Cast's signed to unsigned.
+      - name: Cast_U_To_S
+        value: 32
+        description: Cast's unsigned to signed.
+      - name: Cast_F_To_S
+        value: 33
+        description: Cast's float to signed.
+      - name: Cast_S_To_F
+        value: 34
+        description: Cast's signed to float.
+      - name: Wait_On_B
+        value: 35
+        description: Waits for the amount of time specified in internal B.
+      - name: Wait_If_Zero_On_B
+        value: 36
+        description: Waits for the amount of time specified in internal B, if internal A is zero.
+      - name: Str_Alloc
+        value: 37
+        description: Not Implemented Yet.
+      - name: Str_Dealloc
+        value: 38
+        description: Not Implemented Yet.
+      - name: Str_Set
+        value: 39
+        description: Not Implemented Yet.
+      - name: Str_Update_Bit_Pattern
+        value: 40
+        description: Not Implemented Yet.
+      - name: Str_Copy
+        value: 41
+        description: Not Implemented Yet.
+      - name: Str_Move
+        value: 42
+        description: Not Implemented Yet.
+      - name: Print
+        value: 43
+        description: Print a statically defined string.
+      - name: Print_Var
+        value: 44
+        description: Print a SEQ variable.
+      - name: Print_Str
+        value: 45
+        description: Not Implemented Yet
+  - name: Seq_Engine_State
+    description: The set of states that the sequence engine can be in.
+    literals:
+      - name: UNINITIALIZED
+        description: The engine has not been initialized. Requires both a source id and an engine id.
+      - name: INACTIVE
+        description: The engine does not have a running sequence loaded.
+      - name: RESERVED
+        description: Expecting a sequence to get loaded, but no sequence is currently loaded.
+      - name: ACTIVE
+        description: The engine is currently in use and actively running a sequence.
+      - name: WAITING
+        description: The sequence loaded in this engine is currently waiting on a time value.
+      - name: ENGINE_ERROR
+        description: The engine has encountered an error of some sort and requires corrective action.
+  - name: Seq_Execute_State
+    description: A collapsed set of states the engine is allowed to report after a sequence has completed an execution cycle.
+    literals:
+      - name: UNLOADED
+        description: The engine's current sequence stack has finished running.
+      - name: WAIT_RELATIVE
+        description: The engine's current sequence is waiting on a relative time value (seconds).
+      - name: WAIT_ABSOLUTE
+        description: The engine's current sequence is waiting on an absolute time value (seconds).
+      - name: WAIT_COMMAND
+        description: The engine's current sequence is waiting for a command to be sent.
+      - name: WAIT_TELEMETRY
+        description: The engine's current sequence is waiting on an absolute timeout (seconds) for a telemetry packet.
+      - name: WAIT_TELEMETRY_RELATIVE
+        description: The engine's current sequence is requesting a change from a relative timeout to an absolute timeout (seconds).
+      - name: WAIT_LOAD_SEQ
+        description: The engine's current sequence is requesting that another sequence be loaded.
+      - name: SET_TELEMETRY
+        description: The engine's current sequence is requires a current value from a telemetry packet.
+      - name: KILL_ENGINES
+        description: The engine's current sequence is requesting to kill a range of engines.
+      - name: PRINT
+        description: The engine's current sequence is requesting that a print statement be issued.
+      - name: ERROR
+        description: The engine's current sequence is in an error state.
+  - name: Seq_Runtime_State
+    description: The set of states that a sequence runtime may be in.
+    literals:
+      - name: UNLOADED
+        description: No sequence is currently loaded in the sequence runner.
+      - name: READY
+        description: The sequence can safely be executed without any external work. This state happens after being awoken from sleeping, or after a successful load, etc.
+      - name: DONE
+        description: The loaded sequence has successfully finished executing and will not execute until anoter sequence is loaded (or reloaded).
+      - name: WAIT_RELATIVE
+        description: The sequence is waiting on a relative time value.
+      - name: WAIT_ABSOLUTE
+        description: The sequence is waiting on an absolute time value.
+      - name: WAIT_COMMAND
+        description: The sequence is asking to send a command (could also be waiting on a command response).
+      - name: WAIT_TELEMETRY_SET
+        description: The sequence is waiting for a piece of telemetry, no timeout, and does not care about the value.
+      - name: WAIT_TELEMETRY_VALUE
+        description: The sequence is waiting for a piece of telemetry to be a certain value. Also waiting on an absolute timeout value.
+      - name: WAIT_TELEMETRY_RELATIVE
+        description: The sequence is waiting for a piece of telemetry to be a certain value. Also waiting on a relative timeout value.
+      - name: TELEMETRY_SET
+        description: The sequence has received valid telemetry and should check act upon it's value.
+      - name: TIMEOUT
+        description: This is a non-blocking state the means the sequence runtime has a wait that timed out.
+      - name: KILL_ENGINE
+        description: The sequence is requesting to kill a range of engines.
+      - name: WAIT_LOAD_NEW_SEQ_OVERWRITE
+        description: The current sequence has asked for a sequence to be loaded in the same engine as the current sequence. This will overwrite the current sequence.
+      - name: WAIT_LOAD_NEW_SUB_SEQ
+        description: The current sequence has asked for a sequence to be loaded as a subsequence. When the subsequence finishes execution, control will be returned to the calling sequence.
+      - name: WAIT_LOAD_NEW_SEQ_ELSEWHERE
+        description: The current sequence has asked for a sequence to be loaded into another engine.
+      - name: PRINT
+        description: The current sequence has asked for a print statement to be issued.
+      - name: ERROR
+        description: The current sequence has encountered a known error.
+  - name: Seq_Wait_Type
+    description: This enum represents either a relative or absolute wait.
+    literals:
+      - name: Absolute
+        value: 1
+      - name: Relative
+        value: 2
+  - name: Var_Origin
+    description: Used in seq variable records to determine where to fetch the variable from.
+    literals:
+      - name: In_Sequence
+        value: 0
+        description: Found in the sequence.
+      - name: Local
+        value: 1
+        description: Found in the runtime variable map.
+      - name: Internal
+        value: 2
+        description: Found in one of the two internal variables.
+      - name: Global
+        value: 3
+        description: Found in the seq global variables (currently not supported in Adamant)
+  - name: Print_Type
+    description: The type of message associated with a print statement.
+    literals:
+      - name: Debug
+        value: 0
+        description: A debug print statement.
+      - name: Info
+        value: 1
+        description: An informational print statement.
+      - name: Critical
+        value: 2
+        description: A critical print statement.
+      - name: Error
+        value: 3
+        description: An error print statement.
+  - name: Seq_Data_Type
+    description: This enum names the data types from Seq. This was implemented for printing variables. In C Seq these were represented with chars, so the values my seem random, they are not.
+    literals:
+      - name: Discrete
+        value: 68
+        description: Originally the char 'D'. Represents Discrete types.
+      - name: Float
+        value: 70
+        description: Originally the char 'F'. Represents float types.
+      - name: Signed
+        value: 73
+        description: Originally the char 'I'. Represents signed types.
+      - name: Unsigned
+        value: 85
+        description: Originally the char 'U'. Represents unsigned types.
+  - name: Seq_Data_Format
+    description: This enums names the data formats used in Seq defining details about a telemetry item, including endianess.
+    literals:
+      - name: Unsigned_Byte
+        value: 0
+        description: "Unsigned byte."
+      - name: Unsigned_Word_Le
+        value: 1
+        description: "Unsigned little endian word."
+      - name: Unsigned_Long_Le
+        value: 2
+        description: "Unsigned little endian long."
+      - name: Unsigned_Word_Be
+        value: 3
+        description: "Unsigned big endian word."
+      - name: Unsigned_Long_Be
+        value: 4
+        description: "Unsigned big endian long."
+      - name: Signed_Byte
+        value: 5
+        description: "Signed byte."
+      - name: Signed_Word_Le
+        value: 6
+        description: "Signed little endian word."
+      - name: Signed_Long_Le
+        value: 7
+        description: "Signed little endian long."
+      - name: Signed_Word_Be
+        value: 8
+        description: "Signed big endian word."
+      - name: Signed_Long_Be
+        value: 9
+        description: "Signed big endian long."
+      - name: Float_Le
+        value: 10
+        description: "Little endian float."
+      - name: Float_Be
+        value: 11
+        description: "Big endian float."

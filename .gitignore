@@ -1,0 +1,25 @@
+build/
+.vagrant
+.Trash*
+.pyenv/
+*.pyc
+*.pyo
+__pycache__/
+.tmp
+.DS_Store
+~*
+*.swp
+GNAT-*
+~$*
+.#*#
+*.asv
+*.tmp
+.unison*
+
+# Standard alire ignores:
+/alire/
+/config/
+!/config/README.md
+!/config/adamant.configuration.yaml.original
+!/config/.all_path
+!/config/.gitignore

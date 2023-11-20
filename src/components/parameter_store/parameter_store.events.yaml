@@ -1,0 +1,26 @@
+---
+description: Events for the Parameter Store component.
+events:
+  - name: Memory_Region_Length_Mismatch
+    description: A memory region was received with an invalid length. The length of the region must be the same size as the parameter table.
+    param_type: Invalid_Parameters_Memory_Region_Length.T
+  - name: Memory_Region_Crc_Invalid
+    description: A memory region parameter table was received with an invalid CRC. The computed CRC does not match the CRC found in the header.
+    param_type: Invalid_Parameters_Memory_Region_Crc.T
+  - name: Dumped_Parameters
+    description: Produced a packet with the contents of the parameter store.
+  - name: Parameter_Table_Updated
+    description: Parameter table updated from a received memory region.
+    param_type: Memory_Region.T
+  - name: Parameter_Table_Fetched
+    description: Starting fetching of the parameters into received memory region.
+    param_type: Memory_Region.T
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T
+  - name: Command_Dropped
+    description: A command was dropped due to a full queue.
+    param_type: Command_Header.T
+  - name: Memory_Region_Dropped
+    description: A memory region was dropped due to a full queue.
+    param_type: Parameters_Memory_Region.T

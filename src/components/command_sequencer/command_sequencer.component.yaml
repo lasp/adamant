@@ -1,0 +1,83 @@
+---
+description: |
+  The Command Sequencer component executes command sequences with a configurable number of engines. The sequence engines execute sequences in the LASP Awesome Sequence Engine Language (LASEL) compiled by the LASP SEQ tool. Documentation on LASEL is included in this component's doc/ directory.
+
+  This component runs a configurable number of sequence engines using a single Adamant task. The task runs each engine in priority order, where lower numbered engines take precendence over higher numbered engines. Each engine contains a configurable-sized stack that allows sequences to call subsequences. This component adheres to the property that commands are only executed after previous commands have completed (ie. a command response has been received). In this way the sequences are largely event driven, waiting on the execution of previous commands to finish prior to executing subsequent ones. A periodic tick is supplied to the component to provide timing control for sequences that need to execute relative or absolute waits, or check until a telemetry condition has been met before proceding.
+
+  The sequence engine and sequence runtime (LASEL interpreter) is located in the seq/ directory.
+execution: active
+with:
+  - Sequence_Types
+  - Seq_Types
+  - Command_Sequencer_Enums
+preamble: |
+  -- Create a function type that takes in sequence load information and returns a command that performs the loading and running of
+  -- a sequence. The way a sequence is fetched and loaded into the sequencer may vary from mission to mission. This allows the user
+  -- of the sequencer to encode this mission specific behavior within a function that is passed at initialization.
+  --
+  -- When a sequence loads or spans or calls another sequence, the command sequencer will call this function to formulate the correct
+  -- sequence load command for the assembly. Note that the Source_Id in the command header does not need to be set by this function,
+  -- the sequencer will set it correctly prior to sending this command out.
+  type Create_Sequence_Load_Command_Access is access function (Id : in Sequence_Types.Sequence_Id; Engine_Number : in Seq_Types.Sequence_Engine_Id; Engine_Request : in Command_Sequencer_Enums.Sequence_Load_Engine_Request_Type.E) return Command.T;
+init:
+  description: The initialization subprogram creates a sequencer with the desired number of engines and internal stack sizes.
+  parameters:
+    - name: Num_Engines
+      type: Seq_Types.Num_Engines_Type
+      description: The number of engines allocated in the sequencer. This determines the number of sequences the component can run in parallel.
+    - name: Stack_Size
+      type: Seq_Types.Stack_Depth_Type
+      description: The size of the stack allocated for each engine in entries. Each stack entry contains a single running sequence, and additional stack entries can be used for subsequence calls. A value of 5 here would allow a sequence to call subsequences up to 5 levels deep.
+    - name: Create_Sequence_Load_Command_Function
+      type: Create_Sequence_Load_Command_Access
+      description: When a sequence loads or spans or calls another sequence, the command sequencer will call this function to formulate the correct sequence load command for the assembly. Since the specifics of sequence loading often varies on a mission by mission basis, this function allows the encoding of that mission specific behavior by the user.
+    - name: Packet_Period
+      type: Interfaces.Unsigned_16
+      description: The initial packet rate for the sequencer summary packet in ticks. A value of 0 disabled the packet.
+    - name: Continue_On_Command_Failure
+      type: Boolean
+      description: If set to True, then the sequence engines will continue to execute even if a sent command fails. If set to False, then the engines will halt with an error status if a sent command fails.
+    - name: Timeout_Limit
+      type: Natural
+      description: The number of ticks to wait before timing out sequencer operations such as waiting on a command response or subsequence load. If a timeout of this type occurs the engine will transition to an error state. A value of zero disables these timeouts.
+    - name: Instruction_Limit
+      type: Positive
+      description: The maximum number of sequence instructions we allow the sequence to execute without hitting a pausing action such as sending a command, waiting on telemetry, or waiting for a relative or absolute time. The purpose of this parameter is to prevent a sequence from entering an infinite execution loop which would cause the entire component task to hang indefinitely. You should set the value to some maximum number of instructions that you never expect any of your compiled sequences to hit.
+connectors:
+  - description: The schedule invokee connector. This is used to detect sequence timeout errors, meter out the checking of telemetry for sequence conditionals, and determine when to resume a sequence after a relative or absolute wait.
+    type: Tick.T
+    kind: recv_async
+  - description: Command responses from sent commands are received on this connector, allowed subsequent commands in a sequence to be sent out. Note that during initialization a Register_Source message needs to be sent via this connector for each engine, providing a unique source identifier. This source identifier will be used for each engine when sending out commands after initialization. If using the command router, you should set up the command router to include a unique arrayed connector entry for each engine that needs to be registered.
+    type: Command_Response.T
+    kind: recv_async
+  - description: The command receive connector. Commands received on this connector are executed by the sequencer itself, ie. halting a sequence.
+    type: Command.T
+    kind: recv_async
+  - description: This connector is used to load a sequence into the command sequencer via memory region. Sequences are not copied to this component's memory, they are run directly from the address provided in the given sequence load memory region.
+    type: Sequence_Load.T
+    kind: recv_async
+  - description: This connector is used to send the return status from a sequence load operation.
+    type: Sequence_Load_Return.T
+    kind: send
+  - description: The command send connector. Commands originating from sequences are sent out of this connector.
+    type: Command.T
+    kind: send
+  - description: Fetch a data product item from the database. This is used to check telemetry during conditionals in a sequence.
+    type: Data_Product_Fetch.T
+    return_type: Data_Product_Return.T
+    kind: request
+  - description: This connector is used to register the components commands with the command router component.
+    type: Command_Response.T
+    kind: send
+  - description: Packets are sent out of this connector.
+    type: Packet.T
+    kind: send
+  - description: Data products are sent out of this connector.
+    type: Data_Product.T
+    kind: send
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get

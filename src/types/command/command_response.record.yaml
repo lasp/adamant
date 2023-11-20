@@ -1,0 +1,20 @@
+---
+description: Record for holding command response data.
+fields:
+  - name: Source_Id
+    description: The source ID. An ID assigned to a command sending component.
+    type: Command_Types.Command_Source_Id
+    format: U16
+    default: "0"
+  - name: Registration_Id
+    description: The registration ID. An ID assigned to each registered component at initialization.
+    type: Command_Types.Command_Registration_Id
+    format: U16
+  - name: Command_Id
+    description: The command ID for the command response.
+    type: Command_Types.Command_Id
+    format: U16
+  - name: Status
+    description: The command execution status.
+    type: Command_Enums.Command_Response_Status.E
+    format: E8

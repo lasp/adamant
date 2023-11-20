@@ -1,0 +1,41 @@
+---
+description: This is a simple component with an arrayed invoker connector of every kind.
+execution: passive
+connectors:
+  - description: The arrayed output connector
+    type: Aa.T
+    kind: send
+    count: 4
+  - description: The arrayed request connector
+    type: Aa.T
+    return_type: Bb.T
+    kind: request
+    count: 4
+  - description: The arrayed request connector
+    type: Aa.T
+    kind: provide
+    count: 4
+  - description: The arrayed request connector
+    return_type: Bb.T
+    kind: get
+    count: 4
+  - description: The n arrayed output connector
+    type: Aa.T
+    kind: send
+    count: 0
+  - description: The n arrayed request connector
+    type: Aa.T
+    return_type: Bb.T
+    kind: request
+    count: 0
+  - description: The n arrayed request connector
+    type: Aa.T
+    kind: provide
+    count: 0
+  - description: The n arrayed request connector
+    return_type: Bb.T
+    kind: get
+    count: 0
+  - description: The input connector
+    type: Aa.T
+    kind: recv_sync

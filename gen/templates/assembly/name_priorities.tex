@@ -1,0 +1,16 @@
+The table below outlines the system tasks for the \VAR{prettyname|e} assembly. Task names are in the form \textit{component\_name.task\_name}. The priority \textit{rank} is a number from 1 to \textit{n} denoting how the priority of a component's task compares to others in the system. A rank of 1 is the highest priority in the system. The \textit{priority value} is the actual priority number provided to the system scheduler. A larger \textit{priority value} value signifies a higher priority task.
+
+\captionof{table}{\VAR{prettyname|e} Component Task Priorities}
+{\renewcommand{\arraystretch}{2.2} %<- modify value to suit your needs
+  \begin{xltabular}{\textwidth}{ | c | X | c | c | }
+  \hline
+  \vtop{\hbox{\strut \textbf{Task}}\hbox{\strut \textbf{Number}}} & \textbf{Task Name} & \vtop{\hbox{\strut \textbf{Priority}}\hbox{\strut \textbf{Rank}}} & \vtop{\hbox{\strut \textbf{Priority}}\hbox{\strut \textbf{Value}}} \\ \hline
+%- for task in task_list
+  \texttt{\VAR{task.number}} &
+  \texttt{\url{\VAR{task.component_name}.\VAR{task.name}_Task}} &
+  \texttt{\VAR{task.priority_rank}} &
+  \texttt{\VAR{task.priority}}
+  \\ \hline
+%- endfor
+\end{xltabular}}
+\vspace{5mm} %5mm vertical space

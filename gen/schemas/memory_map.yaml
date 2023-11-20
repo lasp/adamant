@@ -1,0 +1,64 @@
+---
+# This schema describes the yaml format for a memory_map.
+type: map
+mapping:
+  # Description of the memory_map.
+  description:
+    type: str
+    required: False
+  # Any useful handcode to include in the .ads file can be included here.
+  # You can think of this as inline Ada, which might be useful for declaring
+  # custom enum types and the like.
+  preamble:
+    type: str
+    required: False
+  # Many "with" dependencies are automatically deduced and included by
+  # the generator. If you want to manually add a "with" statement, you
+  # can list the names of the packages here.
+  with:
+    seq:
+      - type: str
+    required: False
+  # The start address of this memory map region.
+  start_address:
+    type: int
+    required: True
+  # The length of this memory map region.
+  length:
+    type: int
+    required: True
+  # List of items to include in the memory map.
+  items:
+    seq:
+      - type: map
+        mapping:
+          # Name of the item.
+          name:
+            type: str
+            required: True
+          # Description of the item.
+          description:
+            type: str
+            required: False
+          # The type of the item. Using a packed record or packed
+          # array type is recommended here.
+          type:
+            type: str
+            required: True
+          # The alignment of an item. If not specified the default
+          # value is an alignment of 1, which means the item starts
+          # on a byte boundary.
+          #alignment:
+          #  type: int
+          #  required: False
+          #  default: 1
+          # The value of the item. This is usually left unspecified, but may
+          # be required in special circumstances where you want to initialize
+          # some value in non-volatile storage at every boot.
+          value:
+            type: str
+            required: False
+    # A memory_map must have at least one item.
+    range:
+      min: 1
+    required: True

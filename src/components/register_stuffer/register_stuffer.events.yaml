@@ -1,0 +1,25 @@
+---
+description: Events for the Register Stuffer component.
+events:
+  - name: Invalid_Register_Address
+    description: The register address provided does not start on a 32-bit boundary.
+    param_type: Packed_Address.T
+  - name: Register_Written
+    description: The specified register was written to the commanded value.
+    param_type: Register_Value.T
+  - name: Register_Read
+    description: The specified register was read from.
+    param_type: Register_Value.T
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T
+  - name: Rejected_Protected_Register_Write
+    description: The specified register could not be written because the component was not armed first.
+    param_type: Register_Value.T
+  - name: Armed
+    description: The component received the arm command an is now armed.
+    param_type: Packed_Arm_Timeout.T
+  - name: Unarmed
+    description: The component received a command and is now unarmed.
+  - name: Unarmed_Timeout
+    description: The component armed state timed out and is now unarmed.

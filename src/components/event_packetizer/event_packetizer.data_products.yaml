@@ -1,0 +1,9 @@
+---
+description: Data products for the Event Packetizer component.
+data_products:
+  - name: Events_Dropped_Count
+    description: The number of events dropped by the component.
+    type: Packed_U32.T
+  - name: Bytes_Available
+    description: The current number of bytes available for event storage within the component.
+    type: Packed_Natural.T

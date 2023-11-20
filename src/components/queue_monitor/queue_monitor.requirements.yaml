@@ -1,0 +1,5 @@
+---
+description: The requirements for the Queue Monitor component are specified below.
+requirements:
+  - text: The component shall produce data reporting the current and maximum (high water mark) queue usage of every component queue in an assembly.
+  - text: The component shall produce queue usage data at a periodic rate that is configurable by command.

@@ -1,0 +1,5 @@
+---
+description: This is a unit test suite for the Event Text Logger component
+tests:
+  - name: Test_Event_Printing
+    description: This unit test sends events to the event text logger and expects them to be printed to the screen.

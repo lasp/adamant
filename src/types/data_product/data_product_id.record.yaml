@@ -1,0 +1,9 @@
+---
+description: A packed record which holds a data product identifier.
+with:
+  - Data_Product_Types
+fields:
+  - name: Id
+    description: The data product identifier
+    type: Data_Product_Types.Data_Product_Id
+    format: U16

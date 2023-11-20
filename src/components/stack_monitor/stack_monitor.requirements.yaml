@@ -1,0 +1,6 @@
+---
+description: The requirements for the Stack Monitor component are specified below.
+requirements:
+  - text: The component shall produce data reporting the maximum (high water mark) stack usage of every active component in an assembly.
+  - text: The component shall produce data reporting the maximum (high water mark) secondary stack usage of every active component in an assembly.
+  - text: The component shall produce stack usage data at a periodic rate that is configurable by command.

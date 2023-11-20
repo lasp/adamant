@@ -1,0 +1,51 @@
+---
+description: |
+  The Sequence Store component is responsible for storing and managing access to a set of memory regions (slots) which each hold a single sequence. The managed memory regions are usually located in nonvolatile storage and can be read or written to via this component. Sequences are uploaded to slots and then accesses via sequence ID. Sequences can be activated (allowed to be fetched) or deactivated (not allowed to be fetch) by command. The component enforces that all activated sequences have unique IDs. The component will disallow the activation of a sequence if it shares an ID with an already activated sequence.
+execution: active
+with:
+  - Sequence_Store_Types
+  - Memory_Region
+preamble: |
+  -- Type to hold an array of memory regions. Each represents a slot to hold
+  -- a single sequence of equal or smaller size (including header and meta data).
+  type Sequence_Slot_Array is array (Sequence_Store_Types.Slot_Number range <>) of Memory_Region.T;
+  type Sequence_Slot_Array_Access is access all Sequence_Slot_Array;
+init:
+  description: The component is initialized by providing the memory regions (slots) it is to manage.
+  parameters:
+    - name: sequence_Slots
+      type: Sequence_Slot_Array_Access
+      description: "A list of memory regions. Each represents a slot to hold a single sequence of equal or smaller size (including header). This list will be copied into the component at initialization onto a heap allocated memory. The memory regions must not overlap in any way, must be large enough to at least hold a sequence header, and the list must not be empty. These properties will be enforced by the component via assertions when Init is called."
+    - name: check_Slots_At_Startup
+      type: Boolean
+      description: "If True, then check the validity of the sequences in all slots by computing CRCs over them at startup."
+    - name: dump_Slot_Summary_At_Startup
+      type: Boolean
+      description: "If True, then the slot summaries will be dumped at startup."
+connectors:
+  - description: This is the command recieve connector.
+    type: Command.T
+    kind: recv_async
+  - description: This connector is used to send command responses.
+    type: Command_Response.T
+    kind: send
+  - description: This connector is used to load a new sequence into a slot in the store.
+    type: Sequence_Store_Memory_Region_Store.T
+    kind: recv_async
+  - description: This connector is used to fetch a pointer to a sequence found in the store given its ID.
+    name: Sequence_Store_Memory_Region_Fetch_T_Service
+    type: Packed_Sequence_Id.T
+    return_type: Sequence_Store_Memory_Region_Fetch.T
+    kind: service
+  - description: After a memory region is stored, it is released via a call to this connector. A status is also returned, so the downstream component can determine if the sequence store operation was successful or not.
+    type: Sequence_Store_Memory_Region_Release.T
+    kind: send
+  - description: The packet connector. This produces a summary of the sequence store slots and what is contained within each.
+    type: Packet.T
+    kind: send
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get

@@ -1,0 +1,7 @@
+seq subseq_07
+  argument myArg1 u32
+  argument myArg2 u32
+
+  ; Send a command with arguments:
+  cmd Component_B.Command_2 Seconds $myArg1 Subseconds $myArg2
+endseq

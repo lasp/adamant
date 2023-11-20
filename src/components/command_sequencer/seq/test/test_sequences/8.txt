@@ -1,0 +1,182 @@
+seq 8
+    declare var1 f32
+    declare var2 f32
+
+    ;addition
+    set $var1 = 4.5
+    set $var2 = $var1 + 7
+    if $var2 != 11.5
+        set $var2 = $var1 / 0
+    endif
+
+    ;negative addition
+    set $var1 = 4.25
+    set $var2 = -2.25
+    set $var2 = $var1 + $var2
+    if $var2 != 2
+        set $var2 = $var1 / 0
+    endif
+
+    ;subtraction
+    set $var1 = 20.25
+    set $var2 = $var1 - 22
+    if $var2 != -1.75
+        set $var2 = $var1 / 0
+    endif
+
+    ;Multi
+    set $var1 = 2
+    set $var2 = $var1 * 12
+    if $var2 != 24
+        set $var2 = $var1 / 0
+    endif
+
+    ;Multi
+    set $var1 = 2
+    set $var2 = $var1 * -1
+    if $var2 != -2
+        set $var2 = $var1 / 0
+    endif
+
+    ;Multi
+    set $var1 = 2
+    set $var2 = $var1 * 2.5
+    if $var2 != 5
+        set $var2 = $var1 / 0
+    endif
+
+    ;Div
+    set $var1 = 1
+    set $var2 = $var1 / 2
+    if $var2 != 0.5
+        set $var2 = $var1 / 0
+    endif
+
+    ;Equals
+    set $var1 = 45
+    set $var2 = 45
+    if $var2 == $var1
+        ;do nothing    
+    else
+        set $var2 = $var1 / 0
+    endif
+
+    ;Equals
+    set $var1 = 46
+    set $var2 = 45
+    if $var2 == $var1
+        set $var2 = $var1 / 0
+    endif
+
+    ;Not Equals
+    set $var1 = 45
+    set $var2 = 45
+    if $var2 != $var1
+        set $var2 = $var1 / 0    
+    endif
+
+    ;Not Equals
+    set $var1 = 46
+    set $var2 = 45
+    if $var2 != $var1
+        ;do nothing   
+    else
+        set $var2 = $var1 / 0   
+    endif
+
+    ;Greater than
+    set $var1 = 44
+    set $var2 = 45
+    if $var1 > $var2
+        set $var2 = $var1 / 0   
+    endif
+
+    ;Greater than
+    set $var1 = 46
+    set $var2 = 45
+    if $var1 > $var2
+        ;do nothing   
+    else
+        set $var2 = $var1 / 0   
+    endif
+
+    ;Greater than
+    set $var1 = 45
+    set $var2 = 45
+    if $var1 > $var2
+        set $var2 = $var1 / 0     
+    endif
+
+    ;Less than
+    set $var1 = 46
+    set $var2 = 45
+    if $var1 < $var2
+        set $var2 = $var1 / 0   
+    endif
+
+    ;Less than
+    set $var1 = 44
+    set $var2 = 45
+    if $var1 < $var2
+        ;do nothing   
+    else
+        set $var2 = $var1 / 0   
+    endif
+
+    ;Less than
+    set $var1 = 45
+    set $var2 = 45
+    if $var1 < $var2
+        set $var2 = $var1 / 0     
+    endif
+    
+    ;Greater equal than
+    set $var1 = 44
+    set $var2 = 45
+    if $var1 >= $var2
+        set $var2 = $var1 / 0   
+    endif
+
+    ;Greater equal than
+    set $var1 = 46
+    set $var2 = 45
+    if $var1 >= $var2
+        ;do nothing   
+    else
+        set $var2 = $var1 / 0   
+    endif
+
+    ;Greater equal than
+    set $var1 = 45
+    set $var2 = 45
+    if $var1 >= $var2
+        ;do nothing
+    else 
+        set $var2 = $var1 / 0     
+    endif
+
+    ;Less equal than
+    set $var1 = 46
+    set $var2 = 45
+    if $var1 <= $var2
+        set $var2 = $var1 / 0   
+    endif
+
+    ;Less equal than
+    set $var1 = 44
+    set $var2 = 45
+    if $var1 <= $var2
+        ;do nothing   
+    else
+        set $var2 = $var1 / 0   
+    endif
+
+    ;Less equal than
+    set $var1 = 45
+    set $var2 = 45
+    if $var1 <= $var2
+        ;do nothing
+    else
+        set $var2 = $var1 / 0     
+    endif
+endseq

@@ -1,0 +1,23 @@
+---
+description: This is a simple set of enumerations
+enums:
+  - name: First_Enum
+    description: This is the first enumeration type.
+    literals:
+      - name: Red
+      - name: Green
+      - name: Blue
+      - name: Black
+  - name: Second_Enum
+    description: This is the second enumeration type.
+    literals:
+      - name: Yellow
+        value: 10
+        description: Yellow state.
+      - name: On
+        description: On state.
+      - name: Off
+        description: Off state.
+      - name: Hola
+        value: 0
+        description: Hola state.

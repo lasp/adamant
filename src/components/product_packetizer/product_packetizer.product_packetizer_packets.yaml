@@ -1,0 +1,6 @@
+---
+description: Packets for the Product Packetizer. This packet list is populated based on the product packets model provided to the Product Packetizer component at initialization.
+packets:
+  - name: Dummy
+    description: A placeholder packet that will be overwritten with the packet list provided by the product packets model.
+    id: 777 # We need to assign an ID since to prevent autocoder from generating a set_id_base function for the packets.

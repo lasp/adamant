@@ -1,0 +1,8 @@
+---
+description: A static holder of a variable sized record.
+fields:
+  - name: Random_Field
+    type: Interfaces.Unsigned_8
+    format: U8
+  - name: simple
+    type: Simple_Variable.T

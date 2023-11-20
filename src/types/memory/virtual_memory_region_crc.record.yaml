@@ -1,0 +1,12 @@
+---
+description: A virtual memory region CRC report.
+fields:
+  - name: Region
+    description: The virtual memory region that was CRCed
+    type: Virtual_Memory_Region.T
+  - name: Crc
+    description: The computed CRC
+    type: Crc_16.Crc_16_Type
+    format: U16
+    skip_validation: True
+    byte_image: True

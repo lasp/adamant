@@ -1,0 +1,17 @@
+---
+description: A virtual memory region copy to a physical memory address.
+fields:
+  - name: Source_Address
+    description: The virtual memory address (an index into a zero-addressed memory region).
+    type: Natural
+    format: U32
+  - name: Source_Length
+    description: The number of bytes at the given address to associate with this memory region.
+    type: Natural
+    format: U32
+  - name: Destination_Address
+    description: The starting address of the destination memory region.
+    type: System.Address
+    format: U64
+    skip_validation: True
+    byte_image: True

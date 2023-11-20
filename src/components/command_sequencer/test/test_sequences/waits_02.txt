@@ -1,0 +1,41 @@
+seq waits_02
+  ; Set a variable and do a bit of math:
+  declare myVar u32
+  declare zero u32
+  set $zero = 0
+  set $myVar = 1 + 1
+  set $myVar = $myVar + 1
+
+  wait for 0 ; should act as noop
+
+  ; Perform an absolute wait
+  wait until 120000 ;absolute wait (VTC)
+  ; Send command:
+  cmd Component_A.Command_3 Value $myVar
+
+  wait for $zero ; should act as noop
+
+  ; Perform a relative wait
+  wait for 1 ;relative wait
+  set $myVar = $myVar + 2
+  cmd Component_B.Command_3 Value $myVar
+
+  ; Perform a relative wait with variable wait time
+  wait for $myVar;relative wait
+  set $myVar = $myVar + 2
+  cmd Component_B.Command_3 Value $myVar
+
+  ; Perform an absolute wait with variable wait time
+  set $myVar = 120000 + 10;
+  wait until $myVar;absolute wait (VTC)
+  cmd Component_B.Command_3 Value $myVar
+
+  wait for $zero ; should act as noop
+
+  ; OK now do an absolute wait for a time in the past
+  ; and expect the sequence to transition to the error
+  ; state.
+  set $myVar = $myVar + 2
+  wait until 100; absolute wait (VTC) in past
+  cmd Component_A.Command_3 Value $myVar
+endseq

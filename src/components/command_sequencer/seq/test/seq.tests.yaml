@@ -1,0 +1,75 @@
+---
+description: Unit tests for seq_engine.
+tests:
+  - name: Load_Sequence_Test
+    description: A test on loading sequences into an engine.
+  - name: Run_Valid_Sequences
+    description: A test that runs valid sequences, checks for all sorts of behavior.
+  - name: Instruction_Overflow
+    description: A test that a sequence that executes too many instructions is terminated.
+  - name: Set_Bit_Pattern
+    description: A test for the set bit pattern instruction
+  - name: Send_Bit_Pattern
+    description: A test for the send bit pattern instruction
+  - name: Update_Bit_Pattern
+    description: A test for the update bit pattern instruction
+  - name: Call
+    description: A test for the call instruction
+  - name: Spawn
+    description: A test for the spawn instruction
+  - name: Start
+    description: A test for the start instruction
+  - name: Push
+    description: A test for the Push instruction
+  - name: Eval
+    description: A test for the Eval instruction
+  - name: Fetch_Var
+    description: A test for the Fetch Var instruction
+  - name: Store_Var
+    description: A test for the Store_Var instruction
+  - name: Fetch_TLM
+    description: A test for the Fetch Tlm instruction
+  - name: Wait
+    description: A test for the Wait instruction
+  - name: Seq_Goto
+    description: A test for the Goto instruction
+  - name: Jump_If_Zero
+    description: A test for the Jump if zero instruction
+  - name: Jump_Not_Zero
+    description: A test for the Jump not zero instruction
+  - name: Jump_If_Equal
+    description: A test for the Jump if equal instruction
+  - name: Jump_Not_Equal
+    description: A test for the Jump not equal instruction
+  - name: Seq_Return
+    description: A test for the return instruction
+  - name: Wait_If_Zero
+    description: A test for the Wait if zero instruction
+  - name: Eval_Flt
+    description: A test for the Eval float instruction
+  - name: Cast_F_To_U
+    description: A test for the Cast F to U instruction
+  - name: Cast_U_To_F
+    description: A test for the Cast U to F instruction
+  - name: Eval_S
+    description: A test for the Eval S instruction
+  - name: Cast_S_To_U
+    description: A test for the Cast S to U instruction
+  - name: Cast_U_To_S
+    description: A test for the Cast U to S instruction
+  - name: Cast_F_To_S
+    description: A test for the Cast F to S instruction
+  - name: Cast_S_To_F
+    description: A test for the Cast S to F instruction
+  - name: Wait_On_B
+    description: A test for the Wait on B instruction
+  - name: Wait_If_Zero_On_B
+    description: A test for the Wait if zero on B instruction
+  - name: Cmd_Print
+    description: A test for the Cmd Print instruction
+  - name: Cmd_Print_Var
+    description: A test for the Cmd Print Var instruction
+  - name: Cmd_Str_Alloc
+    description: A test for the Cmd Str Alloc instruction. This is essentially a noop for Adamant, and is tested as such.
+  - name: Bad_Instruction
+    description: A test for parsing a bad instruction with invalid field or opcode.

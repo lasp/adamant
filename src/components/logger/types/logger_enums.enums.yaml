@@ -1,0 +1,24 @@
+---
+description: These are enumerations used for the logger component.
+enums:
+  - name: Logger_Mode
+    description: This flag denotes whether the log is currently enabled or disabled.
+    literals:
+      - name: Disabled
+        value: 0
+        description: The log is disabled and not currently logging data.
+      - name: Enabled
+        value: 1
+        description: The log is enabled and currently logging data.
+  - name: Log_Attempt_Status
+    description: This enumerations returns the status of a log attempt.
+    literals:
+      - name: Success
+        value: 0
+        description: Log action was successful.
+      - name: Serialization_Failure
+        value: 1
+        description: Logging failed due to a serialization error.
+      - name: Too_Full
+        value: 2
+        description: Logging failed because the log was too full to fit the data.

@@ -1,0 +1,7 @@
+---
+description: Packets for the Command Sequencer.
+packets:
+  - name: Summary_Packet
+    description: This packet contains a brief summary of what sequences are running in the sequencer's engines. Its type is determined dynamically based on the number of engines declared in the component.
+  - name: Details_Packet
+    description: This packet contains all useful information about the current state a single engine within the sequencer. Its type is determined dynamically based on the stack size allocated to the engines.

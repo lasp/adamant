@@ -1,0 +1,11 @@
+---
+description: A packed record which holds status information about a failed log attempt.
+fields:
+  - name: Num_Bytes_Logged
+    description: The number of bytes that was attempted to store.
+    type: Natural
+    format: U32
+  - name: Status
+    description: The returned status from the log attempt.
+    type: Logger_Enums.Log_Attempt_Status.E
+    format: E8

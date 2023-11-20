@@ -1,0 +1,22 @@
+---
+execution: active
+description: This is the active component.
+connectors:
+  ###################################
+  # Asynchronous Invokee Connectors
+  ###################################
+  - type: Packed_Byte.T
+    kind: recv_async
+    description: This connector receives a single byte asynchronously that is used to populate the outgoing packet.
+  - type: Packed_U16.T
+    kind: recv_async
+    description: This connector receives a 16-bit number asynchronously that is used to populate the outgoing packet.
+  ######################
+  # Invoker Connectors
+  ######################
+  - return_type: Sys_Time.T
+    kind: get
+    description: This connector is used to fetch the current system time.
+  - type: Packet.T
+    kind: send
+    description: This connector is used to send out a telemetry packet.

@@ -1,0 +1,35 @@
+---
+description:
+  The CCSDS downsampler is a component that is intended to filter down packets that are listed in the downsample list. The input list has two items, one is the APID, and the other is the filter factor.
+  The filter factor is used to know the cadence of filtering and sending packets. This is maintained by a protected binary tree object which takes the APID of the packets from the input list, and adding them to a binary tree with the filter factor.
+  When the packet is received, the APID is checked for filtering and then the filter factor to determine if we send them on or not. Packets that are not in the input list will not be filtered and sent as normal.
+  As a note, the larger that the downsampled list is, the more there is to check in the supporting binary tree. Its recommended that the downsampled list contain less than a couple hundred items.
+execution: passive
+init:
+  description:
+  parameters:
+    - name: Downsample_List
+      type: Ccsds_Downsampler_Types.Ccsds_Downsample_Packet_List_Access
+      description: The list of APIDs that are to be downsampled and the initial filter factor associated with those APIDs.
+connectors:
+  - description: This connector is the input connector for the packets that are coming in. This is where packets are checked for filtering.
+    type: Ccsds_Space_Packet.T
+    kind: recv_sync
+  - description: This is the command receive connector.
+    type: Command.T
+    kind: recv_sync
+  - description: The connector that will forward on unfiltered packets.
+    type: Ccsds_Space_Packet.T
+    kind: send
+  - description: The connector that sends a command response when received.
+    type: Command_Response.T
+    kind: send
+  - description: The connector for data products
+    type: Data_Product.T
+    kind: send
+  - description: The Event connector to send the events specifc to the component.
+    type: Event.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get

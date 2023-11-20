@@ -1,0 +1,11 @@
+---
+description: This is a unit test suite for the Memory Packetizer Fixed Id component.
+tests:
+  - name: Test_Nominal_Packetization
+    description: This unit test tests the packetizer's normal behavior and make sure it packetizes memory properly, metering out the packets according to its rate.
+  - name: Test_Set_Max_Packet_Rate
+    description: This unit test tests the Set_Max_Packet_Rate commmand, and ensures that the rate changes appropriately.
+  - name: Test_Invalid_Command
+    description: This unit test tests a bad Set_Max_Packet_Rate commmand, and ensures that an appropriate event is thrown.
+  - name: Test_Memory_Dump_Dropped
+    description: This unit test tests the behavior when the component's queue becomes full and must drop a memory dump request.

@@ -1,0 +1,43 @@
+\input{common_packages.tex}
+
+\begin{document}
+
+\title{\textbf{Product Extractor Generator} \\
+\large\textit{Autocoder User Guide}}
+\date{}
+\maketitle
+
+\section{Description}
+
+The purpose of this generator is to provide a user the ability to extract data from packet and create data products out of them. The generator takes a YAML model file as an input which is used by the component to determine which packets to extract data products from as well as the offset and type in the packet the component needs to extract. This is performed through an Ada specification and implementation that is autocoded to perform the extraction and verification of the data product. In the case that extracting a data product is invalid for the specified type, then an invalid data structure is returned with the value of the invalid product. 
+
+Note the example shown in this documentation is used in the unit test of this component so that the reader of this document can see it being used in context. Please refer to the unit test code for more details on how this generator can be used.
+
+\section{Schema}
+
+The following pykwalify schema is used to validate the input YAML model. The schema is commented to show what each of the available YAML keys are and what they accomplish. Even without knowing the specifics of pykwalify schemas, you should be able to gleam some knowledge from the file below.
+
+\yamlcodef{../schemas/extracted_products.yaml}
+
+\section{Example Input}
+
+The following is an example extracted product input yaml file. Model files must be named in the form \textit{assembly\_name.extracted\_products.yaml} where the specific name of the extracted products is not allowed. The \textit{assembly\_name} is the assembly which this table will be used, and the rest of the model file name must remain as shown. Generally this file is created in the same directory or near to the assembly model file. This example adheres to the schema shown in the previous section, and is commented to give clarification.
+
+\yamlcodef{../../test/test_assembly/test_products.extracted_products.yaml}
+
+The specified data products consist of everything that the user would normally be required to include when defining a data product for a component, with the addition of the offset in the packet and corresponding APID. The type is also required which must be in the form of a packed type. The last required field is the time type which is either the current time of extraction from the packet or the time contained in the packet. 
+
+\section{Example Output}
+
+The example input shown in the previous section produces the following Ada output. The
+\texttt{Data\_Product\_Extraction\_List} variable should be passed into the CCSDS Product Extractor component's \texttt{Init} procedure during assembly initialization.
+
+The main job of the generator here was to verify the input YAML for validity and then to translate the data to an Ada data structure and Ada extraction and verification function for each product for use by the component. The generator also dynamically creates the data products for the component based on the YAML input.
+
+Ads file:
+\adacodef{../../test/test_assembly/build/src/test_products.ads}
+
+Adb file:
+\adacodef{../../test/test_assembly/build/src/test_products.adb}
+
+\end{document}

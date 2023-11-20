@@ -1,0 +1,17 @@
+---
+description: This is an autocoded data product status record type for a Fault Correction component.
+fields:
+{% for response in responses %}
+  - name: {{ response.full_fault_name_str }}_Status
+    description: "The current status of the {{ response.full_fault_name }} fault response."
+    type: Fault_Correction_Enums.Status_Type.E
+    format: E2
+{% endfor %}
+{% if ((responses|length) % 4) != 0 %}
+{% for idx in range(4 - ((responses|length) % 4)) %}
+  - name: Reserved_{{ loop.index0 }}
+    description: "Padding bits, not used."
+    type: Fault_Correction_Types.Two_Bit_Padding_Type
+    format: U2
+{% endfor %}
+{% endif %}

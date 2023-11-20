@@ -1,0 +1,15 @@
+---
+description: This is a unit test suite for the Limiter component
+tests:
+  - name: Test_Nominal_Limiting
+    description: This unit test excersizes the limiter component, making sure it behaves as expected.
+  - name: Test_Change_Rate_Command
+    description: This unit test excersizes the change rate command of the limiter and makes sure it works.
+  - name: Test_Change_Rate_Parameter
+    description: This unit test excersizes the change rate parameter of the limiter and makes sure it works.
+  - name: Test_Queue_Overflow
+    description: This unit test exercises that a queue overflow results in the appropriate event.
+  - name: Test_Invalid_Command
+    description: This unit test exercises that an invalid command throws the appropriate event.
+  - name: Test_Invalid_Parameter
+    description: This unit test exercises that an invalid parameter throws the appropriate event.

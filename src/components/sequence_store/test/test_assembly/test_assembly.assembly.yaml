@@ -1,0 +1,17 @@
+---
+description: This is an assembly for testing the Sequence Store component.
+with:
+  - Test_Sequence_Store
+########################################
+components:
+########################################
+  - type: Sequence_Store
+    priority: 3
+    stack_size: 40000
+    secondary_stack_size: 15000
+    init_base:
+      - "Queue_Size => 5 * Sequence_Store_Instance.Get_Max_Queue_Element_Size"
+    init:
+      - "Sequence_Slots => Test_Sequence_Store.Slots_Access"
+      - "Check_Slots_At_Startup => False"
+      - "Dump_Slot_Summary_At_Startup => False"

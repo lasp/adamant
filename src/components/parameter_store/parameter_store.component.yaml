@@ -1,0 +1,36 @@
+---
+description: |
+  The Parameter Store component is responsible for storing and managing access to a memory region holding a parameter table. The managed memory region is usually located in nonvolatile storage and can serve as the backup or the default parameter values to use at startup for the system.
+execution: active
+init:
+  description: The component is initialized by providing the memory region it is to manage which holds the parameter table.
+  parameters:
+    - name: bytes
+      type: Basic_Types.Byte_Array_Access
+      description: "A pointer to an allocation of bytes to be used for storing the parameter table. The size of this byte array MUST be the exact size of the parameter table to be stored, or updating or fetch the table will be rejected with a length error."
+    - name: dump_Parameters_On_Change
+      type: Boolean
+      description: If set to True, the component will dump the current parameter values any time a memory region is received to change the parameter table. If set to False, parameters will only be dumped when requested by command.
+      default: "False"
+connectors:
+  - description: This is the command recieve connector.
+    type: Command.T
+    kind: recv_async
+  - description: This connector is used to send command responses.
+    type: Command_Response.T
+    kind: send
+  - description: When a memory region is received on this connector it is assumed that it contains a memory region that is the same size as the managed region. Based on the operation a new parameter table can be loaded into the store, or the current parameter data can be fetched from the store.
+    type: Parameters_Memory_Region.T
+    kind: recv_async
+  - description: After a memory region is received on the Memory_Region_T_Recv_Async connector and then processed, it is released via a call to this connector. A status is also returned, so the downstream component can determine if the parameter table update was successful or not.
+    type: Parameters_Memory_Region_Release.T
+    kind: send
+  - description: The parameter packet connector. A copy of the managed parameter table is dumped via this connector.
+    type: Packet.T
+    kind: send
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get

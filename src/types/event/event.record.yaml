@@ -1,0 +1,11 @@
+---
+description: Generic event packet for holding arbitrary events
+fields:
+  - name: Header
+    description: The event header
+    type: Event_Header.T
+  - name: Param_Buffer
+    description: A buffer that contains the event parameters
+    type: Event_Types.Parameter_Buffer_Type
+    format: U8x{{ event_buffer_size }}
+    variable_length: Header.Param_Buffer_Length

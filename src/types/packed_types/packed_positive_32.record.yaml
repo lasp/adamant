@@ -1,0 +1,7 @@
+---
+description: Single component record for holding packed Positive_32 value.
+fields:
+  - name: Value
+    description: The 32-bit Positive_32. A Positive_32 is ranged integer type that is the same range as the 32-bit modular unsigned int or Interfaces.Unsigned (starting at 1 instead of zero). Because this is a range type and not a modular type, Ada detects overflow or underflow of the type, which is useful in some situations. This is a subtype of Natural_32.
+    type: Basic_Types.Positive_32
+    format: U32

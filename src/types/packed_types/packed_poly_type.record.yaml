@@ -1,0 +1,9 @@
+---
+description: Single component record for holding packed polymorphic type.
+fields:
+  - name: Value
+    description: The polymorphic type.
+    type: Basic_Types.Poly_Type
+    format: U8x8
+    skip_validation: True
+    byte_image: True

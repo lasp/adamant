@@ -1,0 +1,10 @@
+---
+description: A packed record which holds a sequence identifier.
+fields:
+  - name: Slot
+    description: The slot number to store the sequence in.
+    type: Sequence_Store_Types.Slot_Number
+    format: U16
+  - name: Sequence_Region
+    description: The memory region that holds the sequence.
+    type: Memory_Region.T

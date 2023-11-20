@@ -1,0 +1,14 @@
+---
+events:
+  - name: Unrecognized_APID
+    description: A packet was received with an APID that was not found in the routing table. The packet was dropped.
+    param_type: Ccsds_Primary_Header.T
+  - name: Dropped_Packet
+    description: The component's queue overflowed and a packet with the following header was dropped.
+    param_type: Ccsds_Primary_Header.T
+  - name: Unexpected_Sequence_Count_Received
+    description: A packet with an unexpected sequence count was received.
+    param_type: Unexpected_Sequence_Count.T
+  - name: Dropped_Duplicate_Packet
+    description: The component's received two or more packets in a row with identical sequence counts. The duplicate packet was dropped.
+    param_type: Ccsds_Primary_Header.T

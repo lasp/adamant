@@ -1,0 +1,9 @@
+---
+description: Data products for the CCSDS Command Depacketizer component.
+data_products:
+  - name: Rejected_Packet_Count
+    description: The number of packets rejected by the component due to invalid data
+    type: Packed_U16.T
+  - name: Accepted_Packet_Count
+    description: The number of packets accepted by the component
+    type: Packed_U16.T

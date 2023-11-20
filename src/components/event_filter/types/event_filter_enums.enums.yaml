@@ -1,0 +1,12 @@
+---
+description: This an enumeration defined for the event filter commands to determine if we issue the state packet or not.
+enums:
+  - name: Issue_Packet_Type
+    description: An enumeration for commands once the state is change for ground to determine if they want to send the state packet or not
+    literals:
+      - name: No_Issue
+        value: 0
+        description: Packet will not be issued
+      - name: Issue
+        value: 1
+        description: Packet will be issued

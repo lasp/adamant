@@ -1,0 +1,8 @@
+---
+description: The requirements for the Task Watchdog component are specified below.
+requirements:
+  - text: The component will use an initial list of pet connections that have pet connectors to the component to monitor the pet for each respective component.
+  - text: The component will produce faults as specified by the user when a pet has not been received for a specified number of ticks.
+  - text: The component will service a downstream pet connector while all critical tasks are sending pets to the task watchdog component normally.
+  - text: The component will be able to enable and disable watchdog by command for each petter.
+  - text: The component will be able to change the limit value of ticks since the last pet by command for each petter.

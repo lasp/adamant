@@ -1,0 +1,26 @@
+---
+description:
+  The product extractor is a component that extracts data from an incoming packet which it then creates into a data product and sends as its own data product for other component use.
+  This is performed by using a list of types that include the offset and the corresponding APID to know which packets to extract from.
+  The data is verified against the respective type at which point it will either send it on or create an event indicating there was an error.
+  All of this information is derived from a user defined YAML input model that contains the information for each data product and the residing packet. See the generator documentation for more information.
+execution: passive
+init:
+  description:
+  parameters:
+    - name: Data_Product_Extraction_List
+      type: Product_Extractor_Types.Extracted_Product_List_Access
+      description: The list of data products that will be extracted from packets.
+connectors:
+  - description: The connector that will receive the CCSDS space packets and extract data products if necessary
+    type: Ccsds_Space_Packet.T
+    kind: recv_sync
+  - description: The Event connector for sending events
+    type: Event.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get
+  - description: The connector for data products
+    type: Data_Product.T
+    kind: send

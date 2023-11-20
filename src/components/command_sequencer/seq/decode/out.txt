@@ -1,0 +1,23 @@
+12 [SEQ_GOTO] Jump to: 187 [Valid]
+16 [SET_BIT_PATTERN] Id: 1, Length: 1
+25 [SEND_BIT_PATTERN] State Change -> WAIT_COMMAND
+29 [SET_BIT_PATTERN] Id: 1, Length: 1
+38 [SEND_BIT_PATTERN] State Change -> WAIT_COMMAND
+42 [FETCH_TLM_A] Id: 3, new?:FALSE, State Change -> WAIT_TELEMETRY_SET
+54 [STORE_VAR] Storing to position: 0
+66 [FETCH_VAR_A] Fetching from: LOCAL
+78 [FETCH_VAR_B] Fetching from: IN_SEQUENCE
+90 [EVAL] Performing operation: ADDITION
+94 [STORE_VAR] Storing to position: 1
+106 [FETCH_VAR_B] Fetching from: LOCAL
+118 [WAIT_ON_B] Waiting on B, State Change -> WAIT_ABSOLUTE
+122 [SET_BIT_PATTERN] Id: 2, Length: 2
+135 [SEND_BIT_PATTERN] State Change -> WAIT_COMMAND
+139 [FETCH_TLM_A] Id: 3, new?:FALSE
+151 [FETCH_VAR_B] Fetching from: IN_SEQUENCE
+163 [EVAL] Performing operation: EQUALS
+167 [FETCH_VAR_B] Fetching from: LOCAL
+179 [WAIT_IF_ZERO_ON_B] Jump to: 139 [Valid], State Change -> WAIT_TELEMETRY_VALUE
+183 [SEQ_GOTO] Jump to: 195 [End of Sequence]
+187 [SUBSCRIBE] This instruction is ignored.
+191 [SEQ_GOTO] Jump to: 16 [Valid]

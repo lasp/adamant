@@ -1,0 +1,25 @@
+---
+description: Events for the Memory Copier component.
+events:
+  - name: Memory_Region_Length_Mismatch
+    description: A memory region was received with a length less than that specified in the copy command. The length of the region requested must be the same size or greater than the length specified in the copy command.
+    param_type: Invalid_Memory_Region_Length.T
+  - name: Memory_Region_Unavailable
+    description: Requesting the memory region was denied because it is currently in use by another component.
+  - name: Starting_Copy
+    description: Starting copy from source to destination.
+    param_type: Virtual_Memory_Region_Copy.T
+  - name: Finished_Copy
+    description: Finished copy from source to destination, without errors.
+    param_type: Virtual_Memory_Region_Copy.T
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T
+  - name: Copy_Timeout
+    description: A timeout occured while waiting for a copy operation to complete.
+  - name: Copy_Failure
+    description: A copy failed.
+    param_type: Memory_Region_Release.T
+  - name: Command_Dropped
+    description: A command was dropped due to a full queue.
+    param_type: Command_Header.T

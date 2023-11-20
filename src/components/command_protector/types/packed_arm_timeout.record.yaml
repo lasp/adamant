@@ -1,0 +1,9 @@
+---
+description: Holds the armed state timout.
+preamble: |
+  type Arm_Timeout_Type is new Natural range 0 .. 255;
+fields:
+  - name: Timeout
+    description: The timeout value (in ticks).
+    type: Arm_Timeout_Type
+    format: U8

@@ -1,0 +1,9 @@
+---
+description: A packed record which holds a primary and secondary ccsds header.
+fields:
+  - name: Primary_Header
+    description: The CCSDS command header.
+    type: Ccsds_Primary_Header.T
+  - name: Secondary_Header
+    description: The ccsds command secondary header.
+    type: Ccsds_Command_Secondary_Header.T

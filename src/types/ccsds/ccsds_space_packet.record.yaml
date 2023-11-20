@@ -1,0 +1,18 @@
+---
+description: Record for the CCSDS Space Packet
+with:
+  - Basic_Types
+  - Configuration
+preamble: |
+  use Basic_Types;
+  subtype Ccsds_Data_Type is Byte_Array (0 .. Configuration.Ccsds_Packet_Buffer_Size - 1);
+fields:
+  - name: Header
+    description: The CCSDS Primary Header
+    type: Ccsds_Primary_Header.T
+  - name: Data
+    description: User Data Field
+    type: Ccsds_Data_Type
+    format: U8x{{ ccsds_packet_buffer_size }}
+    variable_length: Header.Packet_Length
+    variable_length_offset: 1

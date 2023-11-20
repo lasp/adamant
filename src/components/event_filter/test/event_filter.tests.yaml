@@ -1,0 +1,18 @@
+---
+description: This is a unit test suite for the Event Filter component
+tests:
+  - name: Test_Received_Event
+    description: This unit test is to test an event that was received over the event connector and was either filtered or not.
+  - name: Test_Data_Products
+    description: This unit test is to test the data products for the component state and total filtered count
+  - name: Test_Issue_State_Packet
+    description: This unit test sends the issue command and test that the appropriate values are received in that packet.
+  - name: Test_Command_Single_State_Change
+    description: This unit test is used to test enabling and disabling a single event and testing if the packet is sent if issued by the command.
+  - name: Test_Command_Range_State_Change
+    description: This unit test is used to test enabling and disabling a range of events and testing if the packet is sent if issued by the command.
+  - name: Test_Command_Component_State_Change
+    description: This unit test is used to test enabling and disabling all events and testing if the packet is sent if issued by the command.
+  - name: Test_Invalid_Command
+    description: This unit test exercises that an invalid command throws the appropriate event.
+

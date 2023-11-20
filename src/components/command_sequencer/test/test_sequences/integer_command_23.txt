@@ -1,0 +1,14 @@
+seq integer_command_23
+  ;
+  ; Sequence that tests twos compliment upscaling.
+  ;
+
+  ; Get a 16-bit signed telemetry value, but store it
+  ; in a 32-bit variable
+  declare a i32
+  set $a = Component_A.Data_Product_4.Value
+
+  ; Send command with the telemetry value as upscaled 32-bit 
+  ; integer argument.
+  cmd Component_A.Command_6 Value $a
+endseq

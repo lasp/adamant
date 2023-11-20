@@ -1,0 +1,5 @@
+---
+description: This is a unit test suite for the Connector Protector.
+tests:
+  - name: Test_Protected_Call
+    description: This unit test invokes the protected connector and makes sure the arguments are passed through synchronously, as expected.

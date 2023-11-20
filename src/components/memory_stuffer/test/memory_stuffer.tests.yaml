@@ -1,0 +1,21 @@
+---
+description: This is a unit test suite for the Memory Stuffer component
+tests:
+  - name: Test_Invalid_Initialization
+    description: This unit test makes sure that an invalid initialization results in a runtime assertion.
+  - name: Test_Unprotected_Stuffing
+    description: This unit test excersizes stuffing a region that is unprotected.
+  - name: Test_Protected_Stuffing
+    description: This unit test excersizes stuffing a region that is protected.
+  - name: Test_Arm_Unarm
+    description: This unit test excersizes all of the ways that the arm command can be invalidated prior to a write (except via timeout).
+  - name: Test_Arm_Timeout
+    description: This unit test excersizes the unarming of the arm command via timeout.
+  - name: Test_Invalid_Address
+    description: This unit test excersizes writing to an invalid region of memory
+  - name: Test_Invalid_Command
+    description: This unit test makes sure an invalid command is reported and ignored.
+  - name: Test_Memory_Region_Copy
+    description: This unit test excersizes the memory region copy and release connectors.
+  - name: Test_Memory_Region_Copy_Invalid_Address
+    description: This unit test excersizes the memory region copy and release connectors with an invalid destination address.

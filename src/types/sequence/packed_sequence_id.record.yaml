@@ -1,0 +1,7 @@
+---
+description: A packed record which holds a sequence identifier.
+fields:
+  - name: Id
+    description: The sequence identifier.
+    type: Sequence_Types.Sequence_Id
+    format: U16

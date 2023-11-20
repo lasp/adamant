@@ -1,0 +1,5 @@
+---
+description: These are the commands for the Parameter Store component.
+commands:
+  - name: Dump_Parameter_Store
+    description: Produce a packet with the currently stored parameter values.

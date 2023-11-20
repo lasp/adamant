@@ -1,0 +1,14 @@
+---
+description: A packed record which holds data related to an invalid checksummed CCSDS command packet.
+fields:
+  - name: CCSDS_Header
+    description: The CCSDS command header.
+    type: CCSDS_Command_Header.T
+  - name: Computed_Checksum
+    description: The computed XOR of the entire packet. This should be 0 if the packet passes.
+    type: Xor_8.Xor_8_Type
+    format: U8
+  - name: Expected_Checksum
+    description: The XOR included in the CCSDS packet secondary header.
+    type: Xor_8.Xor_8_Type
+    format: U8

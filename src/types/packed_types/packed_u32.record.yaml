@@ -1,0 +1,7 @@
+---
+description: Single component record for holding packed unsigned 32-bit value.
+fields:
+  - name: Value
+    description: The 32-bit unsigned integer.
+    type: Interfaces.Unsigned_32
+    format: U32

@@ -1,0 +1,14 @@
+---
+description: This is a packed record that holds information about what is contained within a particular sequence store slot.
+fields:
+  - name: Slot_Info
+    description: The slot metadata.
+    type: Sequence_Store_Slot_Metadata.T
+  - name: Id
+    description: The sequence identifier.
+    type: Sequence_Types.Sequence_Id
+    format: U16
+  - name: Sequence_Length
+    description: The length value of the sequence stored in the sequence's header.
+    type: Sequence_Types.Sequence_Length_Type
+    format: U16

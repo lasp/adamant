@@ -1,0 +1,9 @@
+---
+description: Defines the packed apid type the ccsds downsampler uses for the command to modify the filter factor
+fields:
+  - name: Apid
+    type: Ccsds_Primary_Header.CCSDS_Apid_Type
+    format: U16
+  - name: Filter_Factor
+    type: Interfaces.Unsigned_16
+    format: U16

@@ -1,0 +1,36 @@
+---
+description: This is a generic component that can be used to forward a single connector of any type. The component that synchronously forwards any type that it receives. It includes commands to enable or disable this forwarding, so can be effectively used as a stream on/off switch.
+execution: passive
+generic:
+  description: The forwarder is generic in that it can be instantiated to forwarder a stream of any type at compile time.
+  parameters:
+    - name: T
+      description: The generic type of data passed in and out of the forwarder.
+init:
+  description:
+  parameters:
+    - name: Startup_Forwarding_State
+      type: Basic_Enums.Enable_Disable_Type.E
+      description: Is the data stream enabled or disabled on startup. Disable means that the component does not forward any data it receives at startup.
+connectors:
+  - description: This connector is the input connector for the data that is coming in.
+    type: T
+    kind: recv_sync
+  - description: This is the command receive connector.
+    type: Command.T
+    kind: recv_sync
+  - description: The connector that will forward on unfiltered data.
+    type: T
+    kind: send
+  - description: The connector that sends a command response when received.
+    type: Command_Response.T
+    kind: send
+  - description: The connector for data products
+    type: Data_Product.T
+    kind: send
+  - description: The event connector to send the events specifc to the component.
+    type: Event.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get

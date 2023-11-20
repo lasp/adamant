@@ -1,0 +1,11 @@
+description   : This component has a malformed YAML model.
+execution: active
+init:
+  description: An initialization function for this component.
+  parameters:
+    - name: is_Enabled
+      type: Boolean
+      default: "True"
+connectors:
+       - type: Data_Product.T
+         kind: recv_async  

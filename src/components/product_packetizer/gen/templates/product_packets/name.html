@@ -1,0 +1,45 @@
+{% extends "/base/table.html" %}
+{% block title %}<b>{{ name }}</b>{% endblock %}
+{% block info %}
+      <b>Summary:</b>
+      <ul>
+        <li><b>Total Number of Packets:</b> {{ packets|length }}</li>
+      </ul>
+{% endblock %}
+{% block head %}
+      <tr>
+          <th scope="col">Packet Id</th>
+          <th scope="col">Packet Name</th>
+          <th scope="col">Type</th>
+          <th scope="col">Description</th>
+      </tr>
+{% endblock %}
+{% block body %}
+{% for id, p in packets.items() %}
+      <tr>
+        <td style='font-family: "Courier New", Courier, monospace;'>0x{{ '%04x' % p.id }} ({{ p.id }})</b></td>
+        <td style='font-family: "Courier New", Courier, monospace;'><b>{{ p.suite.name }}.{{ p.name }}</b></td>
+        <td style='font-family: "Courier New", Courier, monospace;'>
+{% for dp in p.data_products %}
+{% if dp.include_timestamp %}
+            {{ dp.name }}.Time (Sys_Time.T),
+            <br/>
+{% endif %}
+{% if dp.pad_bytes %}
+            Reserved ({{ dp.size }} bits)
+            {% if not loop.last %}<br/>{% endif %}
+{% elif dp.packet_period_item %}
+            {{ dp.name }}
+            ({% if dp.data_product.type_model %}<a class="record_link" href="../../{{ dp.data_product.type_model.get_src_dir_from(get_src_dir(full_filename)) }}/build/html/{{ dp.data_product.type_model.name.lower() }}.html">{% endif %}{{ dp.data_product.type_model.name }}.T{% if dp.data_product.type_model %}</a>{% endif %})
+            {% if not loop.last %}<br/>{% endif %}
+{% else %}
+            <a class="record_link" href="../../{{ dp.data_product.suite.get_src_dir_from(get_src_dir(full_filename)) }}/build/html/{{ dp.data_product.suite.name.lower() }}.html">{{ dp.name }}</a>
+            ({% if dp.data_product.type_model %}<a class="record_link" href="../../{{ dp.data_product.type_model.get_src_dir_from(get_src_dir(full_filename)) }}/build/html/{{ dp.data_product.type_model.name.lower() }}.html">{% endif %}{{ dp.data_product.type_model.name }}.T{% if dp.data_product.type_model %}</a>{% endif %})
+            {% if not loop.last %}<br/>{% endif %}
+{% endif %}
+{% endfor %}
+        </td>
+        <td>{% if p.description %}{{ printMultiLine(p.description, '') }}{% endif %}</td>
+      </tr>
+{% endfor %}
+{% endblock %}

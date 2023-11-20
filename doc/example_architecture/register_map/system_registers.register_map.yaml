@@ -1,0 +1,11 @@
+---
+description: This is the register map for an example system. Both registers and register sets (a packed record holding more than one register) can be defined and assigned addresses here.
+items:
+  - address: 0x4000_0004
+    name: First_Register
+    description: An important register.
+    type: Packed_U32.Register_T
+  - address: 0x4000_0016
+    name: Second_Register
+    description: An equally important register.
+    type: Packed_Poly_32_Type.Register_T

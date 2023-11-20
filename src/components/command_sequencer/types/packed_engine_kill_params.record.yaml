@@ -1,0 +1,15 @@
+---
+description: A packed record which holds parameters for the engine kill operation.
+fields:
+  - name: Executing_Engine
+    description: The engine which encountered this kill operation.
+    type: Seq_Types.Sequence_Engine_Id
+    format: U8
+  - name: First_Engine
+    description: The first engine ID to kill.
+    type: Seq_Types.Sequence_Engine_Id
+    format: U8
+  - name: Num_Engines
+    description: The number of engines to kill.
+    type: Seq_Types.Sequence_Engine_Id
+    format: U8

@@ -1,0 +1,10 @@
+---
+description: A packed record which holds a sequence store release.
+fields:
+  - name: Sequence_Region
+    description: The memory region that holds the sequence, to be released.
+    type: Memory_Region.T
+  - name: Status
+    type: Sequence_Store_Enums.Sequence_Store_Status.E
+    description: The return status for the memory region store operation.
+    format: E8

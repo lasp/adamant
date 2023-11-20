@@ -1,0 +1,7 @@
+---
+description: A packed record that holds a seq opcode.
+fields:
+  - name: Opcode
+    description: Instruction code
+    type: Seq_Enums.Seq_Opcode.E
+    format: U8

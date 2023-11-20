@@ -1,0 +1,16 @@
+---
+description: These are the commands for the Fault Correction component.
+commands:
+  - name: Enable_Fault_Response
+    description: Enable a fault response for the provided ID. This will only succeed if another response with the same Fault ID is not already enabled.
+    arg_type: Packed_Fault_Id.T
+  - name: Disable_Fault_Response
+    description: Disable a fault response for the provided ID.
+    arg_type: Packed_Fault_Id.T
+  - name: Clear_Fault_Response
+    description: Resets a fault response to the Enabled state of the provided ID. If the fault is latched, it unlatches the fault.
+    arg_type: Packed_Fault_Id.T
+  - name: Clear_All_Fault_Responses
+    description: Resets all fault responses to the Enabled state. Unlatches all latched fault responses.
+  - name: Reset_Data_Products
+    description: This command resets the values of all the component's data product to the values at initialization, except for the Fault_Response_Statuses data product which can be reset by the Clear_All_Fault_Responses command.

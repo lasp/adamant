@@ -1,0 +1,11 @@
+---
+description: A packed record which holds an unexpected state for an engine.
+fields:
+  - name: Engine_Id
+    description: The source sequence engine.
+    type: Seq_Types.Sequence_Engine_Id
+    format: U8
+  - name: Engine_State
+    description: The sequence engine state.
+    type: Seq_Enums.Seq_Engine_State.E
+    format: E8

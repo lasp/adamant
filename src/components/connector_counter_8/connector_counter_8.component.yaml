@@ -1,0 +1,30 @@
+---
+description: This generic component attaches to a connector and counts the invocations occurring on that connector. It then reports this count as a data product and passes the connector invocation through to a connected component on the other side. The count rolls over at 255 and is 1 byte wide.
+execution: passive
+generic:
+  description: The connector counter is generic in that it can be instantiated to count a stream of any type at compile time.
+  parameters:
+    - name: T
+      description: The generic type of data passed in and out of the component.
+connectors:
+  - description: The generic invokee connector.
+    type: T
+    kind: recv_sync
+  - description: The generic invoker connector.
+    type: T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get
+  - description: The count is sent out of this connector.
+    type: Data_Product.T
+    kind: send
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send
+  - description: This connector is used to register the components commands with the command router component.
+    type: Command_Response.T
+    kind: send
+  - description: The command receive connector.
+    type: Command.T
+    kind: recv_sync

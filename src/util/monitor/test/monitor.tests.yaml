@@ -1,0 +1,9 @@
+---
+description: This is a unit test suite for the crc 16 algorithm
+tests:
+  - name: Test_Monitor_Green_To_Red
+    description: This test makes sure monitor transitions from green to red correctly.
+  - name: Test_Monitor_Red_To_Green
+    description: This test makes sure monitor transitions from red to green correctly.
+  - name: Test_Monitor_Enable_Disable
+    description: This test makes sure monitor enable and disable function work correctly.

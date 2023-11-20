@@ -1,0 +1,6 @@
+---
+preamble: subtype Short_Int is Natural range 0 .. 999;
+type: Short_Int
+format: U10
+description: An simple array of Short_Ints
+length: 8

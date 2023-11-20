@@ -1,0 +1,11 @@
+---
+description: Generic packet for holding arbitrary data
+fields:
+  - name: Header
+    description: The packet header
+    type: Packet_Header.T
+  - name: Buffer
+    description: A buffer that contains the packet data
+    type: Packet_Types.Packet_Buffer_Type
+    format: U8x{{ packet_buffer_size }}
+    variable_length: Header.Buffer_Length

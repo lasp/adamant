@@ -1,0 +1,12 @@
+%- for view in views
+\begin{figure}[H]
+  \includegraphics[width=1.0\textwidth,height=0.85\textheight,keepaspectratio,center]{\VAR{view.full_file_dir}/build/eps/\VAR{name|lower}_\VAR{view.specific_name}.eps}
+  \caption{\textbf{\VAR{view.prettyname|e} View:}
+%- if view.description
+    \VAR{view.description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+  }
+\end{figure}
+%- endfor

@@ -1,0 +1,5 @@
+---
+description: This is a set of unit tests for the Parameter Component.
+tests:
+  - name: Unit_Test
+    description: The unit test.

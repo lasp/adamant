@@ -1,0 +1,7 @@
+---
+description: Single component record for holding packed 32-bit floating point number.
+fields:
+  - name: Value
+    description: The 32-bit floating point number.
+    type: Short_Float
+    format: F32

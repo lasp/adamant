@@ -1,0 +1,10 @@
+---
+description: A packed record which holds information about the internal status of the log.
+fields:
+  - name: Meta_Data
+    description: The current meta data of the internal circular buffer.
+    type: Circular_Buffer_Meta.T
+  - name: Current_Mode
+    description: Is the log enabled or disabled?
+    type: Logger_Enums.Logger_Mode.E
+    format: E8

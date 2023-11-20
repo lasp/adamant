@@ -1,0 +1,31 @@
+---
+description: This is a unit test suite for the Product Packetizer.
+tests:
+  - name: Test_Nominal_Packetizing
+    description: This unit test tests the packetizing of packets in a nominal situation.
+  - name: Test_Packet_Enable_Disable
+    description: This unit test tests enabling and disabling a packet via command.
+  - name: Test_Packet_Set_Period
+    description: This unit test tests changing a packet's period by command.
+  - name: Test_Missing_Data_Product
+    description: This unit test tests the component's response to a receiving a missing data product.
+  - name: Test_Bad_Id_Data_Product
+    description: This unit test tests the component's response receiving a bad ID status as response to a data product request.
+  - name: Test_Data_Product_Size_Mismatch
+    description: This unit test tests the component's response receiving data product with an unexpected size.
+  - name: Test_Roll_Over
+    description: This unit test tests the component's behavior when rolling over its internal count.
+  - name: Test_Bad_Commands
+    description: This unit test tests the component's behavior when sending commands with bad packet ids
+  - name: Test_Send_Packet_Command
+    description: This unit test tests the component's ability to respond to a Send Packet command.
+  - name: Test_Offset
+    description: This unit test tests a packet with an offset and makes sure packets come out at the correct time.
+  - name: Test_Padding
+    description: This unit test tests a packet with padding.
+  - name: Test_Zero_Period
+    description: This unit test tests a packet with a period of zero. It should behave just like disabled.
+  - name: Test_Full_Queue
+    description: This unit test tests a command being dropped due to a full queue.
+  - name: Test_Packet_Period_Items
+    description: This unit test tests the special packet period items that can be emmitted inside an product packetizer packet. This unit test also tests a special packet period item with a bad ID.

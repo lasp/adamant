@@ -1,0 +1,15 @@
+---
+description: This record contains information for an event when a product is extracted from a CCSDS packet, but the data was invalid for the type.
+fields:
+  - name: Id
+    description: The data product Id that was attempted to be extracted.
+    type: Data_Product_Types.Data_Product_Id
+    format: U16
+  - name: Errant_Field_Number
+    description: The field that was invalid.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Errant_Field
+    description: A polymorphic type containing the bad field data.
+    type: Basic_Types.Poly_Type
+    format: U8x8

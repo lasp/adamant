@@ -1,0 +1,4 @@
+---
+description: This document specifies a set of requirements for the System Time GPS component
+requirements:
+  - text: FSW will store time as 32 bits of seconds and 32 bits of subseconds.

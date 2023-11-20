@@ -1,0 +1,42 @@
+---
+description: This is the Precision Time Protocol (PTP) Master component. This component implements the master portion of the protocol. Any PTP slaves can use the messages from this component to measure their system time relative to the master, or use the master to synchronize their clocks. Additional documentation on the PTP protocol can be found in the doc/research/ directory for this component.
+execution: active
+init:
+  parameters:
+    - name: Sync_Period
+      type: Positive
+      default: "1"
+      description: The number of ticks between sending precision time protocol messages. A value of zero disables syncing.
+    - name: Enabled_State
+      type: Ptp_State.Ptp_State_Type
+      default: "Ptp_State.Enabled"
+      description: Is precision time protocol enabled or disabled by default at startup.
+connectors:
+  - description: Tick input that is used to calculate time message frequency. The sync_period can be used to set how many ticks should be received before the master clock starts the update process.
+    type: Tick.T
+    kind: recv_async
+  - description: The command receive connector.
+    type: Command.T
+    kind: recv_async
+  - description: Used to receive the Delay_Request messages from PTP slaves. These messages can be timestamped with their receive time by a component external to this system. If not timestamped (ie. seconds and microseconds set to zero) the component will timestamp the messages as it receives them. This timestamp will be relayed back to the slaves in a Delay_Response message.
+    type: Ptp_Time_Message_Receive.T
+    kind: recv_async
+  - description: Receives and forwards the PTP time for a follow-up message (if connected). The time received is an accurate time stamp of when the Sync message was sent. This time can be provided to this component by a lower level component which actually records the time the Sync message leaves the system. If left unconnected, then no follow-up message will be sent by this component. In this case the PTP slave should use the timestamp provided in the Sync message instead of the follow-up message.
+    type: Sys_Time.T
+    name: Follow_Up_Sys_Time_T_Recv_Async
+    kind: recv_async
+  - description: Sends PTP Sync messages, starting a PTP transaction.
+    type: Ptp_Time_Message.T
+    kind: send
+  - description: Used to get system time.
+    return_type: Sys_Time.T
+    kind: get
+  - description: This connector is used to register and respond to the components commands.
+    type: Command_Response.T
+    kind: send
+  - description: The event send connector, sends events.
+    type: Event.T
+    kind: send
+  - description: The data product invoker connector.
+    type: Data_Product.T
+    kind: send

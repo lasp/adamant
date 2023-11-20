@@ -1,0 +1,36 @@
+The table below shows the events for the \VAR{prettyname|e} assembly.
+
+%- if events
+\captionof{table}{\VAR{prettyname|e} Events}
+{\renewcommand{\arraystretch}{2.2} %<- modify value to suit your needs
+\begin{xltabular}{\textwidth}{ | l | X | X | }
+  \hline
+  \textbf{Event ID} & \textbf{Event Name} & \textbf{Parameter Type} \\ \hline
+%- for id, event in events.items()
+  \texttt{0x\VAR{"%04x" % id } (\VAR{ event.id })} &
+  \texttt{\url{\VAR{event.suite.component.instance_name}.\VAR{event.name}}} &
+%- if event.type
+  \texttt{\url{\VAR{event.type}}}
+%- else
+  \texttt{-}
+%- endif
+  \\ \hline
+%- endfor
+\end{xltabular}}
+\vspace{5mm} %5mm vertical space
+
+Event Descriptions:
+\begin{spaceditemize}
+%- for id, event in events.items()
+  \item \textbf{\texttt{\url{\VAR{event.suite.component.instance_name}.\VAR{event.name}}}} -
+%- if event.description
+    \VAR{event.description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+%- else 
+\par The \VAR{prettyname|e} assembly has no events.
+%- endif

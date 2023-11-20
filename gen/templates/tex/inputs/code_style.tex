@@ -1,0 +1,223 @@
+\usepackage{minted}
+
+% Solarized color definitions
+\definecolor{sbase03}{HTML}{002B36}
+\definecolor{sbase02}{HTML}{073642}
+\definecolor{sbase01}{HTML}{586E75}
+\definecolor{sbase00}{HTML}{657B83}
+\definecolor{sbase0}{HTML}{839496}
+\definecolor{sbase1}{HTML}{93A1A1}
+\definecolor{sbase2}{HTML}{EEE8D5}
+%\definecolor{sbase3}{HTML}{FDF6E3}
+% changing this a bit for readibility in pdf
+\definecolor{sbase3}{HTML}{FEF9ED}
+\definecolor{syellow}{HTML}{B58900}
+\definecolor{sorange}{HTML}{CB4B16}
+\definecolor{sred}{HTML}{DC322F}
+\definecolor{smagenta}{HTML}{D33682}
+\definecolor{sviolet}{HTML}{6C71C4}
+\definecolor{sblue}{HTML}{268BD2}
+\definecolor{lblue}{HTML}{0085ff}
+\definecolor{scyan}{HTML}{2AA198}
+\definecolor{sgreen}{HTML}{859900}
+\definecolor{darkblue}{HTML}{0000A0}
+\definecolor{white}{HTML}{ffffff}
+
+% Solarized CStyle definition
+\lstdefinestyle{CStyle}{
+basicstyle=\color{sbase01}\ttfamily,
+backgroundcolor=\color{sbase3},
+keywordstyle=\color{lblue},%scyan
+commentstyle=\color{sbase1},
+stringstyle=\color{sorange},
+identifierstyle=\color{syellow},%sbase00
+numberstyle=\color{sbase00},
+% Break long lines into multiple lines?
+breaklines=true,
+sensitive=true,
+% Show a character for spaces?
+showstringspaces=false,
+% 
+breakatwhitespace=false,         
+captionpos=b,                    
+keepspaces=true,                 
+numbers=left,                    
+numbersep=5pt,                  
+showspaces=false,                
+% showstringspaces=false,
+% showtabs=false,                  
+tabsize=2,
+language=C
+}
+
+\newminted{C}{
+    %style=solarized-light,
+    bgcolor=sbase3,
+    autogobble=true,
+    breaklines=true,
+    breakanywhere,
+    fontsize=\small,
+    linenos
+}
+
+\newmintedfile[ccodef]{C}
+{
+    %style=solarized-light,
+    bgcolor=sbase3,
+    autogobble=true,
+    breaklines=true,
+    breakanywhere,
+    fontsize=\small,
+    linenos
+}
+
+\newminted{cpp}{
+    %style=solarized-light,
+    bgcolor=sbase3,
+    autogobble=true,
+    breaklines=true,
+    breakanywhere,
+    linenos
+}
+
+\newmintedfile[cppcodef]{cpp}
+{
+    %style=solarized-light,
+    bgcolor=sbase3,
+    autogobble=true,
+    breaklines=true,
+    breakanywhere,
+    linenos
+}
+
+\newminted{ada}{
+    style=solarized-light,
+    bgcolor=sbase3,
+    fontsize=\small,
+    autogobble=true,
+    breaklines=true,
+    breakanywhere,
+    linenos
+}
+
+\newmintedfile[adacodef]{ada}
+{
+    style=solarized-light,
+    bgcolor=sbase3,
+    fontsize=\small,
+    autogobble=true,
+    breaklines=true,
+    breakanywhere,
+    linenos
+}
+
+\newminted{yaml}{
+    style=solarized-light,
+    bgcolor=sbase3,
+    fontsize=\small,
+    autogobble=true,
+    breaklines=true,
+    breakanywhere,
+    linenos
+}
+
+\newmintedfile[yamlcodef]{yaml}
+{
+    style=solarized-light,
+    bgcolor=sbase3,
+    fontsize=\small,
+    autogobble=true,
+    breaklines=true,
+    breakanywhere,
+    linenos
+}
+
+\newminted{python}{
+    style=solarized-light,
+    bgcolor=sbase3,
+    fontsize=\small,
+    autogobble=true,
+    breaklines=true,
+    breakanywhere,
+    linenos
+}
+
+\newmintedfile[pythoncodef]{python}
+{
+    style=solarized-light,
+    bgcolor=sbase3,
+    fontsize=\small,
+    autogobble=true,
+    breaklines=true,
+    breakanywhere,
+    linenos
+}
+
+\newminted{matlab}{
+    style=solarized-light,
+    bgcolor=sbase3,
+    fontsize=\small,
+    autogobble=true,
+    breaklines=true,
+    breakanywhere,
+    linenos
+}
+
+\newmintedfile[matlabcodef]{matlab}
+{
+    style=solarized-light,
+    bgcolor=sbase3,
+    fontsize=\small,
+    autogobble=true,
+    breaklines=true,
+    breakanywhere,
+    linenos
+}
+
+\newminted{latex}{
+    style=solarized-light,
+    bgcolor=sbase3,
+    fontsize=\small,
+    autogobble=true,
+    breaklines=true,
+    breakanywhere,
+    linenos
+}
+
+\newmintedfile[latexcodef]{latex}
+{
+    style=solarized-light,
+    bgcolor=sbase3,
+    fontsize=\small,
+    autogobble=true,
+    breaklines=true,
+    breakanywhere,
+    linenos
+}
+
+\newminted{text}{
+    style=solarized-light,
+    bgcolor=sbase3,
+    fontsize=\small,
+    autogobble=true,
+    breaklines=true,
+    breakanywhere,
+    linenos
+}
+
+\newmintedfile[textcodef]{text}
+{
+    style=solarized-light,
+    bgcolor=sbase3,
+    fontsize=\small,
+    autogobble=true,
+    breaklines=true,
+    breakanywhere,
+    linenos
+}
+
+\lstdefinestyle{pcode}{
+  basicstyle=\ttfamily,
+  keywordstyle=\color{darkblue},
+  keywords={if,import,qualified,as,do,where,and,then,end,else,is}
+}

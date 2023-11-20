@@ -1,0 +1,16 @@
+---
+description: A packed record that holds a string to be printed via command sequencer event.
+with:
+  - Event_Types
+  - Basic_Types
+  - Seq_Print_Event_Header
+preamble:
+  subtype Print_String_Type is Basic_Types.Byte_Array (Event_Types.Parameter_Buffer_Type'First .. Event_Types.Parameter_Buffer_Type'Last - Seq_Print_Event_Header.Size_In_Bytes);
+fields:
+  - name: Header
+    description: Basic information about the printed event.
+    type: Seq_Print_Event_Header.T
+  - name: Print_String
+    description: The print string.
+    type: Print_String_Type
+    format: U8x{{ event_buffer_size - 4 }}

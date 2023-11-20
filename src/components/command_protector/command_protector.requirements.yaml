@@ -1,0 +1,12 @@
+---
+description: The requirements for the Command Protector component are specified below.
+requirements:
+  - text: The component shall enter the armed state upon command.
+  - text: The component shall reject protected commands if not in the armed state.
+  - text: The component shall report the armed state in telemetry.
+  - text: The component shall exit the armed state upon receipt of any command, unless it is another arm command.
+  - text: The component shall exit the armed state after a timeout.
+  - text: The component shall set the armed state timeout through ground command.
+  - text: The component shall accept armed state timeouts in the range of 0 to 255 seconds (in 1 second intervals). A value of zero implies infinite timeout.
+  - text: The component shall report the armed state timeout in telemetry.
+

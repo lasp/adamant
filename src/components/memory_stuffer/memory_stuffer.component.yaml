@@ -1,0 +1,39 @@
+---
+description: |
+  The memory stuffer component is an active component that can stuff (write to) memory regions. It reports an error if an action is requested on a memory region outside of the address space that it is configured with during initialization. The component can manage both protected memory regions (which require an arm command prior to stuffing) and unprotected regions (which require no arm prior to stuffing). In addition, the component has a connector to accept a memory region copy request, which will stuff memory with data from another system address. The memory region copy and release conntectors may be disconnected if this feature is not needed.
+execution: active
+init:
+  description: This component requires a list of memory regions which it can write to. These regions can either be protected (requiring and arm command prior to execution) or unprotected, as specified by the second parameter.
+  parameters:
+    - name: memory_Regions
+      type: Memory_Manager_Types.Memory_Region_Array_Access
+      description: An access to a list of memory regions.
+    - name: memory_Region_Protection_List
+      type: Memory_Manager_Types.Memory_Protection_Array_Access
+      default: "null"
+      description: An access to a list of the protected/unprotected state of each memory region. The index in this array corresponds to the index of the memory region affected in the previous parameter. If the array is null, then it is assumed that all memory regions are unprotected.
+connectors:
+  - description: This tick is used to keep track of the armed state timeout and send the data product relating the current timeout value.
+    type: Tick.T
+    kind: recv_async
+  - description: This is the command recieve connector.
+    type: Command.T
+    kind: recv_async
+  - description: A memory region is received on this connector and stuffed to a different memory region, a memory copy.
+    type: Memory_Region_Copy.T
+    kind: recv_async
+  - description: This connector is used to release the received memory region after a copy has occured.
+    type: Memory_Region_Release.T
+    kind: send
+  - description: This connector is used to register and respond to the component's commands.
+    type: Command_Response.T
+    kind: send
+  - description: Data products are sent out of this connector.
+    type: Data_Product.T
+    kind: send
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get

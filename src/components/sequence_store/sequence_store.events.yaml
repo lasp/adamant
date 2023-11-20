@@ -1,0 +1,48 @@
+---
+description: Events for the Sequence Store component.
+events:
+  - name: Sequence_Slot_Active
+    description: The destination slot is currently active so cannot be written to.
+    param_type: Sequence_Store_Memory_Region_Store.T
+  - name: Invalid_Sequence_Crc
+    description: The sequence to store has an invalid CRC and cannot be stored.
+    param_type: Invalid_Sequence_Crc_Info.T
+  - name: Invalid_Sequence_Length
+    description: The sequence to store has a length that will not fit within the destination slot.
+    param_type: Invalid_Sequence_Length_Info.T
+  - name: Writing_Sequence_To_Slot
+    description: A command sequence memory region was received. It will be validated and written to the destination slot.
+    param_type: Sequence_Store_Memory_Region_Store.T
+  - name: Wrote_Sequence_To_Slot
+    description: A command sequence was successfully written to the destination slot.
+    param_type: Slot_Written_Summary.T
+  - name: Checked_Slot_Validity
+    description: The validity of a particular slot was checked and the results are included in this event.
+    param_type: Packed_Slot_Validity.T
+  - name: Checking_All_Slot_Validity
+    description: The validity for all slots within the sequence store.
+  - name: Cannot_Activate_Duplicate_Sequence_Id
+    description: A duplicate sequence ID cannot be activated. All active sequence IDs must be unique.
+    param_type: Packed_Sequence_Id.T
+  - name: Invalid_Slot_Number
+    description: Slot number does not exist and is out of range for the available slots in the component.
+    param_type: Packed_Slot_Number.T
+  - name: Activated_Slot
+    description: Slot was activated.
+    param_type: Packed_Slot_Number.T
+  - name: Deactivated_Slot
+    description: Slot was deactivated.
+    param_type: Packed_Slot_Number.T
+  - name: Dumping_Slot_Summary
+    description: Starting to produce a packet with a summary of the contents of the sequence store slots.
+  - name: Dumped_Slot_Summary
+    description: Produced a packet with a summary of the contents of the sequence store slots.
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T
+  - name: Command_Dropped
+    description: A command was dropped due to a full queue.
+    param_type: Command_Header.T
+  - name: Region_Store_Dropped
+    description: A sequence store memory region was dropped due to a full queue.
+    param_type: Sequence_Store_Memory_Region_Store.T

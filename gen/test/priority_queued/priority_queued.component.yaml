@@ -1,0 +1,22 @@
+---
+description: This is a priority queued test component.
+execution: either
+connectors:
+  - description: The output connector
+    type: Aa.T
+    kind: send
+  - description: The output connector
+    type: Bb.T
+    kind: send
+  - description: The input connector
+    type: Aa.T
+    kind: recv_async
+    priority: 1
+  - description: The input connector
+    type: Bb.T
+    kind: recv_async
+    priority: 2
+  - description: Runs the scheduled activity
+    type: Basic_Types.Byte
+    name: Sched_Recv_Sync
+    kind: recv_sync

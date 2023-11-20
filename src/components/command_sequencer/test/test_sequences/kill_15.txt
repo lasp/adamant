@@ -1,0 +1,15 @@
+seq kill_15
+  ;
+  ; This sequence kills engines 0 and 1.
+  ;
+
+  ; Send valid kill:
+  kill engine 0 2
+  cmd Component_A.Command_1
+
+  ; Try to kill engines that do not exist:
+  kill engine 2 2
+
+  ; Should never get here.
+  cmd Component_B.Command_1
+endseq

@@ -1,0 +1,15 @@
+---
+description: Data products for the Register Stuffer component.
+data_products:
+  - name: Last_Register_Written
+    description: The address and value of the last written register.
+    type: Register_Value.T
+  - name: Last_Register_Read
+    description: The address and value of the last read register.
+    type: Register_Value.T
+  - name: Armed_State
+    description: The current armed/unarmed state of the component.
+    type: Packed_Arm_State.T
+  - name: Armed_State_Timeout
+    description: The time remaining (in ticks) until the armed state expires.
+    type: Packed_Arm_Timeout.T

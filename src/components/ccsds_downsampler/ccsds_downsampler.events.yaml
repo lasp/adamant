@@ -1,0 +1,11 @@
+---
+events:
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T
+  - name: Modified_Factor_Filter
+    description: This event indicates that the filter factor for a particular id has been set based on what was commanded.
+    param_type: Filter_Factor_Cmd_Type.T
+  - name: Factor_Filter_Change_Failed_Invalid_Apid
+    description: This event indicates that the command received a Apid it could not find so it fails since it cannot find the id.
+    param_type: Filter_Factor_Cmd_Type.T

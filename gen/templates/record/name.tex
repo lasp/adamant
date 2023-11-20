@@ -1,0 +1,70 @@
+%- if description
+\VAR{description|e}
+%- endif
+
+%- if preamble 
+\\
+\\
+\textit{Preamble (inline Ada definitions):}
+\begin{adacode}
+\VAR{preamble}
+\end{adacode}
+
+%- endif
+%- if variable_length
+\captionof{table}{\VAR{name|e} Packed Record : \VAR{size} bits \textit{(maximum)}}
+\begin{xltabular}{\textwidth}{ | X | X | l | c | c | c | X |}
+%- else
+\captionof{table}{\VAR{name|e} Packed Record : \VAR{size} bits}
+\begin{xltabular}{\textwidth}{ | X | X | l | c | c | c | }
+%- endif
+  \hline
+%- if variable_length
+  \textbf{Name} & \textbf{Type} & \textbf{Range} & \thead{\textbf{Size}\\\textbf{(Bits)}} & \thead{\textbf{Start}\\\textbf{Bit}} & \thead{\textbf{End}\\\textbf{Bit}} & \thead{\textbf{Variable}\\\textbf{Length}} \\ \hline
+%- else                                                                
+  \textbf{Name} & \textbf{Type} & \textbf{Range} & \thead{\textbf{Size}\\\textbf{(Bits)}} & \thead{\textbf{Start}\\\textbf{Bit}} & \thead{\textbf{End}\\\textbf{Bit}} \\ \hline
+%- endif
+%- for field in fields.values()
+  \texttt{\url{\VAR{field.name}}} &
+  \texttt{\url{\VAR{field.type}}}
+  &
+%- if field.literals
+  \makecell[l]{
+%- for literal in field.literals
+    \texttt{\VAR{literal.value} => \VAR{literal.name|e}} \\
+%- endfor
+  } &
+%- else
+%- if field.range_min != None and field.range_max != None
+  \texttt{\VAR{field.range_min} to \VAR{field.range_max}} &
+%- else
+  - &
+%- endif
+%- endif
+  \texttt{\VAR{field.size}} &
+  \texttt{\VAR{field.start_bit}} &
+  \texttt{\VAR{field.end_bit}}
+%- if variable_length
+%- if field.variable_length
+  & \texttt{\url{\VAR{field.variable_length}}} 
+%- else
+  & \texttt{-} 
+%- endif
+%- endif
+  \\ \hline
+%- endfor
+\end{xltabular}
+\vspace{5mm} %5mm vertical space
+
+Field Descriptions:
+\begin{spaceditemize}
+%- for field in fields.values() 
+  \item \textbf{\texttt{\VAR{field.name|e}}} - 
+%- if field.description
+    \VAR{field.description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space

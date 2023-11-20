@@ -1,0 +1,15 @@
+---
+description: A packed record that holds the header for a string to be printed via command sequencer event.
+fields:
+  - name: Engine_Id
+    description: The sequence engine that is running the sequence.
+    type: Seq_Types.Sequence_Engine_Id
+    format: U8
+  - name: Sequence_Id
+    description: The sequence id that sent the print.
+    type: Sequence_Types.Sequence_Id
+    format: U16
+  - name: Print_Type
+    description: The type of print message (debug, info, critical, error).
+    type: Seq_Enums.Print_Type.E
+    format: E8

@@ -1,0 +1,16 @@
+---
+description: |
+  The Event Text Logger component receives events on an asynchronous queue and prints them either to the terminal or to a file as it receives them. The print statements for events are generated per the assembly that the Event Text Logger is attached to. By pointing the generator to a particular assembly model, you enable it to recognize and print certain events that are present in that assembly.
+execution: active
+preamble: |
+  type Event_To_Text_Function_Access is not null access function (Evt : in Event.T) return String;
+discriminant:
+  description: The discriminant for this component takes an access of type Event_To_Text_Function. The function provided should translate an event to a string for any given event in an assembly. A package with this function implementation is autocoded for each assembly, and can be passed into the Event Text Logger to configure it for a given assembly.
+  parameters:
+    - name: Event_To_Text
+      type: Event_To_Text_Function_Access
+      description: An access to an event to text function.
+connectors:
+  - description: Events are received asynchronously on this connector.
+    type: Event.T
+    kind: recv_async

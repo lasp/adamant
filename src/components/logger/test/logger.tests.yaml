@@ -1,0 +1,15 @@
+---
+description: This is a unit test suite for the Logger component which logs a statically sized log type onto a log instantiated on the heap.
+tests:
+  - name: Test_Log_And_Dump_Enabled
+    description: This unit test tests the storing of log data and subsequent dumping by command when the log is enabled.
+  - name: Test_Log_And_Dump_Disabled
+    description: This unit test tests the storing of log data and subsequent dumping by command when the log is disabled.
+  - name: Test_Log_Overwrite_And_Dump
+    description: This unit test tests the storing of a lot of log data, such that the circular buffer overwrites, and subsequent dumping by command.
+  - name: Test_Enable_Disable
+    description: This unit test tests the enabled/disable commands to the logger to make sure they behave as expected.
+  - name: Test_Init
+    description: This unit test tests initializing the log with both valid and invalid values.
+  - name: Test_Invalid_Command
+    description: This unit test makes sure an invalid command is reported and ignored.

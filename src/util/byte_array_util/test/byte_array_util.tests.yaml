@@ -1,0 +1,11 @@
+---
+description: This is a unit test suite for the byte array util package.
+tests:
+  - name: Test_Extract
+    description: This test makes sure the extract polytype function works as expected.
+  - name: Test_Set
+    description: This test makes sure the set polytype function works as expected.
+  - name: Test_Set_And_Extract
+    description: This test makes sure the set and extract polytype functions work together as expected.
+  - name: Test_Extract_Signed
+    description: This test makes sure the extract polytype function works for signed numbers that are negative.

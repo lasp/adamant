@@ -1,0 +1,16 @@
+---
+description: This is a generic component that can be used to split a single connector of any type into an arrayed connector of that type. This can be useful when a component has a single send connector, but you actually need the data to go to many different places simultaneously. In this case, the splitter component can be attached to the send connector and then distribute the data to many downstream components.
+execution: passive
+generic:
+  description: The splitter is generic in that it can be instantiated to split a stream of any type at compile time.
+  parameters:
+    - name: T
+      description: The generic type of data passed in and out of the splitter.
+connectors:
+  - description: The generic invokee connector.
+    type: T
+    kind: recv_sync
+  - description: The generic arrayed invoker connector.
+    type: T
+    kind: send
+    count: 0 # Unconstrained array; size to be determined by assembly.

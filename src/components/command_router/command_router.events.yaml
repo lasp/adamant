@@ -1,0 +1,53 @@
+---
+events:
+  - name: Command_Received
+    description: A command was received by the command router to be routed.
+    param_type: Command_Header.T
+  - name: Command_Execution_Successful
+    description: A command was routed, executed, and returned a response saying it was executed successfully
+    param_type: Command_Response.T
+  - name: Command_Execution_Failure
+    description: A command execution failed.
+    param_type: Command_Response.T
+  - name: Command_Id_Not_Registered
+    description: A command was sent to the router, but it was not found in the router table.
+    param_type: Command_Header.T
+  - name: Registration_Id_Conflict
+    description: The command Id has already been registered.
+    param_type: Command_Id.T
+  - name: Router_Table_Full
+    description: Cannot add command Id to router table because it is full.
+    param_type: Command_Id.T
+  - name: Outgoing_Command_Dropped
+    description: A command was dropped because the recipient's queue was full.
+    param_type: Command_Header.T
+  - name: Incoming_Command_Dropped
+    description: A command was dropped because the command router's queue was full.
+    param_type: Command_Header.T
+  - name: Noop_Command_Dropped
+    description: A noop command was dropped because the command router's queue was full.
+    param_type: Command_Header.T
+  - name: Command_Response_Dropped
+    description: A command response was dropped because the command router's queue was full.
+    param_type: Command_Response.T
+  - name: Noop_Received
+    description: A Noop command was received.
+  - name: Noop_Arg_Received
+    description: A Noop command was received with an argument.
+    param_type: Command_Router_Arg.T # The Arg
+  - name: Noop_Response_Received
+    description: A noop response self test command was received.
+  - name: Noop_Response_Forwarding_Success
+    description: If this event is sent then the noop response self test command succeeded.
+    param_type: Command_Response.T
+  - name: Forwarded_Command_Response_Dropped
+    description: A forwarded command response was dropped because the receiving component's queue overflowed.
+    param_type: Command_Response.T
+  - name: Invalid_Command_Source_Id
+    description: A command response contained an invalid source id. This is a software bug and should be corrected.
+    param_type: Command_Response.T
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T
+  - name: Data_Products_Reset
+    description: The component's data products have been reset to initialization values.

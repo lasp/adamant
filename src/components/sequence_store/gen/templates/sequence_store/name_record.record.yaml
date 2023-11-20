@@ -1,0 +1,8 @@
+---
+description: This is an autocoded slot summary type for a Sequence Store component.
+fields:
+{% for slot in slots %}
+  - name: Slot_{{ slot.number }}_Summary
+    description: "A summary of what is stored within sequence store slot {{ slot.number }}."
+    type: Packed_Slot_Summary.T
+{% endfor %}

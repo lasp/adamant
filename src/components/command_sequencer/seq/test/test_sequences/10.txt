@@ -1,0 +1,38 @@
+seq 10
+	declare timeout_abs u32
+	declare timeout_rel u32
+	declare var u32
+	declare one u32
+	set $timeout_abs = 2000
+	set $timeout_rel = 10
+	set $var = 0
+        set $one = 1
+
+	waitvalue seq_tlm_16 == 0 ? until 1000
+
+        if $WAIT_TIMEOUT == 1
+          set $var = 2
+        endif
+
+	waitvalue seq_tlm_16 == $var ? for 5
+	waitvalue seq_tlm_16 == $one ? until $timeout_abs
+	waitvalue seq_tlm_16 == $one ? for $timeout_rel
+
+        if $WAIT_TIMEOUT == 1
+          set $var = 4
+        else
+          set $var = 3
+        endif
+
+	waitvalue seq_tlm_16 == $var ? for 5
+
+        ; Test relative wait of zero. should fall through with immediate timeout.
+	set $timeout_rel = 0
+	waitvalue seq_tlm_16 == 10 ? for $timeout_rel
+        if $WAIT_TIMEOUT == 1
+          set $var = 10
+        else
+          set $var = 11
+        endif
+	waitvalue seq_tlm_16 == $var ? for 5
+endseq

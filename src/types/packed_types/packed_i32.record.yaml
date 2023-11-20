@@ -1,0 +1,7 @@
+---
+description: Single component record for holding packed signed 32-bit value.
+fields:
+  - name: Value
+    description: The 32-bit signed integer.
+    type: Interfaces.Integer_32
+    format: I32

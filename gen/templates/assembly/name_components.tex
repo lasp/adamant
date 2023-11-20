@@ -1,0 +1,88 @@
+%- if components
+\captionof{table}{\VAR{prettyname|e} Components}
+{\renewcommand{\arraystretch}{2.2} %<- modify value to suit your needs
+\begin{xltabular}{\textwidth}{ | X | X | c | c |}
+  \hline
+  \textbf{Name} & \textbf{Type} & \textbf{Has Queue} & \textbf{Execution} \\ \hline
+%- for component in components.values()
+  \texttt{\url{\VAR{component.instance_name}}} &
+  \texttt{\url{\VAR{component.name}}} &
+%- if component.connectors.of_kind("recv_async")
+  \texttt{yes} &
+%- else
+  \texttt{no} &
+%- endif
+  \texttt{\VAR{component.instance_execution}}
+  \\ \hline
+%- endfor
+\end{xltabular}}
+\vspace{5mm} %5mm vertical space
+
+\captionof{table}{\VAR{prettyname|e} Component Item Counts}
+{\renewcommand{\arraystretch}{2.2} %<- modify value to suit your needs
+\scriptsize
+\begin{xltabular}{\textwidth}{ | X | r | r | r | r | r | r | r | r | }
+  \hline
+  \textbf{Component Name} & \vtop{\hbox{\strut \textbf{Connec-}}\hbox{\strut \textbf{tors}}} & \textbf{Commands} & \textbf{Events} & \vtop{\hbox{\strut \textbf{Data}}\hbox{\strut \textbf{Products}}} & \vtop{\hbox{\strut \textbf{Data}}\hbox{\strut \textbf{Depend-}}\hbox{\strut \textbf{encies}}} & \vtop{\hbox{\strut \textbf{Param-}}\hbox{\strut \textbf{eters}}} & \textbf{Packets} & \textbf{Faults} \\ \hline
+%- for component in components.values()
+  \texttt{\url{\VAR{component.instance_name}}} &
+  \texttt{\VAR{component.connectors|length}} &
+%- if component.commands
+  \texttt{\VAR{component.commands|length}}
+%- else 
+  \texttt{0}
+%- endif
+  &
+%- if component.events
+  \texttt{\VAR{component.events|length}}
+%- else 
+  \texttt{0}
+%- endif
+  &
+%- if component.data_products
+  \texttt{\VAR{component.data_products|length}}
+%- else 
+  \texttt{0}
+%- endif
+  &
+%- if component.data_dependencies
+  \texttt{\VAR{component.data_dependencies|length}}
+%- else 
+  \texttt{0}
+%- endif
+  &
+%- if component.parameters
+  \texttt{\VAR{component.parameters|length}}
+%- else 
+  \texttt{0}
+%- endif
+  &
+%- if component.packets
+  \texttt{\VAR{component.packets|length}}
+%- else 
+  \texttt{0}
+%- endif
+  &
+%- if component.faults
+  \texttt{\VAR{component.faults|length}}
+%- else 
+  \texttt{0}
+%- endif
+  \\ \hline
+%- endfor
+\end{xltabular}}
+\vspace{5mm} %5mm vertical space
+
+Component Descriptions:
+\begin{spaceditemize}
+%- for component in components.values()
+  \item \textbf{\texttt{\VAR{component.instance_name|e}}} - 
+%- if component.instance_description
+    \VAR{component.instance_description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+%- endif

@@ -1,0 +1,14 @@
+The Command Router is best understood when viewed in the context of an assembly. The following diagram shows a typical setup for the Command Router. 
+
+\begin{figure}[H]
+  \includegraphics[width=0.9\textwidth,center]{assembly/build/eps/context_the_view.eps}
+  \caption{Example usage of the Command Router.}
+\end{figure}
+
+In the above context diagram the Command Router receives commands from two source components. One of these components sends commands at low priority on the Command Router's asynchronous connector. The other sends commands at high priority using the synchronous connector, bypassing the Command Router's internal queue. In most cases, using the asynchronous queue should be the preferred way to execute commands. An application for using the synchronous connector may include fault protection commands that need to execute before any currently queued commands.
+
+After commands are sent to the Command Router they are forwarded to one of three downstream components to execute the commands. The Command Router's binary tree lookup algorithm is used to determine which connector, and therefore which downstream component, a command should be directed to. This binary tree is populated at startup using the command response connectors, which should always be connected from every downstream component back to the Command Router.
+
+The command response connectors are also used to return the success/fail status of the command back to the router after execution. These command responses are tabulated by the Command Router and reported as data products. The Command Router can also be configured to forward the command response back to the component who sent the commands, although this is not required. In the diagram above the low priority sender component expects a response back, but the high priority sender component does not. Command responses can be used by sending components to make decisions based off of whether a command succeeded or not, or to simply meter out commands, not sending another command until the response from the previous command has been received. Both of these patterns are commonly utilized when implementing a command sequencing component.
+
+Also seen in the diagram, the Command Router has loopback connections to itself for commands and command response. This allows the Command Router to self test its capabilities by routing and executing NOOP commands and returning and forwarding the command responses from those commands.

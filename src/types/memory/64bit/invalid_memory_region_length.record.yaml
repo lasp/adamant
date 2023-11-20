@@ -1,0 +1,10 @@
+---
+description: A packed record which holds data related to an invalid memory region length.
+fields:
+  - name: Region
+    description: The memory region and operation.
+    type: Memory_Region.T
+  - name: Expected_Length
+    description: The length bound that the memory region failed to meet.
+    type: Natural
+    format: U32

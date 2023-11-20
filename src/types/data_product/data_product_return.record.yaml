@@ -1,0 +1,10 @@
+---
+description: This record holds data returned from a data product fetch request.
+fields:
+  - name: The_Status
+    description: A status relating whether or not the data product fetch was successful or not.
+    type: Data_Product_Enums.Fetch_Status.E
+    format: E8
+  - name: The_Data_Product
+    description: The data product item returned.
+    type: Data_Product.T

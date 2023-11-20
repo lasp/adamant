@@ -1,0 +1,10 @@
+---
+description: A packed record which holds the parameter memory region to operate on as well as an enumeration specifying the operation to perform.
+fields:
+  - name: Region
+    description: The memory region.
+    type: Memory_Region.T
+  - name: Operation
+    description: The parameter table operation to perform.
+    type: Parameter_Enums.Parameter_Table_Operation_Type.E
+    format: E8

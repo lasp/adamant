@@ -1,0 +1,13 @@
+---
+description: This is a unit test suite for the Time of Tone Master component.
+tests:
+  - name: Test_Tone_Message
+    description: This test ensures that tone messages are sent out appropriately when Ticks are sent to the component.
+  - name: Test_Time_Message
+    description: This test ensures that time messages are sent out appropriately when tone timestamps are sent to the component.
+  - name: Test_Enable_Disabled
+    description: This test ensures that enable and disable commands work.
+  - name: Test_Sync_Once
+    description: This test ensures that the Sync_Once command works.
+  - name: Test_Invalid_Command
+    description: This test ensures that an invalid command is rejected and reported.

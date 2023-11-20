@@ -1,0 +1,97 @@
+Below is a list of useful parameters and statistics that give a quick look into the makeup of the component.
+
+\begin{itemize}
+  \item \textbf{Execution} - 
+    \textit{\VAR{execution|e}}
+
+  \item \textbf{Number of Connectors} - 
+%- if connectors
+    \VAR{connectors|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Invokee Connectors} -
+    %- if connectors.invokee()
+    \VAR{connectors.invokee()|length}
+%- else
+    \textit{None}
+%- endif
+    
+  \item \textbf{Number of Invoker Connectors} -
+%- if connectors.invoker()
+    \VAR{connectors.invoker()|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Generic Connectors} - 
+%- if connectors.generic()
+    \VAR{connectors.generic()|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Generic Types} - 
+%- if generic
+    \VAR{generic.formal_parameters|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Unconstrained Arrayed Connectors} - 
+%- if connectors.n_arrayed()
+    \VAR{connectors.n_arrayed()|length}
+%- else
+    \textit{None}
+%- endif
+    
+  \item \textbf{Number of Commands} -
+%- if commands 
+    \VAR{commands|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Parameters} -
+%- if parameters 
+    \VAR{parameters|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Events} - 
+%- if events
+    \VAR{events|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Faults} - 
+%- if faults 
+    \VAR{faults|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Data Products} - 
+%- if data_products 
+    \VAR{data_products|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Data Dependencies} - 
+%- if data_dependencies
+    \VAR{data_dependencies|length}
+%- else
+    \textit{None}
+%- endif
+
+  \item \textbf{Number of Packets} - 
+%- if packets 
+    \VAR{packets|length}
+%- else
+    \textit{None}
+%- endif
+\end{itemize}

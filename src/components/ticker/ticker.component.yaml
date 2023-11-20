@@ -1,0 +1,16 @@
+---
+description: This is the ticker component.
+execution: active
+discriminant:
+  description: The ticker component is instantiated with the desired tick period in microseconds.
+  parameters:
+    - name: period_us
+      type: Positive
+      description: The tick period in microseconds
+connectors:
+  - description: The sched send connection
+    type: Tick.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get

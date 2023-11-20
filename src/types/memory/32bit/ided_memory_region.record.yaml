@@ -1,0 +1,10 @@
+---
+description: A memory region that has a unique identifier associated with it.
+fields:
+  - name: Id
+    description: Unique identifier for the memory region.
+    type: Interfaces.Unsigned_16
+    format: U16
+  - name: Region
+    description: The source address and length to copy from.
+    type: Memory_Region.T

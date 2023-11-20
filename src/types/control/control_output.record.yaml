@@ -1,0 +1,14 @@
+---
+description: Generic control output.
+fields:
+  - name: Time
+    description: Time tag saved when the data was gathered.
+    type: Sys_Time.T
+  - name: Output_Value
+    description: The control output value.
+    type: Short_Float
+    format: F32
+  - name: Error
+    description: The current control error.
+    type: Short_Float
+    format: F32

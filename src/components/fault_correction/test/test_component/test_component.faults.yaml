@@ -1,0 +1,11 @@
+---
+description: Faults for the Test Component.
+faults:
+  - name: Fault_1
+    description: Fault 1.
+    param_type: Packed_U16.T
+  - name: Fault_2
+    description: Fault 2.
+    param_type: Sys_Time.T
+  - name: Fault_3
+    description: Fault 3.

@@ -1,0 +1,17 @@
+---
+description: This is an autocoded data product status record type for a Task Watchdog component regarding the status of checking each connector for pets.
+fields:
+{% for component in watchdog_list.values() %}
+  - name: {{ component.product_name }}_State
+    description: "The current state of the {{ component.product_name }} watchdog action."
+    type: Task_Watchdog_Enums.Watchdog_Action_State.E
+    format: E2
+{% endfor %}
+{% if (num_petters % 4) != 0 %}
+{% for idx in range(4 - (num_petters % 4)) %}
+  - name: Reserved_{{ loop.index0 }}
+    description: "Padding bits, not used."
+    type: Task_Watchdog_Types.Two_Bit_Padding_Type
+    format: U2
+{% endfor %}
+{% endif %}

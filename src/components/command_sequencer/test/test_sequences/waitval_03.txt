@@ -1,0 +1,67 @@
+seq waitval_03
+  ; Wait for data product 1 to be 0.
+  waitvalue Component_A.Data_Product_1.Value == 0 ? until 120000 ;absolute wait (VTC)
+  cmd Component_A.Command_3 Value 5
+
+  if $WAIT_TIMEOUT == 1
+    ; Timeout
+    cmd Component_B.Command_3 Value 6
+  else
+    cmd Component_B.Command_3 Value 7
+  endif
+
+  ; Wait for data product 1 to be 2.
+  waitvalue Component_A.Data_Product_1.Value == 2 ? until 120001 ;absolute wait (VTC)
+  cmd Component_A.Command_3 Value 8
+
+  if $WAIT_TIMEOUT == 1
+    ; Timeout
+    cmd Component_B.Command_3 Value 9
+  else
+    cmd Component_B.Command_3 Value 10
+  endif
+
+  ; Wait for data product 1 to be > 7.
+  waitvalue Component_B.Data_Product_2.Value > 7.5 ? for 5 ;relative wait
+  cmd Component_A.Command_3 Value 11
+
+  if $WAIT_TIMEOUT == 1
+    ; Timeout
+    cmd Component_B.Command_3 Value 12
+  else
+    cmd Component_B.Command_3 Value 13
+  endif
+
+  ; Wait for data product 1 to be < 99.
+  waitvalue Component_B.Data_Product_1.Value < 99 ? for 5 ;relative wait
+  cmd Component_A.Command_3 Value 14
+
+  if $WAIT_TIMEOUT == 1
+    ; Timeout
+    cmd Component_B.Command_3 Value 15
+  else
+    cmd Component_B.Command_3 Value 16
+  endif
+
+  ; Test zero timeout.
+  waitvalue Component_B.Data_Product_1.Value < 99 ? for 0 ;relative wait
+  cmd Component_A.Command_3 Value 17
+
+  if $WAIT_TIMEOUT == 1
+    ; Timeout
+    cmd Component_B.Command_3 Value 18
+  else
+    cmd Component_B.Command_3 Value 19
+  endif
+
+  ; Test zero timeout again.
+  waitvalue Component_B.Data_Product_1.Value < 99 ? for 0 ;relative wait
+  cmd Component_A.Command_3 Value 20
+
+  if $WAIT_TIMEOUT == 1
+    ; Timeout
+    cmd Component_B.Command_3 Value 21
+  else
+    cmd Component_B.Command_3 Value 22
+  endif
+endseq

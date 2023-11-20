@@ -1,0 +1,5 @@
+---
+description: This is a set of unit tests for the Background Component.
+tests:
+  - name: Test_Nominal
+    description: This test tests the nominal behavior of the component.

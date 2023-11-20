@@ -1,0 +1,11 @@
+---
+description: This is a packed record that holds information about the validity of a particular slot.
+fields:
+  - name: Slot
+    description: The slot number.
+    type: Sequence_Store_Types.Slot_Number
+    format: U16
+  - name: Validity
+    description: The validity of the slot, based on a CRC computation against the CRC in the sequence's header.
+    type: Sequence_Store_Enums.Slot_Valid_Type.E
+    format: E8

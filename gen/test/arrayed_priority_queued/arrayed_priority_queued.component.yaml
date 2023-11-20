@@ -1,0 +1,32 @@
+---
+description: This is a priority queued arrayed invokee test component.
+execution: either
+connectors:
+  - description: The output connector
+    type: Aa.T
+    kind: send
+  - description: The output connector
+    type: Bb.T
+    kind: send
+  - description: The input connector
+    type: Aa.T
+    kind: recv_async
+    priority: 1
+    count: 0
+  - description: The input connector
+    type: Bb.T
+    kind: recv_async
+    priority: 2
+    count: 4
+  - description: Runs the scheduled activity
+    type: Basic_Types.Byte
+    name: Sched_Recv_Sync
+    kind: recv_sync
+  - description: The send connector 1 for unit testing.
+    name: Aa_Packed_Connector_Index_T_Send
+    type: Packed_Connector_Index.T
+    kind: send
+  - description: The send connector 2 for unit testing.
+    name: Bb_Packed_Connector_Index_T_Send
+    type: Packed_Connector_Index.T
+    kind: send

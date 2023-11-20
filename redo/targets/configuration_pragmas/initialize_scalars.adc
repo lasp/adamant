@@ -1,0 +1,5 @@
+-- Turn on initialize scalars. This generates code to set all uninitialized variables to
+-- invalid values. This can be useful in finding bugs due to uninitialized variables during
+-- development. This pragma should not be enabled for production, as it can cause the binary
+-- size and execution time to increase substantially for the program.
+pragma Initialize_Scalars;

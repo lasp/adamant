@@ -1,0 +1,7 @@
+---
+description: Single component record for holding a signed byte
+fields:
+  - name: Value
+    description: The signed byte
+    type: Interfaces.Integer_8
+    format: I8

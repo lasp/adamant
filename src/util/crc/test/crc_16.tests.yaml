@@ -1,0 +1,7 @@
+---
+description: This is a unit test suite for the crc 16 algorithm
+tests:
+  - name: Test_Crc
+    description: This test sends in a bit pattern and validates that the correct CRC is returned.
+  - name: Test_Crc_Seeded
+    description: This test sends in a bit scattered pattern and validates that the correct CRC is returned.

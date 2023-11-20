@@ -1,0 +1,14 @@
+---
+events:
+  - name: Socket_Connected
+    description: The socket was successfully connected on the host and port provided.
+    param_type: Socket_Address.T
+  - name: Socket_Not_Connected
+    description: The socket connection failed on the host and port provided
+    param_type: Socket_Address.T
+  - name: Packet_Send_Failed
+    description: Failed to send a packet over the socket because it has an invalid CCSDS header.
+    param_type: Ccsds_Primary_Header.T
+  - name: Packet_Recv_Failed
+    description: Failed to receive a packet over the socket because it has an invalid CCSDS header.
+    param_type: Ccsds_Primary_Header.T

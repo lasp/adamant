@@ -1,0 +1,19 @@
+---
+events:
+  - name: Log_Attempt_Failed
+    description: A log attempt failed with the following status.
+    param_type: Logger_Error.T
+  - name: Log_Disabled
+    description: The log was disabled. No more data will be stored.
+    param_type: Circular_Buffer_Meta.T
+  - name: Log_Enabled
+    description: The log was enabled. Data will now be stored.
+  - name: Log_Info_Update
+    description: The current meta data of the log was requested.
+    param_type: Logger_Info.T
+  - name: Dumping_Log_Memory
+    description: Currently dumping log memory from the following location.
+    param_type: Memory_Region.T
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T

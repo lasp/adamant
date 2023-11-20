@@ -1,0 +1,7 @@
+---
+description: This is a set of unit tests for the Queued Component.
+tests:
+  - name: Test_Nominal
+    description: This test tests the nominal behavior of the component.
+  - name: Test_Queue_Overflow
+    description: This test makes sure an assertion is thrown by the component if the component's queue overflows.

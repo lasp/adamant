@@ -1,0 +1,9 @@
+---
+description: Data products for the Memory Stuffer component.
+data_products:
+  - name: Armed_State
+    description: The current armed/unarmed state of the component.
+    type: Packed_Arm_State.T
+  - name: Armed_State_Timeout
+    description: The time remaining (in ticks) until the armed state expires.
+    type: Packed_Arm_Timeout.T

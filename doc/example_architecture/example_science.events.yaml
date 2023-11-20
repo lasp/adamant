@@ -1,0 +1,6 @@
+---
+events:
+  - name: Science_Started
+    description: Science collection has started.
+  - name: Science_Stopped
+    description: Science collection has stopped.

@@ -1,0 +1,38 @@
+\input{common_packages.tex}
+
+\begin{document}
+
+\title{\textbf{Fault Responses Generator} \\
+\large\textit{Autocoder User Guide}}
+\date{}
+\maketitle
+
+\section{Description}
+
+The purpose of this generator is to provide a user friendly way of defining the command responses to system faults handled by the Fault Correction component. The generator takes a YAML model file as input which specifies fault, the command response (and associated command arguments) and some configuration parameters for handling the fault response.
+
+Note the example shown in this documentation is used in the unit test of this component so that the reader of this document can see it being used in context. Please refer to the unit test code for more details on how this generator can be used.
+
+\section{Schema}
+
+The following pykwalify schema is used to validate the input YAML model. The schema is commented to show what each of the available YAML keys are and what they accomplish. Even without knowing the specifics of pykwalify schemas, you should be able to gleam some knowledge from the file below.
+
+\yamlcodef{../schemas/fault_responses.yaml}
+
+\section{Example Input}
+
+The following is an example fault responses input yaml file. Model files must be named in the form \textit{optional\_name.assembly\_name.fault\_responses.yaml} where \textit{optional\_name} is the specific name of the fault response set and is only necessary if there is more than one Fault Correction component instances in an assembly. The \textit{assembly\_name} is the assembly which the fault responses will be used, and the rest of the model file name must remain as shown. Generally this file is created in the same directory or near to the assembly model file. This example adheres to the schema shown in the previous section, and is commented to give clarification.
+
+\yamlcodef{../../test/test_assembly/test_assembly.fault_responses.yaml}
+
+As can be seen, specifying the fault responses consists of listing the faults and corresponding command responses. Each fault may be enabled or disable at startup. Each fault may be configured as latching (meaning a command response is only sent out the first time that fault has been received by that component) and non-latching (meaning a command response is sent out each time a fault is received by the component. A latched fault can be cleared by command in the Fault Correction component.
+
+\section{Example Output}
+
+The example input shown in the previous section produces the following Ada output. The \texttt{Fault\_Response\_List} variable should be passed into the Fault Correction component's \texttt{Init} procedure during assembly initialization.
+
+The main job of the generator in this case was to verify the input YAML for validity and then to translate the data to an Ada data structure for use by the component.
+
+\adacodef{../../test/test_assembly/build/src/test_assembly_fault_responses.ads}
+
+\end{document}

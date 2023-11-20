@@ -1,0 +1,16 @@
+{% extends "/base/table.html" %}
+{% block title %}<b>{{ name }}</b> Unit Test Suite{% if component %} for the <b>{{ component.name }}</b> Component{% endif %}{% endblock %}
+{% block head %}
+      <tr>
+          <th scope="col">Test Name</th>
+          <th scope="col">Description</th>
+      </tr>
+{% endblock %}
+{% block body %}
+{% for test in tests.values() %}
+      <tr>
+        <td style='font-family: "Courier New", Courier, monospace;'><b>{{ test.name }}</b></td>
+        <td>{% if test.description %}{{ printMultiLine(test.description, '') }}{% endif %}</td>
+      </tr>
+{% endfor %}
+{% endblock %}

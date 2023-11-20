@@ -1,0 +1,10 @@
+---
+description: This component converts Adamant packets into CCSDS packets, synchronously, and sends them out. Using the CCSDS standard is not required by Adamant. The primary purpose of this component is to add CCSDS packet downlink within an assembly. The conversion process includes calculating a 16-bit CRC which is appended to the end of the CCSDS packet data. Emitted CCSDS packets also include a secondary header with an 8 byte timestamp.
+execution: passive
+connectors:
+  - description: The packet receive connector.
+    type: Packet.T
+    kind: recv_sync
+  - description: The ccsds send connector.
+    type: Ccsds_Space_Packet.T
+    kind: send

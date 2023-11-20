@@ -1,0 +1,13 @@
+---
+description: This is a unit test suite for the Task Watchdog.
+tests:
+  - name: Test_Received_Pet
+    description: This unit test is here to make sure arrayed connectors work as expected.
+  - name: Test_Watchdog_Petter_Check_Command
+    description: This unit test tests the commanding to change the state of the component for checking upstream watchdog pets.
+  - name: Test_Watchdog_Action_Command
+    description: This unit test tests the commanding to change the action given the index of the petter in which to change.
+  - name: Test_Watchdog_Limit_Command
+    description: This unit test tests the commanding to change the limit for a particular index to a new specified value.
+  - name: Test_Invalid_Command
+    description: This unit test makes sure that an invalid command is handled gracefully.

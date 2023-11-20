@@ -1,0 +1,15 @@
+The following section outlines any complex data types used in the component in alphabetical order. This includes packed records and packed arrays that might be used as connector types, command arguments, event parameters, etc..
+\vspace{5mm}
+
+%- if complex_types_alpha
+%- for type, model in complex_types_alpha.items()
+\large{\textbf{\VAR{model.name|e}.T:}}\normalsize
+
+\vspace{2mm}
+\input{\VAR{get_src_dir(model.full_filename)}/build/tex/\VAR{model.model_name}.tex}
+
+%- endfor
+%- else
+\vspace{2mm}
+\textit{No complex types found in component.}
+%- endif

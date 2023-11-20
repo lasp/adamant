@@ -1,0 +1,13 @@
+---
+description: A register value packed record.
+fields:
+  - name: Address
+    description: The address of the register.
+    type: System.Address
+    format: U32
+    skip_validation: True
+    byte_image: True
+  - name: Value
+    description: The value to write to or read from the register
+    type: Interfaces.Unsigned_32
+    format: U32

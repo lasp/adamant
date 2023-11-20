@@ -1,0 +1,32 @@
+%- if description
+\VAR{description|e}
+\\
+%- endif
+
+%- if preamble 
+\\
+\textit{Preamble (inline Ada definitions):}\\
+\texttt{\VAR{preamble|e}}
+\\
+%- endif
+\\
+%- for enum in enums.values()
+\textbf{\texttt{\VAR{enum.name|e}}}:
+%- if enum.description
+\VAR{enum.description|e}
+%- endif
+\captionof{table}{\VAR{enum.name|e} Literals: }
+\begin{xltabular}{\textwidth}{ | l | c | X |}
+  \hline
+  \textbf{Name} & \textbf{Value} & \textbf{Description} \\ \hline
+%- for literal in enum.literals
+  \texttt{\url{\VAR{literal.name}}} &
+  \texttt{\url{\VAR{literal.value}}} &
+%- if literal.description
+  \texttt{\VAR{literal.description|e}} 
+%- endif
+  \\ \hline
+%- endfor
+\end{xltabular}
+\vspace{5mm} %5mm vertical space
+%- endfor

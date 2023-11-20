@@ -1,0 +1,27 @@
+{% extends "/base/table.html" %}
+{% block title %}<b>{{ name }}</b> Packets{% endblock %}
+{% block info %}
+      <b>Summary:</b>
+      <ul>
+        <li><b>Number of Components with Packets:</b> {{ component_kind_dict['packets']|length }}</li>
+        <li><b>Total Number of Packets:</b> {{ packets|length }}</li>
+      </ul>
+{% endblock %}
+{% block head %}
+      <tr>
+          <th scope="col">Packet Id</th>
+          <th scope="col">Packet Name</th>
+          <th scope="col">Type</th>
+          <th scope="col">Description</th>
+      </tr>
+{% endblock %}
+{% block body %}
+{% for id, p in packets.items() %}
+      <tr>
+        <td style='font-family: "Courier New", Courier, monospace;'>0x{{ '%04x' % id }} ({{ p.id }})</b></td>
+        <td style='font-family: "Courier New", Courier, monospace;'><a class="record_link" href="{{ name|lower }}_packets/{{ p.name|lower }}.html"><b>{{ p.full_name }}</b></a></td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{% if p.type %}{% if p.type_model %}<a class="record_link" href="../../{{ p.type_model.get_src_dir_from(get_src_dir(full_filename)) }}/build/html/{{ p.type_package.lower() }}.html">{% endif %}{{ p.type }}{% if p.type_model %}</a>{% endif %}{% else %}<i>Undefined</i>{% endif %}</td>
+        <td>{% if p.description %}{{ printMultiLine(p.description, '') }}{% endif %}</td>
+      </tr>
+{% endfor %}
+{% endblock %}

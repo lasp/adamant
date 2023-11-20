@@ -1,0 +1,19 @@
+---
+description: These are enumerations defined for the B.A.D. Data Parser.
+enums:
+  - name: Watchdog_Enabled_State
+    description: The state for if each watchdog is enabled or disabled for checking
+    literals:
+      - name: Disabled
+        value: 0
+      - name: Enabled
+        value: 1
+  - name: Watchdog_Action_State
+    description: The state for if each watchdog for which action it should take.
+    literals:
+      - name: Disabled
+        value: 0
+      - name: Warn
+        value: 1
+      - name: Error_Fault
+        value: 2

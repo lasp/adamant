@@ -1,0 +1,9 @@
+---
+description: Packed record which holds information about an invalid virtual memory region.
+fields:
+  - name: Invalid_Region
+    description: The memory region that was deemed invalid to operate on.
+    type: Virtual_Memory_Region.T
+  - name: Managed_Region
+    description: The memory region managed by the component that the invalid region was compared against.
+    type: Virtual_Memory_Region_Positive.T

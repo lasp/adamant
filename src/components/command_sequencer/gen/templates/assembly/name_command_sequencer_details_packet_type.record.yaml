@@ -1,0 +1,11 @@
+---
+description: This is an autocoded engine details packet type for a Command Sequencer component.
+fields:
+  - name: Engine_Details
+    description: Details for the engine.
+    type: Engine_Details_Type.T
+{% for entry in range(0, num_command_sequencer_engine_stack_size) %}
+  - name: Stack_Entry_{{ entry }}_Details
+    description: "The detailed state of the engine stack entry {{ entry }}."
+    type: Sequence_Details_Type.T
+{% endfor %}

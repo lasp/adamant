@@ -1,0 +1,36 @@
+The table below shows the faults for the \VAR{prettyname|e} assembly.
+
+%- if faults 
+\captionof{table}{\VAR{prettyname|e} Faults}
+{\renewcommand{\arraystretch}{2.2} %<- modify value to suit your needs
+\begin{xltabular}{\textwidth}{ | l | X | X | }
+  \hline
+  \textbf{Fault ID} & \textbf{Fault Name} & \textbf{Parameter Type} \\ \hline
+%- for id, fault in faults.items()
+  \texttt{0x\VAR{"%04x" % id } (\VAR{ fault.id })} &
+  \texttt{\url{\VAR{fault.suite.component.instance_name}.\VAR{fault.name}}} &
+%- if fault.type
+  \texttt{\url{\VAR{fault.type}}}
+%- else
+  \texttt{-}
+%- endif
+  \\ \hline
+%- endfor
+\end{xltabular}}
+\vspace{5mm} %5mm vertical space
+
+Fault Descriptions:
+\begin{spaceditemize}
+%- for id, fault in faults.items()
+  \item \textbf{\texttt{\url{\VAR{fault.suite.component.instance_name}.\VAR{fault.name}}}} -
+%- if fault.description
+    \VAR{fault.description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+%- else 
+\par The \VAR{prettyname|e} assembly has no faults.
+%- endif

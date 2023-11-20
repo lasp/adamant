@@ -1,0 +1,26 @@
+---
+description: A packed record for the str set instruction.
+fields:
+  - name: Opcode
+    description: Instruction code
+    type: Basic_Types.Byte
+    format: U8
+  - name: Pad1
+    description: Padding
+    type: Basic_Types.Byte
+    format: U8
+  - name: Pad2
+    description: Padding
+    type: Basic_Types.Byte
+    format: U8
+  - name: Pad3
+    description: Padding
+    type: Basic_Types.Byte
+    format: U8
+  - name: Var_Info
+    description: An area for information about the encoded variable. See var_record.record.yaml.
+    type: Var_Record.T
+  - name: Encoded_String
+    description: A 64-byte string buffer, that contains an encoded string literal.
+    type: Seq_Types.Seq_String
+    format: U8x64

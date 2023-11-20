@@ -1,0 +1,6 @@
+---
+description: Packets for the CCSDS Subpacket Extractor component.
+packets:
+  - name: Error_Packet
+    type: Ccsds_Space_Packet.T
+    description: This packet contains a CCSDS packet that was dropped due to error.

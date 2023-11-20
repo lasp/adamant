@@ -1,0 +1,7 @@
+---
+description: The System Time component is a servicing component which provides the system time in GPS format to any component who requests it. Internally, the system time is provided by the Ada.Real_Time library.
+execution: passive
+connectors:
+  - description: The system time is provided via this connector.
+    return_type: Sys_Time.T
+    kind: return

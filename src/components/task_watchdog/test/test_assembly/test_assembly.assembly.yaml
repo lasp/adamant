@@ -1,0 +1,43 @@
+---
+description: This is an assembly for testing the Task Watchdog component.
+with:
+  - Test_Assembly_Task_Watchdog_List
+########################################
+components:
+########################################
+  - type: Test_Component_1
+    name: Component_A
+  - type: Test_Component_2
+    name: Component_B
+  # - type: Test_Component_2
+  #   name: Component_B_Pet_2
+  - type: Task_Watchdog
+    priority: 24
+    stack_size: 50000
+    secondary_stack_size: 15000
+    init:
+      - "Task_Watchdog_Entry_Init_List => Test_Assembly_Task_Watchdog_List.Task_Watchdog_Entry_Init_List"
+    init_base:
+      - "Pet_T_Recv_Sync_Count => 3"
+connections:
+  - from_component: Component_A
+    from_connector: Pet_T_Send
+    to_component: Task_Watchdog_Instance
+    to_connector: Pet_T_Recv_Sync
+    to_index: 1
+  - from_component: Component_B
+    from_connector: Pet_1_T_Send
+    to_component: Task_Watchdog_Instance
+    to_connector: Pet_T_Recv_Sync
+    to_index: 2
+  - from_component: Component_B
+    from_connector: Pet_2_T_Send
+    to_component: Task_Watchdog_Instance
+    to_connector: Pet_T_Recv_Sync
+    to_index: 3
+  # - from_component: Parameters_Instance
+  #   from_connector: Parameter_Update_T_Provide
+  #   from_index: 3
+  #   to_component: Component_C
+  #   to_connector: Parameter_Update_T_Modify
+    # Leave connector 4 unconnected to test unconnected connectors.

@@ -1,0 +1,50 @@
+---
+# This schema describes the yaml format for the task watchdog list of tasks that have a watchdog that needs to be pet.
+type: map
+mapping:
+  description:
+    type: str
+    required: False
+
+  # List of tasks for the task watchdog component.
+  petters:
+    seq:
+      - type: map
+        mapping:
+          # The optional name of the connection petter used to name faults and data products related to the petter.
+          name:
+            type: str
+            required: False
+          # Name of the component instance connector that contains a watchdog to pet
+          connector_name:
+            type: str
+            required: True
+          # Description of the component watchdog
+          description:
+            type: str
+            required: False
+          # The number of ticks that go by without a pet before action needs to be taken.
+          # Must be at least a value of 1 to 2^16 - 2
+          limit:
+            type: int
+            range:
+              min: 1
+              max: 65534
+            required: True
+          # Determines what action to take if the watchdog fails
+          action:
+            type: str
+            enum: ['disabled', 'warn', 'error_fault']
+            required: False
+          # If the action has the potential for a fault, then an id must be provided
+          fault_id:
+            type: int
+            required: False
+          # Determines if the petting of the watchdog stops if it shows incorrect behavior
+          critical:
+            type: bool
+            required: True
+    # A task watchdog must have at least one task to pet
+    range:
+      min: 1
+    required: True

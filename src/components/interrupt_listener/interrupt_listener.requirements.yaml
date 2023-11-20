@@ -1,0 +1,6 @@
+---
+description: The requirements for the Interrupt Listener component are specified below.
+requirements:
+  - text: The component shall attach to a single, user-defined interrupt.
+  - text: When an interrupt is received, the component shall pass a user-defined data type to a user-defined custom interrupt handler.
+  - text: The component shall contain a connector which returns the calling component the latest user-defined interrupt data.

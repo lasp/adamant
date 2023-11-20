@@ -1,0 +1,7 @@
+---
+description: This is a unit test suite for the Connector Queuer.
+tests:
+  - name: Test_Queued_Call
+    description: This unit test invokes the async connector and makes sure the arguments are passed through asynchronously, as expected.
+  - name: Test_Full_Queue
+    description: This unit test fills the queue and makes sure that dropped messages are reported.

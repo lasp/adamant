@@ -1,0 +1,82 @@
+---
+# This schema describes the yaml format for an assembly view.
+type: map
+mapping:
+  # A description describing what the view shows.
+  description:
+    type: str
+    required: False
+  # You can include a "dot" snippet here to be included at the beginning of the digraph
+  preamble:
+    type: str
+    required: False
+  # You can include a "dot" snippet here to be included at the end of the digraph
+  postamble:
+    type: str
+    required: False
+  layout:
+    type: str
+    enum: ['left-to-right', 'top-to-bottom', 'right-to-left', 'bottom-to-top']
+    required: False
+  # Show switches. Each of these turn on and off things on a view:
+  # By default, if not specified, these are all set to true.
+  show_component_type:
+    type: bool
+    required: False
+  show_component_execution:
+    type: bool
+    required: False
+  show_component_priority:
+    type: bool
+    required: False
+  show_component_name:
+    type: bool
+    required: False
+  show_connector_type:
+    type: bool
+    required: False
+  hide_group_outline:
+    type: bool
+    required: False
+  # A rule which determines how the filters are applied to the assembly.
+  # If not provided, the assumed rule is to "and" all the filters together
+  # in order.
+  rule:
+    type: str
+    required: False
+  # A list of filters to be applied to the assembly model to
+  # limit what is shown in the view.
+  filters:
+    seq:
+      - type: map
+        mapping:
+          # a filter name is required
+          name:
+            type: str
+            required: True
+          # The type of filter to be applied.
+          #   component_name - filter by component names
+          #   component_type - filter by component types
+          #   component_execution - filter by component exucution types (active or passive)
+          #   component_name_context - filter by component name and all it's immediate connections
+          #   component_type_context - filter by component type and all it's immediate connections
+          #   connector_name - filter by connector_names
+          #   connecter_type - filter by connector type
+          #   connecter_kind - filter by connector kinds (recv_async, recv_sync, send, request, service, get, return, provide, modify)
+          type:
+            type: str
+            enum: ['component_name', 'component_name_context', 'component_type', 'component_type_context', 'component_execution', 'connector_name', 'connector_type', 'connector_kind']
+            required: True
+          # Items to include in the view, ie. they are filtered in (white list).
+          include:
+            seq:
+              - type: str
+                unique: True
+            required: False
+          # Items which are excluded from the view, ie. they are filtered out (black list)
+          exclude:
+            seq:
+              - type: str
+                unique: True
+            required: False
+    required: False

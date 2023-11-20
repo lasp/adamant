@@ -1,0 +1,7 @@
+---
+description: The pet datatype is used for servicing a watchdog. Included in this type is a count.
+fields:
+  - name: Count
+    description: The cycle number of the pet.
+    type: Interfaces.Unsigned_32
+    format: U32

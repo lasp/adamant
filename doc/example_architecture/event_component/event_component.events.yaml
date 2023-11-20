@@ -1,0 +1,16 @@
+---
+# Optional - description of event suite
+description: A set of events for the Event Component.
+# Required - list of events included in the event suite
+events:
+    # Required - the name of the event
+  - name: Tick_Received
+    # Optional - a description of the event
+    description: A tick was received by the component.
+    # Optional - the parameter type to include with the event
+    param_type: Tick.T
+  - name: Ten_More_Ticks_Received
+    description: This event is produced for every 10 ticks and includes the total number of ticks received by the component.
+    param_type: Packed_U16.T
+  - name: First_Tick_Received
+    description: This event is produced only when the first tick is received.

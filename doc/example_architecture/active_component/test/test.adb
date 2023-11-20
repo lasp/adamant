@@ -1,0 +1,17 @@
+--------------------------------------------------------------------------------
+-- Active_Component Tests
+--------------------------------------------------------------------------------
+
+with AUnit.Reporter.Text;
+with AUnit.Run;
+with Active_Component_Tests.Implementation.Suite;
+
+procedure Test is
+   -- Create runner for test suite:
+   procedure Runner is new AUnit.Run.Test_Runner (Active_Component_Tests.Implementation.Suite.Get);
+   -- Use the text reporter:
+   Reporter : AUnit.Reporter.Text.Text_Reporter;
+begin
+   -- Run tests:
+   Runner (Reporter);
+end Test;

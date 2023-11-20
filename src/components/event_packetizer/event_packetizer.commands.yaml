@@ -1,0 +1,5 @@
+---
+description: These are the commands for the event packetizer component.
+commands:
+  - name: Send_Packet
+    description: Send a packet out next tick, unless there are no events stored within the component.

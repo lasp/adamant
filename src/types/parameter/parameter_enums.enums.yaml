@@ -1,0 +1,57 @@
+---
+description: These are enumerations that are used in the Adamant parameter system.
+enums:
+  - name: Parameter_Operation_Type
+    description: This enumeration lists the different parameter operations that can be performed.
+    literals:
+      - name: Stage
+        value: 0
+        description: Stage the parameter.
+      - name: Update
+        value: 1
+        description: All parameters are staged, it is ok to update all parameters now.
+      - name: Fetch
+        value: 2
+        description: Fetch the parameter.
+  - name: Parameter_Update_Status
+    description: This status enumerations provides information on the success/failure of a parameter operation.
+    literals:
+      - name: Success
+        value: 0
+        description: Parameter was successfully staged.
+      - name: Id_Error
+        value: 1
+        description: Parameter id was not valid.
+      - name: Validation_Error
+        value: 2
+        description: Parameter values were not successfully validated.
+      - name: Length_Error
+        value: 3
+        description: Parameter length was not correct.
+  - name: Parameter_Table_Operation_Type
+    description: This enumeration lists the different parameter table operations that can be performed.
+    literals:
+      - name: Get
+        value: 0
+        description: Retrieve the current values of the parameters.
+      - name: Set
+        value: 1
+        description: Set the current values of the parameters.
+  - name: Parameter_Table_Update_Status
+    description: This status enumerations provides information on the success/failure of a parameter table update.
+    literals:
+      - name: Success
+        value: 0
+        description: Parameter was successfully staged.
+      - name: Length_Error
+        value: 1
+        description: Parameter table length was not correct.
+      - name: Crc_Error
+        value: 2
+        description: The computed CRC of the table does not match the stored CRC.
+      - name: Parameter_Error
+        value: 3
+        description: Failed to fetch or update an individual parameter within a component.
+      - name: Dropped
+        value: 4
+        description: The operation could not be performed because it was dropped from a full queue.

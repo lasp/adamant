@@ -1,0 +1,10 @@
+---
+description: This is a simple test component.
+execution: passive
+connectors:
+  - description: The invoker connector
+    type: Cc.T
+    kind: send
+  - description: The invokee connector
+    type: Cc.T
+    kind: recv_sync

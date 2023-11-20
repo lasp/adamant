@@ -1,0 +1,4 @@
+---
+description: The requirements for the Memory Copier component are specified below.
+requirements:
+  - text: The component shall copy a memory region from one memory store to another on command.

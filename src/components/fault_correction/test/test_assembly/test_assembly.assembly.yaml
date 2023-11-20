@@ -1,0 +1,28 @@
+---
+description: This is an assembly for testing the Fault Correction component.
+with:
+  - Test_Assembly_Fault_Responses
+########################################
+components:
+########################################
+  - type: Test_Component
+    name: Component_A
+  - type: Test_Component
+    name: Component_B
+  - type: Test_Component
+    name: Component_C
+  - type: Fault_Correction
+    init:
+      - "Fault_Response_Configurations => Test_Assembly_Fault_Responses.Fault_Response_List"
+    priority: 24
+    stack_size: 50000
+    secondary_stack_size: 15000
+    init_base:
+      - "Queue_Size => 20 * Fault_Correction_Instance.Get_Max_Queue_Element_Size"
+connections:
+  # Dummy connection. We need one to make schema happy, but it doesn't
+  # affect testing.
+  - from_component: Fault_Correction_Instance
+    from_connector: Command_T_Send
+    to_component: Component_A
+    to_connector: Command_T_Recv_Sync

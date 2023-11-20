@@ -1,0 +1,30 @@
+---
+description: |
+  The memory dumper component is an active component that can dump memory regions or report the CRC of memory regions by command. It reports an error if an action is requested on a memory region outside of the address space that it is configured with during initialization.
+execution: active
+init:
+  description: This component requires a list of memory regions which it can dump and CRC.
+  parameters:
+    - name: memory_Regions
+      type: Memory_Manager_Types.Memory_Region_Array_Access
+      description: An access to a list of memory regions.
+connectors:
+  - description: This is the command recieve connector.
+    type: Command.T
+    kind: recv_async
+  - description: This connector is used to register and respond to the component's commands.
+    type: Command_Response.T
+    kind: send
+  - description: The memory dump connector.
+    name: Memory_Dump_Send
+    type: Memory_Packetizer_Types.Memory_Dump
+    kind: send
+  - description: The data product invoker connector
+    type: Data_Product.T
+    kind: send
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get

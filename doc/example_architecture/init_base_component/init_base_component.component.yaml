@@ -1,0 +1,17 @@
+---
+execution: passive
+description: This is an example component with an base package initialization.
+connectors:
+  - type: Tick.T
+    # Any component with an asynchronous connector requires an internal queue.
+    # The sizing of this queue (in bytes) is done during the initialization
+    # of the base package in the init_base procedure.
+    kind: recv_async
+    description: This connector provides the schedule tick for the component.
+  - type: Packet.T
+    kind: send
+    description: This connector is used to send out a telemetry packet.
+    # A count of zero specifies this connector as "unconstrained" it must
+    # be constrained at runtime by allocating its size on the heap during
+    # initialization. This is achieved in the init_base procedure.
+    count: 0

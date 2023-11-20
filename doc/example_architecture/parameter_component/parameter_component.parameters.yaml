@@ -1,0 +1,19 @@
+---
+# Optional - description of parameter suite
+description: A set of parameters for the Parameter Component.
+# Required - list of parameters included in the parameter suite
+parameters:
+    # Required - the name of the parameter
+  - name: Start_Count
+    # Optional - a description of the parameter
+    description: The value to start counting at.
+    # Required - the parameter type
+    type: Packed_U16.T
+    # Required - the default value of the parameter. This is the value that
+    # is used until the component's parameters have been set by an external
+    # parameter managing component.
+    default: "(Value => 0)"
+  - name: Hello_World_Value
+    description: The value of count at which the Hello, World! string is printed.
+    type: Packed_U16.T
+    default: "(Value => 16)"

@@ -1,0 +1,15 @@
+The following section outlines any complex data types used in the assembly in alphabetical order. This includes packed records and packed arrays that might be used as connector types, command arguments, or event parameters.
+\vspace{5mm}
+
+%- if complex_types_alpha
+%- for type in complex_types_alpha.values()
+\large{\textbf{\VAR{type.name|e}.T:}}\normalsize
+
+\vspace{2mm}
+\input{\VAR{get_src_dir(type.full_filename)}/build/tex/\VAR{type.name.lower()}.tex}
+
+%- endfor
+%- else
+\vspace{2mm}
+\textit{No complex types found in component.}
+%- endif

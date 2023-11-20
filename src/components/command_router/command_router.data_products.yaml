@@ -1,0 +1,25 @@
+---
+description: Data products for the Command Router component.
+data_products:
+  - name: Command_Receive_Count
+    description: The number of commands received by the component.
+    type: Packed_U16.T
+  - name: Command_Success_Count
+    description: The number of commands that successfully executed.
+    type: Packed_U16.T
+  - name: Command_Failure_Count
+    description: The number of commands that failed to execute.
+    type: Packed_U16.T
+  - name: Last_Received_Command
+    description: The ID of the last received command by the command router.
+    type: Command_Id.T
+  - name: Last_Successful_Command
+    description: The ID of the last successful command routed by the command router.
+    type: Command_Id.T
+  - name: Last_Failed_Command
+    description: The ID and status of the last failed command routed by the command router.
+    type: Command_Id_Status.T
+  - name: Noop_Arg_Last_Value
+    description: The last value sent with the Noop_Arg command. This data product can be useful for testing purposes.
+    type: Command_Router_Arg.T
+

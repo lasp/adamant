@@ -1,0 +1,22 @@
+---
+execution: passive
+# Optional - description of component
+description: This is the example component.
+# Required - List of Connectors
+connectors:
+  ######################
+  # Invokee Connectors
+  ######################
+    # Required - the datatype to be passed along connector
+  - type: Tick.T
+    # Required - the kind of connector
+    kind: send
+    # Optional - description of connector
+    description: This connector provides the schedule tick for the component.
+  ######################
+  # Invoker Connectors
+  ######################
+  - return_type: Sys_Time.T
+    kind: return
+  - type: Packet.T
+    kind: recv_sync

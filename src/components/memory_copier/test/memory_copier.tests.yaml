@@ -1,0 +1,17 @@
+---
+description: This is a unit test suite for the Memory Copier component.
+tests:
+  - name: Test_Nominal_Copy
+    description: This unit test tests the nominal copy command from the source to the destination.
+  - name: Test_Copy_Failure
+    description: This unit test tests the component's response to a failed copy.
+  - name: Test_Copy_Timeout
+    description: This unit test tests the component's response when the destination component does not respond to a copy command before a timeout occurs.
+  - name: Test_Memory_Unavailable
+    description: This unit test tests the component's response when the source component is unavailable for copy.
+  - name: Test_Length_Mismatch
+    description: This unit test tests the component's response when source component returns a region that is too small.
+  - name: Test_Full_Queue
+    description: This unit test tests a command being dropped due to a full queue.
+  - name: Test_Invalid_Command
+    description: This unit test exercises that an invalid command throws the appropriate event.

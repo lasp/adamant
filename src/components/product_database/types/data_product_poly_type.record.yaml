@@ -1,0 +1,18 @@
+---
+description: Data product poly type, for dumping arbitrary data products.
+with:
+  - Basic_Types
+fields:
+  - name: Time
+    description: The timestamp for the data product item.
+    type: Sys_Time.T
+  - name: Id
+    description: The data product identifier
+    type: Data_Product_Types.Data_Product_Id
+    format: U16
+  - name: Data
+    description: The polymorphic type.
+    type: Basic_Types.Poly_32_Type
+    format: U8x4
+    skip_validation: True
+    byte_image: True

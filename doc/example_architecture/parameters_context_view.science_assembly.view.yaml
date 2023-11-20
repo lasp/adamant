@@ -1,0 +1,8 @@
+---
+description: This is a parameters view.
+show_component_priority: False
+filters:
+  - name: include_component_types
+    type: component_name_context
+    include:
+      - parameters_Instance

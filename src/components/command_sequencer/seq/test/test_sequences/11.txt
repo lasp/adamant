@@ -1,0 +1,4 @@
+seq 11
+	declare var u32
+	set $var = seq_tlm_16
+endseq

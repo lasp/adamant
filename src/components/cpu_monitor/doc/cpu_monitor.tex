@@ -1,0 +1,62 @@
+\input{common_packages.tex}
+
+\begin{document}
+
+\title{\textbf{Cpu Monitor} \\
+\large\textit{Component Design Document}}
+\date{}
+\maketitle
+
+\section{Description}
+\input{build/tex/cpu_monitor_description.tex}
+
+\section{Requirements}
+\input{build/tex/cpu_monitor_requirements.tex}
+
+\section{Design}
+
+\subsection{At a Glance}
+\input{build/tex/cpu_monitor_stats.tex}
+
+\subsection{Diagram}
+\begin{figure}[H]
+  \includegraphics[width=1.0\textwidth,center]{../build/eps/cpu_monitor.eps}
+  \caption{Cpu Monitor component diagram.}
+\end{figure}
+
+\subsection{Connectors}
+\input{build/tex/cpu_monitor_connectors.tex}
+
+\subsection{Initialization}
+\input{build/tex/cpu_monitor_init.tex}
+
+\subsection{Commands}
+
+\input{build/tex/cpu_monitor_commands.tex}
+
+\subsection{Events}
+
+\input{build/tex/cpu_monitor_events.tex}
+
+\subsection{Packets}
+
+\input{build/tex/cpu_monitor_packets.tex}
+
+\section{Unit Tests}
+
+\input{build/tex/cpu_monitor_unit_test.tex}
+
+\section{Appendix}
+\subsection{Preamble}
+
+\input{build/tex/cpu_monitor_preamble.tex}
+
+\subsection{Packed Types}
+
+\input{build/tex/cpu_monitor_types.tex}
+
+\subsection{Enumerations}
+
+\input{build/tex/cpu_monitor_enums.tex}
+
+\end{document}

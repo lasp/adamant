@@ -1,0 +1,10 @@
+---
+description: This is a simple test component which has a provide-modify connector.
+execution: passive
+connectors:
+  - description: The provider connector
+    kind: provide
+    type: Aa.T
+  - description: The modifier connector
+    kind: modify
+    type: Bb.T

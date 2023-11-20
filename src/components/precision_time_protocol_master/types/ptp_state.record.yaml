@@ -1,0 +1,10 @@
+---
+description: The precision time protocol disable/enable state.
+preamble: |
+  type Ptp_State_Type is (Disabled, Enabled);
+  for Ptp_State_Type use (Disabled => 0, Enabled => 1);
+fields:
+  - name: State
+    description: Is precision time protocol enabled or disabled.
+    type: Ptp_State_Type
+    format: E8

@@ -1,0 +1,13 @@
+---
+description: This is a unit test suite for the Rate Group component.
+tests:
+  - name: Nominal
+    description: This unit test excersizes Rate Group component through a nominal scenario.
+  - name: Cycle_Slip_Trigger
+    description: This unit test triggers a cycle slip and makes sure that the Rate Group component reports it.
+  - name: Time_Reporting
+    description: This unit test makes sure that the max execution and max cycle time are reported correctly.
+  - name: Full_Queue
+    description: This unit test makes sure that when a component has a full queue during scheduling the correct event is thrown.
+  - name: Test_Dropped_Tick
+    description: This unit test makes sure the proper error is thrown when the rate group component's queue gets full.

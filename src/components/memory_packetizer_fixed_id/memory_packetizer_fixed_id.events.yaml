@@ -1,0 +1,11 @@
+---
+events:
+  - name: Memory_Dump_Request_Dropped
+    description: The queue for memory dump requests overflowed and a request to dump memory with the given packet id was dropped.
+    param_type: Packet_Id.T
+  - name: Max_Packet_Rate_Set
+    description: A new maximum rate has been set for the packetizer.
+    param_type: Packets_Per_Period.T
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T

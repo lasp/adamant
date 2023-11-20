@@ -1,0 +1,15 @@
+---
+description: Record for holding information about an invalid parameter
+fields:
+  - name: Id
+    description: The parameter Id received.
+    type: Parameter_Types.Parameter_Id
+    format: U16
+  - name: Errant_Field_Number
+    description: The field that was invalid. 1 is the first field, 0 means unkown field, 2**32 means that the length field of the parameter was invalid.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Errant_Field
+    description: A polymorphic type containing the bad field data, or length when Errant_Field_Number is 2**32.
+    type: Basic_Types.Poly_Type
+    format: U8x8

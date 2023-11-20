@@ -1,0 +1,30 @@
+---
+events:
+  - name: Watchdog_Pet_Checks_Enabled
+    description: Indicates a command was recieved to enable the checks on upstream pets.
+  - name: Watchdog_Pet_Checks_Disabled
+    description: Indicates a command was recieved to disable the checks on upstream pets.
+  - name: Watchdog_Limit_Set
+    description: An event to indicate that the limit was changed by command for a particular index.
+    param_type: Watchdog_Limit_Cmd.T
+  - name: Watchdog_Action_Set
+    description: An event to indicate that the action was changed by command for a particular index.
+    param_type: Watchdog_Action_Cmd.T
+  - name: Watchdog_Limit_Change_Index_Out_Of_Range
+    description: Event indicating there was an error for the index range in the set limit command.
+    param_type: Packed_Connector_Index.T
+  - name: Watchdog_Action_Change_Index_Out_Of_Range
+    description: Event indicating there was an error for the index range in the set limit command.
+    param_type: Packed_Connector_Index.T
+  - name: Watchdog_Action_Change_Invalid_Transition_To_Fault
+    description: Event indicating there was an error trying to set the action to fault. The petter did not have a fault declared in the model so the action cannot be set to fault.
+    param_type: Packed_Connector_Index.T
+  - name: Component_Exceeded_Pet_Limit
+    description: Event to indicate a pet connector has not received a pet within the set limits for that component.
+    param_type: Packed_Connector_Index.T
+  - name: Critical_Task_Not_Petting
+    description: Event to indicate that one or more of our critical tasks have not indicated a pet in the maximum limit of ticks. The hardware watchdog will not be pet in this case.
+    param_type: Packed_Connector_Index.T
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T

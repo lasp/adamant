@@ -1,0 +1,21 @@
+---
+description: This is a packed record that holds information about a sequence load error.
+fields:
+  - name: Load
+    description: The sequence load info.
+    type: Sequence_Load.T
+  - name: Header
+    description: The header of the sequence.
+    type: Sequence_Header.T
+  - name: Stack_Level
+    description: How deep is the current stack usage? This reports the stack level of the currently running sequence.
+    type: Seq_Types.Max_Seq_Num
+    format: U8
+  - name: State
+    description: The running sequence state.
+    type: Seq_Enums.Seq_Runtime_State.E
+    format: E8
+  - name: Sequence_Error_Code
+    description: The error code of the last encountered sequence error.
+    type: Seq_Enums.Seq_Error.E
+    format: E8

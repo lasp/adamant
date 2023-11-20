@@ -1,0 +1,4 @@
+---
+type: Packed_Address.T
+description: An array of packed addresses in big endian. This is sized to easily fit a normal stack trace.
+length: 100

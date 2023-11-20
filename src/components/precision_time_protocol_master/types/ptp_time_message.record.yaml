@@ -1,0 +1,16 @@
+---
+description: Record for the PTP Time Sync Message.
+fields:
+  - name: Message_Type
+    description: Type of message contained in this packet.
+    type: Ptp_Enums.Ptp_Message_Type.E
+    format: E8
+    default: 'Ptp_Enums.Ptp_Message_Type.Sync'
+  - name: Transaction_Count
+    description: Ptp transaction counter. This increments with every sync message.
+    type: Interfaces.Unsigned_16
+    format: U16
+    default: '0'
+  - name: Time_Stamp
+    description: Message time information, meaning depends on message type.
+    type: Sys_Time.T

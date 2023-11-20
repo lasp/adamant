@@ -1,0 +1,5 @@
+---
+description: This is the packet send unit test suite for the Socket Interface Component
+tests:
+  - name: Test_Packet_Send
+    description: This unit makes sure that packets sent through the component's queue are fowarded through the socket.

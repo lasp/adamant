@@ -1,0 +1,10 @@
+---
+description: A passive component which sends ccsds
+execution: either
+connectors:
+  - type: Command.T
+    kind: send
+  - type: Command_Response.T
+    kind: recv_async
+  - type: Command_Response.T
+    kind: recv_sync

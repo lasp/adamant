@@ -1,0 +1,30 @@
+---
+execution: passive
+description: This is the priority queued component.
+connectors:
+  ######################
+  # Invokee Connectors
+  ######################
+  - type: Tick.T
+    kind: recv_sync
+    description: This connector provides the schedule tick for the component.
+  ###################################
+  # Asynchronous Invokee Connectors
+  ###################################
+  - type: Packed_Byte.T
+    kind: recv_async
+    description: This connector receives a single byte asynchronously that is used to populate the outgoing packet. Data received on this connector is considered lower priority than data received on the Packed_U16_T_Recv_Async connector.
+    priority: 1
+  - type: Packed_U16.T
+    kind: recv_async
+    description: This connector receives a 16-bit number asynchronously that is used to populate the outgoing packet. Data received on this connector is considered higher priority than data received on the Packed_Byte_T_Recv_Async connector.
+    priority: 2
+  ######################
+  # Invoker Connectors
+  ######################
+  - return_type: Sys_Time.T
+    kind: get
+    description: This connector is used to fetch the current system time.
+  - type: Packet.T
+    kind: send
+    description: This connector is used to send out a telemetry packet.

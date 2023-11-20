@@ -1,0 +1,7 @@
+---
+description: State value packed for the task watchdog data products
+fields:
+  - name: State
+    description: The state of the watchdog component to check all upstream petters.
+    type: Task_Watchdog_Enums.Watchdog_Enabled_State.E
+    format: E8

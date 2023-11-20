@@ -1,0 +1,21 @@
+---
+description: Events for the Precision Time Protocol Master component.
+events:
+  - name: Unexpected_Message_Type
+    description: Recieved a message of unexpected type, message is sent as parameter.
+    param_type: Ptp_Time_Message.T
+  - name: Unexpected_Transaction_Count
+    description: Recieved a message of unexpected type, message is sent as parameter along with the expected transaction number.
+    param_type: Unexpected_Ptp_Transaction_Count.T
+  - name: Ptp_Enabled
+    description: The PTP has been enabled by command.
+  - name: Ptp_Disabled
+    description: The PTP has been disabled by command.
+  - name: Syncing_Once
+    description: A command was received to complete a single PTP transaction at the next Tick.
+  - name: Queue_Overflowed
+    description: An incoming message was dropped due to the queue overflowing. The queue needs to be made larger.
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T
+

@@ -1,0 +1,9 @@
+---
+description: Data dependencies for the Example Science Component.
+data_dependencies:
+  - name: Sensor_1_Reading
+    description: Sensor data value 1, as input to science processing.
+    type: Packed_U32.T
+  - name: Sensor_2_Reading
+    description: Sensor data value 2, as input to science processing.
+    type: Packed_U32.T

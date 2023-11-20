@@ -1,0 +1,7 @@
+---
+description: A record holding a Positive with a 16-bit range.
+fields:
+  - name: Value
+    description: The 16-bit Positive Integer.
+    type: Basic_Types.Positive_16
+    format: U16

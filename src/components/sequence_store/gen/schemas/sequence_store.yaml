@@ -1,0 +1,27 @@
+---
+# This schema describes the yaml format for a sequence store.
+type: map
+mapping:
+  # Description of the sequence store.
+  description:
+    type: str
+    required: False
+  # List of slots to include in the store.
+  slots:
+    seq:
+      - type: map
+        mapping:
+          # The address of the slot. This can be an address value or reference
+          # a variable within another package.
+          address:
+            type: str
+            required: True
+          # The length of the slot in bytes. This can be an integer or reference
+          # a variable within another package.
+          length:
+            type: str
+            required: True
+    # A  sequence store must have at least one slot.
+    range:
+      min: 1
+    required: True

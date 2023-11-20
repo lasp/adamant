@@ -1,0 +1,19 @@
+---
+description: These are the commands for the logger component.
+commands:
+  - name: Enable
+    description: Enable the logger to start saving data.
+  - name: Disable
+    description: Disable the logger from saving received data.
+  - name: Dump_Log
+    description: Dump the entire log oldest to newest data.
+  - name: Dump_Newest_Data
+    arg_type: Packed_Positive_Length.T
+    description: Dump the newest X bytes of data from the log.
+  - name: Dump_Oldest_Data
+    arg_type: Packed_Positive_Length.T
+    description: Dump the oldest X bytes of data from the log.
+  - name: Dump_Log_Memory
+    description: Dump the entire region of memory associated with the logger from start to finish in memory byte order.
+  - name: Send_Meta_Data_Event
+    description: Send an event out with the meta data of the log.

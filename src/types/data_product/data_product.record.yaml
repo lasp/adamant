@@ -1,0 +1,13 @@
+---
+description: Generic data product packet for holding arbitrary data types
+with:
+  - Basic_Types
+fields:
+  - name: Header
+    description: The data product header
+    type: Data_Product_Header.T
+  - name: Buffer
+    description: A buffer that contains the data product type
+    type: Data_Product_Types.Data_Product_Buffer_Type
+    format: U8x{{ data_product_buffer_size }}
+    variable_length: Header.Buffer_Length

@@ -1,0 +1,13 @@
+---
+description: A simple component which receives commands to help simulate an assembly that has commandable components.
+execution: passive
+connectors:
+  - description: This is the command recieve connector.
+    type: Command.T
+    kind: recv_sync
+  - description: This connector is used to send command responses.
+    type: Command_Response.T
+    kind: send
+  - description: Data products are sent out of this connector.
+    type: Data_Product.T
+    kind: send

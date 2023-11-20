@@ -1,0 +1,14 @@
+---
+description: This is an autocoded summary packet type for a Command Sequencer component.
+fields:
+{% if num_command_sequencer_engines > 0 %}
+{% for engine in range(0, num_command_sequencer_engines) %}
+  - name: Engine_{{ engine }}_Summary
+    description: "A summary of the state of command sequencer Engine {{ engine }}."
+    type: Engine_Summary_Type.T
+{% endfor %}
+{% else%}
+  - name: Dummy_Engine_Summary
+    description: "Placeholder field."
+    type: Engine_Summary_Type.T
+{% endif %}

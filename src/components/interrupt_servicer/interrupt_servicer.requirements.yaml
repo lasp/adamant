@@ -1,0 +1,7 @@
+---
+description: The requirements for the Interrupt Servicer component are specified below.
+requirements:
+  - text: The component shall attach to a single, user-defined interrupt.
+  - text: When an interrupt is received, the component shall pass a user-defined data type to a user-defined custom interrupt handler.
+  - text: When an interrupt is received, the component shall pass the user-defined interrupt data to an attached external component.
+  - text: The component shall contain an internal task on which an external component executes when an interrupt is received.

@@ -1,0 +1,9 @@
+---
+description: This is a unit test suite for the Command Rejector.
+tests:
+  - name: Test_Initialization
+    description: This unit test tests all permutations of initializing the component and makes sure improper initialization results in a runtime assertion.
+  - name: Test_Command_Accept
+    description: This unit test tests that a command not on the reject list is passed along.
+  - name: Test_Command_Reject
+    description: This unit test tests that a command on the reject list is dropped by the component.

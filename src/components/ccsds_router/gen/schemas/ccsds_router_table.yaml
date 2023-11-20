@@ -1,0 +1,54 @@
+---
+# This schema describes the yaml format for a ccsds router table.
+type: map
+mapping:
+  # The name of the component that this router table is being constructed for. This component
+  # must exist in the assembly specified by this file's name otherwise an error will be thrown.
+  # The component's name must be specified so that the generator can verify that any routed
+  # connections in the table actually exist in the assembly.
+  ccsds_router_instance_name:
+    type: str
+    required: True
+  # Description of the table.
+  description:
+    type: str
+    required: False
+  # List of table entries. Each entry is a map between a CCSDS packet's APID and a list of destination
+  # of which to route that packet. At least one destination is required, but "ignore" can be used to
+  # not route a certain packet.
+  table:
+    seq:
+      - type: map
+        mapping:
+          # The APID of the CCSDS packet we intend to route.
+          apid:
+            type: int
+            required: True
+          # The names of the components to route this packet to. Note, this uses the actual name
+          # of the component as found in the assembly. If the component name does not exist, an
+          # error will be thrown. This is a list, and at least one item MUST be specified. If you
+          # do not want to route packets of this APID, then you may list "ignore" here and the
+          # packet will not be routed.
+          destinations:
+            seq:
+              - type: str
+            required: True
+          # Description of this router table entry.
+          description:
+            type: str
+            required: False
+          # The sequence count check mode to perform on this APID. The options are as follows:
+          #
+          #  no_check   - CCSDS packets of this APID will not be checked for sequence count
+          #      warn   - CCSDS packets of this APID will produce a warning event if a packet
+          #               is received with an unexpected (non-incrementing) sequence count
+          #  drop_dupes - the second CCSDS packet of this APID will be dropped if two packets
+          #               in a row are seen with the same APID. Note that 'drop_dupes' also
+          #               implies the same behavior as 'warn' listed above.
+          sequence_check:
+            type: str
+            enum: ['no_check', 'warn', 'drop_dupes']
+            required: False
+    range:
+      min: 1
+    required: True

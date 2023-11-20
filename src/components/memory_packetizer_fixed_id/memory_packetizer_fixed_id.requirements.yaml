@@ -1,0 +1,5 @@
+---
+description: The requirements for the Memory Packetizer Fixed Id are specified below.
+requirements:
+  - text: The component shall receive pointers to contiguous data regions in memory and create packets containing the data stored at this region.
+  - text: The component shall be able to meter the production of packets to not exceed a commandable maximum rate.

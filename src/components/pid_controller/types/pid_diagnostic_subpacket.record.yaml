@@ -1,0 +1,15 @@
+---
+description: This record contains the subpacket definition for the PID controller
+fields:
+  - name: Measured_Angle
+    description: The last measured angle
+    type: Short_Float
+    format: F32
+  - name: Reference_Angle
+    description: The last reference angle
+    type: Short_Float
+    format: F32
+  - name: Current_Out_Angle
+    description: The current output angle to the AW
+    type: Short_Float
+    format: F32

@@ -1,0 +1,5 @@
+---
+events:
+  - name: Rejected_Command
+    description: A command was rejected (dropped) because it was found in the reject list.
+    param_type: Command_Header.T

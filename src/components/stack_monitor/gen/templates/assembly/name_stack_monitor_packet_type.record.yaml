@@ -1,0 +1,24 @@
+---
+description: This is the autocoded packet type for the stack monitor component. It contains stack and secondary stack utilization information for every task in the assembly.
+fields:
+{% if task_list %}
+{% for task in task_list %}
+  - name: {{ task.component_name }}_{{ task.name }}_Primary_Stack_Usage
+    description: The primary stack utilization percentage for the {{ task.component_name }}.{{ task.name }} task.
+    type: Basic_Types.Byte
+    format: U8
+  - name: {{ task.component_name }}_{{ task.name }}_Secondary_Stack_Usage
+    description: The secondary stack utilization percentage for the {{ task.component_name }}.{{ task.name }} task.
+    type: Basic_Types.Byte
+    format: U8
+{% endfor %}
+{% else%}
+  - name: Dummy_Primary_Stack_Usage
+    description: Placeholder.
+    type: Basic_Types.Byte
+    format: U8
+  - name: Dummy_Secondary_Stack_Usage
+    description: Placeholder
+    type: Basic_Types.Byte
+    format: U8
+{% endif %}

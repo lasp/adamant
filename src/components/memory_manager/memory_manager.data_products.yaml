@@ -1,0 +1,12 @@
+---
+description: Data products for the Memory Manager component.
+data_products:
+  - name: Crc_Report
+    description: The last computed CRC by the memory manager component.
+    type: Virtual_Memory_Region_Crc.T
+  - name: Memory_Region_Status
+    description: Status relating whether the memory region is currently allocated or not.
+    type: Memory_Manager_State.T
+  - name: Memory_Location
+    description: Reports the physical start address and length of the virtual memory region allocated to this component.
+    type: Memory_Region.T

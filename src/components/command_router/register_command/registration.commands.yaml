@@ -1,0 +1,6 @@
+---
+description: Special command telling a component to register its command Ids with the Command Router.
+commands:
+  - name: Register_Commands
+    description: The special register command which provides a registration Id to the component.
+    arg_type: Command_Registration_Request.T # registration Id

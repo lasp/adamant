@@ -1,0 +1,33 @@
+%- if unit_tests
+The following section describes the unit test suites written to test the component.
+
+%- for unit_test in unit_tests
+\subsection{\textit{\VAR{unit_test.name|e}} Test Suite}
+
+%- if unit_test.description
+\VAR{unit_test.description|e} \\
+
+%- else
+Below is a description of the individual tests in this test suite.
+%- endif
+\vspace{5mm} %5mm vertical space
+Test Descriptions:
+\begin{spaceditemize}
+%- for test in unit_test.tests.values()
+  \item \textbf{\texttt{\VAR{test.name|e}}} -
+%- if test.description
+    \VAR{test.description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+
+%- endfor
+%- else
+None
+%- endif
+
+
+

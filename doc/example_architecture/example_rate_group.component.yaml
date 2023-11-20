@@ -1,0 +1,11 @@
+---
+description: This component provides a task for passive components to execute on cyclically.
+execution: active
+connectors:
+  - type: Tick.T
+    kind: recv_async
+    description: A periodic tick from the hardware or software timer is received on this connector.
+  - type: Tick.T
+    kind: send
+    count: 5
+    description: Ticks at different frequencies are sent out of this connector.

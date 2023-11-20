@@ -1,0 +1,14 @@
+---
+description: A packed record which holds a sequence to load into a specific engine.
+fields:
+  - name: Engine_Request
+    description: Load the sequence into any available engine or a specific engine.
+    type: Command_Sequencer_Enums.Sequence_Load_Engine_Request_Type.E
+    format: E8
+  - name: Engine_Id
+    description: The destination engine in which to run the sequence.
+    type: Seq_Types.Sequence_Engine_Id
+    format: U8
+  - name: Sequence_Region
+    description: The memory region that holds the sequence.
+    type: Memory_Region.T

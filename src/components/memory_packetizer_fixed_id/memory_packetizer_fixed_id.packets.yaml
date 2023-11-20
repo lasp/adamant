@@ -1,0 +1,5 @@
+---
+description: Packets for the Memory Packetizer Fixed Id component.
+packets:
+  - name: Memory_Dump_Packet
+    description: This packet contains memory dump data from an upstream component.

@@ -1,0 +1,48 @@
+%- if faults
+%- if faults.description
+\VAR{faults.description} \\
+%- else
+\par Below is a list of the faults for the \VAR{prettyname|e} component.
+%- endif
+
+\captionof{table}{\VAR{prettyname|e} Fault}
+\begin{xltabular}{\textwidth}{ | c | l | X | }
+  \hline
+%- if packets.ids
+  \textbf{Global ID} &
+%- else
+  \textbf{Local ID} &
+%- endif
+  \textbf{Fault Name} & \textbf{Parameter Type} \\ \hline
+%- for fault in faults
+%- if faults.ids
+  \texttt{0x\VAR{"%04x" % fault.id } (\VAR{fault.id})} &
+%- else
+  \texttt{0x\VAR{"%04x" % loop.index0} (\VAR{loop.index0})} &
+%- endif
+  \texttt{\url{\VAR{fault.name}}} &
+%- if fault.type
+  \texttt{\url{\VAR{fault.type}}}
+%- else
+  \texttt{-}
+%- endif
+  \\ \hline
+%- endfor
+\end{xltabular}
+\vspace{5mm} %5mm vertical space
+
+Fault Descriptions:
+\begin{spaceditemize}
+%- for fault in faults
+  \item \textbf{\texttt{\VAR{fault.name|e}}} -
+%- if fault.description
+    \VAR{fault.description|e}
+%- else
+    \textit{No description provided.}
+%- endif
+%- endfor
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+%- else
+\par The \VAR{prettyname|e} component has no faults.
+%- endif

@@ -1,0 +1,11 @@
+---
+# Optional - description of unit test suite
+description: This is a set of unit tests for the Oo_Package package.
+# Required - list of tests
+tests:
+    # Required - name of test
+  - name: Test_Init
+    # Optional - descriptiono of test
+    description: This test makes sure the initialization function works as expected.
+  - name: Test_Add
+    description: This test makes sure the addition function works as expected.

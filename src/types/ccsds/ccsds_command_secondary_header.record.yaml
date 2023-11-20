@@ -1,0 +1,18 @@
+---
+description: Record for the LASP-specific command secondary header.
+preamble: |
+  type Function_Code_Type is mod 2**7;
+  type One_Bit_Pad_Type is mod 2**1;
+fields:
+  - name: Reserved
+    description: Reserve bit.
+    type: One_Bit_Pad_Type
+    format: U1
+  - name: Function_Code
+    description: The command function code.
+    type: Function_Code_Type
+    format: U7
+  - name: Checksum
+    description: An 8 bit checksum over the entire command packet
+    type: Interfaces.Unsigned_8
+    format: U8

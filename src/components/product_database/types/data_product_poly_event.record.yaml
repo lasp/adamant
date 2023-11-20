@@ -1,0 +1,14 @@
+---
+description: Data product with 4 byte data buffer.
+with:
+  - Basic_Types
+fields:
+  - name: Header
+    description: The data product header
+    type: Data_Product_Header.T
+  - name: Data
+    description: The polymorphic type.
+    type: Basic_Types.Poly_32_Type
+    format: U8x4
+    skip_validation: True
+    byte_image: True

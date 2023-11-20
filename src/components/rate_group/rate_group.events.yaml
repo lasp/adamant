@@ -1,0 +1,17 @@
+---
+events:
+  - name: Cycle_Slip
+    description: Execution ran long on this cycle.
+    param_type: Cycle_Slip_Param.T
+  - name: Max_Cycle_Time_Exceeded
+    description: A new maximum cycle time was reached. The event parameter is a Tick type with the maximum cycle time as the Time and the cycle count where the maximum cycle was achieved as the Count.
+    param_type: Time_Exceeded.T
+  - name: Max_Execution_Time_Exceeded
+    description: A new maximum execution time was reached. The event parameter is a Tick type with the maximum cycle time as the Time and the cycle count where the maximum cycle was achieved as the Count.
+    param_type: Time_Exceeded.T
+  - name: Component_Has_Full_Queue
+    description: The rate group tried to put a Tick on a component's queue, but the queue was full, so the Tick was dropped.
+    param_type: Full_Queue_Param.T
+  - name: Incoming_Tick_Dropped
+    description: The rate group component's queue is full, so it cannot store the tick coming in. This usually means the rate group is cycle slipping and not running as fast as it needs to.
+    param_type: Tick.T

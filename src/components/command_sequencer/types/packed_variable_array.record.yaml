@@ -1,0 +1,71 @@
+---
+description: This record holds sequence engine arguments that can be prodided to an engine prior to load of a sequence.
+fields:
+  - name: Engine_Id
+    description: The sequence engine.
+    type: Seq_Types.Sequence_Engine_Id
+    format: U8
+  - name: Argument_01
+    description: A 32-bit unsigned integer sequence argument. If the sequence expects this argument to be a type other than an unsigned integer, the unsigned integer value will be interpreted as that type without changing the underlying bit representation.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Argument_02
+    description: A 32-bit unsigned integer sequence argument. If the sequence expects this argument to be a type other than an unsigned integer, the unsigned integer value will be interpreted as that type without changing the underlying bit representation.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Argument_03
+    description: A 32-bit unsigned integer sequence argument. If the sequence expects this argument to be a type other than an unsigned integer, the unsigned integer value will be interpreted as that type without changing the underlying bit representation.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Argument_04
+    description: A 32-bit unsigned integer sequence argument. If the sequence expects this argument to be a type other than an unsigned integer, the unsigned integer value will be interpreted as that type without changing the underlying bit representation.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Argument_05
+    description: A 32-bit unsigned integer sequence argument. If the sequence expects this argument to be a type other than an unsigned integer, the unsigned integer value will be interpreted as that type without changing the underlying bit representation.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Argument_06
+    description: A 32-bit unsigned integer sequence argument. If the sequence expects this argument to be a type other than an unsigned integer, the unsigned integer value will be interpreted as that type without changing the underlying bit representation.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Argument_07
+    description: A 32-bit unsigned integer sequence argument. If the sequence expects this argument to be a type other than an unsigned integer, the unsigned integer value will be interpreted as that type without changing the underlying bit representation.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Argument_08
+    description: A 32-bit unsigned integer sequence argument. If the sequence expects this argument to be a type other than an unsigned integer, the unsigned integer value will be interpreted as that type without changing the underlying bit representation.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Argument_09
+    description: A 32-bit unsigned integer sequence argument. If the sequence expects this argument to be a type other than an unsigned integer, the unsigned integer value will be interpreted as that type without changing the underlying bit representation.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Argument_10
+    description: A 32-bit unsigned integer sequence argument. If the sequence expects this argument to be a type other than an unsigned integer, the unsigned integer value will be interpreted as that type without changing the underlying bit representation.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Argument_11
+    description: A 32-bit unsigned integer sequence argument. If the sequence expects this argument to be a type other than an unsigned integer, the unsigned integer value will be interpreted as that type without changing the underlying bit representation.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Argument_12
+    description: A 32-bit unsigned integer sequence argument. If the sequence expects this argument to be a type other than an unsigned integer, the unsigned integer value will be interpreted as that type without changing the underlying bit representation.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Argument_13
+    description: A 32-bit unsigned integer sequence argument. If the sequence expects this argument to be a type other than an unsigned integer, the unsigned integer value will be interpreted as that type without changing the underlying bit representation.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Argument_14
+    description: A 32-bit unsigned integer sequence argument. If the sequence expects this argument to be a type other than an unsigned integer, the unsigned integer value will be interpreted as that type without changing the underlying bit representation.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Argument_15
+    description: A 32-bit unsigned integer sequence argument. If the sequence expects this argument to be a type other than an unsigned integer, the unsigned integer value will be interpreted as that type without changing the underlying bit representation.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Argument_16
+    description: A 32-bit unsigned integer sequence argument. If the sequence expects this argument to be a type other than an unsigned integer, the unsigned integer value will be interpreted as that type without changing the underlying bit representation.
+    type: Interfaces.Unsigned_32
+    format: U32

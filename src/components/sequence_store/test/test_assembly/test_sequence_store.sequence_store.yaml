@@ -1,0 +1,23 @@
+---
+# Optional - Description of sequence store
+description: This is an example sequence store layout.
+# Required - A list of slots that the store should manage. These
+# slots should not overlap in anyway. Overlap will be checked for
+# within the component Init.
+slots:
+  # Required - Address of first slot. This may be a numerical address
+  # or a reference to a variable defined elsewhere. It is recommended
+  # to use this model in conjunction with the memory_map model to
+  # enforce no overlap.
+  - address: Test_Slots.Slot_0_Memory'Address
+  # Required - Length of first slot. This may be a numerical length
+  # or a reference to a variable defined elsewhere. It is recommended
+  # to use this model in conjunction with the memory_map model to
+  # enforce no overlap.
+    length: Test_Slots.Slot_0_Memory'Length
+  - address: Test_Slots.Slot_1_Memory'Address
+    length: Test_Slots.Slot_1_Memory'Length
+  - address: Test_Slots.Slot_2_Memory'Address
+    length: Test_Slots.Slot_2_Memory'Length
+  - address: Test_Slots.Slot_3_Memory'Address
+    length: Test_Slots.Slot_3_Memory'Length

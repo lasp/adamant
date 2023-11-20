@@ -1,0 +1,9 @@
+---
+description: Data products for the Example Science Component.
+data_products:
+  - name: Science_1_Data
+    description: Science data value 1.
+    type: Packed_F32.T
+  - name: Science_2_Data
+    description: Science data value 2.
+    type: Packed_F32.T

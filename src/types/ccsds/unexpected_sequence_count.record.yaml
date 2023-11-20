@@ -1,0 +1,14 @@
+---
+description: A packed record which holds data related to an unexpected sequence count.
+fields:
+  - name: Ccsds_Header
+    description: The packet identifier
+    type: Ccsds_Primary_Header.T
+  - name: Received_Sequence_Count
+    description: The sequence count received in the ccsds command.
+    type: Interfaces.Unsigned_16
+    format: U16
+  - name: Expected_Sequence_Count
+    description: The sequence count that was expected to see in the command. +1 from the last sequence count received.
+    type: Interfaces.Unsigned_16
+    format: U16

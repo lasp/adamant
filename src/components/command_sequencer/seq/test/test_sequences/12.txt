@@ -1,0 +1,19 @@
+seq 12
+	declare var u32
+	set $var = 5
+	declare zero u32
+	set $zero = 0
+	wait for $var
+
+	set $var = $var + 2
+	cmd seq_cmd_arg Value $var
+
+	set $var = 120000 + 10
+
+	wait until $var
+
+        wait for 0 ; should act as noop
+        wait for $zero ; should act as noop
+
+	cmd seq_cmd_arg Value $var
+endseq

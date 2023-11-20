@@ -1,0 +1,18 @@
+{% extends "/base/table.html" %}
+{% block title %}<b>{{ formatType(model_name) }}</b> Data Product Suite{% endblock %}
+{% block head %}
+      <tr>
+          <th scope="col">Data Product Name</th>
+          <th scope="col">Type</th>
+          <th scope="col">Description</th>
+      </tr>
+{% endblock %}
+{% block body %}
+{% for dp in data_products %}
+      <tr>
+        <td style='font-family: "Courier New", Courier, monospace;'><b>{{ dp.name }}</b></td>
+        <td style='font-family: "Courier New", Courier, monospace;'>{% if dp.type %}{% if dp.type_model %}<a class="record_link" href="../../{{ dp.type_model.get_src_dir_from(get_src_dir(full_filename)) }}/build/html/{{ dp.type_package.lower() }}.html">{% endif %}{{ dp.type }}{% if dp.type_model %}</a>{% endif %}{% else %}-{% endif %}</td>
+        <td>{% if dp.description %}{{ printMultiLine(dp.description, '') }}{% endif %}</td>
+      </tr>
+{% endfor %}
+{% endblock %}

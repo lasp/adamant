@@ -1,0 +1,5 @@
+---
+description: Packets for the Memory Manager.
+packets:
+  - name: Memory_Region_Packet
+    description: This packet contains memory region data.

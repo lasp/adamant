@@ -1,0 +1,57 @@
+---
+description:
+  The Event Limiter is used to limit the number of events in the system for prevention of flooding the system with a single event.
+  The component takes in a range of event IDs which sets up a 1-bit enable/disable state and 3-bit counter for each ID, for a total of 4-bits. Any IDs out of that range will not be limited.
+  Each event counter monitors how many events have been sent through the component, before it limits from a given persistence value that can be set from 1 to 7.
+  Each tick of the system will decrement each of the event counters by 1. At this point, there will be an event issued if any events are at the event limit and the number of events that were dropped. An event listed at the limit does not necessarily mean that any events of that ID were dropped.
+  The component itself can be disabled to allow all events through with no limiting, but will maintain the state of each event for when it is re-enabled.
+  The user also has the ability to dump all the states of the ID range in a packet. Each ID also has the ability to be disabled or enabled, where disabled will not limit events of that ID.
+execution: passive
+with:
+  - Event_Types
+  - Two_Counter_Entry
+init:
+  description:
+  parameters:
+    - name: Event_Id_Start
+      type: Event_Types.Event_Id
+      description: The event ID that begins the range of ids that the component will include for potential limiting of events.
+    - name: Event_Id_Stop
+      type: Event_Types.Event_Id
+      description: The event ID that ends the range of ids that the component will include for potential limiting of events.
+    - name: Event_Disable_List
+      type: Two_Counter_Entry.Event_Id_List
+      description: A list of event IDs that are enabled by default
+      default: "(1 .. 0 => 0)"
+    - name: Event_Limit_Persistence
+      type: Two_Counter_Entry.Persistence_Type
+      description: The inital persistence of the number of events to allow before limiting them between ticks (1 to 7)
+connectors:
+  - description: This is the base tick for the component. Upon reception the component will decrement the count of each ID unless it is already 0. Every tick, an event of what has been filtered will be sent.
+    type: Tick.T
+    kind: recv_sync
+  - description: Events are received synchronously on this connector and checked for the number of events of that ID.
+    type: Event.T
+    kind: recv_sync
+  - description: This is the command receive connector.
+    type: Command.T
+    kind: recv_sync
+  - description: The Event connector to forward on events when the limiting is disabled, unknown events come in, or if the event count is less than the persistence and is enabled for limiting.
+    type: Event.T
+    kind: send
+    name: Event_Forward_T_Send
+  - description: The Event connector to send the events specifc to the component.
+    type: Event.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get
+  - description: This connector is used to register and respond to the component's commands.
+    type: Command_Response.T
+    kind: send
+  - description: The connector for data products
+    type: Data_Product.T
+    kind: send
+  - description: Packet for sending a packet for all the event states.
+    type: Packet.T
+    kind: send

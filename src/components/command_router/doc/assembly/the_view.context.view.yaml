@@ -1,0 +1,5 @@
+---
+description: This view shows the passive context.
+layout: left-to-right
+show_component_priority: False
+postamble: "{ rank=source; Low_Pri_Cmd_Sender, Hi_Pri_Cmd_Sender }"
