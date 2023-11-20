@@ -9,7 +9,7 @@ jobs:
     name: style_all
     runs-on: ubuntu-latest
     container:
-      image: dinkelk/adamant:example-latest
+      image: ghcr.io/lasp/adamant:example-latest
     env:
       INSTALL_DIR: /home/user/env
       ADAMANT_DIR: ${{ github.workspace }}
