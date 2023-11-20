@@ -36,7 +36,7 @@ def throw_exception_with_filename(func):
 # Decorator which catches a model exception and addes
 # a line number if the argument of the function contains
 # an attribue "lc.line" which is the line number attribute
-# of a rout trip loaded yaml dictionary from ruamel.yaml
+# of a round trip loaded yaml dictionary from ruamel.yaml
 def throw_exception_with_lineno(func):
     def inner(*args, **kwargs):
         try:

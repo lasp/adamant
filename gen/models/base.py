@@ -262,7 +262,8 @@ class base(renderable_object, metaclass=abc.ABCMeta):
             warnings.simplefilter("ignore", yaml.error.UnsafeLoaderWarning)
             # with open(self.full_filename, 'r') as stream:
             try:
-                return yaml.load(yaml_text, Loader=yaml.RoundTripLoader)
+                yml = yaml.YAML(typ='rt')
+                return yml.load(yaml_text)
                 # import sys
                 # sys.stderr.write(str(self.data) + "\n")
                 # sys.stderr.write(str(type(self.data)) + "\n")
