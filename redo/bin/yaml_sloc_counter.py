@@ -14,7 +14,8 @@ def _openYaml(yaml_file):
         import warnings
 
         warnings.simplefilter("ignore", yaml.error.UnsafeLoaderWarning)
-        return yaml.load(yaml_text, Loader=yaml.RoundTripLoader)
+        yml = yaml.YAML(typ='rt')
+        return yml.load(yaml_text)
 
     # Open and read the yaml file:
     with open(yaml_file, "r") as f:
