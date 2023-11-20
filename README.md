@@ -15,7 +15,7 @@ Adamant was created to solve two problems:
  1. Provide a technical solution that addresses the unique challenges of spacecraft flight software, with a focus on performance
  2. Allow for direct, verbatim code reuse from project to project to reduce development costs and increase reliability
 
-The framework is used by first creating a model of the software in [YAML](https://yaml.org/) based domain specific language. This model defines a set of components and describes how they are connected together. 
+The framework is used by first creating a model of the software in [YAML](https://yaml.org/)-based domain specific language. This model defines a set of components and describes how they are connected together. 
 
  ![`Adamant Component and Connector Diagram`](doc/img/assembly.png "Adamant Component and Connector Diagram")
 
