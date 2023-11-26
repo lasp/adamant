@@ -1,6 +1,7 @@
 with Interfaces.C;
 pragma Unreferenced (Interfaces.C);
 with Ada.Task_Identification; use Ada.Task_Identification;
+with Ada.Exceptions;
 
 package body Socket is
 
@@ -32,6 +33,7 @@ package body Socket is
    end Is_Ip_Address;
 
    procedure Connect (Self : in out Instance; Addr : in String; Port : in Natural) is
+      use Ada.Exceptions;
       Sock : Socket_Type;
       Channel : Stream_Access;
    begin
@@ -62,10 +64,11 @@ package body Socket is
       Self.Channel := Channel;
       Self.Connected := True;
    exception
-      when Socket_Error =>
+      when Socket_Error | Host_Error =>
          Self.Connected := False;
-      when others =>
-         pragma Assert (False, "Unhandled exception occured while connecting to socket in " & Image (Current_Task));
+      when E : others =>
+         pragma Assert (False, "Unhandled exception occured while connecting to socket in " &
+           Image (Current_Task) & ASCII.LF & Exception_Name (E) & ": " & Exception_Message (E));
    end Connect;
 
    procedure Disconnect (Self : in out Instance) is
