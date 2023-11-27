@@ -28,6 +28,14 @@ Note that many of these checks are annoyingly pedantic, but this helps ensure un
 
 Once the pull request is passing all tests and checks and has been approved by a maintainer it will be merged into the Adamant repository!
 
+## Ownership
+
+We abide by the [GitHub Terms of Service](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service#6-contributions-under-repository-license) which states:
+
+> Whenever you add Content to a repository containing notice of a license, you license that Content under the same terms, and you agree that you have the right to license that Content under those terms.
+
+In short, you will own the copyright to the portion of the code that you modify, and that code will be licensed under the Apache-2.0 license.
+
 ## Questions?
 
 Ask using the project's [discussions](https://github.com/lasp/adamant/discussions).
