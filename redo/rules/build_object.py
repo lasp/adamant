@@ -298,7 +298,7 @@ def _run_gprbuild_command(build_target_instance, sources_to_compile, source_depe
     # Run the compile command in .gpr directory:
     cwd = os.getcwd()
     os.chdir(gpr_project_file_dir)
-    shell.run_command_suppress_output(compile_cmd)
+    shell.run_command(compile_cmd)
     os.chdir(cwd)
 
 
