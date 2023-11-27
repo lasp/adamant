@@ -44,6 +44,9 @@ package body Seq_Runtime.Decoder is
    use Seq_Wait_Type;
    use Var_Origin;
 
+   -- We can handle up to 512 KB sized sequence.
+   Max_Sequence_Size : constant Natural := 524_288;
+
    function Strip (In_String : in String) return String is
    begin
       return Trim (In_String, Ada.Strings.Both);
@@ -53,7 +56,7 @@ package body Seq_Runtime.Decoder is
       Sequence : Memory_Region.T;
       Buffer : Basic_Types.Byte_Array_Access;
    begin
-      Buffer := new Basic_Types.Byte_Array (0 .. 16_383);
+      Buffer := new Basic_Types.Byte_Array (0 .. Max_Sequence_Size - 1);
 
       -- Attempt to load a sequence into a memory region
       if Load_Sequence_In_Memory (Path, Buffer, Sequence) = False then
