@@ -16,6 +16,9 @@ package body Seq_Simulator is
    use Seq_Execute_State;
    use Sys_Time;
 
+   -- We can handle up to 512 KB sized sequence.
+   Max_Sequence_Size : constant Natural := 524_288;
+
    function Initialize (Self : in out Instance; Num_Engines : in Sequence_Engine_Id; Stack_Size : in Max_Seq_Num; Start_Source_Id : in Command_Source_Id) return Boolean is
       The_Source_Id : Command_Source_Id := Start_Source_Id;
    begin
@@ -63,7 +66,7 @@ package body Seq_Simulator is
       Instr_Limit : constant Positive := 10_000;
       Pc : Seq_Position;
    begin
-      Buffer := new Basic_Types.Byte_Array (0 .. 16_383);
+      Buffer := new Basic_Types.Byte_Array (0 .. Max_Sequence_Size - 1);
 
       -- Attempt to load a sequence into a memory region
       if Load_Sequence_In_Memory (Filepath, Buffer, Sequence) = False then
@@ -182,7 +185,7 @@ package body Seq_Simulator is
                         New_Sequence : Memory_Region.T;
                         New_Buffer : Basic_Types.Byte_Array_Access;
                      begin
-                        New_Buffer := new Basic_Types.Byte_Array (0 .. 16_383);
+                        New_Buffer := new Basic_Types.Byte_Array (0 .. Max_Sequence_Size - 1);
                                                 -- Attempt to load a sequence into a memory region
                         if Load_Sequence_In_Memory (File_Path, New_Buffer, New_Sequence) = False then
                            Put_Line (ASCII.HT & "Could not load given sequence: " & File_Path);
