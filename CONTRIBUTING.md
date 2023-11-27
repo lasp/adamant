@@ -2,7 +2,7 @@
 
 Adamant welcomes any and all contributions! Do you have something to add?
 
-This file provides basic information on how to contribute to the Adamant software framework.
+This file provides information on how to contribute to the Adamant software framework.
 
 While we encourage all contributions, remember that Adamant is used everyday to create reliable and efficient software for safety-critical applications including spacecraft. As such, code quality is important, and you may be asked to make adjustments to your submission prior to inclusion.
 
@@ -20,7 +20,7 @@ All pull requests are reviewed by an Adamant maintainer and the community. Your 
 
 ### Tests and Checks
 
-Adamant leverages [GitHub Actions](https://docs.github.com/en/actions) to unit test and style check the code. These automated checks will be run after a maintainer has reviewed your request. All checks must pass successfully before your pull request can be included.
+Adamant leverages [GitHub Actions](https://docs.github.com/en/actions) to unit test and style check the code. These automated checks will be initiated when a pull request has been opened. All checks must pass successfully before your pull request can be included.
 
 Note that many of these checks are annoyingly pedantic, but this helps ensure uniformity and quality in the Adamant code base. Adamant maintainers may make commits on your pull request to correct minor issues.
 
@@ -28,9 +28,9 @@ Note that many of these checks are annoyingly pedantic, but this helps ensure un
 
 Once the pull request is passing all tests and checks and has been approved by a maintainer it will be merged into the Adamant repository!
 
-## Ownership
+## Contribution Ownership
 
-We abide by the [GitHub Terms of Service](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service#6-contributions-under-repository-license) which states:
+Contributions to Adamant will abide by the [GitHub Terms of Service](https://docs.github.com/en/site-policy/github-terms/github-terms-of-service#6-contributions-under-repository-license) which states:
 
 > Whenever you add Content to a repository containing notice of a license, you license that Content under the same terms, and you agree that you have the right to license that Content under those terms.
 
