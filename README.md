@@ -33,7 +33,7 @@ This model is used to generate the structural code, documentation, unit test sca
 
 ## Getting Started
 
-The best way to get started with Adamant is to try out the [Example Project](https://github.com/lasp/example). The example demonstrates a functioning deployment of Adamant that runs on both Linux and an embedded [Raspberry Pi Pico](https://www.raspberrypi.com/products/raspberry-pi-pico/) target. The example also provides a docker-based build environment that contains all the dependencies needed for working with Adamant. You are encouraged to clone the example project and begin modifying it to meet your needs.
+The best way to get started with Adamant is to try out the [Example Project](https://github.com/lasp/adamant_example). The example demonstrates a functioning deployment of Adamant that runs on both Linux and an embedded [Raspberry Pi Pico](https://www.raspberrypi.com/products/raspberry-pi-pico/) target. The example also provides a docker-based build environment that contains all the dependencies needed for working with Adamant. You are encouraged to clone the example project and begin modifying it to meet your needs.
 
 Want to read more first? See the [Architecture Description Document](doc/architecture_description_document/architecture_description_document.pdf) and [User Guide](doc/user_guide/user_guide.pdf).
 
@@ -52,7 +52,7 @@ Below are some helpful resources for learning up on Adamant and the various tool
 
  * The [Architecture Description Document](doc/architecture_description_document/architecture_description_document.pdf) provides an overview of Adamant's architecture and main concepts.
  * The [User Guide](doc/user_guide/user_guide.pdf) is a comprehensive resource for developers looking to start using the Adamant framework.
- * Check out the [Example Project](https://github.com/lasp/example) to explore Adamant in action.
+ * Check out the [Example Project](https://github.com/lasp/adamant_example) to explore Adamant in action.
  * New to Ada or SPARK? Learn more [here](https://learn.adacore.com/). But familiar with C++ or Java? Take a look at [this guide](https://learn.adacore.com/courses/Ada_For_The_CPP_Java_Developer/index.html).
  * Learn more about Adamant's [redo](https://github.com/dinkelk/redo)-based build system.
 
