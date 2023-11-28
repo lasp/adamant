@@ -248,7 +248,7 @@ One of the goals of Adamant is to produce highly modular embedded software. This
 
 When working with Adamant you will always have a minimum of 2 repositories, one that includes the Adamant framework, and another that contains your mission specific deployment, or \textit{assembly}. However, it may make sense to have 3, 4, or more repositories that make up your system. Adamant poses no limit on how you modularize your system, and allows you to tie the compilation of everything together via the \textit{build path}, which is detailed in Section \ref{The Build Path}. \\
 
-Setting up a mission-specific repository is often different for each mission, based on the needs for that mission. Included with Adamant is an Example project which provides a good starting point for most projects. This section details how to set up Adamant with the \href{https://github.com/lasp/example}{\textcolor{blue}{example repository}} in order to get up and running with the system. Once you have had a chance to go through this guide and experiment with the example repository, it is recommended that you make a copy of the example repository and begin modifying it to form your own project repository. \\
+Setting up a mission-specific repository is often different for each mission, based on the needs for that mission. Included with Adamant is an Example project which provides a good starting point for most projects. This section details how to set up Adamant with the \href{https://github.com/lasp/adamant_example}{\textcolor{blue}{example repository}} in order to get up and running with the system. Once you have had a chance to go through this guide and experiment with the example repository, it is recommended that you make a copy of the example repository and begin modifying it to form your own project repository. \\
 
 \subsubsection{Project Directory}
 
@@ -258,7 +258,7 @@ Usually, all repositories for a project are cloned into a single ``project direc
 \begin{minted}{text}
 > mkdir project  # make project directory
 > cd project
-> git clone https://github.com/lasp/example.git
+> git clone https://github.com/lasp/adamant_example.git
 > git clone https://github.com/lasp/adamant.git
 \end{minted}
 \vspace{5mm} %5mm vertical space
@@ -273,7 +273,7 @@ Adamant uses a virtual environment for development for a few reasons. First, usi
 
 Developers can be picky about the tools they install, the editors they use, and whether or not to use spaces or tabs (you should use spaces!). Adamant does its best to not force the use of any tool on any developer, with the exception of using \texttt{redo}, discussed in Section \ref{Using Redo}. To accomplish this, the Adamant virtual environment shares the project directory, discussed in the last section, between the host and the virtual machine. In this way, the developer can install whatever tools they want on either the host or the virtual machine, to interact with the system how they please. The only requirement is that you must run build commands, ie. \texttt{redo}, from within the virtual machine via the virtual environment GUI or an \texttt{ssh} session. \\
 
-The virtual environment for Adamant is based on Linux, because it is ubiquitous, easy to configure, open source, and widely supported. Currently the virtual environment managed by \href{https://www.docker.com/}{\texttt{\textcolor{blue}{Docker}}}. To ensure that you use the most up to date instructions for setting up the example repository it is recommended you follow the repository specific directions stored in \href{https://github.com/lasp/example/blob/main/docker/README.md}{\textcolor{blue}{this README.md}}. Please follow those instructions to bring up your machine. \\
+The virtual environment for Adamant is based on Linux, because it is ubiquitous, easy to configure, open source, and widely supported. Currently the virtual environment managed by \href{https://www.docker.com/}{\texttt{\textcolor{blue}{Docker}}}. To ensure that you use the most up to date instructions for setting up the example repository it is recommended you follow the repository specific directions stored in \href{https://github.com/lasp/adamant_example/blob/main/docker/README.md}{\textcolor{blue}{this README.md}}. Please follow those instructions to bring up your machine. \\
 
 \subsubsection{Project Configuration} \label{Project Configuration}
 
@@ -312,7 +312,7 @@ You can now modify \textit{project.configuration.yaml} and version control it wi
 
 It is advisable to include the export command above within your environment files that get sourced whenever a new shell is opened, ie. from .bashrc. \\
 
-A good example for how to set up the configuration file for you project is to look at the \href{https://github.com/lasp/example/tree/main}{\textcolor{blue}{example repository}} which includes its configuration within the \textit{config/} directory, and sets the \texttt{ADAMANT\_CONFIGURATION\_YAML} variable using the \textit{env/setenv.sh} script.
+A good example for how to set up the configuration file for you project is to look at the \href{https://github.com/lasp/adamant_example/tree/main}{\textcolor{blue}{example repository}} which includes its configuration within the \textit{config/} directory, and sets the \texttt{ADAMANT\_CONFIGURATION\_YAML} variable using the \textit{env/setenv.sh} script.
 
 \subsection{Adamant File Structure}
 
@@ -628,30 +628,30 @@ Python Class:  Linux_Test
 
 Pico
 Description:   This is the default Raspberry Pi Pico microprocessor cross compile target. This is simply a rename of Pico_Development.
-Project File:  /home/user/example/redo/targets/gpr/pico_development.gpr
+Project File:  /home/user/adamant_example/redo/targets/gpr/pico_development.gpr
 Path Files:    .all_path, .Pico_Development_path, .Pico_Base_path, .Pico_path, .arm_bare_board_path, .bb_path, .32bit_path
-Python Module: /home/user/example/redo/targets/pico.py
+Python Module: /home/user/adamant_example/redo/targets/pico.py
 Python Class:  Pico
 
 Pico_Debug
 Description:   This target compiles for the Raspberry Pi Pico microprocessor. It has optimization disabled in both the Adamant code and the runtime code. It enforces all possible validation checks with pragma Initialize_Scalars enabled.
-Project File:  /home/user/example/redo/targets/gpr/pico_debug.gpr
+Project File:  /home/user/adamant_example/redo/targets/gpr/pico_debug.gpr
 Path Files:    .all_path, .Pico_Debug_path, .Pico_Base_path, .Pico_path, .arm_bare_board_path, .bb_path, .32bit_path
-Python Module: /home/user/example/redo/targets/pico.py
+Python Module: /home/user/adamant_example/redo/targets/pico.py
 Python Class:  Pico_Debug
 
 Pico_Development
 Description:   This target compiles for the Raspberry Pi Pico microprocessor. It has optimization enabled and enforces all possible validation checks with pragma Initialize_Scalars enabled.
-Project File:  /home/user/example/redo/targets/gpr/pico_development.gpr
+Project File:  /home/user/adamant_example/redo/targets/gpr/pico_development.gpr
 Path Files:    .all_path, .Pico_Development_path, .Pico_Base_path, .Pico_path, .arm_bare_board_path, .bb_path, .32bit_path
-Python Module: /home/user/example/redo/targets/pico.py
+Python Module: /home/user/adamant_example/redo/targets/pico.py
 Python Class:  Pico_Development
 
 Pico_Production
 Description:   This target compiles for the Raspberry Pi Pico microprocessor. It has optimization enabled and only enforces the Ada Reference Manual validation checks.
-Project File:  /home/user/example/redo/targets/gpr/pico_production.gpr
+Project File:  /home/user/adamant_example/redo/targets/gpr/pico_production.gpr
 Path Files:    .all_path, .bb_path, .Pico_Base_path, .Pico_path, .arm_bare_board_path, .Pico_Production_path, .32bit_path
-Python Module: /home/user/example/redo/targets/pico.py
+Python Module: /home/user/adamant_example/redo/targets/pico.py
 Python Class:  Pico_Production
 \end{minted}
 \vspace{5mm} %5mm vertical space
@@ -5379,7 +5379,7 @@ We can see that we can now compile the main object file, \textit{build/obj/Linux
 \end{minted}
 \vspace{5mm} %5mm vertical space
 
-The \textit{science\_assembly} presented here is for demonstration purposes, does not contain any actual code, and so cannot be compiled. However, the reader is encouraged to check out the \href{https://github.com/lasp/example/tree/main}{\textcolor{blue}{example repository}} which contains a compilable and runnable assembly. \\
+The \textit{science\_assembly} presented here is for demonstration purposes, does not contain any actual code, and so cannot be compiled. However, the reader is encouraged to check out the \href{https://github.com/lasp/adamant_example/tree/main}{\textcolor{blue}{example repository}} which contains a compilable and runnable assembly. \\
  
 \subsection{Subassemblies}
 
@@ -5774,7 +5774,7 @@ More than one rank and group can be specified by adding another set of ``\{\}" w
 
 For more information on DOT rank specifications see \href{https://www.graphviz.org/doc/info/attrs.html#d:rank}{\textcolor{blue}{this documentation}}. \\
 
-Creating good view diagrams takes practice and trial and error. Often you will need to create the view, see how it looks, and then slowly make adjustments until it looks the way you want. For more examples, take a look at the \href{https://github.com/lasp/example/tree/main/src/assembly/linux/views}{\textcolor{blue}{example repository views}}.
+Creating good view diagrams takes practice and trial and error. Often you will need to create the view, see how it looks, and then slowly make adjustments until it looks the way you want. For more examples, take a look at the \href{https://github.com/lasp/adamant_example/tree/main/src/assembly/linux/views}{\textcolor{blue}{example repository views}}.
 
 \subsection{Assembly Documentation} \label{Assembly Documentation}
 
@@ -5943,7 +5943,7 @@ or alternatively you can run the special Adamant command:
 
 which will build the documentation and perform the copy for you. Note that any assembly views, Section \ref{Assembly Views}, found in subdirectories of the model directory will automatically be added to the documentation with a caption that matches the view's description. \\
 
-The produced documentation is not shown here for brevity, but is linked \href{https://github.com/lasp/adamant/blob/main/doc/example_architecture/doc/science_assembly.pdf}{\textcolor{blue}{here}}. For a more complete example, check out the \href{https://github.com/lasp/example/blob/main/src/assembly/linux/doc/linux_example.pdf}{\textcolor{blue}{example repository assembly design document}}.
+The produced documentation is not shown here for brevity, but is linked \href{https://github.com/lasp/adamant/blob/main/doc/example_architecture/doc/science_assembly.pdf}{\textcolor{blue}{here}}. For a more complete example, check out the \href{https://github.com/lasp/adamant_example/blob/main/src/assembly/linux/doc/linux_example.pdf}{\textcolor{blue}{example repository assembly design document}}.
 
 \subsection{Assembly Metrics}
 
@@ -5995,7 +5995,7 @@ Next, we can see that 3 Hydra pages can be generated for viewing packets from th
 
 Lastly, Adamant can generate the \textit{science\_assembly\_packet\_pages.prc} script which automatically generates pages for every packet that an assembly can produce. \\
 
-Coordinating these autocoded files into a fully functional Hydra configuration is too complicated to describe in this document. However, a fully functional example is provided in the example repository \href{https://github.com/lasp/example/tree/main/src/assembly/linux/main/hydra}{\textcolor{blue}{hydra configuration directory}}. Hydra can be spawned and interfaced with the \texttt{Linux} assembly by running the single command:
+Coordinating these autocoded files into a fully functional Hydra configuration is too complicated to describe in this document. However, a fully functional example is provided in the example repository \href{https://github.com/lasp/adamant_example/tree/main/src/assembly/linux/main/hydra}{\textcolor{blue}{hydra configuration directory}}. Hydra can be spawned and interfaced with the \texttt{Linux} assembly by running the single command:
 
 \vspace{5mm} %5mm vertical space
 \begin{minted}{text}
