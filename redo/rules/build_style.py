@@ -95,7 +95,8 @@ class build_style(build_rule_base):
                           + " -S "
                           + os.path.basename(style_log_file)
                           + " 2>&1 | tee -a "
-                          + style_log_file)
+                          + style_log_file
+                          + " 1>&2")
         shell.run_command("codespell "
                           + build_directory
                           + " -I "
@@ -103,7 +104,8 @@ class build_style(build_rule_base):
                           + " -S "
                           + os.path.basename(style_log_file)
                           + " 2>&1 | tee -a "
-                          + style_log_file)
+                          + style_log_file
+                          + " 1>&2")
 
         # Finally lint any YAML files:
         def _yaml_lint(filenames=[]):
