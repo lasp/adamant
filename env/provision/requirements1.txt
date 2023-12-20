@@ -15,3 +15,4 @@ Pygments
 matplotlib
 flake8
 black
+codespell
