@@ -1,0 +1,8 @@
+./gnd/bin/decode_event_log.py:8: depdendencies ==> dependencies
+./gnd/bin/decode_event_packets.py:8: depdendencies ==> dependencies
+./gnd/bin/socket_event_decoder.py:64: depdendencies ==> dependencies
+./gnd/bin/socket_event_decoder.py:145: pase ==> pass, pace, parse
+./gnd/bin/socket_event_decoder.py:203: occured ==> occurred
+./gnd/bin/socket_event_decoder.py:213: occured ==> occurred
+./gnd/hydra/README.md:3: publically ==> publicly
+./gnd/util/event_class_generator.py:78: depdencies ==> dependencies
