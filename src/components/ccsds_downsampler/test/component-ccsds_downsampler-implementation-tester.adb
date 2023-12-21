@@ -83,7 +83,7 @@ package body Component.Ccsds_Downsampler.Implementation.Tester is
       Self.Dispatch_Data_Product (Arg);
    end Data_Product_T_Recv_Sync;
 
-   -- The Event connector to send the events specifc to the component.
+   -- The Event connector to send the events specific to the component.
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T) is
    begin
       -- Push the argument onto the test history for looking at later:

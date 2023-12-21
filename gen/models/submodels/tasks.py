@@ -195,7 +195,7 @@ class tasks(object):
                     + component_name
                     + " requires the following subtask initializations: "
                     + str(list(self.subtask_names))
-                    + " but these initialzations were provided: "
+                    + " but these initializations were provided: "
                     + str(subtask_names)
                 )
 

@@ -289,7 +289,7 @@ class build_executable(build_rule_base):
         if "DEBUG" in os.environ and os.environ["DEBUG"]:
             do_debug = True
 
-        # Run the linke and bind commands in .gpr directory:
+        # Run the link and bind commands in .gpr directory:
         cwd = os.getcwd()
         os.chdir(gpr_project_file_dir)
         shell.run_command(bind_command, debug=do_debug)

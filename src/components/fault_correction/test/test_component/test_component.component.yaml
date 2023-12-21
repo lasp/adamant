@@ -2,7 +2,7 @@
 description: A simple component which throws faults and receives commands to help simulate an assembly that has both features.
 execution: passive
 connectors:
-  - description: This is the command recieve connector.
+  - description: This is the command receive connector.
     type: Command.T
     kind: recv_sync
   - description: This connector is used to send command responses.

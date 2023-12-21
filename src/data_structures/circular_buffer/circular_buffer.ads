@@ -16,7 +16,7 @@ package Circular_Buffer is
    -- meta data, but no access to the internal buffer is granted the user.
    -- Look at inheriting packages for better data structures to use. The
    -- purpose of this package is solely to consolidate shared code and thus
-   -- ease of implementation and testing of the inherting data structures.
+   -- ease of implementation and testing of the inheriting data structures.
    type Base is tagged private;
 
    --
@@ -68,9 +68,9 @@ package Circular_Buffer is
    --
    -- Dump functions:
    --
-   -- These functions dump the interal circular buffer via an array of pointers.
+   -- These functions dump the internal circular buffer via an array of pointers.
    -- This array of pointers is of length 2, the second pointer accounting for
-   -- wrap arounds in the dump request. Sometimes the dump request can be accomodated
+   -- wrap arounds in the dump request. Sometimes the dump request can be accommodated
    -- using a single pointer, in which case the second pointer will be set to null
    -- with zero length:
    type Pointer_Dump is array (0 .. 1) of Byte_Array_Pointer.Instance;

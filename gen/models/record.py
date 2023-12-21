@@ -477,7 +477,7 @@ class record(packed_type):
                 names.append(a_field.name)
         return names
 
-    # This funcion will create a graph of all of the child fields of whatever data_product is calling it
+    # This function will create a graph of all of the child fields of whatever data_product is calling it
     # This function returns a dictionary in the form of:
     # {
     # "paths" : [[]],

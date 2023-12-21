@@ -143,14 +143,14 @@ package body Component.Ccsds_Command_Depacketizer.Implementation.Tester is
       Self.Invalid_Packet_Type_History.Push (Arg);
    end Invalid_Packet_Type;
 
-   -- The packet recieved was too small to contain necessary command information.
+   -- The packet received was too small to contain necessary command information.
    overriding procedure Packet_Too_Small (Self : in out Instance; Arg : in Invalid_Packet_Length.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Packet_Too_Small_History.Push (Arg);
    end Packet_Too_Small;
 
-   -- The packet recieved was too large and is bigger than the size of a command.
+   -- The packet received was too large and is bigger than the size of a command.
    overriding procedure Packet_Too_Large (Self : in out Instance; Arg : in Invalid_Packet_Length.T) is
    begin
       -- Push the argument onto the test history for looking at later:

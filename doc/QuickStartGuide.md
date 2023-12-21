@@ -31,9 +31,9 @@ In Adamant, anything constructed by the build system will always be put into a d
 There are some basic `redo` commands available in Adamant that are almost always available, and can be particularly useful:
 
 * `redo what` - The build system will explore the build path and print a list of the available outputs that can be built from the current directory. The list returned is not guaranteed to be complete, but this deficiency should not hinder anyone except for the most advanced Adamant users.
-* `redo all` - The build system will try to generate every output available within a directory's `build/` directory. What `redo all` will construct can be visualized by using `redo what`. Note, running simply `redo` is assumed by `redo` to be equivelant to running `redo all`.
+* `redo all` - The build system will try to generate every output available within a directory's `build/` directory. What `redo all` will construct can be visualized by using `redo what`. Note, running simply `redo` is assumed by `redo` to be equivalent to running `redo all`.
 * `redo clean` - This removes any `build/` directories found recursively from where it is run.
-* `redo test_all` - Recursively find any unit tests from where this command is run, compile them, and run them, outputing a simple pass/fail report to the terminal.
+* `redo test_all` - Recursively find any unit tests from where this command is run, compile them, and run them, outputting a simple pass/fail report to the terminal.
 * `redo publish` - Recursively "publish" any documentation found from this directory. For more detail on "publishing" documentation see the "Creating Component Documentation" section.
 * `redo style` - Run style checks on all source files (Python, Ada, and YAML) found in this directory.
 * `redo targets` - Show all available build targets, see the "Setting the Build Target" section.

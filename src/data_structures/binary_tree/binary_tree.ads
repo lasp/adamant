@@ -45,7 +45,7 @@ package Binary_Tree is
    -- Search for element in tree. This is done in O(log n) where n is the current size of the tree.
    -- Return: True means element was found. False means it was not. The element and index in the array where it was found are also returned.
    function Search (Self : in Instance; Element : in Element_Type; Element_Found : out Element_Type; Element_Index : out Positive) return Boolean;
-   -- Get an element via its index. This can be helpful to quickly retreive an element in O(1) time if you have already obtained its index via "search".
+   -- Get an element via its index. This can be helpful to quickly retrieve an element in O(1) time if you have already obtained its index via "search".
    function Get (Self : in Instance; Element_Index : in Positive) return Element_Type;
    -- Set an element via its index. This can be helpful to quickly set an element in O(1) time if you have already obtained its index via "search".
    procedure Set (Self : in out Instance; Element_Index : in Positive; Element : in Element_Type);

@@ -54,7 +54,7 @@ package body Component.Precision_Time_Protocol_Master.Implementation is
             -- Transaction_Number data product is defined as the last sent sequence number.
             Self.Transaction_Count := Self.Transaction_Count + 1;
 
-            -- Send out sync messsage:
+            -- Send out sync message:
             Self.Ptp_Time_Message_T_Send ((Message_Type => Sync, Transaction_Count => Self.Transaction_Count, Time_Stamp => Time_Stamp));
 
             -- Update data products:
@@ -131,7 +131,7 @@ package body Component.Precision_Time_Protocol_Master.Implementation is
    overriding procedure Follow_Up_Sys_Time_T_Recv_Async (Self : in out Instance; Arg : in Sys_Time.T) is
       use Ptp_Enums.Ptp_Message_Type;
    begin
-      -- Send out follow up messsage with updated time:
+      -- Send out follow up message with updated time:
       Self.Ptp_Time_Message_T_Send ((Message_Type => Follow_Up, Transaction_Count => Self.Transaction_Count, Time_Stamp => Arg));
 
       -- Update data products:

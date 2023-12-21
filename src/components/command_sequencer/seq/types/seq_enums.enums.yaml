@@ -7,7 +7,7 @@ enums:
       - name: NONE
         description: This means that the sequence is currently not in an error state.
       - name: PARSE
-        description: An instruction parse error occured. This can happen when an instruction has a constrained field (i.e. eval operations, fetch, store, etc.) and the read value does not conform to the constraint.
+        description: An instruction parse error occurred. This can happen when an instruction has a constrained field (i.e. eval operations, fetch, store, etc.) and the read value does not conform to the constraint.
       - name: OPCODE
         description: This occurs when an instruction opcode is read and it is not within the set of valid opcodes. Potential causes include misaligned memory, invalid jumps, compiler versions, bit corruption, etc.
       - name: COMMAND_PARSE
@@ -31,7 +31,7 @@ enums:
       - name: LIMIT
         description: This occurs when a sequence has executed too many instructions in a row without blocking (instruction limit is mission configurable, and should be relatively high).
       - name: EVAL
-        description: An exception occured while performing an arithmetic, bitwise, or logical operation on two values.
+        description: An exception occurred while performing an arithmetic, bitwise, or logical operation on two values.
       - name: FLOAT_VALUE
         description: The runtime attempted to read an internal as a float, but the float was read as NaN/inf/-inf/some invalid value.
       - name: EXECUTE
@@ -53,11 +53,11 @@ enums:
       - name: Recursion
         description: The sequence has exceeded its in-component recursion limit and is not executable.
       - name: Command_Timeout
-        description: A command response was not recieved within the timeout limit.
+        description: A command response was not received within the timeout limit.
       - name: Load_Timeout
-        description: A sequence load was not recieved within the timeout limit.
+        description: A sequence load was not received within the timeout limit.
       - name: Telemetry_Timeout
-        description: A telemetry value was not recieved within the timeout limit.
+        description: A telemetry value was not received within the timeout limit.
       - name: Unimplemented
         description: The opcode found has not been implemented in this runtime.
   - name: Seq_Operation
@@ -146,7 +146,7 @@ enums:
         description: Requests that a sequence should be loaded on a different engine.
       - name: Start
         value: 5
-        description: Requests that a sequence should be loaded on this engine, overwritting the current sequence.
+        description: Requests that a sequence should be loaded on this engine, overwriting the current sequence.
       - name: Push
         value: 6
         description: Pushes arguments to the engine running the current sequence, will then be pushed to a newly loaded sequence.
@@ -315,7 +315,7 @@ enums:
       - name: READY
         description: The sequence can safely be executed without any external work. This state happens after being awoken from sleeping, or after a successful load, etc.
       - name: DONE
-        description: The loaded sequence has successfully finished executing and will not execute until anoter sequence is loaded (or reloaded).
+        description: The loaded sequence has successfully finished executing and will not execute until another sequence is loaded (or reloaded).
       - name: WAIT_RELATIVE
         description: The sequence is waiting on a relative time value.
       - name: WAIT_ABSOLUTE
@@ -397,7 +397,7 @@ enums:
         value: 85
         description: Originally the char 'U'. Represents unsigned types.
   - name: Seq_Data_Format
-    description: This enums names the data formats used in Seq defining details about a telemetry item, including endianess.
+    description: This enums names the data formats used in Seq defining details about a telemetry item, including endianness.
     literals:
       - name: Unsigned_Byte
         value: 0

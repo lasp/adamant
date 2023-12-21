@@ -14,7 +14,7 @@ package Unit_Test_Termination_Handler is
 
    -- Note: This task termination prototype will only work on a native
    -- platform. Ada.Task_Termination has a different package spec for
-   -- embedded plaforms that use Ravenscar.
+   -- embedded platforms that use Ravenscar.
    protected Task_Termination is
       procedure Handler (Cause : Ada.Task_Termination.Cause_Of_Termination; T : Ada.Task_Identification.Task_Id; X : Ada.Exceptions.Exception_Occurrence);
    end Task_Termination;

@@ -6,7 +6,7 @@ faults:
     # Required - the name of the fault
   - name: Discontinuous_Time_Fault
     # Optional - a description of the fault
-    description: A discontinous time was detected by the component.
+    description: A discontinuous time was detected by the component.
     # Optional - the parameter type to include with the fault
     param_type: Packed_U32.T
     # Optional - a statically defined ID for the fault

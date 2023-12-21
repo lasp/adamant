@@ -44,7 +44,7 @@ package Queue is
    -- we catch this condition and return the Error status, allowing the user to
    -- handle the condition as they please, usually by either moving on, or trying
    -- again. Proper usage of this queue in Adamant should avoid the possibility of
-   -- this condition ever occuring. Good design usually avoids more than one task
+   -- this condition ever occurring. Good design usually avoids more than one task
    -- simultaneously popping or pushing to the same queue in a blocking manner. Use
    -- the "no_wait" version of these functions above whenever possible.
    --

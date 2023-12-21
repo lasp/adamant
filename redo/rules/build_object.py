@@ -101,7 +101,7 @@ def _build_all_ada_dependencies(ada_source_files, source_db):
         ]
 
         # Special handling to make sure we build C-objects for which we have
-        # Ada bindings: In most cases if Ada calls into C/C++ or vise versa
+        # Ada bindings: In most cases if Ada calls into C/C++ or vice versa
         # there is no way of "discovering" that that dependency exists. However,
         # in this special case we can follow a convention to cover the common case
         # where a user has generated Ada bindings for .h or .hpp file. These generated
@@ -453,7 +453,7 @@ def _precompile_objects(object_files):
 # the final location and dependency tracking has been handled.
 def _handle_prebuilt_object(redo_1, redo_2, redo_3):
     # First see if the object has already been compiled and is in the object temp dir. This
-    # is a speed optimization that may have already occured.
+    # is a speed optimization that may have already occurred.
     temp_object_dir = os.environ["OBJECT_PRE_BUILD_DIR"]
     temp_object_file = os.path.join(temp_object_dir, os.path.basename(redo_1))
     if os.path.isfile(temp_object_file):

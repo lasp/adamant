@@ -205,7 +205,7 @@ package body Seq_Simulator is
                end;
             when Error =>
                Put_Line (ASCII.HT & "The runtime error code is: " & Trim (Self.Seq_Engines (To_Load).Get_Seq_Error_Code'Image, Ada.Strings.Left));
-               Put_Line (ASCII.HT & "The error occured at pc: " & Trim (Self.Seq_Engines (To_Load).Get_Lowest_Child_Position'Image, Ada.Strings.Left));
+               Put_Line (ASCII.HT & "The error occurred at pc: " & Trim (Self.Seq_Engines (To_Load).Get_Lowest_Child_Position'Image, Ada.Strings.Left));
                New_Line;
                return;
             when Kill_Engines =>

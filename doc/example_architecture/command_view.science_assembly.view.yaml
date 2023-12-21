@@ -37,7 +37,7 @@ filters:
     # Required - The filter type. Filter types available are:
     #   component_name - filter by component names
     #   component_type - filter by component types
-    #   component_execution - filter by component exucution types (active or passive)
+    #   component_execution - filter by component execution types (active or passive)
     #   component_context - filter by component and all it's immediate connections
     #   connector_name - filter by connector_names
     #   connecter_type - filter by connector type

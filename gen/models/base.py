@@ -91,7 +91,7 @@ class renderable_object(object):
 # inherit from this class.
 class base(renderable_object, metaclass=abc.ABCMeta):
     #################################################
-    # Model Cacheing:
+    # Model Caching:
     #################################################
 
     def load_from_cache(cls, filename):
@@ -238,7 +238,7 @@ class base(renderable_object, metaclass=abc.ABCMeta):
                 c.validate(raise_exception=True)
             except BaseException as e:
                 raise ModelException(
-                    "Error occured while validating "
+                    "Error occurred while validating "
                     + self.full_filename
                     + " against "
                     + self.full_schema

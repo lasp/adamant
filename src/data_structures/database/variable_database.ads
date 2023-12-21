@@ -11,7 +11,7 @@ with Serializer_Types;
 --    4) Serialized_Length - a function that when passed a serialized version of T will return the length of T (number of bytes)
 --
 -- To initialize the component 3 parameters must be passed
---    1) The minumum Id that the database should be able to accommodate
+--    1) The minimum Id that the database should be able to accommodate
 --    2) The maximum Id that the database should be able to accommodate
 --
 -- The database will be sized to have entries for each possible Id between the minimum and maximum.

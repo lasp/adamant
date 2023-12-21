@@ -102,7 +102,7 @@ package body Component.Event_Limiter.Implementation is
    -- event_Id_Start : Event_Types.Event_Id - The number of packets that the component contains internally. This is the available buffer that the component has to store events. When all packets are exhausted, then the component begins dropping events. The component needs to be at least double buffered, meaning a minimum of two packets need to be allocated.
    -- event_Id_Stop : Event_Types.Event_Id - The number of ticks that can be received before a partial packet timeout occurs. When a partial packet timeout occurs, a packet containing at least one event is sent out, and then the timeout is reset. A value of zero passed for this parameter will disable the partial packet timeout, meaning only full packets are ever sent out of the component.
    -- event_Disable_List : Two_Counter_Entry.Event_Id_List - A list of event IDs that are enabled by default
-   -- event_Limit_Persistence : Two_Counter_Entry.Persistence_Type - The inital persistence of the number of events to allow before limiting them between ticks (1 to 7)
+   -- event_Limit_Persistence : Two_Counter_Entry.Persistence_Type - The initial persistence of the number of events to allow before limiting them between ticks (1 to 7)
    --
    overriding procedure Init
       (Self : in out Instance; Event_Id_Start : in Event_Types.Event_Id; Event_Id_Stop : in Event_Types.Event_Id; Event_Disable_List : in Two_Counter_Entry.Event_Id_List := (1 .. 0 => 0); Event_Limit_Persistence : in Two_Counter_Entry.Persistence_Type)
@@ -112,7 +112,7 @@ package body Component.Event_Limiter.Implementation is
       -- This is asserted in the package as well but added here for extra clarity
       pragma Assert (Event_Id_Stop >= Event_Id_Start, "Stop id must be equal to or greater than the start ID for the event limiter");
 
-      -- Divide by 8 to determine the number of ids we need to accomodate (1 id per bit). Add eight since the difference needs to account for an extra byte if we have ids that need to fil up some of the next byte
+      -- Divide by 8 to determine the number of ids we need to accommodate (1 id per bit). Add eight since the difference needs to account for an extra byte if we have ids that need to fil up some of the next byte
       Self.State_Packet_Size := Natural (Event_Id_Stop - Event_Id_Start + 8) / 8;
       -- Make sure our size is not larger than the size of a packet
       pragma Assert (Self.State_Packet_Size <= Packet_Types.Packet_Buffer_Length_Type'Last, "Packet length for the event states in event limiter is larger than the max packet length");
@@ -147,13 +147,13 @@ package body Component.Event_Limiter.Implementation is
             case Status is
                when Success =>
                   null; -- do nothing here and move on
-                  -- Save the event id into our event that indicates this id was limited (if room is avaliable)
+                  -- Save the event id into our event that indicates this id was limited (if room is available)
                when Event_Max_Limit =>
                   if Num_Event_Limited_Event.Num_Event_Ids <= Num_Event_Limited_Event.Event_Id_Limited_Array'Length then
                      Num_Event_Limited_Event.Event_Id_Limited_Array (Integer (Num_Event_Limited_Event.Num_Event_Ids)) := Dec_Event_Id;
                      Num_Event_Limited_Event.Num_Event_Ids := Num_Event_Limited_Event.Num_Event_Ids + 1;
                   end if;
-                  -- Assert on the status. We know the range so we shouldnt get an invalid_Id error
+                  -- Assert on the status. We know the range so we shouldn't get an invalid_Id error
                when Invalid_Id =>
                   pragma Assert (False, "Invalid_Id found when decrementing all event limiter counters which should not be possible: " & Natural'Image (Natural (Dec_Event_Id)));
             end case;
@@ -183,7 +183,7 @@ package body Component.Event_Limiter.Implementation is
                      Bit_Location := Bit_Num ((Id - Id_Start) mod 8);
                      case Bit_Location is
                         when 0 =>
-                           -- Reset the bitmap incase this is the last byte but isnt fully filled
+                           -- Reset the bitmap in case this is the last byte but isn't fully filled
                            Event_Bitmap := (State_0 => Disabled, State_1 => Disabled, State_2 => Disabled, State_3 => Disabled, State_4 => Disabled, State_5 => Disabled, State_6 => Disabled, State_7 => Disabled);
                            Event_Bitmap.State_0 := Event_State;
                         when 1 =>
@@ -243,7 +243,7 @@ package body Component.Event_Limiter.Implementation is
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T) is
       Status : Two_Counter_Entry.Count_Status;
    begin
-      -- Regardless of the global state, we call the increment. The global component enable/disable state as well as each individual id state is handled in the increment for efficency.
+      -- Regardless of the global state, we call the increment. The global component enable/disable state as well as each individual id state is handled in the increment for efficiency.
       Self.Event_Array.Increment_Counter (Arg.Header.Id, Status);
       -- Only when status is an Event_Max_Limit, then we dont do anything. Otherwise, the event gets passed on
       case Status is

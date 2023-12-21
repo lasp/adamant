@@ -2,28 +2,28 @@
 description: This is a unit test suite for the Memory Manager component
 tests:
   - name: Test_Init
-    description: This unit test excersizes all possible combinations of initializing the component to make sure only valid initializations succeed, and others throw an assertion.
+    description: This unit test exercises all possible combinations of initializing the component to make sure only valid initializations succeed, and others throw an assertion.
   - name: Test_Nominal_Request_Release
-    description: This unit test excersizes the nominal request/release of the component's memory region.
+    description: This unit test exercises the nominal request/release of the component's memory region.
   - name: Test_Off_Nominal_Request_Release
-    description: This unit test excersizes the error conditions that can arise when requesting/releasing the component's memory region.
+    description: This unit test exercises the error conditions that can arise when requesting/releasing the component's memory region.
   - name: Test_Nominal_Memory_Dump
-    description: This unit test excersizes the memory dump commands.
+    description: This unit test exercises the memory dump commands.
   - name: Test_Nominal_Memory_Crc
-    description: This unit test excersizes the memory crc commands.
+    description: This unit test exercises the memory crc commands.
   - name: Test_Nominal_Memory_Write
-    description: This unit test excersizes the memory write command.
+    description: This unit test exercises the memory write command.
   - name: Test_Write_Unreleased_Region
-    description: This unit test excersizes the write command when the memory is not available.
+    description: This unit test exercises the write command when the memory is not available.
   - name: Test_Dump_Invalid_Region
-    description: This unit test excersizes the memory dump command with invalid memory regions.
+    description: This unit test exercises the memory dump command with invalid memory regions.
   - name: Test_Crc_Invalid_Region
-    description: This unit test excersizes the crc command with invalid memory regions.
+    description: This unit test exercises the crc command with invalid memory regions.
   - name: Test_Write_Invalid_Region
-    description: This unit test excersizes the write command with invalid memory regions.
+    description: This unit test exercises the write command with invalid memory regions.
   - name: Test_Force_Release_Command
-    description: This unit test excersizes the force release command.
+    description: This unit test exercises the force release command.
   - name: Test_Command_Dropped
-    description: This unit test excersizes the behavior when the internal queue overflows.
+    description: This unit test exercises the behavior when the internal queue overflows.
   - name: Test_Invalid_Command
     description: This unit test makes sure an invalid command is reported and ignored.

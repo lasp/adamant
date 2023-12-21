@@ -38,7 +38,7 @@ package body {{ name }} is
       Extraction_Status := Extract_Data_Product.Extract_Data_Product (Pkt => Pkt, Offset => {{data_product.offset}}, Length => {{ data_product.product_type }}.Size_In_Bytes, Id => Id, Timestamp => Timestamp, Dp => Dp);
 {% endif %}
 
-      -- Make sure the extraction was successfull, at this point the only failure should be the length
+      -- Make sure the extraction was successful, at this point the only failure should be the length
       case Extraction_Status is
          when Length_Overflow => return Length_Error;
          when Success => null;
@@ -60,7 +60,7 @@ package body {{ name }} is
             when True =>
                return Success;
             when False =>
-               -- When there is a validation error, fill in a data structure with the relevent information for the component to use to send an event.
+               -- When there is a validation error, fill in a data structure with the relevant information for the component to use to send an event.
                declare
                   P_Type : Basic_Types.Poly_Type := (others => 0);
                begin

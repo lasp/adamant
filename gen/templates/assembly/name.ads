@@ -92,7 +92,7 @@ package {{ name }} is
    {{ task.component_name }}_{{ task.name }}_Task_Info : aliased Task_Types.Task_Info := (
       Number => {{ task.number }},
       Id => Ada.Task_Identification.Null_Task_Id,
-      -- The following is initialized by the component iself.
+      -- The following is initialized by the component itself.
       Priority => 0,
       Stack_Address => System.Null_Address,
       Stack_Size => 0,

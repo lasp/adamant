@@ -192,7 +192,7 @@ def get_report(
 
     # Build target info:
     if build_target_instance:
-        # Hack to determine if this is a gprbuild objet or
+        # Hack to determine if this is a gprbuild object or
         # a regular build object:
         gprbuild = False
         try:

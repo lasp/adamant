@@ -348,7 +348,7 @@ package body Task_Watchdog_Tests.Implementation is
       T.Pet_T_Send (Connector_Count_Type (2), Input_Pet);
       T.Pet_T_Send (Connector_Count_Type (3), Input_Pet);
 
-      -- First change is to promote to fault on one that is apropriate but was not defined as fault to start
+      -- First change is to promote to fault on one that is appropriate but was not defined as fault to start
       T.Command_T_Send (T.Commands.Set_Watchdog_Action ((Index => 3, New_Action => Watchdog_Action_State.Error_Fault)));
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Set_Watchdog_Action_Id, Status => Success));

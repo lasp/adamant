@@ -2,9 +2,9 @@
 description: This is a unit test suite for the Command Router component
 tests:
   - name: Test_Nominal_Routing
-    description: This unit test excersizes command routing via the Command Router internal commands.
+    description: This unit test exercises command routing via the Command Router internal commands.
   - name: Test_Nominal_Registration
-    description: This unit test excersizes command registration from the external testing component, and then makes sure the command routing works.
+    description: This unit test exercises command registration from the external testing component, and then makes sure the command routing works.
   - name: Test_Routing_Errors
     description: This unit test makes sure errors are thrown when unknown commands are sent.
   - name: Test_Registration_Errors

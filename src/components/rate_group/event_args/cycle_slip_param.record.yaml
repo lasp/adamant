@@ -2,9 +2,9 @@
 description: This is a type that contains useful information about a cycle slip.
 fields:
   - name: Slipped_Tick
-    description: "The tick during which the cycle slip occured."
+    description: "The tick during which the cycle slip occurred."
     type: Tick.T
   - name: Num_Slips
-    description: "The number of cycle slips that have occured."
+    description: "The number of cycle slips that have occurred."
     type: Interfaces.Unsigned_16
     format: U16

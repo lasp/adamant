@@ -17,7 +17,7 @@ connectors:
     type: Parameter_Update.T
     kind: provide
     count: 0
-  - description: This is the command recieve connector.
+  - description: This is the command receive connector.
     type: Command.T
     kind: recv_async
   - description: This connector is used to send command responses.

@@ -110,7 +110,7 @@ package body Component.Ccsds_Command_Depacketizer.Implementation is
                            Self.Drop_Packet (Arg, Self.Events.Packet_Too_Large (Self.Sys_Time_T_Get, (Arg.Header, Length => Argument_Data_Length, Length_Bound => The_Command.Arg_Buffer'Length)));
                         else
                            -- We don't need anything else out of the secondary header, unless an error
-                           -- occures, so just skip right over it.
+                           -- occurs, so just skip right over it.
                            Next_Index := Next_Index + Ccsds_Command_Secondary_Header_Length;
 
                            -- Set the command header arg buffer length:

@@ -45,7 +45,7 @@ private
    -------------------------------------------------------
    -- Definition of subtasks functions for task execution:
    -------------------------------------------------------
-   -- This internal task is used to listen on the serial port for incomming packets.
+   -- This internal task is used to listen on the serial port for incoming packets.
    -- IMPORTANT: This component needs an inner task to run the
    -- following function as if it were the "cycle" method of
    -- a normal component. The "cycle" method of this component

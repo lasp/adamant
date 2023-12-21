@@ -66,7 +66,7 @@ package body Component.Fault_Component.Implementation.Tester is
    -----------------------------------------------
    -- Description:
    --    A set of faults for the Fault Component.
-   -- A discontinous time was detected by the component.
+   -- A discontinuous time was detected by the component.
    overriding procedure Discontinuous_Time_Fault (Self : in out Instance; Arg : in Packed_U32.T) is
    begin
       -- Push the argument onto the test history for looking at later:

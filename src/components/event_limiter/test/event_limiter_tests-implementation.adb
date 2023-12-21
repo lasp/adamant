@@ -252,7 +252,7 @@ package body Event_Limiter_Tests.Implementation is
       T.Event_T_Send (Incoming_Event);
       Natural_Assert.Eq (T.Event_Forward_T_Recv_Sync_History.Get_Count, 6);
 
-      -- Again check the data product before we would issue another but the next one shouldnt have any limited messages
+      -- Again check the data product before we would issue another but the next one shouldn't have any limited messages
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 4);
 
       -- Now decrement once to get the data product and make sure we tracked the number of limited events
@@ -289,7 +289,7 @@ package body Event_Limiter_Tests.Implementation is
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 0);
       Natural_Assert.Eq (T.Event_Forward_T_Recv_Sync_History.Get_Count, 0);
 
-      -- Perfom a tick before anything is sent which helps make sure that decrementing on a 0 count doent produce anything
+      -- Perform a tick before anything is sent which helps make sure that decrementing on a 0 count doent produce anything
       T.Tick_T_Send (Input_Tick);
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
       Packed_U16_Assert.Eq (T.Limited_Events_Since_Tick_History.Get (1), (Value => 0));
@@ -471,7 +471,7 @@ package body Event_Limiter_Tests.Implementation is
       Put_Line ("----------------------------------");
       Put_Line ("Testing Issue State Packet:");
       Put_Line ("----------------------------------");
-      -- Setup some events that are enabled and some disabled with a small persistance to quickly test if the state change was successfull.
+      -- Setup some events that are enabled and some disabled with a small persistence to quickly test if the state change was successful.
       Self.Tester.Component_Instance.Init (Event_Id_Start => Start_Id, Event_Id_Stop => 13, Event_Disable_List => Event_Start_List, Event_Limit_Persistence => 5);
 
       -- Just send the packet and check that everything is as expected. There are a mix of enabled and disabled that should be confirmed.
@@ -530,7 +530,7 @@ package body Event_Limiter_Tests.Implementation is
       Put_Line ("----------------------------------");
       Put_Line ("Testing Change Single Event State:");
       Put_Line ("----------------------------------");
-      -- Setup some events that are enabled and some disabled with a small persistance to quickly test if the state change was successfull.
+      -- Setup some events that are enabled and some disabled with a small persistence to quickly test if the state change was successful.
       Self.Tester.Component_Instance.Init (Event_Id_Start => Start_Id, Event_Id_Stop => 10, Event_Disable_List => Event_Start_List, Event_Limit_Persistence => 2);
 
       -- Start by disabling an enabled event.
@@ -644,7 +644,7 @@ package body Event_Limiter_Tests.Implementation is
       Put_Line ("----------------------------------");
       Put_Line ("Testing Change Range Event State:");
       Put_Line ("----------------------------------");
-      -- Setup some events that are enabled and some disabled with a small persistance to quickly test if the state change was successfull.
+      -- Setup some events that are enabled and some disabled with a small persistence to quickly test if the state change was successful.
       Self.Tester.Component_Instance.Init (Event_Id_Start => Start_Id, Event_Id_Stop => 10, Event_Disable_List => Event_Start_List, Event_Limit_Persistence => 2);
 
       -- Start by enabling all events.
@@ -781,7 +781,7 @@ package body Event_Limiter_Tests.Implementation is
       Put_Line ("----------------------------------");
       Put_Line ("Testing Change All Event States:");
       Put_Line ("----------------------------------");
-      -- Setup some events that are enabled and some disabled with a small persistance to quickly test if the state change was successfull.
+      -- Setup some events that are enabled and some disabled with a small persistence to quickly test if the state change was successful.
       Self.Tester.Component_Instance.Init (Event_Id_Start => Start_Id, Event_Id_Stop => 11, Event_Disable_List => Event_Start_List, Event_Limit_Persistence => 2);
       -- Make sure all data products were set in the Set_Up procedure, then clear the history for the rest of testing.
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 3);

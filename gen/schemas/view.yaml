@@ -57,7 +57,7 @@ mapping:
           # The type of filter to be applied.
           #   component_name - filter by component names
           #   component_type - filter by component types
-          #   component_execution - filter by component exucution types (active or passive)
+          #   component_execution - filter by component execution types (active or passive)
           #   component_name_context - filter by component name and all it's immediate connections
           #   component_type_context - filter by component type and all it's immediate connections
           #   connector_name - filter by connector_names

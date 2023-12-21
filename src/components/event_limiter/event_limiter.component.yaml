@@ -25,7 +25,7 @@ init:
       default: "(1 .. 0 => 0)"
     - name: Event_Limit_Persistence
       type: Two_Counter_Entry.Persistence_Type
-      description: The inital persistence of the number of events to allow before limiting them between ticks (1 to 7)
+      description: The initial persistence of the number of events to allow before limiting them between ticks (1 to 7)
 connectors:
   - description: This is the base tick for the component. Upon reception the component will decrement the count of each ID unless it is already 0. Every tick, an event of what has been filtered will be sent.
     type: Tick.T
@@ -40,7 +40,7 @@ connectors:
     type: Event.T
     kind: send
     name: Event_Forward_T_Send
-  - description: The Event connector to send the events specifc to the component.
+  - description: The Event connector to send the events specific to the component.
     type: Event.T
     kind: send
   - description: The system time is retrieved via this connector.

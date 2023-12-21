@@ -19,7 +19,7 @@ class build_target_base(metaclass=abc.ABCMeta):
         return 10250
 
     # The default implementation of this is for native, so the string is blank. For
-    # arm this might be overridden to "arm-eabi-" or something similiar. This is preprended
+    # arm this might be overridden to "arm-eabi-" or something similar. This is prepended
     # to ada_compiler, c_compiler etc below:
     def compiler_prefix(self):
         return ""
@@ -71,7 +71,7 @@ class build_target_base(metaclass=abc.ABCMeta):
 
     # Optional: Return a list of extra include flags
     # for the compiler. All includes will be prepended
-    # by "-I" and seperated by a space when put in the
+    # by "-I" and separated by a space when put in the
     # compilation command.
     # Note: All source included in the build_path
     # is already automatically included in the compile
@@ -97,7 +97,7 @@ class build_target_base(metaclass=abc.ABCMeta):
 
     # Optional: Return a string of extra include flags
     # for the binder. All includes must be prepended
-    # by "-I" and seperated by a space.
+    # by "-I" and separated by a space.
     # Note: All source included in the build_path
     # is already automatically included in the bind
     # command and does not need to be returned here.
@@ -145,7 +145,7 @@ class build_target_base(metaclass=abc.ABCMeta):
 
     # Optional: Return a list of extra include flags
     # for the compiler. All includes will be prepended
-    # by "-I" and seperated by a space when put in the
+    # by "-I" and separated by a space when put in the
     # compilation command.
     # Note: All source included in the build_path
     # is already automatically included in the compile
@@ -170,7 +170,7 @@ class build_target_base(metaclass=abc.ABCMeta):
 
     # Optional: Return a list of extra include flags
     # for the compiler. All includes will be prepended
-    # by "-I" and seperated by a space when put in the
+    # by "-I" and separated by a space when put in the
     # compilation command.
     # Note: All source included in the build_path
     # is already automatically included in the compile

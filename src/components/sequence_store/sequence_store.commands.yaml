@@ -5,7 +5,7 @@ commands:
     description: Activate a sequence slot so that its contents can be fetched.
     arg_type: Packed_Slot_Number.T
   - name: Deactivate_Slot
-    description: Deactive a sequence slot so that its contents can no longer be fetched.
+    description: Deactivate a sequence slot so that its contents can no longer be fetched.
     arg_type: Packed_Slot_Number.T
   - name: Check_Slot
     description: Check the CRC of a sequence in a particular slot to see if it matches the CRC found in the header.

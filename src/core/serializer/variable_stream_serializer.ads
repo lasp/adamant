@@ -11,7 +11,7 @@ package Variable_Stream_Serializer is
    Max_Serialized_Length : constant Natural := T'Object_Size / Stream_Element'Object_Size;
    -- Serialize to and deserialize from streams.
    function Serialize (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Input : in T) return Serialization_Status;
-   -- Deserialize needs to know the minimum length of the variable type (usuall the size of the header) in order to read that
+   -- Deserialize needs to know the minimum length of the variable type (usually the size of the header) in order to read that
    -- many bytes off the stream before determining how many additional bytes need to be read to deserialize the entire type.
    -- Passing the type's "Min_Serialized_Length" constant (found in the record autocoded ads) will suffice for this.
    function Deserialize (Stream : not null access Ada.Streams.Root_Stream_Type'Class; Minimum_Length : in Natural; Output : out T) return Serialization_Status;

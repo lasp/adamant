@@ -8,7 +8,7 @@ import os.path
 
 # Split a model filename into its components and
 # check to make sure that is complies with the adamant
-# model file nameing convention.
+# model file naming convention.
 def split_model_file_name(model_filename):
     def err(string):
         error.error_abort(

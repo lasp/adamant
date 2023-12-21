@@ -225,7 +225,7 @@ package body Circular_Buffer is
             pragma Assert (First_Copy_Length + Second_Copy_Length = Bytes_Length);
             -- Perform first copy to end of internal array:
             Self.Bytes (Tail .. Self.Bytes'Last) := Bytes (Bytes'First .. Bytes'First + First_Copy_Length - 1);
-            -- Wrap around and copy bytes at begginning of internal array:
+            -- Wrap around and copy bytes at beginning of internal array:
             Self.Bytes (Self.Bytes'First .. Self.Bytes'First + Second_Copy_Length - 1) := Bytes (Bytes'First + First_Copy_Length .. Bytes'Last);
          end;
       else
@@ -236,7 +236,7 @@ package body Circular_Buffer is
       -- Set the and count:
       Self.Count := Self.Count + Bytes_Length;
       if Overwrite and then Self.Count > Self.Bytes'Length then
-         -- We need to move head if an overwrite actually occures, since we are
+         -- We need to move head if an overwrite actually occurs, since we are
          -- basically "popping" old data by doing the overwrite.
          Self.Head := (Self.Head + (Self.Count - Self.Bytes'Length)) mod Self.Bytes'Length;
          -- The count should never be greater than the length of the buffer.

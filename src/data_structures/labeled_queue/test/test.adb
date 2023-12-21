@@ -145,7 +145,7 @@ begin
    Natural_Assert.Eq (Len, 10);
    Pop_Assert.Eq (Queue.Peek_Label (Label), Success);
    Label_Assert.Eq (Label, Variable_Type);
-   -- An offset here wouldnt usually work, but in this case the values of the array make is a success.
+   -- An offset here wouldn't usually work, but in this case the values of the array make is a success.
    Pop_Type_Assert.Eq (Peek_Simple_Variable (Queue, Label, Variable_Var2, Offset => 1), Success);
    Label_Assert.Eq (Label, Variable_Type);
    Put_Line ("Peeked: " & Simple_Variable.Representation.Image (Variable_Var2));

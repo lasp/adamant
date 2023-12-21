@@ -34,7 +34,7 @@ private
    -----------------------------------------------
    -- Description:
    --    A set of data dependencies for the Data Dependency Component.
-   -- Function which retreives a data dependency.
+   -- Function which retrieves a data dependency.
    -- The default implementation is to simply call the Data_Product_Fetch_T_Request connector. Change the implementation if this component
    -- needs to do something different.
    overriding function Get_Data_Dependency (Self : in out Instance; Id : in Data_Product_Types.Data_Product_Id) return Data_Product_Return.T is (Self.Data_Product_Fetch_T_Request ((Id => Id)));

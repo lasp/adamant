@@ -57,7 +57,7 @@ abstract project a_adamant is
       -- Adamant source code adheres to the following style checking switches provided
       -- by GNAT. See: https://gcc.gnu.org/onlinedocs/gnat_ugn/Style-Checking.html
       --
-      -- gnaty3 - indention of 3 spaces
+      -- gnaty3 - indentation of 3 spaces
       -- gnatya - casing of attributes
       -- gnatyA - use of 'Length must use index for multi-dimensional arrays
       -- gnatyb - blanks not allowed at end
@@ -109,7 +109,7 @@ abstract project a_adamant is
 
    -- Binder definition:
    package Binder is
-      -- Redo handles compilation consistancy, so ignore errors based on timestamp consistancy
+      -- Redo handles compilation consistency, so ignore errors based on timestamp consistency
       -- that GPRBuild produces.
       for Switches ("Ada") use ("-t");
    end Binder;

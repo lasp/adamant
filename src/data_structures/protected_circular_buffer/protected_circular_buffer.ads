@@ -3,7 +3,7 @@ with Basic_Types;
 with Serializer_Types;
 
 -- This is a protected (thread safe) buffer that supports the pushing,
--- popping, and peaking of variable sized byte arrayes or typed buffer
+-- popping, and peaking of variable sized byte arrays or typed buffer
 -- elements.
 package Protected_Circular_Buffer is
 

@@ -11,9 +11,9 @@ private
    overriding procedure Set_Up_Test (Self : in out Instance);
    overriding procedure Tear_Down_Test (Self : in out Instance);
 
-   -- This unit test excersizes command routing via the Command Router internal commands.
+   -- This unit test exercises command routing via the Command Router internal commands.
    overriding procedure Test_Nominal_Routing (Self : in out Instance);
-   -- This unit test excersizes command registration from the external testing component, and then makes sure the command routing works.
+   -- This unit test exercises command registration from the external testing component, and then makes sure the command routing works.
    overriding procedure Test_Nominal_Registration (Self : in out Instance);
    -- This unit test makes sure errors are thrown when unknown commands are sent.
    overriding procedure Test_Routing_Errors (Self : in out Instance);

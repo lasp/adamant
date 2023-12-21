@@ -25,7 +25,7 @@ package Task_Synchronization is
    -- An extension of the Wait_Release_Object above, this object provides
    -- the same release/wait logic but also implements a timeout. Another task,
    -- possibly a third task, can call "timeout" after it is deemed that a
-   -- timeout has occured. This will cause a waiting task to release and
+   -- timeout has occurred. This will cause a waiting task to release and
    -- the "Timed_Out" variable will be set to True. There is also a function
    -- which returns if a task is currently waiting or not, which can be used
    -- to implement more sophisticated timeout logic.
@@ -68,13 +68,13 @@ package Task_Synchronization is
    -- timing features in regards to the timeout. It assumes three threads of
    -- execution. One thread "Waits" on a condition until a second thread "Releases"
    -- the condition. A third thread periodically calls Increment_Timeout_If_Waiting
-   -- which will timout the waiting thread if it has been waiting for a certain
+   -- which will timeout the waiting thread if it has been waiting for a certain
    -- number of counts.
    protected type Wait_Release_Timeout_Counter_Object is
       -- Initialize the timeout counter object with the timeout
       -- limit. Every time Increment_Timeout_Counter is called
       -- the counter will be checked against the limit. If the
-      -- counter >= limit then a timout condition will
+      -- counter >= limit then a timeout condition will
       -- be triggered.
       procedure Set_Timeout_Limit (New_Timeout_Limit : in Natural);
       -- Block on this entry until released by Release or Timeout. If
@@ -85,8 +85,8 @@ package Task_Synchronization is
       procedure Release;
       -- Every time Increment_Timeout_If_Waiting is called
       -- the counter will be checked against the limit. If the
-      -- counter >= limit then a timout condition will
-      -- be triggered. A timout condition consists of
+      -- counter >= limit then a timeout condition will
+      -- be triggered. A timeout condition consists of
       -- Release any task blocked on Wait, but set Timed_Out to True.
       -- This usually needs to be called in a different task from the
       -- task that calls Release.

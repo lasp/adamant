@@ -105,7 +105,7 @@ class enum_m_generator(basic_generator, generator_base):
 
     def generate(self, input_filename, methods_to_call_on_model_obj=[]):
         #
-        # This is a uniqe generator in that in takes a single input a name.enums.yaml
+        # This is a unique generator in that in takes a single input a name.enums.yaml
         # and produces multiple outputs. The target will be a directory in build/m/name
         # that contains a .m file for eacn enumeration defined in name.enums.yaml. The
         # reason for this is that matlab only allows a single class definition per file

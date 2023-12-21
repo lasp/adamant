@@ -12,7 +12,7 @@ from base_classes.build_rule_base import build_rule_base
 # are built using the build_pdf rule, the are constructed in
 # a build/pdf directory. Since these directories are removed
 # upon cleaning, they are not permanently saved in the repository.
-# In order to permanantly save PDF documentation, so that we
+# In order to permanently save PDF documentation, so that we
 # don't always have to recompile them to use them, this "publish"
 # rule was created.
 #

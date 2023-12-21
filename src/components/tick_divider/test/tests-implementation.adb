@@ -51,7 +51,7 @@ package body Tests.Implementation is
          T.Tick_T_Send ((Time => Systime, Count => Unsigned_32 (Idx)));
       end loop;
 
-      -- Make sure rollover occured:
+      -- Make sure rollover occurred:
       Boolean_Assert.Eq (T.Check_Counts (Count => 5, Max_Count => 70), True);
 
       -- We are expecting 74/7 + 74/5 + 2 (for 0th iteration) for

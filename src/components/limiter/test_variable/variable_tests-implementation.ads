@@ -15,7 +15,7 @@ private
    overriding procedure Set_Up_Test (Self : in out Instance);
    overriding procedure Tear_Down_Test (Self : in out Instance);
 
-   -- This unit test excersizes the limiter component while queueing variable length packets.
+   -- This unit test exercises the limiter component while queueing variable length packets.
    overriding procedure Test_Queueing_Variable_Length (Self : in out Instance);
 
    -- Instantiate generic component package:

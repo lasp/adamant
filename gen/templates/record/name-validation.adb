@@ -71,7 +71,7 @@ package body {{ name }}.Validation is
 {% endfor %}
 {% endif %}
       --
-      -- Check individial fields:
+      -- Check individual fields:
       --
 
 {% for field in fields.values() %}
@@ -203,7 +203,7 @@ package body {{ name }}.Validation is
 {% endfor %}
 {% endif %}
       --
-      -- Check individial fields:
+      -- Check individual fields:
       --
 
 {% for field in fields.values() %}
@@ -335,7 +335,7 @@ package body {{ name }}.Validation is
 {% endfor %}
 {% endif %}
       --
-      -- Check individial fields:
+      -- Check individual fields:
       --
 {% for field in fields.values() %}
       -- Check {{ field.name }}:

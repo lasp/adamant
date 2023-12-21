@@ -83,7 +83,7 @@ class map_ads_generator(basic_generator):
             old_target,
         )
 
-        # Exit early if error occured:
+        # Exit early if error occurred:
         if ret != 0:
             error.error_print(
                 "Analyzing generated map " + output_filename + " with GNATprove failed."

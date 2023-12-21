@@ -789,7 +789,7 @@ package body Command_Router_Tests.Implementation is
       Command_Response.Assertion.Command_Response_Assert.Eq (T.Command_Response_T_To_Forward_Recv_Sync_History.Get (3), (Source_Id => 2, Registration_Id => 2, Command_Id => 27, Status => Success));
       Command_Response.Assertion.Command_Response_Assert.Eq (T.Command_Response_T_To_Forward_Recv_Sync_History.Get (4), (Source_Id => 3, Registration_Id => 3, Command_Id => 15, Status => Failure));
 
-      -- Send a commmand response with zero. Expect nothing to be forwarded.
+      -- Send a command response with zero. Expect nothing to be forwarded.
       T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 3, Command_Id => 15, Status => Register));
       T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 3, Command_Id => 15, Status => Register));
       T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 3, Command_Id => 15, Status => Register));

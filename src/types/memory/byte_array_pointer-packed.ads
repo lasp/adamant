@@ -7,7 +7,7 @@ with Memory_Region;
 package Byte_Array_Pointer.Packed is
 
    -- Return a packed version of this type. This is useful if you need to send
-   -- this pointer down in an event or something similiar.
+   -- this pointer down in an event or something similar.
    function Pack (Self : in Instance) return Memory_Region.T;
 
    -- Opposite of above function:

@@ -9,7 +9,7 @@ The following diagram shows the most common way that the CCSDS Router component 
 
 In the above context diagram the CCSDS Router is made passive. This means that any CCSDS packet passed to it will be routed on the thread of the calling component, since the calling component uses the \texttt{Ccsds\_Space\_Packet\_Recv\_Sync} connector.
 
-Sometimes it is desireable to do the routing on a different thread of execution to decouple this processing from work going on upstream of the component. The most obvious way to accomplish this is to make the CCSDS Router component active, so it has its own thread of execution. The context diagram below shows this setup.
+Sometimes it is desirable to do the routing on a different thread of execution to decouple this processing from work going on upstream of the component. The most obvious way to accomplish this is to make the CCSDS Router component active, so it has its own thread of execution. The context diagram below shows this setup.
 
 \begin{figure}[H]
   \includegraphics[width=0.9\textwidth,center]{assembly/build/eps/context_active.eps}
@@ -25,4 +25,4 @@ It is also possible to achieve both synchronous and asynchronous routing using t
   \caption{Example usage of a passive CCSDS Router which routes packets on the thread of its caller.}
 \end{figure}
 
-Note, there is a limitation with this use case. A CCSDS packet with the same APID should not be sent through both the synchronous and asyncronous invokee connectors at the same time if sequence number checking is enabled. Since the router table is not a protected object this could produce errant warnings about sequence number tracking, since it is expected that two updates to the sequence numbers tracked in this table will not occur to the same APID at the same time. There has been no real world use case identified which would require that the internal table become a protected object. If a use case is identified, this issue can be revisited.
+Note, there is a limitation with this use case. A CCSDS packet with the same APID should not be sent through both the synchronous and asynchronous invokee connectors at the same time if sequence number checking is enabled. Since the router table is not a protected object this could produce errant warnings about sequence number tracking, since it is expected that two updates to the sequence numbers tracked in this table will not occur to the same APID at the same time. There has been no real world use case identified which would require that the internal table become a protected object. If a use case is identified, this issue can be revisited.

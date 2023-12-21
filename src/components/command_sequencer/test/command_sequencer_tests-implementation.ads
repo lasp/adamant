@@ -46,7 +46,7 @@ private
    overriding procedure Test_Sequence_Execution_Error (Self : in out Instance);
    -- This unit test tests sequence command and subsequence load timeouts.
    overriding procedure Test_Sequence_Timeouts (Self : in out Instance);
-   -- This unit test tests issueing the details packet by command.
+   -- This unit test tests issuing the details packet by command.
    overriding procedure Test_Issue_Details_Packet (Self : in out Instance);
    -- This unit test tests changing the summary packet period by command.
    overriding procedure Test_Set_Summary_Packet_Period (Self : in out Instance);

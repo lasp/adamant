@@ -3,7 +3,7 @@ with Tick;
 
 --
 -- Because the Tick.T type is such a common type used to parameterize the the
--- interrupt hanlder components (ie. the Interrupt Servicer) this package contains
+-- interrupt handler components (ie. the Interrupt Servicer) this package contains
 -- common code used to instantiate a Tick.T based interrupt component.
 --
 package Tick_Interrupt_Handler is

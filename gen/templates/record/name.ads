@@ -472,7 +472,7 @@ package {{ name }} is
    -- Return a field (provided by a field number) as a polymorphic type.
    -- This is useful for returning any field in a record in a very generic
    -- way. Fields bigger than the polymorphic type will only have their
-   -- least signficant bits returned. This function should be used in tandem
+   -- least significant bits returned. This function should be used in tandem
    -- with the Validation package to create useful error messages for an invalid
    -- type:
    function Get_Field (Src : in T; Field : in Interfaces.Unsigned_32) return Basic_Types.Poly_Type;

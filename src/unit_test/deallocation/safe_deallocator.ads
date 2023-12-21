@@ -23,7 +23,7 @@ package Safe_Deallocator is
       type Name is access Object;
    procedure Deallocate_If_Testing (X : in out Name);
 
-   -- Reenable warnings:
+   -- Re-enable warnings:
    pragma Warnings (On, "formal parameter ""X"" is not modified");
    pragma Warnings (On, "mode could be ""in"" instead of ""in out""");
 

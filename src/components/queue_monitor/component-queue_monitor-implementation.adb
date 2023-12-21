@@ -76,7 +76,7 @@ package body Component.Queue_Monitor.Implementation is
       Self.Packet_Counter.Increment_Count;
    end Tick_T_Recv_Sync;
 
-   -- This is the command recieve connector.
+   -- This is the command receive connector.
    overriding procedure Command_T_Recv_Sync (Self : in out Instance; Arg : in Command.T) is
       -- Execute the command:
       Stat : constant Command_Response_Status.E := Self.Execute_Command (Arg);

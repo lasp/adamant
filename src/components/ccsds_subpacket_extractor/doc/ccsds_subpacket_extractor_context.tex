@@ -9,7 +9,7 @@ The following diagram shows the most common way that the CCSDS Subpacket Extract
 
 In the above context diagram the CCSDS Subpacket Extractor is made passive. This means that any CCSDS packet passed to it will be subpacket extracted on the thread of the calling component, since the calling component uses the \texttt{Ccsds\_Space\_Packet\_Recv\_Sync} connector.
 
-Sometimes it is desireable to do the extracting on a different thread of execution to decouple this processing from work going on upstream of the component. The most obvious way to accomplish this is to make the CCSDS Subpacket Extractor component active, so it has its own thread of execution. The context diagram below shows this setup.
+Sometimes it is desirable to do the extracting on a different thread of execution to decouple this processing from work going on upstream of the component. The most obvious way to accomplish this is to make the CCSDS Subpacket Extractor component active, so it has its own thread of execution. The context diagram below shows this setup.
 
 \begin{figure}[H]
   \includegraphics[width=0.9\textwidth,center]{assembly/build/eps/context_active.eps}

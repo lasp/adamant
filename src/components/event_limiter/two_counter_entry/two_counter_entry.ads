@@ -59,7 +59,7 @@ package Two_Counter_Entry is
    function Get_Event_Start_Stop_Range (Self : in Instance; Event_Stop_Id : out Event_Id) return Event_Id;
 
 private
-   -- Helper functions to perfom range checking on the array, pass the counter data, and to rewite the values back in. Returns the entry if a valid one is found and otherwise fails with the Invalid_Id status
+   -- Helper functions to perform range checking on the array, pass the counter data, and to rewrite the values back in. Returns the entry if a valid one is found and otherwise fails with the Invalid_Id status
    function Get_Entry (Self : in Instance; Id : in Event_Id; Event_Info : out Two_Counter_Entry_Type.T) return Event_Location;
    procedure Set_Entry (Self : in out Instance; Id : in Event_Id; Event_New_Info : in Two_Counter_Entry_Type.T);
 

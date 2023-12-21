@@ -7,7 +7,7 @@ with Component.Interrupt_Listener_Reciprocal;
 with System;
 with Ada.Interrupts.Names;
 
--- This is the Interrupt Listener component. This component contains an internal piece of data (of generic type) which should be altered by a custom interrupt procedure passed in at instantiation. External components can request the latest version of this data at any time. A common use for this component might be to manage a counter, where the custom procedure increments the count with each interrupt, and the requestor of the count uses the count to determine if an interrupt has been received.
+-- This is the Interrupt Listener component. This component contains an internal piece of data (of generic type) which should be altered by a custom interrupt procedure passed in at instantiation. External components can request the latest version of this data at any time. A common use for this component might be to manage a counter, where the custom procedure increments the count with each interrupt, and the requester of the count uses the count to determine if an interrupt has been received.
 generic
 package Component.Interrupt_Listener.Implementation.Tester is
 

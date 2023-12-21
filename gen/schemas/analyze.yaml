@@ -16,7 +16,7 @@ mapping:
   #  "level" sets the level of analysis, which impacts both time and accuracy. Note that messages
   #  for lower levels are not necessarily a subset of those for higher levels.
   #
-  # The default level is 2 and can be overriden via the "level" field.
+  # The default level is 2 and can be overridden via the "level" field.
   #
   # Level Description
   #

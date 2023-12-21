@@ -19,7 +19,7 @@ sys.setrecursionlimit(5000)
 # data type can be stored within the underlying unqlite
 # database.
 
-# UNQLITE Constant Definitons. For some reason
+# UNQLITE Constant Definitions. For some reason
 # I cannot find this in the unqlite module, so I
 # have just redefined them here.
 _UNQLITE_OPEN_READONLY = 0x00000001

@@ -113,7 +113,7 @@ package Component.Event_Limiter.Implementation.Tester is
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- The Event connector to send the events specifc to the component.
+   -- The Event connector to send the events specific to the component.
    overriding procedure Event_Forward_T_Recv_Sync (Self : in out Instance; Arg : in Event.T);
    -- The Event connector to forward on events if enabled and not limited
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T);

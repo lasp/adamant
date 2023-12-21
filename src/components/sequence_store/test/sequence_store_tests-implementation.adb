@@ -736,7 +736,7 @@ package body Sequence_Store_Tests.Implementation is
       Natural_Assert.Eq (T.Dumping_Slot_Summary_History.Get_Count, 4);
       Natural_Assert.Eq (T.Dumped_Slot_Summary_History.Get_Count, 4);
 
-      -- Send command to check nonexistant slot:
+      -- Send command to check nonexistent slot:
       T.Command_T_Send (T.Commands.Check_Slot ((Slot => 4)));
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 5);

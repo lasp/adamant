@@ -7,10 +7,10 @@ events:
     description: A packet was received with an invalid ccsds packet type. The expected packet type is a telecommand, but a telemtry packet was received.
     param_type: Ccsds_Primary_Header.T
   - name: Packet_Too_Small
-    description: The packet recieved was too small to contain necessary command information.
+    description: The packet received was too small to contain necessary command information.
     param_type: Invalid_Packet_Length.T
   - name: Packet_Too_Large
-    description: The packet recieved was too large and is bigger than the size of a command.
+    description: The packet received was too large and is bigger than the size of a command.
     param_type: Invalid_Packet_Length.T
   - name: No_Secondary_Header
     description: A packet was received without a secondary header, but the secondary header is required.

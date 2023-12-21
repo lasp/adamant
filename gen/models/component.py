@@ -321,7 +321,7 @@ class component(base):
             ]
         )
 
-        # We have a naming requirement that any entity in an ided entity submodel must have a uniqe name. Ie. A command
+        # We have a naming requirement that any entity in an ided entity submodel must have a unique name. Ie. A command
         # for a component cannot have the same name as an event for that component. This creates problems with Hydra and
         # sometimes with Ada compilation. To keep things simple, we do not allow this to happen.
         entity_names = []

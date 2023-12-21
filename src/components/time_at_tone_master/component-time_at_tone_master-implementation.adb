@@ -65,7 +65,7 @@ package body Component.Time_At_Tone_Master.Implementation is
             Current_Sys_Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
             -- Calculate the wake up time. We grab Clock as close to grabbing the
             -- system time as possible. We cannot just use Clock as the system time
-            -- since getting the system time is mission dependant, and Clock may not
+            -- since getting the system time is mission dependent, and Clock may not
             -- be accurate as a system time. Clock is a good monotonic time, however,
             -- so is useful for determining the delay time.
             Wake_Up_Time : constant Ada.Real_Time.Time := Ada.Real_Time.Clock + Self.Wait_Time;

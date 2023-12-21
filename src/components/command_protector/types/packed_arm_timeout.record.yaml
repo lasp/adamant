@@ -1,5 +1,5 @@
 ---
-description: Holds the armed state timout.
+description: Holds the armed state timeout.
 preamble: |
   type Arm_Timeout_Type is new Natural range 0 .. 255;
 fields:

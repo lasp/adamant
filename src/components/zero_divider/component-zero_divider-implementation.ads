@@ -5,7 +5,7 @@
 -- Includes:
 with Command;
 
--- The purpose of this component is to provide a safe, commandable way to cause the Ada Last Chance Handler to be called. To accomplish this, this component provides a Divide_By_Zero command which divides an integer by zero, which causes an Ada exception to be thrown, which is purposely not handled. The Divide_By_Zero command must be passed a magic number as an argument. If the magic number does not match the number that this component is instantiated with at initialization, then the Divide_By_Zero is not executed. This feature prevents inadvertant execution of this command.
+-- The purpose of this component is to provide a safe, commandable way to cause the Ada Last Chance Handler to be called. To accomplish this, this component provides a Divide_By_Zero command which divides an integer by zero, which causes an Ada exception to be thrown, which is purposely not handled. The Divide_By_Zero command must be passed a magic number as an argument. If the magic number does not match the number that this component is instantiated with at initialization, then the Divide_By_Zero is not executed. This feature prevents inadvertent execution of this command.
 package Component.Zero_Divider.Implementation is
 
    -- The component class instance record:

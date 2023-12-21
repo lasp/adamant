@@ -17,7 +17,7 @@ mapping:
   parameters:
     seq:
       # Each parameter name must be in the format "Component_Instance_Name"."Parameter_Name" or
-      # simpy "Component_Instance_Name" to use all of the component's parameters.
+      # simply "Component_Instance_Name" to use all of the component's parameters.
       - type: str
         required: False
     # A parameter table must have at least one parameter.

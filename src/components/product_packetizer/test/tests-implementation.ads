@@ -37,7 +37,7 @@ private
    overriding procedure Test_Zero_Period (Self : in out Instance);
    -- This unit test tests a command being dropped due to a full queue.
    overriding procedure Test_Full_Queue (Self : in out Instance);
-   -- This unit test tests the special packet period items that can be emmitted inside an product packetizer packet.
+   -- This unit test tests the special packet period items that can be emitted inside an product packetizer packet.
    overriding procedure Test_Packet_Period_Items (Self : in out Instance);
 
    -- Test data and state:

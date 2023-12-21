@@ -5,7 +5,7 @@ from util import pydep
 from util import redo
 from util import crc_16
 
-# We have a few autocoded depdendencies we need to import. So do that:
+# We have a few autocoded dependencies we need to import. So do that:
 pydep.build_py_deps()
 from ccsds_space_packet import Ccsds_Space_Packet
 from event import Event

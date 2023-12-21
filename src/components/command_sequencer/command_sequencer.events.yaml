@@ -45,7 +45,7 @@ events:
   - name: Killed_All_Engines
     description: A command was executed to kill all running sequences.
   - name: Killed_Engine
-    description: A command was executed to kill a sequence running in a specic engine
+    description: A command was executed to kill a sequence running in a specific engine
     param_type: Packed_Sequence_Engine_Id.T
   - name: Dropped_Command
     description: A command was dropped due to a full queue.
@@ -69,7 +69,7 @@ events:
     description: An extra source registration was received, but all engines have a source ID already.
     param_type: Command_Response.T
   - name: Sequence_Execution_Error
-    description: An error occured while executing a sequence.
+    description: An error occurred while executing a sequence.
     param_type: Engine_Error_Type.T
   - name: Sequence_Timeout_Error
     description: A sequence timed out waiting on a command response of subsequence load.

@@ -9,7 +9,7 @@ package body Component.Command_Component.Implementation is
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- This is the command recieve connector.
+   -- This is the command receive connector.
    overriding procedure Command_T_Recv_Sync (Self : in out Instance; Arg : in Command.T) is
       -- Execute the command:
       Stat : constant Command_Response_Status.E := Self.Execute_Command (Arg);

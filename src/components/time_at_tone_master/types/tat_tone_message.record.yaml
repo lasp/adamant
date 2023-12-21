@@ -5,6 +5,6 @@ fields:
     description: The timestamp associated with the tick.
     type: Sys_Time.T
   - name: Count
-    description: The transaction number of the message. One transation is a time message and a tone message, increments after the tone message is sent. Can be checked by the time at tone slave to make sure that transactions are not mixed up.
+    description: The transaction number of the message. One transaction is a time message and a tone message, increments after the tone message is sent. Can be checked by the time at tone slave to make sure that transactions are not mixed up.
     type: Interfaces.Unsigned_32
     format: U32

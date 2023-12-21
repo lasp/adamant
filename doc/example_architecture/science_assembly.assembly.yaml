@@ -48,8 +48,8 @@ components:
     # Optional - declare the base id for an ided entity
     # suite. If not declared, or a parameter is omitted,
     # then Adamant will automatically figure out the base
-    # id to use, selectin the lowest remaining ID
-    # avaialable.
+    # id to use, selecting the lowest remaining ID
+    # available.
     set_id_bases:
       - "data_Product_Id_Base => 100"
     # Required (only for components that have a data_dependencies

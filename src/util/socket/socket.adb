@@ -59,7 +59,7 @@ package body Socket is
       -- Setup send channel:
       Channel := Stream (Sock);
 
-      -- Set the object memebers:
+      -- Set the object members:
       Self.Socket := Sock;
       Self.Channel := Channel;
       Self.Connected := True;
@@ -67,7 +67,7 @@ package body Socket is
       when Socket_Error | Host_Error =>
          Self.Connected := False;
       when E : others =>
-         pragma Assert (False, "Unhandled exception occured while connecting to socket in " &
+         pragma Assert (False, "Unhandled exception occurred while connecting to socket in " &
            Image (Current_Task) & ASCII.LF & Exception_Name (E) & ": " & Exception_Message (E));
    end Connect;
 

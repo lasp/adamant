@@ -10,4 +10,4 @@ tests:
   - name: Test_Serialization_Failure
     description: This test tries to store and access data that is malformed and returns a serialization failure.
   - name: Test_Override
-    description: This test excersizes the override feature.
+    description: This test exercises the override feature.

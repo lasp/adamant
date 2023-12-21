@@ -11,11 +11,11 @@ private
    overriding procedure Set_Up_Test (Self : in out Instance);
    overriding procedure Tear_Down_Test (Self : in out Instance);
 
-   -- This unit test excersizes dumping a valid region of memory managed by the component
+   -- This unit test exercises dumping a valid region of memory managed by the component
    overriding procedure Test_Nominal_Dumping (Self : in out Instance);
-   -- This unit test excersizes CRCing from a valid region of memory
+   -- This unit test exercises CRCing from a valid region of memory
    overriding procedure Test_Memory_Crc (Self : in out Instance);
-   -- This unit test excersizes dumping and CRCing from an invalid region of memory
+   -- This unit test exercises dumping and CRCing from an invalid region of memory
    overriding procedure Test_Invalid_Address (Self : in out Instance);
    -- This unit test makes sure an invalid command is reported and ignored.
    overriding procedure Test_Invalid_Command (Self : in out Instance);

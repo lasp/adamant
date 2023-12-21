@@ -7,7 +7,7 @@ with Command;
 with Parameter;
 with Protected_Variables;
 
--- This is the limiter component. This component receives a generic type of data and queues that data. It then meters the output of the data theourh a "send" connector at a commandable rate. The rate is set upon initialization, can be changed by command, or by parameter. The command or parameter connections may be ommitted if these features are not used.
+-- This is the limiter component. This component receives a generic type of data and queues that data. It then meters the output of the data theourh a "send" connector at a commandable rate. The rate is set upon initialization, can be changed by command, or by parameter. The command or parameter connections may be omitted if these features are not used.
 generic
 package Component.Limiter.Implementation is
 

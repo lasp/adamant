@@ -13,7 +13,7 @@ private
    overriding procedure Set_Up_Test (Self : in out Instance);
    overriding procedure Tear_Down_Test (Self : in out Instance);
 
-   -- This unit test adds registration elemenents to the router table and asserts for correct response and table structure
+   -- This unit test adds registration elements to the router table and asserts for correct response and table structure
    overriding procedure Add_To_Table (Self : in out Instance);
 
    -- Test data and state:

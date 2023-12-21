@@ -94,7 +94,7 @@ package body Component.Event_Filter.Implementation is
       pragma Assert (Event_Id_Start_Range <= Event_Id_End_Range, "End id must be equal to or greater than the start ID for the event filter");
       Self.Event_Entries.Init (Event_Id_Start_Range, Event_Id_End_Range, Event_Filter_List);
 
-      -- Grab the array length of the entries to make sure that the length isnt longer than the max size of a packet
+      -- Grab the array length of the entries to make sure that the length isn't longer than the max size of a packet
       Event_Entry_Array := Self.Event_Entries.Get_Entry_Array;
       -- Make sure our size is not larger than the size of a packet
       pragma Assert (Event_Entry_Array'Length <= Packet_Types.Packet_Buffer_Length_Type'Last, "Packet length for the event states in event filter is larger than the max packet length");

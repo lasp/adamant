@@ -34,7 +34,7 @@ connectors:
     type: Event.T
     kind: send
     name: Event_Forward_T_Send
-  - description: The Event connector to send the events specifc to the component.
+  - description: The Event connector to send the events specific to the component.
     type: Event.T
     kind: send
   - description: The system time is retrieved via this connector.

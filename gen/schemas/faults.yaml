@@ -21,7 +21,7 @@ mapping:
             required: False
           # Identifier for the fault. This is optional, but if provided for one
           # fault, must be provided for all faults. If not provided then faults
-          # IDs will be set via the Set_Id_Base initialization funciton. If IDs
+          # IDs will be set via the Set_Id_Base initialization function. If IDs
           # are provided, then fault IDs are static.
           id:
             type: int

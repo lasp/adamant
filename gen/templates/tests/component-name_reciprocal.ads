@@ -146,7 +146,7 @@ package Component.{{ name }}_Reciprocal is
       -- System time for test:
       System_Time : Sys_Time.T := (0, 0);
 {% endif %}
-      -- Flags for different log outputs that are avaliable for this component. There are switches for each connector and each item of each connector.
+      -- Flags for different log outputs that are available for this component. There are switches for each connector and each item of each connector.
       Log_Verbose : Boolean := False;
 {% if connectors %}
 {% for connector in connectors %}

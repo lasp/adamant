@@ -61,7 +61,7 @@ private
    ---------------------------------------
    -- This is the base tick for the component.
    overriding procedure Tick_T_Recv_Sync (Self : in out Instance; Arg : in Tick.T);
-   -- This is the command recieve connector.
+   -- This is the command receive connector.
    overriding procedure Command_T_Recv_Sync (Self : in out Instance; Arg : in Command.T);
 
    ---------------------------------------

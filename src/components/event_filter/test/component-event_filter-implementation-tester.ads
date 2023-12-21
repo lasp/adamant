@@ -102,7 +102,7 @@ package Component.Event_Filter.Implementation.Tester is
    ---------------------------------------
    -- The Event connector to forward on events when the filtering is disabled, or if unknown events come in.
    overriding procedure Event_Forward_T_Recv_Sync (Self : in out Instance; Arg : in Event.T);
-   -- The Event connector to send the events specifc to the component.
+   -- The Event connector to send the events specific to the component.
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T);
    -- The system time is retrieved via this connector.
    overriding function Sys_Time_T_Return (Self : in out Instance) return Sys_Time.T;

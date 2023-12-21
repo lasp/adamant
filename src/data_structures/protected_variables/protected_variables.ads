@@ -66,7 +66,7 @@ package Protected_Variables is
    -- The user usually checks to see when the counter has reached zero, using the
    -- is_Count_At_Period function, and an action is performed if the returned value is true.
    -- These variables often need to be grouped together into a single protected object
-   -- to accomodate some operations that need to modify both automically in a thread
+   -- to accommodate some operations that need to modify both automatically in a thread
    -- safe manner.
    generic
       -- Any modular type

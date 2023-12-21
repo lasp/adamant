@@ -51,7 +51,7 @@ package Byte_Array_Util is
    --
    -- The Set_Poly_Type_Status is returned from the function
    --    Success - The polytype was successfully stored in the destination byte array
-   --    Truncation_Error - If trunction is not allowed (e. Truncation_Allowed = False) then this can occur. This means
+   --    Truncation_Error - If truncation is not allowed (e. Truncation_Allowed = False) then this can occur. This means
    --                                 that the provided polytype value exceeds the value representable in a type with Size size in
    --                                 bytes. This means that some information will be lost during the "set" operation. If this is
    --                                 intended, then Truncation_Allowed must be set to True. In this case, Truncation_Error will

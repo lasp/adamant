@@ -63,8 +63,8 @@ class gprbuild_target_base(metaclass=abc.ABCMeta):
 
     # So gnatmetric does not work well with project files, at least in the
     # unique way that Adamant uses .gpr files. The build system instead calls
-    # gnatmetric without any reference to project files. This is unforunate
-    # because we are requiring the user to redifine some of the information
+    # gnatmetric without any reference to project files. This is unfortunate
+    # because we are requiring the user to redefine some of the information
     # flags/etc here in order to get gnatmetric to work. This is a hack,
     # but is a solution that works for now. Building metrics is not
     # used as commonly or is as essential as compilation, so a bit of oddness

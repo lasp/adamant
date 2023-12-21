@@ -8,7 +8,7 @@ with Ided_Memory_Region;
 with Command;
 with Memory_Manager_Enums;
 
--- The component manages access to a single memory location through a single pointer. When requested, the component loans out access to the pointer if it is available. The length of the pointer will always be the entire length of the memory region. The component will reject any requests to access the pointer again until the pointer is returned from the requestor. Request/release memory transactions are each provided a unique ID. To release the memory, the same ID must be provided that was issues upon request. This mechanism reduces the risk of an inadvertant call to release from causing an unintended release of the memory. The component includes a data product relating whether the memory is currently allocated or not. The component responds to commands to CRC, dump, and force-release the memory region. Note that this component is active only to provide a seperate thread of execution on which to execute the CRC command, which could take a long time to execute.
+-- The component manages access to a single memory location through a single pointer. When requested, the component loans out access to the pointer if it is available. The length of the pointer will always be the entire length of the memory region. The component will reject any requests to access the pointer again until the pointer is returned from the requester. Request/release memory transactions are each provided a unique ID. To release the memory, the same ID must be provided that was issues upon request. This mechanism reduces the risk of an inadvertent call to release from causing an unintended release of the memory. The component includes a data product relating whether the memory is currently allocated or not. The component responds to commands to CRC, dump, and force-release the memory region. Note that this component is active only to provide a separate thread of execution on which to execute the CRC command, which could take a long time to execute.
 package Component.Memory_Manager.Implementation is
 
    -- The component class instance record:
@@ -35,7 +35,7 @@ private
       -- Request access. If status is set to true then a unique ID is returned.
       procedure Request (Self : in out Instance; Id : out Unsigned_16; State : out Memory_Manager_Enums.Memory_State.E; Status : out Request_Status);
       -- Release access with a given ID. If status is set to true then the release
-      -- succeded, otherwise an unexpected ID was returned.
+      -- succeeded, otherwise an unexpected ID was returned.
       procedure Release (Self : in out Instance; Id : in Unsigned_16; State : out Memory_Manager_Enums.Memory_State.E; Status : out Release_Status);
       -- Release access, no ID needed.
       procedure Force_Release (Self : in out Instance);
@@ -54,7 +54,7 @@ private
       -- The (protected) arbiter object for the virtual memory region:
       Arbiter : Protected_Memory_Arbiter;
       -- A copy of the memory region managed in "bytes" for efficient
-      -- returning to requestors.
+      -- returning to requesters.
       Region : Memory_Region.T;
       Virtual_Region : Virtual_Memory_Region_Positive.T;
    end record;
@@ -108,7 +108,7 @@ private
    overriding function Crc_Memory_Region_Bytes (Self : in out Instance; Arg : in Virtual_Memory_Region_Positive.T) return Command_Execution_Status.E;
    -- Perform a write to the memory region at the provided address. If the memory is not available an error event will be produced.
    overriding function Write_Memory_Region (Self : in out Instance; Arg : in Virtual_Memory_Region_Write.T) return Command_Execution_Status.E;
-   -- Forces the release of the memory region if it is currently allocated. This command can be used to recover from an anomolous condition.
+   -- Forces the release of the memory region if it is currently allocated. This command can be used to recover from an anomalous condition.
    overriding function Force_Release (Self : in out Instance) return Command_Execution_Status.E;
 
    -- Invalid command handler. This procedure is called when a command's arguments are found to be invalid:

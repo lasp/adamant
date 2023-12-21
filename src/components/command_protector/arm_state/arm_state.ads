@@ -17,7 +17,7 @@ package Arm_State is
       --
       -- Arm the system and provide a timeout value:
       procedure Arm (New_Timeout : in Packed_Arm_Timeout.Arm_Timeout_Type);
-      -- Unarm the system and cancel the timout:
+      -- Unarm the system and cancel the timeout:
       procedure Unarm;
       -- Decrement the timeout, and transition to the unarmed state if the
       -- timeout has expired.

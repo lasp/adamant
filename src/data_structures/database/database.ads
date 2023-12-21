@@ -5,7 +5,7 @@
 --
 -- To initialize the component 3 parameters must be passed
 --    1) The maximum number of values for the database to hold
---    2) The minumum Id that the database should be able to accommodate
+--    2) The minimum Id that the database should be able to accommodate
 --    3) The maximum Id that the database should be able to accommodate
 --
 -- The data structure will allocate two tables. The first table will be as large as the value

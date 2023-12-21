@@ -195,7 +195,7 @@ package body Component.Fault_Correction.Implementation is
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- This is the command recieve connector.
+   -- This is the command receive connector.
    overriding procedure Command_T_Recv_Async (Self : in out Instance; Arg : in Command.T) is
       -- Execute the command:
       Stat : constant Command_Response_Status.E := Self.Execute_Command (Arg);
@@ -460,7 +460,7 @@ package body Component.Fault_Correction.Implementation is
       Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Last_Fault_Id_Received (The_Time, (Id => Fault_Id'First)));
       Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Time_Of_Last_Fault_Received (The_Time, (0, 0)));
 
-      -- Send infomational event saying that we got the command.
+      -- Send informational event saying that we got the command.
       Self.Event_T_Send_If_Connected (Self.Events.Data_Products_Reset (The_Time));
       return Success;
    end Reset_Data_Products;

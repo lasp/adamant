@@ -16,7 +16,7 @@ package {{ name }}_Data_Dependencies is
    Number_Of_Data_Dependencies : constant Natural := {{ data_dependencies|length }};
    Number_Of_Components_With_Data_Dependencies : constant Natural := {{ component_kind_dict['data_dependencies']|length }};
 
-   -- List of data dependency ids. These have been resoved and refer to data product IDs in the system:
+   -- List of data dependency ids. These have been resolved and refer to data product IDs in the system:
 {% for id, dd in data_dependencies.items() %}
    {{ dd.suite.component.instance_name }}_{{ dd.name }} : constant Data_Product_Id := {{ dd.id }}; -- 0x{{ '%04x' % id }}
 {% endfor %}

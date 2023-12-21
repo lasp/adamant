@@ -75,7 +75,7 @@ package body Component.Command_Router.Implementation is
       Self.Command_T_To_Route_Recv_Sync (Arg);
    end Command_T_To_Route_Recv_Async;
 
-   -- On this connector the Command Router recieves incoming commands that need to be routed to the correct destination component. This connector is synchronous, and thus bypasses the internal queue. It should be used by components that need high priority command execution. It should only be called after command registration has occurred, or a race condition is present.
+   -- On this connector the Command Router receives incoming commands that need to be routed to the correct destination component. This connector is synchronous, and thus bypasses the internal queue. It should be used by components that need high priority command execution. It should only be called after command registration has occurred, or a race condition is present.
    overriding procedure Command_T_To_Route_Recv_Sync (Self : in out Instance; Arg : in Command.T) is
       -- Local variables:
       Send_Index : Command_Types.Command_Registration_Id;
@@ -112,7 +112,7 @@ package body Component.Command_Router.Implementation is
       end case;
    end Command_T_To_Route_Recv_Sync;
 
-   -- This is the command recieve connector for the Command Router. The NOOP commands sent on this connector will be executed by the command router. This connector will usually be connected in loopback from the Command_T_Send connector in order to provide aliveness test capabilities, or disconnected completely.
+   -- This is the command receive connector for the Command Router. The NOOP commands sent on this connector will be executed by the command router. This connector will usually be connected in loopback from the Command_T_Send connector in order to provide aliveness test capabilities, or disconnected completely.
    overriding procedure Command_T_Recv_Async (Self : in out Instance; Arg : in Command.T) is
       -- Execute the command:
       Stat : constant Command_Response_Status.E := Self.Execute_Command (Arg);
@@ -150,7 +150,7 @@ package body Component.Command_Router.Implementation is
       end if;
    end Register_Command;
 
-   -- Command registrations are received on this connector during initialization. Command responses from connected components are recieved on this connector during execution.
+   -- Command registrations are received on this connector during initialization. Command responses from connected components are received on this connector during execution.
    overriding procedure Command_Response_T_Recv_Async (Self : in out Instance; Arg : in Command_Response.T) is
       use Command_Response_Status;
       use Command_Types;
@@ -256,7 +256,7 @@ package body Component.Command_Router.Implementation is
    overriding function Noop_Response (Self : in out Instance) return Command_Execution_Status.E is
       use Command_Execution_Status;
    begin
-      -- Send infomational event saying that we got the command.
+      -- Send informational event saying that we got the command.
       Self.Event_T_Send_If_Connected (Self.Events.Noop_Response_Received (Self.Sys_Time_T_Get));
       -- OK now start self test by sending a noop command.
       Self.Command_T_To_Route_Recv_Sync (Self.Commands.Noop);
@@ -284,7 +284,7 @@ package body Component.Command_Router.Implementation is
          Self.Data_Product_T_Send (Self.Data_Products.Noop_Arg_Last_Value (The_Time, (Value => 0)));
       end if;
 
-      -- Send infomational event saying that we got the command.
+      -- Send informational event saying that we got the command.
       Self.Event_T_Send_If_Connected (Self.Events.Data_Products_Reset (The_Time));
 
       return Success;
@@ -331,7 +331,7 @@ package body Component.Command_Router.Implementation is
    overriding procedure Command_T_To_Route_Recv_Async_Dropped (Self : in out Instance; Arg : in Command.T) is
       use Command_Response_Status;
    begin
-      -- If an incoming command was dropped then the command router itself needs to send a comand response. In this
+      -- If an incoming command was dropped then the command router itself needs to send a command response. In this
       -- case, we do this by directly sending the command response to ourself right now.
       Self.Command_Response_T_Recv_Async ((
          Source_Id => Arg.Header.Source_Id,

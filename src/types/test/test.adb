@@ -38,7 +38,7 @@ procedure Test is
    -- Byte array type:
    type Byte_Array is array (Natural range 0 .. (Serialized_Length - 1)) of Unsigned_8;
 
-   -- Function to covert packed type to byte array:
+   -- Function to convert packed type to byte array:
    function To_Byte_Array (Input : in Packed) return Byte_Array is
       pragma Warnings (Off, "overlay changes scalar storage order");
       Result : constant Byte_Array with Import, Convention => Ada, Address => Input'Address;

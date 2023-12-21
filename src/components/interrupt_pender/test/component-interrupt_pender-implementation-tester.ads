@@ -11,7 +11,7 @@ with Ada.Interrupts.Names;
 
 -- Invokee Connector Includes:
 
--- This is the Interrupt Pender component. It is attached to an interrupt and provides a connector which will block any component that invokes it until an interrupt is triggered. When an interrup occurs the component will return a Tick to the waiting component. This component should be made passive in order to function properly.
+-- This is the Interrupt Pender component. It is attached to an interrupt and provides a connector which will block any component that invokes it until an interrupt is triggered. When an interrupt occurs the component will return a Tick to the waiting component. This component should be made passive in order to function properly.
 generic
 package Component.Interrupt_Pender.Implementation.Tester is
 

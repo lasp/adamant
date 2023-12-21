@@ -2,4 +2,4 @@
 description: This is unit test suite tests out the variable queueing of a generic component. The purpose of this unit test is not to test the limiter specifically, but the autocoding logic of a generic asynchronous connector of variable length type.
 tests:
   - name: Test_Queueing_Variable_Length
-    description: This unit test excersizes the limiter component while queueing variable length packets.
+    description: This unit test exercises the limiter component while queueing variable length packets.

@@ -60,17 +60,17 @@ private
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- On this connector the Command Router recieves incoming commands that need to be routed to the correct destination component.
+   -- On this connector the Command Router receives incoming commands that need to be routed to the correct destination component.
    overriding procedure Command_T_To_Route_Recv_Async (Self : in out Instance; Arg : in Command.T);
    -- This procedure is called when a Command_T_To_Route_Recv_Async message is dropped due to a full queue.
    overriding procedure Command_T_To_Route_Recv_Async_Dropped (Self : in out Instance; Arg : in Command.T);
-   -- On this connector the Command Router recieves incoming commands that need to be routed to the correct destination component. This connector is synchronous, and thus bypasses the internal queue. It should be used by components that need high priority command execution. It should only be called after command registration has occurred, or a race condition is present.
+   -- On this connector the Command Router receives incoming commands that need to be routed to the correct destination component. This connector is synchronous, and thus bypasses the internal queue. It should be used by components that need high priority command execution. It should only be called after command registration has occurred, or a race condition is present.
    overriding procedure Command_T_To_Route_Recv_Sync (Self : in out Instance; Arg : in Command.T);
-   -- This is the command recieve connector for the Command Router. The NOOP commands sent on this connector will be executed by the command router. This connector will usually be connected in loopback from the Command_T_Send connector in order to provide aliveness test capabilities, or disconnected completely.
+   -- This is the command receive connector for the Command Router. The NOOP commands sent on this connector will be executed by the command router. This connector will usually be connected in loopback from the Command_T_Send connector in order to provide aliveness test capabilities, or disconnected completely.
    overriding procedure Command_T_Recv_Async (Self : in out Instance; Arg : in Command.T);
    -- This procedure is called when a Command_T_Recv_Async message is dropped due to a full queue.
    overriding procedure Command_T_Recv_Async_Dropped (Self : in out Instance; Arg : in Command.T);
-   -- Command registrations are received on this connector during initialization. Command responses from connected components are recieved on this connector during execution.
+   -- Command registrations are received on this connector during initialization. Command responses from connected components are received on this connector during execution.
    overriding procedure Command_Response_T_Recv_Async (Self : in out Instance; Arg : in Command_Response.T);
    -- This procedure is called when a Command_Response_T_Recv_Async message is dropped due to a full queue.
    overriding procedure Command_Response_T_Recv_Async_Dropped (Self : in out Instance; Arg : in Command_Response.T);

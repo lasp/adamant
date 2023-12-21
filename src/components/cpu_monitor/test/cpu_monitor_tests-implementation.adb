@@ -23,12 +23,12 @@ package body Cpu_Monitor_Tests.Implementation is
    --- Task definitions:
    Task_Info_1 : aliased Task_Types.Task_Info :=
       (Number => 1, Id => Ada.Task_Identification.Null_Task_Id,
-   -- The following is initialized by the component iself.
+   -- The following is initialized by the component itself.
    Priority => 0, Stack_Address => System.Null_Address, Stack_Size => 0, Secondary_Stack_Address => System.Null_Address, Secondary_Stack_Size => 0, Secondary_Stack_Max_Usage => 0);
 
    Task_Info_2 : aliased Task_Types.Task_Info :=
       (Number => 2, Id => Ada.Task_Identification.Current_Task,
-   -- The following is initialized by the component iself.
+   -- The following is initialized by the component itself.
    Priority => 0, Stack_Address => System.Null_Address, Stack_Size => 0, Secondary_Stack_Address => System.Null_Address, Secondary_Stack_Size => 0, Secondary_Stack_Max_Usage => 0);
 
    -- List of task infos for all tasks:

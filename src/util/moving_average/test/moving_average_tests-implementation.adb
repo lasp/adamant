@@ -203,7 +203,7 @@ package body Moving_Average_Tests.Implementation is
       -- Run mean with no data:
       Ma.Calculate_Mean_Variance_Max (Ignore_Mean, Ignore_Variance, Ignore_Max);
 
-      -- Test a invalid initilization
+      -- Test a invalid initialization
       --ma.init(Sample_Storage_Size => 6, Sample_Calculation_Size => 10);
       pragma Unreferenced (Ma);
    end Test_Not_Initialized;

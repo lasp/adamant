@@ -4,6 +4,6 @@ requirements:
   - text: The PID controller component shall take a measured error input to determine the P, I, and D components of the control.
   - text: The PID controller component shall include a limit to the integral term to avoid controller wind-up.
   - text: The PID controller component shall include a feed-forward term to the controller.
-  - text: The PID controller component shall calculate the mean, variance, and max of the error over a specifed sample count.
+  - text: The PID controller component shall calculate the mean, variance, and max of the error over a specified sample count.
   - text: The PID controller component shall produce diagnostic packets with subpackets that contain the measured, reference, and the current angle.
   - text: The PID controller component shall output the current control error for control of hardware by other components.

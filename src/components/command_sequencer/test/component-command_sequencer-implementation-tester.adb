@@ -430,7 +430,7 @@ package body Component.Command_Sequencer.Implementation.Tester is
       Self.Killed_All_Engines_History.Push (Arg);
    end Killed_All_Engines;
 
-   -- A command was executed to kill a sequence running in a specic engine
+   -- A command was executed to kill a sequence running in a specific engine
    overriding procedure Killed_Engine (Self : in out Instance; Arg : in Packed_Sequence_Engine_Id.T) is
    begin
       -- Push the argument onto the test history for looking at later:
@@ -486,7 +486,7 @@ package body Component.Command_Sequencer.Implementation.Tester is
       Self.Unexpected_Register_Source_History.Push (Arg);
    end Unexpected_Register_Source;
 
-   -- An error occured while executing a sequence.
+   -- An error occurred while executing a sequence.
    overriding procedure Sequence_Execution_Error (Self : in out Instance; Arg : in Engine_Error_Type.T) is
    begin
       -- Push the argument onto the test history for looking at later:

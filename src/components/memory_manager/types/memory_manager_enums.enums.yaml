@@ -9,7 +9,7 @@ enums:
         description: The memory region is available for request.
       - name: In_Use
         value: 1
-        description: The memory region is NOT available for request, as it is currently in use by another requestor.
+        description: The memory region is NOT available for request, as it is currently in use by another requester.
   - name: Memory_Request_Status
     description: This status relates whether or not the memory request succeeded or failed.
     literals:

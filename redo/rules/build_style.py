@@ -10,7 +10,7 @@ import re
 import glob
 
 
-# This command is the equivelant of turning on style checking
+# This command is the equivalent of turning on style checking
 # and recompiling all objects within the current directory. ie.
 #
 #  $ export CHECK_STYLE=True
@@ -48,7 +48,7 @@ class build_style(build_rule_base):
         # Turn on the style checking:
         os.environ["CHECK_STYLE"] = "True"
 
-        # Simply force recompile all the objects in this directory whith style checking enabled
+        # Simply force recompile all the objects in this directory with style checking enabled
         # and we will get nice style check messages.
         filesystem.safe_makedir(style_directory)
         style_log_file = style_directory + os.sep + "style.log"
@@ -89,7 +89,9 @@ class build_style(build_rule_base):
         codespell_cwd = directory + os.sep + "*.*"
         codespell_ignore = os.environ["ADAMANT_DIR"] + os.sep + "redo" + os.sep + "codespell" + os.sep + "ignore_list.txt"
         codespell_output = "\" 2>&1 | tee -a " + style_log_file + " 1>&2"
-        codespell_suffix = " -I " + codespell_ignore + " --skip=\"" + style_directory + codespell_output
+        codespell_build_dir = "*" + os.sep + "build" + os.sep + "obj,*" + os.sep + "build" + os.sep + "bin"
+        codespell_skip = " --skip=\"*" + os.sep + "alire," + codespell_build_dir + ",*.pdf,*.eps,*.svg," + style_directory
+        codespell_suffix = " -I " + codespell_ignore + codespell_skip + codespell_output
         shell.run_command("codespell "
                           + codespell_cwd
                           + codespell_suffix)

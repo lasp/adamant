@@ -33,7 +33,7 @@
 
 <!--1-->
 <!-- When -messages min, "might fail" check messages are ranked "NOT_AN_ERROR"
-     (instead of low), unless overriden by another rule. -->
+     (instead of low), unless overridden by another rule. -->
 <Message_Rule Matching_Probability="NOT_AN_ERROR">
   <Message_Pattern>
     <String_Specifier

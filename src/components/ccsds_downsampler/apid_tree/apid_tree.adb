@@ -40,7 +40,7 @@ package body Apid_Tree is
       Search_Status : constant Boolean := Self.Downsample_Entry.Search (((Apid => Apid, Filter_Factor => 1, Filter_Count => 0)), Fetched_Entry, Tree_Index);
    begin
       case Search_Status is
-         -- If we couldnt find the packet, then increment the pass count and move on
+         -- If we couldn't find the packet, then increment the pass count and move on
          when False =>
             -- Update the counter and return the status
             Self.Num_Passed_Packets := Self.Num_Passed_Packets + 1;
@@ -81,7 +81,7 @@ package body Apid_Tree is
       Index : Positive;
       Search_Status : constant Boolean := Self.Downsample_Entry.Search ((Apid => Apid, Filter_Factor => 1, Filter_Count => 0), Fetched_Entry, Index);
    begin
-      -- set the index output variable just incase we dont find the entry
+      -- set the index output variable just in case we dont find the entry
       Tree_Index := Positive'First;
       case Search_Status is
          when True =>

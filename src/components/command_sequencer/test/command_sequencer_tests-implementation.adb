@@ -561,7 +561,7 @@ package body Command_Sequencer_Tests.Implementation is
       T.Command_Response_T_Send ((Source_Id => 1, Registration_Id => 0, Command_Id => Component_A_Commands.Get_Command_2_Id, Status => Success));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
-      -- Now exepct the component to have output another command, the load sequence command:
+      -- Now expect the component to have output another command, the load sequence command:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 2);
       Load_Command := Create_Sequence_Load_Command (Id => 8, Engine_Number => 1, Engine_Request => Specific_Engine);
@@ -1069,7 +1069,7 @@ package body Command_Sequencer_Tests.Implementation is
       T.Component_B_Data_Product_2 := (Value => 9.9);
       T.Component_B_Data_Product_1 := (Value => 22);
 
-      -- OK now send the command response to allow the sequnce to continue executing.
+      -- OK now send the command response to allow the sequence to continue executing.
       T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0, Command_Id => Component_A_Commands.Get_Command_3_Id, Status => Success));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
@@ -1081,7 +1081,7 @@ package body Command_Sequencer_Tests.Implementation is
       T.Component_A_Data_Product_1 := (Value => 2);
       T.Component_B_Data_Product_2 := (Value => 8.76);
 
-      -- OK now send the command response to allow the sequnce to continue executing.
+      -- OK now send the command response to allow the sequence to continue executing.
       T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0, Command_Id => Component_A_Commands.Get_Command_3_Id, Status => Success));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
@@ -1089,7 +1089,7 @@ package body Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 3);
       Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (3), Component_A_Commands.Command_3 ((Value => 99)));
 
-      -- OK now send the command response to allow the sequnce to continue executing.
+      -- OK now send the command response to allow the sequence to continue executing.
       T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0, Command_Id => Component_A_Commands.Get_Command_3_Id, Status => Success));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
@@ -1097,7 +1097,7 @@ package body Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 4);
       Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (4), Component_A_Commands.Command_3 ((Value => 99)));
 
-      -- OK now send the command response to allow the sequnce to continue executing.
+      -- OK now send the command response to allow the sequence to continue executing.
       T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0, Command_Id => Component_A_Commands.Get_Command_3_Id, Status => Success));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
@@ -1134,7 +1134,7 @@ package body Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 5);
       Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (5), Component_A_Commands.Command_3 ((Value => 99)));
 
-      -- OK now send the command response to allow the sequnce to continue executing.
+      -- OK now send the command response to allow the sequence to continue executing.
       T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0, Command_Id => Component_A_Commands.Get_Command_3_Id, Status => Success));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
@@ -1310,7 +1310,7 @@ package body Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
 
-      -- Ok n ext telemetry comparion = Passes
+      -- Ok n ext telemetry comparison = Passes
       T.Component_B_Data_Product_1 := (Value => 1);
       T.Tick_T_Send (((0, 0), 0));
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -3345,7 +3345,7 @@ package body Command_Sequencer_Tests.Implementation is
       -- Test killing invalid engine:
       ---------------------------------------------
 
-      -- OK now send the kill command to kill non existant engine:
+      -- OK now send the kill command to kill non existent engine:
       T.Command_T_Send (T.Commands.Kill_Engine ((Engine_Id => 3)));
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 2);

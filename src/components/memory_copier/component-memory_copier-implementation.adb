@@ -85,7 +85,7 @@ package body Component.Memory_Copier.Implementation is
       -- Request the source memory region:
       Request : constant Memory_Region_Request.T := Self.Memory_Region_Request_T_Get;
       -- Calculate the minimum length that the requested region must have in order for
-      -- the vitual memoy region to be valid.
+      -- the virtual memoy region to be valid.
       Min_Length : constant Natural := Virtual_Region.Address + Virtual_Region.Length;
    begin
       -- Check the request memory status:

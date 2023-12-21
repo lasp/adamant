@@ -1,7 +1,7 @@
 import os.path
 
 # This modules provides utility functions for manipulating
-# filenames, particularily the filenames that are provided
+# filenames, particularly the filenames that are provided
 # as arguments to .do files for redo, ie. $1 $2 and $3.
 
 

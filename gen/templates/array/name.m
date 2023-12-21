@@ -107,7 +107,7 @@ classdef {{ name }}
     end
 
     function pred = is_equal(self, other, num_elements_to_compare)
-      % Special __eq__ funciton when you only want to compare a certain number of elements in the array
+      % Special __eq__ function when you only want to compare a certain number of elements in the array
       % not every element in the array.
       pred = length(class(self)) == length(class(other));
       if pred

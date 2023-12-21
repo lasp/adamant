@@ -54,7 +54,7 @@ package Interrupt_Handlers is
    end Task_Signal;
 
    -- This interrupt handler simply updates an internal count that a task can query and
-   -- reset. This is useful for letting a task know that an interrupt has occured without
+   -- reset. This is useful for letting a task know that an interrupt has occurred without
    -- blocking the task (as the above handler does).
    protected type Interrupt_Counter (Pri : System.Interrupt_Priority; Int_Id : Ada.Interrupts.Interrupt_ID; Custom_Procedure : Interrupt_Procedure_Type) is
       -- Function which returns the current count without modifying it:

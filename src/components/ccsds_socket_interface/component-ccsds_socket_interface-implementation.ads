@@ -6,7 +6,7 @@
 -- Invokee Connector Includes:
 with Socket;
 
--- The Socket Component is an interface component which connects the rest of the assembly to an outside entity (usually the ground system) via a TCP/IP socket. It spawns an internal task to listen to the socket for incoming data. It also provides an asynchronous receive connector which it services on it's task, sending any data it receives out of the socket. The data send and recieve connectors are of a generic buffer type, Com_Packet, so that data of an arbitrary format can be sent via this component.
+-- The Socket Component is an interface component which connects the rest of the assembly to an outside entity (usually the ground system) via a TCP/IP socket. It spawns an internal task to listen to the socket for incoming data. It also provides an asynchronous receive connector which it services on it's task, sending any data it receives out of the socket. The data send and receive connectors are of a generic buffer type, Com_Packet, so that data of an arbitrary format can be sent via this component.
 --
 package Component.Ccsds_Socket_Interface.Implementation is
 
@@ -47,7 +47,7 @@ private
    -------------------------------------------------------
    -- Definition of subtasks functions for task execution:
    -------------------------------------------------------
-   -- This internal task is used to listen on the socket for incomming packets.
+   -- This internal task is used to listen on the socket for incoming packets.
    -- IMPORTANT: This component needs an inner task to run the
    -- following function as if it were the "cycle" method of
    -- a normal component. The "cycle" method of this component

@@ -100,7 +100,7 @@ package body Component.Cpu_Monitor.Implementation is
       end if;
    exception
       -- Handle divide by zero error, which may happen on start up.
-      -- A constaint error could occur too if the times are wonky.
+      -- A constraint error could occur too if the times are wonky.
       when others =>
          return 0;
    end Cpu_Percentage;
@@ -180,7 +180,7 @@ package body Component.Cpu_Monitor.Implementation is
       Self.Count := (Self.Count + 1) mod Self.Max_Count;
    end Tick_T_Recv_Sync;
 
-   -- This is the command recieve connector.
+   -- This is the command receive connector.
    overriding procedure Command_T_Recv_Sync (Self : in out Instance; Arg : in Command.T) is
       -- Execute the command:
       Stat : constant Command_Response_Status.E := Self.Execute_Command (Arg);

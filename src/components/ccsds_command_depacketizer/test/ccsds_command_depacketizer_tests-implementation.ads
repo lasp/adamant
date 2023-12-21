@@ -12,9 +12,9 @@ private
    overriding procedure Set_Up_Test (Self : in out Instance);
    overriding procedure Tear_Down_Test (Self : in out Instance);
 
-   -- This unit test excersizes the nominal behavior of the ccsds command depacketizer.
+   -- This unit test exercises the nominal behavior of the ccsds command depacketizer.
    overriding procedure Test_Nominal_Depacketization (Self : in out Instance);
-   -- This unit test makes sure that packets with invalid checsums are reported and dropped.
+   -- This unit test makes sure that packets with invalid checksums are reported and dropped.
    overriding procedure Test_Invalid_Packet_Checksum (Self : in out Instance);
    -- This unit test makes sure that packets with invalid packet types are reported and dropped.
    overriding procedure Test_Invalid_Packet_Type (Self : in out Instance);

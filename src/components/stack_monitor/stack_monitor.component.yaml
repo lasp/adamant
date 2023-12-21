@@ -22,7 +22,7 @@ connectors:
   - description: The system time is retrieved via this connector.
     return_type: Sys_Time.T
     kind: get
-  - description: This is the command recieve connector.
+  - description: This is the command receive connector.
     type: Command.T
     kind: recv_sync
   - description: This connector is used to register and respond to the component's commands.

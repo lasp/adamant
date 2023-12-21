@@ -33,7 +33,7 @@ def optimize_path():
 
 
 # Python exit without garbage collection. This is a small performance
-# enhacement.
+# enhancement.
 def exit():
     from os import _exit
 

@@ -41,7 +41,7 @@ class generator_base(metaclass=abc.ABCMeta):
     # build rule so that the hand written "overriding" file is
     # used instead.
     #
-    # Note: this function can be overriden by the inheriting class
+    # Note: this function can be overridden by the inheriting class
     # if this default behavior is not desired.
     def output_filename_(self, input_filename):
         # Call the enherited class output_filename method:

@@ -93,7 +93,7 @@ class interrupts(object):
     def set_ids_and_priorities(self, discriminant_obj, component_name):
         # Resolve all interrupt ids and priorities with the discriminant object:
         for interrupt in self.list:
-            # Get the priority and id parameters from the descriminant:
+            # Get the priority and id parameters from the discriminant:
             priority_param = discriminant_obj.get_parameter(
                 interrupt.priority_parameter_name
             )

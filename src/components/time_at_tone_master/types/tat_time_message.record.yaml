@@ -1,10 +1,10 @@
 ---
-description: The Time message datatype used for sending time messages between the time at tone master and the time at tone slave. Included in this type is the Time when the tone message will be sent and a transation number.
+description: The Time message datatype used for sending time messages between the time at tone master and the time at tone slave. Included in this type is the Time when the tone message will be sent and a transaction number.
 fields:
   - name: Time
     description: The timestamp associated with the tick.
     type: Sys_Time.T
   - name: Count
-    description: The transaction number of the message. One transation is a time message and a tone message, increments after the tone message is sent. Can be checked by the time at tone slave to make sure that transactions are not mixed up.
+    description: The transaction number of the message. One transaction is a time message and a tone message, increments after the tone message is sent. Can be checked by the time at tone slave to make sure that transactions are not mixed up.
     type: Interfaces.Unsigned_32
     format: U32

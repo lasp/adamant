@@ -20,7 +20,7 @@ import os.path
 # This database is useful for figuring out where c source is located
 # in the system given just a base name (which may be all that is included
 # in the "#include" dependencies of a C source file). Note that all
-# entries in this database must be uniqe, meaning that C files in the
+# entries in this database must be unique, meaning that C files in the
 # build path of the same name, but in different directories are not
 # allowed in Adamant, because of the interface with Ada, even though
 # this pattern is allowed by the C language specification.

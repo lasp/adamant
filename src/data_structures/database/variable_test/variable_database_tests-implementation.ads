@@ -22,7 +22,7 @@ private
    overriding procedure Test_Data_Not_Available (Self : in out Instance);
    -- This test tries to store and access data that is malformed and returns a serialization failure.
    overriding procedure Test_Serialization_Failure (Self : in out Instance);
-   -- This test excersizes the override feature.
+   -- This test exercises the override feature.
    overriding procedure Test_Override (Self : in out Instance);
 
    -- Type definitions:

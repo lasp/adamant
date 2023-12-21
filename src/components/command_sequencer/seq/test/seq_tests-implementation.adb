@@ -161,7 +161,7 @@ package body Seq_Tests.Implementation is
          Seq_Error_Code_Assert.Eq (Engine.Get_Seq_Error_Code, Load_Length);
          Seq_Header.Length := Sequence.Length - 1;
 
-         -- Make sure loading to sequence not in unloaded state proces error.
+         -- Make sure loading to sequence not in unloaded state process error.
          Load_Status_Assert.Eq (Engine.Load (Sequence), Failure);
          Engine_State_Assert.Eq (Engine.Get_Engine_State, Engine_Error);
          State_Assert.Eq (Engine.Get_Running_Sequence_State, Error);
@@ -1324,13 +1324,13 @@ package body Seq_Tests.Implementation is
       -- Valid jump position but no jump performed
       Seq_Position_Assert.Eq (Seq_Runtime.Tester.Call_Fetch_Var (Self.Wb_Runner, Nonzerovarinstruction, Seq_Internal.A), 12); -- Loads a non-zero value into internal A
       Seq_Runtime.Tester.Set_Position (Self.Wb_Runner, 0);
-      Seq_Position_Assert.Eq (Seq_Runtime.Tester.Call_Jump_If_Zero (Self.Wb_Runner, Header, Validjumpinstruction), 4);   -- No jump should have occured
+      Seq_Position_Assert.Eq (Seq_Runtime.Tester.Call_Jump_If_Zero (Self.Wb_Runner, Header, Validjumpinstruction), 4);   -- No jump should have occurred
       State_Assert.Neq (Self.Wb_Runner.Get_State, Error);
       Seq_Runtime.Tester.Reset_Instance (Self.Wb_Runner);
       -- Valid jump position with jump performed
       Seq_Position_Assert.Eq (Seq_Runtime.Tester.Call_Fetch_Var (Self.Wb_Runner, Zerovarinstruction, Seq_Internal.A), 12); -- Loads zero into internal A
       Seq_Runtime.Tester.Set_Position (Self.Wb_Runner, 0);
-      Seq_Position_Assert.Eq (Seq_Runtime.Tester.Call_Jump_If_Zero (Self.Wb_Runner, Header, Validjumpinstruction), 85);   -- A jump to 85 should have occured
+      Seq_Position_Assert.Eq (Seq_Runtime.Tester.Call_Jump_If_Zero (Self.Wb_Runner, Header, Validjumpinstruction), 85);   -- A jump to 85 should have occurred
       State_Assert.Neq (Self.Wb_Runner.Get_State, Error);
    end Jump_If_Zero;
 

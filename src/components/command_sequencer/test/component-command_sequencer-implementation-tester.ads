@@ -43,7 +43,7 @@ with Seq_Print_Event_Record.Representation;
 
 -- The Command Sequencer component executes command sequences with a configurable number of engines. The sequence engines execute sequences in the LASP Awesome Sequence Engine Language (LASEL) compiled by the LASP SEQ tool. Documentation on LASEL is included in this component's doc/ directory.
 --
--- This component runs a configurable number of sequence engines using a single Adamant task. The task runs each engine in priority order, where lower numbered engines take precendence over higher numbered engines. Each engine contains a configurable-sized stack that allows sequences to call subsequences. This component adheres to the property that commands are only executed after previous commands have completed (ie. a command response has been received). In this way the sequences are largely event driven, waiting on the execution of previous commands to finish prior to executing subsequent ones. A periodic tick is supplied to the component to provide timing control for sequences that need to execute relative or absolute waits, or check until a telemetry condition has been met before proceding.
+-- This component runs a configurable number of sequence engines using a single Adamant task. The task runs each engine in priority order, where lower numbered engines take precedence over higher numbered engines. Each engine contains a configurable-sized stack that allows sequences to call subsequences. This component adheres to the property that commands are only executed after previous commands have completed (ie. a command response has been received). In this way the sequences are largely event driven, waiting on the execution of previous commands to finish prior to executing subsequent ones. A periodic tick is supplied to the component to provide timing control for sequences that need to execute relative or absolute waits, or check until a telemetry condition has been met before proceeding.
 --
 -- The sequence engine and LASEL interpreter is located in the seq/ directory.
 package Component.Command_Sequencer.Implementation.Tester is
@@ -269,7 +269,7 @@ package Component.Command_Sequencer.Implementation.Tester is
    overriding procedure Sequence_Load_Error (Self : in out Instance; Arg : in Sequence_Load_Error_Info.T);
    -- A command was executed to kill all running sequences.
    overriding procedure Killed_All_Engines (Self : in out Instance);
-   -- A command was executed to kill a sequence running in a specic engine
+   -- A command was executed to kill a sequence running in a specific engine
    overriding procedure Killed_Engine (Self : in out Instance; Arg : in Packed_Sequence_Engine_Id.T);
    -- A command was dropped due to a full queue.
    overriding procedure Dropped_Command (Self : in out Instance; Arg : in Command_Header.T);
@@ -285,7 +285,7 @@ package Component.Command_Sequencer.Implementation.Tester is
    overriding procedure Unexpected_Command_Response (Self : in out Instance; Arg : in Command_Response.T);
    -- An extra source registration was received, but all engines have a source ID already.
    overriding procedure Unexpected_Register_Source (Self : in out Instance; Arg : in Command_Response.T);
-   -- An error occured while executing a sequence.
+   -- An error occurred while executing a sequence.
    overriding procedure Sequence_Execution_Error (Self : in out Instance; Arg : in Engine_Error_Type.T);
    -- A sequence timed out waiting on a command response of subsequence load.
    overriding procedure Sequence_Timeout_Error (Self : in out Instance; Arg : in Engine_Error_Type.T);

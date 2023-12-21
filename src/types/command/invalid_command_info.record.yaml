@@ -6,7 +6,7 @@ fields:
     type: Command_Types.Command_Id
     format: U16
   - name: Errant_Field_Number
-    description: The field that was invalid. 1 is the first field, 0 means unkown field, 2**32 means that the length field of the command was invalid.
+    description: The field that was invalid. 1 is the first field, 0 means unknown field, 2**32 means that the length field of the command was invalid.
     type: Interfaces.Unsigned_32
     format: U32
   - name: Errant_Field
