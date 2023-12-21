@@ -89,7 +89,8 @@ class build_style(build_rule_base):
         codespell_cwd = directory + os.sep + "*.*"
         codespell_ignore = os.environ["ADAMANT_DIR"] + os.sep + "redo" + os.sep + "codespell" + os.sep + "ignore_list.txt"
         codespell_output = "\" 2>&1 | tee -a " + style_log_file + " 1>&2"
-        codespell_skip = " --skip=\"*" + os.sep + "alire,*" + os.sep + "build" + os.sep + "obj,*" + os.sep + "build" + os.sep + "bin,*.pdf,*.eps,*.svg," + style_directory
+        codespell_build_dir = "*" + os.sep + "build" + os.sep + "obj,*" + os.sep + "build" + os.sep + "bin"
+        codespell_skip = " --skip=\"*" + os.sep + "alire," + codespell_build_dir + ",*.pdf,*.eps,*.svg," + style_directory
         codespell_suffix = " -I " + codespell_ignore + codespell_skip + codespell_output
         shell.run_command("codespell "
                           + codespell_cwd
