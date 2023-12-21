@@ -70,6 +70,9 @@ package {{ name }} is
    -----------------------------------
    -- Component Instances:
    -----------------------------------
+   -- Remove some reference style checking to deal with incorrect capitalization in system packages.
+   pragma Style_Checks ("-rn");
+
 {% for component in components.values() %}
 {% if component.instance_description %}
 {{ printMultiLine(component.instance_description, '   -- ') }}
@@ -83,6 +86,9 @@ package {{ name }} is
 {% endfor %}
 
 {% endif %}
+   -- Remove some reference style checking to deal with incorrect capitalization in system packages.
+   pragma Style_Checks ("+rn");
+
 {% if task_list %}
    -----------------------------------
    -- Task Creation:
@@ -118,12 +124,16 @@ package {{ name }} is
       {{ task.number }} => {{ task.component_name }}_{{ task.name }}_Task_Info'Access{{ "," if not loop.last }}
 {% endfor %}
    );
+
 {% else %}
    -- List of task infos for all tasks:
    Task_List : aliased Task_Types.Task_Info_List := (1 .. 0 => null); -- empty
 
 {% endif %}
 {% if interrupt_list %}
+   -- Remove some reference style checking to deal with incorrect capitalization in system packages.
+   pragma Style_Checks ("-rn");
+
    -- List of all interrupts used in the system:
    Interrupt_List : aliased Interrupt_Types.Interrupt_Id_List := (
 {% for interrupt in interrupt_list %}
@@ -131,6 +141,9 @@ package {{ name }} is
       {{ loop.index0 }} => {{ interrupt.id }}{{ "," if not loop.last }}
 {% endfor %}
    );
+
+   -- Remove some reference style checking to deal with incorrect capitalization in system packages.
+   pragma Style_Checks ("+rn");
 
 {% else %}
    -- List of all interrupts used in the system:
