@@ -54,7 +54,7 @@ package Byte_Array_Pointer is
    function Length (Self : in Instance) return Natural with
       Inline => True;
 
-   -- Get address of buffer. Using "Pointer" should be preferred, excpet in rare circumstances
+   -- Get address of buffer. Using "Pointer" should be preferred, except in rare circumstances
    -- where the actual address is needed.
    function Address (Self : in Instance) return System.Address with
       Inline => True;

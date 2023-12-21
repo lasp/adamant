@@ -1,4 +1,4 @@
--- Use the low level GNAT.IO package since the sytem is in a precarious state.
+-- Use the low level GNAT.IO package since the system is in a precarious state.
 with GNAT.IO;
 with System.Storage_Elements;
 

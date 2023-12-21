@@ -6,7 +6,7 @@
 with Command;
 with Protected_Variables;
 
--- This generic component attaches to a connector and counts the invocations occuring on that connector. It then reports this count as a data product and passes the connector invocation through to a connected component on the other side. The count rolls over at 255 and is 1 byte wide.
+-- This generic component attaches to a connector and counts the invocations occurring on that connector. It then reports this count as a data product and passes the connector invocation through to a connected component on the other side. The count rolls over at 255 and is 1 byte wide.
 generic
 package Component.Connector_Counter_16.Implementation is
 

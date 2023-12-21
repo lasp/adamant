@@ -62,7 +62,7 @@ package body Component.Ccsds_Serial_Interface.Implementation is
    -------------------------------------------------------
    -- Definition of subtasks functions for task execution:
    -------------------------------------------------------
-   -- This internal task is used to listen on the serial port for incomming packets.
+   -- This internal task is used to listen on the serial port for incoming packets.
    overriding procedure Listener (Self : in out Instance) is
       use Interfaces;
       A_Byte : Basic_Types.Byte;

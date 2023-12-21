@@ -18,7 +18,7 @@ begin
 
    -- Read and write register but only access certain components. The
    -- compiler will ensure that the ENTIRE register is read/written
-   -- during the folling operations.
+   -- during the following operations.
    if Reg.Hw_1_Enabled = Enable and then Reg.Hw_2_Enabled = Enable then
       Reg.Threshold := 22;
    end if;

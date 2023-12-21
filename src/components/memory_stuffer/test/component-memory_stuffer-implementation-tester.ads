@@ -96,7 +96,7 @@ package Component.Memory_Stuffer.Implementation.Tester is
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- This connector is used to release the received memory region after a copy has occured.
+   -- This connector is used to release the received memory region after a copy has occurred.
    overriding procedure Memory_Region_Release_T_Recv_Sync (Self : in out Instance; Arg : in Memory_Region_Release.T);
    -- This connector is used to register and respond to the component's commands.
    overriding procedure Command_Response_T_Recv_Sync (Self : in out Instance; Arg : in Command_Response.T);

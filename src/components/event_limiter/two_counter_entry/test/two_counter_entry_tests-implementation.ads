@@ -13,7 +13,7 @@ private
    overriding procedure Set_Up_Test (Self : in out Instance);
    overriding procedure Tear_Down_Test (Self : in out Instance);
 
-   -- This test is inteded to test the different permutations of the init of the byte array.
+   -- This test is intended to test the different permutations of the init of the byte array.
    overriding procedure Test_Init_List (Self : in out Instance);
    -- This unit test tests incrementing the appropriate count when given an ID.
    overriding procedure Test_Increment_Count (Self : in out Instance);

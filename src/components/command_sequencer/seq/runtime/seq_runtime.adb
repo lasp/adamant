@@ -250,7 +250,7 @@ package body Seq_Runtime is
    end Check_Wake;
 
    -- Takes arguments in and updates the local var array.
-   -- The runtime must be unloaded for this function call to be successfull
+   -- The runtime must be unloaded for this function call to be successful
    procedure Give_Arguments (Self : in out Instance; Args : in Variable_Array) is
    begin
       Self.Local_Variable_Array := Args;
@@ -551,7 +551,7 @@ package body Seq_Runtime is
             return Self.Cmd_Jump_Not_Zero;
          when Jump_If_Equal =>
             return Self.Cmd_Jump_If_Equal;
-         -- This is not coverable currently because the sequencer has no statments that compile
+         -- This is not coverable currently because the sequencer has no statements that compile
          -- this instruction in. Adamant does support it however.
          when Jump_Not_Equal =>
             return Self.Cmd_Jump_Not_Equal;
@@ -567,7 +567,7 @@ package body Seq_Runtime is
             return Self.Position + 4;
          when Eval_Flt =>
             return Self.Cmd_Eval_Flt;
-         -- This instruction is currently dissallowed in the Adamant compiler,
+         -- This instruction is currently disallowed in the Adamant compiler,
          -- so it is not coverable. The instruction is implemented however, and this
          -- feature can be supported by simply allowing this instruction in the compiler.
          when Cast_F_To_U =>
@@ -580,7 +580,7 @@ package body Seq_Runtime is
             return Self.Cmd_Cast_S_To_U;
          when Cast_U_To_S =>
             return Self.Cmd_Cast_U_To_S;
-         -- This instruction is currently dissallowed in the Adamant compiler,
+         -- This instruction is currently disallowed in the Adamant compiler,
          -- so it is not coverable. The instruction is implemented however, and this
          -- feature can be supported by simply allowing this instruction in the compiler.
          when Cast_F_To_S =>

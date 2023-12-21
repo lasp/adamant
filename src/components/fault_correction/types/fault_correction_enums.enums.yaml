@@ -33,4 +33,4 @@ enums:
         description: A fault has been detected and a command response has been issued.
       - name: Fault_Latched
         value: 3
-        description: A fault has been detected and a command response has been issued. The fualt has been latched, so any more faults received with this ID will not issue another response until the this fault response has been unlatched.
+        description: A fault has been detected and a command response has been issued. The fault has been latched, so any more faults received with this ID will not issue another response until the this fault response has been unlatched.

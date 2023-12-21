@@ -98,7 +98,7 @@ private
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- This is the command recieve connector.
+   -- This is the command receive connector.
    overriding procedure Command_T_Recv_Async (Self : in out Instance; Arg : in Command.T);
    -- This procedure is called when a Command_T_Recv_Async message is dropped due to a full queue.
    overriding procedure Command_T_Recv_Async_Dropped (Self : in out Instance; Arg : in Command.T);
@@ -128,7 +128,7 @@ private
    --    These are the commands for the Parameter Store component.
    -- Activate a sequence slot so that its contents can be fetched.
    overriding function Activate_Slot (Self : in out Instance; Arg : in Packed_Slot_Number.T) return Command_Execution_Status.E;
-   -- Deactive a sequence slot so that its contents can no longer be fetched.
+   -- Deactivate a sequence slot so that its contents can no longer be fetched.
    overriding function Deactivate_Slot (Self : in out Instance; Arg : in Packed_Slot_Number.T) return Command_Execution_Status.E;
    -- Check the CRC of a sequence in a particular slot to see if it matches the CRC found in the header.
    overriding function Check_Slot (Self : in out Instance; Arg : in Packed_Slot_Number.T) return Command_Execution_Status.E;

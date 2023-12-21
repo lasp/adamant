@@ -17,7 +17,7 @@ with Invalid_Command_Info.Representation;
 with Invalid_Parameter_Info.Representation;
 with Data_Product;
 
--- This is the limiter component. This component receives a generic type of data and queues that data. It then meters the output of the data through a ``send" connector at a commandable rate. The rate is set upon initialization, can be changed by command, or by parameter. The command or parameter connections may be ommitted if one or both of these features are not used. The packet rate is in units of the periodic tick rate that drives the component.
+-- This is the limiter component. This component receives a generic type of data and queues that data. It then meters the output of the data through a ``send" connector at a commandable rate. The rate is set upon initialization, can be changed by command, or by parameter. The command or parameter connections may be omitted if one or both of these features are not used. The packet rate is in units of the periodic tick rate that drives the component.
 generic
 package Component.Limiter.Implementation.Tester is
 

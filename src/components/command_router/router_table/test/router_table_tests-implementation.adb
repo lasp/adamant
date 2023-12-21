@@ -69,7 +69,7 @@ package body Router_Table_Tests.Implementation is
       Registration_Assert.Eq (Registration_Id, 36);
       Natural_Assert.Eq (Self.Table.Get_Size, 3);
 
-      -- Search table for nonexistant registrations:
+      -- Search table for nonexistent registrations:
       Lookup_Assert.Eq (Self.Table.Lookup_Registration_Id (96, Ignore), Router_Table.Id_Not_Found);
       Natural_Assert.Eq (Self.Table.Get_Size, 3);
 

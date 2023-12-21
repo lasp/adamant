@@ -132,7 +132,7 @@ package body Component.Ccsds_Downsampler.Implementation is
    -----------------------------------------------
    -- Description:
    --    These are the commands for the ccsds downsampler component.
-   -- Modifiy the filter factor of a specified APID. A value of 0 will filter all packets of that ID.
+   -- Modify the filter factor of a specified APID. A value of 0 will filter all packets of that ID.
    overriding function Modify_Filter_Factor (Self : in out Instance; Arg : in Filter_Factor_Cmd_Type.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
       use Apid_Tree;
@@ -145,7 +145,7 @@ package body Component.Ccsds_Downsampler.Implementation is
       case Status is
          when Success =>
             Self.Event_T_Send_If_Connected (Self.Events.Modified_Factor_Filter (Self.Sys_Time_T_Get, Arg));
-            -- If successfull, then get the entry back and send the data product to also verify
+            -- If successful, then get the entry back and send the data product to also verify
             Self.Send_Filter_Data_Product (Self.Apid_Entries.Get_Tree_Entry (Index), Index);
             return Success;
          when Invalid_Id =>

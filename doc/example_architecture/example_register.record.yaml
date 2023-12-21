@@ -1,8 +1,8 @@
 ---
 description: This is an example packed register.
 preamble: |
-  type Enable_Disable_Type is (Disabl, Enable);
-  for Enable_Disable_Type use (Disabl => 0, Enable => 1);
+  type Enable_Disable_Type is (Disable, Enable);
+  for Enable_Disable_Type use (Disable => 0, Enable => 1);
   type Fourteen_Bit_Uint is mod 2**14;
 # List the record fields. The whole register must be 32-bits in size.
 fields:

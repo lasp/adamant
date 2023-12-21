@@ -13,9 +13,9 @@ private
 
    -- This unit test tests the packetizer's normal behavior and make sure it packetizes memory properly, metering out the packets according to its rate.
    overriding procedure Test_Nominal_Packetization (Self : in out Instance);
-   -- This unit test tests the Set_Max_Packet_Rate commmand, and ensures that the rate changes appropriately.
+   -- This unit test tests the Set_Max_Packet_Rate command, and ensures that the rate changes appropriately.
    overriding procedure Test_Set_Max_Packet_Rate (Self : in out Instance);
-   -- This unit test tests a bad Set_Max_Packet_Rate commmand, and ensures that an appropriate event is thrown.
+   -- This unit test tests a bad Set_Max_Packet_Rate command, and ensures that an appropriate event is thrown.
    overriding procedure Test_Invalid_Command (Self : in out Instance);
    -- This unit test tests the behavior when the component's queue becomes full and must drop a memory dump request.
    overriding procedure Test_Memory_Dump_Dropped (Self : in out Instance);

@@ -9,7 +9,7 @@ package body Monitor is
          Self.State := Disabled;
       end if;
 
-      -- Set the persistance thresholds:
+      -- Set the persistence thresholds:
       Self.Set_Persistance_Thresholds (
          Green_To_Red_Persistance_Threshold => Green_To_Red_Persistance_Threshold,
          Red_To_Green_Persistance_Threshold => Red_To_Green_Persistance_Threshold

@@ -225,7 +225,7 @@ package body Component.Pid_Controller.Implementation is
       Self.Process_Parameter_Update (Arg);
    end Parameter_Update_T_Modify;
 
-   -- This is the command recieve connector.
+   -- This is the command receive connector.
    overriding procedure Command_T_Recv_Sync (Self : in out Instance; Arg : in Command.T) is
       -- Execute the command:
       Stat : constant Command_Response_Status.E := Self.Execute_Command (Arg);

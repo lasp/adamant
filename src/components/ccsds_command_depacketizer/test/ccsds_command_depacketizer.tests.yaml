@@ -2,9 +2,9 @@
 description: This is a unit test suite for the CCSDS Command Depacketizer component
 tests:
   - name: Test_Nominal_Depacketization
-    description: This unit test excersizes the nominal behavior of the ccsds command depacketizer.
+    description: This unit test exercises the nominal behavior of the ccsds command depacketizer.
   - name: Test_Invalid_Packet_Checksum
-    description: This unit test makes sure that packets with invalid checsums are reported and dropped.
+    description: This unit test makes sure that packets with invalid checksums are reported and dropped.
   - name: Test_Invalid_Packet_Type
     description: This unit test makes sure that packets with invalid packet types are reported and dropped.
   - name: Test_Packet_Too_Small

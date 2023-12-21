@@ -174,7 +174,7 @@ package body Tests.Implementation is
 
       --   --------------------------------------------------
       --   -- For this test change the time delta so more
-      --   -- elapsed time occures during execution. This
+      --   -- elapsed time occurs during execution. This
       --   -- should trigger the mex execution time. The
       --   -- tick time is set high enough that a new
       --   -- cycle time should not be thrown:

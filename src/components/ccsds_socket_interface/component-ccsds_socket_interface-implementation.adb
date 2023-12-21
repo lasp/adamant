@@ -89,7 +89,7 @@ package body Component.Ccsds_Socket_Interface.Implementation is
    -------------------------------------------------------
    -- Definition of subtasks functions for task execution:
    -------------------------------------------------------
-   -- This internal task is used to listen on the socket for incomming packets.
+   -- This internal task is used to listen on the socket for incoming packets.
    overriding procedure Listener (Self : in out Instance) is
       use Ada.Real_Time;
       use Serializer_Types;

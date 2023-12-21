@@ -28,7 +28,7 @@ package body Event_Filter_Entry is
          State_7 => Event_Filter_State.Unfiltered
       )) (0));
 
-      -- Then disable the event baised on our disable list
+      -- Then disable the event based on our disable list
       for Event_Id_To_Filter of Event_Filter_List loop
          Status := Set_Filter_State (Self, Event_Id_To_Filter, Event_Filter_State.Filtered);
          -- Assert here on status

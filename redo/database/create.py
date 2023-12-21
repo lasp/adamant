@@ -91,7 +91,7 @@ def _add_to_regex_dict_of_sets(dic, regex, object_instance):
         dic[regex] = (cregex, {object_instance})
 
 
-# Similiar to above but add a regex + ".do"
+# Similar to above but add a regex + ".do"
 def _add_to_regex_dict_of_sets_w_do(dic, regex, object_instance):
     if regex in dic:
         cregex, do_cregex, oi_set = dic[regex]
@@ -281,7 +281,7 @@ class _redo_target_dictionary(dict):
 
 
 # Create new build system databases that do not depend on
-# the buid path. We split this up because this operation can
+# the build path. We split this up because this operation can
 # be run even before the build path is calculated, which is
 # necessary for some operations.
 def create_pre_build_path():
@@ -465,7 +465,7 @@ def create(build_path):
                     # Add the do target to the redo_targets:
                     redo_target_dict.add_target(directory, do_target)
                     # If this do file builds an source file add it to the
-                    # source database if it is not already in the source databse
+                    # source database if it is not already in the source database
                     if _is_ada_source_file(
                         do_target
                     ) and do_target not in source_db.try_get_source(

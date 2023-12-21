@@ -135,7 +135,7 @@ package body Priority_Queue is
       Elements_On_Queue : constant Natural := Self.Priority_Heap.Get_Size;
    begin
       -- Make sure the indexes make sense based on how many elements are currently
-      -- enqueued. This logic helps us find any FSW inconsistancies and will also
+      -- enqueued. This logic helps us find any FSW inconsistencies and will also
       -- catch bit flips.
       if Self.Index_Pool_Start > Self.Index_Pool_Stop then
          pragma Assert ((Self.Index_Pool_Start - Self.Index_Pool_Stop) = Elements_On_Queue);

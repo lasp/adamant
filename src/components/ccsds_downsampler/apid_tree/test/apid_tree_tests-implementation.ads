@@ -12,7 +12,7 @@ private
    overriding procedure Set_Up_Test (Self : in out Instance);
    overriding procedure Tear_Down_Test (Self : in out Instance);
 
-   -- This test is inteded to test the different permutations of the init of the apid and filter factor type array.
+   -- This test is intended to test the different permutations of the init of the apid and filter factor type array.
    overriding procedure Test_Init_List (Self : in out Instance);
    -- This unit test tests changing the value of the filter factor for a given apid.
    overriding procedure Test_Set_Filter_Factor (Self : in out Instance);

@@ -81,7 +81,7 @@ package Component.Ccsds_Product_Extractor.Implementation.Tester is
    -----------------------------------------------
    -- Description:
    --    Data products for the Ccsds Product Extractor component.
-   -- A dummy data product since this component doesnt have its own data products, this provides a base to start from. This will be removed and replaced with the extracted products that the user defines in the extracted_products YAML file.
+   -- A dummy data product since this component doesn't have its own data products, this provides a base to start from. This will be removed and replaced with the extracted products that the user defines in the extracted_products YAML file.
    overriding procedure Dummy (Self : in out Instance; Arg : in Packed_Byte.T);
 
    -----------------------------------------------

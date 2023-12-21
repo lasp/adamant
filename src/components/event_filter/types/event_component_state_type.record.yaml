@@ -2,6 +2,6 @@
 description: This record is for the data product that indicates if the event filter component is enabled for filtering or disabled all together.
 fields:
   - name: Component_Filter_State
-    description: Flag to indicate if the component is enabled or disabled at a overriding level from the individal event states
+    description: Flag to indicate if the component is enabled or disabled at a overriding level from the individual event states
     type: Event_Filter_Entry_Enums.Global_Filter_State.E
     format: E8

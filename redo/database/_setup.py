@@ -14,7 +14,7 @@ import atexit
 # This module is private in that it exposes no public
 # function that are meant to be called externally. The
 # exception is database/setup.py, which calls the _setup()
-# funtion in this module. The purpose of splitting the two
+# function in this module. The purpose of splitting the two
 # modules up is to improve performance. Most of the time
 # the setup module is used, it does not need to import all the
 # many modules that these function require. By splitting the
@@ -28,7 +28,7 @@ import atexit
 # The dictionary is ordered, since order matters for things like
 # c compilation. We want to include project specific paths last
 # so that they can overwrite things in the database last, taking
-# precidence over same-named things in the core framework.
+# precedence over same-named things in the core framework.
 # ie. src/core/stuff.h in a project specific directory will be
 #     built/used instead of a src/core/stuff.h in a framework dir
 class _build_path(OrderedDict):
@@ -178,7 +178,7 @@ def _get_build_roots(cwd):
         return list(set([adamant_root, current_root]))
 
 
-# Santize a list of directories, removing empty
+# Sanitize a list of directories, removing empty
 # strings and removing duplicates.
 def _sanitize_path(path):
     path = list(filter(bool, path))
@@ -243,13 +243,13 @@ def _setup(redo_1, redo_2, redo_3, sandbox=False):
     # Create temporary directory to store source code links. This optimization
     # speeds up object compilation times.
     source_link_dir = linkdir + os.sep + "src"
-    # Set environment variable so that object compilation can retreive this location:
+    # Set environment variable so that object compilation can retrieve this location:
     os.environ["SOURCE_LINK_DIR"] = source_link_dir
     filesystem.safe_makedir(source_link_dir)
     # For any top level target that is running this setup we create a .running
     # file in the session temporary directory. This indicates that this rule
     # (or its dependencies) are currently building. This file will be removed
-    # when the building of this target is finished. Ths purpose of this file is
+    # when the building of this target is finished. The purpose of this file is
     # to help indicate to the build system when the temporary directory is no
     # longer begin used, and thus can be removed, freeing up RAM space on the
     # build machine.
@@ -257,14 +257,14 @@ def _setup(redo_1, redo_2, redo_3, sandbox=False):
     # Create temporary directory to store object links. This optimization
     # speeds up binding times.
     object_link_dir = linkdir + os.sep + "obj"
-    # Set environment variable so that object compilation can retreive this location:
+    # Set environment variable so that object compilation can retrieve this location:
     os.environ["OBJECT_LINK_DIR"] = object_link_dir
     filesystem.safe_makedir(object_link_dir)
     # Create temporary directory to store pre-built object files. This optimization
     # speeds up compilation times by allowing multiple objects to be built at the
     # same time using GPRBuild.
     object_pre_build_dir = linkdir + os.sep + "obj_pre"
-    # Set environment variable so that object compilation can retreive this location:
+    # Set environment variable so that object compilation can retrieve this location:
     os.environ["OBJECT_PRE_BUILD_DIR"] = object_pre_build_dir
     filesystem.safe_makedir(object_pre_build_dir)
     db_dir = linkdir + os.sep + "db"

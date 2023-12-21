@@ -48,7 +48,7 @@ def create_basic_generator(
     )
 
 
-# Add a class to a specific module. By defualt, calling this will add the generator to
+# Add a class to a specific module. By default, calling this will add the generator to
 # the module you called the function from.
 def add_class_to_module(cls, module=globals()):
     module[cls.__name__] = cls

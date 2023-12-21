@@ -61,7 +61,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    # We have a few autocoded depdendencies we need to import. So do that:
+    # We have a few autocoded dependencies we need to import. So do that:
     if not args.P:
         from util import pydep
 
@@ -142,7 +142,7 @@ if __name__ == "__main__":
         try:
             event_data, server = client_socket.recvfrom(packet_len)
             # print_log("got data: " + str(len(event_data)))
-            # If data is large enough to be a valid packet, the try to pase it.
+            # If data is large enough to be a valid packet, then try to pass it.
             if event_data and len(event_data) >= min_packet_len:
                 # The binary data should be a set of CCSDS packets, so extract those:
                 packet = Ccsds_Space_Packet.create_from_byte_array(event_data)
@@ -200,7 +200,7 @@ if __name__ == "__main__":
         except socket.error:
             client_socket.close()
             print_log(
-                "Socket error occured: {} | Exiting".format(socket.error)
+                "Socket error occurred: {} | Exiting".format(socket.error)
                 + " at "
                 + timestamp_str()
             )
@@ -210,4 +210,4 @@ if __name__ == "__main__":
             print_log("Socket Closed | Exiting at " + timestamp_str())
             sys.exit(0)
         except BaseException as e:
-            print_log("Unexpected error occured:\n" + str(e))
+            print_log("Unexpected error occurred:\n" + str(e))

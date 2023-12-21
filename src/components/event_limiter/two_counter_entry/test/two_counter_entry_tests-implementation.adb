@@ -74,7 +74,7 @@ package body Two_Counter_Entry_Tests.Implementation is
       -- Last one out of range
       State_Return_Status := My_Counter.Get_Enable_State (6, Event_State);
       Event_State_Status_Assert.Eq (State_Return_Status, Two_Counter_Entry.Invalid_Id);
-      Event_State_Assert.Eq (Event_State, Event_State_Type.Disabled); -- Make sure we dont have something unitialized
+      Event_State_Assert.Eq (Event_State, Event_State_Type.Disabled); -- Make sure we dont have something uninitialized
       My_Counter.Destroy;
 
       -- Single event init, default list
@@ -180,7 +180,7 @@ package body Two_Counter_Entry_Tests.Implementation is
       Count_Status_Assert.Eq (Return_Status, Two_Counter_Entry.Success);
       Return_Status := My_Counter.Increment_Counter (6);    -- Count = 6
       Count_Status_Assert.Eq (Return_Status, Two_Counter_Entry.Success);
-      -- Maxed out presistance call
+      -- Maxed out persistence call
       Return_Status := My_Counter.Increment_Counter (6);    -- Count = 7
       Count_Status_Assert.Eq (Return_Status, Two_Counter_Entry.Event_Max_Limit);
       -- Checking that it should still be maxed out
@@ -207,7 +207,7 @@ package body Two_Counter_Entry_Tests.Implementation is
       Count_Status_Assert.Eq (Return_Status, Two_Counter_Entry.Success);
       Return_Status := My_Counter.Increment_Counter (5);    -- Count = 6 Total of 7, Count is post incremented to 7
       Count_Status_Assert.Eq (Return_Status, Two_Counter_Entry.Success);
-      -- Maxed out presistance call
+      -- Maxed out persistence call
       Return_Status := My_Counter.Increment_Counter (5);    -- Count = 7
       Count_Status_Assert.Eq (Return_Status, Two_Counter_Entry.Event_Max_Limit);
       -- Checking that it should still be maxed out
@@ -310,7 +310,7 @@ package body Two_Counter_Entry_Tests.Implementation is
       Return_Status := My_Counter.Decrement_Counter (3);
       Count_Status_Assert.Eq (Return_Status, Two_Counter_Entry.Success);
 
-      -- Increment and then test the return of the decrment
+      -- Increment and then test the return of the decrement
       Return_Status := My_Counter.Increment_Counter (3);
       Count_Status_Assert.Eq (Return_Status, Two_Counter_Entry.Success);
       Return_Status := My_Counter.Increment_Counter (3);
@@ -376,7 +376,7 @@ package body Two_Counter_Entry_Tests.Implementation is
       Return_Status := My_Counter.Decrement_Counter (4);
       Count_Status_Assert.Eq (Return_Status, Two_Counter_Entry.Success);
 
-      -- To test that a disabled event doesnt return a max limit, we need to increment, disable the event, then decrement
+      -- To test that a disabled event doesn't return a max limit, we need to increment, disable the event, then decrement
       State_Return_Status := My_Counter.Get_Enable_State (5, Event_State);
       Event_State_Status_Assert.Eq (State_Return_Status, Two_Counter_Entry.Success);
       Event_State_Assert.Eq (Event_State, Event_State_Type.Enabled);
@@ -583,7 +583,7 @@ package body Two_Counter_Entry_Tests.Implementation is
       Persistence := My_Counter.Get_Persistence;
       Natural_Assert.Eq (Natural (Persistence), 7);
 
-      -- Make sure we opperate on enabled events
+      -- Make sure we operate on enabled events
       State_Return_Status := My_Counter.Get_Enable_State (0, Event_State);
       Event_State_Status_Assert.Eq (State_Return_Status, Two_Counter_Entry.Success);
       Event_State_Assert.Eq (Event_State, Event_State_Type.Enabled);
@@ -652,7 +652,7 @@ package body Two_Counter_Entry_Tests.Implementation is
       Return_Status := My_Counter.Increment_Counter (2);
       Count_Status_Assert.Eq (Return_Status, Two_Counter_Entry.Event_Max_Limit);
 
-      -- Also make sure that the persistance for the last one was reset back to the limit
+      -- Also make sure that the persistence for the last one was reset back to the limit
       Return_Status := My_Counter.Decrement_Counter (0);
       Count_Status_Assert.Eq (Return_Status, Two_Counter_Entry.Event_Max_Limit);
 

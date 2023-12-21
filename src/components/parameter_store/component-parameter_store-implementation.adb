@@ -56,7 +56,7 @@ package body Component.Parameter_Store.Implementation is
       if Self.Is_Packet_T_Send_Connected then
          -- First calculate the CRC of the parameter store, and overwrite the calculated_CRC field in the header.
          -- We do this every time we dump the packet, to make sure the calculated_CRC is always up to date. This
-         -- lets the ground see if a bit flip ocurred.
+         -- lets the ground see if a bit flip occurred.
          declare
             use Serializer_Types;
             use Basic_Types;
@@ -79,7 +79,7 @@ package body Component.Parameter_Store.Implementation is
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- This is the command recieve connector.
+   -- This is the command receive connector.
    overriding procedure Command_T_Recv_Async (Self : in out Instance; Arg : in Command.T) is
       -- Execute the command:
       Stat : constant Command_Response_Status.E := Self.Execute_Command (Arg);

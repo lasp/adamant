@@ -159,7 +159,7 @@ package body Time_Of_Tone_Master_Tests.Implementation is
          Natural_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get_Count, 0);
       end loop;
 
-      -- Set period to one and reenable:
+      -- Set period to one and re-enable:
       Self.Tester.Component_Instance.Init (Sync_Period => 1, Enabled_State => Disabled);
 
       -- Call the component set up method that the assembly would normally call.

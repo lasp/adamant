@@ -2,7 +2,7 @@
 execution: passive
 description: This is the command component, which executes commands.
 connectors:
-  - description: This is the command recieve connector.
+  - description: This is the command receive connector.
     type: Command.T
     kind: recv_sync
   - description: This connector is used to register the components commands at initialization, and send command responses after execution.

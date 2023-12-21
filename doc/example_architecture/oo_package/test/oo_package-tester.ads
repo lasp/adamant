@@ -5,7 +5,7 @@ package Oo_Package.Tester is
    -- internal private variables during testing, even though you don't want this
    -- feature during the deployment of your software.
    --
-   -- This function retreives the private value of "n" from within the object's
+   -- This function retrieves the private value of "n" from within the object's
    -- record and returns it.
    function Get_N (Self : in Instance) return Integer;
 

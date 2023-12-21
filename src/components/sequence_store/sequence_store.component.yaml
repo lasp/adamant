@@ -23,7 +23,7 @@ init:
       type: Boolean
       description: "If True, then the slot summaries will be dumped at startup."
 connectors:
-  - description: This is the command recieve connector.
+  - description: This is the command receive connector.
     type: Command.T
     kind: recv_async
   - description: This connector is used to send command responses.

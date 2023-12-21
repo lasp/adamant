@@ -59,7 +59,7 @@ package body Component.Parameters.Implementation is
 
             -- Make sure the parameter entries are layout in byte order, with no deadspace and no overlap, and are not too large.
             pragma Assert (Param_Entry.Start_Index = Current_Byte, "Unexpected byte layout in parameter table at ID '" & Parameter_Id'Image (Param_Entry.Id) & "'.");
-            pragma Assert (Param_Entry.End_Index >= Param_Entry.Start_Index, "end_Index must be greated than start_Index at ID '" & Parameter_Id'Image (Param_Entry.Id) & "'.");
+            pragma Assert (Param_Entry.End_Index >= Param_Entry.Start_Index, "end_Index must be greater than start_Index at ID '" & Parameter_Id'Image (Param_Entry.Id) & "'.");
             pragma Assert (Param_Entry.End_Index - Param_Entry.Start_Index + 1 <= Parameter_Types.Parameter_Buffer_Length_Type'Last,
                "Parameter ID '" & Parameter_Id'Image (Param_Entry.Id) & "' is too large to fit in the parameter record.");
             Current_Byte := Param_Entry.End_Index + 1;
@@ -394,7 +394,7 @@ package body Component.Parameters.Implementation is
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- This is the command recieve connector.
+   -- This is the command receive connector.
    overriding procedure Command_T_Recv_Async (Self : in out Instance; Arg : in Command.T) is
       -- Execute the command:
       Stat : constant Command_Response_Status.E := Self.Execute_Command (Arg);

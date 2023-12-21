@@ -97,7 +97,7 @@ package Seq_Runtime is
                 Self.Get_State = Wait_Load_New_Seq_Elsewhere;
 
    -- If a "spawn" instruction is encountered, this function will return the destination engine that the
-   -- new sequence shouod be spawned into.
+   -- new sequence should be spawned into.
    function Get_Spawn_Destination (Self : in Instance) return Sequence_Engine_Id with
       Pre => Self.Get_State = Wait_Load_New_Seq_Elsewhere;
 

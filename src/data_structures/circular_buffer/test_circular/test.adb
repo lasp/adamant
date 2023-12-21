@@ -398,7 +398,7 @@ procedure Test is
       Put_Line ("Passed.");
       Put_Line ("");
 
-      Put_Line ("Test more overwites.");
+      Put_Line ("Test more overwrites.");
       Data := (others => 0);
       Check_Meta (0);
       -- Lots of overwrites:

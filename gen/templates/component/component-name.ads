@@ -278,7 +278,7 @@ package Component.{{ name }} is
    -- Description:
 {{ printMultiLine(data_dependencies.description, '   --    ') }}
 {% endif %}
-   -- Function which retreives a data dependency. This should be overridden by the implementation to call the correct connector.
+   -- Function which retrieves a data dependency. This should be overridden by the implementation to call the correct connector.
    not overriding function Get_Data_Dependency (Self : in out Base_Instance; Id : in Data_Product_Types.Data_Product_Id) return Data_Product_Return.T is abstract;
 
    -- Invalid data dependency handler. This procedure is called when a data dependency's id or length are found to be invalid:
@@ -331,7 +331,7 @@ private
    );
 
 {% if connectors.arrayed_invokee() %}
-   -- Define connector indentifier record, which also includes
+   -- Define connector identifier record, which also includes
    -- room for the index that the connector is being invoked on.
    type Connector_Identifier_Type is record
       Id : Connector_Identifier_Enum;
@@ -350,7 +350,7 @@ private
       Index at 0 range 8 .. 23;
    end record;
 {% else %}
-   -- Define packed connector indentifier record.
+   -- Define packed connector identifier record.
    type Connector_Identifier_Type is record
       Id : Connector_Identifier_Enum;
    end record

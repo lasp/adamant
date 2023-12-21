@@ -85,7 +85,7 @@ package body Task_Synchronization is
          -- allows a task to poll this procedure, regardless
          -- of whether a task is waiting or not.
          if Wait'Count > 0 then
-            -- If we are at or over the timout limit then
+            -- If we are at or over the timeout limit then
             -- trigger a timeout condition.
             if Timeout_Count >= Timeout_Limit then
                Do_Timeout := True;

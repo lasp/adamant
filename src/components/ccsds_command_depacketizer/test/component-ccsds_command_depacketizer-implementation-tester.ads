@@ -110,9 +110,9 @@ package Component.Ccsds_Command_Depacketizer.Implementation.Tester is
    overriding procedure Invalid_Packet_Checksum (Self : in out Instance; Arg : in Invalid_Packet_Xor8_Info.T);
    -- A packet was received with an invalid ccsds packet type. The expected packet type is a telecommand, but a telemtry packet was received.
    overriding procedure Invalid_Packet_Type (Self : in out Instance; Arg : in Ccsds_Primary_Header.T);
-   -- The packet recieved was too small to contain necessary command information.
+   -- The packet received was too small to contain necessary command information.
    overriding procedure Packet_Too_Small (Self : in out Instance; Arg : in Invalid_Packet_Length.T);
-   -- The packet recieved was too large and is bigger than the size of a command.
+   -- The packet received was too large and is bigger than the size of a command.
    overriding procedure Packet_Too_Large (Self : in out Instance; Arg : in Invalid_Packet_Length.T);
    -- A packet was received without a secondary header, but the secondary header is required.
    overriding procedure No_Secondary_Header (Self : in out Instance; Arg : in Ccsds_Primary_Header.T);

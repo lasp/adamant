@@ -16,7 +16,7 @@ events:
     description: A command was received with invalid parameters.
     param_type: Invalid_Command_Info.T
   - name: Copy_Timeout
-    description: A timeout occured while waiting for a copy operation to complete.
+    description: A timeout occurred while waiting for a copy operation to complete.
   - name: Copy_Failure
     description: A copy failed.
     param_type: Memory_Region_Release.T

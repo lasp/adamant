@@ -90,7 +90,7 @@ private
    -----------------------------------------------
    -- Description:
    --    These are the commands for the ccsds downsampler component.
-   -- Modifiy the filter factor of a specified APID. A value of 0 will filter all packets of that ID.
+   -- Modify the filter factor of a specified APID. A value of 0 will filter all packets of that ID.
    overriding function Modify_Filter_Factor (Self : in out Instance; Arg : in Filter_Factor_Cmd_Type.T) return Command_Execution_Status.E;
 
    -- Invalid command handler. This procedure is called when a command's arguments are found to be invalid:

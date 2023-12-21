@@ -201,7 +201,7 @@ package body Event_Filter_Entry_Tests.Implementation is
       State_Return_Status := Event_Filter.Filter_Event (1);
       Event_Filter_Status_Assert.Eq (State_Return_Status, Unfiltered);
 
-      -- Since there is only one, test the boundry cases
+      -- Since there is only one, test the boundary cases
       State_Return_Status := Event_Filter.Filter_Event (0);
       Event_Filter_Status_Assert.Eq (State_Return_Status, Out_Of_Range);
 
@@ -240,7 +240,7 @@ package body Event_Filter_Entry_Tests.Implementation is
       State_Filter_Status := Event_Filter.Filter_Event (0);
       Event_Filter_Status_Assert.Eq (State_Filter_Status, Unfiltered);
 
-      -- Same process as before but refersed on one that begins filterd
+      -- Same process as before but refersed on one that begins filtered
       State_Filter_Status := Event_Filter.Filter_Event (3);
       Event_Filter_Status_Assert.Eq (State_Filter_Status, Filtered);
 

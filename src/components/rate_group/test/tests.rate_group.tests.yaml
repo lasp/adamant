@@ -2,7 +2,7 @@
 description: This is a unit test suite for the Rate Group component.
 tests:
   - name: Nominal
-    description: This unit test excersizes Rate Group component through a nominal scenario.
+    description: This unit test exercises Rate Group component through a nominal scenario.
   - name: Cycle_Slip_Trigger
     description: This unit test triggers a cycle slip and makes sure that the Rate Group component reports it.
   - name: Time_Reporting

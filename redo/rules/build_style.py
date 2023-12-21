@@ -10,7 +10,7 @@ import re
 import glob
 
 
-# This command is the equivelant of turning on style checking
+# This command is the equivalent of turning on style checking
 # and recompiling all objects within the current directory. ie.
 #
 #  $ export CHECK_STYLE=True
@@ -48,7 +48,7 @@ class build_style(build_rule_base):
         # Turn on the style checking:
         os.environ["CHECK_STYLE"] = "True"
 
-        # Simply force recompile all the objects in this directory whith style checking enabled
+        # Simply force recompile all the objects in this directory with style checking enabled
         # and we will get nice style check messages.
         filesystem.safe_makedir(style_directory)
         style_log_file = style_directory + os.sep + "style.log"

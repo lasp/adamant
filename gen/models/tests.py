@@ -81,7 +81,7 @@ class tests(component_submodel):
             # Do base class load:
             component_submodel.load_component(self)
         except ModelException:
-            # If this occured, then this unit test is likely not a component
+            # If this occurred, then this unit test is likely not a component
             # unit test, so just continue on. We want self.component to be None
             # in this case.
             pass

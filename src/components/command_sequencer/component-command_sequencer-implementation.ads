@@ -12,7 +12,7 @@ with Seq_Types;
 
 -- The Command Sequencer component executes command sequences with a configurable number of engines. The sequence engines execute sequences in the LASP Awesome Sequence Engine Language (LASEL) compiled by the LASP SEQ tool. Documentation on LASEL is included in this component's doc/ directory.
 --
--- This component runs a configurable number of sequence engines using a single Adamant task. The task runs each engine in priority order, where lower numbered engines take precendence over higher numbered engines. Each engine contains a configurable-sized stack that allows sequences to call subsequences. This component adheres to the property that commands are only executed after previous commands have completed (ie. a command response has been received). In this way the sequences are largely event driven, waiting on the execution of previous commands to finish prior to executing subsequent ones. A periodic tick is supplied to the component to provide timing control for sequences that need to execute relative or absolute waits, or check until a telemetry condition has been met before proceding.
+-- This component runs a configurable number of sequence engines using a single Adamant task. The task runs each engine in priority order, where lower numbered engines take precedence over higher numbered engines. Each engine contains a configurable-sized stack that allows sequences to call subsequences. This component adheres to the property that commands are only executed after previous commands have completed (ie. a command response has been received). In this way the sequences are largely event driven, waiting on the execution of previous commands to finish prior to executing subsequent ones. A periodic tick is supplied to the component to provide timing control for sequences that need to execute relative or absolute waits, or check until a telemetry condition has been met before proceeding.
 --
 -- The sequence engine and LASEL interpreter is located in the seq/ directory.
 package Component.Command_Sequencer.Implementation is
@@ -43,7 +43,7 @@ private
    type Seq_Engine_Array is array (Seq_Types.Sequence_Engine_Id range <>) of Seq.Engine;
    type Seq_Engine_Array_Access is access all Seq_Engine_Array;
 
-   -- Create a type for auxillary data for each sequence engine. This holds information
+   -- Create a type for auxiliary data for each sequence engine. This holds information
    -- about each sequence engine that is not held within the engine type itself.
    type Engine_Aux_Data_Type is record
       -- Timeout counter - this helps the component timeout while waiting on a specific
@@ -63,7 +63,7 @@ private
       -- Maximum number of instructions that can be executed without a pausing action. Prevents
       -- infinite loops within a running sequence.
       Instruction_Limit : Positive := Positive'Last;
-      -- Maximum number ot ticks to spend waiting on command responses and subsequence loads. A
+      -- Maximum number of ticks to spend waiting on command responses and subsequence loads. A
       -- timeout results in a transition of the engine to an error state.
       Timeout_Limit : Natural := Natural'First;
       -- Configuration which determines whether or not an engine continues to execute after a

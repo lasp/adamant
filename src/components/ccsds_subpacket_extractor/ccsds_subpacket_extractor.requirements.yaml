@@ -2,5 +2,5 @@
 description: The requirements for the CCSDS Subpacket Extractor component are specified below.
 requirements:
   - text: The component shall extract CCSDS subpackets from a received CCSDS packet.
-  - text: The component shall drop unsuccessfully extracted CCSDS subpackets and report the occurence in an event.
+  - text: The component shall drop unsuccessfully extracted CCSDS subpackets and report the occurrence in an event.
   - text: The component shall package and send unsuccessfully extracted CCSDS subpackets as error packets.

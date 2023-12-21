@@ -1,9 +1,9 @@
 ---
 events:
   - name: Watchdog_Pet_Checks_Enabled
-    description: Indicates a command was recieved to enable the checks on upstream pets.
+    description: Indicates a command was received to enable the checks on upstream pets.
   - name: Watchdog_Pet_Checks_Disabled
-    description: Indicates a command was recieved to disable the checks on upstream pets.
+    description: Indicates a command was received to disable the checks on upstream pets.
   - name: Watchdog_Limit_Set
     description: An event to indicate that the limit was changed by command for a particular index.
     param_type: Watchdog_Limit_Cmd.T

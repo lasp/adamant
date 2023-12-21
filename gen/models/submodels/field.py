@@ -396,7 +396,7 @@ class field(variable):
         # This is not a packed type, determine if type is valid based on size in bits.
         else:
             # The caller to this function must have already loaded the type ranges for this type, otherwise
-            # the ranges wont be available for the comparison below.
+            # the ranges won't be available for the comparison below.
             assert self.type_ranges_loaded, (
                 "This should be True for '"
                 + str(self.name)

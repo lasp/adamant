@@ -16,7 +16,7 @@ private
 
    -- This unit test is to test incrementing counters for the range events as they come in with both enabled and disabled states.
    overriding procedure Test_Received_Event (Self : in out Instance);
-   -- This unit test is to test the decrement of all the event counters in the tick and the contruction of the event if events were limited.
+   -- This unit test is to test the decrement of all the event counters in the tick and the construction of the event if events were limited.
    overriding procedure Test_Decrement_Event_Count (Self : in out Instance);
    -- This unit test sends the issue command and test that the appropriate values are received in that packet.
    overriding procedure Test_Issue_State_Packet (Self : in out Instance);

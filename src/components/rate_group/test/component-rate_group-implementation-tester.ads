@@ -18,7 +18,7 @@ with Cycle_Slip_Param.Representation;
 with Time_Exceeded.Representation;
 with Full_Queue_Param.Representation;
 
--- The Rate Group component is a queued component which invokes Tick connectors attached to it whenever it receives a Tick in. The tick in is intended to be periodic, allowing the component to control the execution of other components at a periodic rate. All components attached to the invoker connector of this component are said to be in a rate group, since they all excute at the same rate. Components are executed in the order they are attached to the components invoker connector. The execution of all attached connectors is expected to complete before another incoming Tick is put on the Rate Group component's queue. If the execution runs long, a cycle slip event is reported.
+-- The Rate Group component is a queued component which invokes Tick connectors attached to it whenever it receives a Tick in. The tick in is intended to be periodic, allowing the component to control the execution of other components at a periodic rate. All components attached to the invoker connector of this component are said to be in a rate group, since they all execute at the same rate. Components are executed in the order they are attached to the components invoker connector. The execution of all attached connectors is expected to complete before another incoming Tick is put on the Rate Group component's queue. If the execution runs long, a cycle slip event is reported.
 --
 -- Note that this component is designed to be Active in an assembly. In this way the Rate Group will provide a task on which Passive components can execute.
 package Component.Rate_Group.Implementation.Tester is

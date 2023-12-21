@@ -224,7 +224,7 @@ package body Variable_Database_Tests.Implementation is
          Value.Length := Cnt;
          Value.Buffer := (others => Cnt);
          Cnt := Cnt + 1;
-         Put_Line ("overridding " & Natural'Image (Natural (Id)) & " => " & Simple_Variable.Representation.To_Tuple_String (Value));
+         Put_Line ("overriding " & Natural'Image (Natural (Id)) & " => " & Simple_Variable.Representation.To_Tuple_String (Value));
          U_Status := Self.Db.Override (Id, Value);
          Update_Status_Assert.Eq (U_Status, My_Database.Success);
          pragma Assert (Self.Db.Any_Overridden = True);

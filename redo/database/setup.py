@@ -61,7 +61,7 @@ def reset():
 
 # This function does any necessary build system cleanup.
 # It will only do the cleanup if this is the top level
-# instatiation of redo.
+# instantiation of redo.
 def cleanup(redo_1, redo_2, redo_3):
     if "TOP_LEVEL_TARGET" in os.environ and os.environ["TOP_LEVEL_TARGET"] == redo_1:
         from database import _setup

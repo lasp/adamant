@@ -119,7 +119,7 @@ package Component.Memory_Copier.Implementation.Tester is
    overriding procedure Finished_Copy (Self : in out Instance; Arg : in Virtual_Memory_Region_Copy.T);
    -- A command was received with invalid parameters.
    overriding procedure Invalid_Command_Received (Self : in out Instance; Arg : in Invalid_Command_Info.T);
-   -- A timeout occured while waiting for a copy operation to complete.
+   -- A timeout occurred while waiting for a copy operation to complete.
    overriding procedure Copy_Timeout (Self : in out Instance);
    -- A copy failed.
    overriding procedure Copy_Failure (Self : in out Instance; Arg : in Memory_Region_Release.T);

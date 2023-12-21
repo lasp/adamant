@@ -85,7 +85,7 @@ package body Event_Packetizer_Tests.Implementation is
       P_Idx : Natural;
       Bytes_Sent : Natural := 0;
    begin
-      -- Intialize the component with 2 internal packets, and no packet timeout:
+      -- Initialize the component with 2 internal packets, and no packet timeout:
       T.Component_Instance.Init (Num_Internal_Packets => 2, Partial_Packet_Timeout => 0);
 
       -- Send some ticks and expect no packets:
@@ -215,7 +215,7 @@ package body Event_Packetizer_Tests.Implementation is
       The_Packet : Packet.T;
       P_Idx : Natural;
    begin
-      -- Intialize the component with 2 internal packets, and a packet timeout of 3 ticks:
+      -- Initialize the component with 2 internal packets, and a packet timeout of 3 ticks:
       T.Component_Instance.Init (Num_Internal_Packets => 2, Partial_Packet_Timeout => 3);
 
       -- Send some ticks and expect no packets:
@@ -298,7 +298,7 @@ package body Event_Packetizer_Tests.Implementation is
       The_Packet : Packet.T;
       P_Idx : Natural;
    begin
-      -- Intialize the component with 2 internal packets, and a packet timeout of 3 ticks:
+      -- Initialize the component with 2 internal packets, and a packet timeout of 3 ticks:
       T.Component_Instance.Init (Num_Internal_Packets => 2, Partial_Packet_Timeout => 1);
 
       -- Send some ticks and expect no packets:
@@ -374,7 +374,7 @@ package body Event_Packetizer_Tests.Implementation is
       P_Idx : Natural;
       Commands : Event_Packetizer_Commands.Instance renames Self.Tester.Commands;
    begin
-      -- Intialize the component with 2 internal packets, and a disabled packet timeout:
+      -- Initialize the component with 2 internal packets, and a disabled packet timeout:
       T.Component_Instance.Init (Num_Internal_Packets => 2, Partial_Packet_Timeout => 0);
 
       -- Send some ticks and expect no packets:
@@ -493,7 +493,7 @@ package body Event_Packetizer_Tests.Implementation is
       P_Idx : Natural;
       Bytes_Sent : Natural := 0;
    begin
-      -- Intialize the component with 2 internal packets, and no packet timeout:
+      -- Initialize the component with 2 internal packets, and no packet timeout:
       T.Component_Instance.Init (Num_Internal_Packets => 2, Partial_Packet_Timeout => 0);
 
       -- OK, fill up a packet, and make sure that no packets are dropped:
@@ -633,7 +633,7 @@ package body Event_Packetizer_Tests.Implementation is
       T.Event_T_Send (Event_2);
       T.Event_T_Send (Event_2);
 
-      -- Intialize the component with 2 internal packets, and no packet timeout:
+      -- Initialize the component with 2 internal packets, and no packet timeout:
       T.Component_Instance.Init (Num_Internal_Packets => 2, Partial_Packet_Timeout => 0);
 
       -- Send tick and expect data product to be emitted:

@@ -13,7 +13,7 @@ with Interfaces; use Interfaces;
 with Seq_Print;
 
 -- This package implements a sequence engine which is designed to run a single sequence at a time. It includes
--- a stack that allows sequences to "call" eachother up to a depth limit set at initialization.
+-- a stack that allows sequences to "call" each other up to a depth limit set at initialization.
 package Seq is
    use Seq_Engine_State;
    use Seq_Runtime_State;
@@ -70,7 +70,7 @@ package Seq is
    -- Get the state of the currently running sequence.
    function Get_Running_Sequence_State (Self : in Engine) return Seq_Enums.Seq_Runtime_State.E;
 
-   -- Get the currenty deepest allocated level in the stack. 0 means that the highest level
+   -- Get the currently deepest allocated level in the stack. 0 means that the highest level
    -- sequence is running.
    function Get_Stack_Level (Self : in Engine) return Max_Seq_Num;
 
@@ -174,7 +174,7 @@ package Seq is
    -- Return the runtime state of the sequence at the specified stack index.
    function Get_Sequence_State (Self : in Engine; Index : in Max_Seq_Num) return Seq_Runtime_State.E;
 
-   -- Return state after the last exection of the sequence at the specified stack index.
+   -- Return state after the last execution of the sequence at the specified stack index.
    function Get_Last_Execute_State (Self : in Engine) return Seq_Execute_State.E;
 
    -- Return memory region containing the sequence at the specified stack index.

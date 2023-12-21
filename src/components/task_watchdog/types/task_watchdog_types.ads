@@ -4,7 +4,7 @@ with Task_Watchdog_Enums;
 
 package Task_Watchdog_Types is
    use Task_Watchdog_Enums;
-   -- Counter types for compatability and limits
+   -- Counter types for compatibility and limits
    type Missed_Pet_Count_Type is new Natural range Natural'First .. 65535;
    subtype Missed_Pet_Limit_Type is Missed_Pet_Count_Type range Missed_Pet_Count_Type'First + 1 .. Missed_Pet_Count_Type'Last - 1;
 

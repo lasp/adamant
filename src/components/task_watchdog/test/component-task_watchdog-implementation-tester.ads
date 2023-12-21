@@ -23,7 +23,7 @@ with Watchdog_Action_Cmd.Representation;
 with Packed_Connector_Index.Representation;
 with Invalid_Command_Info.Representation;
 
--- The Task Watchdog component receives pets from components that execute in a periodic manner throughout the assembly. The receipt of a pet indicates that the component is running well and is what is refered to as a watchdog. If it detects that the component has stopped executing for some configurable time, called a limit, it will either ignore the fault, throw a warning event, or throw a fault and possibly stop servicing an downstream watchdog (usually a hardware watchdog) based on the component's configuration. The configuration is dependent on the input list generated from a yaml model for this component. The input requires a connector name, a limit for the number of ticks without a pet, the criticality of the component, and the action to take if the limit is exceeded which is one of the three described before.
+-- The Task Watchdog component receives pets from components that execute in a periodic manner throughout the assembly. The receipt of a pet indicates that the component is running well and is what is referred to as a watchdog. If it detects that the component has stopped executing for some configurable time, called a limit, it will either ignore the fault, throw a warning event, or throw a fault and possibly stop servicing an downstream watchdog (usually a hardware watchdog) based on the component's configuration. The configuration is dependent on the input list generated from a yaml model for this component. The input requires a connector name, a limit for the number of ticks without a pet, the criticality of the component, and the action to take if the limit is exceeded which is one of the three described before.
 -- In addition, the criticality of the task is also defined in the yaml model which determines if the watchdog component stops petting the downstream watchdog.
 package Component.Task_Watchdog.Implementation.Tester is
 
@@ -115,9 +115,9 @@ package Component.Task_Watchdog.Implementation.Tester is
    -----------------------------------------------
    -- Event handler primitive:
    -----------------------------------------------
-   -- Indicates a command was recieved to enable the checks on upstream pets.
+   -- Indicates a command was received to enable the checks on upstream pets.
    overriding procedure Watchdog_Pet_Checks_Enabled (Self : in out Instance);
-   -- Indicates a command was recieved to disable the checks on upstream pets.
+   -- Indicates a command was received to disable the checks on upstream pets.
    overriding procedure Watchdog_Pet_Checks_Disabled (Self : in out Instance);
    -- An event to indicate that the limit was changed by command for a particular index.
    overriding procedure Watchdog_Limit_Set (Self : in out Instance; Arg : in Watchdog_Limit_Cmd.T);

@@ -28,7 +28,7 @@ begin
    Define_Switch (Config, Num_Engines'Access, "-n:", Long_Switch => "--num_engines:", Help => "The number of sequence engines to include in the simulator (default 1).");
    Define_Switch (Config, Stack_Depth'Access, "-s:", Long_Switch => "--stack_depth:", Help => "The stack depth to include in each simulator sequence engine (default 1).");
    Define_Switch (Config, Initial_Load'Access, "-e:", Long_Switch => "--engine_to_load:", Help => "The engine to load the sequence into (default 0).");
-   Define_Switch (Config, Start_Source_Id'Access, "-i:", Long_Switch => "--start_source_id:", Help => "The engine command srouce ID to load into the first engine (default 0). Each subsequent engine will have an incremented command source ID starting at this value.");
+   Define_Switch (Config, Start_Source_Id'Access, "-i:", Long_Switch => "--start_source_id:", Help => "The engine command source ID to load into the first engine (default 0). Each subsequent engine will have an incremented command source ID starting at this value.");
    Define_Switch (Config, Start_Time'Access, "-t:", Long_Switch => "--start_time:", Help => "The simulator absolute start time in seconds (default 0).");
    Define_Switch (Config, Config_Filename_Access'Access, "-c:", Long_Switch => "--config:", Help => "The sequence builder configuration file that defines commands and telemetry.");
    Define_Switch (Config, Ignore'Access, "-d:", Help => "This switch is unused, but used to maintain compatibility with the original SEQ implementation.");
@@ -70,7 +70,7 @@ begin
    -- Initialize the simulator:
    Put_Line ("Initializing simulator with " & Strip (Num_Engines'Image) & " sequence engines, each with a stack depth of " & Strip (Stack_Depth'Image) & ". The starting command source ID is " & Strip (Start_Source_Id'Image) & ".");
    if not Simulator.Initialize (Sequence_Engine_Id (Num_Engines), Max_Seq_Num (Stack_Depth), Command_Source_Id (Start_Source_Id)) then
-      Put_Line ("An error occured initializing the engines!");
+      Put_Line ("An error occurred initializing the engines!");
       return;
    end if;
 

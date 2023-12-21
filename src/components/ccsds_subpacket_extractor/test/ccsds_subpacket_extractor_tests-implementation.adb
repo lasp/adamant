@@ -338,7 +338,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       Packet.Header.Packet_Length := Packet.Header.Packet_Length + 1;
       T.Ccsds_Space_Packet_T_Send (Packet);
 
-      -- Expect 2 packets to be extacted correctly:
+      -- Expect 2 packets to be extracted correctly:
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 2);
       Ccsds_Space_Packet_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get (1), Packet_1);
       Ccsds_Space_Packet_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get (2), Packet_3);
@@ -359,7 +359,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       T.Ccsds_Space_Packet_T_Send_2 (Packet);
       Natural_Assert.Eq (Self.Tester.Dispatch_All, 1);
 
-      -- Expect 1 packet to be extacted correctly:
+      -- Expect 1 packet to be extracted correctly:
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 3);
       Ccsds_Space_Packet_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get (3), Packet_3);
 
@@ -448,7 +448,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       Packet.Header.Packet_Length := Packet.Header.Packet_Length + 1;
       T.Ccsds_Space_Packet_T_Send (Packet);
 
-      -- Expect 2 packets to be extacted correctly:
+      -- Expect 2 packets to be extracted correctly:
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 7);
       Ccsds_Space_Packet_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get (6), Packet_1);
       Ccsds_Space_Packet_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get (7), Packet_3);

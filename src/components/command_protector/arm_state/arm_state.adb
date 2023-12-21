@@ -23,7 +23,7 @@ package body Arm_State is
          Timeout := New_Timeout;
       end Arm;
 
-      -- Unarm the system and cancel the timout:
+      -- Unarm the system and cancel the timeout:
       procedure Unarm is
          use Packed_Arm_Timeout;
       begin

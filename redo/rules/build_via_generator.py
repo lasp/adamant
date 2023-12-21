@@ -12,7 +12,7 @@ import sys
 
 # This private function runs a generator. It first inspects
 # the output filename and makes sure that it is a registered
-# product in the generator database. If it is, it retreives the
+# product in the generator database. If it is, it retrieves the
 # appropriate generator, and runs it on the input file to
 # generate the output file.
 def _generate(output_filename):

@@ -186,7 +186,7 @@ def get_source_dependencies(source_filename):
 
 
 # Every object depends on any specification file (.ads) of a withed package. Figuring out
-# which adb file should be depended on is a bit trickier. The ruled are layed out here:
+# which adb file should be depended on is a bit trickier. The ruled are laid out here:
 #
 #   https://gcc.gnu.org/onlinedocs/gcc-4.9.2/gnat_ugn/Source-Dependencies.html
 #
@@ -227,7 +227,7 @@ def get_source_dependencies(source_filename):
 #
 # These determinations are not quite accurate, but they are conservative. For instance, #1 and #2 really only apply if
 # the object that is currently being compiled actually instantiates a generic object. We are not checking if this is
-# the case, we just assume it might be since it is withing the package. For #3 we do not check to see if the -gnatn
+# the case, we just assume it might be since it is within the package. For #3 we do not check to see if the -gnatn
 # or -gnatN switch is being used, we just assume it is. This is also conservative.
 #
 # Even with this conservative approach, substantial gains in recompilation performance can be seen.

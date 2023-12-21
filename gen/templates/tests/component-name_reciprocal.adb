@@ -483,7 +483,7 @@ package body Component.{{ name }}_Reciprocal is
                subtype Sized_Byte_Array is Basic_Types.Byte_Array (Sized_Byte_Array_Index);
                Overlay : Sized_Byte_Array with Import, Convention => Ada, Address => Item'Address;
             begin
-               -- Safely copy the buffer to the overlayed type:
+               -- Safely copy the buffer to the overlaid type:
                Safe_Left_Copy (Overlay, P.Buffer (P.Buffer'First .. P.Buffer'First + P.Header.Buffer_Length - 1));
             end;
          end if;

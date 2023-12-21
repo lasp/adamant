@@ -5,7 +5,7 @@
 -- Standard Includes:
 with Ada.Real_Time; use Ada.Real_Time;
 
--- The Rate Group component is a queued component which invokes Tick connectors attached to it whenever it receives a Tick in. The tick in is intended to be periodic, allowing the component to control the execution of other components at a periodic rate. All components attached to the invoker connector of this component are said to be in a rate group, since they all excute at the same rate. Components are executed in the order they are attached to the components invoker connector. The execution of all attached connectors is expected to complete before another incoming Tick is put on the Rate Group component's queue. If the execution runs long, a cycle slip event is reported.
+-- The Rate Group component is a queued component which invokes Tick connectors attached to it whenever it receives a Tick in. The tick in is intended to be periodic, allowing the component to control the execution of other components at a periodic rate. All components attached to the invoker connector of this component are said to be in a rate group, since they all execute at the same rate. Components are executed in the order they are attached to the components invoker connector. The execution of all attached connectors is expected to complete before another incoming Tick is put on the Rate Group component's queue. If the execution runs long, a cycle slip event is reported.
 --
 -- Note that this component is designed to be Active in an assembly. In this way the Rate Group will provide a task on which Passive components can execute.
 --
@@ -20,7 +20,7 @@ package Component.Rate_Group.Implementation is
    --
    -- Init Parameters:
    -- Ticks_Per_Timing_Report : Interfaces.Unsigned_16 - The period (in ticks) that the component should wait before sending a timing report data product. A value of zero prevents the component from sending the data product.
-   -- Timing_Report_Delay_Ticks : Interfaces.Unsigned_16 - The number of tickes the component waits before calculating and sending a timing report data product. It is common for the first few executions of a rate group to have execution times longer than normal due to startup logic. In this case, it is often desireable to ignore these cycles in the timing report, especially for the maximum values.
+   -- Timing_Report_Delay_Ticks : Interfaces.Unsigned_16 - The number of tickes the component waits before calculating and sending a timing report data product. It is common for the first few executions of a rate group to have execution times longer than normal due to startup logic. In this case, it is often desirable to ignore these cycles in the timing report, especially for the maximum values.
    -- Issue_Time_Exceeded_Events : Boolean - If set to True, an event will be issued any time the maximum execution or wall clock time of the component is exceeded. If set to False, these events will never be issued. The same information is accessible via the component's data products, so enabling the event may become a redundant annoyance.
    --
    overriding procedure Init (Self : in out Instance; Ticks_Per_Timing_Report : in Interfaces.Unsigned_16 := 1; Timing_Report_Delay_Ticks : in Interfaces.Unsigned_16 := 3; Issue_Time_Exceeded_Events : in Boolean := False);

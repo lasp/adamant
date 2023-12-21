@@ -2,7 +2,7 @@
 description: This is a simple test component which has a request-service connector.
 execution: passive
 connectors:
-  - description: The requestor connector
+  - description: The requester connector
     kind: request
     type: Aa.T
     return_type: Aa.T

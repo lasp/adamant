@@ -437,7 +437,7 @@ package body Component.Command_Sequencer.Implementation is
       -- Grab the current time after execution.
       Current_Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
       -- Define the recursion limit as related to the number of engines. This allows someone to write a sequence that
-      -- kills each engine one after another using a single "kill" command. We set minumum to 10. This also allows at
+      -- kills each engine one after another using a single "kill" command. We set minimum to 10. This also allows at
       -- least 10 print statements in a row.
       Recursion_Limit : constant Natural := Natural'Max (Self.Seq_Engines.all'Length + 1, 10);
    begin
@@ -497,7 +497,7 @@ package body Component.Command_Sequencer.Implementation is
                -- sequence into any currently available engine. Otherwise, let's range check the engine.
                if Destination_Engine_Id /= Engine.Get_Engine_Id then
                   if Destination_Engine_Id = 255 then
-                     -- Seach for an available engine and use the first one we find.
+                     -- Search for an available engine and use the first one we find.
                      declare
                         Available_Engine_Id : Seq_Types.Sequence_Engine_Id;
                         Engine_Available : constant Boolean := Self.Find_Available_Engine (Available_Engine_Id);
@@ -763,7 +763,7 @@ package body Component.Command_Sequencer.Implementation is
                   when Wait_Relative | Wait_Telemetry_Relative | Wait_Absolute | Kill_Engines | Print =>
                      pragma Assert (False);
 
-                  -- These waits all require timeout logic to be excersized.
+                  -- These waits all require timeout logic to be exercised.
                   when Wait_Command | Wait_Load_Seq =>
                      -- Check for a timeout:
                      if not Self.Increment_Timeout (Engine) then
@@ -1328,7 +1328,7 @@ package body Component.Command_Sequencer.Implementation is
                begin
                   -- This implementation assumes that the variable array is of length 16 and the number
                   -- of arguments provided in Packed_Variable_Array.T is also 16. If this is not true, then
-                  -- both types and the copy code below need to be updated to be consistant.
+                  -- both types and the copy code below need to be updated to be consistent.
                   pragma Compile_Time_Error (Variable_Array'Length /= 16, "Expected variable length array to be 16.");
 
                   -- Now load the arguments in one at a time. An assertion

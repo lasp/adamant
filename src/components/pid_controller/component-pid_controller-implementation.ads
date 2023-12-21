@@ -87,7 +87,7 @@ private
    overriding procedure Control_Input_U_Recv_Sync (Self : in out Instance; Arg : in Control_Input.U);
    -- The parameter update connector. This does not need to be connected if the parameter for this component will not be used.
    overriding procedure Parameter_Update_T_Modify (Self : in out Instance; Arg : in out Parameter_Update.T);
-   -- This is the command recieve connector.
+   -- This is the command receive connector.
    overriding procedure Command_T_Recv_Sync (Self : in out Instance; Arg : in Command.T);
 
    ---------------------------------------

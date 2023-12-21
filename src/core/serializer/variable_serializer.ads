@@ -18,7 +18,7 @@ package Variable_Serializer is
    subtype Byte_Array is Basic_Types.Byte_Array (Byte_Array_Index);
 
    -- All the subprograms below convert from a type to a byte array or a byte
-   -- array to a type. They perform similiarly to an unchecked conversion between the
+   -- array to a type. They perform similarly to an unchecked conversion between the
    -- two types. In terms of performance, a copy is executed when converting one type
    -- to another. If this is not desired, the user can use an overlay directly instead
    -- in their own code. You are encouraged to use the Serialized Length function when

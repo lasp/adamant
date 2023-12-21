@@ -11,11 +11,11 @@ private
    overriding procedure Set_Up_Test (Self : in out Instance);
    overriding procedure Tear_Down_Test (Self : in out Instance);
 
-   -- This unit test excersizes the nominal behavior of the ccsds packetizer.
+   -- This unit test exercises the nominal behavior of the ccsds packetizer.
    overriding procedure Test_Nominal_Packetization (Self : in out Instance);
-   -- This unit test excersizes the packetization of a maximum sized adamant packet into a ccsds packet.
+   -- This unit test exercises the packetization of a maximum sized adamant packet into a ccsds packet.
    overriding procedure Test_Max_Size_Packetization (Self : in out Instance);
-   -- This unit test excersizes the packetization of a minimum sized Adamant packet into a CCSDS packet, which should succeed without issue.
+   -- This unit test exercises the packetization of a minimum sized Adamant packet into a CCSDS packet, which should succeed without issue.
    overriding procedure Test_Min_Size_Packetization (Self : in out Instance);
 
    -- Test data and state:

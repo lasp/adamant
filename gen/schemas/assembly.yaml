@@ -39,7 +39,7 @@ mapping:
   #
   # Make sure subassemblies are in the build path or an error will result.
   # Subassemblies can be used to split up large assembly files into smaller,
-  # more managable files. This can facilitate reuse and ease assembly
+  # more manageable files. This can facilitate reuse and ease assembly
   # maintenance.
   subassemblies:
     seq:
@@ -106,7 +106,7 @@ mapping:
             seq:
               - type: str
             required: False
-          # If the component has values to fill in for the descriminant they should be
+          # If the component has values to fill in for the discriminant they should be
           # listed here as name value pairs, ie.
           #   "Name => Value"
           discriminant:

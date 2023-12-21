@@ -34,7 +34,7 @@ private
       Sync_Period : Positive := Positive'First;
       -- Boolean to allow us to sync once:
       Sync_Once : Boolean := False;
-      -- Counters for keeping track of messages sent and recieved
+      -- Counters for keeping track of messages sent and received
       -- by PTP master.
       Transaction_Count : Interfaces.Unsigned_16 := Interfaces.Unsigned_16'First;
       Follow_Up_Message_Count : Interfaces.Unsigned_16 := Interfaces.Unsigned_16'First;

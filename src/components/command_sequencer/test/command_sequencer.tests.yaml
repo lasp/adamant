@@ -36,7 +36,7 @@ tests:
   - name: Test_Sequence_Timeouts
     description: This unit test tests sequence command and subsequence load timeouts.
   - name: Test_Issue_Details_Packet
-    description: This unit test tests issueing the details packet by command.
+    description: This unit test tests issuing the details packet by command.
   - name: Test_Set_Summary_Packet_Period
     description: This unit test tests changing the summary packet period by command.
   - name: Test_Command_Invalid_Engine

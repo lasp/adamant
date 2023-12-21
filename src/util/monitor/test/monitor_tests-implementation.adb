@@ -170,7 +170,7 @@ package body Monitor_Tests.Implementation is
       Status_Assert.Eq (Mon.Check (False), Red);
       Status_Assert.Eq (Mon.Check (False), Red);
 
-      -- Set persistance thresholds:
+      -- Set persistence thresholds:
       Mon.Set_Persistance_Thresholds (Green_To_Red_Persistance_Threshold => 5, Red_To_Green_Persistance_Threshold => 1);
       State_Assert.Eq (Mon.Get_State, Green);
 

@@ -183,14 +183,14 @@ package body Component.Precision_Time_Protocol_Master.Implementation.Tester is
    -----------------------------------------------
    -- Description:
    --    Events for the Precision Time Protocol Master component.
-   -- Recieved a message of unexpected type, message is sent as parameter.
+   -- Received a message of unexpected type, message is sent as parameter.
    overriding procedure Unexpected_Message_Type (Self : in out Instance; Arg : in Ptp_Time_Message.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Unexpected_Message_Type_History.Push (Arg);
    end Unexpected_Message_Type;
 
-   -- Recieved a message of unexpected type, message is sent as parameter along with the expected transaction number.
+   -- Received a message of unexpected type, message is sent as parameter along with the expected transaction number.
    overriding procedure Unexpected_Transaction_Count (Self : in out Instance; Arg : in Unexpected_Ptp_Transaction_Count.T) is
    begin
       -- Push the argument onto the test history for looking at later:

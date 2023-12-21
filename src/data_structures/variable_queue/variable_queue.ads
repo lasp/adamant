@@ -4,7 +4,7 @@ with Ada.Synchronous_Task_Control;
 with Serializer_Types;
 
 -- This is a protected (thread safe) queue that supports the pushing,
--- popping, and peaking of variable sized byte arrayes or typed queue
+-- popping, and peaking of variable sized byte arrays or typed queue
 -- elements.
 package Variable_Queue is
 
@@ -92,7 +92,7 @@ package Variable_Queue is
       -- we catch this condition and return the Error status, allowing the user to
       -- handle the condition as they please, usually by either moving on, or trying
       -- again. Proper usage of this queue in Adamant should avoid the possibility of
-      -- this condition ever occuring. Good design usually avoids more than one task
+      -- this condition ever occurring. Good design usually avoids more than one task
       -- simultaneously popping or pushing to the same queue in a blocking manner. Use
       -- the "no_wait" version of these functions above whenever possible.
       --
@@ -179,7 +179,7 @@ package Variable_Queue is
 
    -- Standard pop function for statically sized packed types. Pass in the type and deserializer function to
    -- instantiate the generic function. Note: even if a deserialization error is encountered during the popping
-   -- from the queue, the internal queue element is still removed from the intenal queue. So you can always count
+   -- from the queue, the internal queue element is still removed from the internal queue. So you can always count
    -- on pop to remove an element from the queue, even if an error is returned, unless of course the queue is empty.
    generic
       type T is private;
@@ -192,7 +192,7 @@ package Variable_Queue is
 
    -- Pop function for variable length packed types. Pass in the type, deserializer function, and a function
    -- which returns the serialized length of the type in order to instantiate the generic function.
-   -- from the queue, the internal queue element is still removed from the intenal queue. So you can always count
+   -- from the queue, the internal queue element is still removed from the internal queue. So you can always count
    -- on pop to remove an element from the queue, even if an error is returned, unless of course the queue is empty.
    generic
       type T is private;

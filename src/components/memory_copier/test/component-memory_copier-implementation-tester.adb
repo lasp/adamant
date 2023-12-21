@@ -182,7 +182,7 @@ package body Component.Memory_Copier.Implementation.Tester is
       Self.Invalid_Command_Received_History.Push (Arg);
    end Invalid_Command_Received;
 
-   -- A timeout occured while waiting for a copy operation to complete.
+   -- A timeout occurred while waiting for a copy operation to complete.
    overriding procedure Copy_Timeout (Self : in out Instance) is
       Arg : constant Natural := 0;
    begin

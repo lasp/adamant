@@ -167,7 +167,7 @@ package body Byte_Array_Util is
 
       -- Check the polytype value to see if it can be stored without truncation:
       declare
-         -- Calulate the limit that, if exceeded, would mean trunction would occur.
+         -- Calculate the limit that, if exceeded, would mean truncation would occur.
          Limit : constant Unsigned_32 := Shift_Right (16#FFFFFFFF#, Unsigned_32'Object_Size - Size);
          -- Calculate the unsigned integer value of the polytype. We do this manually to
          -- avoid any dependency on a packed record in this low level package. This assumes

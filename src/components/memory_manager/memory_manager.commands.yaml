@@ -13,4 +13,4 @@ commands:
     description: Perform a write to the memory region at the provided address. If the memory is not available an error event will be produced.
     arg_type: Virtual_Memory_Region_Write.T
   - name: Force_Release
-    description: Forces the release of the memory region if it is currently allocated. This command can be used to recover from an anomolous condition.
+    description: Forces the release of the memory region if it is currently allocated. This command can be used to recover from an anomalous condition.

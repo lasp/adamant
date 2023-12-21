@@ -52,7 +52,7 @@ class Linux_Test(Linux_Base):
         )
 
 
-# Converage target which works with gcov:
+# Coverage target which works with gcov:
 class Linux_Coverage(Linux_Base):
     def description(self):
         return ("Same as Linux_Test except it adds compilation flags to assist with coverage analysis"

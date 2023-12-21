@@ -18,7 +18,7 @@ begin
 
    -- Read and write registers but only access certain components. The
    -- compiler will ensure that the ENTIRE register is read/written
-   -- during the folling operations.
+   -- during the following operations.
    if Registers (1).Hw_1_Enabled = Enable and then
        Registers (4).Hw_2_Enabled = Enable
    then

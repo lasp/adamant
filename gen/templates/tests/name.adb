@@ -25,7 +25,7 @@ package body {{ name }} is
       Self.Logger.Log (String_Util.Trim_Both (String_To_Log));
    end Log;
 
-   -- Initalize the logging for the log file ensuring the correct directory is avaliable
+   -- Initialize the logging for the log file ensuring the correct directory is available
    procedure Init_Logging (Self : in out Base_Instance; File_Name : in String) is
       use Ada.Calendar.Formatting;
       -- The path returned by the Command_Name is the path to the test.elf, so back out to the build directory

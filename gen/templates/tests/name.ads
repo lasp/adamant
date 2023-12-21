@@ -40,7 +40,7 @@ package {{ name }} is
    procedure Set_Up_Test (Self : in out Base_Instance) is abstract;
    procedure Tear_Down_Test (Self : in out Base_Instance) is abstract;
 
-   -- Number of tests varable
+   -- Number of tests variable
    Num_Tests : constant Positive := {{ tests|length }};
 
    -- Test name list type for the names

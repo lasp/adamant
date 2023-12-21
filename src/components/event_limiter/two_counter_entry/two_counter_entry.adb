@@ -20,7 +20,7 @@ package body Two_Counter_Entry is
       -- Init the array so that all events are enabled by default and the counts are set to 0.
       Self.Bytes.all := (others => Two_Counter_Entry_Type.Serialization.To_Byte_Array ((Top_Event_Enabled_State => Event_State_Type.Enabled, Top_Event_Count => 0, Bottom_Event_Enabled_State => Event_State_Type.Enabled, Bottom_Event_Count => 0)) (0));
 
-      -- Then disable the event baised on our disable list
+      -- Then disable the event based on our disable list
       for Event_Id_To_Disable of Event_Disable_List loop
          Status := Set_Enable_State (Self, Event_Id_To_Disable, Event_State_Type.Disabled);
          -- Assert here on status
@@ -52,9 +52,9 @@ package body Two_Counter_Entry is
       Status : Event_Location;
       Increment_Status : Count_Status := Success;
    begin
-      -- Check the master state. If it is disabled then bypass all the logic for efficency
+      -- Check the master state. If it is disabled then bypass all the logic for efficiency
       if Self.Master_Enable_State = Enabled then
-         -- Start by range checking. If this fails we shouldnt access anything after
+         -- Start by range checking. If this fails we shouldn't access anything after
          Status := Get_Entry (Self, Id, Event_Info);
 
          case Status is
@@ -124,7 +124,7 @@ package body Two_Counter_Entry is
    begin
       -- If the master state is disabled, then bypass all the logic and just return success
       if Self.Master_Enable_State = Enabled then
-         -- Start by range checking. If this fails we shouldnt access anything after
+         -- Start by range checking. If this fails we shouldn't access anything after
          Status := Get_Entry (Self, Id, Event_Info);
          case Status is
             when Invalid_Id =>
@@ -186,7 +186,7 @@ package body Two_Counter_Entry is
       Event_Info : Two_Counter_Entry_Type.T;
       Status : Event_Location;
    begin
-      -- Start by range checking. If this fails we shouldnt access anything after
+      -- Start by range checking. If this fails we shouldn't access anything after
       Status := Get_Entry (Self, Id, Event_Info);
 
       case Status is
@@ -216,9 +216,9 @@ package body Two_Counter_Entry is
       Event_Info : Two_Counter_Entry_Type.T;
       Status : Event_Location;
    begin
-      -- Set our event state just incase we have a bad Id
+      -- Set our event state just in case we have a bad Id
       Event_State := Event_State_Type.Disabled;
-      -- Start by range checking. If this fails we shouldnt access anything after
+      -- Start by range checking. If this fails we shouldn't access anything after
       Status := Get_Entry (Self, Id, Event_Info);
 
       case Status is
@@ -235,7 +235,7 @@ package body Two_Counter_Entry is
 
    procedure Set_Persistence (Self : in out Instance; New_Persistence : in Persistence_Type) is
    begin
-      -- If the new persistence decreases, then we need to loop through all the events and make sure the counts are less than or equal to the new persistance
+      -- If the new persistence decreases, then we need to loop through all the events and make sure the counts are less than or equal to the new persistence
       if New_Persistence < Self.Persistence then
          -- No need to check the id since we assume it should be in range from our init values
          for Idx in Self.Bytes'Range loop
@@ -311,9 +311,9 @@ package body Two_Counter_Entry is
                Convention => Ada,
                Address => Self.Bytes (Event_Id_In)'Address;
          begin
-            -- Give the caller the overlayed byte so that it can be operated on and copied back in.
+            -- Give the caller the overlaid byte so that it can be operated on and copied back in.
             Event_Info := Overlay;
-            -- Return a Top or Bottom status so that the caller doesnt have to perfom the math on the id again and knows which half of the byte to operate on.
+            -- Return a Top or Bottom status so that the caller doesn't have to perform the math on the id again and knows which half of the byte to operate on.
             if Top_Or_Bottom = 0 then
                return Top;
             else

@@ -11,7 +11,7 @@ private
    overriding procedure Set_Up_Test (Self : in out Instance);
    overriding procedure Tear_Down_Test (Self : in out Instance);
 
-   -- This unit test excersizes Rate Group component through a nominal scenario.
+   -- This unit test exercises Rate Group component through a nominal scenario.
    overriding procedure Nominal (Self : in out Instance);
    -- This unit test triggers a cycle slip and makes sure that the Rate Group component reports it.
    overriding procedure Cycle_Slip_Trigger (Self : in out Instance);

@@ -4,7 +4,7 @@ description: |
 execution: active
 subtasks:
   - name: Listener
-    description: This internal task is used to listen on the serial port for incomming packets.
+    description: This internal task is used to listen on the serial port for incoming packets.
 connectors:
   - description: On this connector the Socket Interface Component receives data and sends it out of the socket.
     type: Ccsds_Space_Packet.T

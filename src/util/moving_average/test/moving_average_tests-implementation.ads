@@ -14,7 +14,7 @@ private
 
    -- This unit test tests the mathmatic values that are calculated from a known set of samples
    overriding procedure Test_Statistic_Values (Self : in out Instance);
-   -- This unit test tests reseting the appropriate values in the statistics to give a new start to the moving average
+   -- This unit test tests resetting the appropriate values in the statistics to give a new start to the moving average
    overriding procedure Test_Reset_Statistics (Self : in out Instance);
    -- This unit test changes the length of the number of samples the moving averages is calculated over.
    overriding procedure Test_Change_Sample_Length (Self : in out Instance);

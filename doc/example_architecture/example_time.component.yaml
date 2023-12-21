@@ -2,7 +2,7 @@
 description: This component provides system time to components in the assembly.
 execution: passive
 preamble: |
-  type Time_Source_Type is (Sofware, Hardware);
+  type Time_Source_Type is (Software, Hardware);
 discriminant:
   description: The discriminant is used to specify the time source.
   parameters:

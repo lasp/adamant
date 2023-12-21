@@ -294,7 +294,7 @@ The Adamant framework will not function without a configuration file in place. T
 
 You can now modify the values in \textit{adamant.configuration.yaml} to work for your project. Note that \textit{adamant.configuration.yaml} has been added to .gitignore, and should NOT be checked into your version control system if you intend on merging changes from your Adamant repository back into the framework root repository.
 
-Version controlling the configuration file is usually desireable. To accomplish this, copy the Adamant default configuration into your project specific repository:
+Version controlling the configuration file is usually desirable. To accomplish this, copy the Adamant default configuration into your project specific repository:
 
 \vspace{5mm} %5mm vertical space
 \begin{minted}{text}
@@ -555,15 +555,15 @@ The Adamant build system supports building binary object and executable files fo
 \end{spacedenumerate}
 \vspace{5mm} %5mm vertical space
 
-The Ada compiler used in Adamant is generally GNAT based \texttt{gcc} for Native Linux compiles, and \texttt{gcc}-based cross compilers for embeddded targets (ie. \texttt{arm-eabi-gcc} for ARM). The compiler, compilation flags, and runtime are all determined by the \textit{build target}. The Adamant \textit{build path} determines which source code is compileable for a given \textit{build target} and is discussed in the following section. To add a custom build target for your system see Section \ref{Adding a Build Target} for details. \\
+The Ada compiler used in Adamant is generally GNAT based \texttt{gcc} for Native Linux compiles, and \texttt{gcc}-based cross compilers for embedded targets (ie. \texttt{arm-eabi-gcc} for ARM). The compiler, compilation flags, and runtime are all determined by the \textit{build target}. The Adamant \textit{build path} determines which source code is compilable for a given \textit{build target} and is discussed in the following section. To add a custom build target for your system see Section \ref{Adding a Build Target} for details. \\
 
 As background, it is important to understand the Ada runtime system, on top of which an Ada application runs. The Ada runtime provides the tasking logic necessary to implement the Ada language. Adamant utilizes bare metal runtimes provided by AdaCore, which come in the following flavors:
 
 \vspace{5mm} %5mm vertical space
 \begin{spaceditemize}
   \item \textbf{\texttt{ZFP}} - The zero-footprint runtime only allows the non-tasking semantics of the Ada language. The resulting program must be single-threaded. This runtime is designed for formal software certification and/or for systems that are severely resource constrained.
-  \item \textbf{\texttt{SFP}} - The small footprint runtime implements a restricted subset of the Ada tasking system described by the Ravenscar profile. This runtime provides minimal tasking capabilities, without exception propogation, to make formal software certification feasible.
-  \item \textbf{\texttt{Full}} - The full runtime implements a restricted subset of the Ada tasking system described by the Jorvik profile. This profile is a slightly relaxed version of the Ravenscar profile, and allows exception propogation, designed for use on most embedded systems that do not require formal software certification. Note that the Jorvik profile is still very minimal compared to the full Ada language semantics which offers \texttt{select} statements, \texttt{rendezvous}, etc. These more flexible facilities are still not available in the Jorvik profile.
+  \item \textbf{\texttt{SFP}} - The small footprint runtime implements a restricted subset of the Ada tasking system described by the Ravenscar profile. This runtime provides minimal tasking capabilities, without exception propagation, to make formal software certification feasible.
+  \item \textbf{\texttt{Full}} - The full runtime implements a restricted subset of the Ada tasking system described by the Jorvik profile. This profile is a slightly relaxed version of the Ravenscar profile, and allows exception propagation, designed for use on most embedded systems that do not require formal software certification. Note that the Jorvik profile is still very minimal compared to the full Ada language semantics which offers \texttt{select} statements, \texttt{rendezvous}, etc. These more flexible facilities are still not available in the Jorvik profile.
 \end{spaceditemize}
 \vspace{5mm} %5mm vertical space
 
@@ -586,7 +586,7 @@ Note that runtimes can be compiled with debug flags (\textit{Debug} mode) or wit
 
 Ada allows the configuration of runtime validity checks within the language. It is advisable to keep the default reference manual checks on in \textit{Production} mode to prevent any undefined behavior. In all other modes, all validity checking provided by GNAT is enabled. This provides much more extensive type checking than the default Ada checking, which can help track down hard to find bugs at the cost of extra code insertion into the binary. More information on validity checks within the Ada compiler can be found \href{https://gcc.gnu.org/onlinedocs/gcc-4.6.2/gnat_ugn_unw/Validity-Checking.html#Validity-Checking}{\textcolor{blue}{here}}. \\
 
-Ada also allows the user to restrict the use and behavior of the language by specifying configuration pragmas that apply to all the source code in the compilation. In \textit{Production}, \textit{Development}, and \textit{Debug} mode the Ravenscar profile is applied which restricts the tasking semantics allowed in the source code. This ensures that these builds will work with embedded runtimes, which support limited tasking semantics of the Ada language. Ravenscar is not enforced in \textit{Test} and \textit{Coverage} mode, to enabled more elaborate unit testing setups. All modes except \textit{Production} (*and \textit{Development} on bareboard targets) specify the pragma \texttt{Initialize\_Scalars}, which when used in conjunction with all validity checks enabled (\textit{-gnatVa}) can greatly aid in the detection of uninitialized variable bugs. Note that this pragma purposely initializes all unitialized variables to values outside the range for that type in order to force runtime errors for any variables that are used prior to initialization. See this \href{https://www.adacore.com/uploads/techPapers/rtchecks.pdf}{\textcolor{blue}{case study}} to explore the benefits of \texttt{Initialize\_Scalars} pragma. \\
+Ada also allows the user to restrict the use and behavior of the language by specifying configuration pragmas that apply to all the source code in the compilation. In \textit{Production}, \textit{Development}, and \textit{Debug} mode the Ravenscar profile is applied which restricts the tasking semantics allowed in the source code. This ensures that these builds will work with embedded runtimes, which support limited tasking semantics of the Ada language. Ravenscar is not enforced in \textit{Test} and \textit{Coverage} mode, to enabled more elaborate unit testing setups. All modes except \textit{Production} (*and \textit{Development} on bareboard targets) specify the pragma \texttt{Initialize\_Scalars}, which when used in conjunction with all validity checks enabled (\textit{-gnatVa}) can greatly aid in the detection of uninitialized variable bugs. Note that this pragma purposely initializes all uninitialized variables to values outside the range for that type in order to force runtime errors for any variables that are used prior to initialization. See this \href{https://www.adacore.com/uploads/techPapers/rtchecks.pdf}{\textcolor{blue}{case study}} to explore the benefits of \texttt{Initialize\_Scalars} pragma. \\
 
 In summary, the \textit{Production} mode should be used for deployed software on target hardware. The \textit{Development} mode should be the most commonly used mode, as it should be preferred for most development and testing on target hardware. The \textit{Debug} mode turns off optimization of application and runtime code to make tracking down hard to find bugs easier. The \textit{Test} and \textit{Coverage} modes are designed for unit testing. These modes are an attempt at standardization of build configurations, but of course you can create a custom build target that does not adhere to any of these conventions. See Section \ref{Adding a Build Target} for details. \\
 
@@ -1055,7 +1055,7 @@ Unit test logs will always be written to the subdirectory \textit{build/log}. An
 \inputminted{text}{../example_architecture/simple_package/test_better4/build/log/Test_That_Should_Pass.log}
 \vspace{5mm} %5mm vertical spac
 
-The first test here is the passing test where all the messages are logged. Logs always appear in the form \textit{<timestamp> <message>} where \textit{<timestamp>} is Unix seconds. The user can log anything avaliable to them in the unit test, such as the individual items being tested. \\
+The first test here is the passing test where all the messages are logged. Logs always appear in the form \textit{<timestamp> <message>} where \textit{<timestamp>} is Unix seconds. The user can log anything available to them in the unit test, such as the individual items being tested. \\
 
 The next test is the failure test, but this time there are no user defined messages injected into the log. Here we see the default messages that get logged including the timing for starting and finishing the test, as well as the setup and tear down fixtures.
 
@@ -1064,11 +1064,11 @@ The next test is the failure test, but this time there are no user defined messa
 \inputminted{text}{../example_architecture/simple_package/test_better4/build/log/Test_That_Should_Fail.log}
 \vspace{5mm} %5mm vertical space
 
-This is a simple but easy way for the user to mark where issues are occuring, or even print out their own data to the log for faster debugging of both the unit test code and the production code.
+This is a simple but easy way for the user to mark where issues are occurring, or even print out their own data to the log for faster debugging of both the unit test code and the production code.
 
 \subsubsection{Unit Test Coverage Report} \label{Unit Test Coverage Report}
 
-It is often desireable to know how much of the implementation code that a unit test actually tests. One metric for quantifying this is through a ``coverage" report, which shows which lines of code the unit tests traversed, and which lines of code were not not executed. For Adamant embedded systems, a 100\% line coverage metric is required, and justification must be provided if this goal cannot be achieved. Note that Adamant uses the \href{https://gcovr.com/en/stable/}{\textcolor{blue}{gcovr}} tool to generate reports. \\
+It is often desirable to know how much of the implementation code that a unit test actually tests. One metric for quantifying this is through a ``coverage" report, which shows which lines of code the unit tests traversed, and which lines of code were not not executed. For Adamant embedded systems, a 100\% line coverage metric is required, and justification must be provided if this goal cannot be achieved. Note that Adamant uses the \href{https://gcovr.com/en/stable/}{\textcolor{blue}{gcovr}} tool to generate reports. \\
 
 Once we have a passing set of unit tests, creating a coverage report is not difficult. From the \textit{test\_better} directory created in the last section we can run:
 
@@ -1166,7 +1166,7 @@ Below is the source code for an object-oriented tagged type that we can put in t
 
 We can see that the package contains a tagged type named \texttt{Instance}. \textit{Instance} is the standard name used for a tagged type within Adamant when a package contains a single tagged type, which is common. \\
 
-Below the tagged type is two public subprograms, or ``primitives". These subprograms are considered primitive operations of the tagged type \texttt{Instance} because \texttt{Instance} is passed as an argument to them. Primitives are similiar to ``methods" in Java or a ``member functions" in C++. The first subprogram is a procedure called \texttt{Init} which initializes the object, which is always named \texttt{self} in Adamant. The second subprogram implements an adding function similiar to what was presented in the previous sections. This time, however, a private variable, \texttt{n}, stored within the tagged type record is added to the input argument instead. The variable \texttt{n} is part of the private definition of type \texttt{Instance} and thus cannot be accessed outside of the \texttt{Oo\_Package}, except within a child package, as we will see in the next section.
+Below the tagged type is two public subprograms, or ``primitives". These subprograms are considered primitive operations of the tagged type \texttt{Instance} because \texttt{Instance} is passed as an argument to them. Primitives are similar to ``methods" in Java or a ``member functions" in C++. The first subprogram is a procedure called \texttt{Init} which initializes the object, which is always named \texttt{self} in Adamant. The second subprogram implements an adding function similar to what was presented in the previous sections. This time, however, a private variable, \texttt{n}, stored within the tagged type record is added to the input argument instead. The variable \texttt{n} is part of the private definition of type \texttt{Instance} and thus cannot be accessed outside of the \texttt{Oo\_Package}, except within a child package, as we will see in the next section.
 
 \subsubsection{``White-box" Unit Testing}
 
@@ -1888,7 +1888,7 @@ This will build a .m file for each enumeration defined in \textit{example\_enums
 \textit{Second\_Enum.m}
 \matlabcodef{../example_architecture/build/m/Example_Enums/Second_Enum.m}
 
-The MATLAB classs contain the numeric definitions for each of the enumeration literals.
+The MATLAB class contain the numeric definitions for each of the enumeration literals.
 
 An example of how these classes can be used is shown below in a file called \textit{test.m}:
 
@@ -2041,7 +2041,7 @@ The beginning of this section outlines the different component patterns that are
 \end{itemize}
 \vspace{5mm} %5mm vertical space
 
-Each pattern builds on the previous pattern. It is recommended that for best understanding of an active component with queue to first read the sections for a passive component without queue followed by a passive component with queue, before proceding to the active component with queue section.
+Each pattern builds on the previous pattern. It is recommended that for best understanding of an active component with queue to first read the sections for a passive component without queue followed by a passive component with queue, before proceeding to the active component with queue section.
 
 \subsection{Creating a Passive Component} \label{Creating a Passive Component}
 
@@ -2103,7 +2103,7 @@ Recall that connector \textit{kinds} are used to specify the direction and synch
 
 The chosen connector \textit{kind} pair determines whether or not a \textit{type}, \textit{return\_type}, or both is required for the connector definition. Note that a model error will be produced if you fail to comply with the table above, so have no fear of making mistakes. \\
 
-The definition of the \texttt{Packet\_T\_Send} connector specifies the optional field \textit{count}. The \textit{count} field is used to specify an \textit{arrayed} connector. When not specified, the connector \textit{count} is assumed to be 1, which means that the connector is not arrayed. If a positive value greated than 1 is provided, then the component is created with an array of connectors of the specified size. If the \textit{count} is defined as 0, as is the case here, than the connector array size is said to be \textit{unconstrained} and will be set during the component's instantiation within an assembly, see Section \ref{Assemblies}. In this case we have created an unconstrained array of \texttt{Packed.T} \textit{send} connectors, which can be called by index. \\
+The definition of the \texttt{Packet\_T\_Send} connector specifies the optional field \textit{count}. The \textit{count} field is used to specify an \textit{arrayed} connector. When not specified, the connector \textit{count} is assumed to be 1, which means that the connector is not arrayed. If a positive value greater than 1 is provided, then the component is created with an array of connectors of the specified size. If the \textit{count} is defined as 0, as is the case here, than the connector array size is said to be \textit{unconstrained} and will be set during the component's instantiation within an assembly, see Section \ref{Assemblies}. In this case we have created an unconstrained array of \texttt{Packed.T} \textit{send} connectors, which can be called by index. \\
 
 Note that we have defined an optional \textit{name} for the \texttt{Tick\_T\_Recv\_Sync} connector. If no \textit{name} is specified then Adamant will generate a name for the connector in the form \textit{type\_kind} where \textit{type} is the connector type with any ``."s replaced by ``\_"s and \textit{kind} is the connector's \textit{kind}. In general, it is considered good practice to NOT provide names for connectors, as the autocoded names are informative and follow a convention that provides information about of the connector's form and function. However, there are certainly exceptions to this rule. Sometimes defining a custom name makes more sense, like in the case where a component has two connectors of the same \textit{type} that perform distinct behaviors. \\
 
@@ -2559,7 +2559,7 @@ With a component unit test, the user has the choice of two log procedures. Using
 \inputminted{text}{../example_architecture/example_component/test4/build/log/Test_That_Should_Fail.log}
 \vspace{5mm} %5mm vertical space
 
-And the passing test has none of our injected log messages, but there is still default logging occuring from all of the interfaces being used during the test.
+And the passing test has none of our injected log messages, but there is still default logging occurring from all of the interfaces being used during the test.
 
 \vspace{5mm} %5mm vertical space
 \textit{build/log/Test\_That\_Should\_Fail.log}
@@ -2868,7 +2868,7 @@ Note that any subsequent call that may overflow the queue will trigger the asser
 
 \subsubsection{Implementing a Priority Queued Component} \label{Implementing a Priority Queued Component}
 
-The previous sections presented how to construct and unit test a component that contains a standard internal queue. The Adamant standard queue is a very efficient (in both space and time) first-in-first-out FIFO queue. However, sometimes it is desireable to have a queue that implements priority-based dequeueing logic instead of FIFO. Priority queues allow the component to process messages deemed more important prior to servicing others, regardless of the order in which they were enqueued. \\
+The previous sections presented how to construct and unit test a component that contains a standard internal queue. The Adamant standard queue is a very efficient (in both space and time) first-in-first-out FIFO queue. However, sometimes it is desirable to have a queue that implements priority-based dequeueing logic instead of FIFO. Priority queues allow the component to process messages deemed more important prior to servicing others, regardless of the order in which they were enqueued. \\
 
 A few implementation differences between the Adamant standard queue and the priority queue should be understood. The standard queue is implemented as a single buffer of memory where queued items are stored efficiently, packed together, with no wasted bytes. As such, initializing the standard queue requires that the user specify the total number of bytes the queue should contain. The priority queue does not make as efficient use of memory. Each element on the priority queue takes up the number of bytes necessary to hold the maximum sized element that the queue will need to hold. So if two different types need to be stored on the queue, one takes up 5 bytes and another takes up 500 bytes, each element on the queue will be 500 bytes in length. Enqueuing the 5 byte item will leave 495 bytes unused in that queue entry. Instead of initializing the queue as a total number of bytes, a priority queue is initialized with a \textit{depth} which specifies how many entries of maximum size the queue will hold before beginning to drop items. \\
 
@@ -2982,7 +2982,7 @@ Next, we modify the templates to include the component's behavior. To implement 
 \textit{component-active\_component-implementation.adb}:
 \adacodef{../example_architecture/active_component/component-active_component-implementation.adb}
 
-We can see that the implementations of \texttt{Packed\_Byte\_T\_Recv\_Async} and \texttt{Packed\_U16\_T\_Recv\_Async} are very similiar. Any time an item is popped off the component's queue one of these handlers is called. A packet is then created containing the data item and sent out of the component. The \texttt{Packed\_Byte\_T\_Recv\_Async\_Dropped} and \texttt{Packed\_U16\_T\_Recv\_Async\_Dropped} subprograms are implemented in the same fashion as in Section \ref{Implementing a Queued Component} and will get called if the component queue ever becomes too full to hold another item. \\
+We can see that the implementations of \texttt{Packed\_Byte\_T\_Recv\_Async} and \texttt{Packed\_U16\_T\_Recv\_Async} are very similar. Any time an item is popped off the component's queue one of these handlers is called. A packet is then created containing the data item and sent out of the component. The \texttt{Packed\_Byte\_T\_Recv\_Async\_Dropped} and \texttt{Packed\_U16\_T\_Recv\_Async\_Dropped} subprograms are implemented in the same fashion as in Section \ref{Implementing a Queued Component} and will get called if the component queue ever becomes too full to hold another item. \\
 
 We can make sure that this code compiles by running:
 
@@ -3922,7 +3922,7 @@ Now let's look at the implementation package body to see how to fetch data depen
 
 Besides the \texttt{Invalid\_Data\_Dependency} procedure, which just prints out an error message if an invalid data dependency is received, the only subprogram included is the \texttt{Tick.T} connector handler. This would likely be tied to a rate group and get called periodically in a running assembly. The implementation of the handler does two things: 1) It grabs the \texttt{Counter} data dependency and reports its value via a print message, and 2) It grabs the \texttt{Temperature} data dependency and checks it against a static limit if it is both valid. Both data dependencies are also checked to make sure they are not stale. \\
 
-The \texttt{Counter} data dependency and its corresponding timestamp is requested via the \texttt{Get\_Counter} function. Note that the return status of this function should be checked prior to using the returned counter value, as it may not be valid. If \texttt{Success} is returned, then the counter is valid and can be used. If \texttt{Not\_Available} is returned, then there is not corresponding data product available yet in the central store to relate the value of the counter. In this case, the returned value for \texttt{cnt} should not be used. If \texttt{Stale} is returned then the data dependency's timstamp was older than the \texttt{stale\_Reference} (the current time in this case) minus the data dependency's \textit{stale limit}. Using a data dependency that is stale can be problematic, and should be avoided. Finally, if \texttt{Error} is returned, then something unexpected happened, and you should also not use \texttt{cnt}. Note that an \texttt{Error} return value will only be returned after a call to \texttt{Invalid\_Data\_Dependency} has been made by the base package. In this way, the component developer can encapsulate all error handling for invalid data dependencies in this single subprogram. \\
+The \texttt{Counter} data dependency and its corresponding timestamp is requested via the \texttt{Get\_Counter} function. Note that the return status of this function should be checked prior to using the returned counter value, as it may not be valid. If \texttt{Success} is returned, then the counter is valid and can be used. If \texttt{Not\_Available} is returned, then there is not corresponding data product available yet in the central store to relate the value of the counter. In this case, the returned value for \texttt{cnt} should not be used. If \texttt{Stale} is returned then the data dependency's timestamp was older than the \texttt{stale\_Reference} (the current time in this case) minus the data dependency's \textit{stale limit}. Using a data dependency that is stale can be problematic, and should be avoided. Finally, if \texttt{Error} is returned, then something unexpected happened, and you should also not use \texttt{cnt}. Note that an \texttt{Error} return value will only be returned after a call to \texttt{Invalid\_Data\_Dependency} has been made by the base package. In this way, the component developer can encapsulate all error handling for invalid data dependencies in this single subprogram. \\
 
 The \texttt{Temperature} data dependency is requested via the \texttt{Get\_Temperature} function and is checked in a similar fashion. The next section will describe how to unit test component that uses data dependencies. \\
 
@@ -4222,7 +4222,7 @@ Unlike for data products, packets, and events, this package is not intended to b
 
 First, we can see that there is a \texttt{Instance} type, which is the command suite tagged type. There is also a public \texttt{local\_command\_Id\_Type} enumeration which declares the \textit{local IDs} for the commands. When instantiated in a component, these local IDs will be added to the component's \textit{command ID base}. The command ID base can be set through the public function \texttt{set\_Id\_Base} which is called during component initialization, see Section \ref{Component Set ID Bases}. Note that the ID base for the command suite is stored in the \texttt{Instance} record in the private section in the \texttt{id\_Base} variable. \\
 
-Also stored in the \texttt{Instance} record is a \texttt{source\_Id} variable. This variable can be set or retrieved through the \texttt{set\_Source\_Id} and \texttt{get\_Source\_Id} subprograms. The \texttt{Source\_Id} get's populated in the command header and signifies where the command is originating from. This value is generally not used by the component executing command, but is used by the Adamant standard command routing and command response forwarding system provided by the Command Router component, see \textit{src/components/command\_router}. \\
+Also stored in the \texttt{Instance} record is a \texttt{source\_Id} variable. This variable can be set or retrieved through the \texttt{set\_Source\_Id} and \texttt{get\_Source\_Id} subprograms. The \texttt{Source\_Id} gets populated in the command header and signifies where the command is originating from. This value is generally not used by the component executing command, but is used by the Adamant standard command routing and command response forwarding system provided by the Command Router component, see \textit{src/components/command\_router}. \\
 
 Next, there is a set of two functions which return the ID for each command in the command suite. The returned ID will already have the ID base offset applied to the local ID. Finally, there is a set of two functions that are used to create the two commands. \\
 
@@ -4419,7 +4419,7 @@ To handle parameter updating, the component base package autocode is altered to 
 \end{spaceditemize}
 \vspace{5mm} %5mm vertical space
 
-The \texttt{Fetch} operation is the most straightfoward. The current \textit{staged} value of the parameter is simply returned to the caller. The \texttt{Stage} and \texttt{Update} operations are a bit more sophisticated and are described further. \\
+The \texttt{Fetch} operation is the most straightforward. The current \textit{staged} value of the parameter is simply returned to the caller. The \texttt{Stage} and \texttt{Update} operations are a bit more sophisticated and are described further. \\
 
 When a parameter \texttt{Stage} operation is received by a component, the component base package does the following:
 
@@ -4451,7 +4451,7 @@ The following is the hand-coded implementation package body for the \textit{para
 \textit{component-parameter\_component-implementation.adb}:
 \adacodef{../example_architecture/parameter_component/component-parameter_component-implementation.adb}
 
-The first thing to notice is the implementation of the \texttt{Parameter\_Update\_T\_Modify} connector handler. This code is completely generated by the template autocoder, and rarely needs to be modified by the developer. It calls \texttt{Process\_Parameter\_Update} which is an autocoded procedure in the base package that performs the procedure described above, processing the paramter update based on the specified \texttt{Operation}. Returned from this call is the parameter status which is returned to the connector caller (via \texttt{in out} procedure parameter). \\
+The first thing to notice is the implementation of the \texttt{Parameter\_Update\_T\_Modify} connector handler. This code is completely generated by the template autocoder, and rarely needs to be modified by the developer. It calls \texttt{Process\_Parameter\_Update} which is an autocoded procedure in the base package that performs the procedure described above, processing the parameter update based on the specified \texttt{Operation}. Returned from this call is the parameter status which is returned to the connector caller (via \texttt{in out} procedure parameter). \\
 
 The next procedure, \texttt{Tick\_T\_Recv\_Sync} represents the main execution of the component. In this procedure, we first call \texttt{Self.Update\_Parameters}, which is implemented in the component base package. As described earlier, if all the parameters for the component have been staged through calls to \texttt{Parameter\_Update\_T\_Modify} from an external component (as indicated by the \texttt{Update} operation), then this function will atomically copy those staged parameters to their working copies in the component \texttt{Instance} record. If an \texttt{Update} has not yet been received, then the call to \texttt{Update\_Parameters} does nothing and returns instantly. \\
 
@@ -4886,7 +4886,7 @@ connections:
 
 The new tag here is \texttt{generic\_types}, which contains a list of the generic parameter names and the types to instantiate them with.  Similar to the \texttt{init\_base} tag, all \texttt{generic\_types} must be listed as id-value pairs of the form ``\texttt{generic\_Parameter\_Name => Type}". What we have done here is turned our generic \textit{splitter} into a splitter specialized for splitting events. We can easily define a few more splitters in our assembly model for any other type we wish to split. This is the power of generic components. \\
 
-Note that special care needs to be taken when defining a generic connector type that is of kind \textit{recv\_async}. This implies that the generic type will get serialized onto the component's internal queue. Usually in Adamant, if an \textit{recv\_async} connector is called, the type gets serialized onto the component's internal queue. If the type is a packed record of variable length, then only the bytes used in the type (usually specified by a length field in a header) will be serialized onto the queue. The same behavior is not implemented by default when using a generic type on a \textit{recv\_async} connector. By default, the maximum size of the generic type will always get serialized onto the queue. The reason for this is that the component has no way of determining the serialized length of the type, unless you explicitely provide a way. \\
+Note that special care needs to be taken when defining a generic connector type that is of kind \textit{recv\_async}. This implies that the generic type will get serialized onto the component's internal queue. Usually in Adamant, if an \textit{recv\_async} connector is called, the type gets serialized onto the component's internal queue. If the type is a packed record of variable length, then only the bytes used in the type (usually specified by a length field in a header) will be serialized onto the queue. The same behavior is not implemented by default when using a generic type on a \textit{recv\_async} connector. By default, the maximum size of the generic type will always get serialized onto the queue. The reason for this is that the component has no way of determining the serialized length of the type, unless you explicitly provide a way. \\
 
 For example, if a component with a generic \textit{recv\_async} connector is instantiated with the type \texttt{Command.T}, then every time a command is received by the component, the maximum size of the \texttt{Command.T} type is serialized onto the queue. To get around this behavior and allow the intelligent serialization of variable length types you MUST include an additional formal parameter in your \texttt{generic} definition in the component model named \texttt{Serialized\_Length}, which provides a function that returns the serialized length of the packed record. The definition should look like the example shown below:
 
@@ -4908,14 +4908,14 @@ etc.
 
 When the Adamant system sees a \texttt{Serialized\_Length} function provided in the generic formal parameter list, it will automatically include the autocoded logic to intelligently serialized variable length types onto the component's internal queue. Note that all packed records defined in Adamant, whether they are variable length or not, include a \texttt{Serialized\_Length} function which fits the definition shown above. Thus this generic formal definition can be used to instantiate the component with static sized or variable length packed records alike. The underlying autocoded base package will handle both cases correctly. \\
 
-For an example of this pattern see the \textit{Limiter} component found in \textit{src/components/generics/limiter}. The component contains unit tests that excersize the component's asynchronous connector instantiated with both a staticly sized and variable length packed record.
+For an example of this pattern see the \textit{Limiter} component found in \textit{src/components/generics/limiter}. The component contains unit tests that exercise the component's asynchronous connector instantiated with both a statically sized and variable length packed record.
 
 \subsubsection{Component Interrupt Handling} \label{Component Interrupt Handling}
 
 Adamant provides modeling support for any component that directly handles interrupts. Interrupt specific parameters such as the interrupt priority and ID are often set via the \textit{discriminant} in Ada. Indeed, you could simply use the \textit{discrimininant} tag in your component model to pass in this interrupt data, see Section \ref{Component Instantiation} but then the Adamant modeling system would not know about the interrupt. By providing a way to specify interrupts directly within a component model we are able to more readily produce documentation and other useful autocode associated with all the interrupts in the system. So if you need to handle and interrupt in your component, using the feature presented in this section is highly recommended. \\
 
 
-Most interrupt handling in Adamant can be achieved by using the components found in \textit{src/components/interrupt\_handlers}. Sometimes you need to handle interrupts in a particular way that these components cannot accomodate, and thus you need to define an interrupt handling component from scratch. In this case, using the Adamant interrupt handling components will serve as good examples. In fact, we will use the Adamant \textit{interrupt\_servicer} component to demonstrate the interrupt feature in this section. \\
+Most interrupt handling in Adamant can be achieved by using the components found in \textit{src/components/interrupt\_handlers}. Sometimes you need to handle interrupts in a particular way that these components cannot accommodate, and thus you need to define an interrupt handling component from scratch. In this case, using the Adamant interrupt handling components will serve as good examples. In fact, we will use the Adamant \textit{interrupt\_servicer} component to demonstrate the interrupt feature in this section. \\
 
 Let's take a look at the interrupt servicer component model which can be found in \textit{src/components/interrupt\_handlers/interrupt\_servicer/}: \\
 
@@ -4931,7 +4931,7 @@ The purpose of this tag is twofold 1) to provide the Adamant modeling system wit
 \textit{component-interrupt\_servicer-implementation.ads:} 
 \adacodef{../../src/components/interrupt_servicer/component-interrupt_servicer-implementation.ads}
 
-As can be seen in the component \texttt{Instance} definition, the discriminant not only consists of the \texttt{discriminant} parameter defined in the model, \texttt{custom\_Interrupt\_Procedure}, it also has two additional parameters, \texttt{interrupt\_Id} and \texttt{interrupt\_Priority}. The second two parameters are inserted automatically due to the \texttt{interrupt} definition in the component model. We can see that these two parameters are used to instantiate a \texttt{Task\_Signal} object in the component record, whose definition can be found in the Adamant core interrupt handlers packege, \textit{src/core/interrupt\_handlers}. You should consider using, or adding to, this package if you are defining a custom interrupt handling component in your system. \\
+As can be seen in the component \texttt{Instance} definition, the discriminant not only consists of the \texttt{discriminant} parameter defined in the model, \texttt{custom\_Interrupt\_Procedure}, it also has two additional parameters, \texttt{interrupt\_Id} and \texttt{interrupt\_Priority}. The second two parameters are inserted automatically due to the \texttt{interrupt} definition in the component model. We can see that these two parameters are used to instantiate a \texttt{Task\_Signal} object in the component record, whose definition can be found in the Adamant core interrupt handlers package, \textit{src/core/interrupt\_handlers}. You should consider using, or adding to, this package if you are defining a custom interrupt handling component in your system. \\
 
 Instantiating a component with interrupts in the assembly model is no different than instantiating any other component with \texttt{discriminant} parameters defined. An example is shown below.
 
@@ -5032,9 +5032,9 @@ Again, this pattern can only really be understood by studying the existing compo
 \newpage
 \section{Assemblies} \label{Assemblies}
 
-In Adamant, an \textit{assembly} is a collection of components that have been connected together to form an executable deployment of sofware. Assemblies are lightweight, modeled constructs that can be used for a variety of purposes. Often when developing software with Adamant you will develop a multitude of assemblies. You may have an assembly that contains a configuration of components that perform an early demonstration test of your system. You may have an assembly specially tuned to test a single piece of hardware. You may have an assembly that only executes in a simulation environment on a desktop PC. Finally, you will almost certainly have a production assembly that is used to construct the target sofware for your project. \\
+In Adamant, an \textit{assembly} is a collection of components that have been connected together to form an executable deployment of software. Assemblies are lightweight, modeled constructs that can be used for a variety of purposes. Often when developing software with Adamant you will develop a multitude of assemblies. You may have an assembly that contains a configuration of components that perform an early demonstration test of your system. You may have an assembly specially tuned to test a single piece of hardware. You may have an assembly that only executes in a simulation environment on a desktop PC. Finally, you will almost certainly have a production assembly that is used to construct the target software for your project. \\
 
-The component-based principles of Adamant make constructing different assemblies of components for different purposes straightfoward. Because components are loosely coupled, they can easily be swapped and rearranged as necessary to create differently functioning software while reusing the code found in common core components. \\
+The component-based principles of Adamant make constructing different assemblies of components for different purposes straightforward. Because components are loosely coupled, they can easily be swapped and rearranged as necessary to create differently functioning software while reusing the code found in common core components. \\
 
 This section demonstrates how to construct an assembly and use it to produce integrated software made up of a set of loosely coupled components. This section also presents diagram and documentation generation, integration with a ``ground" system, integration-level testing, and more.
 
@@ -5957,9 +5957,9 @@ When an assembly is compiled into an executable binary and deployed to the targe
 
 \textit{Note that Hydra is not yet publicly available, but will be made so in the future.}
 
-Adamant provides support for interfacing with Hydra at the assembly level. Specifically, any assembly can be controlled by Hydra via commands and recieve data from the Adamant system through data products and packets. \\
+Adamant provides support for interfacing with Hydra at the assembly level. Specifically, any assembly can be controlled by Hydra via commands and receive data from the Adamant system through data products and packets. \\
 
-Hydra is configured via special XML files. Many of these files can be generated from an Adamant assembly model. To see what is available we can run \texttt{redo what} from an assemnbly directory. For example, we can run this from the \textit{science\_assembly} directory created in previous sections (some output ommitted for brevity):
+Hydra is configured via special XML files. Many of these files can be generated from an Adamant assembly model. To see what is available we can run \texttt{redo what} from an assemnbly directory. For example, we can run this from the \textit{science\_assembly} directory created in previous sections (some output omitted for brevity):
 
 \vspace{5mm} %5mm vertical space
 \begin{minted}{text}
@@ -6111,7 +6111,7 @@ Opening this file with an IDE will allow you to view and modify any source code 
 
 A coding style is a set of rules or guidelines used when writing the source code for a program. The rules generally pertain to the visual appearance of the code and the aim is to improve uniformity in the ``look" of the code. Once developers become accustomed to a particular coding style, they can more easily read and understand source code written in that style. Adamant enforces a coding style for all Ada, Python, and YAML to enforce consistency and improve understandability. \\
 
-The main tool for enforcing style is \texttt{redo style}. When run, this will check any Ada, Python, YAML, or autocoded Ada, Python, or YAML and ensure that the style guidlines are met. The following example is run in \textit{doc/example\_architecture/style\_demo}. Which includes the following poorly written code: \\
+The main tool for enforcing style is \texttt{redo style}. When run, this will check any Ada, Python, YAML, or autocoded Ada, Python, or YAML and ensure that the style guidelines are met. The following example is run in \textit{doc/example\_architecture/style\_demo}. Which includes the following poorly written code: \\
 
 \textit{main.adb}:
 \adacodef{../example_architecture/style_demo/main.adb}
@@ -6481,7 +6481,7 @@ To create the generated Ada package we can run \texttt{redo build/src/system\_re
 
 This is not the normal output we expect to see when generating an Ada package. However, the register map produced is special in that it is written mostly in SPARK, the formally provable subset of Ada. \texttt{GNATprove} is then automatically run to statically check the output, which is shown above. \\
 
-The primary reason for this is that SPARK disallows the definition of bit-constrained types with address clauses. A bit-constrained type is a type that for some bit value can become invalid, causing a \texttt{Contraint\_Error} to be thrown at runtime. While bit-constrained types are useful for catching bugs in most Ada code, they can be troublesome when interfacing with volatile hardware interfaces, where the compiler is not in control of what might be written to these types. In such cases, a hardware interface may write an invalid bit value to a type within a register map. When this type is later read by the Ada program, a \texttt{Contraint\_Error} will be thrown. To prevent this, Adamant does not allow bit-constrained types to be defined in register maps. To enforce this it uses the SPARK programming language. If bit-constrained types are used in the register map than an error will produced and the specification will not be generated. \\
+The primary reason for this is that SPARK disallows the definition of bit-constrained types with address clauses. A bit-constrained type is a type that for some bit value can become invalid, causing a \texttt{Constraint\_Error} to be thrown at runtime. While bit-constrained types are useful for catching bugs in most Ada code, they can be troublesome when interfacing with volatile hardware interfaces, where the compiler is not in control of what might be written to these types. In such cases, a hardware interface may write an invalid bit value to a type within a register map. When this type is later read by the Ada program, a \texttt{Constraint\_Error} will be thrown. To prevent this, Adamant does not allow bit-constrained types to be defined in register maps. To enforce this it uses the SPARK programming language. If bit-constrained types are used in the register map than an error will produced and the specification will not be generated. \\
 
 The generated specification files is shown below: \\
 
@@ -6506,7 +6506,7 @@ which when opened with your favorite web browser looks something like this:
 
 \subsection{Creating a Memory Map} \label{Creating a Memory Map}
 
-A \textit{memory map} in Adamant is similar to a \textit{register map}, discussed in Section \ref{Creating a Register Map}, however, instead of defining the address for each item individually, items are layed out contiguously (packed tightly) at a given starting address. The common use case for a \textit{memory map} is when defining a set of data that needs to be saved in nonvolatile memory located at a specific hardware address. \\
+A \textit{memory map} in Adamant is similar to a \textit{register map}, discussed in Section \ref{Creating a Register Map}, however, instead of defining the address for each item individually, items are laid out contiguously (packed tightly) at a given starting address. The common use case for a \textit{memory map} is when defining a set of data that needs to be saved in nonvolatile memory located at a specific hardware address. \\
 
 Often in embedded systems, data needs to be stored persistently, across reboots. This data is usually stored in some kind of nonvolatile memory, such as MRAM, commonly without aid of a file system. In such a case, important variables are stored at predetermined static addresses. In Adamant, we refer to this as a \textit{memory map}. \\
 
@@ -6550,7 +6550,7 @@ To create the generated Ada package we can run \texttt{redo build/src/nonvolatil
 
 This is not the normal output we expect to see when generating an Ada package. However, the memory map produced is special in that it is written mostly in SPARK, the formally provable subset of Ada. \texttt{GNATprove} is then automatically run to statically check the output, which is shown above. \\
 
-The primary reason for this is that SPARK disallows the definition of bit-constrained types with address clauses. A bit-constrained type is a type that for some bit value can become invalid, causing a \texttt{Contraint\_Error} to be thrown at runtime. While bit-constrained types are useful for catching bugs in most Ada code, they can be troublesome when interfacing with volatile hardware interfaces, where the compiler is not in control of what might be written to these types. In such cases, a hardware interface may write an invalid bit value to a type within a memory map. When this type is later read by the Ada program, a \texttt{Contraint\_Error} will be thrown. To prevent this, Adamant does not allow bit-constrained types to be defined in memory maps. To enforce this it uses the SPARK programming language. If bit-constrained types are used in the register map than an error will produced and the specification will not be generated. \\
+The primary reason for this is that SPARK disallows the definition of bit-constrained types with address clauses. A bit-constrained type is a type that for some bit value can become invalid, causing a \texttt{Constraint\_Error} to be thrown at runtime. While bit-constrained types are useful for catching bugs in most Ada code, they can be troublesome when interfacing with volatile hardware interfaces, where the compiler is not in control of what might be written to these types. In such cases, a hardware interface may write an invalid bit value to a type within a memory map. When this type is later read by the Ada program, a \texttt{Constraint\_Error} will be thrown. To prevent this, Adamant does not allow bit-constrained types to be defined in memory maps. To enforce this it uses the SPARK programming language. If bit-constrained types are used in the register map than an error will produced and the specification will not be generated. \\
 
 The generated specification files is shown below: \\
 

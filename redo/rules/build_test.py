@@ -68,7 +68,7 @@ class build_test(build_rule_base):
             error.abort()
 
         # For some reason AUnit does not produce an errored return status if
-        # no assertions failed but an unexpected error occured. Fix this:
+        # no assertions failed but an unexpected error occurred. Fix this:
         if bool(re.search(r"Unexpected\s+Errors:\s+[1-9][0-9]*", stdout)) or bool(
             re.search(r"Unexpected\s+Errors:\s+[1-9][0-9]*", stderr)
         ):

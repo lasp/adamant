@@ -75,7 +75,7 @@ package Component.Forwarder.Implementation.Tester is
    overriding procedure Command_Response_T_Recv_Sync (Self : in out Instance; Arg : in Command_Response.T);
    -- The connector for data products
    overriding procedure Data_Product_T_Recv_Sync (Self : in out Instance; Arg : in Data_Product.T);
-   -- The event connector to send the events specifc to the component.
+   -- The event connector to send the events specific to the component.
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T);
    -- The system time is retrieved via this connector.
    overriding function Sys_Time_T_Return (Self : in out Instance) return Sys_Time.T;

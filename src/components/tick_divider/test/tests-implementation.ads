@@ -11,7 +11,7 @@ private
    overriding procedure Set_Up_Test (Self : in out Instance);
    overriding procedure Tear_Down_Test (Self : in out Instance);
 
-   -- This unit test excersizes tick dividing with a variety of divisors, including disabled divisors. It runs the component through enough iterations to excersize the count rollover, and checks to make sure this happens.
+   -- This unit test exercises tick dividing with a variety of divisors, including disabled divisors. It runs the component through enough iterations to exercise the count rollover, and checks to make sure this happens.
    overriding procedure Nominal (Self : in out Instance);
    -- This unit test configures the component with a variety of bad input parameters and checks to make sure exceptions are thrown as expected.
    overriding procedure Bad_Setup (Self : in out Instance);

@@ -68,7 +68,7 @@ private
    type Instance is new Event_Packetizer.Base_Instance with record
       -- Internal packets:
       Packet_Array : Protected_Packet_Array;
-      -- Partial packet count - how many ticks have pased while component
+      -- Partial packet count - how many ticks have passed while component
       -- has held a partial packet.
       Partial_Packet_Count : Natural := 0;
       Partial_Packet_Timeout : Natural := 0;

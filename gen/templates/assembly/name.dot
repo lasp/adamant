@@ -27,7 +27,7 @@ digraph {{ name }} {
     color=gray
 {% endif %}
 
-    // Coponents in cluster_{{ loop.index }}
+    // Components in cluster_{{ loop.index }}
 {% for name, component in group.items() %}
     {{ component.instance_name }} [
 {% if component.instance_execution == "active" and show_switches["show_component_execution"] %}

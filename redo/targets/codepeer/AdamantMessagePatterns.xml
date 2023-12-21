@@ -32,7 +32,7 @@
 
 <!--117-->
 <!-- If an unused output parameter is named "ignore" than -->
-<!-- this is intentional and the warning should be supressed. -->
+<!-- this is intentional and the warning should be suppressed. -->
 <Message_Rule Matching_Probability="SUPPRESSED">
   <Message_Pattern>
     <String_Specifier

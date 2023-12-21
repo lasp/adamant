@@ -311,7 +311,7 @@ package body Ccsds_Downsampler_Tests.Implementation is
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 28);
       Data_Product_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get (28), Test_Dp_Recieved (2, 0));
 
-      -- Check that it was successfull
+      -- Check that it was successful
       T.Ccsds_Space_Packet_T_Send (Incoming_Packet);
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 7);
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 29);

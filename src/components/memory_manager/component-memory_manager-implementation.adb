@@ -42,7 +42,7 @@ package body Component.Memory_Manager.Implementation is
       end Request;
 
       -- Release access with a given ID. If status is set to true then the release
-      -- succeded, otherwise an unexpected ID was returned.
+      -- succeeded, otherwise an unexpected ID was returned.
       procedure Release (Self : in out Instance; Id : in Unsigned_16; State : out Memory_Manager_Enums.Memory_State.E; Status : out Release_Status) is
          use Memory_Manager_Enums.Memory_State;
          Expected_Id : constant Unsigned_16 := Current_Id - 1;
@@ -351,7 +351,7 @@ package body Component.Memory_Manager.Implementation is
       return Failure;
    end Write_Memory_Region;
 
-   -- Forces the release of the memory region if it is currently allocated. This command can be used to recover from an anomolous condition.
+   -- Forces the release of the memory region if it is currently allocated. This command can be used to recover from an anomalous condition.
    overriding function Force_Release (Self : in out Instance) return Command_Execution_Status.E is
       use Command_Execution_Status;
    begin

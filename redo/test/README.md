@@ -2,7 +2,7 @@
 
 #### Description
 
-This directory contains a set of unit tests which ensure the functionality of the build sytem.
+This directory contains a set of unit tests which ensure the functionality of the build system.
 
 #### Contents
 

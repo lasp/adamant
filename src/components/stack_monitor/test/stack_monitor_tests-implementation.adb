@@ -153,12 +153,12 @@ package body Stack_Monitor_Tests.Implementation is
 
       -- Test the primary stack. Let's fill up the stacks 639 bytes and see what happens.
       for Idx in Natural range 0 .. 638 loop
-         Task_1_Stack (Task_1_Stack'Last - Idx) := 12; -- Something other thatn 0xCC
-         Task_2_Stack (Task_2_Stack'Last - Idx) := 12; -- Something other thatn 0xCC
+         Task_1_Stack (Task_1_Stack'Last - Idx) := 12; -- Something other than 0xCC
+         Task_2_Stack (Task_2_Stack'Last - Idx) := 12; -- Something other than 0xCC
       end loop;
 
       -- A little white box testing. The internal index in the component for
-      -- cacheing should be the last possible index.
+      -- caching should be the last possible index.
       T.Check_Stack_Indexes ((Task_1_Stack'Last, Task_2_Stack'Last));
 
       -- Send a tick and expect a packet.
@@ -174,14 +174,14 @@ package body Stack_Monitor_Tests.Implementation is
       -- Test the primary stack. Let's fill up the first stack to 90 percent and
       -- the second stack to 50 percent.
       for Idx in Natural range 639 .. 902 loop
-         Task_1_Stack (Task_1_Stack'Last - Idx) := 12; -- Something other thatn 0xCC
+         Task_1_Stack (Task_1_Stack'Last - Idx) := 12; -- Something other than 0xCC
       end loop;
       for Idx in Natural range 639 .. 1_002 loop
-         Task_2_Stack (Task_2_Stack'Last - Idx) := 12; -- Something other thatn 0xCC
+         Task_2_Stack (Task_2_Stack'Last - Idx) := 12; -- Something other than 0xCC
       end loop;
 
       -- A little white box testing. The internal index in the component for
-      -- cacheing should be at the last location where the stack ended.
+      -- caching should be at the last location where the stack ended.
       T.Check_Stack_Indexes ((Task_1_Stack'Last - 638, Task_2_Stack'Last - 638));
 
       -- Send a tick and expect a packet.
@@ -196,14 +196,14 @@ package body Stack_Monitor_Tests.Implementation is
 
       -- Test the primary stack. Let's fill up the stacks to 100 percent.
       for Idx in Natural range 902 .. 999 loop
-         Task_1_Stack (Task_1_Stack'Last - Idx) := 12; -- Something other thatn 0xCC
+         Task_1_Stack (Task_1_Stack'Last - Idx) := 12; -- Something other than 0xCC
       end loop;
       for Idx in Natural range 1_002 .. 1_999 loop
-         Task_2_Stack (Task_2_Stack'Last - Idx) := 12; -- Something other thatn 0xCC
+         Task_2_Stack (Task_2_Stack'Last - Idx) := 12; -- Something other than 0xCC
       end loop;
 
       -- A little white box testing. The internal index in the component for
-      -- cacheing should be at the last location where the stack ended.
+      -- caching should be at the last location where the stack ended.
       T.Check_Stack_Indexes ((Task_1_Stack'Last - 902, Task_2_Stack'Last - 1_002));
 
       -- Send a tick and expect a packet.
@@ -217,7 +217,7 @@ package body Stack_Monitor_Tests.Implementation is
       Packet_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (8), Pkt);
 
       -- A little white box testing. The internal index in the component for
-      -- cacheing should be at the last location where the stack ended.
+      -- caching should be at the last location where the stack ended.
       T.Check_Stack_Indexes ((0, 0));
 
       -- Send a tick and expect a packet.
@@ -229,7 +229,7 @@ package body Stack_Monitor_Tests.Implementation is
       Packet_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (9), Pkt);
 
       -- A little white box testing. The internal index in the component for
-      -- cacheing should be at the last location where the stack ended.
+      -- caching should be at the last location where the stack ended.
       T.Check_Stack_Indexes ((0, 0));
 
       -- OK let's test some special cases.
@@ -247,7 +247,7 @@ package body Stack_Monitor_Tests.Implementation is
       Packet_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (10), Pkt);
 
       -- A little white box testing. The internal index in the component for
-      -- cacheing should be at the last location where the stack ended.
+      -- caching should be at the last location where the stack ended.
       T.Check_Stack_Indexes ((0, 0));
 
       -- No events should have been sent unless a command was sent. No commands were sent.

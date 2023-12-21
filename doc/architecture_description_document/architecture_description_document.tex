@@ -27,7 +27,7 @@ At its core, Adamant is a component-based framework. Component-based frameworks 
   \item \textbf{Encapsulation} - A component hides the details of its internal behavior and state and only allows other components to access its functionality through the interface it presents. 
   \item \textbf{Independence} - Components do not depend on other components, they depend only on their interfaces. This means that changes to one component are unlikely to ripple through the entire system. 
   \item \textbf{Reusability} - Some components may be designed for a project-specific task, however, many components can be designed in a generic way such that they can be reused in similar systems with no modification. In addition, a component can be placed in a variety of execution contexts and be still expected to function as designed.
-  \item \textbf{Replacability} - Because a component is simply represented by its interfaces, it can substituted for another component as long as it adheres to the same interface. 
+  \item \textbf{Replaceability} - Because a component is simply represented by its interfaces, it can substituted for another component as long as it adheres to the same interface. 
 \end{itemize}
 
 Components in Adamant communicate with one another through strongly typed \textit{connectors}. Components can have many connectors, of many different types, which can either send or receive data or both. Because connectors are exposed in the design, data flow within an Adamant architecture is not obscured, but rather can be easily inspected by a viewer of the design.
@@ -168,7 +168,7 @@ This \texttt{Example\_Command\_Router} component's job is to take commands async
 % parameters 
 \begin{figure}[H]
   \includegraphics[width=1.0\textwidth,center]{../example_architecture/build/eps/example_parameters.eps}
-  \caption{\texttt{Example\_Parameters} component which takes requests for parameter values by identifier, and synchronously returns them to the requestor}
+  \caption{\texttt{Example\_Parameters} component which takes requests for parameter values by identifier, and synchronously returns them to the requester}
 \end{figure}
 
 The \texttt{Example\_Parameters} component's primary task is to push the current value of parameters to components throughout the system. To accomplish this, it has an arrayed \textit{provide} connector through which it sends parameter updates to destination components. The component also includes a connector which allows parameter values to be changed by command. 

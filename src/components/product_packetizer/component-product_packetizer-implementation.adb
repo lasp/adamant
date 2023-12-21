@@ -27,7 +27,7 @@ package body Component.Product_Packetizer.Implementation is
       -- Find a common multiple for the packet periods. We do this to make sure
       -- that periods are upheld even in the case of rollover of the counter value.
       for Idx in Self.Packet_List.all'Range loop
-         -- Make sure all packet items are not null in Init, so we don't get a suprise later.
+         -- Make sure all packet items are not null in Init, so we don't get a surprise later.
          pragma Assert (Self.Packet_List.all (Idx).Items /= null);
 
          -- Extract the period from this index:

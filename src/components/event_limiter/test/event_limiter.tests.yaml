@@ -4,7 +4,7 @@ tests:
   - name: Test_Received_Event
     description: This unit test is to test incrementing counters for the range events as they come in with both enabled and disabled states.
   - name: Test_Decrement_Event_Count
-    description: This unit test is to test the decrement of all the event counters in the tick and the contruction of the event if events were limited.
+    description: This unit test is to test the decrement of all the event counters in the tick and the construction of the event if events were limited.
   - name: Test_Issue_State_Packet
     description: This unit test sends the issue command and test that the appropriate values are received in that packet.
   - name: Test_Command_Single_State_Change

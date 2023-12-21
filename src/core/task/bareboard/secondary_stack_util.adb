@@ -1,4 +1,4 @@
--- We know that this is version dependant. We will need to update this if the
+-- We know that this is version dependent. We will need to update this if the
 -- runtime implementation changes.
 pragma Warnings (Off, """System.Secondary_Stack"" is an internal GNAT unit");
 pragma Warnings (Off, "use of this unit is non-portable and version-dependent");

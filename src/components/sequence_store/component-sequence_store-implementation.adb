@@ -17,7 +17,7 @@ package body Component.Sequence_Store.Implementation is
 
    use Sequence_Store_Types;
 
-   -- Define the overhead byte assciated with a slot in memory.
+   -- Define the overhead byte associated with a slot in memory.
    Num_Slot_Meta_Bytes : constant Natural := Sequence_Store_Slot_Header.Size_In_Bytes - Sequence_Header.Size_In_Bytes;
    -- Check our constant to make sure it makes sense.
    pragma Compile_Time_Error (Num_Slot_Meta_Bytes /= Sequence_Store_Slot_Metadata.Size_In_Bytes, "Expected meta data bytes to equal size of metadata type.");
@@ -122,7 +122,7 @@ package body Component.Sequence_Store.Implementation is
    -- function does not check the bounds of the slot_Index, it assumes that the caller
    -- has already checked the bounds.
    function Get_Slot_Header (Self : in Instance; Slot_Index : in Slot_Number) return Sequence_Store_Slot_Header.T is
-      -- Overlay sequence header over the begining of the appropriate slot. We know that this overlay
+      -- Overlay sequence header over the beginning of the appropriate slot. We know that this overlay
       -- will not go over the end of the memory region, since we have checked the memory region's length
       -- in the Init, and ensured they are all at least as large as this header.
       To_Return : constant Sequence_Store_Slot_Header.T with Import, Convention => Ada, Address => Self.Slots.all (Slot_Index).Address;
@@ -134,7 +134,7 @@ package body Component.Sequence_Store.Implementation is
    -- function does not check the bounds of the slot_Index, it assumes that the caller
    -- has already checked the bounds.
    procedure Set_Slot_Header (Self : in Instance; Slot_Index : in Slot_Number; Header : in Sequence_Store_Slot_Header.T) is
-      -- Overlay sequence header over the begining of the appropriate slot. We know that this overlay
+      -- Overlay sequence header over the beginning of the appropriate slot. We know that this overlay
       -- will not go over the end of the memory region, since we have checked the memory region's length
       -- in the Init, and ensured they are all at least as large as this header.
       To_Set : Sequence_Store_Slot_Header.T with Import, Convention => Ada, Address => Self.Slots.all (Slot_Index).Address;
@@ -145,7 +145,7 @@ package body Component.Sequence_Store.Implementation is
    -- Given a slot number return the memory region that stores the sequence header and sequence data. This memory
    -- region excludes the slot meta data which is found at the beginning of each slot.
    function Get_Sequence_Memory_Region (Self : in Instance; Slot_Index : in Slot_Number) return Memory_Region.T is
-      -- Overlay sequence header over the begining of the appropriate slot. We know that this overlay
+      -- Overlay sequence header over the beginning of the appropriate slot. We know that this overlay
       -- will not go over the end of the memory region, since we have checked the memory region's length
       -- in the Init, and ensured they are all at least as large as this header.
       Slot_Header : constant Sequence_Store_Slot_Header.T with Import, Convention => Ada, Address => Self.Slots.all (Slot_Index).Address;
@@ -158,7 +158,7 @@ package body Component.Sequence_Store.Implementation is
    -- Given a slot number return the maximum sized memory region that could store a   sequence header and sequence data at this slot.
    -- This memory region excludes the slot meta data which is found at the beginning of each slot.
    function Get_Max_Size_Sequence_Memory_Region (Self : in Instance; Slot_Index : in Slot_Number) return Memory_Region.T is
-      -- Overlay sequence header over the begining of the appropriate slot. We know that this overlay
+      -- Overlay sequence header over the beginning of the appropriate slot. We know that this overlay
       -- will not go over the end of the memory region, since we have checked the memory region's length
       -- in the Init, and ensured they are all at least as large as this header.
       Slot_Header : constant Sequence_Store_Slot_Header.T with Import, Convention => Ada, Address => Self.Slots.all (Slot_Index).Address;
@@ -302,7 +302,7 @@ package body Component.Sequence_Store.Implementation is
                   B_Stop : constant System.Address := B.Address + Storage_Offset (B.Length - 1);
                   -- Calculate offset between start addresses. Note: that there is no
                   -- > or < operators supplied for System.Address, so we use subtraction
-                  -- instead to convert the offset to a Storage_Offset wich supports these
+                  -- instead to convert the offset to a Storage_Offset which supports these
                   -- comparison operators.
                   Offset : constant Storage_Offset := A_Start - B_Start;
                begin
@@ -394,7 +394,7 @@ package body Component.Sequence_Store.Implementation is
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- This is the command recieve connector.
+   -- This is the command receive connector.
    overriding procedure Command_T_Recv_Async (Self : in out Instance; Arg : in Command.T) is
       -- Execute the command:
       Stat : constant Command_Response_Status.E := Self.Execute_Command (Arg);
@@ -596,7 +596,7 @@ package body Component.Sequence_Store.Implementation is
       end if;
    end Activate_Slot;
 
-   -- Deactive a sequence slot so that its contents can no longer be fetched.
+   -- Deactivate a sequence slot so that its contents can no longer be fetched.
    overriding function Deactivate_Slot (Self : in out Instance; Arg : in Packed_Slot_Number.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
       use Sequence_Store_Enums.Slot_State_Type;

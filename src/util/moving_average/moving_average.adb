@@ -14,7 +14,7 @@ package body Moving_Average is
       if Sample_Calculation_Size <= -1 then
          Self.Items_Length := Sample_Storage_Size;
       else
-         -- Assertion to make sure the desired calculation size cant be 0. Must be -1 or a number between 1 and Sample_Storage_Size.
+         -- Assertion to make sure the desired calculation size can't be 0. Must be -1 or a number between 1 and Sample_Storage_Size.
          pragma Assert (Sample_Calculation_Size > 0, "The sample calculation size must be greater than 0");
          pragma Assert (Sample_Calculation_Size <= Sample_Storage_Size, "The sample calculation size must be less than the max sample size");
          Self.Items_Length := Sample_Calculation_Size;
@@ -59,7 +59,7 @@ package body Moving_Average is
             Self.Max_Value := New_Sample;
          end if;
 
-         -- If we loop back to the begining of the samples, then reset the max
+         -- If we loop back to the beginning of the samples, then reset the max
          if Self.Head = 0 then
             Self.Max_Value := New_Sample;
          end if;
@@ -124,7 +124,7 @@ package body Moving_Average is
       Self.Sum_Squared := 0.0;
    end Reset;
 
-   -- Used to change the effective length of the running statisitics
+   -- Used to change the effective length of the running statistics
    function Change_Sample_Calculation_Size (Self : in out Instance; New_Sample_Length : in Positive) return Size_Status is
    begin
       -- Check that the requested length is not longer than the max length

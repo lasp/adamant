@@ -28,7 +28,7 @@ connectors:
   - description: The connector for data products
     type: Data_Product.T
     kind: send
-  - description: The event connector to send the events specifc to the component.
+  - description: The event connector to send the events specific to the component.
     type: Event.T
     kind: send
   - description: The system time is retrieved via this connector.

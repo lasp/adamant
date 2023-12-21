@@ -258,7 +258,7 @@ package body Pid_Controller_Tests.Implementation is
       Packed_F32_Assert.Eq (T.Pid_Error_History.Get (2), (Value => 4.0));
       Short_Float_Assert.Eq (T.Control_Output_U_Recv_Sync_History.Get (4).Output_Value, 48.794, Epsilon => 0.001);
 
-      -- Now lets test the limiting on the integral term in the negitive direction
+      -- Now lets test the limiting on the integral term in the negative direction
       T.Control_Input_U_Send (((0, 0), 10.0, 1.0, 0.0, True));
       T.Control_Input_U_Send (((0, 0), 10.0, 1.0, 0.0, False));
       T.Control_Input_U_Send (((0, 0), 10.0, 1.0, 0.0, False));

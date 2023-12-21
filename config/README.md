@@ -20,7 +20,7 @@ You can now modify the values in `adamant.configuration.yaml` to work for your p
 version control system if you intend on merging changes from your Adamant repository back into
 the framework root repository.
 
-Version controlling the configuration file is usually desireable. To accomplish this, copy the
+Version controlling the configuration file is usually desirable. To accomplish this, copy the
 Adamant default configuration into your project specific repository:
 
 ```

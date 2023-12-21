@@ -109,7 +109,7 @@ package body Binary_Tree_Tests.Implementation is
       Boolean_Assert.Eq (Self.Tree.Search (17, Tree_Element, Ignore), True);
       Natural_Assert.Eq (Tree_Element, 17);
 
-      -- Non existant Tree_Elements:
+      -- Non existent Tree_Elements:
       Boolean_Assert.Eq (Self.Tree.Search (2, Ignore, Ignore_Index), False);
       Boolean_Assert.Eq (Self.Tree.Search (11, Ignore, Ignore_Index), False);
       Boolean_Assert.Eq (Self.Tree.Search (27, Ignore, Ignore_Index), False);

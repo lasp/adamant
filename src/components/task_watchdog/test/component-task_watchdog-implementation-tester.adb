@@ -154,7 +154,7 @@ package body Component.Task_Watchdog.Implementation.Tester is
    -----------------------------------------------
    -- Event handler primitive:
    -----------------------------------------------
-   -- Indicates a command was recieved to enable the checks on upstream pets.
+   -- Indicates a command was received to enable the checks on upstream pets.
    overriding procedure Watchdog_Pet_Checks_Enabled (Self : in out Instance) is
       Arg : constant Natural := 0;
    begin
@@ -162,7 +162,7 @@ package body Component.Task_Watchdog.Implementation.Tester is
       Self.Watchdog_Pet_Checks_Enabled_History.Push (Arg);
    end Watchdog_Pet_Checks_Enabled;
 
-   -- Indicates a command was recieved to disable the checks on upstream pets.
+   -- Indicates a command was received to disable the checks on upstream pets.
    overriding procedure Watchdog_Pet_Checks_Disabled (Self : in out Instance) is
       Arg : constant Natural := 0;
    begin
