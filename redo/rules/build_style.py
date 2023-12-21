@@ -85,6 +85,18 @@ class build_style(build_rule_base):
             shell.run_command(flake_cmd)
             os.chdir(cwd)
 
+        # Run codespell check:
+        codespell_cwd = directory + os.sep + "*.*"
+        codespell_ignore = os.environ["ADAMANT_DIR"] + os.sep + "redo" + os.sep + "codespell" + os.sep + "ignore_list.txt"
+        codespell_output = "\" 2>&1 | tee -a " + style_log_file + " 1>&2"
+        codespell_suffix = " -I " + codespell_ignore + " --skip=\"" + style_directory + codespell_output
+        shell.run_command("codespell "
+                          + codespell_cwd
+                          + codespell_suffix)
+        shell.run_command("codespell "
+                          + build_directory
+                          + codespell_suffix)
+
         # Finally lint any YAML files:
         def _yaml_lint(filenames=[]):
             cmd = (
