@@ -182,6 +182,7 @@ def get_src_dir(redo_arg):
         dir_path, dir_name = _get_1_dir_path(dir_path)
         if dir_name == "build":
             to_return = os.path.dirname(dir_path)
+            break
     if to_return:
         return to_return
     else:

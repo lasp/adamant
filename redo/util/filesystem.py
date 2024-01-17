@@ -34,9 +34,9 @@ def safe_symlink(filename, link_filename, overwrite=False):
 
 
 # This generator is a modified version of os.walk, except that it
-# ignores "build" directories (by default) and hidden directories
+# ignores "build" and "alire" directories (by default) and hidden directories
 # as it recurses. This improves performance of a recursive search.
-def recurse_through_repo(directory, ignore=["build"]):
+def recurse_through_repo(directory, ignore=["build", "alire"]):
     # Walk recursively through the repository, ignoring hidden directories and build directories:
     for root, dirnames, filenames in os.walk(directory):
         # Don't traverse into hidden directories:

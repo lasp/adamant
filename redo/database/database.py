@@ -52,10 +52,8 @@ def _get_flock(filename):
     return FileLock(_get_flock_filename(filename), timeout=10)
 
 
-# Private helper functions for opening/creating an unqlite database:
-def _create(filename):
-    # Create a database from a fresh file every time. If the user
-    # does not want this they can call open_rw instead.
+# Private helper functions for deleting/opening/creating an unqlite database:
+def _destroy(filename):
     try:
         os.remove(filename)
     except OSError:
@@ -64,6 +62,12 @@ def _create(filename):
         os.remove(_get_flock_filename(filename))
     except OSError:
         pass
+
+
+def _create(filename):
+    # Create a database from a fresh file every time. If the user
+    # does not want this they can call open_rw instead.
+    _destroy(filename)
     lock = _get_flock(filename)
     db = None
     try:
@@ -141,6 +145,11 @@ class database(object):
             self.db.close()
         except BaseException:
             pass
+
+    # Completely remote the database from the filesystem.
+    def destroy(self):
+        self.close()
+        _destroy(self.filename)
 
     # Close the database.
     def __del__(self):

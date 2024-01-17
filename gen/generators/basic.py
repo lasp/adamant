@@ -141,6 +141,7 @@ class basic_generator(object):
     ):
         # Set the generator model class and type name:
         self.model_cls = model_class
+        self._model_obj = {}
         self.model_type = self.model_cls.__name__.lower()
         self.has_dependencies = has_dependencies
         self.camel_case_filename = camel_case_filename
@@ -157,6 +158,12 @@ class basic_generator(object):
         name, ext = os.path.splitext(self.template_basename)
         self.extension = ext[1:]
         self.descriptor = name.split("name")[-1]
+
+    # Cache model object for speed:
+    def model_object(self, input_filename):
+        if input_filename not in self._model_obj:
+            self._model_obj[input_filename] = self.model_cls(input_filename)
+        return self._model_obj[input_filename]
 
     def input_file_regex(self):
         return r".*\." + self.model_type + r"\.yaml$"
@@ -235,7 +242,7 @@ class basic_generator(object):
         return dirname + os.sep + build_dir + os.sep + output_filename
 
     def _generate_output(self, input_filename, methods_to_call_on_model_obj=[]):
-        model_obj = self.model_cls(input_filename)
+        model_obj = self.model_object(input_filename)
 
         # Call any desired methods on the model object. This performance feature is used to
         # add functionality to some models that are needed by only some generators,
@@ -265,7 +272,7 @@ class basic_generator(object):
     # Depend on the primary model dependencies:
     def depends_on(self, input_filename):
         if self.has_dependencies:
-            m = self.model_cls(input_filename)
+            m = self.model_object(input_filename)
             if hasattr(m, "get_dependencies"):
                 # import sys
                 # sys.stderr.write("depending on: " + str(m.get_dependencies()) + "\n")
