@@ -445,6 +445,7 @@ redo  what
 redo all
 redo clean
 redo clean_all
+redo clear_cache
 redo templates
 redo publish
 redo targets
@@ -473,6 +474,7 @@ Adamant also provides a set of build commands that can be used in almost any pro
   \item \textbf{\texttt{redo recursive}} - runs \texttt{redo all} from this directory and all below it
   \item \textbf{\texttt{redo clean}} - removes all \textit{build/} directories from this directory and all below it
   \item \textbf{\texttt{redo clean\_all}} - removes all \textit{build/} directories from this entire repository
+  \item \textbf{\texttt{redo clear\_cache}} - remove the model cache that the build system uses to increase performance, see Section \ref{The Model Cache}
   \item \textbf{\texttt{redo templates}} - finds and builds all autocoded templates (in \textit{build/template/}) that can be built from this directory
   \item \textbf{\texttt{redo test\_all}} - finds and runs all unit tests from this directory an all below it. Note: Add a \textit{.skip\_test} file to a directory to exclude it from being run by \texttt{redo test\_all}.
   \item \textbf{\texttt{redo coverage\_all}} - finds and runs all unit tests from this directory an all below it and generates coverage reports for each. Note: Add a \textit{.skip\_test} or \textit{.skip\_coverage} file to a directory to exclude it from being run by \texttt{redo coverage\_all}.
@@ -532,12 +534,13 @@ For more \texttt{redo} options you can run:
 \end{minted}
 \vspace{5mm} %5mm vertical space
 
-Very rarely, \texttt{redo} can get itself into an unknown state. If things are not behaving correctly you can wipe out the redo database, and force things to rebuild fresh, which often fixes any issues that arise. The best procedure to do this is:
+Very rarely, \texttt{redo} can get itself into an unknown state. If things are not behaving correctly you can wipe out the redo database, and force things to rebuild fresh, which often fixes any issues that arise.To be safe, you can also remove the model cache that the build system uses to increase performance. The best procedure to do this is:
 
 \vspace{5mm} %5mm vertical space
 \begin{minted}{text}
 > rm -rf ~/.redo      # remove the redo database
 > redo clean_all      # clean the entire repository
+> redo clear_cache    # remove the model cache
 > redo <your_command> # retry the redo command that was not working
 \end{minted}
 \vspace{5mm} %5mm vertical space
@@ -6713,6 +6716,20 @@ The default behavior of the Adamant build system is provided by the \textit{.do}
 \vspace{5mm} %5mm vertical space
 
 Note that adding some build rules, such as compiling for a new programming language, will require more work than the procedure presents above. In that case, it is recommended to understand the \textit{set up} and \textit{database} portions of the build system located in \textit{redo/database}.
+
+\subsubsection{Model Caching} \label{The Model Cache}
+
+When building a target, the Adamant build system spends a lot of time reading YAML models from the file system, validating them, and then using them to generate outputs. Since most of these models do not change often on disk, the build system caches them in a database in \textit{/temp} to speed up build times. It is important when designing python models to correctly track the dependencies so that cached entries can be refreshed when a YAML model, or a YAML model's dependency, has changed. To do this, ensure that your python model correctly implements the \texttt{get\_dependencies} method, which should return a list of all YAML files that the current YAML file depends on. For example, a \texttt{*.component.yaml} always depends on its IDed entity models: \texttt{*.data\_products.yaml}, \texttt{*.data\_commands.yaml}, etc. \\
+
+If you suspect that the cache is messed up, or you want to ensure a completely clean build, you can clear the cache by running:
+
+\vspace{5mm} %5mm vertical space
+\begin{minted}{text}
+> redo clear_cache
+\end{minted}
+\vspace{5mm} %5mm vertical space
+
+which will remove the entire cache database from the system. It will be recreated next time you build a new target.
 
 \subsection{The Generator System} \label{Adding Generators}
 

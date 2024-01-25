@@ -1,7 +1,12 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
+try:
+    from util import performance
+except ModuleNotFoundError:
+    import sys
+    sys.stderr.write("Adamant environment not set up! Run:\n    source ~/adamant/env/activate\n")
+    sys.exit(1)
 # Optimize python path:
-from util import performance
 performance.optimize_path()
 
 # Imports
@@ -11,9 +16,9 @@ from rules.build_eps import build_eps
 # This .do file builds .eps (PostScript) files.
 
 if __name__ == "__main__":
-  assert len(sys.argv) == 4
-  rule = build_eps()
-  rule.build(*sys.argv[1:])
+    assert len(sys.argv) == 4
+    rule = build_eps()
+    rule.build(*sys.argv[1:])
 
 # Exit fast:
-performance.exit()
+performance.exit(sys.argv[2])

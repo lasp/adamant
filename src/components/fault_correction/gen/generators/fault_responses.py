@@ -181,3 +181,9 @@ class fault_responses_packed_id_type_record_yaml(basic_generator, generator_base
     def generate(self, input_filename):
         r = fault_responses.fault_responses(input_filename)
         print(r.render(self.template, template_path=self.template_dir))
+
+    def depends_on(self, input_filename):
+        deps = basic_generator.depends_on(self, input_filename)
+        enum_gen = fault_responses_status_enum_yaml()
+        deps.append(enum_gen.output_filename(input_filename))
+        return deps

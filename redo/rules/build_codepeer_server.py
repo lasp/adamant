@@ -75,8 +75,6 @@ def _start_server(base_dir, build_target):
         + str(port)
         + " -XADAMANT_DIR="
         + os.environ["ADAMANT_DIR"]
-        + " -XADAMANT_ENV_DIR="
-        + os.environ["ADAMANT_ENV_DIR"]
         + " -XOBJECT_DIR="
         + output_dir
         + " -XSOURCE_DIRS="

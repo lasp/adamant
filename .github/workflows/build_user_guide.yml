@@ -12,22 +12,12 @@ jobs:
     name: build_user_guide
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/lasp/adamant:example-latest
-    env:
-      INSTALL_DIR: /home/user/env
-      ADAMANT_DIR: ${{ github.workspace }}
-      ADAMANT_CONFIGURATION_YAML: ${{ github.workspace }}/config/adamant.configuration.yaml
+      image: ghcr.io/lasp/adamant:latest
     steps:
       - run: echo "Starting job triggered by a ${{ github.event_name }} event on a ${{ runner.os }} server hosted by GitHub."
       - run: echo "Checking out ${{ github.repository }} on branch ${{ github.ref }}."
       - name: Check out repository code
         uses: actions/checkout@v3
-      - name: Mark repository as safe so we can run git commands within it
-        run: git config --global --add safe.directory $ADAMANT_DIR
-      - name: Get alire dependencies
-        run: alr -n build --release && alr -n toolchain --select gnat_native && alr -n toolchain --select gprbuild
-      - name: Set up Adamant configuration file
-        run: cp config/adamant.configuration.yaml.original config/adamant.configuration.yaml
       - name: Build the user guide
         run: bash env/github_run.sh "redo doc/user_guide/build_user_guide"
       - name: Archive user guide PDF

@@ -285,8 +285,6 @@ def _run_gprbuild_command(build_target_instance, sources_to_compile, source_depe
         + sources_to_compile_str
         + " -XADAMANT_DIR="
         + os.environ["ADAMANT_DIR"]
-        + " -XADAMANT_ENV_DIR="
-        + os.environ["ADAMANT_ENV_DIR"]
         + " -XOBJECT_DIR="
         + object_dir
         + " -XSOURCE_DIRS="

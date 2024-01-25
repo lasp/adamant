@@ -3,7 +3,6 @@ abstract project a_adamant is
    -- Grab external variables. These are used to communicate between the
    -- Adamant build system and GPRBuild.
    ADAMANT_DIR := external("ADAMANT_DIR", "");
-   ADAMANT_ENV_DIR := external("ADAMANT_ENV_DIR", "");
    SOURCE_DIRS := external_as_list("SOURCE_DIRS", ",");
    OBJECT_DIR := external("OBJECT_DIR");
    EXEC_DIR := external("EXEC_DIR", "");

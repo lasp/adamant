@@ -117,8 +117,6 @@ def _prove_ada_sources(source_files, base_dir):
         + gpr_project_file
         + " -XADAMANT_DIR="
         + os.environ["ADAMANT_DIR"]
-        + " -XADAMANT_ENV_DIR="
-        + os.environ["ADAMANT_ENV_DIR"]
         + " -XOBJECT_DIR="
         + build_dir
         + " -XSOURCE_DIRS="
