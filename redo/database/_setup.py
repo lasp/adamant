@@ -274,9 +274,8 @@ def _setup(redo_1, redo_2, redo_3, sandbox=False):
     # the build path. Let's create these now. In fact,
     # we may need some of them in order to calculate
     # the build path, below:
-    import database.create
-
-    database.create.create_pre_build_path()
+    from database.create import create_pre_build_path
+    create_pre_build_path()
 
     # Form the build path:
     # The total path consists of:
@@ -384,7 +383,8 @@ def _setup(redo_1, redo_2, redo_3, sandbox=False):
         )
 
     # Create the database:
-    database.create.create(path)
+    from database.create import create
+    create(path)
 
 
 # Remove temporary directory if it exists.

@@ -95,10 +95,66 @@ class base(renderable_object, metaclass=abc.ABCMeta):
     #################################################
 
     def load_from_cache(cls, filename):
+        def is_model_cached_this_session(filename):
+            with model_cache_database() as db:
+                # Get the time when we last cached the model from this file:
+                cached_sesion_id = db.get_model_session_id(filename)
+                if cached_sesion_id is not None and cached_sesion_id == os.environ["ADAMANT_SESSION_ID"]:
+                    return True
+            return False
+
+        def is_cached_model_up_to_date(filename):
+            # See if the model is stored in the database  cache stored on disk:
+            with model_cache_database() as db:
+                # Get the time when we last cached the model from this file:
+                cache_time_stamp = db.get_model_time_stamp(filename)
+                if cache_time_stamp is None:
+                    return False
+
+                # If the cache time is newer than the file modification time
+                # then we can safely use the cached model:
+                file_time_stamp = os.path.getmtime(filename)
+                if cache_time_stamp >= file_time_stamp:
+                    return True
+
+        def do_load_from_cache(filename):
+            with model_cache_database() as db:
+                return db.get_model(filename)  # This can return None
+
+        def mark_model_cached_this_session(filename):
+            with model_cache_database(mode=DATABASE_MODE.READ_WRITE) as db:
+                db.mark_cached_model_up_to_date_for_session(filename)
+
+        # If the model was cached this redo session, then we know it is safe to use
+        # directly from cache without any additional checking. Dependencies do not
+        # need to be checked, since this would have been done earlier in this session,
+        # ie. milliseconds ago.
+        if is_model_cached_this_session(filename):
+            return do_load_from_cache(filename)
+
+        # If the model was written from a previous session, then we need to check its
+        # write timestamp against the file timestamp to determine if the cached entry is
+        # still valid:
         model = None
-        # See if the model is stored in the database  cache stored on disk:
-        with model_cache_database() as db:
-            model = db.get_model(filename)  # This can return None
+        if is_cached_model_up_to_date(filename):
+            model = do_load_from_cache(filename)
+
+        # We have a model we can use from cache. It was written in a previous
+        # session. This is only safe to use if none of the model dependencies
+        # have not changed on disk either.
+        if model is not None:
+            for dep_model_filename in model.get_dependencies():
+                if not is_cached_model_up_to_date(dep_model_filename):
+                    # One of the dependencies models has recently changed on disk,
+                    # so we need to reload this model from scratch. We cannot safely
+                    # use the cached version.
+                    return None
+
+        # This cached model has been fully validated for this session. So if we use it again
+        # during the session, we can short circuit the full validation and return from
+        # is_model_cached_this_session()
+        mark_model_cached_this_session(filename)
+
         return model
 
     def save_to_cache(self):
@@ -125,6 +181,8 @@ class base(renderable_object, metaclass=abc.ABCMeta):
                 self.filename = os.path.basename(filename)
                 self.full_filename = full_filename
                 self.do_save_to_cache = True
+                # import sys
+                # sys.stderr.write("lcache " + self.filename + "\n")
             else:
                 # Create from scratch:
                 self = super(base, cls).__new__(cls)
@@ -132,6 +190,8 @@ class base(renderable_object, metaclass=abc.ABCMeta):
                 self.filename = os.path.basename(filename)
                 self.full_filename = full_filename
                 self.do_save_to_cache = True
+                # import sys
+                # sys.stderr.write("lfile " + self.filename + "\n")
         else:
             # Create from scratch. This is usually only called when
             # reconstructing the object from cache.

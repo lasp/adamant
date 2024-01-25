@@ -32,6 +32,7 @@ class build_what(build_rule_base):
             # "recursive",
             "clean",
             "clean_all",
+            "clear_cache",
             "templates",
             "publish",
             "targets",
