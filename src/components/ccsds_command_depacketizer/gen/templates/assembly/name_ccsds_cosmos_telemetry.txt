@@ -1,0 +1,32 @@
+{% for id, packet in packets.items() %}
+TELEMETRY {{ name|upper }} {{ packet.name|upper }} BIG_ENDIAN "{{ packet.description }}"
+{# The ccsds packets header #}
+{# This header assumed by the Ccsds_packets_Depacketizer component #}
+  ITEM CCSDSVER 0 3 UINT "CCSDS packet version number"
+  ITEM CCSDSTYPE 3 1 UINT "CCSDS packet type (COMMAND or TELEMETRY)"
+    STATE TLM 0
+    STATE CMD 1
+  ITEM CCSDSSHF 4 1 UINT "CCSDS secondary header flag"
+    STATE FALSE 0
+    STATE TRUE 1
+  ID_ITEM CCSDSAPID 5 11 UINT {{ packet.id }} "CCSDS application process ID"
+  ITEM CCSDSSEQFLAGS 16 2 UINT "CCSDS sequence flags"
+    STATE FIRST 0
+    STATE CONT 1
+    STATE LAST 2
+    STATE NOGROUP 3
+  ITEM CCSDSSEQNT 18 14 UINT "CCSDS packet sequence count"
+  ITEM CCSDSLENGTH 32 16 UINT "CCSDS packet data length"
+  ITEM CCSDSSEC 48 32 UINT "Seconds since epoch"
+  ITEM CCSDSSUBSEC 80 32 UINT "Milliseconds of day (0 - 86399999)"
+{# The packets definitions. #}
+{% for item_name, item in packet.items.items() %}
+  APPEND_ITEM {{ item.entity.full_name|upper }}.{% if item.flat_name %}{{ item.flat_name|upper }}{% else %}{{ item.flat_name }}{% endif %} {{ item.size -}}
+{%- if 'Short_Float' in item.type %} FLOAT "
+{%- elif 'Buffer' in item.type or item.size > 64 %} BLOCK "
+{%- else %} UINT "{%- endif -%}
+{{ item.flat_desc|replace('\n','') }}"
+{% endfor %}
+  APPEND_ITEM CRC.PARAM 16 UINT "CRC value"
+
+{% endfor %}

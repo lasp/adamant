@@ -1,0 +1,33 @@
+{% for id, command in commands.items() %}
+COMMAND {{ name|upper }} {{ command.suite.component.instance_name|upper }}-{{ command.name|upper }} BIG_ENDIAN "{{ command.description }}"
+{# The ccsds command header #}
+{# This header assumed by the Ccsds_Command_Depacketizer component #}
+  PARAMETER CCSDSVER 0 3 UINT 0 7 0 "Packet version number"
+  PARAMETER CCSDSTYPE 3 1 UINT 0 1 1 "Packet type"
+    STATE TLM 0
+    STATE CMD 1
+  PARAMETER CCSDSSHF 4 1 UINT 0 1 1 "CCSDS secondary header flag"
+    STATE FALSE 0
+    STATE TRUE 1
+  PARAMETER CCSDSAPID 5 11 UINT 0 2047 8 "CCSDS application process ID"
+  PARAMETER CCSDSSEQFLAGS 16 2 UINT 0 3 3 "Sequence flags"
+    STATE FIRST 0
+    STATE CONT 1
+    STATE LAST 2
+    STATE NOGROUP 3
+  PARAMETER CCSDSSEQNT 18 14 UINT MIN MAX 0 "Packet sequence count"
+  PARAMETER CCSDSLENGTH 32 16 UINT MIN MAX {% if command.size != None %}{{ (command.type_model.fields|length * (command.size / 8) + 3)|int }}{% else %}3{% endif %} "Packet data length"
+  PARAMETER CCSDSSHDRRB 48 1 UINT MIN MAX 0 "Secondary header reserve bit"
+  PARAMETER CCSDSSHDRFC 49 7 UINT MIN MAX 0 "Secondary header function code"
+  PARAMETER CCSDSSHDRCRC 56 8 UINT MIN MAX 0 "Secondary header checksum"
+  ID_PARAMETER CCSDSCMDID 64 16 UINT MIN MAX {{ command.id }} "CCSDS command ID"
+{# The command argument definitions. #}
+{% if command.type %}{% if command.type_model %}{% for field in command.type_model.fields %}
+  APPEND_PARAMETER {{ field|upper }} {{ command.size -}}
+{%- if 'F32' in command.type %} FLOAT MIN MAX {% if command.default_value %}{{ command.default_value }}{% else %}0{% endif %}
+{%- elif 'Buffer' in command.type or command.size > 64 %} BLOCK 0
+{%- else %} UINT MIN MAX {% if command.default_value %}{{ command.default_value }}{% else %}0{% endif %}{% endif %} "{{ command.type_model.description|replace('\n','') }}"
+{% endfor %}{% endif %}{% endif %}
+{#  APPEND_PARAMETER CRC.PARAM 16 UINT MIN MAX 0 "CRC value" #}
+
+{% endfor %}
