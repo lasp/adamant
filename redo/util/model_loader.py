@@ -156,7 +156,7 @@ def load_project_configuration():
             "Could not find Adamant configuration file in location: "
             + config_file
             + "\nMake sure a configuration file exists at this location or set the ADAMANT_CONFIGURATION_YAML"
-            + "environment variable to use a different configuration file location."
+            + " environment variable to use a different configuration file location."
         )
 
     # We have a valid configuration file, load it:

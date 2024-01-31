@@ -1,0 +1,154 @@
+#!/bin/bash
+
+# This script sets up the environment for the framework,
+# including the path, the python environment.
+
+# Only set the environment once:
+if test -n "$ADAMANT_ENVIRONMENT_SET"
+then
+  return
+fi
+
+# If the ADAMANT_DIR is not specified, then set it
+if test -z "$ADAMANT_DIR" # ie. /home/user/adamant
+then
+  # Set the adamant directory based on the location of this file.
+  export ADAMANT_DIR=`readlink -f "${BASH_SOURCE[0]}" | xargs dirname | xargs dirname`
+fi
+
+echo "------------------------------------------------------------------"
+echo "Activating Adamant environment at $ADAMANT_DIR."
+echo "------------------------------------------------------------------"
+
+# We expect input arguments to be a list of build roots
+# (not including the adamant directory) in the form:
+#
+#   path/to/build_root_1:path/to/build_root_2:etc
+#
+IFS=':' read -ra paths <<< "$1"
+
+# Check if $ADAMANT_DIR is present in the paths
+found_adamant_dir=false
+for path in "${paths[@]}"; do
+  if [ "$path" = "$ADAMANT_DIR" ]; then
+    found_adamant_dir=true
+    break
+  fi
+done
+
+# If $ADAMANT_DIR is not found, insert it at the beginning of the paths
+if [ "$found_adamant_dir" = false ]; then
+  paths=("$ADAMANT_DIR" "${paths[@]}")
+fi
+
+# If the ADAMANT_CONFIGURATION_YAML is not specified then set it
+if test -z "$ADAMANT_CONFIGURATION_YAML" # ie. /home/user/adamant
+then
+  config_file=$ADAMANT_DIR/config/adamant.configuration.yaml
+  # Copy if from .original if needed
+  if ! test -f "$config_file"
+  then
+    cp -f $config_file.original $config_file
+  fi
+  export ADAMANT_CONFIGURATION_YAML=$config_file
+fi
+
+# Set up python. If the ADAMANT_PYTHON_ENV is not specified
+# then we set it to a default
+if test -z "$ADAMANT_PYTHON_ENV" # ie. ~/.py_env
+then
+  export ADAMANT_PYTHON_ENV=$HOME/.py_env
+fi
+
+# See if the python environment already exists, if it does
+# then use it. Else, create it, and then use it.
+py_activate=$ADAMANT_PYTHON_ENV/bin/activate
+if test -f "$py_activate"
+then
+  . $py_activate
+else
+  echo "Setting up python environment in $ADAMANT_PYTHON_ENV..."
+  python3 -m venv $ADAMANT_PYTHON_ENV
+  . $py_activate
+  pip3 install --upgrade pip
+  pip3 install wheel
+  pip3 install -r $ADAMANT_DIR/env/requirements1.txt
+  pip3 install -r $ADAMANT_DIR/env/requirements2.txt
+  echo "Done."
+fi
+
+# Set up path:
+GROUND_BIN=$ADAMANT_DIR/gnd/bin
+export PATH=$GROUND_BIN:$PATH
+
+# Some other variables needed by python configuration:
+export SCHEMAPATH=$ADAMANT_DIR/gen/schemas
+export TEMPLATEPATH=$ADAMANT_DIR/gen/templates
+
+# Make temp directory for build system
+ADAMANT_TMP_DIR=`mktemp -d`
+ADAMANT_TMP_DIR=$ADAMANT_TMP_DIR".adamant"
+export ADAMANT_TMP_DIR
+mkdir -p $ADAMANT_TMP_DIR
+
+# Set up Alire toolchain if it is not set up.
+if ! test -d "$ADAMANT_DIR/alire" || ! test -d "$HOME/.config/alire"
+then
+  echo "Setting up alire toolchain..."
+  cd $ADAMANT_DIR
+  alr -n toolchain --select gnat_native
+  alr -n toolchain --select gprbuild
+  alr -n build --release
+  cd - > /dev/null
+  echo "Done."
+fi
+
+# Iterate through each path and print them out
+echo ""
+echo "Configuring build roots: ${paths[@]}"
+for path in "${paths[@]}"; do
+  echo -n "  Setting up $path...  "
+  cd $path
+
+  # Mark path as safe git directory if it is not already marked.
+  if ! git config --global --get-regexp '^safe\.directory' | grep -q "^safe\.directory $path$"; then
+    git config --global --add safe.directory "$path"
+  fi
+
+  # Set up alire configuration if it is not yet set up. We already did this for
+  # Adamant (the alire/ directory exists), so only do this for project directories.
+  if ! test -d "$path/alire"
+  then
+    echo "Building alire dependencies..."
+    alr -n build --release
+    echo "Done."
+  fi
+
+  # This runs "export GPR_PROJECT_PATH=etc" which sets the GPR_PROJECT_PATH
+  # to whatever alr thinks it should be for the Adamant project crate.
+  # This allows the Adamant build system to then use gprbuild in the same way
+  # that alr would.
+  #
+  # Also update PATH. Alire will include the current PATH set by the Adamant
+  # environment plus some alire specific paths.
+  #
+  eval `alr -n printenv | grep PATH`
+
+  # Activate the local python configuration:
+  . $ADAMANT_DIR/env/set_python_path.sh $path
+
+  cd - &> /dev/null
+  echo "Done."
+done
+echo "Done."
+echo ""
+echo "-- Adamant Configuration --"
+echo "ADAMANT_DIR=$ADAMANT_DIR"
+echo "ADAMANT_CONFIGURATION_YAML=$ADAMANT_CONFIGURATION_YAML"
+echo "ADAMANT_PYTHON_ENV=$ADAMANT_PYTHON_ENV"
+echo ""
+echo "Adamant environment activated successfully."
+echo ""
+
+# Signify the environment is set up
+export ADAMANT_ENVIRONMENT_SET="yes"

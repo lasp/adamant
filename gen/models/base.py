@@ -113,7 +113,10 @@ class base(renderable_object, metaclass=abc.ABCMeta):
 
                 # If the cache time is newer than the file modification time
                 # then we can safely use the cached model:
-                file_time_stamp = os.path.getmtime(filename)
+                try:
+                    file_time_stamp = os.path.getmtime(filename)
+                except FileNotFoundError:
+                    return False
                 if cache_time_stamp >= file_time_stamp:
                     return True
 

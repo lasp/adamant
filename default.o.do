@@ -1,7 +1,12 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
+try:
+    from util import performance
+except ModuleNotFoundError:
+    import sys
+    sys.stderr.write("Adamant environment not set up! Run:\n    source ~/adamant/env/activate\n")
+    sys.exit(1)
 # Optimize python path:
-from util import performance
 performance.optimize_path()
 
 # Imports

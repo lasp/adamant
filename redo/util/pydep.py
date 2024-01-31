@@ -1,7 +1,6 @@
 import os
 import sys
 from util import redo
-from modulefinder import ModuleFinder
 from database.py_source_database import py_source_database
 from base_classes.build_rule_base import build_rule_base
 from util import shell
@@ -14,6 +13,16 @@ from util import shell
 # that were found in the source file, but could not be
 # found on the file system.
 def pydep(source_file, path=[]):
+    # monkey-patch broken modulefinder._find_module
+    # (https://github.com/python/cpython/issues/84530)
+    # in Python 3.8-3.10
+    #
+    # Found: https://github.com/thebjorn/pydeps/commit/17a09ac344cad06cc9a1e9129c08ffee02cb4b60
+    import modulefinder
+    if hasattr(modulefinder, '_find_module'):
+        from imp import find_module
+        modulefinder._find_module = find_module
+
     # If a path is not provided than just use the python
     # path variable:
     if not path:
@@ -21,7 +30,7 @@ def pydep(source_file, path=[]):
 
     # Run the module finder script on the given
     # python source file.
-    finder = ModuleFinder(path=path)
+    finder = modulefinder.ModuleFinder(path=path)
     finder.run_script(source_file)
 
     # Collect and return the results:
