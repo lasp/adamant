@@ -1,9 +1,5 @@
-#else
-
-# This Dockerfile needs to be run from within the project/ directory (AKA ../../ from here)
-# so that docker has access to all the files it needs. ie.
 #
-# $ docker build -t $DOCKER_IMAGE_NAME -f adamant_example/docker/Dockerfile .
+# $ docker build -t $DOCKER_IMAGE_NAME -f Dockerfile .
 #
 # For best results use the ./build_image.sh and ./create_container.sh scripts
 # provided in this directory.
