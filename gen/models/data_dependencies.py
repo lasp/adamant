@@ -95,6 +95,7 @@ class data_dependencies(component_submodel, ided_suite):
                 "Data_Product_Return",
                 "Ada.Real_Time",
                 "Data_Product_Enums",
+                "Sys_Time",
             ]
             + self.includes
         )
@@ -113,7 +114,8 @@ class data_dependencies(component_submodel, ided_suite):
         component_submodel.set_component(self, component)
 
     def get_dependencies(self):
-        return ided_suite.get_dependencies(self)
+        return component_submodel.get_dependencies(self) + \
+               ided_suite.get_dependencies(self)
 
     # Called by component, which passes set_data_dependencies instance data.
     @throw_exception_with_lineno

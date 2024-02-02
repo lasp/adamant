@@ -208,4 +208,5 @@ class packets(component_submodel, ided_suite):
         self.packets = list(self.entities.values())
 
     def get_dependencies(self):
-        return ided_suite.get_dependencies(self)
+        return component_submodel.get_dependencies(self) + \
+               ided_suite.get_dependencies(self)
