@@ -35,7 +35,7 @@ This model is used to generate the structural code, documentation, unit test sca
 
 The best way to get started with Adamant is to try out the [Example Project](https://github.com/lasp/adamant_example). The example demonstrates a functioning deployment of Adamant that runs on both Linux and an embedded [Raspberry Pi Pico](https://www.raspberrypi.com/products/raspberry-pi-pico/) target. The example also provides a docker-based build environment that contains all the dependencies needed for working with Adamant. You are encouraged to clone the example project and begin modifying it to meet your needs.
 
-If you want to create your own project from scratch, it is best to start by bringing up the provided [Docker environment](https://github.com/lasp/adamant/docker), which comes with Adamant's dependencies pre-installed. From here, you can build and run things within Adamant and then start building out your own project that uses it.
+If you want to create your own project from scratch, it is best to start by bringing up the provided [Docker environment](https://github.com/lasp/adamant/tree/main/docker), which comes with Adamant's dependencies pre-installed. From here, you can build and run things within Adamant and then start building out your own project that uses it.
 
 Want to read more first? See the [Architecture Description Document](doc/architecture_description_document/architecture_description_document.pdf) and [User Guide](doc/user_guide/user_guide.pdf).
 
