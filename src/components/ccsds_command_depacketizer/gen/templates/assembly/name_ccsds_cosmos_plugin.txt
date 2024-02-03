@@ -3,11 +3,10 @@ VARIABLE {{ name|lower }}_target_name {{ name|upper }}
 VARIABLE port_w 2003
 VARIABLE port_r 2003
 VARIABLE checksum_parameter_name CCSDSSHDRCRC
-VARIABLE checksum_bit_size 8
-
 
 TARGET {{ name|upper }} <%= {{ name|lower }}_target_name %>
-INTERFACE <%= {{ name|lower }}_target_name %>_INT tcpip_server_interface.rb <%= port_w %> <%= port_r %> 10.0 nil BURST
+INTERFACE <%= {{ name|lower }}_target_name %>_INT tcpip_server_interface.rb <%= port_w %> <%= port_r %> 10.0 nil LENGTH 32 16 7
   MAP_TARGET <%= {{ name|lower }}_target_name %>
-  PROTOCOL READ_WRITE crc_8bc_protocol.rb nil false "ERROR" -16 16
-  PROTOCOL WRITE cmd_checksum.rb <% checksum_parameter_name %> <% checksum_bit_size %>
+  PROTOCOL READ crc_protocol.rb nil true "ERROR" -16 16
+  PROTOCOL WRITE cmd_checksum.rb <%= checksum_parameter_name %>
+

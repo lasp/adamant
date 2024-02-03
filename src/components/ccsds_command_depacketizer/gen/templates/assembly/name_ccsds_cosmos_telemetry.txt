@@ -27,6 +27,6 @@ TELEMETRY {{ name|upper }} {{ packet.name|upper }} BIG_ENDIAN "{{ packet.descrip
 {%- else %} UINT "{%- endif -%}
 {{ item.flat_desc|replace('\n','') }}"
 {% endfor %}
-  APPEND_ITEM CRC.PARAM 16 UINT "CRC value"
+  APPEND_ITEM SUBPACKET.DATA 0 BLOCK "Subpacket data"
 
 {% endfor %}
