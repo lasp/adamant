@@ -44,6 +44,7 @@ package body {{ name }}.Implementation is
 
 {% endif %}
       -- TODO Insert custom set up code here.
+      null;
    end Set_Up_Test;
 
    overriding procedure Tear_Down_Test (Self : in out Instance) is
@@ -56,6 +57,7 @@ package body {{ name }}.Implementation is
 {% endif %}
    begin
       -- TODO Insert custom cleanup code here.
+      null;
 {% if component %}
 {% if component.connectors.invoker() or component.connectors.of_kind("recv_async") or component.events %}
       -- Free component heap:

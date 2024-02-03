@@ -1270,7 +1270,7 @@ class assembly(subassembly):
     #############################################################
 
     def get_dependencies(self):
-        return self.models_dependent_on
+        return super().get_dependencies() + self.models_dependent_on
 
     # Note: all of these functions are optional, and only need be called if
     # a generator needs the data that they produce. These functions generate
