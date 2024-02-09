@@ -19,10 +19,11 @@ module OpenC3
 
     end
 
+    # @write_packet generates packet checksum: XOR of packet bytes with 0xFF seed
     def write_packet(packet, seed = 0xFF)
       if @write_item_name
-        crc = packet.buffer.bytes.reduce(seed, :^)
-        packet.write(@write_item_name, crc)
+        checksum = packet.buffer.bytes.reduce(seed, :^)
+        packet.write(@write_item_name, checksum)
       end
       packet
     end

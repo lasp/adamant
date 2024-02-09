@@ -20,7 +20,7 @@ COMMAND {{ name|upper }} {{ command.suite.component.instance_name|upper }}-{{ co
   PARAMETER CCSDSSHDRRB 48 1 UINT MIN MAX 0 "Secondary header reserve bit"
   PARAMETER CCSDSSHDRFC 49 7 UINT MIN MAX 0 "Secondary header function code"
   PARAMETER CCSDSSHDRCRC 56 8 UINT MIN MAX 0 "Secondary header checksum"
-  ID_PARAMETER CCSDSCMDID 64 16 UINT MIN MAX {{ command.id }} "CCSDS command ID"
+  ID_PARAMETER CCSDSCMDID 64 16 UINT MIN MAX {{ command.id }} "Adamant command ID"
 {# The command argument definitions. #}
 {% if command.type %}{% if command.type_model %}{% for field in command.type_model.fields %}
   APPEND_PARAMETER {{ field|upper }} {{ command.size -}}
@@ -28,6 +28,5 @@ COMMAND {{ name|upper }} {{ command.suite.component.instance_name|upper }}-{{ co
 {%- elif 'Buffer' in command.type or command.size > 64 %} BLOCK 0
 {%- else %} UINT MIN MAX {% if command.default_value %}{{ command.default_value }}{% else %}0{% endif %}{% endif %} "{{ command.type_model.description|replace('\n','') }}"
 {% endfor %}{% endif %}{% endif %}
-{#  APPEND_PARAMETER CRC.PARAM 16 UINT MIN MAX 0 "CRC value" #}
 
 {% endfor %}
