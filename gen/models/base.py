@@ -135,7 +135,7 @@ class base(renderable_object, metaclass=abc.ABCMeta):
                 cached_submodels = db.get_model_submodels(filename)
 
             if cached_submodels:
-                _, _, model_name, _, _= redo_arg.split_model_filename(filename)
+                _, _, model_name, _, _ = redo_arg.split_model_filename(filename)
                 new_submodels = model_loader._get_model_file_paths(model_name)
                 # import sys
                 # sys.stderr.write(model_name + "\n")

@@ -54,6 +54,7 @@ class model_cache_database(database):
     def get_model_submodels(self, model_file):
         return self.try_fetch(model_file + "_submod@paths@@")
 
+
 # Create an empty model cache database file, if one does
 # not already exist:
 def touch_model_cache_database():
