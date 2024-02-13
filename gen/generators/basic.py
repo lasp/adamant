@@ -14,6 +14,7 @@ def create_basic_generator(
     template_dir=None,
     has_dependencies=True,
     camel_case_filename=False,
+    ignore_cache=False
 ):
     #
     # Dynamically generate a class of the form:
@@ -31,6 +32,7 @@ def create_basic_generator(
             template_dir=template_dir,
             has_dependencies=has_dependencies,
             camel_case_filename=camel_case_filename,
+            ignore_cache=ignore_cache
         )
 
     cls_name = (
@@ -62,6 +64,7 @@ def add_basic_generator_to_module(
     template_dir=None,
     has_dependencies=True,
     camel_case_filename=False,
+    ignore_cache=False
 ):
     module_name = module["__name__"]
     cls = create_basic_generator(
@@ -71,6 +74,7 @@ def add_basic_generator_to_module(
         template_dir=template_dir,
         has_dependencies=has_dependencies,
         camel_case_filename=camel_case_filename,
+        ignore_cache=ignore_cache
     )
     add_class_to_module(cls, module)
 
@@ -83,6 +87,7 @@ def add_basic_generators_to_module(
     template_dir=None,
     has_dependencies=True,
     camel_case_filename=False,
+    ignore_cache=False
 ):
     for template in templates:
         add_basic_generator_to_module(
@@ -92,6 +97,7 @@ def add_basic_generators_to_module(
             template_dir=template_dir,
             has_dependencies=has_dependencies,
             camel_case_filename=camel_case_filename,
+            ignore_cache=ignore_cache
         )
 
 
@@ -138,6 +144,7 @@ class basic_generator(object):
         template_dir=None,
         has_dependencies=True,
         camel_case_filename=False,
+        ignore_cache=False
     ):
         # Set the generator model class and type name:
         self.model_cls = model_class
@@ -145,6 +152,7 @@ class basic_generator(object):
         self.model_type = self.model_cls.__name__.lower()
         self.has_dependencies = has_dependencies
         self.camel_case_filename = camel_case_filename
+        self.ignore_cache = ignore_cache
 
         # If a full template filename is not given, then form one using
         # the model_type:
@@ -162,7 +170,7 @@ class basic_generator(object):
     # Cache model object for speed:
     def model_object(self, input_filename):
         if input_filename not in self._model_obj:
-            self._model_obj[input_filename] = self.model_cls(input_filename)
+            self._model_obj[input_filename] = self.model_cls(input_filename, ignore_cache=self.ignore_cache)
         return self._model_obj[input_filename]
 
     def input_file_regex(self):

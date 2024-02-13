@@ -87,10 +87,25 @@ class renderable_object(object):
             self.__dict__, template_file, template_path, extensions=["jinja2.ext.do"]
         )
 
+# We use this meta class to intercept calls to create a new "base" object. It
+# looks for arguments that should only be passed to __new__, currently this only
+# includes an option to ignore the model cache on load, and filters those arguments
+# before passing the remaining arguments to __init__. This differs slightly from the
+# default python behavior, and allows us to not propogate arguments like "ignore_cache"
+# through the __init__ for all model objects that inherit from base.
+#
+# This meta class also extends the abc.ABCMeta class, so we get the features from that
+# as well.
+class base_meta(abc.ABCMeta, type):
+    def __call__(cls, *args, **kwargs):
+        ignore_cache = kwargs.pop("ignore_cache", False)
+        instance = cls.__new__(cls, *args, **kwargs, ignore_cache=ignore_cache)
+        cls.__init__(instance, *args, **kwargs)
+        return instance
 
 # The model base class. All python models that load yaml files should
 # inherit from this class.
-class base(renderable_object, metaclass=abc.ABCMeta):
+class base(renderable_object, metaclass=base_meta):
     #################################################
     # Model Caching:
     #################################################
@@ -204,9 +219,18 @@ class base(renderable_object, metaclass=abc.ABCMeta):
     def __new__(cls, filename, *args, **kwargs):
         # Try to load the model from the cache:
         if filename:
+            # See if we are requested to ignore the cache for this model
+            # load:
+            ignore_cache = kwargs.get("ignore_cache")
             full_filename = os.path.abspath(filename)
-            model = cls.load_from_cache(cls, full_filename)
-            if model:
+            model = None
+            if not ignore_cache:
+                model = cls.load_from_cache(cls, full_filename)
+
+            # If we are not ignoring the cache, and the model was found in
+            # the cache, then use it, otherwise create the model from scratch
+            # by reading in the file.
+            if not ignore_cache and model:
                 # Create from cached model:
                 self = model
                 self.from_cache = True
