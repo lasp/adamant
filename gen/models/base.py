@@ -87,11 +87,12 @@ class renderable_object(object):
             self.__dict__, template_file, template_path, extensions=["jinja2.ext.do"]
         )
 
+
 # We use this meta class to intercept calls to create a new "base" object. It
 # looks for arguments that should only be passed to __new__, currently this only
 # includes an option to ignore the model cache on load, and filters those arguments
 # before passing the remaining arguments to __init__. This differs slightly from the
-# default python behavior, and allows us to not propogate arguments like "ignore_cache"
+# default python behavior, and allows us to not propagate arguments like "ignore_cache"
 # through the __init__ for all model objects that inherit from base.
 #
 # This meta class also extends the abc.ABCMeta class, so we get the features from that
@@ -102,6 +103,7 @@ class base_meta(abc.ABCMeta):
         instance = cls.__new__(cls, *args, **kwargs, ignore_cache=ignore_cache)
         cls.__init__(instance, *args, **kwargs)
         return instance
+
 
 # The model base class. All python models that load yaml files should
 # inherit from this class.
