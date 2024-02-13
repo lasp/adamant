@@ -231,7 +231,6 @@ class base(renderable_object, metaclass=base_meta):
                 self.filename = os.path.basename(filename)
                 self.full_filename = full_filename
                 self.do_save_to_cache = True
-                # import sys
                 # sys.stderr.write("lcache " + self.filename + "\n")
             else:
                 # Create from scratch:
@@ -240,7 +239,6 @@ class base(renderable_object, metaclass=base_meta):
                 self.filename = os.path.basename(filename)
                 self.full_filename = full_filename
                 self.do_save_to_cache = True
-                # import sys
                 # sys.stderr.write("lfile " + self.filename + "\n")
         else:
             # Create from scratch. This is usually only called when
@@ -372,13 +370,9 @@ class base(renderable_object, metaclass=base_meta):
             import warnings
 
             warnings.simplefilter("ignore", yaml.error.UnsafeLoaderWarning)
-            # with open(self.full_filename, 'r') as stream:
             try:
                 yml = yaml.YAML(typ='rt')
                 return yml.load(yaml_text)
-                # import sys
-                # sys.stderr.write(str(self.data) + "\n")
-                # sys.stderr.write(str(type(self.data)) + "\n")
             except yaml.YAMLError as exc:
                 raise ModelException(str(exc))
 
@@ -405,11 +399,9 @@ class base(renderable_object, metaclass=base_meta):
             tokens = list(jinja_lexer.tokenize(contents))
             has_jinja_directives = False
             for token in tokens:
-                # sys.stderr.write(token.type + "\n")
                 if token.type != "data":
                     has_jinja_directives = True
                     break
-            # sys.stderr.write(self.full_filename + " has jinja directives? " + str(has_jinja_directives) + "\n")
 
             # If there are jinja directives in the file, then lets render them using
             # the global project configuration YAML.
