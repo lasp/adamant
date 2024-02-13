@@ -1,15 +1,14 @@
 %- if description
 \VAR{description|e}
-\\
+\vspace{5mm}
 %- endif
 
 %- if preamble 
-\\
+\vspace{10mm}
 \textit{Preamble (inline Ada definitions):}\\
 \texttt{\VAR{preamble|e}}
-\\
 %- endif
-\\
+\vspace{5mm}
 %- for enum in enums.values()
 \textbf{\texttt{\VAR{enum.name|e}}}:
 %- if enum.description
