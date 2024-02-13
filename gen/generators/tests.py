@@ -1,6 +1,6 @@
 from base_classes.generator_base import generator_base
 from generators.basic import basic_generator
-from models import tests
+from models import tests, component
 from util import error
 from util import model_loader
 import os.path
@@ -134,6 +134,10 @@ class tester_generator(basic_generator):
             component_name, model_types="component"
         )
         if component_model_path:
+            # Override the model class. We are going to use the component model
+            # to generate this output instead of the test model, since it contains
+            # all the info needed.
+            self.model_cls = component.component
             basic_generator.generate(self, component_model_path)
 
     # Depend on the component model and any commands, data products, events models that the component uses:
