@@ -27,17 +27,18 @@ class build_all(build_rule_base):
         # Regex to match metric files:
         metric_reg = re.compile(r".*build/metric/.*\.txt$")
         assertion_obj_reg = re.compile(r".*build/obj/.*\-assertion.o$")
+        c_obj_reg = re.compile(r".*build/obj/.*\-c.o$")
         obj_reg = re.compile(r".*build/obj/.*.o$")
 
         # Find all the objects that can be built in in this build directory, minus any assertion objects since
-        # those are not cross platform.
-        assertion_obj_reg = re.compile(r".*build/obj/.*\-assertion.o$")
+        # those are not cross platform, and minus .C packages, since those don't compile for every packed type.
         objects = [
             target
             for target in targets
             if os.path.dirname(target).startswith(build_directory)
             and target.endswith(".o")
             and not assertion_obj_reg.match(target)
+            and not c_obj_reg.match(target)
         ]
 
         # Pre build the objects using gprbuild to compile them all together. This is a performance enhancement:

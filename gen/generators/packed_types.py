@@ -13,6 +13,7 @@ record_templates = [
     "record/name-validation.adb",
     "record/name-assertion.ads",
     "record/name-assertion.adb",
+    "record/name-c.ads",
     "record/name.py",
     "record/name_type_ranges.adb",
 ]

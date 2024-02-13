@@ -1,0 +1,5 @@
+---
+description: Packed 3 element vector of 32-bit floats.
+type: Short_Float
+format: F32
+length: 3
