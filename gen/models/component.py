@@ -612,7 +612,7 @@ class component(base):
         self.models_dependent_on = list(set(self.models_dependent_on))
 
     def get_dependencies(self):
-        return self.models_dependent_on
+        return super().get_dependencies() + self.models_dependent_on
 
     # Look for and load all unit tests associated with this component.
     # Note: We cannot to this the standard way, ie. using the model loader, because unit tests

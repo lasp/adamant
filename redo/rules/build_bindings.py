@@ -104,10 +104,11 @@ class build_bindings(build_rule_base):
             if source_files:
                 # We only care about headers
                 source_files = [source for source in source_files if source.endswith(".h") or source.endswith(".hpp")]
-                assert len(source_files) == 1
-                return _generate_bindings(
-                    redo_1, redo_2, redo_3, source_files[0], db
-                )
+                if len(source_files) > 0:
+                    assert len(source_files) == 1, str(source_files)
+                    return _generate_bindings(
+                        redo_1, redo_2, redo_3, source_files[0], db
+                    )
 
         # If we still have not found source files to build this
         # object, then we are out of luck. Alert the user.

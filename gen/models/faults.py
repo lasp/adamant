@@ -88,7 +88,8 @@ class faults(component_submodel, ided_suite):
         self._set_component_no_id_bases(component)
 
     def get_dependencies(self):
-        return ided_suite.get_dependencies(self)
+        return component_submodel.get_dependencies(self) + \
+               ided_suite.get_dependencies(self)
 
     # Override this method. If we have a fault suite with static ids, then we do not want to call the base class,
     # otherwise we do.

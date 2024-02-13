@@ -73,7 +73,7 @@ class packed_type(base):
 
     # Get model dependencies:
     def get_dependencies(self):
-        return self.deps_list
+        return super().get_dependencies() + self.deps_list
 
     def load_type_ranges(self):
         if not self.type_ranges_loaded:

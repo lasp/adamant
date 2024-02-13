@@ -16,6 +16,10 @@ abstract project a_adamant is
    package Naming is
      for Spec_Suffix ("C++") use ".hpp";
      for Body_Suffix ("C++") use ".cpp";
+     -- Generally we use lower case Ada files, but in the case
+     -- of C/C++ bindings, mixed case may be necessary to mirror
+     -- the format of the C/C++ files.
+     for Casing use "mixedcase";
    end Naming;
 
    -- Produce executables with .elf suffix:

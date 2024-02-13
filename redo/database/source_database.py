@@ -58,7 +58,7 @@ class source_database(database):
 
         # Get the Ada package name from the filename and try to
         # fetch a record if it exists.
-        package_name = ada.file_name_to_package_name(source_filename)
+        package_name = ada.file_name_to_package_name(source_filename).lower()
         record = self.try_fetch(package_name)
 
         # If the record already exists, we need to be very careful about adding another source

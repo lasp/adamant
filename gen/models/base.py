@@ -15,6 +15,7 @@ import sys
 import re
 import textwrap
 
+
 # This is the base object for generator models. All other generator
 # models should inherit from this base. This class does a few things:
 #
@@ -229,6 +230,7 @@ class base(renderable_object, metaclass=abc.ABCMeta):
             self.full_schema = os.path.abspath(schema)
             self.schema = os.path.splitext(os.path.basename(self.full_schema))[0]
             self.time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+            self.dependencies = []
 
             # Save off some local functions:
             self.zip = zip
@@ -339,8 +341,40 @@ class base(renderable_object, metaclass=abc.ABCMeta):
         # not an Adamant configuration file.
         resolved_yaml = None
         if self.model_type != "configuration":
-            self.config = model_loader.load_project_configuration()
-            resolved_yaml = self.config.render(self.full_filename, template_path=os.sep)
+
+            # Read contents of file:
+            with open(self.full_filename, 'r') as f:
+                contents = f.read()
+
+            # Create a Jinja template:
+            from jinja2 import Environment
+            env = Environment()
+            template = env.from_string(contents)
+
+            # Using the lexer, look for any token types that are not
+            # "data". This means that jinja needs to render this file
+            # using the global config.
+            jinja_lexer = env.lexer
+            tokens = list(jinja_lexer.tokenize(contents))
+            has_jinja_directives = False
+            for token in tokens:
+                # sys.stderr.write(token.type + "\n")
+                if token.type != "data":
+                    has_jinja_directives = True
+                    break
+            # sys.stderr.write(self.full_filename + " has jinja directives? " + str(has_jinja_directives) + "\n")
+
+            # If there are jinja directives in the file, then lets render them using
+            # the global project configuration YAML.
+            if has_jinja_directives:
+                self.config = model_loader.load_project_configuration()
+                resolved_yaml = template.render(self.config.__dict__)
+
+                # In this case we also know that this model depends on the project configuration,
+                # so track that.
+                self.dependencies.append(self.config.full_filename)
+            else:
+                resolved_yaml = contents
         else:
             with open(self.full_filename, "r") as f:
                 resolved_yaml = f.read()
@@ -370,7 +404,7 @@ class base(renderable_object, metaclass=abc.ABCMeta):
     # using that model can be rebuilt. By default, if this method is not overridden, then
     # an empty list of dependencies is returned.
     def get_dependencies(self):
-        return []
+        return self.dependencies
 
     # Abstract method for load. Child classes should override this method and
     # load data from self.data into object specific data structures that will be
