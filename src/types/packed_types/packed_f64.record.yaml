@@ -1,0 +1,11 @@
+---
+description: Single component record for holding packed 64-bit floating point number.
+with:
+  - Interfaces
+preamble: |
+   subtype Float_64 is Interfaces.IEEE_Float_64;
+fields:
+  - name: Value
+    description: The 64-bit floating point number.
+    type: Float_64
+    format: F64

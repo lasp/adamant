@@ -1,0 +1,7 @@
+---
+description: Single component record for holding packed signed 64-bit value.
+fields:
+  - name: Value
+    description: The 64-bit signed integer.
+    type: Interfaces.Integer_64
+    format: I64
