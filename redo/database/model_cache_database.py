@@ -31,10 +31,6 @@ class model_cache_database(database):
         if model_object.submodels is not None:
             submodel_paths = model_loader._get_model_file_paths(model_object.model_name)
             self.store(model_file + "_submod@paths@@", submodel_paths)
-            # import sys
-            # sys.stderr.write("SAVING\n")
-            # sys.stderr.write(str(model_object.model_name) + "\n")
-            # sys.stderr.write(str(submodel_paths) + "\n")
 
     # Update the session ID for a model. We use this to indicate that a model has been
     # fully validated (ie. not outdated) for this redo session.
