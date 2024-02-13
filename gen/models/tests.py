@@ -47,8 +47,8 @@ class tests(component_submodel):
             self.description = self.data["description"]
         if "preamble" in self.data:
             self.preamble = self.data["preamble"]
-        tests = self.data["tests"]
-        for t in tests:
+        the_tests = self.data["tests"]
+        for t in the_tests:
             name = ada.formatType(t["name"])
             description = None
             if "description" in t:

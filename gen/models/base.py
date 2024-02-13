@@ -96,7 +96,7 @@ class renderable_object(object):
 #
 # This meta class also extends the abc.ABCMeta class, so we get the features from that
 # as well.
-class base_meta(abc.ABCMeta, type):
+class base_meta(abc.ABCMeta):
     def __call__(cls, *args, **kwargs):
         ignore_cache = kwargs.pop("ignore_cache", False)
         instance = cls.__new__(cls, *args, **kwargs, ignore_cache=ignore_cache)
@@ -152,14 +152,6 @@ class base(renderable_object, metaclass=base_meta):
             if cached_submodels:
                 _, _, model_name, _, _ = redo_arg.split_model_filename(filename)
                 new_submodels = model_loader._get_model_file_paths(model_name)
-                # import sys
-                # sys.stderr.write(model_name + "\n")
-                # sys.stderr.write("cached_submodels\n")
-                # sys.stderr.write(str(cached_submodels) + "\n")
-                # sys.stderr.write("new_submodels\n")
-                # sys.stderr.write(str(new_submodels) + "\n")
-                # sys.stderr.write(str(cached_submodels == new_submodels) + "\n")
-                # sys.stderr.write("\n")
                 return not (cached_submodels == new_submodels)
 
             # If this model does not have submodels, then return False
