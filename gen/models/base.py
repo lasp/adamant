@@ -105,7 +105,7 @@ class base(renderable_object, metaclass=abc.ABCMeta):
             return False
 
         def is_cached_model_up_to_date(filename):
-            # See if the model is stored in the database  cache stored on disk:
+            # See if the model is stored in the database cache stored on disk:
             with model_cache_database() as db:
                 # Get the time when we last cached the model from this file:
                 cache_time_stamp = db.get_model_time_stamp(filename)
@@ -129,12 +129,40 @@ class base(renderable_object, metaclass=abc.ABCMeta):
             with model_cache_database(mode=DATABASE_MODE.READ_WRITE) as db:
                 db.mark_cached_model_up_to_date_for_session(filename)
 
+        def were_new_submodels_created(filename):
+            cached_submodels = None
+            with model_cache_database() as db:
+                cached_submodels = db.get_model_submodels(filename)
+
+            if cached_submodels:
+                _, _, model_name, _, _= redo_arg.split_model_filename(filename)
+                new_submodels = model_loader._get_model_file_paths(model_name)
+                # import sys
+                # sys.stderr.write(model_name + "\n")
+                # sys.stderr.write("cached_submodels\n")
+                # sys.stderr.write(str(cached_submodels) + "\n")
+                # sys.stderr.write("new_submodels\n")
+                # sys.stderr.write(str(new_submodels) + "\n")
+                # sys.stderr.write(str(cached_submodels == new_submodels) + "\n")
+                # sys.stderr.write("\n")
+                return not (cached_submodels == new_submodels)
+
+            # If this model does not have submodels, then return False
+            return False
+
         # If the model was cached this redo session, then we know it is safe to use
         # directly from cache without any additional checking. Dependencies do not
         # need to be checked, since this would have been done earlier in this session,
         # ie. milliseconds ago.
         if is_model_cached_this_session(filename):
             return do_load_from_cache(filename)
+
+        # If this model has submodels, we need to make sure a new submodel
+        # as not been created. For example, if a name.events.yaml for name.component.yaml
+        # gets created on disk, this means the cached entry for name.component.yaml is
+        # invalid. This is true for the parent model of any newly created submodel.
+        if were_new_submodels_created(filename):
+            return None
 
         # If the model was written from a previous session, then we need to check its
         # write timestamp against the file timestamp to determine if the cached entry is
@@ -231,6 +259,7 @@ class base(renderable_object, metaclass=abc.ABCMeta):
             self.schema = os.path.splitext(os.path.basename(self.full_schema))[0]
             self.time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
             self.dependencies = []
+            self.submodels = None
 
             # Save off some local functions:
             self.zip = zip
