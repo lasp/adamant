@@ -88,9 +88,26 @@ class renderable_object(object):
         )
 
 
+# We use this meta class to intercept calls to create a new "base" object. It
+# looks for arguments that should only be passed to __new__, currently this only
+# includes an option to ignore the model cache on load, and filters those arguments
+# before passing the remaining arguments to __init__. This differs slightly from the
+# default python behavior, and allows us to not propagate arguments like "ignore_cache"
+# through the __init__ for all model objects that inherit from base.
+#
+# This meta class also extends the abc.ABCMeta class, so we get the features from that
+# as well.
+class base_meta(abc.ABCMeta):
+    def __call__(cls, *args, **kwargs):
+        ignore_cache = kwargs.pop("ignore_cache", False)
+        instance = cls.__new__(cls, *args, **kwargs, ignore_cache=ignore_cache)
+        cls.__init__(instance, *args, **kwargs)
+        return instance
+
+
 # The model base class. All python models that load yaml files should
 # inherit from this class.
-class base(renderable_object, metaclass=abc.ABCMeta):
+class base(renderable_object, metaclass=base_meta):
     #################################################
     # Model Caching:
     #################################################
@@ -105,7 +122,7 @@ class base(renderable_object, metaclass=abc.ABCMeta):
             return False
 
         def is_cached_model_up_to_date(filename):
-            # See if the model is stored in the database  cache stored on disk:
+            # See if the model is stored in the database cache stored on disk:
             with model_cache_database() as db:
                 # Get the time when we last cached the model from this file:
                 cache_time_stamp = db.get_model_time_stamp(filename)
@@ -129,12 +146,32 @@ class base(renderable_object, metaclass=abc.ABCMeta):
             with model_cache_database(mode=DATABASE_MODE.READ_WRITE) as db:
                 db.mark_cached_model_up_to_date_for_session(filename)
 
+        def were_new_submodels_created(filename):
+            cached_submodels = None
+            with model_cache_database() as db:
+                cached_submodels = db.get_model_submodels(filename)
+
+            if cached_submodels:
+                _, _, model_name, _, _ = redo_arg.split_model_filename(filename)
+                new_submodels = model_loader._get_model_file_paths(model_name)
+                return not (cached_submodels == new_submodels)
+
+            # If this model does not have submodels, then return False
+            return False
+
         # If the model was cached this redo session, then we know it is safe to use
         # directly from cache without any additional checking. Dependencies do not
         # need to be checked, since this would have been done earlier in this session,
         # ie. milliseconds ago.
         if is_model_cached_this_session(filename):
             return do_load_from_cache(filename)
+
+        # If this model has submodels, we need to make sure a new submodel
+        # as not been created. For example, if a name.events.yaml for name.component.yaml
+        # gets created on disk, this means the cached entry for name.component.yaml is
+        # invalid. This is true for the parent model of any newly created submodel.
+        if were_new_submodels_created(filename):
+            return None
 
         # If the model was written from a previous session, then we need to check its
         # write timestamp against the file timestamp to determine if the cached entry is
@@ -176,16 +213,24 @@ class base(renderable_object, metaclass=abc.ABCMeta):
     def __new__(cls, filename, *args, **kwargs):
         # Try to load the model from the cache:
         if filename:
+            # See if we are requested to ignore the cache for this model
+            # load:
+            ignore_cache = kwargs.get("ignore_cache")
             full_filename = os.path.abspath(filename)
-            model = cls.load_from_cache(cls, full_filename)
-            if model:
+            model = None
+            if not ignore_cache:
+                model = cls.load_from_cache(cls, full_filename)
+
+            # If we are not ignoring the cache, and the model was found in
+            # the cache, then use it, otherwise create the model from scratch
+            # by reading in the file.
+            if not ignore_cache and model:
                 # Create from cached model:
                 self = model
                 self.from_cache = True
                 self.filename = os.path.basename(filename)
                 self.full_filename = full_filename
                 self.do_save_to_cache = True
-                # import sys
                 # sys.stderr.write("lcache " + self.filename + "\n")
             else:
                 # Create from scratch:
@@ -194,7 +239,6 @@ class base(renderable_object, metaclass=abc.ABCMeta):
                 self.filename = os.path.basename(filename)
                 self.full_filename = full_filename
                 self.do_save_to_cache = True
-                # import sys
                 # sys.stderr.write("lfile " + self.filename + "\n")
         else:
             # Create from scratch. This is usually only called when
@@ -231,6 +275,7 @@ class base(renderable_object, metaclass=abc.ABCMeta):
             self.schema = os.path.splitext(os.path.basename(self.full_schema))[0]
             self.time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
             self.dependencies = []
+            self.submodels = None
 
             # Save off some local functions:
             self.zip = zip
@@ -325,13 +370,9 @@ class base(renderable_object, metaclass=abc.ABCMeta):
             import warnings
 
             warnings.simplefilter("ignore", yaml.error.UnsafeLoaderWarning)
-            # with open(self.full_filename, 'r') as stream:
             try:
                 yml = yaml.YAML(typ='rt')
                 return yml.load(yaml_text)
-                # import sys
-                # sys.stderr.write(str(self.data) + "\n")
-                # sys.stderr.write(str(type(self.data)) + "\n")
             except yaml.YAMLError as exc:
                 raise ModelException(str(exc))
 
@@ -358,11 +399,9 @@ class base(renderable_object, metaclass=abc.ABCMeta):
             tokens = list(jinja_lexer.tokenize(contents))
             has_jinja_directives = False
             for token in tokens:
-                # sys.stderr.write(token.type + "\n")
                 if token.type != "data":
                     has_jinja_directives = True
                     break
-            # sys.stderr.write(self.full_filename + " has jinja directives? " + str(has_jinja_directives) + "\n")
 
             # If there are jinja directives in the file, then lets render them using
             # the global project configuration YAML.

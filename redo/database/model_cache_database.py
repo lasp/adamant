@@ -2,6 +2,7 @@ from database.database import database
 from database.database import DATABASE_MODE
 from time import time as curr_time
 from os import environ, sep
+from util import model_loader
 
 # The purpose of the model cache is to save off YAML file model load
 # data structures after they have been read from a file, validated, and
@@ -27,6 +28,9 @@ class model_cache_database(database):
         self.store(model_file, model_object)
         self.store(model_file + "_time@st@@", curr_time())
         self.store(model_file + "_sess@id@@", environ["ADAMANT_SESSION_ID"])
+        if model_object.submodels is not None:
+            submodel_paths = model_loader._get_model_file_paths(model_object.model_name)
+            self.store(model_file + "_submod@paths@@", submodel_paths)
 
     # Update the session ID for a model. We use this to indicate that a model has been
     # fully validated (ie. not outdated) for this redo session.
@@ -42,6 +46,9 @@ class model_cache_database(database):
 
     def get_model_time_stamp(self, model_file):
         return self.try_fetch(model_file + "_time@st@@")
+
+    def get_model_submodels(self, model_file):
+        return self.try_fetch(model_file + "_submod@paths@@")
 
 
 # Create an empty model cache database file, if one does
