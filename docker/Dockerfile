@@ -63,28 +63,6 @@ RUN cat /dev/zero | ssh-keygen -q -N "" \
     && DEBIAN_FRONTEND=noninteractive apt install -yq texlive-lang-english texlive-lang-european texlive-fonts-recommended \
     && DEBIAN_FRONTEND=noninteractive apt-get -yq clean
 
-# Install elf2uf2
-#
-#   source: https://circuitdigest.com/microcontroller-projects/how-to-program-raspberry-pi-pico-using-c
-#
-#   # Install prerequisites:
-#   sudo apt install git cmake gcc-arm-none-eabi gcc g++ libstdc++-arm-none-eabi-newlib
-#   sudo apt-get install cmake make
-#   sudo apt install automake autoconf build-essential texinfo libtool libftdi-dev libusb-1.0-0-dev
-#    ^ The prepreqs for compiling elf2uf2 are already installed at this point,
-#       but leaving this comment here for reference
-#
-FROM base AS install_elf2uf2
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq make cmake \
-    && mkdir -p /root/pico \
-    && cd /root/pico \
-    && git clone -b master https://github.com/raspberrypi/pico-sdk.git \
-    && cd /root/pico/pico-sdk/tools/elf2uf2 \
-    && mkdir build \
-    && cd build \
-    && cmake .. \
-    && make
-
 # Install Alire:
 FROM base AS install_alire
 ENV ALIRE_VERSION="1.2.2"
@@ -120,7 +98,6 @@ ENV BIN_DIR=/usr/local/bin
 COPY --from=install_redo /root/redo/bin/* $BIN_DIR
 COPY --from=install_libadalang /root/libadalang/libadalang_tool_builder/tools/* $BIN_DIR
 COPY --from=install_alire /root/alire/bin/alr $BIN_DIR
-COPY --from=install_elf2uf2 /root/pico/pico-sdk/tools/elf2uf2/build/elf2uf2 $BIN_DIR
 COPY --from=install_sequence_builder /root/adamant_seq/bin/* $BIN_DIR
 
 # Set up .bashrc to automatically activate the Adamant environment
