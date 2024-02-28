@@ -91,8 +91,10 @@ is
 
    pragma Warnings (Off, "indirect writes to ""{{ item.name }}"" through a potential alias are ignored");
    pragma Warnings (Off, "writing to ""{{ item.name }}"" is assumed to have no effects on other non-volatile objects");
+   pragma Warnings (Off, "assuming no concurrent accesses to non-atomic object ""{{ item.name }}""");
    {{ item.name }} : aliased {{ item.type }}
       with Import, Convention => Ada, Address => {{ item.name }}_Address;
+   pragma Warnings (On, "assuming no concurrent accesses to non-atomic object ""{{ item.name }}""");
    pragma Warnings (On, "writing to ""{{ item.name }}"" is assumed to have no effects on other non-volatile objects");
    pragma Warnings (On, "indirect writes to ""{{ item.name }}"" through a potential alias are ignored");
 

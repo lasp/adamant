@@ -38,7 +38,6 @@ abstract project a_adamant is
       --
       -- -gnatf - full errors
       -- -gnatwa - enable all warnings
-      -- -gnatwh - warn on hiding
       -- -gnatwl - elaboration pragma warnings
       -- -gnatw.o - modified but unreferenced out parameters warnings
       -- -gnatwt - deleted conditional code
@@ -48,7 +47,7 @@ abstract project a_adamant is
       -- Note: I did not turn on gnatwd, because writing "all" all the time makes things
       -- less readable.
       --
-      ADA_FLAGS := ("-gnatf", "-gnatwa", "-gnatwh", "-gnatwl", "-gnatw.o", "-gnatwt", "-gnatw.X");
+      ADA_FLAGS := ("-gnatf", "-gnatwa", "-gnatwl", "-gnatw.o", "-gnatwt", "-gnatw.X");
       COMMON_C_FLAGS := ("-Wall", "-Wextra", "-pedantic");
       C_FLAGS := COMMON_C_FLAGS & ("-std=gnu99");
       CPP_FLAGS := COMMON_C_FLAGS & ("-std=c++0x");

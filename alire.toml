@@ -17,10 +17,10 @@ tags = ["embedded", "framework"]
 website = "https://github.com/lasp/adamant"
 
 [[depends-on]]
-gnat_native = "12.2.1"
+gnat_native = "13.2.1"
 gprbuild = "22.0.1"
-gnatprove = "12.1.1"
-aunit = "23.0.0"
+gnatprove = "13.2.1"
+aunit = "24.0.0"
 
 # This crate provides gnatpp & gnatmetric. However this
 # takes a very long time to compile. We will do this
