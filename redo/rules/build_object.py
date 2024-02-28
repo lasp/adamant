@@ -211,11 +211,15 @@ def get_c_source_dependencies(source_file, build_target_instance, c_source_db=No
             includes = "-I" + " -I".join(db.get_all_source_dirs())
 
     # Run g++ -MM to generate dependencies for a source file in a .d output:
+    if source_file.endswith(".cpp"):
+        compiler = "g++"
+    else:
+        compiler = "gcc"
     obj_file = redo_arg.src_file_to_obj_file(source_file, build_target_instance.name)
     dep_output_file = os.path.join(os.path.dirname(obj_file), os.path.basename(source_file)) + ".d"
     filesystem.safe_makedir(os.path.dirname(dep_output_file))
     compiler_prefix, _ = build_target_instance.gnatmetric_info()
-    gcc_m_command = compiler_prefix + "g++ " + source_file + " -MM -MG -MF " + dep_output_file + " " + includes
+    gcc_m_command = compiler_prefix + compiler + " " + source_file + " -MM -MG -MF " + dep_output_file + " " + includes
     shell.run_command(gcc_m_command)
 
     # Open the dependency file and parse it to get out the dependencies:
@@ -230,8 +234,9 @@ def _build_all_c_dependencies(
     def _get_immediate_dependencies(source_files):
         all_deps = []
         for source_file in source_files:
-            # Get dependencies for this source files:
-            all_deps.extend(get_c_source_dependencies(source_file, build_target_instance, c_source_db))
+            # Get dependencies for this source file. Ignore assembly files.
+            if not source_file.endswith(".s"):
+                all_deps.extend(get_c_source_dependencies(source_file, build_target_instance, c_source_db))
         return list(set(all_deps))
 
     def _get_all_dependencies(source_files):
@@ -347,7 +352,7 @@ def _get_object_sources(object_file):
         source_to_compile_extension = None
         for source_file in source_files:
             _, source_to_compile_extension = os.path.splitext(source_file)
-            if source_to_compile_extension in [".c", ".cpp"]:
+            if source_to_compile_extension in [".c", ".cpp", ".s"]:
                 source_to_compile = source_file
                 break
 
@@ -555,7 +560,7 @@ def _compile_c_object(redo_1, redo_2, redo_3, source_files, db):
     source_to_compile_extension = None
     for source_file in source_files:
         _, source_to_compile_extension = os.path.splitext(source_file)
-        if source_to_compile_extension in [".c", ".cpp"]:
+        if source_to_compile_extension in [".c", ".cpp", ".s"]:
             source_to_compile = source_file
             break
 
@@ -656,7 +661,7 @@ class build_object(build_rule_base):
     # an object. In C/C++ only the .c or .cpp files produce object
     # code, so ignore header files.
     def input_file_regex(self):
-        return [r"^((?!template/).)*\.ad[sb]$", r"^((?!template/).)*\.cp?p?$"]
+        return [r"^((?!template/).)*\.ad[sb]$", r"^((?!template/).)*\.(h|hpp|c|cpp|s)$"]
 
     # Output object files will always be stored with the same name
     # as their source package, and in the build/obj directory.
