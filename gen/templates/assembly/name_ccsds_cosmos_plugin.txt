@@ -1,12 +1,12 @@
-# Set VARIABLEs here to allow variation in your plugin
-VARIABLE {{ name|lower }}_target_name {{ name|upper }}
-VARIABLE port_w 2003
-VARIABLE port_r 2003
-VARIABLE checksum_parameter_name CCSDSSHDRCRC
+# Set Variables here to allow variation in your plugin
+Variable {{ name|lower }}_target_name {{ name }}
+Variable port_w 2003
+Variable port_r 2003
+Variable checksum_parameter_name Ccsdsshdrcrc
 
-TARGET {{ name|upper }} <%= {{ name|lower }}_target_name %>
-INTERFACE <%= {{ name|lower }}_target_name %>_INT tcpip_server_interface.rb <%= port_w %> <%= port_r %> 10.0 nil LENGTH 32 16 7
-  MAP_TARGET <%= {{ name|lower }}_target_name %>
-  PROTOCOL READ crc_protocol.rb nil true "ERROR" -16 16
-  PROTOCOL WRITE cmd_checksum.rb <%= checksum_parameter_name %>
+Target {{ name }} <%= {{ name|lower }}_target_name %>
+Interface <%= {{ name|lower }}_target_name %>_INT tcpip_server_interface.rb <%= port_w %> <%= port_r %> 10.0 nil Length 32 16 7
+  Map_Target <%= {{ name|lower }}_target_name %>
+  Protocol Read crc_protocol.rb nil true "ERROR" -16 16
+  Protocol Write cmd_checksum.rb <%= checksum_parameter_name %>
 
