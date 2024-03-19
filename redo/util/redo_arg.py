@@ -152,6 +152,12 @@ def in_build_template_dir(redo_arg):
     build_dir, src_dir = _get_2_dirs(redo_arg)
     return build_dir == "build" and src_dir == "template"
 
+# Given a filename check if the file is found
+# in a directory like /path/to/build/template/$TARGET
+def in_build_template_target_dir(redo_arg):
+    build_dir, obj_dir, target_dir = _get_3_dirs(redo_arg)
+    return build_dir == "build" and obj_dir == "template" and target_dir
+
 
 # Given a filename check if the file is found
 # in a directory like /path/to/build/metric
@@ -212,6 +218,7 @@ def get_target(redo_arg):
         in_build_obj_dir(redo_arg)
         or in_build_bin_dir(redo_arg)
         or in_build_metric_dir(redo_arg)
+        or in_build_template_target_dir(redo_arg)
     )
     return _get_1_dir(redo_arg)
 
