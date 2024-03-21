@@ -1,37 +1,42 @@
 {% for id, command in commands.items() %}
 Command {{ name }} {{ command.suite.component.instance_name }}-{{ command.name }} Big_Endian "{{ command.description }}"
 {# The ccsds command header #}
-{# This header assumed by the Ccsds_Command_Depacketizer component #}
-  Parameter Ccsdsver 0 3 UINT 0 7 0 "Packet version number"
-  Parameter Ccsdstype 3 1 UINT 0 1 1 "Packet type"
-    State TLM 0
-    State CMD 1
-  Parameter Ccsdsshf 4 1 UINT 0 1 1 "CCSDS secondary header flag"
-    State FALSE 0
-    State TRUE 1
-  Parameter Ccsdsapid 5 11 UINT 0 2047 8 "CCSDS application process ID"
-  Parameter Ccsdsseqflags 16 2 UINT 0 3 3 "Sequence flags"
-    State FIRST 0
-    State CONT 1
-    State LAST 2
-    State NOGROUP 3
-  Parameter Ccsdssqnt 18 14 UINT MIN MAX 0 "Packet sequence count"
-  Parameter Ccsdslength 32 16 UINT MIN MAX {% if command.size != None %}{{ (command.type_model.fields|length * (command.size / 8) + 3)|int }}{% else %}3{% endif %} "Packet data length"
-  Parameter Ccsdsshdrrb 48 1 UINT MIN MAX 0 "Secondary header reserve bit"
-  Parameter Ccsdsshdrfc 49 7 UINT MIN MAX 0 "Secondary header function code"
-  Parameter Ccsdsshdrcrc 56 8 UINT MIN MAX 0 "Secondary header checksum"
-  ID_Parameter Ccsdscmdid 64 16 UINT MIN MAX {{ command.id }} "Adamant command ID"
+{% set header_bit_position = [] %}
+{% for field_name, field in ccsds_primary_header_model.fields.items() %}
+  Parameter {{ field.name }} {{ field.start_bit }} {{ field.size -}}
+{% if loop.last %}{% set _ = header_bit_position.append(field.start_bit + field.size) %}{% endif %}
+{%- if 'F' in field.format.type[0] %} FLOAT
+{%- elif 'U' in field.format.type[0] %} UINT
+{%- elif 'E' in field.format.type[0] %} UINT
+{%- elif 'I' in field.format.type[0] %} INT
+{%- endif %} 0 {{ 2**field.size - 1 }} {% if field.default_value != number %}0{% else %}{{field.default_value}}{% endif %} "{{ field.description|replace('\n','') }}"
+{% if field.is_enum %}
+{% for literals in field.datatype.model.literals %}
+    State {{ literals.name }} {{ literals.value }}
+{% endfor %}{% endif -%}{% endfor %}
+{% for field_name, field in ccsds_command_secondary_header.fields.items() %}
+  Parameter {{ field.name }} {{ header_bit_position|last + field.start_bit }} {{ field.size -}}
+{%- if 'F' in field.format.type[0] %} FLOAT
+{%- elif 'U' in field.format.type[0] %} UINT
+{%- elif 'E' in field.format.type[0] %} UINT
+{%- elif 'I' in field.format.type[0] %} INT
+{%- endif %} 0 {{ 2**field.size - 1 }} {% if field.default_value != number %}0{% else %}{{field.default_value}}{% endif %} "{{ field.description|replace('\n','') }}"
+{% if field.is_enum %}
+{% for literals in field.datatype.model.literals %}
+    State {{ literals.name }} {{ literals.value }}
+{% endfor %}{% endif -%}{% endfor %}
+  ID_Parameter Adamant_Commant_Id 64 16 UINT MIN MAX {{ command.id }} "Adamant command ID"
 {# The command argument definitions. #}
 {% if command.type %}{% if command.type_model %}{% for field_name, field in command.type_model.fields.items() %}
-  Append_Parameter {% if field.type_model.name %}{{ field.type_model.name }}.{% endif %}{{ field.name }} {% if field.format.type %}{{ field.format.type[1:] }}{% endif %}{% if field.type_model.size %}{{ field.type_model.size }}{% endif -%}
-{% if field.format.type %}{%- if 'F' in field.format.type[0] %} FLOAT MIN MAX {% if command.default_value %}{{ command.default_value }}{% else %}0{% endif %}
-{%- elif 'U' in field.format.type[0] %} UINT MIN MAX {% if command.default_value %}{{ command.default_value }}{% else %}0{% endif %}
-{%- elif 'E' in field.format.type[0] %} UINT MIN MAX {% if command.default_value %}{{ command.default_value }}{% else %}0{% endif %}
-{%- elif 'I' in field.format.type[0] %} INT MIN MAX {% if command.default_value %}{{ command.default_value }}{% else %}0{% endif %}{% endif %}
-{%- elif 'Buffer' in command.type or command.size > 64 %} BLOCK 0
-{%- else %} UINT MIN MAX {% if command.default_value %}{{ command.default_value }}{% else %}0{% endif %}{% endif %} "{{ field.description|replace('\n','') }}"
+  Append_Parameter {% if field.type_model.name %}{{ field.type_model.name }}.{% endif %}{{ field.name }} {% if field.format.type %}{{ field.format.type[1:] }}{% endif %}{% if field.type_model.size %}{{ field.type_model.size }}{% endif %}
+{% if field.format.type %}{% if 'F' in field.format.type[0] %} FLOAT MIN MAX {% if command.default_value %}{{ command.default_value }}{% else %}0{% endif %}
+{% elif 'U' in field.format.type[0] %} UINT MIN MAX {% if command.default_value %}{{ command.default_value }}{% else %}0{% endif %}
+{% elif 'E' in field.format.type[0] %} UINT MIN MAX {% if command.default_value %}{{ command.default_value }}{% else %}0{% endif %}
+{% elif 'I' in field.format.type[0] %} INT MIN MAX {% if command.default_value %}{{ command.default_value }}{% else %}0{% endif %}{% endif %}
+{% else %} UINT MIN MAX {% if command.default_value %}{{ command.default_value }}{% else %}0{% endif %}{% endif %} "{{ field.description|replace('\n','') }}"
 {% if field.format.type and 'E' in field.format.type[0] %}{% for literals in field.type_model.literals %}
     State {{ literals.name }} {{ literals.value }}
-{% endfor %}{% endif %}{% endfor %}{% endif %}{% endif %}
+{% endfor %}{% endif %}
+{% endfor %}{% endif %}{% endif %}
 
 {% endfor %}

@@ -49,5 +49,6 @@ class assembly_cosmos_telemetry_txt(assembly_cosmos_plugin_generator_base, gener
 
     def generate(self, input_filename):
         a = self.model_cls(input_filename)
+        a.ccsds_primary_header_model = model_loader.try_load_model_by_name("Ccsds_Primary_Header")
         genassem.create_type_field_strings(a)
         print(a.render(self.template, template_path=self.template_dir))

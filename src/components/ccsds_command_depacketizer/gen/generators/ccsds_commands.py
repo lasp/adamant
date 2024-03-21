@@ -1,6 +1,7 @@
 from base_classes.generator_base import generator_base
 from generators import assembly as assembly_gen
 import os.path
+from util import model_loader
 from generators.assembly import assembly_hydra_generator, assembly_cosmos_plugin_generator_base
 
 # This module contains a generators which produces
@@ -34,5 +35,7 @@ class assembly_cosmos_commands_txt(assembly_cosmos_plugin_generator_base, genera
 
     def generate(self, input_filename):
         a = self.model_cls(input_filename)
+        a.ccsds_primary_header_model = model_loader.try_load_model_by_name("Ccsds_Primary_Header")
+        a.ccsds_command_secondary_header = model_loader.try_load_model_by_name("Ccsds_Command_Secondary_Header")
         assembly_gen.create_type_field_strings(a)
         print(a.render(self.template, template_path=self.template_dir))
