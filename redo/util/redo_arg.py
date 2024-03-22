@@ -152,6 +152,7 @@ def in_build_template_dir(redo_arg):
     build_dir, src_dir = _get_2_dirs(redo_arg)
     return build_dir == "build" and src_dir == "template"
 
+
 # Given a filename check if the file is found
 # in a directory like /path/to/build/template/$TARGET
 def in_build_template_target_dir(redo_arg):

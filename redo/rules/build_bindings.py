@@ -51,7 +51,7 @@ def _generate_bindings(redo_1, redo_2, redo_3, source_file, c_source_db):
     # gets created there:
     cwd = os.getcwd()
     template_temp_dir = redo_arg.get_build_dir(redo_1) \
-            + os.sep + "template" + os.sep + build_target + os.sep + "temp"
+        + os.sep + "template" + os.sep + build_target + os.sep + "temp"
     filesystem.safe_makedir(template_temp_dir)
     os.chdir(template_temp_dir)
     shell.run_command_suppress_output(compile_cmd)
