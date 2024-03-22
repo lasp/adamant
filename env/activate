@@ -41,6 +41,20 @@ if [ "$found_adamant_dir" = false ]; then
   paths=("$ADAMANT_DIR" "${paths[@]}")
 fi
 
+# Make sure the permissions of everything in the paths is correct
+# on some systems (SELinux) the bind mounts have root permissions
+# and this is a way to fix that.
+user="user"
+for path in "${paths[@]}"; do
+    # Get the current owner of the directory
+    current_owner=$(stat -c "%U:%G" $path)
+    # Check if the owner is not user:user
+    if [ "$current_owner" != "$user:$user" ]; then
+        echo "Changing ownership of $path to $user:$user."
+        sudo chown -R $user:$user $path 2>/dev/null
+    fi
+done
+
 # If the ADAMANT_CONFIGURATION_YAML is not specified then set it
 if test -z "$ADAMANT_CONFIGURATION_YAML" # ie. /home/user/adamant
 then
