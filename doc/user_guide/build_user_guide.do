@@ -33,7 +33,7 @@ redo-ifchange ../example_architecture/memory_map/all
 redo-ifchange ../example_architecture/register_map/all
 redo-ifchange ../example_architecture/yaml_sloc/all
 redo-ifchange ../example_architecture/c_lib/templates
-cp -f ../example_architecture/c_lib/build/template/c_lib_h.ads ../example_architecture/c_lib/c_lib_h.ads
+cp -f ../example_architecture/c_lib/build/template/Linux/c_lib_h.ads ../example_architecture/c_lib/c_lib_h.ads
 redo-ifchange ../example_architecture/c_lib/all
 $ADAMANT_DIR/gnd/matlab/build_all_matlab_autocode.sh ../example_architecture
 
