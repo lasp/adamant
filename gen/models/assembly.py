@@ -1205,6 +1205,7 @@ class assembly(subassembly):
 
         for submodel in self.submodels.values():
             submodel.final()
+            submodel.save_to_cache()
 
     # Special function to load all the complex types in the assembly. Most
     # generators will not need this:

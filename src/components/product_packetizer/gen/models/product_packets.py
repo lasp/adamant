@@ -16,6 +16,7 @@ from models.submodels.field import field
 from util import model_loader
 from models.submodels.ided_suite import ided_entity
 from models.base import base
+from models.assembly import assembly_submodel
 
 # Fetch the packet type size from the assembly, and save the result internally
 # in case it is asked for again.
@@ -320,7 +321,7 @@ class dummy:
 
 # This is the object model for a packet suite. It extracts data from a
 # input file and stores the data as object member variables.
-class product_packets(base):
+class product_packets(assembly_submodel):
     # Initialize the packet object, ingest data, and check it by
     # calling the base class init function.
     def __init__(self, filename):
@@ -342,6 +343,7 @@ class product_packets(base):
         self.includes = []
         self.packets = OrderedDict()  # map from name to packet obj
         self.packet_ids = []
+        self.models_dependent_on = []
 
         # Populate the object with the contents of the
         # file data:
@@ -496,6 +498,10 @@ class product_packets(base):
                         dp.data_product = dp.component.data_products.get_with_name(
                             dp.data_product_name
                         )
+                        self.models_dependent_on.extend(
+                            [dp.component.data_products.full_filename] + \
+                            dp.component.data_products.get_dependencies()
+                        )
 
                     # Set the size:
                     dp.size = dp.data_product.type_model.size  # in bits
@@ -523,11 +529,10 @@ class product_packets(base):
             # Set the packet size
             pkt.size = packet_size
 
-    # Public function to resolve all of the data product ids, given
-    # an assembly model.
-    @throw_exception_with_filename
-    def set_assembly(self, assembly):
-        self.assembly = assembly
+        self.models_dependent_on = list(set(self.models_dependent_on))
+
+    def get_dependencies(self):
+        return self.models_dependent_on
 
     # We use the final function to create the item list and resolve the data product IDS.
     def final(self):
