@@ -74,6 +74,7 @@ class task_watchdog_list(assembly_submodel):
         self.name = None
         self.description = None
         self.task_watchdog_instance_name = None
+        self.pets_resolved = False
         self.watchdog_list = OrderedDict()  # map from name to packet obj
         self.num_petters = 0
         self.component_list = (
@@ -103,6 +104,9 @@ class task_watchdog_list(assembly_submodel):
                 )
 
     def _resolve_pet_connectors(self):
+        if self.pets_resolved:
+            return
+        self.pets_resolved = True
         # The assembly should be loaded first:
         assert (
             self.assembly
@@ -113,7 +117,6 @@ class task_watchdog_list(assembly_submodel):
                 self.component_list[assm_component.name] = assm_component
 
         for watchdog_component in self.component_list:
-            # sys.stderr.write("Name to search: " + str(self.name) + "\n")
             self.task_watchdog_instance_model = self.assembly.get_component_with_name(
                 watchdog_component + "_Instance"
             )
@@ -140,6 +143,10 @@ class task_watchdog_list(assembly_submodel):
         task_watchdog_connector = self.task_watchdog_instance_model.connectors.of_name(
             "Pet_T_Recv_Sync"
         )
+        # Add model to dependencies:
+        self.dependencies.append(
+            self.task_watchdog_instance_model.full_filename
+        )
         # Get all the component names connected to that connector:
         connections = task_watchdog_connector.get_connections()
         connected_components = {}
@@ -160,11 +167,12 @@ class task_watchdog_list(assembly_submodel):
                     + "."
                     + str(c.from_connector.name)
                 )
-                # sys.stderr.write("Component: " + str(c) + "\n")
-                # sys.stderr.write("Instance Name: " + str(c.from_component.instance_name) + "\n")
-                # sys.stderr.write("Instance Name: " + str(c.from_connector.name) + "\n")
                 if key_name not in connected_components:
                     connected_components[key_name] = [c.to_index]
+                    # Add model to dependencies:
+                    self.dependencies.append(
+                        c.from_component.full_filename
+                    )
                 else:
                     raise ModelException("Connector name already exist: " + key_name)
 
@@ -185,6 +193,9 @@ class task_watchdog_list(assembly_submodel):
         self.watchdog_list = OrderedDict(
             sorted(self.watchdog_list.items(), key=lambda x: x[1].connector_id)
         )
+
+        # Remove duplicate dependencies
+        self.dependencies = list(set(self.dependencies))
 
     # Public function to resolve all of the connector ids, given
     # an assembly model.

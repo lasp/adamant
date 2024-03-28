@@ -1,5 +1,4 @@
 from util import ada
-from models.base import base
 import os.path
 from collections import OrderedDict
 from models.exceptions import (
@@ -7,6 +6,7 @@ from models.exceptions import (
     throw_exception_with_lineno,
     throw_exception_with_filename,
 )
+from models.assembly import assembly_submodel
 
 
 class router_table_entry(object):
@@ -47,7 +47,7 @@ class router_table_entry(object):
 
 # This is the object model for a router table. It extracts data from a
 # input file and stores the data as object member variables.
-class ccsds_router_table(base):
+class ccsds_router_table(assembly_submodel):
     # Initialize the table object, ingest data, and check it by
     # calling the base class init function.
     def __init__(self, filename):
@@ -120,6 +120,11 @@ class ccsds_router_table(base):
                 + '".'
             )
 
+        # Add model to dependencies:
+        self.dependencies.append(
+            self.ccsds_router_instance_model.full_filename
+        )
+
         # Get the router's output connector:
         router_connector = self.ccsds_router_instance_model.connectors.of_name(
             "Ccsds_Space_Packet_T_Send"
@@ -154,6 +159,11 @@ class ccsds_router_table(base):
                         connected_components[c.to_component.instance_name][
                             connector_name
                         ] = (idx + 1)
+
+                        # Add model to dependencies:
+                        self.dependencies.append(
+                            c.to_component.full_filename
+                        )
                 except KeyError:
                     # Insert the connector and index that the connector is attached to:
                     connected_components[component_name] = {connector_name: idx + 1}
@@ -226,3 +236,6 @@ class ccsds_router_table(base):
             entry.destination_indexes = [
                 e for e in OrderedDict.fromkeys(entry.destination_indexes) if e is not None
             ]
+
+        # Remove duplicate dependencies
+        self.dependencies = list(set(self.dependencies))

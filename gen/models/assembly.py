@@ -72,6 +72,7 @@ class assembly_submodel(base):
     def set_assembly(self, assembly):
         # Set the assembly:
         self.assembly = assembly
+        self.dependencies.append(self.assembly.full_filename)
 
         # Now modify the assembly, so it knows about this
         # submodel.
@@ -593,7 +594,6 @@ class assembly(subassembly):
         self.entity_dict = (
             {}
         )  # Dictionary containing things like events, commands, etc.
-        self.models_dependent_on = []
         self.arrayed_connections = []
 
         # Loading booleans for speed optimization:
@@ -959,12 +959,12 @@ class assembly(subassembly):
                     files.append(a.full_filename)
                 return files
 
-            self.models_dependent_on += subassembly_files(self)
+            self.dependencies += subassembly_files(self)
             for c in self.components.values():
-                self.models_dependent_on += [c.full_filename] + c.get_dependencies()
+                self.dependencies += [c.full_filename] + c.get_dependencies()
             for m in submodels:
-                self.models_dependent_on.extend([m.full_filename] + m.get_dependencies())
-            self.models_dependent_on = list(set(self.models_dependent_on))
+                self.dependencies.extend([m.full_filename] + m.get_dependencies())
+            self.dependencies = list(set(self.dependencies))
 
             # FOR DEBUG ONLY
             # Print a histogram of connection types in the assembly:
@@ -1205,6 +1205,7 @@ class assembly(subassembly):
 
         for submodel in self.submodels.values():
             submodel.final()
+            submodel.save_to_cache()
 
     # Special function to load all the complex types in the assembly. Most
     # generators will not need this:
@@ -1268,9 +1269,6 @@ class assembly(subassembly):
     #############################################################
     # Special public functions:
     #############################################################
-
-    def get_dependencies(self):
-        return super().get_dependencies() + self.models_dependent_on
 
     # Note: all of these functions are optional, and only need be called if
     # a generator needs the data that they produce. These functions generate
