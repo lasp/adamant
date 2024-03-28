@@ -135,7 +135,6 @@ class component(base):
 
         # Initialize other things:
         self.execution = None
-        self.models_dependent_on = []
         self.base_ads_includes = []
         self.base_adb_includes = []
         self.template_ads_includes = []
@@ -366,7 +365,7 @@ class component(base):
                 model = model_loader.try_load_model_by_name(ada.getPackage(t))
             if model:
                 additional_type_models.append(model)
-                self.models_dependent_on.extend([model.full_filename] + model.get_dependencies())
+                self.dependencies.extend([model.full_filename] + model.get_dependencies())
 
         # Gather all type models for component.
         # Grab all type models from our ided_suites, ie. commands, events, etc.
@@ -606,13 +605,10 @@ class component(base):
         ut_model_files = self._load_unit_tests()
 
         # Gather dependencies of our dependencies:
-        self.models_dependent_on.extend(ut_model_files)
+        self.dependencies.extend(ut_model_files)
         for m in submodels:
-            self.models_dependent_on.extend([m.full_filename] + m.get_dependencies())
-        self.models_dependent_on = list(set(self.models_dependent_on))
-
-    def get_dependencies(self):
-        return super().get_dependencies() + self.models_dependent_on
+            self.dependencies.extend([m.full_filename] + m.get_dependencies())
+        self.dependencies = list(set(self.dependencies))
 
     # Look for and load all unit tests associated with this component.
     # Note: We cannot to this the standard way, ie. using the model loader, because unit tests
