@@ -187,6 +187,7 @@ class base(renderable_object, metaclass=base_meta):
         # will modify this current model, so we should not reload the cached version
         # of this model.
         if model is not None:
+            # sys.stderr.write("deps: " + str(model.get_dependencies()) + "\n")
             for dep_model_filename in model.get_dependencies():
                 if not is_cached_model_up_to_date(dep_model_filename) or \
                        is_model_cached_this_session(dep_model_filename):

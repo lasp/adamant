@@ -1,4 +1,3 @@
-from models.base import base
 from util import ada
 import os.path
 from util import model_loader
@@ -8,6 +7,7 @@ from models.exceptions import (
     throw_exception_with_filename,
 )
 from collections import OrderedDict
+from models.assembly import assembly_submodel
 
 # Fetch the data product type buffer size and save the result internally
 # in case it is asked for again.
@@ -109,7 +109,7 @@ class fault_response(object):
 
 # This is the object model for a fault response set. It extracts data from a
 # input file and stores the data as object member variables.
-class fault_responses(base):
+class fault_responses(assembly_submodel):
     # Initialize the packet object, ingest data, and check it by
     # calling the base class init function.
     def __init__(self, filename):
@@ -206,6 +206,12 @@ class fault_responses(base):
             )
             response.fault_id = response.fault.id
 
+            # Add fault model to dependencies:
+            self.dependencies.extend(
+                [response.fault_component.faults.full_filename] +
+                response.fault_component.faults.get_dependencies()
+            )
+
             # OK seconds things second. Let's resolve the command ID:
             try:
                 response.command_component = assm.components[
@@ -252,5 +258,12 @@ class fault_responses(base):
                 self.includes.append(response.command_arg_type_model.name)
                 self.has_command_args = True
 
+            # Add command model to dependencies:
+            self.dependencies.extend(
+                [response.command_component.commands.full_filename] +
+                response.command_component.commands.get_dependencies()
+            )
+
         # Uniquify includes:
         self.includes = list(OrderedDict.fromkeys(self.includes))
+        self.dependencies = list(set(self.dependencies))

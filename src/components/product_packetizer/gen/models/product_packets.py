@@ -3,19 +3,17 @@ import os.path
 from collections import OrderedDict
 from models.exceptions import (
     ModelException,
-    throw_exception_with_lineno,
-    throw_exception_with_filename,
+    throw_exception_with_lineno
 )
 from models.packets import (
     packet,
     items_list_from_ided_entity,
     _items_from_record,
-    packet_item,
+    packet_item
 )
 from models.submodels.field import field
 from util import model_loader
 from models.submodels.ided_suite import ided_entity
-from models.base import base
 from models.assembly import assembly_submodel
 
 # Fetch the packet type size from the assembly, and save the result internally
@@ -343,7 +341,6 @@ class product_packets(assembly_submodel):
         self.includes = []
         self.packets = OrderedDict()  # map from name to packet obj
         self.packet_ids = []
-        self.models_dependent_on = []
 
         # Populate the object with the contents of the
         # file data:
@@ -498,8 +495,8 @@ class product_packets(assembly_submodel):
                         dp.data_product = dp.component.data_products.get_with_name(
                             dp.data_product_name
                         )
-                        self.models_dependent_on.extend(
-                            [dp.component.data_products.full_filename] + \
+                        self.dependencies.extend(
+                            [dp.component.data_products.full_filename] +
                             dp.component.data_products.get_dependencies()
                         )
 
@@ -529,10 +526,7 @@ class product_packets(assembly_submodel):
             # Set the packet size
             pkt.size = packet_size
 
-        self.models_dependent_on = list(set(self.models_dependent_on))
-
-    def get_dependencies(self):
-        return self.models_dependent_on
+        self.dependencies = list(set(self.dependencies))
 
     # We use the final function to create the item list and resolve the data product IDS.
     def final(self):

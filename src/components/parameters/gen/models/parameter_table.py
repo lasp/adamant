@@ -82,6 +82,7 @@ class parameter_table(assembly_submodel):
         self.name = None
         self.description = None
         self.parameter_name_list = []
+        self.parameter_table_resolved = False
         self.parameters = OrderedDict()  # map from name to packet obj
         self.components = (
             OrderedDict()
@@ -103,6 +104,9 @@ class parameter_table(assembly_submodel):
         self.parameter_name_list = self.data["parameters"]
 
     def _resolve_parameter_table(self):
+        if self.parameter_table_resolved:
+            return
+        self.parameter_table_resolved = True
         # The assembly should be loaded first:
         assert (
             self.assembly
@@ -176,6 +180,12 @@ class parameter_table(assembly_submodel):
                     # Store table entry in dictionary:
                     store_parameter_table_entry(table_entry)
 
+                # Update dependencies
+                self.dependencies.extend(
+                    [comp.parameters.full_filename] +
+                    comp.parameters.get_dependencies()
+                )
+
             elif len(split_name) == 2:
                 # This specifies both component name and parameter name. First load the component:
                 component_name = split_name[0]
@@ -205,6 +215,12 @@ class parameter_table(assembly_submodel):
 
                 # Store table entry in dictionary:
                 store_parameter_table_entry(table_entry)
+
+                # Update dependencies
+                self.dependencies.extend(
+                    [comp.parameters.full_filename] +
+                    comp.parameters.get_dependencies()
+                )
 
             else:
                 raise ModelException(
@@ -304,6 +320,9 @@ class parameter_table(assembly_submodel):
         # Resolve all parameter component ids:
         for table_entry in self.parameters.values():
             table_entry.component_id = destinations[table_entry.component_name][0]
+
+        # Remove duplicate dependencies
+        self.dependencies = list(set(self.dependencies))
 
     # Public function to resolve all of the parameter ids, given
     # an assembly model.

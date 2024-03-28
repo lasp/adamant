@@ -72,6 +72,7 @@ class assembly_submodel(base):
     def set_assembly(self, assembly):
         # Set the assembly:
         self.assembly = assembly
+        self.dependencies.append(self.assembly.full_filename)
 
         # Now modify the assembly, so it knows about this
         # submodel.
