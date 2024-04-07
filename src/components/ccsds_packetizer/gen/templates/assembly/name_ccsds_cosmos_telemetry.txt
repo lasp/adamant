@@ -16,17 +16,22 @@ Telemetry {{ name }} {{ packet.name }} Big_Endian "{{ packet.description }}"
   Item Ccsdssubsec 80 32 UINT "Milliseconds of day (0 - 86399999)"
 {# The packet definitions. #}
 {% for item_name, item in packet.items.items() %}
-  Append_Item {{ item.entity.full_name }}{% if item.flat_name %}.{{ item.flat_name }}{% endif %} {{ item.size -}}
-{%- if 'F' in item.format.type[0] %} FLOAT "
-{%- elif 'U' in item.format.type[0] %} UINT "
-{%- elif 'E' in item.format.type[0] %} UINT "
-{%- elif 'I' in item.format.type[0] %} INT "
+  {% if 'x' in (item.format|string)[2] %}Append_Array_Item {% if item.type_model.name %}{{ item.type_model.name }}.{% endif %}{{ item.name }} {{ (item.format|string)[1] }}
+{%- if 'F' in (item.format|string)[0] %} FLOAT
+{%- elif 'U' in (item.format|string)[0] %} UINT
+{%- elif 'E' in (item.format|string)[0] %} UINT
+{%- elif 'I' in (item.format|string)[0] %} INT{% endif %} {{ (item.format|string)[1]|int * (item.format|string)[3:]|int }} "{{ item.description|replace('\n','') }}"
+{% else %}Append_Item {{ item.entity.full_name }}{% if item.flat_name %}.{{ item.flat_name }}{% endif %} {{ item.size -}}
+{%- if 'F' in (item.format|string)[0] %} FLOAT "
+{%- elif 'U' in (item.format|string)[0] %} UINT "
+{%- elif 'E' in (item.format|string)[0] %} UINT "
+{%- elif 'I' in (item.format|string)[0] %} INT "
 {%- else %} UINT "{%- endif -%}
 {{ item.flat_desc|replace('\n','') }}"
 {% if item.is_enum %}
 {% for literals in item.datatype.model.literals %}
     State {{ literals.name }} {{ literals.value }}
-{% endfor %}{% endif %}
+{% endfor %}{% endif %}{% endif %}
 {% endfor %}
   Append_Item Subpacket.Data 0 BLOCK "Subpacket data"
 
