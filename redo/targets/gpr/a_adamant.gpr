@@ -42,7 +42,6 @@ abstract project a_adamant is
       -- -gnatw.o - modified but unreferenced out parameters warnings
       -- -gnatwt - deleted conditional code
       -- -gnatw.X - disable warnings for No_Exception_Propagation mode, since this is usable in Linux
-      -- -gnat2022 - use gnat2022 Ada features
       --
       -- Note: I did not turn on gnatwd, because writing "all" all the time makes things
       -- less readable.

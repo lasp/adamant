@@ -11,4 +11,4 @@ fields:
     type: Example_Register.Register_T_Le
   - name: Reg_3
     description: The third register.
-    type: Example_Register.Register_T
+    type: Example_Register.Register_T_Le

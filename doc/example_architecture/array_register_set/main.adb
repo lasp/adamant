@@ -5,7 +5,7 @@ with System.Storage_Elements; use System.Storage_Elements;
 procedure Main is
    use Example_Register;
    -- Define hardware register array:
-   Registers : Example_Packed_Register_Array.Register_T;
+   Registers : Example_Packed_Register_Array.Register_T_Le;
    for Registers'Address use To_Address (Integer_Address (16#0070_0014#));
    -- Define register copy:
    Reg_Copy : Example_Register.T_Le;

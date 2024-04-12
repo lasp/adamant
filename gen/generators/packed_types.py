@@ -26,6 +26,7 @@ array_templates = [
     "array/name-validation.ads",
     "array/name-validation.adb",
     "array/name-assertion.ads",
+    "array/name-c.ads",
     "array/name.py",
     "array/name_type_ranges.adb",
 ]

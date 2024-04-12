@@ -20,21 +20,18 @@ with {{ include }}.C;
 package {{ name }}.C is
 
    -- Unpacked C/C++ compatible type:
-   type U_C is record
-{% for field in fields.values() %}
-{% if field.description %}
-{{ printMultiLine(field.description, '      -- ') }}
-{% endif %}
-{% if field.is_packed_type %}
-      {{ field.name }} : aliased {{ field.type_package }}.C.U_C{% if field.default_value %} := {{ field.default_value }}{% endif %};
+{% if element.is_packed_type %}
+   type Unconstrained_C is array (Unconstrained_Index_Type range <>) of aliased {{ element.type_package }}.C.U_C
+      with Convention => C;
 {% else %}
-      {{ field.name }} : aliased {{ field.type }}{% if field.default_value %} := {{ field.default_value }}{% endif %};
+   type Unconstrained_C is array (Unconstrained_Index_Type range <>) of aliased {{ element.type }}
+      with Convention => C;
 {% endif %}
-{% endfor %}
-   end record
-      with Convention => C_Pass_By_Copy;
 
-   -- Access type for U_C.
+   -- Unpacked array type:
+   subtype U_C is Unconstrained{% if length %} (Constrained_Index_Type){% endif %};
+
+   -- Access type for U
    type U_C_Access is access all U_C;
 
    -- Functions for converting between the Ada and C version of the packed type:

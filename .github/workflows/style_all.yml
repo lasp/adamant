@@ -17,12 +17,12 @@ jobs:
       - run: echo "Starting job triggered by a ${{ github.event_name }} event on a ${{ runner.os }} server hosted by GitHub."
       - run: echo "Checking out ${{ github.repository }} on branch ${{ github.ref }}."
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Check all style
         run: bash env/github_run.sh "redo style_all"
       - name: Archive logs for failed style checks
         if: always() # Make sure this runs even if `redo style_all` fails
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: failed_style_logs
           path: build/failed_style_logs

@@ -213,7 +213,7 @@ class {{ name }}(PackedTypeBase):
     def to_string(self, prefix=""):
         strn = prefix + self.to_byte_string() + "\n"
 {% for field in fields.values() %}
-        strn += prefix + "{{ field.name }} : {{ field.type }} = " + \
+        strn += prefix + "{{ field.name }} : {{ field.type }} => " + \
 {% if field.type_model %}
             (("\n" + self.{{ field.name }}.to_string(prefix + "    "))
                 if self.{{ field.name }} is not None else str(None))
@@ -227,7 +227,7 @@ class {{ name }}(PackedTypeBase):
     def to_tuple_string(self):
         strn = "("
 {% for field in fields.values() %}
-        strn += "{{ field.name }} = " + \
+        strn += "{{ field.name }} => " + \
 {% if field.type_model %}
             (self.{{ field.name }}.to_tuple_string()
                 if self.{{ field.name }} is not None else str(None))

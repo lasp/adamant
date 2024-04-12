@@ -2,6 +2,6 @@
 description: This is a packed record named that holds two registers.
 fields:
   - name: one
-    type: Aa.Register_T
+    type: Aa.Register_T_Le
   - name: two
     type: Aa.Register_T_Le

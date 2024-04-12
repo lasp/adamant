@@ -3,8 +3,12 @@
 --
 -- Generated from {{ filename }} on {{ time }}.
 --------------------------------------------------------------------------------
+pragma Ada_2022;
 
-{% if not is_volatile_type %}
+{% if unpacked_types %}
+with Byte_Array_Util;
+
+{% endif %}
 {% if packed_type_includes %}
 -- Record Field Includes:
 {% for include in packed_type_includes %}
@@ -12,17 +16,9 @@ with {{ include }}.Validation;
 {% endfor %}
 
 {% endif %}
-{% endif %}
 package body {{ name }}.Validation is
 
-{% if is_volatile_type %}
-   -- Validation not supported for volatile record. Convert to a regular record for
-   -- a validation checking function.
-   procedure Dummy_Valid is
-   begin
-      null;
-   end Dummy_Valid;
-{% else %}
+{% if endianness in ["either", "big"] %}
    pragma Warnings (Off, "formal parameter ""r"" is not referenced");
    function Valid (R : in T; Errant_Field : out Interfaces.Unsigned_32) return Boolean is
    pragma Warnings (On, "formal parameter ""r"" is not referenced");
@@ -116,7 +112,7 @@ package body {{ name }}.Validation is
 {% if field.variable_length %}
       Variable_Length := Integer (R.{{ field.variable_length }}) + Integer ({{ field.variable_length_offset }});
       if Variable_Length > 0 then
-         if not {{ field.type_package }}.Validation.Valid ({{ field.type_package }}.Unconstrained (R.{{ field.name }} (R.{{ field.name }}'First .. R.{{ field.name }}'First + Variable_Length - 1)), E_Field) then
+         if not {{ field.type_package }}.Validation.Valid (R.{{ field.name }}, E_Field, R.{{ field.name }}'First, R.{{ field.name }}'First + Variable_Length - 1) then
             Errant_Field := {{ field.start_field_number - 1 }} + E_Field;
             return False;
          end if;
@@ -155,6 +151,8 @@ package body {{ name }}.Validation is
          return False;
    end Valid;
 
+{% endif %}
+{% if endianness in ["either", "little"] %}
    pragma Warnings (Off, "formal parameter ""r"" is not referenced");
    function Valid (R : in T_Le; Errant_Field : out Interfaces.Unsigned_32) return Boolean is
    pragma Warnings (On, "formal parameter ""r"" is not referenced");
@@ -248,7 +246,7 @@ package body {{ name }}.Validation is
 {% if field.variable_length %}
       Variable_Length := Integer (R.{{ field.variable_length }}) + Integer ({{ field.variable_length_offset }});
       if Variable_Length > 0 then
-         if not {{ field.type_package }}.Validation.Valid ({{ field.type_package }}.Unconstrained (R.{{ field.name }} (R.{{ field.name }}'First .. R.{{ field.name }}'First + Variable_Length - 1)), E_Field) then
+         if not {{ field.type_package }}.Validation.Valid (R.{{ field.name }}, E_Field, R.{{ field.name }}'First, R.{{ field.name }}'First + Variable_Length - 1) then
             Errant_Field := {{ field.start_field_number - 1 }} + E_Field;
             return False;
          end if;
@@ -287,6 +285,7 @@ package body {{ name }}.Validation is
          return False;
    end Valid;
 
+{% endif %}
    pragma Warnings (Off, "formal parameter ""r"" is not referenced");
    function Valid (R : in U; Errant_Field : out Interfaces.Unsigned_32) return Boolean is
    pragma Warnings (On, "formal parameter ""r"" is not referenced");
@@ -379,7 +378,7 @@ package body {{ name }}.Validation is
 {% if field.variable_length %}
       Variable_Length := Integer (R.{{ field.variable_length }}) + Integer ({{ field.variable_length_offset }});
       if Variable_Length > 0 then
-         if not {{ field.type_package }}.Validation.Valid ({{ field.type_package }}.Unconstrained (R.{{ field.name }} (R.{{ field.name }}'First .. R.{{ field.name }}'First + Variable_Length - 1)), E_Field) then
+         if not {{ field.type_package }}.Validation.Valid (R.{{ field.name }} (R.{{ field.name }}'First .. R.{{ field.name }}'First + Variable_Length - 1), E_Field) then
             Errant_Field := {{ field.start_field_number - 1 }} + E_Field;
             return False;
          end if;
@@ -417,6 +416,99 @@ package body {{ name }}.Validation is
          Errant_Field := 0;
          return False;
    end Valid;
-{% endif %}
 
+{% if endianness in ["either", "big"] %}
+   function Get_Field (Src : in T; Field : in Interfaces.Unsigned_32) return Basic_Types.Poly_Type is
+{% if unpacked_types %}
+      use Byte_Array_Util;
+{% endif %}
+      To_Return : Basic_Types.Poly_Type := [others => 0];
+   begin
+      case Field is
+{% for field in fields.values() %}
+{% if field.is_packed_type %}
+         when {{ field.start_field_number }} .. {{ field.end_field_number }} =>
+            To_Return := {{ field.type_package }}.Validation.Get_Field (Src.{{ field.name }}, Field - {{ field.start_field_number + 1 }});
+{% else %}
+         when {{ field.start_field_number }} =>
+            declare
+               -- Copy field over to an unpacked var so that it is byte aligned. The value here is out of range,
+               -- and we know this, so suppresss any checks by the compiler for this copy.
+               pragma Suppress (Range_Check);
+               pragma Suppress (Overflow_Check);
+               Var : constant {{ field.type }} := Src.{{ field.name }};
+               pragma Unsuppress (Range_Check);
+               pragma Unsuppress (Overflow_Check);
+               -- Now overlay the var with a byte array before copying it into the polytype.
+{% if field.type in ["Basic_Types.Byte", "Byte"] %}
+               subtype Byte_Array is Basic_Types.Byte_Array (0 .. 0);
+{% else %}
+               subtype Byte_Array is Basic_Types.Byte_Array (0 .. {{ field.type }}'Object_Size / Basic_Types.Byte'Object_Size - 1);
+{% endif %}
+               pragma Warnings (Off, "overlay changes scalar storage order");
+               Overlay : constant Byte_Array with Import, Convention => Ada, Address => Var'Address;
+               pragma Warnings (On, "overlay changes scalar storage order");
+            begin
+               Safe_Right_Copy (To_Return, Overlay);
+            end;
+{% endif %}
+{% endfor %}
+         when others => null;
+      end case;
+      return To_Return;
+   exception
+      -- We are just trying to do our best here. So if a constraint error is thrown during this process,
+      -- we don't want to die.
+      when Constraint_Error =>
+         return To_Return;
+   end Get_Field;
+
+{% endif %}
+{% if endianness in ["either", "little"] %}
+   function Get_Field (Src : in T_Le; Field : in Interfaces.Unsigned_32) return Basic_Types.Poly_Type is
+{% if unpacked_types %}
+      use Byte_Array_Util;
+{% endif %}
+      To_Return : Basic_Types.Poly_Type := [others => 0];
+   begin
+      case Field is
+{% for field in fields.values() %}
+{% if field.is_packed_type %}
+         when {{ field.start_field_number }} .. {{ field.end_field_number }} =>
+            To_Return := {{ field.type_package }}.Validation.Get_Field (Src.{{ field.name }}, Field - {{ field.start_field_number + 1 }});
+{% else %}
+         when {{ field.start_field_number }} =>
+            declare
+               -- Copy field over to an unpacked var so that it is byte aligned. The value here is out of range,
+               -- and we know this, so suppresss any checks by the compiler for this copy.
+               pragma Suppress (Range_Check);
+               pragma Suppress (Overflow_Check);
+               Var : constant {{ field.type }} := Src.{{ field.name }};
+               pragma Unsuppress (Range_Check);
+               pragma Unsuppress (Overflow_Check);
+               -- Now overlay the var with a byte array before copying it into the polytype.
+{% if field.type in ["Basic_Types.Byte", "Byte"] %}
+               subtype Byte_Array is Basic_Types.Byte_Array (0 .. 0);
+{% else %}
+               subtype Byte_Array is Basic_Types.Byte_Array (0 .. {{ field.type }}'Object_Size / Basic_Types.Byte'Object_Size - 1);
+{% endif %}
+               pragma Warnings (Off, "overlay changes scalar storage order");
+               Overlay : constant Byte_Array with Import, Convention => Ada, Address => Var'Address;
+               pragma Warnings (On, "overlay changes scalar storage order");
+            begin
+               Safe_Right_Copy (To_Return, Overlay);
+            end;
+{% endif %}
+{% endfor %}
+         when others => null;
+      end case;
+      return To_Return;
+   exception
+      -- We are just trying to do our best here. So if a constraint error is thrown during this process,
+      -- we don't want to die.
+      when Constraint_Error =>
+         return To_Return;
+   end Get_Field;
+
+{% endif %}
 end {{ name }}.Validation;
