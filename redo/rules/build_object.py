@@ -235,7 +235,7 @@ def _build_all_c_dependencies(
         all_deps = []
         for source_file in source_files:
             # Get dependencies for this source file. Ignore assembly files.
-            if not source_file.endswith(".s"):
+            if not source_file.endswith(".S") and not source_file.endswith(".s"):
                 all_deps.extend(get_c_source_dependencies(source_file, build_target_instance, c_source_db))
         return list(set(all_deps))
 
@@ -352,7 +352,7 @@ def _get_object_sources(object_file):
         source_to_compile_extension = None
         for source_file in source_files:
             _, source_to_compile_extension = os.path.splitext(source_file)
-            if source_to_compile_extension in [".c", ".cpp", ".s"]:
+            if source_to_compile_extension in [".c", ".cpp", ".S", ".s"]:
                 source_to_compile = source_file
                 break
 
@@ -560,7 +560,7 @@ def _compile_c_object(redo_1, redo_2, redo_3, source_files, db):
     source_to_compile_extension = None
     for source_file in source_files:
         _, source_to_compile_extension = os.path.splitext(source_file)
-        if source_to_compile_extension in [".c", ".cpp", ".s"]:
+        if source_to_compile_extension in [".c", ".cpp", ".S", ".s"]:
             source_to_compile = source_file
             break
 

@@ -156,7 +156,7 @@ class tester_generator(basic_generator):
                     + component_name
                     + "'."
                 )
-            return component_model.models_dependent_on + [component_model.full_filename]
+            return component_model.get_dependencies() + [component_model.full_filename]
         return []
 
 

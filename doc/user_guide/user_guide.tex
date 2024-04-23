@@ -6045,17 +6045,17 @@ redo  what
 redo all
 redo clean
 redo build/obj/Linux/c_lib.o
-redo build/template/c_lib_h.ads
+redo build/template/Linux/c_lib_h.ads
 \end{minted}
 \vspace{5mm} %5mm vertical space
 
-To build the Ada bindings run:
+Note that binding generation is specific to your build target, since different compilers will often bind to symbols with different naming. To build the Ada bindings run:
 
 \vspace{5mm} %5mm vertical space
 \begin{minted}{text}
 > redo templates
   redo  templates
-  redo    build/template/c_lib_h.ads
+  redo    build/template/Linux/c_lib_h.ads
 \end{minted}
 \vspace{5mm} %5mm vertical space
 
@@ -6070,7 +6070,7 @@ Let's take a look at the C source code: \\
 which provides a simple data structure and function that increments a value up to a limit before rolling over. Let's also look at the generated Ada bindings: \\
 
 \textit{c\_lib\_h.ads}:
-\adacodef{../example_architecture/c_lib/build/template/c_lib_h.ads}
+\adacodef{../example_architecture/c_lib/build/template/Linux/c_lib_h.ads}
 
 As you can see, \textit{c\_lib\_h.ads} includes Ada bindings for the C struct and the call to \texttt{increment}. Below is an example \textit{main.adb} that uses the bindings to call the C library. \\
 

@@ -1,0 +1,9 @@
+---
+description: Packed 3 element vector of 64-bit floats.
+with:
+  - Interfaces
+preamble: |
+   subtype Float_64 is Interfaces.IEEE_Float_64;
+type: Float_64
+format: F64
+length: 3

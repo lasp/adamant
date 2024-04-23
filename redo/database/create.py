@@ -228,7 +228,7 @@ def _is_ada_source_file(filename):
 # Determine if a filename is c/c++ or asm source file by its extension.
 def _is_c_source_file(filename):
     _, ext = os.path.splitext(filename)
-    return ext in [".c", ".cpp", ".h", ".hpp", ".s"]
+    return ext in [".c", ".cpp", ".h", ".hpp", ".S", ".s"]
 
 
 # Determine if a filename is python source file by its extension.
@@ -348,7 +348,7 @@ def create(build_path):
     ada_source_regex = re.compile(r".*\.ad[sb]$")
     do_file_regex = re.compile(r".*\.do$")
     yaml_file_regex = re.compile(r".*\.yaml$")
-    c_source_regex = re.compile(r".*\.(h|hpp|c|cpp|s)$")
+    c_source_regex = re.compile(r".*\.(h|hpp|c|cpp|S|s)$")
 
     # Search first for model files, and create the model database. This
     # may be needed by generators, so we need to build it first.

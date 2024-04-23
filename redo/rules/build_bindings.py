@@ -11,16 +11,25 @@ from base_classes.build_rule_base import build_rule_base
 from rules.build_object import _build_all_c_dependencies, _get_build_target_instance
 
 
-# This function compiles a c object file from a given
-# source file.
+# This function generates Ada bindings for a given C/C++ source file
 def _generate_bindings(redo_1, redo_2, redo_3, source_file, c_source_db):
 
     # First build all the dependencies for this source file and for the include
     # string for those dependencies:
-    build_target_instance, _ = _get_build_target_instance(target.get_default_target())
+
+    # Get the build target instance:
+    build_target = redo_arg.get_target(redo_2)
+    build_target_instance, _ = _get_build_target_instance(build_target)
     deps = _build_all_c_dependencies([source_file], c_source_db, build_target_instance=build_target_instance)
     dep_dirs = list(set([os.path.dirname(dep) for dep in deps]))
-    include_str = "-I" + " -I".join(dep_dirs)
+    include_str = ""
+    if dep_dirs:
+        include_str = " -I" + " -I".join(dep_dirs)
+
+    # Get the gnatmetric info from the target, ie. arm-eabi-
+    prefix, _ = build_target_instance.gnatmetric_info(
+        target=build_target
+    )
 
     # Should we use gcc or g++ for bindings generation
     compiler = "gcc"
@@ -30,18 +39,19 @@ def _generate_bindings(redo_1, redo_2, redo_3, source_file, c_source_db):
     # Generate the compilation command that dumps the bindings, ie:
     #    gcc -c -fdump-ada-spec -C c_lib.h
     compile_cmd = (
-        compiler + " "
+        prefix + compiler + " "
         + "-c "
         + "-fdump-ada-spec "
         + "-C "
         + source_file
-        + " " + include_str
+        + include_str
     )
 
     # Run the bindings command in templates directory so the file
     # gets created there:
     cwd = os.getcwd()
-    template_temp_dir = redo_arg.get_build_dir(redo_1) + os.sep + "template" + os.sep + "temp"
+    template_temp_dir = redo_arg.get_build_dir(redo_1) \
+        + os.sep + "template" + os.sep + build_target + os.sep + "temp"
     filesystem.safe_makedir(template_temp_dir)
     os.chdir(template_temp_dir)
     shell.run_command_suppress_output(compile_cmd)
@@ -64,11 +74,11 @@ def _generate_bindings(redo_1, redo_2, redo_3, source_file, c_source_db):
 class build_bindings(build_rule_base):
     def _build(self, redo_1, redo_2, redo_3):
         # Make sure the binding is being built in the correct directory:
-        if not redo_arg.in_build_template_dir(redo_1):
+        if not redo_arg.in_build_template_target_dir(redo_1):
             error.error_abort(
-                "Object file '"
+                "Bindings file '"
                 + redo_1
-                + "' can only be built in a 'build/template' directory."
+                + "' can only be built in a 'build/template/$TARGET' directory."
             )
 
         # If no source files were found, then maybe this object
@@ -128,6 +138,8 @@ class build_bindings(build_rule_base):
             "build"
             + os.sep
             + "template"
+            + os.sep
+            + target.get_default_target()
             + os.sep
             + base
             + "_" + ext[1:]
