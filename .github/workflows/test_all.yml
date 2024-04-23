@@ -17,12 +17,12 @@ jobs:
       - run: echo "Starting job triggered by a ${{ github.event_name }} event on a ${{ runner.os }} server hosted by GitHub."
       - run: echo "Checking out ${{ github.repository }} on branch ${{ github.ref }}."
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Run all unit tests
         run: bash env/github_run.sh "redo test_all"
       - name: Archive logs for failed unit tests
         if: always() # Make sure this runs even if `redo test_all` fails
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: failed_test_logs
           path: ${{ github.workspace }}/build/failed_test_logs

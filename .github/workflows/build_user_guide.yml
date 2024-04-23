@@ -17,11 +17,11 @@ jobs:
       - run: echo "Starting job triggered by a ${{ github.event_name }} event on a ${{ runner.os }} server hosted by GitHub."
       - run: echo "Checking out ${{ github.repository }} on branch ${{ github.ref }}."
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Build the user guide
         run: bash env/github_run.sh "redo doc/user_guide/build_user_guide"
       - name: Archive user guide PDF
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: user_guide
           path: doc/user_guide/build/pdf/user_guide.pdf
@@ -29,7 +29,7 @@ jobs:
       - name: Build the architecture description document
         run: bash env/github_run.sh "redo doc/architecture_description_document/build/pdf/architecture_description_document.pdf"
       - name: Archive user guide PDF
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: architecture_description_document 
           path: doc/architecture_description_document/build/pdf/architecture_description_document.pdf
