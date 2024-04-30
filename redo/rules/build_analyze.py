@@ -241,8 +241,6 @@ def _analyze_ada_sources(source_files, base_dir, build_target, binary_mode=False
         + gpr_project_file
         + " -XADAMANT_DIR="
         + os.environ["ADAMANT_DIR"]
-        + " -XADAMANT_ENV_DIR="
-        + os.environ["ADAMANT_ENV_DIR"]
         + " -XOBJECT_DIR="
         + output_dir
         + " -XSOURCE_DIRS="

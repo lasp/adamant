@@ -72,8 +72,10 @@ is
    {{ item.name }}_End : constant Unsigned_32 := {{ item.name }}_Offset + {{ item.name }}_Size - 1; -- 0x{{ '%08X' % (item.address + item.size - 1) }}
    {{ item.name }}_Address : constant System.Address := To_Address (Integer_Address ({{ item.name }}_Offset));
    pragma Warnings (Off, "writing to ""{{ item.name }}"" is assumed to have no effects on other non-volatile objects");
+   pragma Warnings (Off, "assuming no concurrent accesses to non-atomic object ""{{ item.name }}""");
    {{ item.name }} : aliased {{ item.type }}
       with {% if item.volatile_aspect %}{{ item.volatile_aspect }} => True, {% endif %}Import, Convention => Ada, Address => {{ item.name }}_Address;
+   pragma Warnings (On, "assuming no concurrent accesses to non-atomic object ""{{ item.name }}""");
    pragma Warnings (On, "writing to ""{{ item.name }}"" is assumed to have no effects on other non-volatile objects");
 
 {% endfor %}

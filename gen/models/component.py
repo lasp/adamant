@@ -135,7 +135,6 @@ class component(base):
 
         # Initialize other things:
         self.execution = None
-        self.models_dependent_on = []
         self.base_ads_includes = []
         self.base_adb_includes = []
         self.template_ads_includes = []
@@ -342,11 +341,6 @@ class component(base):
                     + ". All component entities must have unique names."
                 )
 
-        # Gather dependencies of our dependencies:
-        for m in submodels:
-            self.models_dependent_on.extend([m.full_filename] + m.get_dependencies())
-        self.models_dependent_on = list(set(self.models_dependent_on))
-
         # Handle ID base initialization:
         # Set the component's set_id_bases parameters. This list is filled in by
         # submodels that need an id base.
@@ -371,6 +365,7 @@ class component(base):
                 model = model_loader.try_load_model_by_name(ada.getPackage(t))
             if model:
                 additional_type_models.append(model)
+                self.dependencies.extend([model.full_filename] + model.get_dependencies())
 
         # Gather all type models for component.
         # Grab all type models from our ided_suites, ie. commands, events, etc.
@@ -607,10 +602,13 @@ class component(base):
         ]
 
         # Finally, let's load any unit tests:
-        self._load_unit_tests()
+        ut_model_files = self._load_unit_tests()
 
-    def get_dependencies(self):
-        return self.models_dependent_on
+        # Gather dependencies of our dependencies:
+        self.dependencies.extend(ut_model_files)
+        for m in submodels:
+            self.dependencies.extend([m.full_filename] + m.get_dependencies())
+        self.dependencies = list(set(self.dependencies))
 
     # Look for and load all unit tests associated with this component.
     # Note: We cannot to this the standard way, ie. using the model loader, because unit tests
@@ -621,6 +619,7 @@ class component(base):
         from models.tests import tests
         import glob
 
+        ut_model_files = []
         self.full_file_dir = os.path.dirname(self.full_filename)
         for root, dirs, files in os.walk(self.full_file_dir):
             for dirname in dirs:
@@ -636,6 +635,8 @@ class component(base):
                         t = tests(unit_test_model)
                         t.set_component(self)
                         self.unit_tests.append(t)
+                        ut_model_files.append(t.full_filename)
+        return ut_model_files
 
     # This method should be called by the assembly to load assembly derived data about
     # the component into the component model itself. This includes resolved identifiers,

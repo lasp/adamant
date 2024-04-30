@@ -115,7 +115,7 @@ class hydra_packet_pages_prc(assembly_hydra_generator, generator_base):
 # Hydra XML generator:
 ##############################################
 # Mapping from basic Ada types to format strings for Hydra.
-type_format_dictionary = {"Natural": "%d", "Integer": "%d", "Float": "%f"}
+type_format_dictionary = {"U": "%d", "I": "%d", "F": "%f"}
 
 
 # Function which produces a format string to print an Ada type:
@@ -136,7 +136,7 @@ def create_type_print_strings(theAssembly):
                     )
                 elif field.format:
                     try:
-                        string += type_format_dictionary[field.type]
+                        string += type_format_dictionary[field.format.type[0]]
                     except Exception:
                         string += "%d"
                 else:

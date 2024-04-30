@@ -105,11 +105,11 @@
   <typeDN name="E64" size="64" endian="BIG"/>
 
   <!-- Floating point types -->
-  <typeFloat name="F32"/>
-  <typeDouble name="F64"/>
+  <typeFloat name="F32" size="32" endian="BIG"/>
+  <typeDouble name="F64" size="64" endian="BIG"/>
 
   <!-- Special types -->
-  <typeChar name="char"/>
+  <typeChar name="char" size="8"/>
 
   <!-- Ada specific types -->
   <typeDN name="Natural" size="32" endian="BIG"/>

@@ -1,4 +1,4 @@
-from generators.basic import add_basic_generators_to_module
+from generators.basic import add_basic_generators_to_module, add_basic_generator_to_module
 from models import component
 
 # This module contains generators that produce products related
@@ -26,7 +26,6 @@ component_templates = [
     "component/name_enums.tex",
     "component/name_interrupts.tex",
     "component/name_requirements.tex",
-    "component/name_unit_test.tex",
 ]
 
 component_templates_no_deps = ["component/name.dot", "component/name.tex"]
@@ -40,4 +39,15 @@ add_basic_generators_to_module(
     component_templates_no_deps,
     module=this_module,
     has_dependencies=False,
+)
+# We cannot use the cached component model for anything to do with unit
+# tests, since unit tests are not in the path, and need to be found by
+# searching the filesystem each time. By doing this, we will always detect
+# any new unit tests models that might appear on the filesystem for a
+# component.
+add_basic_generator_to_module(
+    component.component,
+    "component/name_unit_test.tex",
+    module=this_module,
+    ignore_cache=True
 )

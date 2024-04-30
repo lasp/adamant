@@ -3,7 +3,6 @@ abstract project a_adamant is
    -- Grab external variables. These are used to communicate between the
    -- Adamant build system and GPRBuild.
    ADAMANT_DIR := external("ADAMANT_DIR", "");
-   ADAMANT_ENV_DIR := external("ADAMANT_ENV_DIR", "");
    SOURCE_DIRS := external_as_list("SOURCE_DIRS", ",");
    OBJECT_DIR := external("OBJECT_DIR");
    EXEC_DIR := external("EXEC_DIR", "");
@@ -17,6 +16,10 @@ abstract project a_adamant is
    package Naming is
      for Spec_Suffix ("C++") use ".hpp";
      for Body_Suffix ("C++") use ".cpp";
+     -- Generally we use lower case Ada files, but in the case
+     -- of C/C++ bindings, mixed case may be necessary to mirror
+     -- the format of the C/C++ files.
+     for Casing use "mixedcase";
    end Naming;
 
    -- Produce executables with .elf suffix:
@@ -35,7 +38,6 @@ abstract project a_adamant is
       --
       -- -gnatf - full errors
       -- -gnatwa - enable all warnings
-      -- -gnatwh - warn on hiding
       -- -gnatwl - elaboration pragma warnings
       -- -gnatw.o - modified but unreferenced out parameters warnings
       -- -gnatwt - deleted conditional code
@@ -45,7 +47,7 @@ abstract project a_adamant is
       -- Note: I did not turn on gnatwd, because writing "all" all the time makes things
       -- less readable.
       --
-      ADA_FLAGS := ("-gnatf", "-gnatwa", "-gnatwh", "-gnatwl", "-gnatw.o", "-gnatwt", "-gnatw.X");
+      ADA_FLAGS := ("-gnatf", "-gnatwa", "-gnatwl", "-gnatw.o", "-gnatwt", "-gnatw.X");
       COMMON_C_FLAGS := ("-Wall", "-Wextra", "-pedantic");
       C_FLAGS := COMMON_C_FLAGS & ("-std=gnu99");
       CPP_FLAGS := COMMON_C_FLAGS & ("-std=c++0x");

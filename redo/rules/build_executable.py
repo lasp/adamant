@@ -250,8 +250,6 @@ class build_executable(build_rule_base):
             source_to_compile
             + " -XADAMANT_DIR="
             + os.environ["ADAMANT_DIR"]
-            + " -XADAMANT_ENV_DIR="
-            + os.environ["ADAMANT_ENV_DIR"]
             + " -XOBJECT_DIR="
             + obj_dir
             + " -XEXEC_DIR="

@@ -70,7 +70,7 @@
       <frameCopy name="Sys_Time" prefix="Ccsds-{{ packet.full_name|replace(".","-") }}-"/>
 {% if packet.items %}
 {% for item_name,item in packet.items.items() %}
-      <itemDef name="Ccsds-{{ item.full_name|replace(".","-") }}" type="{% if item.is_enum or item.literals %}{{ item.full_name|replace(".","-") }}-Enum{% else %}{{ item.format.type}}{% endif %}"{% if item.format.length and item.format.length > 1 %} num="{{ item.format.length }}"{% endif%}>
+      <itemDef name="Ccsds-{{ item.full_name|replace(".","-") }}" type="{% if item.is_enum or item.literals %}{{ item.full_name|replace(".","-") }}-Enum{% else %}{{ item.format.type }}{% endif %}"{% if item.format.length and item.format.length > 1 %} num="{{ item.format.length }}"{% endif%}>
 {% if item.flattened_description %}
         <description text="{{ item.flattened_description }}"/>
 {% endif %}

@@ -1,6 +1,10 @@
 import sys
 from os import environ
 
+# Global profiler, used if PROFILE_ADAMANT_BUILD environment
+# variable is set.
+profiler = None
+
 
 # This modules provides some performance enhancement to .do files:
 def optimize_path():
@@ -31,10 +35,27 @@ def optimize_path():
     else:
         _optimize_path()
 
+    # Turn on the build system profiler if we are in that mode:
+    if "PROFILE_ADAMANT_BUILD" in environ:
+        # Start profiling
+        import cProfile
+        global profiler
+        profiler = cProfile.Profile()
+        profiler.enable()
+
 
 # Python exit without garbage collection. This is a small performance
 # enhancement.
-def exit():
+def exit(redo_2):
+    # Turn off the build system profiler if we are in that mode:
+    if "PROFILE_ADAMANT_BUILD" in environ:
+        # Stop profiling
+        profiler.disable()
+        import pstats
+        with open(redo_2 + ".profile.txt", "w") as f:
+            ps = pstats.Stats(profiler, stream=f).sort_stats('cumtime')
+            ps.print_stats()
+
     from os import _exit
 
     sys.stdout.flush()
