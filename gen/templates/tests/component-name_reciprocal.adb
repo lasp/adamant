@@ -354,7 +354,7 @@ package body Component.{{ name }}_Reciprocal is
    -- Send special zero-id parameter to component signaling it to update its staged
    -- parameters to its local parameters whenever it is ready.
    procedure Update_Local_Parameters (Self : in out Base_Instance) is
-      Zero_Param : constant Parameter.T := (Header => (Id => 0, Buffer_Length => 0), Buffer => (others => 0));
+      Zero_Param : constant Parameter.T := (Header => (Id => 0, Buffer_Length => 0), Buffer => [others => 0]);
    begin
       Self.Parameter_T_Send (Zero_Param);
    end Update_Local_Parameters;

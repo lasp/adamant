@@ -1,0 +1,16 @@
+---
+description: This is an example packed record that demonstrates the nesting of other packed records within.
+fields:
+  - name: Simple_Field
+    description: A simple float, we must provide a format
+    type: Short_Float
+    # Required
+    format: F32
+  - name: Nested_Field_1
+    description: This field is of type Example Record, which is itself a packed record definition.
+    type: Example_Record.T
+    # ^ No format specification is necessary, since the
+    # bit representation of a packed record is known
+  - name: Nested_Field_2
+    description: Another field of type Example Record.
+    type: Example_Record.T

@@ -10,13 +10,11 @@ pydep.build_py_deps()
 from aa import Aa
 from bb import Bb
 from cc import Cc
-from dd import Dd
 from simple_variable import Simple_Variable
 from simple_variable_holder import Simple_Variable_Holder
 from simple_variable_offset import Simple_Variable_Offset
 from header import Header
 from another_header import Another_Header
-from simple_variable_header import Simple_Variable_Header
 from simple_variable_array import Simple_Variable_Array
 from complex_array import Complex_Array
 from test_enums import Second_Enum
@@ -87,25 +85,6 @@ if __name__ == "__main__":
     println("passed.")
     println()
 
-    println("testing D:")
-    println("create D:")
-    d = Dd(Bytes=[255, 5, 4, 3, 2, 1], Words=[55, 56, 57, 58], Odd_Ball=16)
-    println(str(d))
-    println(str(d.to_tuple_string()))
-    println(str(d.to_byte_array().hex()))
-    println(str(d.to_byte_string()))
-    data = d.to_byte_array()
-    println("create D2:")
-    d2 = Dd()
-    assert d != d2
-    println(str(d2))
-    println("fill D2:")
-    d2.from_byte_array(data)
-    println(str(d2))
-    assert d == d2
-    println("passed.")
-    println()
-
     println("testing simple:")
     println("create simple:")
     s = Simple_Variable(Length=5, Buffer=[1, 2, 3, 4, 5])
@@ -160,27 +139,6 @@ if __name__ == "__main__":
     o2.from_byte_array(data)
     println(str(o2))
     assert o == o2
-    println("passed.")
-    println()
-
-    println("testing header:")
-    println("create header:")
-    header = Header(A=a, Length=7)
-    another_header = Another_Header(B=99, Secondary_Header=header)
-    h = Simple_Variable_Header(Header=another_header, Buffer=[1, 2, 3, 4, 5, 6, 7])
-    println(str(h))
-    println(str(h.to_tuple_string()))
-    println(str(h.to_byte_array().hex()))
-    println(str(h.to_byte_string()))
-    data = h.to_byte_array()
-    println("create header2:")
-    h2 = Simple_Variable_Header()
-    assert h != h2
-    println(str(h2))
-    println("fill header2:")
-    h2.from_byte_array(data)
-    println(str(h2))
-    assert h == h2
     println("passed.")
     println()
 

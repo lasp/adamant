@@ -3,24 +3,102 @@
 --
 -- Generated from {{ filename }} on {{ time }}.
 --------------------------------------------------------------------------------
+pragma Ada_2022;
 
-{% if unpacked_types %}
--- Standard includes:
-with Byte_Array_Util;
-
-{% endif %}
 package body {{ name }} is
 
-{% if is_volatile_type %}
-   -- We create this so that an .adb can be generated legally. This will
-   -- get optimized out. Volatile packed records do not need regular packed
-   -- record .adb.
-   procedure Dummy is
+{% if endianness in ["either", "big"] %}
+   function Pack (Src : in U) return T is
    begin
-      null;
-   end Dummy;
+{% if complex_type_models %}
+      return (
+{% for field in fields.values() %}
+{% if field.is_packed_type %}
+         {{ field.name }} => {{ field.type_package }}.Pack (Src.{{ field.name }}){{ "," if not loop.last }}
 {% else %}
+         {{ field.name }} => Src.{{ field.name }}{{ "," if not loop.last }}
+{% endif %}
+{% endfor %}
+      );
+{% else %}
+      return T (Src);
+{% endif %}
+   end Pack;
+
+{% endif %}
+{% if endianness in ["either", "little"] %}
+   function Pack (Src : in U) return T_Le is
+   begin
+{% if complex_type_models %}
+      return (
+{% for field in fields.values() %}
+{% if field.is_packed_type %}
+         {{ field.name }} => {{ field.type_package }}.Pack (Src.{{ field.name }}){{ "," if not loop.last }}
+{% else %}
+         {{ field.name }} => Src.{{ field.name }}{{ "," if not loop.last }}
+{% endif %}
+{% endfor %}
+      );
+{% else %}
+      return T_Le (Src);
+{% endif %}
+   end Pack;
+
+{% endif %}
+{% if endianness in ["either", "big"] %}
+   function Unpack (Src : in T) return U is
+   begin
+{% if complex_type_models %}
+      return (
+{% for field in fields.values() %}
+{% if field.is_packed_type %}
+         {{ field.name }} => {{ field.type_package }}.Unpack (Src.{{ field.name }}){{ "," if not loop.last }}
+{% else %}
+         {{ field.name }} => Src.{{ field.name }}{{ "," if not loop.last }}
+{% endif %}
+{% endfor %}
+      );
+{% else %}
+      return U (Src);
+{% endif %}
+   end Unpack;
+
+{% endif %}
+{% if endianness in ["either", "little"] %}
+   function Unpack (Src : in T_Le) return U is
+   begin
+{% if complex_type_models %}
+      return (
+{% for field in fields.values() %}
+{% if field.is_packed_type %}
+         {{ field.name }} => {{ field.type_package }}.Unpack (Src.{{ field.name }}){{ "," if not loop.last }}
+{% else %}
+         {{ field.name }} => Src.{{ field.name }}{{ "," if not loop.last }}
+{% endif %}
+{% endfor %}
+      );
+{% else %}
+      return U (Src);
+{% endif %}
+   end Unpack;
+{% if endianness in ["either"] %}
+
+   function Swap_Endianness (Src : in T) return T_Le is
+      Unpacked : constant U := Unpack (Src);
+   begin
+      return Pack (Unpacked);
+   end Swap_Endianness;
+
+   function Swap_Endianness (Src : in T_Le) return T is
+      Unpacked : constant U := Unpack (Src);
+   begin
+      return Pack (Unpacked);
+   end Swap_Endianness;
+{% endif %}
+
+{% endif %}
 {% if variable_length %}
+{% if endianness in ["either", "big"] %}
    function Serialized_Length (Src : in T; Num_Bytes_Serialized : out Natural) return Serialization_Status is
 {% for include in variable_length_dynamically_sized_type_includes %}
       use {{ include }};
@@ -95,6 +173,8 @@ package body {{ name }} is
       end;
    end Serialized_Length;
 
+{% endif %}
+{% if endianness in ["either", "little"] %}
    function Serialized_Length_Le (Src : in T_Le; Num_Bytes_Serialized : out Natural) return Serialization_Status is
 {% for include in variable_length_dynamically_sized_type_includes %}
       use {{ include }};
@@ -169,7 +249,9 @@ package body {{ name }} is
       end;
    end Serialized_Length_Le;
 
+{% endif %}
 {% else %}
+{% if endianness in ["either", "big"] %}
    function Serialized_Length (Src : in T; Num_Bytes_Serialized : out Natural) return Serialization_Status is
       Ignore : T renames Src;
    begin
@@ -177,6 +259,8 @@ package body {{ name }} is
       return Success;
    end Serialized_Length;
 
+{% endif %}
+{% if endianness in ["either", "little"] %}
    function Serialized_Length_Le (Src : in T_Le; Num_Bytes_Serialized : out Natural) return Serialization_Status is
       Ignore : T_Le renames Src;
    begin
@@ -184,6 +268,8 @@ package body {{ name }} is
       return Success;
    end Serialized_Length_Le;
 
+{% endif %}
+{% if endianness in ["either", "big"] %}
    function Serialized_Length (Src : in Basic_Types.Byte_Array; Num_Bytes_Serialized : out Natural) return Serialization_Status is
    begin
       if Max_Serialized_Length > Src'Length then
@@ -195,6 +281,8 @@ package body {{ name }} is
       return Success;
    end Serialized_Length;
 
+{% endif %}
+{% if endianness in ["either", "little"] %}
    function Serialized_Length_Le (Src : in Basic_Types.Byte_Array; Num_Bytes_Serialized : out Natural) return Serialization_Status is
    begin
       if Max_Serialized_Length > Src'Length then
@@ -207,101 +295,5 @@ package body {{ name }} is
    end Serialized_Length_Le;
 
 {% endif %}
-   function Get_Field (Src : in T; Field : in Interfaces.Unsigned_32) return Basic_Types.Poly_Type is
-{% if packed_type_includes %}
-      use Interfaces;
 {% endif %}
-{% if unpacked_types %}
-      use Byte_Array_Util;
-{% endif %}
-      To_Return : Basic_Types.Poly_Type := (others => 0);
-   begin
-      case Field is
-{% for field in fields.values() %}
-{% if field.is_packed_type %}
-         when {{ field.start_field_number }} .. {{ field.end_field_number }} =>
-            To_Return := {{ field.type_package }}.Get_Field (Src.{{ field.name }}, Field - {{ field.start_field_number + 1 }});
-{% else %}
-         when {{ field.start_field_number }} =>
-            declare
-               -- Copy field over to an unpacked var so that it is byte aligned. The value here is out of range,
-               -- and we know this, so suppresss any checks by the compiler for this copy.
-               pragma Suppress (Range_Check);
-               pragma Suppress (Overflow_Check);
-               Var : constant {{ field.type }} := Src.{{ field.name }};
-               pragma Unsuppress (Range_Check);
-               pragma Unsuppress (Overflow_Check);
-               -- Now overlay the var with a byte array before copying it into the polytype.
-{% if field.type in ["Basic_Types.Byte", "Byte"] %}
-               subtype Byte_Array is Basic_Types.Byte_Array (0 .. 0);
-{% else %}
-               subtype Byte_Array is Basic_Types.Byte_Array (0 .. {{ field.type }}'Object_Size / Basic_Types.Byte'Object_Size - 1);
-{% endif %}
-               pragma Warnings (Off, "overlay changes scalar storage order");
-               Overlay : constant Byte_Array with Import, Convention => Ada, Address => Var'Address;
-               pragma Warnings (On, "overlay changes scalar storage order");
-            begin
-               Safe_Right_Copy (To_Return, Overlay);
-            end;
-{% endif %}
-{% endfor %}
-         when others => null;
-      end case;
-      return To_Return;
-   exception
-      -- We are just trying to do our best here. So if a constraint error is thrown during this process,
-      -- we don't want to die.
-      when Constraint_Error =>
-         return To_Return;
-   end Get_Field;
-
-   function Get_Field (Src : in T_Le; Field : in Interfaces.Unsigned_32) return Basic_Types.Poly_Type is
-{% if packed_type_includes %}
-      use Interfaces;
-{% endif %}
-{% if unpacked_types %}
-      use Byte_Array_Util;
-{% endif %}
-      To_Return : Basic_Types.Poly_Type := (others => 0);
-   begin
-      case Field is
-{% for field in fields.values() %}
-{% if field.is_packed_type %}
-         when {{ field.start_field_number }} .. {{ field.end_field_number }} =>
-            To_Return := {{ field.type_package }}.Get_Field (Src.{{ field.name }}, Field - {{ field.start_field_number + 1 }});
-{% else %}
-         when {{ field.start_field_number }} =>
-            declare
-               -- Copy field over to an unpacked var so that it is byte aligned. The value here is out of range,
-               -- and we know this, so suppresss any checks by the compiler for this copy.
-               pragma Suppress (Range_Check);
-               pragma Suppress (Overflow_Check);
-               Var : constant {{ field.type }} := Src.{{ field.name }};
-               pragma Unsuppress (Range_Check);
-               pragma Unsuppress (Overflow_Check);
-               -- Now overlay the var with a byte array before copying it into the polytype.
-{% if field.type in ["Basic_Types.Byte", "Byte"] %}
-               subtype Byte_Array is Basic_Types.Byte_Array (0 .. 0);
-{% else %}
-               subtype Byte_Array is Basic_Types.Byte_Array (0 .. {{ field.type }}'Object_Size / Basic_Types.Byte'Object_Size - 1);
-{% endif %}
-               pragma Warnings (Off, "overlay changes scalar storage order");
-               Overlay : constant Byte_Array with Import, Convention => Ada, Address => Var'Address;
-               pragma Warnings (On, "overlay changes scalar storage order");
-            begin
-               Safe_Right_Copy (To_Return, Overlay);
-            end;
-{% endif %}
-{% endfor %}
-         when others => null;
-      end case;
-      return To_Return;
-   exception
-      -- We are just trying to do our best here. So if a constraint error is thrown during this process,
-      -- we don't want to die.
-      when Constraint_Error =>
-         return To_Return;
-   end Get_Field;
-{% endif %}
-
 end {{ name }};

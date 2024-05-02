@@ -12,5 +12,5 @@ fields:
   - name: Buffer
     type: Buffer_Type
     format: U8x20
-    default: (others => 0)
+    default: "[others => 0]"
     variable_length: Length

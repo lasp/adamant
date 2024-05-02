@@ -133,22 +133,21 @@ class {{ name }}(PackedTypeBase):
 
     def to_string(self, prefix=""):
         strn = prefix + self.to_byte_string() + "\n"
-        strn += prefix + "{{ name }} : array {{ element.type }}[0:{{ length - 1 }}] = \n"
+        strn += prefix + "{{ name }} : array {{ element.type }} [0:{{ length - 1 }}] => [\n"
         for e in self.elements:
 {% if element.type_model %}
             strn += prefix + "    " + ((e.to_tuple_string()) if e is not None else str(None)) + "\n"
 {% else %}
             strn += prefix + "    " + str(e) + "\n"
 {% endif %}
-        return strn[:-1]
+        return strn + prefix + "]"
 
     def to_tuple_string(self):
-        strn = "("
-        strn += "{{ name }} = ("
+        strn = "["
         for e in self.elements:
 {% if element.type_model %}
             strn += (e.to_tuple_string() if e is not None else str(None)) + ", "
 {% else %}
             strn += str(e) + ", "
 {% endif %}
-        return strn[:-2] + "))"
+        return strn[:-2] + "]"

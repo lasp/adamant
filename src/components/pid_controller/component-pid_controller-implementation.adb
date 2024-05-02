@@ -100,7 +100,7 @@ package body Component.Pid_Controller.Implementation is
       --
       declare
          -- Pull out the timestamp from the input data for ease of use:
-         Timestamp : Sys_Time.T renames Arg.Time;
+         Timestamp : constant Sys_Time.T := Sys_Time.Pack (Arg.Time);
          -- Create locals for the statistics
          Mean_Error : Short_Float := 0.0;
          Variance_Error : Short_Float := 0.0;
@@ -127,7 +127,7 @@ package body Component.Pid_Controller.Implementation is
          Pid_Control_Output := Pid_Proportional_Output + Pid_Integral_Output + Pid_Derivative_Output + Arg.Feed_Forward_Value;
 
          -- Output the control
-         Self.Control_Output_U_Send_If_Connected ((Time => Timestamp, Output_Value => Pid_Control_Output, Error => Pid_Control_Error));
+         Self.Control_Output_U_Send_If_Connected ((Time => Arg.Time, Output_Value => Pid_Control_Output, Error => Pid_Control_Error));
 
          -- Update the previous values here
          Self.Control_Error_Prev := Pid_Control_Error;
