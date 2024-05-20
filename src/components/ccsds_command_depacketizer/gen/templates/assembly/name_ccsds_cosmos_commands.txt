@@ -4,8 +4,8 @@ Command {{ name }} {{ command.suite.component.instance_name }}-{{ command.name }
 {# The ccsds command header #}
 {% set header_bit_position = [] %}
 {% for field_name, field in ccsds_primary_header_model.fields.items() %}
-  Parameter {{ field.name }} {{ field.start_bit }} {{ field.size -}}
-{% if loop.last %}{% set _ = header_bit_position.append(field.start_bit + field.size) %}{% endif %} {{ plugin_format_dictionary[field.format.type[0]] }} 0 {{ 2**field.size - 1 }} {% if field.default_value == None or not field.default_value.isnumeric() %}0{% else %}{{ field.default_value }}{% endif %} "{{ field.description|replace('\n','') }}"
+{% if loop.last %}{% set _ = header_bit_position.append(field.start_bit + field.size) %}{% endif %}  Parameter {{ field.name }} {{ field.start_bit }} {{ field.size }} {{ plugin_format_dictionary[field.format.type[0]] }} 0 {{ 2**field.size - 1 }} {% if field.name == 'Packet_Length' %}{% if command.size != None %}{{ (command.type_model.fields|length * (command.size / 8) + 3)|int -}}
+{% else %}3{% endif %}{% elif field.name == 'Packet_Type' %}1{% elif field.name == 'Secondary_Header' %}1{% elif field.name == 'Apid' %}8{% elif field.name == 'Sequence_Flag' %}3{% else %}{% if field.default_value == None or not field.default_value.isnumeric() %}0{% else %}{{ field.default_value }}{% endif %}{% endif %} "{{ field.description|replace('\n','') }}"
 {% if field.is_enum %}
 {% for literals in field.datatype.model.literals %}
     State {{ literals.name }} {{ literals.value }}

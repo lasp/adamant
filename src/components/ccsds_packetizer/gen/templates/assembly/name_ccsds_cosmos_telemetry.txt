@@ -4,8 +4,9 @@ Telemetry {{ name }} {{ packet.name }} Big_Endian "{{ packet.description }}"
 {# The ccsds packet header #}
 {% set header_bit_position = [] %}
 {% for field_name, field in ccsds_primary_header_model.fields.items() %}
-{% if loop.last %}{% set _ = header_bit_position.append(field.start_bit + field.size) %}{% endif %}  Item {{ field.name }} {{ field.start_bit }} {{ field.size }} {{ plugin_format_dictionary[field.format.type[0]] }} "{{ field.description|replace('\n','') }}"
-{% if field.is_enum %}
+{% if loop.last %}{% set _ = header_bit_position.append(field.start_bit + field.size) %}{% endif %}{% if field.name == 'Apid' %}  Id_Item {{ field.name }} {{ field.start_bit }} {{ field.size }} {{ plugin_format_dictionary[field.format.type[0]] }} {{ packet.id }} "{{ field.description|replace('\n','') }}"
+{% else %}  Item {{ field.name }} {{ field.start_bit }} {{ field.size }} {{ plugin_format_dictionary[field.format.type[0]] }} "{{ field.description|replace('\n','') }}"
+{% endif %}{% if field.is_enum %}
 {% for literals in field.datatype.model.literals %}
     State {{ literals.name }} {{ literals.value }}
 {% endfor %}{% endif -%}{% endfor %}
