@@ -4,24 +4,27 @@ Telemetry {{ name }} {{ packet.name }} Big_Endian "{{ packet.description }}"
 {# The ccsds packet header #}
 {% set header_bit_position = [] %}
 {% for field_name, field in ccsds_primary_header_model.fields.items() %}
-{% if loop.last %}{% set _ = header_bit_position.append(field.start_bit + field.size) %}{% endif %}{% if field.name == 'Apid' %}  Id_Item {{ field.name }} {{ field.start_bit }} {{ field.size }} {{ plugin_format_dictionary[field.format.type[0]] }} {{ packet.id }} "{{ field.description|replace('\n','') }}"
-{% else %}  Item {{ field.name }} {{ field.start_bit }} {{ field.size }} {{ plugin_format_dictionary[field.format.type[0]] }} "{{ field.description|replace('\n','') }}"
+{% if loop.last %}{% set _ = header_bit_position.append(field.start_bit + field.size) %}{% endif %}{% if field.name == 'Apid' %}  Id_Item {{ field.name }} {{ field.start_bit }} {{ field.size }} {{ plugin_format_dictionary[field.format.type[0]] }} {{ packet.id }} "{{ field.description|replace('\n','->') }}"
+{% else %}  Item {{ field.name }} {{ field.start_bit }} {{ field.size }} {{ plugin_format_dictionary[field.format.type[0]] }} "{{ field.description|replace('\n','->') }}"
 {% endif %}{% if field.is_enum %}
 {% for literals in field.datatype.model.literals %}
     State {{ literals.name }} {{ literals.value }}
 {% endfor %}{% endif -%}{% endfor %}
 {% for field_name, field in sys_time_record_model.fields.items() %}
-  Item {{ field.name }} {{ header_bit_position|last + field.start_bit }} {{ field.size }} {{ plugin_format_dictionary[field.format.type[0]] }} "{{ field.description|replace('\n','') }}"
+  Item {{ field.name }} {{ header_bit_position|last + field.start_bit }} {{ field.size }} {{ plugin_format_dictionary[field.format.type[0]] }} "{{ field.description|replace('\n','->') }}"
 {% endfor %}
 {# The packet definitions. #}
 {% for item_name, item in packet.items.items() %}
-  {% if 'x' in (item.format|string)[2] %}Append_Array_Item {% if item.type_model.name %}{{ item.type_model.name }}.{% endif %}{{ item.name }} {{ (item.format|string)[1] }} {{ plugin_format_dictionary[item.format.type[0]] }} {{ (item.format|string)[1]|int * (item.format|string)[3:]|int }} "{{ item.description|replace('\n','') }}"
-{% else %}Append_Item {{ item.entity.full_name }}{% if item.flat_name %}.{{ item.flat_name }}{% endif %} {{ item.size }} {{ plugin_format_dictionary[item.format.type[0]] }} "{{ item.flat_desc|replace('\n','') }}"
+  {% if 'x' in (item.format|string)[2] %}Append_Array_Item {% if item.type_model.name %}{{ item.type_model.name }}.{% endif %}{{ item.name }} {{ (item.format|string)[1] }} {{ plugin_format_dictionary[item.format.type[0]] }} {{ (item.format|string)[1]|int * (item.format|string)[3:]|int }} "{{ item.description|replace('\n','->') }}"
+{% else %}Append_Item {{ item.entity.full_name }}{% if item.flat_name %}.{{ item.flat_name }}{% endif %} {{ item.size }} {{ plugin_format_dictionary[item.format.type[0]] }} "{{ item.flat_desc|replace('\n','->') }}"
 {% if item.is_enum %}
 {% for literals in item.datatype.model.literals %}
     State {{ literals.name }} {{ literals.value }}
 {% endfor %}{% endif %}{% endif %}
 {% endfor %}
-  Append_Item Subpacket.Data 0 BLOCK "Subpacket data"
+{% if packet.name|string == 'Events_Packet' %}  Append_Item Subpacket.Data -16 BLOCK "Subpacket data"
+  Item CRC -16 16 UINT "Packet CRC value"
+{% else %}  Append_Item CRC 16 UINT "Packet CRC value"
+{% endif %}
 
 {% endfor %}
