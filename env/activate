@@ -176,3 +176,6 @@ echo ""
 
 # Signify the environment is set up
 export ADAMANT_ENVIRONMENT_SET="yes"
+
+
+. $ADAMANT_DIR/env/redo_completion.sh
