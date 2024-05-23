@@ -123,20 +123,6 @@ class hydra_packet_pages_prc(assembly_hydra_generator, generator_base):
         )
 
 
-class assembly_ccsds_cosmos_plugin_txt(assembly_cosmos_plugin_generator_base, generator_base):
-    def __init__(self):
-        this_file_dir = os.path.dirname(os.path.realpath(__file__))
-        template_dir = os.path.join(this_file_dir, ".." + os.sep + "templates")
-        assembly_cosmos_plugin_generator_base.__init__(
-            self, "name_ccsds_cosmos_plugin.txt", template_dir=template_dir, subdir="plugin"
-        )
-
-    def generate(self, input_filename):
-        a = self.model_cls(input_filename)
-        create_type_field_strings(a)
-        print(a.render(self.template, template_path=self.template_dir))
-
-
 ##############################################
 # Hydra XML generator:
 ##############################################
