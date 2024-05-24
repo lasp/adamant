@@ -4,7 +4,7 @@ events:
     description: A packet was received with an invalid checksum
     param_type: Invalid_Packet_Xor8_Info.T
   - name: Invalid_Packet_Type
-    description: A packet was received with an invalid ccsds packet type. The expected packet type is a telecommand, but a telemtry packet was received.
+    description: A packet was received with an invalid ccsds packet type. The expected packet type is a telecommand, but a telemetry packet was received.
     param_type: Ccsds_Primary_Header.T
   - name: Packet_Too_Small
     description: The packet received was too small to contain necessary command information.

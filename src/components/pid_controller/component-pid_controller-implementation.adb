@@ -147,7 +147,7 @@ package body Component.Pid_Controller.Implementation is
             Self.Data_Product_T_Send (Self.Data_Products.D_Output (Timestamp, ((Value => Pid_Derivative_Output))));
             Self.Data_Product_T_Send (Self.Data_Products.Ff_Output (Timestamp, ((Value => Arg.Feed_Forward_Value))));
 
-            -- Finish filling in the statistcs
+            -- Finish filling in the statistics
             Self.Data_Product_T_Send (Self.Data_Products.Pid_Error (Timestamp, ((Value => Pid_Control_Error))));
             Self.Data_Product_T_Send (Self.Data_Products.Pid_Error_Mean (Timestamp, ((Value => Mean_Error))));
             Self.Data_Product_T_Send (Self.Data_Products.Pid_Error_Variance (Timestamp, ((Value => Variance_Error))));

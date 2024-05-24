@@ -94,7 +94,7 @@ package body Component.Product_Database.Implementation is
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- Stora a data product item in the database.
+   -- Store a data product item in the database.
    overriding procedure Data_Product_T_Recv_Sync (Self : in out Instance; Arg : in Data_Product.T) is
       use Data_Product_Database;
       Status : Update_Status;

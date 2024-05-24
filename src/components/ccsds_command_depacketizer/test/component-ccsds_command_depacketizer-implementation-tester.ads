@@ -108,7 +108,7 @@ package Component.Ccsds_Command_Depacketizer.Implementation.Tester is
    -----------------------------------------------
    -- A packet was received with an invalid checksum
    overriding procedure Invalid_Packet_Checksum (Self : in out Instance; Arg : in Invalid_Packet_Xor8_Info.T);
-   -- A packet was received with an invalid ccsds packet type. The expected packet type is a telecommand, but a telemtry packet was received.
+   -- A packet was received with an invalid ccsds packet type. The expected packet type is a telecommand, but a telemetry packet was received.
    overriding procedure Invalid_Packet_Type (Self : in out Instance; Arg : in Ccsds_Primary_Header.T);
    -- The packet received was too small to contain necessary command information.
    overriding procedure Packet_Too_Small (Self : in out Instance; Arg : in Invalid_Packet_Length.T);

@@ -136,7 +136,7 @@ package body Component.Ccsds_Command_Depacketizer.Implementation.Tester is
       Self.Invalid_Packet_Checksum_History.Push (Arg);
    end Invalid_Packet_Checksum;
 
-   -- A packet was received with an invalid ccsds packet type. The expected packet type is a telecommand, but a telemtry packet was received.
+   -- A packet was received with an invalid ccsds packet type. The expected packet type is a telecommand, but a telemetry packet was received.
    overriding procedure Invalid_Packet_Type (Self : in out Instance; Arg : in Ccsds_Primary_Header.T) is
    begin
       -- Push the argument onto the test history for looking at later:

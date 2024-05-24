@@ -305,7 +305,7 @@ package body Pid_Controller_Tests.Implementation is
 
       Self.Tester.Component_Instance.Init (Control_Frequency => 100.0, Database_Update_Period => 3, Moving_Average_Max_Samples => 10, Moving_Average_Init_Samples => 5);
 
-      -- Make the perameter invalid by modifying its length.
+      -- Make the parameter invalid by modifying its length.
       Param.Header.Buffer_Length := 0;
 
       -- Send bad parameter and expect bad response:

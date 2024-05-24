@@ -2,7 +2,7 @@
 -- Two_Counter_Entry Tests Spec
 --------------------------------------------------------------------------------
 
--- This is a unit test suite forthe two_counter_entry object for help with the event_limiter
+-- This is a unit test suite for the two_counter_entry object for help with the event_limiter
 package Two_Counter_Entry_Tests.Implementation is
    -- Test data and state:
    type Instance is new Two_Counter_Entry_Tests.Base_Instance with private;
