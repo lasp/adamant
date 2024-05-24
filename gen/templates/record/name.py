@@ -40,11 +40,11 @@ class {{ name }}(PackedTypeBase):
         if {{ field.name }} is not None:
 {% if field.is_enum %}
             assert isinstance({{ field.name }}, {{ field.type_model.name }}), \
-                ("Expected type for field '{{ field.name }}' to be '{{ field.type_model.name }}'"
+                ("Expected type for field '{{ field.name }}' to be '{{ field.type_model.name }}' "
                  " and instead found '" + str(type({{ field.name }})))
 {% elif field.is_packed_type %}
             assert isinstance({{ field.name }}, {{ field.type_package }}), \
-                ("Expected type for field '{{ field.name }}' to be '{{ field.type_package }}'"
+                ("Expected type for field '{{ field.name }}' to be '{{ field.type_package }}' "
                  "and instead found '" + str(type({{ field.name }})))
 {% if field.variable_length %}
             # Make sure variable length field value is not larger than the packed array length
@@ -64,7 +64,7 @@ class {{ name }}(PackedTypeBase):
             if self.{{ field.variable_length }} is not None:
                 assert (self.{{ field.variable_length }} + int({{ field.variable_length_offset }})) == len({{ field.name }}), \
                     ("Expected length of variable length field '{{ field.name }}' to match value of "
-                     "'{{ field.variable_length }} + int({{ field.variable_length_offset }})'"
+                     "'{{ field.variable_length }} + int({{ field.variable_length_offset }})' "
                      "which is '" + str((self.{{ field.variable_length }} + int({{ field.variable_length_offset }}))) + ""
                      "', but instead found length of '" + str(len({{ field.name }})) + "'.")
 {% else %}
@@ -75,7 +75,7 @@ class {{ name }}(PackedTypeBase):
 {% else %}
             assert isinstance({{ field.name }}, {{ field.format.get_python_type_string() }}), \
                 ("Expected type for field '{{ field.name }}' to be "
-                 "'{{ field.format.get_python_type_string() }}'"
+                 "'{{ field.format.get_python_type_string() }}' "
                  "and instead found '" + str(type({{ field.name }})))
 {% if field.format.type[0] == "U" %}
             assert {{ field.name }} >= 0, \

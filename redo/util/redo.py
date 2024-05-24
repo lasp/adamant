@@ -106,7 +106,7 @@ def info_print_bold(string):
     sys.stderr.flush()
 
 
-# Maing function to facilitate testing this modukle
+# Main function to facilitate testing this module
 # from the commandline.
 if __name__ == "__main__":
     command_dict = {

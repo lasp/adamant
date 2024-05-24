@@ -19,7 +19,7 @@ with Invalid_Command_Info.Representation;
 with Data_Product;
 with Packed_Arm_State.Representation;
 
--- The memory stuffer component is an active component that can stuff (write to) memory regions. It reports an error if an action is requested on a memory region outside of the address space that it is configured with during initialization. The component can manage both protected memory regions (which require an arm command prior to stuffing) and unprotected regions (which require no arm prior to stuffing). In addition, the component has a connector to accept a memory region copy request, which will stuff memory with data from another system address. The memory region copy and release conntectors may be disconnected if this feature is not needed.
+-- The memory stuffer component is an active component that can stuff (write to) memory regions. It reports an error if an action is requested on a memory region outside of the address space that it is configured with during initialization. The component can manage both protected memory regions (which require an arm command prior to stuffing) and unprotected regions (which require no arm prior to stuffing). In addition, the component has a connector to accept a memory region copy request, which will stuff memory with data from another system address. The memory region copy and release connectors may be disconnected if this feature is not needed.
 package Component.Memory_Stuffer.Implementation.Tester is
 
    use Component.Memory_Stuffer_Reciprocal;

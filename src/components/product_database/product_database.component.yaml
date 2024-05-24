@@ -18,7 +18,7 @@ init:
       default: "True"
       description: By default the product database will send an event every time a data product is fetched that is missing. Sometimes this is expected behavior and the message is annoying. This flag allows that event to be disabled permanently on startup if needed.
 connectors:
-  - description: Stora a data product item in the database.
+  - description: Store a data product item in the database.
     type: Data_Product.T
     kind: recv_sync
   - description: Fetch a data product item from the database.

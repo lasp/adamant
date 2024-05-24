@@ -74,7 +74,7 @@ ccsds_packet_buffer_size: 1274
 # define the amount of "usable" stack used by the Stack Monitor component. You should 
 # size this value as small as possible, but the value MUST be larger than the amount
 # of stack that a task uses prior to calling the Cycle procedure the first time, and MUST
-# be smaller than that smallest task stack efined in the system. When in doubt, leave 
+# be smaller than that smallest task stack defined in the system. When in doubt, leave 
 # this value at the default.
 #
 # Note, this value only affects bareboard runtimes. Linux uses a predefined stack margin

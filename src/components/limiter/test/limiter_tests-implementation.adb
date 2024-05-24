@@ -321,7 +321,7 @@ package body Limiter_Tests.Implementation is
       T : Component_Tester_Package.Instance_Access renames Self.Tester;
       Param : Parameter.T := T.Parameters.Max_Sends_Per_Tick ((Value => 0));
    begin
-      -- Make the perameter invalid by modifying its length.
+      -- Make the parameter invalid by modifying its length.
       Param.Header.Buffer_Length := 0;
 
       -- Send bad parameter and expect bad response:

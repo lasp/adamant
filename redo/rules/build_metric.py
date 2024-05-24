@@ -82,7 +82,7 @@ class build_metric(build_rule_base):
         metric_dir = os.path.join(
             root_dir, "build" + os.sep + "metric" + os.sep + build_target
         )
-        detailed_metric_dir = os.path.join(metric_dir, redo_no_txt_base + ".metrix")
+        detailed_metric_dir = os.path.join(metric_dir, redo_no_txt_base + ".metrix")  # codespell:ignore metrix
         cargs_string = ""
         filesystem.safe_makedir(detailed_metric_dir)
 

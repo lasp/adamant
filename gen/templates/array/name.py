@@ -32,17 +32,17 @@ class {{ name }}(PackedTypeBase):
             assert isinstance(elements, list), \
                 "Expected type for elements to be 'list' and instead found '" + str(type(elements))
             assert len(elements) == self.length, \
-                ("Expected length of element array to be '" + str(self.length) + "'"
+                ("Expected length of element array to be '" + str(self.length) + "' "
                  "but instead found length of: " + str(len(elements)))
             for e in elements:
                 if e is not None:
 {% if element.is_packed_type %}
                     assert isinstance(e, {{ element.type_package }}), \
-                        ("Expected type for elements to be '{{ element.type_package }}'"
+                        ("Expected type for elements to be '{{ element.type_package }}' "
                          "and instead found '" + str(type(e)))
 {% elif element.is_enum %}
                     assert isinstance(e, {{ element.type_model.name }}), \
-                        ("Expected type for elements to be '{{ element.type_model.name }}'"
+                        ("Expected type for elements to be '{{ element.type_model.name }}' "
                          "and instead found '" + str(type(e)))
 {% else %}
 {% if element.format %}
@@ -50,11 +50,11 @@ class {{ name }}(PackedTypeBase):
                     assert isinstance(e, list), \
                         "Expected type for elements to be 'list' and instead found '" + str(type(e))
                     assert len(e) == {{ element.format.length }}, \
-                        ("Expected length of list for elements to be '{{ element.format.length }}'"
+                        ("Expected length of list for elements to be '{{ element.format.length }}' "
                          "but instead found a list of length '" + str(len(e)) + "'.")
 {% else %}
                     assert isinstance(e, {{ element.format.get_python_type_string() }}), \
-                        ("Expected type for elements to be '{{ element.format.get_python_type_string() }}'"
+                        ("Expected type for elements to be '{{ element.format.get_python_type_string() }}' "
                          "and instead found '" + str(type(e)))
 {% if element.format.type[0] == "U" %}
                     assert e >= 0, \
