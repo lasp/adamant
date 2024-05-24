@@ -155,14 +155,16 @@ class build_prove(build_rule_base):
             except BaseException:
                 targets = []
         # Find all the objects that can be built in in this build directory, minus any assertion objects since
-        # those are not cross platform.
+        # those are not cross platform, and minus .C packages, since those don't compile for every packed type.
         assertion_obj_reg = re.compile(r".*build/obj/.*\-assertion.o$")
+        c_obj_reg = re.compile(r".*build/obj/.*\-c.o$")
         objects = [
             target
             for target in targets
             if os.path.dirname(target).startswith(build_directory)
             and target.endswith(".o")
             and not assertion_obj_reg.match(target)
+            and not c_obj_reg.match(target)
         ]
         if objects:
             sources = _get_source_files(objects)

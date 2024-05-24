@@ -3,15 +3,15 @@ description: A variable sized record with offset.
 with:
   - Interfaces
 preamble: |
-  subtype Limited_16 is Interfaces.Unsigned_16 range 0 .. 65000;
-  type Buffer_Type is array (Integer range -15 .. 4) of Limited_16;
+  subtype Limited_8 is Interfaces.Unsigned_8 range 0 .. 250;
+  type Buffer_Type is array (Integer range -15 .. 4) of Limited_8;
 fields:
   - name: Length
     type: Interfaces.Unsigned_8
     format: U8
   - name: Buffer
     type: Buffer_Type
-    format: U16x20
-    default: (others => 0)
+    format: U8x20
+    default: "[others => 0]"
     variable_length: Length
     variable_length_offset: +1

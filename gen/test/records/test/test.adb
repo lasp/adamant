@@ -1,16 +1,18 @@
+pragma Ada_2022;
 with Ada.Text_IO; use Ada.Text_IO;
 with Aa.Representation;
 with Aa.Validation;
 with Aa.Assertion; use Aa.Assertion;
+with Aa.C; use Aa.C;
 with Bb.Representation;
 with Bb.Validation;
 with Bb.Assertion; use Bb.Assertion;
 with Cc.Representation;
 with Cc.Validation;
 with Cc.Assertion; use Cc.Assertion;
-with Dd.Representation;
-with Dd.Validation;
-with Dd.Assertion; use Dd.Assertion;
+with Cc.C; use Cc.C;
+with Ee.Representation;
+with Ee.Assertion; use Ee.Assertion;
 with Simple_Variable.Representation;
 with Simple_Variable.Validation;
 with Simple_Variable.Assertion; use Simple_Variable.Assertion;
@@ -20,9 +22,6 @@ with Simple_Variable_Holder.Assertion; use Simple_Variable_Holder.Assertion;
 with Simple_Variable_Offset.Representation;
 with Simple_Variable_Offset.Validation;
 with Simple_Variable_Offset.Assertion; use Simple_Variable_Offset.Assertion;
-with Simple_Variable_Header.Representation;
-with Simple_Variable_Header.Validation;
-with Simple_Variable_Header.Assertion; use Simple_Variable_Header.Assertion;
 with Simple_Variable_Array.Representation;
 with Simple_Variable_Array.Validation;
 with Simple_Variable_Array.Assertion; use Simple_Variable_Array.Assertion;
@@ -39,9 +38,10 @@ procedure Test is
    function Poly2bytestring is new String_Util.To_Byte_String (Poly_Type);
 
    -- Record definitions:
-   Rh : Register_Holder.Register_T with
+   Rh : Register_Holder.Register_T_Le with
      Volatile => True;
    A : Aa.T := (One => 4, Two => 20, Three => 101);
+   A_Unpacked : Aa.U;
    A_Le : Aa.T_Le := (One => 4, Two => 20, Three => 101);
    A_Volatile : Aa.Volatile_T with
      Volatile;
@@ -49,64 +49,58 @@ procedure Test is
      Atomic;
    A_Register : Aa.Register_T with
      Volatile_Full_Access;
+   A_C : Aa.C.U_C := (One => 5, Two => 21, Three => 102);
    B : Bb.T := (Element => 8, Element2 => 9);
+   B_Le : constant Bb.T_Le := (Element => 8, Element2 => 9);
    C : Cc.T := (C => Second_Enum.Yellow, A => A, B => B);
-   D : Dd.T := (Bytes => (others => 0), Words => (others => 1), Odd_Ball => 18);
-   V : Simple_Variable.T := (Length => 3, Buffer => (250, 249, 248, others => 0));
-   V2 : Simple_Variable.T := (Length => 0, Buffer => (others => 0));
+   C_Unpacked : Cc.U := (C => Second_Enum.Yellow, A => (One => 4, Two => 20, Three => 101), B => (Element => 8, Element2 => 9));
+   C_C : Cc.C.U_C := (C => Second_Enum.Hola, A => (One => 5, Two => 21, Three => 102), B => (Element => 9, Element2 => 10));
+   E : Ee.T_Le := (A => A_Le, B => B_Le, C => -5);
+   E_Unpacked : Ee.U;
+   V : Simple_Variable.T := (Length => 3, Buffer => [250, 249, 248, others => 0]);
+   V2 : Simple_Variable.T := (Length => 0, Buffer => [others => 0]);
    V_Untouched : constant Simple_Variable.T := V;
-   V_Filled : constant Simple_Variable.T := (Length => 3, Buffer => (250, 249, 248, others => 9));
-   V_Garbage : constant Simple_Variable.T := (Length => 255, Buffer => (250, 249, 248, others => 9));
-   Sv : Simple_Variable_Holder.T := (Random_Field => 7, Simple => (Length => 3, Buffer => (250, 249, 248, others => 0)));
-   Sv2 : Simple_Variable_Holder.T := (Random_Field => 0, Simple => (Length => 0, Buffer => (others => 0)));
+   V_Filled : constant Simple_Variable.T := (Length => 3, Buffer => [250, 249, 248, others => 9]);
+   V_Garbage : constant Simple_Variable.T := (Length => 255, Buffer => [250, 249, 248, others => 9]);
+   Sv : Simple_Variable_Holder.T := (Random_Field => 7, Simple => (Length => 3, Buffer => [250, 249, 248, others => 0]));
+   Sv2 : Simple_Variable_Holder.T := (Random_Field => 0, Simple => (Length => 0, Buffer => [others => 0]));
    Sv_Untouched : constant Simple_Variable_Holder.T := Sv;
-   Sv_Filled : constant Simple_Variable_Holder.T := (Random_Field => 7, Simple => (Length => 3, Buffer => (250, 249, 248, others => 9)));
-   Sv_Garbage : constant Simple_Variable_Holder.T := (Random_Field => 7, Simple => (Length => 255, Buffer => (250, 249, 248, others => 9)));
-   Ov : Simple_Variable_Offset.T := (Length => 3, Buffer => (65_000, 64_999, 64_998, 64_997, others => 0));
-   Ov2 : Simple_Variable_Offset.T := (Length => 0, Buffer => (others => 0));
+   Sv_Filled : constant Simple_Variable_Holder.T := (Random_Field => 7, Simple => (Length => 3, Buffer => [250, 249, 248, others => 9]));
+   Sv_Garbage : constant Simple_Variable_Holder.T := (Random_Field => 7, Simple => (Length => 255, Buffer => [250, 249, 248, others => 9]));
+   Ov : Simple_Variable_Offset.T := (Length => 3, Buffer => [240, 239, 238, 237, others => 0]);
+   Ov2 : Simple_Variable_Offset.T := (Length => 0, Buffer => [others => 0]);
    Ov_Untouched : constant Simple_Variable_Offset.T := Ov;
-   Ov_Filled : constant Simple_Variable_Offset.T := (Length => 3, Buffer => (65_000, 64_999, 64_998, 64_997, others => 9));
-   Ov_Garbage : constant Simple_Variable_Offset.T := (Length => 255, Buffer => (65_000, 64_999, 64_998, 64_997, others => 9));
-   Hv : Simple_Variable_Header.T := (Header => (B => 254, Secondary_Header => (A => A, Length => 4)), Buffer => (B, B, B, B, others => (0, 1)));
-   Hv2 : Simple_Variable_Header.T := (Header => (B => 254, Secondary_Header => (A => A, Length => 0)), Buffer => (others => (0, 1)));
-   Hv_Untouched : constant Simple_Variable_Header.T := Hv;
-   Hv_Filled : constant Simple_Variable_Header.T := (Header => (B => 254, Secondary_Header => (A => A, Length => 4)), Buffer => (others => B));
-   Hv_Garbage : constant Simple_Variable_Header.T := (Header => (B => 254, Secondary_Header => (A => A, Length => 16_000)), Buffer => (others => (0, 1)));
-   Av : Simple_Variable_Array.T := (Length => 2, Buffer => (A, A, others => (0, 19, 5)));
-   Av2 : Simple_Variable_Array.T := (Length => 2, Buffer => (others => (0, 19, 5)));
+   Ov_Filled : constant Simple_Variable_Offset.T := (Length => 3, Buffer => [240, 239, 238, 237, others => 9]);
+   Ov_Garbage : constant Simple_Variable_Offset.T := (Length => 255, Buffer => [240, 239, 238, 237, others => 9]);
+   Av : Simple_Variable_Array.T := (Length => 2, Buffer => [A, A, others => (0, 19, 5)]);
+   Av2 : Simple_Variable_Array.T := (Length => 2, Buffer => [others => (0, 19, 5)]);
    Av_Untouched : constant Simple_Variable_Array.T := Av;
-   Av_Filled : constant Simple_Variable_Array.T := (Length => 2, Buffer => (A, A, others => (0, 20, 5)));
-   Av_Garbage : constant Simple_Variable_Array.T := (Length => 255, Buffer => (A, A, others => (0, 19, 5)));
+   Av_Filled : constant Simple_Variable_Array.T := (Length => 2, Buffer => [A, A, others => (0, 20, 5)]);
+   Av_Garbage : constant Simple_Variable_Array.T := (Length => 255, Buffer => [A, A, others => (0, 19, 5)]);
    A2 : Aa.T;
    B2 : Bb.T;
    C2 : Cc.T;
-   D2 : Dd.T;
 
    -- Record array definitions:
-   A_Bytes : Aa.Serialization.Byte_Array := (0 => 255, others => 0);
-   B_Bytes : Bb.Serialization.Byte_Array := (others => 0);
-   C_Bytes : Cc.Serialization.Byte_Array := (others => 0);
-   D_Bytes : Dd.Serialization.Byte_Array := (others => 0);
-   V_Bytes : Simple_Variable.Serialization.Byte_Array := (0 => 2, others => 255);
-   V_Bytes2 : Simple_Variable.Serialization.Byte_Array := (others => 0);
-   V_Bytes3 : Simple_Variable.Serialization.Byte_Array := (others => 0);
-   V_Bytes_Garbage : constant Simple_Variable.Serialization.Byte_Array := (others => 255);
-   Sv_Bytes : Simple_Variable_Holder.Serialization.Byte_Array := (0 => 255, 1 => 2, others => 255);
-   Sv_Bytes2 : Simple_Variable_Holder.Serialization.Byte_Array := (others => 0);
-   Sv_Bytes3 : Simple_Variable_Holder.Serialization.Byte_Array := (others => 0);
-   Sv_Bytes_Garbage : constant Simple_Variable_Holder.Serialization.Byte_Array := (others => 255);
-   Ov_Bytes : Simple_Variable_Offset.Serialization.Byte_Array := (0 => 2, others => 255);
-   Ov_Bytes2 : Simple_Variable_Offset.Serialization.Byte_Array := (others => 0);
-   Ov_Bytes3 : Simple_Variable_Offset.Serialization.Byte_Array := (others => 0);
-   Ov_Bytes_Garbage : constant Simple_Variable_Offset.Serialization.Byte_Array := (others => 255);
-   Hv_Bytes : Simple_Variable_Header.Serialization.Byte_Array := (0 => 254, 1 => 255, 2 => 0, 3 => 0, 4 => 0, 5 => 0, 6 => 1, others => 255);
-   Hv_Bytes2 : Simple_Variable_Header.Serialization.Byte_Array := (others => 0);
-   Hv_Bytes3 : Simple_Variable_Header.Serialization.Byte_Array := (others => 0);
-   Hv_Bytes_Garbage : constant Simple_Variable_Header.Serialization.Byte_Array := (others => 255);
-   Av_Bytes : Simple_Variable_Array.Serialization.Byte_Array := (0 => 2, others => 255);
-   Av_Bytes2 : Simple_Variable_Array.Serialization.Byte_Array := (others => 0);
-   Av_Bytes3 : Simple_Variable_Array.Serialization.Byte_Array := (others => 0);
-   Av_Bytes_Garbage : constant Simple_Variable_Array.Serialization.Byte_Array := (others => 255);
+   A_Bytes : Aa.Serialization.Byte_Array := [0 => 255, others => 0];
+   B_Bytes : Bb.Serialization.Byte_Array := [others => 0];
+   C_Bytes : Cc.Serialization.Byte_Array := [others => 0];
+   V_Bytes : Simple_Variable.Serialization.Byte_Array := [0 => 2, others => 255];
+   V_Bytes2 : Simple_Variable.Serialization.Byte_Array := [others => 0];
+   V_Bytes3 : Simple_Variable.Serialization.Byte_Array := [others => 0];
+   V_Bytes_Garbage : constant Simple_Variable.Serialization.Byte_Array := [others => 255];
+   Sv_Bytes : Simple_Variable_Holder.Serialization.Byte_Array := [0 => 255, 1 => 2, others => 255];
+   Sv_Bytes2 : Simple_Variable_Holder.Serialization.Byte_Array := [others => 0];
+   Sv_Bytes3 : Simple_Variable_Holder.Serialization.Byte_Array := [others => 0];
+   Sv_Bytes_Garbage : constant Simple_Variable_Holder.Serialization.Byte_Array := [others => 255];
+   Ov_Bytes : Simple_Variable_Offset.Serialization.Byte_Array := [0 => 2, others => 255];
+   Ov_Bytes2 : Simple_Variable_Offset.Serialization.Byte_Array := [others => 0];
+   Ov_Bytes3 : Simple_Variable_Offset.Serialization.Byte_Array := [others => 0];
+   Ov_Bytes_Garbage : constant Simple_Variable_Offset.Serialization.Byte_Array := [others => 255];
+   Av_Bytes : Simple_Variable_Array.Serialization.Byte_Array := [0 => 2, others => 255];
+   Av_Bytes2 : Simple_Variable_Array.Serialization.Byte_Array := [others => 0];
+   Av_Bytes3 : Simple_Variable_Array.Serialization.Byte_Array := [others => 0];
+   Av_Bytes_Garbage : constant Simple_Variable_Array.Serialization.Byte_Array := [others => 255];
 
    -- Other local vars:
    Stat : Serialization_Status;
@@ -116,7 +110,7 @@ procedure Test is
    V_Size : Natural;
    V_Size_Filled : Natural;
 begin
-   Rh := (Aa.Register_T (A), Aa.Register_T_Le (A));
+   Rh := (Aa.Register_T_Le (A), Aa.Register_T_Le (A));
 
    Put_Line ("Printing records: ");
    Put_Line ("A:");
@@ -125,8 +119,6 @@ begin
    Put_Line (Bb.Representation.Image (B));
    Put_Line ("C:");
    Put_Line (Cc.Representation.Image (C));
-   Put_Line ("D:");
-   Put_Line (Dd.Representation.Image (D));
    Put_Line ("V1:");
    Put_Line (Simple_Variable.Representation.Image (V));
    Put_Line ("V2:");
@@ -139,10 +131,6 @@ begin
    Put_Line (Simple_Variable_Offset.Representation.Image (Ov));
    Put_Line ("Vo2:");
    Put_Line (Simple_Variable_Offset.Representation.Image (Ov2));
-   Put_Line ("Vh1:");
-   Put_Line (Simple_Variable_Header.Representation.Image (Hv));
-   Put_Line ("Vh2:");
-   Put_Line (Simple_Variable_Header.Representation.Image (Hv2));
    Put_Line ("Va1:");
    Put_Line (Simple_Variable_Array.Representation.Image (Av));
    Put_Line ("Va2:");
@@ -154,11 +142,9 @@ begin
    pragma Assert (Aa.Validation.Valid (A, Ignore), "A is not valid, but should be.");
    pragma Assert (Bb.Validation.Valid (B, Ignore), "B is not valid, but should be.");
    pragma Assert (Cc.Validation.Valid (C, Ignore), "C is not valid, but should be.");
-   pragma Assert (Dd.Validation.Valid (D, Ignore), "D is not valid, but should be.");
    pragma Assert (Simple_Variable.Validation.Valid (V, Ignore), "V is not valid, but should be.");
    pragma Assert (Simple_Variable_Holder.Validation.Valid (Sv, Ignore), "SV is not valid, but should be.");
    pragma Assert (Simple_Variable_Offset.Validation.Valid (Ov, Ignore), "OV is not valid, but should be.");
-   pragma Assert (Simple_Variable_Header.Validation.Valid (Hv, Ignore), "HV is not valid, but should be.");
    pragma Assert (Simple_Variable_Array.Validation.Valid (Av, Ignore), "AV is not valid, but should be.");
    Put_Line ("passed.");
    Put_Line ("");
@@ -167,14 +153,11 @@ begin
    A := Aa.Serialization.From_Byte_Array (A_Bytes);
    B := Bb.Serialization.From_Byte_Array (B_Bytes);
    C := Cc.Serialization.From_Byte_Array (C_Bytes);
-   D := Dd.Serialization.From_Byte_Array (D_Bytes);
    Stat := Simple_Variable.Serialization.From_Byte_Array (V, V_Bytes);
    pragma Assert (Stat = Success, "serialization failed");
    Stat := Simple_Variable_Holder.Serialization.From_Byte_Array (Sv, Sv_Bytes);
    pragma Assert (Stat = Success, "serialization failed");
    Stat := Simple_Variable_Offset.Serialization.From_Byte_Array (Ov, Ov_Bytes);
-   pragma Assert (Stat = Success, "serialization failed");
-   Stat := Simple_Variable_Header.Serialization.From_Byte_Array (Hv, Hv_Bytes);
    pragma Assert (Stat = Success, "serialization failed");
    Stat := Simple_Variable_Array.Serialization.From_Byte_Array (Av, Av_Bytes);
    pragma Assert (Stat = Success, "serialization failed");
@@ -184,37 +167,30 @@ begin
    Put_Line ("Validating records (expect failure): ");
    pragma Assert (not Aa.Validation.Valid (A, Field_Number), "A is valid, but should not be.");
    pragma Assert (Field_Number = 1, "A field_Number is wrong.");
-   Put_Line (Poly2bytestring (Aa.Get_Field (A, Field_Number)));
-   pragma Assert (Aa.Get_Field (A, Field_Number) = (0, 0, 0, 0, 255, 0, 0, 0), "A's polytype field is wrong.");
+   Put_Line (Poly2bytestring (Aa.Validation.Get_Field (A, Field_Number)));
+   pragma Assert (Aa.Validation.Get_Field (A, Field_Number) = [0, 0, 0, 0, 255, 0, 0, 0], "A's polytype field is wrong.");
    pragma Assert (not Bb.Validation.Valid (B, Field_Number), "B is valid, but should not be.");
    pragma Assert (Field_Number = 2, "B field_Number is wrong.");
-   pragma Assert (Bb.Get_Field (B, Field_Number) = (0, 0, 0, 0, 0, 0, 0, 0), "B's polytype field is wrong.");
+   pragma Assert (Bb.Validation.Get_Field (B, Field_Number) = [0, 0, 0, 0, 0, 0, 0, 0], "B's polytype field is wrong.");
    pragma Assert (not Cc.Validation.Valid (C, Field_Number), "C is valid, but should not be.");
    pragma Assert (Field_Number = 3, "C field_Number is wrong.");
-   pragma Assert (Cc.Get_Field (C, Field_Number) = (0, 0, 0, 0, 0, 0, 0, 0), "C's polytype field is wrong.");
-   pragma Assert (not Dd.Validation.Valid (D, Field_Number), "D is valid, but should not be.");
-   pragma Assert (Field_Number = 2, "D field_Number is wrong.");
-   pragma Assert (Dd.Get_Field (D, Field_Number) = (0, 0, 0, 0, 0, 0, 0, 0), "D's polytype field is wrong.");
+   pragma Assert (Cc.Validation.Get_Field (C, Field_Number) = [0, 0, 0, 0, 0, 0, 0, 0], "C's polytype field is wrong.");
    pragma Assert (not Simple_Variable.Validation.Valid (V, Field_Number), "V is valid, but should not be.");
    pragma Assert (Field_Number = 2, "V field_Number is wrong.");
-   Put_Line (Poly2bytestring (Simple_Variable.Get_Field (V, Field_Number)));
-   pragma Assert (Simple_Variable.Get_Field (V, Field_Number) = (0, 0, 0, 0, 0, 0, 0, 0), "V's polytype field is wrong.");
+   Put_Line (Poly2bytestring (Simple_Variable.Validation.Get_Field (V, Field_Number)));
+   pragma Assert (Simple_Variable.Validation.Get_Field (V, Field_Number) = [0, 0, 0, 0, 0, 0, 0, 0], "V's polytype field is wrong.");
    pragma Assert (not Simple_Variable_Holder.Validation.Valid (Sv, Field_Number), "V is valid, but should not be.");
    pragma Assert (Field_Number = 3, "V field_Number is wrong.");
-   Put_Line (Poly2bytestring (Simple_Variable_Holder.Get_Field (Sv, Field_Number)));
-   pragma Assert (Simple_Variable_Holder.Get_Field (Sv, Field_Number) = (0, 0, 0, 0, 0, 0, 0, 0), "V's polytype field is wrong.");
+   Put_Line (Poly2bytestring (Simple_Variable_Holder.Validation.Get_Field (Sv, Field_Number)));
+   pragma Assert (Simple_Variable_Holder.Validation.Get_Field (Sv, Field_Number) = [0, 0, 0, 0, 0, 0, 0, 0], "V's polytype field is wrong.");
    pragma Assert (not Simple_Variable_Offset.Validation.Valid (Ov, Field_Number), "V is valid, but should not be.");
    pragma Assert (Field_Number = 2, "V field_Number is wrong.");
-   Put_Line (Poly2bytestring (Simple_Variable_Offset.Get_Field (Ov, Field_Number)));
-   pragma Assert (Simple_Variable_Offset.Get_Field (Ov, Field_Number) = (0, 0, 0, 0, 0, 0, 0, 0), "V's polytype field is wrong.");
-   pragma Assert (not Simple_Variable_Header.Validation.Valid (Hv, Field_Number), "V is valid, but should not be.");
-   pragma Assert (Field_Number = 2, "V field_Number is wrong." & Interfaces.Unsigned_32'Image (Field_Number));
-   Put_Line (Poly2bytestring (Simple_Variable_Header.Get_Field (Hv, Field_Number)));
-   pragma Assert (Simple_Variable_Header.Get_Field (Hv, Field_Number) = (0, 0, 0, 0, 0, 0, 0, 0), "V's polytype field is wrong.");
+   Put_Line (Poly2bytestring (Simple_Variable_Offset.Validation.Get_Field (Ov, Field_Number)));
+   pragma Assert (Simple_Variable_Offset.Validation.Get_Field (Ov, Field_Number) = [0, 0, 0, 0, 0, 0, 0, 0], "V's polytype field is wrong.");
    pragma Assert (not Simple_Variable_Array.Validation.Valid (Av, Field_Number), "V is valid, but should not be.");
    pragma Assert (Field_Number = 2, "V field_Number is wrong." & Interfaces.Unsigned_32'Image (Field_Number));
-   Put_Line (Poly2bytestring (Simple_Variable_Array.Get_Field (Av, Field_Number)));
-   pragma Assert (Simple_Variable_Array.Get_Field (Av, Field_Number) = (0, 0, 0, 0, 0, 0, 0, 0), "V's polytype field is wrong.");
+   Put_Line (Poly2bytestring (Simple_Variable_Array.Validation.Get_Field (Av, Field_Number)));
+   pragma Assert (Simple_Variable_Array.Validation.Get_Field (Av, Field_Number) = [0, 0, 0, 0, 0, 0, 0, 0], "V's polytype field is wrong.");
    Put_Line ("passed.");
    Put_Line ("");
 
@@ -228,13 +204,10 @@ begin
    C_Bytes := Cc.Serialization.To_Byte_Array (C);
    C2 := Cc.Serialization.From_Byte_Array (C_Bytes);
    Cc_Assert.Eq (C, C2);
-   D_Bytes := Dd.Serialization.To_Byte_Array (D);
-   D2 := Dd.Serialization.From_Byte_Array (D_Bytes);
-   Dd_Assert.Eq (D, D2);
    Put_Line ("passed.");
    Put_Line ("");
 
-   Put_Line ("Testing serilization/deserialization of variable sized record: ");
+   Put_Line ("Testing serialization/deserialization of variable sized record: ");
    Stat := Simple_Variable.Serialized_Length (V_Untouched, V_Size);
    pragma Assert (Stat = Success, "serialization length failed");
    Stat := Simple_Variable.Serialized_Length (V_Filled, V_Size_Filled);
@@ -260,7 +233,7 @@ begin
    Put_Line ("passed.");
    Put_Line ("");
 
-   Put_Line ("Testing serilization/deserialization of variable sized record (part 2): ");
+   Put_Line ("Testing serialization/deserialization of variable sized record (part 2): ");
    Put_Line ("Max serialized size: " & Natural'Image (Simple_Variable.Serialization.Max_Serialized_Length));
    Put_Line ("v serialized size: " & Natural'Image (V_Size));
    Put_Line ("V filled serialized size: " & Natural'Image (V_Size_Filled));
@@ -310,7 +283,7 @@ begin
    Put_Line ("passed.");
    Put_Line ("");
 
-   Put_Line ("Testing serilization/deserialization of variable sized record holder: ");
+   Put_Line ("Testing serialization/deserialization of variable sized record holder: ");
    Stat := Simple_Variable_Holder.Serialized_Length (Sv_Untouched, V_Size);
    pragma Assert (Stat = Success, "serialization length failed");
    Stat := Simple_Variable_Holder.Serialized_Length (Sv_Filled, V_Size_Filled);
@@ -332,11 +305,19 @@ begin
    Put_Line (Simple_Variable_Holder.Representation.To_Tuple_String (Sv_Untouched));
    Put_Line ("sV2:");
    Put_Line (Simple_Variable_Holder.Representation.To_Tuple_String (Sv2));
+   Simple_Variable_Holder_Assert.Eq (Sv_Untouched, Sv2);
    Simple_Variable_Holder_Assert_All.Eq (Sv_Untouched, Sv2);
+   Sv2.Simple.Buffer (Sv2.Simple.Buffer'First + 3 .. Sv2.Simple.Buffer'First + 10) := [others => 7];
+   Put_Line ("sV1:");
+   Put_Line (Simple_Variable_Holder.Representation.To_Tuple_String (Sv_Untouched));
+   Put_Line ("sV2:");
+   Put_Line (Simple_Variable_Holder.Representation.To_Tuple_String (Sv2));
+   Simple_Variable_Holder_Assert.Eq (Sv_Untouched, Sv2);
+   Simple_Variable_Holder_Assert_All.Neq (Sv_Untouched, Sv2);
    Put_Line ("passed.");
    Put_Line ("");
 
-   Put_Line ("Testing serilization/deserialization of variable sized record (part 2): ");
+   Put_Line ("Testing serialization/deserialization of variable sized record (part 2): ");
    Put_Line ("Max serialized size: " & Natural'Image (Simple_Variable_Holder.Serialization.Max_Serialized_Length));
    Put_Line ("v serialized size: " & Natural'Image (V_Size));
    Put_Line ("V filled serialized size: " & Natural'Image (V_Size_Filled));
@@ -386,7 +367,7 @@ begin
    Put_Line ("passed.");
    Put_Line ("");
 
-   Put_Line ("Testing serilization/deserialization of variable sized record: ");
+   Put_Line ("Testing serialization/deserialization of variable sized record: ");
    Stat := Simple_Variable_Offset.Serialized_Length (Ov_Untouched, V_Size);
    pragma Assert (Stat = Success, "serialization length failed");
    Stat := Simple_Variable_Offset.Serialized_Length (Ov_Filled, V_Size_Filled);
@@ -412,7 +393,7 @@ begin
    Put_Line ("passed.");
    Put_Line ("");
 
-   Put_Line ("Testing serilization/deserialization of variable sized record (part 2): ");
+   Put_Line ("Testing serialization/deserialization of variable sized record (part 2): ");
    Put_Line ("Max serialized size: " & Natural'Image (Simple_Variable_Offset.Serialization.Max_Serialized_Length));
    Put_Line ("v serialized size: " & Natural'Image (V_Size));
    Put_Line ("V filled serialized size: " & Natural'Image (V_Size_Filled));
@@ -462,83 +443,7 @@ begin
    Put_Line ("passed.");
    Put_Line ("");
 
-   Put_Line ("Testing serilization/deserialization of variable sized record: ");
-   Stat := Simple_Variable_Header.Serialized_Length (Hv_Untouched, V_Size);
-   pragma Assert (Stat = Success, "serialization length failed");
-   Stat := Simple_Variable_Header.Serialized_Length (Hv_Filled, V_Size_Filled);
-   pragma Assert (Stat = Success, "serialization length failed");
-   Put_Line ("Max serialized size: " & Natural'Image (Simple_Variable_Header.Max_Serialized_Length));
-   Put_Line ("Min serialized size: " & Natural'Image (Simple_Variable_Header.Min_Serialized_Length));
-   Put_Line ("Actual serialized size: " & Natural'Image (V_Size));
-   Put_Line ("V bytes before copy: " & Natural'Image (V_Size));
-   Put_Line (String_Util.Bytes_To_String (Hv_Bytes));
-   Stat := Simple_Variable_Header.Serialization.To_Byte_Array (Hv_Bytes (0 .. V_Size - 1), Hv_Untouched, The_Size);
-   pragma Assert (Stat = Success, "serialization failed");
-   pragma Assert (The_Size = V_Size, "serialization produces wrong size: " & Natural'Image (The_Size));
-   Put_Line ("V bytes after copy:");
-   Put_Line (String_Util.Bytes_To_String (Hv_Bytes));
-   Stat := Simple_Variable_Header.Serialization.From_Byte_Array (Hv2, Hv_Bytes, The_Size);
-   pragma Assert (Stat = Success, "deserialization failed");
-   pragma Assert (The_Size = V_Size, "deserialization produces wrong size: " & Natural'Image (The_Size));
-   Put_Line ("V1:");
-   Put_Line (Simple_Variable_Header.Representation.To_Tuple_String (Hv_Untouched));
-   Put_Line ("V2:");
-   Put_Line (Simple_Variable_Header.Representation.To_Tuple_String (Hv2));
-   Simple_Variable_Header_Assert_All.Eq (Hv_Untouched, Hv2);
-   Put_Line ("passed.");
-   Put_Line ("");
-
-   Put_Line ("Testing serilization/deserialization of variable sized record (part 2): ");
-   Put_Line ("Max serialized size: " & Natural'Image (Simple_Variable_Header.Serialization.Max_Serialized_Length));
-   Put_Line ("v serialized size: " & Natural'Image (V_Size));
-   Put_Line ("V filled serialized size: " & Natural'Image (V_Size_Filled));
-   pragma Assert (V_Size = V_Size_Filled, "sizes don't match");
-   Stat := Simple_Variable_Header.Serialization.To_Byte_Array (Hv_Bytes3 (0 .. V_Size - 1), Hv_Untouched, The_Size);
-   pragma Assert (Stat = Success, "serialization failed");
-   pragma Assert (The_Size = V_Size, "serialization produces wrong size: " & Natural'Image (The_Size));
-   Put_Line ("V bytes after copy:");
-   Put_Line (String_Util.Bytes_To_String (Hv_Bytes3));
-   Stat := Simple_Variable_Header.Serialization.To_Byte_Array (Hv_Bytes2 (0 .. V_Size_Filled - 1), Hv_Filled, The_Size);
-   pragma Assert (Stat = Success, "serialization failed");
-   pragma Assert (The_Size = V_Size_Filled, "serialization produces wrong size: " & Natural'Image (The_Size));
-   Put_Line ("V filled bytes after copy:");
-   Put_Line (String_Util.Bytes_To_String (Hv_Bytes2));
-   Put_Line ("V filled bytes (showing only filled):");
-   Put_Line (String_Util.Bytes_To_String (Hv_Bytes2 (0 .. V_Size_Filled - 1)));
-   Byte_Array_Assert.Eq (Hv_Bytes3, Hv_Bytes2);
-   Put_Line ("passed.");
-   Put_Line ("");
-
-   Put_Line ("Testing error handling of deserialization of variable sized record containing garbage: ");
-   Stat := Simple_Variable_Header.Serialization.From_Byte_Array (Hv2, Hv_Bytes_Garbage, The_Size);
-   pragma Assert (Stat = Failure, "deserialization succeeded but was expected to fail.");
-   Put_Line ("failed at byte: " & Natural'Image (The_Size));
-   Stat := Simple_Variable_Header.Serialization.From_Byte_Array (Hv2, Hv_Bytes (0 .. 5), The_Size);
-   pragma Assert (Stat = Failure, "deserialization succeeded but was expected to fail.");
-   Put_Line ("failed at byte: " & Natural'Image (The_Size));
-   Stat := Simple_Variable_Header.Serialization.From_Byte_Array (Hv2, Hv_Bytes (0 .. V_Size - 2), The_Size);
-   pragma Assert (Stat = Failure, "deserialization succeeded but was expected to fail.");
-   Put_Line ("failed at byte: " & Natural'Image (The_Size));
-   Put_Line ("passed.");
-   Put_Line ("");
-
-   Put_Line ("Testing error handling of serialization of variable sized record: ");
-   Stat := Simple_Variable_Header.Serialization.To_Byte_Array (Hv_Bytes, Hv_Garbage, The_Size);
-   pragma Assert (Stat = Failure, "serialization succeeded but was expected to fail.");
-   Put_Line ("failed at byte: " & Natural'Image (The_Size));
-   Stat := Simple_Variable_Header.Serialized_Length (Hv_Garbage, The_Size);
-   pragma Assert (Stat = Failure, "serialization length failed");
-   Put_Line ("length failed at byte: " & Natural'Image (The_Size));
-   Stat := Simple_Variable_Header.Serialization.To_Byte_Array (Hv_Bytes (1 .. 0), Hv_Untouched, The_Size);
-   pragma Assert (Stat = Failure, "serialization succeeded but was expected to fail.");
-   Put_Line ("failed at byte: " & Natural'Image (The_Size));
-   Stat := Simple_Variable_Header.Serialization.To_Byte_Array (Hv_Bytes (0 .. V_Size - 2), Hv_Untouched, The_Size);
-   pragma Assert (Stat = Failure, "serialization succeeded but was expected to fail.");
-   Put_Line ("failed at byte: " & Natural'Image (The_Size));
-   Put_Line ("passed.");
-   Put_Line ("");
-
-   Put_Line ("Testing serilization/deserialization of variable sized record: ");
+   Put_Line ("Testing serialization/deserialization of variable sized record: ");
    Stat := Simple_Variable_Array.Serialized_Length (Av_Untouched, V_Size);
    pragma Assert (Stat = Success, "serialization length failed");
    Stat := Simple_Variable_Array.Serialized_Length (Av_Filled, V_Size_Filled);
@@ -564,7 +469,7 @@ begin
    Put_Line ("passed.");
    Put_Line ("");
 
-   Put_Line ("Testing serilization/deserialization of variable sized record (part 2): ");
+   Put_Line ("Testing serialization/deserialization of variable sized record (part 2): ");
    Put_Line ("Max serialized size: " & Natural'Image (Simple_Variable_Array.Serialization.Max_Serialized_Length));
    Put_Line ("v serialized size: " & Natural'Image (V_Size));
    Put_Line ("V filled serialized size: " & Natural'Image (V_Size_Filled));
@@ -611,6 +516,45 @@ begin
    Stat := Simple_Variable_Array.Serialization.To_Byte_Array (Av_Bytes (0 .. V_Size - 2), Av_Untouched, The_Size);
    pragma Assert (Stat = Failure, "serialization succeeded but was expected to fail.");
    Put_Line ("failed at byte: " & Natural'Image (The_Size));
+   Put_Line ("passed.");
+   Put_Line ("");
+
+   Put_Line ("Pack/unpack test: ");
+   A := (One => 4, Two => 20, Three => 101);
+   A_Unpacked := Aa.Unpack (A);
+   Put_Line ("A:");
+   -- Put_Line (A'Image);
+   Put_Line (Aa.Representation.Image (A));
+   Put_Line ("A_Unpacked:");
+   -- Put_Line (A_Unpacked'Image);
+   Put_Line (Aa.Representation.Image (A_Unpacked));
+   Aa_U_Assert.Eq (A_Unpacked, (One => 4, Two => 20, Three => 101));
+   A := Aa.Pack (A_Unpacked);
+   Put_Line ("A:");
+   Put_Line (Aa.Representation.Image (A));
+   Aa_Assert.Eq (A, (One => 4, Two => 20, Three => 101));
+   Put_Line ("passed.");
+   Put_Line ("");
+
+   Put_Line ("Swap endianness:");
+   A_Le := Aa.Swap_Endianness (A);
+   Put_Line ("A_Le:");
+   Put_Line (Aa.Representation.Image (A_Le));
+   Aa_Le_Assert.Eq (A_Le, (One => 4, Two => 20, Three => 101));
+   Put_Line ("passed.");
+   Put_Line ("");
+
+   Put_Line ("Pack/unpack test (nested): ");
+   E_Unpacked := Ee.Unpack (E);
+   Put_Line ("E:");
+   Put_Line (Ee.Representation.Image (E));
+   Put_Line ("E_Unpacked:");
+   Put_Line (Ee.Representation.Image (E_Unpacked));
+   Ee_U_Assert.Eq (E_Unpacked, (A => (One => 4, Two => 20, Three => 101), B => (Element => 8, Element2 => 9), C => -5));
+   E := Ee.Pack (E_Unpacked);
+   Put_Line ("E:");
+   Put_Line (Ee.Representation.Image (E));
+   Ee_Le_Assert.Eq (E, (A => (One => 4, Two => 20, Three => 101), B => (Element => 8, Element2 => 9), C => -5));
    Put_Line ("passed.");
    Put_Line ("");
 
@@ -661,6 +605,40 @@ begin
    Put_Line (Aa.Representation.Image (A_Le));
 
    Aa_Le_Assert.Eq (A_Le, A_Le);
+   Put_Line ("passed.");
+   Put_Line ("");
+
+   Put_Line ("C conversion test: ");
+   A_Unpacked := (One => 4, Two => 20, Three => 101);
+   A_C := To_C (A_Unpacked);
+   Put_Line ("A_Unpacked:");
+   Put_Line (Aa.Representation.Image (A_Unpacked));
+   Put_Line ("A_C:");
+   Put_Line (A_C'Image);
+   A_C := (One => 5, Two => 21, Three => 102);
+   A_Unpacked := To_Ada (A_C);
+   Put_Line ("A_Unpacked:");
+   Put_Line (Aa.Representation.Image (A_Unpacked));
+   Put_Line ("A_C:");
+   Put_Line (A_C'Image);
+   Aa_U_Assert.Eq (A_Unpacked, (One => 5, Two => 21, Three => 102));
+   Put_Line ("passed.");
+   Put_Line ("");
+
+   Put_Line ("C conversion test 2: ");
+   C_Unpacked := (C => Second_Enum.Yellow, A => (One => 4, Two => 20, Three => 101), B => (Element => 8, Element2 => 9));
+   C_C := To_C (C_Unpacked);
+   Put_Line ("C_Unpacked:");
+   Put_Line (Cc.Representation.Image (C_Unpacked));
+   Put_Line ("C_C:");
+   Put_Line (C_C'Image);
+   C_C := (C => Second_Enum.Hola, A => (One => 5, Two => 21, Three => 102), B => (Element => 9, Element2 => 10));
+   C_Unpacked := To_Ada (C_C);
+   Put_Line ("C_Unpacked:");
+   Put_Line (Cc.Representation.Image (C_Unpacked));
+   Put_Line ("C_C:");
+   Put_Line (C_C'Image);
+   Cc_U_Assert.Eq (C_Unpacked, (C => Second_Enum.Hola, A => (One => 5, Two => 21, Three => 102), B => (Element => 9, Element2 => 10)));
    Put_Line ("passed.");
    Put_Line ("");
 

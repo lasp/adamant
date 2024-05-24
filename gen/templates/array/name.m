@@ -192,7 +192,7 @@ classdef {{ name }}
 
       % Return a human readable representation of the object.
       strn = prefix + self.to_byte_string() + newline;
-      strn = strn + prefix + "{{ name }} : array {{ element.type }}[0:{{ length - 1 }}] = " + newline;
+      strn = strn + prefix + "{{ name }} : array {{ element.type }} [0:{{ length - 1 }}] => [" + newline;
       for idx=1:self.array_length
         strn = strn + prefix + ...
 {% if element.is_enum %}
@@ -206,14 +206,13 @@ classdef {{ name }}
 {% endif %}
                newline;
       end
+      strn = strn + prefix + "]";
       strn = char(strn);
-      strn = strn(1:length(strn)-1);
     end
 
     function strn = to_tuple_string(self)
       % Return a comma separated representation of the object.
-      strn = '(' + ...
-             "{{ name }} = (";
+      strn = "[";
       for idx=1:self.array_length
         strn = strn + ...
 {% if element.is_enum %}
@@ -228,7 +227,7 @@ classdef {{ name }}
                ", ";
       end
       strn = char(strn);
-      strn = strn(1:length(strn)-2) + "))";
+      strn = [strn(1:length(strn)-2), ']'];
     end
   end
 

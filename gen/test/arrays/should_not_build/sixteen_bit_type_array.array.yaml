@@ -1,0 +1,10 @@
+---
+with:
+  - Interfaces
+preamble: |
+   subtype Eight_Bit_Limited is Interfaces.Unsigned_16 range 1 .. 17;
+   type The_8_Bit_Type is array (Natural range 0 .. 7) of Eight_Bit_Limited;
+type: The_8_Bit_Type
+format: U16x8
+description: An simple array of U8s
+length: 200

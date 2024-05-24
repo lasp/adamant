@@ -879,7 +879,7 @@ package body Component.{{ name }} is
                -- Create a poly type with the invalid parameter and send it to the handler.
                declare
 {% if command.type_model %}
-                  P_Type : constant Basic_Types.Poly_Type := {{ command.type_package }}.Get_Field (Args, Errant_Field);
+                  P_Type : constant Basic_Types.Poly_Type := {{ command.type_package }}.Validation.Get_Field (Args, Errant_Field);
 {% else %}
                   P_Type : Basic_Types.Poly_Type := (others => 0);
 {% endif %}
@@ -1030,7 +1030,7 @@ package body Component.{{ name }} is
             if Args_Valid then
                -- Stage the parameter:
 {% if par.type_package %}
-               Self.Staged_Parameters.Stage_{{ par.name }} ({{ par.type_package }}.U (Par_To_Stage));
+               Self.Staged_Parameters.Stage_{{ par.name }} ({{ par.type_package }}.Unpack (Par_To_Stage));
 {% else %}
                Self.Staged_Parameters.Stage_{{ par.name }} (Par_To_Stage);
 {% endif %}
@@ -1039,7 +1039,7 @@ package body Component.{{ name }} is
                -- Create a poly type with the invalid parameter and send it to the handler.
                declare
 {% if par.type_model %}
-                  P_Type : constant Basic_Types.Poly_Type := {{ par.type_package }}.Get_Field (Par_To_Stage, Errant_Field);
+                  P_Type : constant Basic_Types.Poly_Type := {{ par.type_package }}.Validation.Get_Field (Par_To_Stage, Errant_Field);
 {% else %}
                   P_Type : Basic_Types.Poly_Type := (others => 0);
 {% endif %}
@@ -1090,7 +1090,7 @@ package body Component.{{ name }} is
       use Parameter_Types;
 {% if par.type_model %}
       package Buffer_Deserializer renames {{ par.type_package }}.Serialization;
-      Value : constant {{ par.type_package }}.T := {{ par.type_package }}.T (Self.Staged_Parameters.Get_{{ par.name }});
+      Value : constant {{ par.type }} := {{ par.type_package }}.Pack (Self.Staged_Parameters.Get_{{ par.name }});
 {% else %}
       package Buffer_Deserializer is new Serializer ({{ par.type }});
       Value : constant {{ par.type }} := Self.Staged_Parameters.Get_{{ par.name }};

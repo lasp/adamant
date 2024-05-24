@@ -13,6 +13,7 @@ record_templates = [
     "record/name-validation.adb",
     "record/name-assertion.ads",
     "record/name-assertion.adb",
+    "record/name-c.ads",
     "record/name.py",
     "record/name_type_ranges.adb",
 ]
@@ -25,6 +26,7 @@ array_templates = [
     "array/name-validation.ads",
     "array/name-validation.adb",
     "array/name-assertion.ads",
+    "array/name-c.ads",
     "array/name.py",
     "array/name_type_ranges.adb",
 ]

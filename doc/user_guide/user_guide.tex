@@ -1236,30 +1236,36 @@ Everything works as expected and produces the test output:
 \newpage
 \section{Packed Types} \label{Packed Types}
 
-Often in embedded systems, communication protocols and access to hardware devices require specific patterns of transferred bytes and bits to properly function. However, technical differences in processors and compilers can often make code reuse difficult to achieve in a cross-platform and portable way. For instance, processors used in the design of embedded systems can be either big or little endian, depending on the chosen platform. Embedded systems often communicate with other embedded processors or end-user systems which have an endianness different from their own. If not carefully handled, these differences in endianness can be one of the largest sources of defects encountered while debugging embedded software. Besides endianness issues, the ``packed"-ness, that is, the amount of padding supplied around individual types, of a struct or array in processor memory differs based on the compiler used. The differences in endianness and ``packed"-ness can make writing portable software difficult without a layer of abstraction to handle the differences.
+Often in embedded systems, communication protocols and hardware devices require a very specific binary format for transferred bytes or bits to properly function. However, technical differences in processors and compilers can often make code built to talk to these devices diffucult to implement in a cross-platform and portable way. For instance, processors used in the design of embedded systems can be either big or little endian, depending on the chosen platform. Embedded systems often communicate with other embedded processors or end-user systems which have an endianness different from their own. If not carefully handled, these differences in endianness can be one of the largest sources of defects encountered while debugging embedded software. Besides endianness issues, the ``packed"-ness, that is, the amount of padding supplied around individual types, of a struct or array in processor memory differs based on the compiler used. The differences in endianness and ``packed"-ness can make writing portable software difficult without a layer of abstraction to handle the differences. \\
 
 Adamant aims to solve these problem through the use of \textit{packed types}.  In Adamant, packed types are modeled using a YAML specification. From the specification, the following type definitions are generated:
 
+\vspace{5mm} %5mm vertical space
 \begin{spaceditemize}
-  \item \textbf{\texttt{T}} - A big endian representation of the type. These are the most commonly seen type in Adamant.
-  \item \textbf{\texttt{T\_Le}} - A little endian representation of the type. This is usually only used to communicate with little endian specific hardware.
-  \item \textbf{\texttt{U}} - A \textit{native} version of the type whose bit layout has been chosen by the compiler. This is usually the most performant version of the type, but the bit layout changes based on the compiler used, and thus is not portable. This version is often used when performance is a concern, but the layout of the bits does not matter.
+  \item \textbf{\texttt{T}} - A big endian packed representation of the type with no padding. These are the most commonly seen type in Adamant.
+  \item \textbf{\texttt{T\_Le}} - A little endian packed representation of the type with no padding. This is usually only used to communicate with little endian specific external hardware.
+  \item \textbf{\texttt{U}} - A \textit{native} version of the type whose bit layout has been chosen by the compiler. This is usually the most performant version of the type, but the bit layout changes based on the compiler used, and thus is not portable. This type will be in endianness of the target processor and will often include padding to align values to machine-defined boundaries for performance. This version is often used when performance is a concern, but the layout of the bits does not matter.
 \end{spaceditemize}
+\vspace{5mm} %5mm vertical space
 
-The \texttt{T} and \texttt{T\_Le} types can be thought of as the \textit{serialized} version of the record, where the bit layout and endianness is known, no matter the compiler or processor that the code is running on. The \texttt{U} version of the type can be thought of as the \textit{native} version of the type, which has been optimized by the compiler for the target processor. For each of the types above Adamant also provides facilities to validate that the values in the type are within range, pretty print the type, check the value of the type during testing via assertions, and produce HTML and PDF documentation for the type. These features are discussed in the following subsections.
+The \texttt{T} and \texttt{T\_Le} types can be thought of as the \textit{serialized} version of the record, where the bit layout and endianness is known, no matter the compiler or processor that the code is running on. The \texttt{U} version of the type can be thought of as the \textit{native} version of the type, which has been optimized by the compiler for the target processor. Adamant provides subprograms to convert between these 3 types so that a user can easily pack, unpack, or swap the endianness of the data at will. Subprogams to reinterpret packed types as an array of bytes (serialization) or to reinterpret an array of bytes as a packed type (deserialization) are also provided. \\
+
+For each of the types above, Adamant also provides facilities to validate that the values in the type are within range, pretty print the type, check the value of the type during testing via assertions, and produce HTML and PDF documentation for the type. These features are discussed in the following subsections.
 
 \subsection{Packed Records} \label{Packed Records}
 
-Using packed records is the preferred method of declaring data types in Adamant. A packed record is a structure-like datatype which can contain an arbitrary number of fields of any type, including arrays, packed arrays, or even other packed records.
+Using packed records is the preferred method of declaring data types in Adamant. A packed record is a structure-like datatype which can contain an arbitrary number of fields of any type, including arrays, packed arrays, or even other packed records. \\
 
 To define a packed record, a developer should create a YAML model file of the form \textit{name.record.yaml}, where \textit{name} is the desired name of the packed record. Let's create a record with the following fields:
 
+\vspace{5mm} %5mm vertical space
 \begin{spaceditemize}
   \item \textbf{\texttt{Value\_1}} - A five bit modular type that wraps around at 32.
   \item \textbf{\texttt{Value\_2}} - A 3 bit signed integer type with a valid range from -3 to 2.
   \item \textbf{\texttt{Value\_3}} - An 8-bit enumeration type with valid states: Red, Green, Blue, Purple, Pink, and Chartreuse
   \item \textbf{\texttt{Value\_4}} - A 32-bit floating point type.
 \end{spaceditemize}
+\vspace{5mm} %5mm vertical space
 
 Below is the example packed record definition called \textit{example\_record}, stored in a file called \textit{example\_record.record.yaml}:
 
@@ -1282,7 +1288,9 @@ This YAML model file above contains comments explaining whether or not each fiel
     \texttt{E5x10} & an array of ten 5-bit enumerations \\ \hline
 \end{xltabular}
 
-Ada uses the \textit{format} specification to understand the number of bits taken up by the type. If the number of bits specified in the representation field is not compatible with the type specified in the type field, the Ada compiler will warn or error, telling the user to fix the inconsistency. The enumeration portion of the \textit{format} is needed is to make the record visible to a ground system, such as Hydra. Adamant currently supports the display of many representations in Hydra including all signed and unsigned integers from 1 to 64 bits and floating point numbers of 32 and 64 precision and enumeration types. There is no support in Adamant or Hydra to display values with representations over 64 bits in length. The record should be further divided or an array \textit{format} should be used in this case. Note that an entire record's length must end on a 1 byte (8-bit) boundary, or a error message will be produced. Add additional fields of pad bytes to make the total length of the record end on an 8-bit boundary.
+Ada uses the \textit{format} specification to understand the number of bits taken up by the type. If the number of bits specified in the representation field is not compatible with the type specified in the type field, the Ada compiler will warn or error, telling the user to fix the inconsistency. The enumeration portion of the \textit{format} is needed is to make the record visible to a ground system, such as Hydra. Adamant currently supports the display of many representations in Hydra including all signed and unsigned integers from 1 to 64 bits and floating point numbers of 32 and 64 precision and enumeration types. There is no support in Adamant or Hydra to display values with representations over 64 bits in length. The record should be further divided or an array \textit{format} should be used in this case. Note that an entire record's length must end on a 1 byte (8-bit) boundary, or a error message will be produced. Add additional fields of pad bytes to make the total length of the record end on an 8-bit boundary. \\
+
+Note that packed records can also specify fields with types that are themselves other packed records (or packed arrays, discussed in Section \ref{Packed Arrays}). In this case, a \textit{format} specification for that field is not necessary. The concept of nesting packed records within other packed records is discussed further in Section \ref{Nested Packed Records}. Including records or arrays defined in raw Ada packages (ie. not modeled using Adamant) are not allowed to be included in packed records, since they are, by default, unpacked in representation and their lengths and bit layout is not known to the Adamant modeling system.
 
 \subsubsection{Packed Record Ada Specification} \label{Packed Record Ada Specification}
 
@@ -1299,13 +1307,13 @@ Two source code files are autocoded: \textit{build/src/example\_record.ads} and 
 
 \adacodef{../example_architecture/build/src/example_record.ads}
 
-A record is produced with 4 fields as expected. The \texttt{U} type will respect the Ada \textit{type} given in the YAML file, and any range or default value associated with it. The representation of this type on disk is completely up to the compiler. The unpacked type should be used whenever the type is used in heavy calculations, since the compiler will be able to optimize the program for speed instead of spending time worrying about storage space and endianness. If the representation or size of the type is of concern, like when sending the data through a connector or to a different processing unit, the \texttt{T} type should be used. This is a specialization of the \texttt{U} type which specifies exactly how the record should be laid out in memory. The size of each field is calculated, and a big endian representation is requested. \\ 
+A record is produced with 4 fields as expected. The \texttt{U} type will respect the Ada \textit{type} given in the YAML file, and any range or default value associated with it. The representation of this type in memory is completely up to the compiler. The unpacked type should be used whenever the type is used in heavy calculations, since the compiler will be able to optimize the program for speed instead of spending time worrying about storage space and endianness. If the representation or size of the type is of concern, like when sending the data through a connector or to an external system, the \texttt{T} type should be used. This is a specialization of the \texttt{U} type which specifies exactly how the record should be laid out in memory. The size of each field is calculated, and a big endian representation is requested. \\ 
 
 Some examples of how to use the specification are presented in the following two sections.
 
 \subsubsection{Packed Record Type Conversion} \label{Packed Record Type Conversion}
 
-Converting a record between the \texttt{T} and \texttt{U} types (and vise-versa) is trivial since the \texttt{T} type is a derived type of \texttt{U}. Converting between the two is as simple as using an explicit type conversion, ie:
+Converting a record between the \texttt{T}, \texttt{T\_Le}, and \texttt{U} types can be done via the \texttt{Pack}, \texttt{Unpack}, and \texttt{Swap\_Endianness} functions, as shown in the following example:
 
 \adacodef{../example_architecture/record_conversion/main.adb}
 
@@ -1559,6 +1567,25 @@ MATLAB classes can also be autogenerated for variable-length packed records and 
 
 Note that it is up to the user to make sure their MATLAB path is configured to include the appropriate directories for their program. Sometimes it is convenient to have all autocoded MATLAB copied to a single directory. Adamant provides some scripts to achieve this in \textit{gnd/matlab/build\_all\_matlab\_autocode.sh} and \textit{gnd/matlab/copy\_all\_matlab\_autocode.sh}.
 
+\subsubsection{Nested Packed Records} \label{Nested Packed Records}
+
+Packed records or packed arrays (discussed in in Section \ref{Packed Arrays}) can also contain fields that are themselves packed records (or arrays). These types can be nested arbitrarily deep, but there are some limitations on nesting that will be discussed in this section. \\
+
+See an example below, a packed record that includes two fields that are of packed record type:
+
+\yamlcodef{../example_architecture/nested_record/nested_record.record.yaml}
+
+Note that the \texttt{format} field is not defined when the type of the field is a packed record, since the bit representation can be determined by the model for that packed record. \\
+
+Nesting of packed types carries with it the following limitations/constraints:
+
+\vspace{5mm} %5mm vertical space
+\begin{spacedenumerate}
+  \item Only \texttt{T} or \texttt{T\_Le} types are allowed to be included as a packed record field type, since they represent ``packed'' types with known endianness and bit representation. \texttt{U} types are not allowed to be declared in a packed record or packed array since the bit representation is determined by the compiler. Similarly, arrays or records declared in a raw Ada package (ie. not modeled using Adamant) are also not allowed, since these, by default, are also unpacked types.
+  \item If a big-endian \texttt{T} type is used as a field type, then any other nested packed types must also be big-endian \texttt{T} types. Mixing endian is not currently supported. In this case, a \texttt{T\_Le} type is not generated for the packed record, only a \texttt{T} and \texttt{U} type will be provided. Consequently, no \texttt{Swap\_Endianness} function is provided either. The converse is true if little-endian \texttt{T\_Le} types are nested in a packed record.
+\end{spacedenumerate}
+\vspace{5mm} %5mm vertical space
+
 \subsubsection{Variable Length Packed Records} \label{Variable Length Packed Records}
 
 The packed types that have been presented so far are all static in length. To be more specific, when these types are put onto an Adamant queue, they always take up the same amount of memory. For memory efficiency, Adamant also supports variable length packed records. In particular these records have two main features that are common in many communication protocols:
@@ -1598,17 +1625,35 @@ For the most part, variable length packed records have the same facilities avail
 
 The mechanism for determining a variable length record's length is the autocoded \texttt{Serialized\_Length} subprograms provided in the specification. These subprograms allow the user to determine the length of a type (in bytes). While the length of most packed records are static, meaning the function will always return the same value, variable length packed records will return different values based on the type's content, ie. the \texttt{variable\_length} field. These \texttt{Serialized\_Length} subprograms are important because they are required by all generic packages within adamant that deal with variable length packed records, including Adamant's variable queue package used for component queues, see Section \ref{The Component Queue}.
 
-\subsection{Packed Arrays}
+\subsubsection{C/C++ Packed Records} \label{C Packed Records}
 
-Packed arrays are similar to their packed record counterparts, and contain all of the features presented in the previous packed record sections. Specifying a packed arrays requires providing an element type and a length. The element type may be of any type including packed arrays, packed records, or types that don't end on a byte boundary. The resulting autocoded packed type will be of static length and of the type provided. The size of the array in memory will be packed such that it is the size of the format specified (in bits) multiplied by the length.
+Adamant includes support for mixing C and C++ with Ada. See Section \ref{C Interfacing}. For any packed record or packed array (see section \ref{Packed Arrays}), a \texttt{.C} child package can be generated which provides a version of the packed type suitable for passing to a binded C or C++ function. To create this package run:
 
-One useful utility of packed arrays might be to declare an array of 10-bit items that is packed tight with no padding. This is the idea we will use for our example. We want to declare an array of 10-bit integers with a valid range between 0 and 999 that is 8 elements long. Because the array is made up of 10-bit numbers, the packed version of the array should only take up 10-bytes in memory. Note, that some versions of the Ada compiler will require packed arrays to end on a 4-byte boundary. A compiler error will be thrown in this case, and you may have to modify your packed array YAML to comply.
+\vspace{5mm} %5mm vertical space
+\begin{minted}{text}
+> redo build/obj/Linux/example_record-c.o
+\end{minted}
+\vspace{5mm} %5mm vertical space
+
+This generates the source file \textit{build/src/example\_record-c.ads}. The autocoded specification is shown below.
+
+\adacodef{../example_architecture/build/src/example_record-c.ads}
+
+The type is declared with the name \texttt{U\_C} as in unpacked C/C++ native representation. Notice that all the field members include the \texttt{aliased} keyword to indicate that any field in the record might be dereferenced at any time, following C/C++ semantics. Appropriate pragmas are also included to specify that the value will be passed to C/C++ functions in the proper way. \\
+
+Two functions are also provided: \texttt{To\_C} to convert an unpacked Ada type, \texttt{U}, to the unpacked C/C++ type, \texttt{U\_C}, and \texttt{To\_Ada} to convert an unpacked C/C++ type to the unpacked Ada type. These functions can be used before or after calling into a binded C/C++ function. Doing so encapsulates the usage of the C and C++ type to only where it is needed. This allows the user to utilize all the features of Adamant packed types in the rest of the Ada-based code.
+
+\subsection{Packed Arrays} \label{Packed Arrays}
+
+Packed arrays are similar to their packed record counterparts, and contain all of the features presented in the previous packed record sections. Specifying a packed arrays requires providing an element type and a length. The element type may be of any type including packed arrays, packed records, or types that don't end on a byte boundary. The resulting autocoded packed type will be of static length and of the type provided. The size of the array in memory will be packed such that it is the size of the format specified (in bits) multiplied by the length. \\
+
+One useful utility of packed arrays might be to declare an array of 10-bit items that is packed tight with no padding. This is the idea we will use for our example. We want to declare an array of 10-bit integers with a valid range between 0 and 999 that is 8 elements long. Because the array is made up of 10-bit numbers, the packed version of the array should only take up 10-bytes in memory. Note, that some versions of the Ada compiler will require packed arrays to end on a 4-byte boundary. A compiler error will be thrown in this case, and you may have to modify your packed array YAML to comply. \\
 
 To define a packed array, a developer should create a YAML model file of the form \textit{name.array.yaml}, where \textit{name} is the desired name of the packed array. Below is the example packed array definition called \textit{example\_array}, stored in a file called \textit{example\_array.array.yaml}:
 
 \yamlcodef{../example_architecture/example_array.array.yaml}
 
-This YAML model file above contains comments explaining whether or not each field is optional or required. The main portion of the model is the packed array \textit{type}, \textit{length}, and \textit{format} specification. The type of the field can be any Ada type, including arrays, records, enumerations, packed records, or other packed arrays. The \textit{format} field is where a developer can describe out how the field will be represented in memory in its packed form, and is identical to the format specification for packed records. See the previous sections for more details on \textit{format}. The \textit{length} field specifies how many elements the packed array contains. Unconstrained packed arrays are not currently supported in Adamant.
+This YAML model file above contains comments explaining whether or not each field is optional or required. The main portion of the model is the packed array \textit{type}, \textit{length}, and \textit{format} specification. The type of the field can be any Ada type, including arrays, records, enumerations, packed records, or other packed arrays. The \textit{format} field is where a developer can describe out how the field will be represented in memory in its packed form, and is identical to the format specification for packed records. The \textit{format} specification is not necessary if the array type is a packed record or packed array since the length of the type in memory is known from that type's model, see Section \ref{Nested Packed Records}. See the previous sections for more details on \textit{format}. The \textit{length} field specifies how many elements the packed array contains. Unconstrained packed arrays are not currently supported in Adamant.
 
 \subsubsection{Packed Array Ada Specification}
 
@@ -1625,7 +1670,7 @@ This will generate the source files \textit{build/src/example\_array.ads} and \t
 
 \adacodef{../example_architecture/build/src/example_array.ads}
 
-An array is produced with the specifications we described. The \texttt{U} type will respect the Ada \textit{type} given in the YAML file, and any range associated with it. The representation of this type on disk is completely up to the compiler. The unpacked type should be used whenever the type is used in heavy calculations, since the compiler will be able to optimize the program for speed instead of spending time worrying about storage space and endianness. If the representation or size of the type is of concern, like when sending the data through a connector or to a different processing unit, the \texttt{T} type should be used. This is a specialization of the \texttt{U} type which specifies exactly how the array should be laid out in memory. The size of each field is calculated, and a big endian representation is requested.
+An array is produced with the specifications we described. The \texttt{U} type will respect the Ada \textit{type} given in the YAML file, and any range associated with it. The representation of this type in memory is completely up to the compiler. The unpacked type should be used whenever the type is used in heavy calculations, since the compiler will be able to optimize the program for speed instead of spending time worrying about storage space and endianness. If the representation or size of the type is of concern, like when sending the data through a connector or to a different processing unit, the \texttt{T} type should be used. This is a specialization of the \texttt{U} type which specifies exactly how the array should be laid out in memory. The size of each field is calculated, and a big endian representation is requested.
 
 \subsubsection{Packed Array Type Conversion}
 
@@ -1710,6 +1755,14 @@ Packed array python classes are similar to packed record python classes. See Sec
 \subsubsection{Packed Array MATLAB Class}
 
 Packed array MATLAB classes are similar to packed record MATLAB classes. See Section \ref{Packed Record MATLAB Class} for details.
+
+\subsubsection{Nested Packed Arrays}
+
+Packed arrays with elements of type packed arrays or packed records are allowed. This is specified similarly to the way it is done for packed records. See Section \ref{Nested Packed Records} for details.
+
+\subsubsection{C/C++ Packed Arrays}
+
+Packed arrays can be converted to a C/C++ type in a similar way to packed records. See Section \ref{C Packed Records} for details.
 
 \subsection{Enumerations}
 
@@ -1915,7 +1968,7 @@ MATLAB classes can also be autogenerated for packed records and packed arrays, s
 
 \subsection{Packed Registers}
 
-Adamant packed records and arrays allow a developer to specify the exact bit representation of a type within the Ada language. This feature makes it ideal for describing hardware register definitions and memory mapped IO. However, using regular packed record types \texttt{.T} (for big endian machines) and \texttt{.T\_Le} (for little endian machines) is often not enough to ensure correct interaction with the hardware. On many hardware platforms, registers must be read in their entirety with a single CPU instruction without interruptions from other tasks in the system, and without reads and writes being removed by compiler optimizations. Adamant provides a method for circumventing these issues using special Volatile, Atomic, and Register packed records and packed record sets, which are described in the subsequent sections.
+Adamant packed records and arrays allow a developer to specify the exact bit representation of a type within the Ada language. This feature makes it ideal for describing hardware register definitions and memory mapped IO. However, using regular packed record types \texttt{.T} (for big endian machines) and \texttt{.T\_Le} (for little endian machines) is often not enough to ensure correct interaction with the hardware. On many hardware platforms, registers must be read in their entirety (ie. all 32-bits) with a single CPU instruction without interruptions from other tasks in the system, and without reads and writes being removed by compiler optimizations. Adamant provides a method for circumventing these issues using special Volatile, Atomic, and Register packed records and packed record sets, which are described in the subsequent sections.
 
 \subsubsection{Volatile, Atomic, and Volatile Full Access in Ada}
 
@@ -1978,13 +2031,13 @@ Notice the new types \texttt{.Atomic\_T}, \texttt{.Atomic\_T\_Le}, \texttt{.Regi
 
 \adacodef{../example_architecture/record_register/main.adb}
 
-Notice that we have defined the register type for a little endian machine and tied it to a specific hardware address. We then access the register by reading the entire register into a copy, modifying that copy, and then writing the register back into place. Generally, this is the pattern that should be followed when working with hardware registers, as it is most efficient and readable. However, the second set of code also words due to the \texttt{Volatile\_Full\_Access} type specification. Two bits are read from the register and then a 14-bit number is written. With a normal packed record, this operation would fail since likely the compiler would not read or write the entire 32-bit register during the operation, resulting in unintended behavior within the hardware. However, with the \texttt{.Register\_T\_Le} type, the entire register is read for each of the two comparisons and a read-modify-write sequence is used to set the 14-bit threshold. While this works as intended, the first pattern is usually preferred as it will result in more efficient code.
+Notice that we have defined the register type for a little endian machine and tied it to a specific hardware address. We then access the register by reading the entire register into a copy, modifying that copy, and then writing the register back into place. Generally, this is the pattern that should be followed when working with hardware registers, as it is most efficient and readable. However, the second set of code also works due to the \texttt{Volatile\_Full\_Access} type specification. Two bits are read from the register and then a 14-bit number is written. With a normal packed record, this operation would fail since likely the compiler would not read or write the entire 32-bit register during the operation, resulting in unintended behavior within the hardware. However, with the \texttt{.Register\_T\_Le} type, the entire register is read for each of the two comparisons and a read-modify-write sequence is used to set the 14-bit threshold. While this works as intended, the first pattern is usually preferred as it will result in more efficient code.
 
 \subsubsection{Packed Register Set}
 
-The previous section demonstrated how to define and access a hardware register using Adamant packed records. Complex hardware devices are often defined as a set of registers. While a set of registers can be defined as a regular packed record in Adamant, you will not gain access to the \texttt{Volatile\_Full\_Access} pragma for each of the individual registers which could result in errant reads/writes of the registers. The proper way to define a register set in Adamant is to create an encompassing packed record which holds each of the individual register components. \\
+The previous section demonstrated how to define and access a hardware register using Adamant packed records. Complex hardware devices are often defined as a set of registers. While a set of registers can be defined as a regular packed record in Adamant, you will not gain access to the \texttt{Volatile\_Full\_Access} pragma for each of the individual registers which could result in errant reads/writes of the registers. The proper way to define a register set in Adamant is to create an encompassing packed record which holds each of the individual register components. In other words, we are creating a packed record with many nested packed records inside, each which represent an individual register. See Section \ref{Nested Packed Records} for more information on nesting packed records. \\
 
-The following defines a register set which consists of three registers of the type \texttt{Example\_Register.Register\_T\_Le}, except for the last which is \texttt{Example\_Register.Register\_T}. Mixed endianness is allowed, if unusual. The \texttt{Register} types are used to ensure that the compiler produces code for accessing each individual register by reading/writing all bits of the register atomically.
+The following defines a register set which consists of three registers of the type \texttt{Example\_Register.Register\_T\_Le}. Mixed endianness is not currently allowed within a single packed record. The \texttt{Register} types are used to ensure that the compiler produces code for accessing each individual register by reading/writing all bits of the register atomically.
 
 \yamlcodef{../example_architecture/example_register_set.record.yaml}
 
@@ -1994,9 +2047,7 @@ The resulting generated code is different from that normally produced for a pack
 
 \adacodef{../example_architecture/build/src/example_register_set.ads}
 
-First, note that there is no \texttt{U} type provided. Since the record is only made up of packed records, there is no such thing as an unpacked definition. There is also not a \texttt{T} or \texttt{T\_Le} type available. Since all components of this record are \texttt{Volatile}, or \texttt{Atomic} or \texttt{Register} (which imply \texttt{Volatile}), the entire packed record is also considered \texttt{Volatile}. For this reason, only a \texttt{Volatile\_T} or \texttt{Volatile\_T\_Le} type are provided. Note that the difference between the big endian and little endian versions of these type is meaningless. The endianness of each individual register is defined by the type of that register as defined in the yaml. In this case, the first two registers are little endian and the last one is big endian. \\
-
-In the case where all the item types of the register set are defined as a \texttt{Register} a special type is created for the register set called \texttt{Register\_T} and \texttt{Register\_T\_Le}. These are functionally the same type as \texttt{Volatile\_T} or \texttt{Volatile\_T\_Le}, but since these types are only generated when the entire register set consists of \texttt{Register} types, using the \texttt{Register} type is preferable, since you can use it to ensure that all internal items are of type \texttt{Register}. \\
+First, note that there is \texttt{U} and \texttt{T\_Le} types declared which include \texttt{.U} and \texttt{.T\_Le} versions of the underlying registers. These may be useful in some situations. However, a \texttt{Register\_T\_Le} is also created that includes the \texttt{Register\_T\_Le} version of each field. This represents a register set that adheres to the \texttt{Volatile\_Full\_Access} semantics when the individual fields are read from or written to. \\
 
 The register set can be used like any normal packed record, except that accessing the individual records is safe for the hardware due to the underlying \texttt{Volatile\_Full\_Access} type specification. The following example expands on the example provided in the previous section for a single register. This time we access different registers found within the register set.
 
@@ -2022,7 +2073,7 @@ In this case we have an array of 10 elements, each of \texttt{Register\_T\_Le} t
 
 \adacodef{../example_architecture/build/src/example_packed_register_array.ads}
 
-This is treated similar to a packed register set, described in the previous section. Because the array is made up of packed \texttt{Register} components, an \texttt{U}, \texttt{T}, and \texttt{T\_Le} type are not provided. Instead a \texttt{Volatile\_T}, and \texttt{Volatile\_T\_Le} type is provided, since the internal array components are also \texttt{Volatile}. Because all the array components are of type \texttt{Register}, a type \texttt{Register\_T} and \texttt{Register\_T\_Le} is also provided. As before, the endianness used of the type at this level is not important. The endianness of reads and writes is determined by the array component type, in this case little endian. \\
+This is treated similar to a packed register set, described in the previous section. Because all the array components are of type \texttt{Register}, a type \texttt{Register\_T} and \texttt{Register\_T\_Le} is provided. \\
 
 The code below illustrates using these arrays to read/write registers.
 
