@@ -1,6 +1,6 @@
 ---
 description: This is a packed record named A
-preamble:
+preamble: |
   subtype One_Type is Natural range 0 .. 19;
   subtype Two_Type is Positive range 19 .. 230;
   subtype Three_Type is Natural range 5 .. 2056;
