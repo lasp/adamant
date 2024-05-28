@@ -41,7 +41,7 @@ class {{ name }}(PackedTypeBase):
 {% if field.is_enum %}
             assert isinstance({{ field.name }}, {{ field.type_model.name }}), \
                 ("Expected type for field '{{ field.name }}' to be '{{ field.type_model.name }}' "
-                 " and instead found '" + str(type({{ field.name }})))
+                 "and instead found '" + str(type({{ field.name }})))
 {% elif field.is_packed_type %}
             assert isinstance({{ field.name }}, {{ field.type_package }}), \
                 ("Expected type for field '{{ field.name }}' to be '{{ field.type_package }}' "
