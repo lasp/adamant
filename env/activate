@@ -148,6 +148,16 @@ for path in "${paths[@]}"; do
   #
   eval `alr -n printenv | grep PATH`
 
+  # Set up the LD_LIBRARY_PATH so that it also includes the libraries that come
+  # with the alr native compiler.
+  eval `alr -n printenv | grep GNAT_NATIVE_ALIRE_PREFIX`
+  if [ -n "$GNAT_NATIVE_ALIRE_PREFIX" ]; then
+      # Check if $GNAT_NATIVE_ALIRE_PREFIX/lib64 is already in LD_LIBRARY_PATH
+      if [[ ":$LD_LIBRARY_PATH:" != *":$GNAT_NATIVE_ALIRE_PREFIX/lib64:"* ]]; then
+          export LD_LIBRARY_PATH="$GNAT_NATIVE_ALIRE_PREFIX/lib64:$LD_LIBRARY_PATH"
+      fi
+  fi
+
   # Activate the local python configuration:
   . $ADAMANT_DIR/env/set_python_path.sh $path
 
