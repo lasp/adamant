@@ -21,6 +21,10 @@ abstract project a_bareboard_base extends all "a_adamant.gpr" is
          -- debug flags
          ("-g");
 
+      for Switches ("C++") use a_adamant.Compiler'Switches ("C++") &
+         -- debug flags
+         ("-g");
+
       for Switches ("Asm_Cpp") use a_adamant.Compiler'Switches ("Asm_Cpp") &
          -- debug flags
          ("-g");

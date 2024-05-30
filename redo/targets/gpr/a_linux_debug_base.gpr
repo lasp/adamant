@@ -6,7 +6,7 @@ abstract project a_linux_debug_base extends all "a_adamant.gpr" is
       -- Add preprocessor definitions and configuration pragma switches:
       for Switches ("Ada") use a_adamant.Compiler'Switches ("Ada") &
          -- optimization
-         ("-O0") & 
+         ("-O0") &
          -- debug flags
          ("-g") &
          -- dynamic stack checking
@@ -16,7 +16,7 @@ abstract project a_linux_debug_base extends all "a_adamant.gpr" is
          -- -gnata - assertions are enabled
          ("-gnato", "-gnata") &
          -- Turn on ALL validity checking, not just that which is specified in the Ada Reference Manual.
-         -- This combined with Initialize_Scalars, below, greatly aids in discovering uninitializated 
+         -- This combined with Initialize_Scalars, below, greatly aids in discovering uninitializated
          -- variable bugs.
          ("-gnatVa") &
          -- Define Initialize_Scalars pragma to allow better detection of unitizialized variable bugs.
@@ -24,13 +24,13 @@ abstract project a_linux_debug_base extends all "a_adamant.gpr" is
 
       for Switches ("C") use a_adamant.Compiler'Switches ("C") &
          -- optimization
-         ("-O0") & 
+         ("-O0") &
          -- debug flags
          ("-g");
 
       for Switches ("Asm_Cpp") use a_adamant.Compiler'Switches ("Asm_Cpp") &
          -- optimization
-         ("-O0") & 
+         ("-O0") &
          -- debug flags
          ("-g");
    end Compiler;
