@@ -3,6 +3,7 @@ import os.path
 import sys
 from base_classes.build_rule_base import build_rule_base
 from os import environ
+from rules.build_what_predefined import get_predefined_targets
 
 
 # This build rule lists all the known redo targets that
@@ -26,24 +27,7 @@ class build_what(build_rule_base):
             return sorted(set(lst), key=lambda x: lst.index(x))
 
         # Define the special targets that exist everywhere...
-        redo_targets = [
-            "all",
-            # "path",
-            # "recursive",
-            "clean",
-            "clean_all",
-            "clear_cache",
-            "templates",
-            "publish",
-            "targets",
-            "prove",
-            "analyze",
-            "style",
-            "pretty",
-            "test_all",
-            "coverage_all",
-            "style_all",
-        ]
+        redo_targets = get_predefined_targets()
         directory = os.path.dirname(redo_1)
         with redo_target_database() as db:
             try:

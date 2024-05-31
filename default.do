@@ -44,6 +44,8 @@ if __name__ == "__main__":
         from rules.build_clear_cache import build_clear_cache as rule_cls
     elif base == "what":
         from rules.build_what import build_what as rule_cls
+    elif base == "what_predefined":
+        from rules.build_what_predefined import build_what_predefined as rule_cls
     elif base == "prove":
         from rules.build_prove import build_prove as rule_cls
     elif base == "analyze":

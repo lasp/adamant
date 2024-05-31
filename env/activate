@@ -164,6 +164,7 @@ for path in "${paths[@]}"; do
   cd - &> /dev/null
   echo "Done."
 done
+
 echo "Done."
 echo ""
 echo "-- Adamant Configuration --"
@@ -176,3 +177,6 @@ echo ""
 
 # Signify the environment is set up
 export ADAMANT_ENVIRONMENT_SET="yes"
+
+# Adding redo tab completion feature to shell
+. $ADAMANT_DIR/env/redo_completion.sh
