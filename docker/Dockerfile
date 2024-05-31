@@ -100,6 +100,9 @@ COPY --from=install_libadalang /root/libadalang/libadalang_tool_builder/tools/* 
 COPY --from=install_alire /root/alire/bin/alr $BIN_DIR
 COPY --from=install_sequence_builder /root/adamant_seq/bin/* $BIN_DIR
 
+# Enable directory colors for redo tab completion:
+RUN echo "set colored-stats on" > $HOME/.inputrc
+
 # Set up .bashrc to automatically activate the Adamant environment
 RUN cp /root/.bashrc $HOME/.bashrc \
     && echo "cd $HOME && [ -f "~/adamant/env/activate" ] && source adamant/env/activate" >> $HOME/.bashrc \
