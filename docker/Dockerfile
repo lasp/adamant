@@ -108,5 +108,5 @@ RUN cp /root/.bashrc $HOME/.bashrc \
     && echo "cd $HOME && [ -f "~/adamant/env/activate" ] && source adamant/env/activate" >> $HOME/.bashrc \
     && chown -R $DOCKER_USER:$DOCKER_USER $HOME
 
-# Make sure user is root at end.
-USER root
+# Make sure user is user at end.
+USER user
