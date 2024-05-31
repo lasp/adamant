@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/lasp/adamant:latest
+      options: --user root
     steps:
       - run: echo "Starting job triggered by a ${{ github.event_name }} event on a ${{ runner.os }} server hosted by GitHub."
       - run: echo "Checking out ${{ github.repository }} on branch ${{ github.ref }}."
