@@ -1,7 +1,5 @@
 #!/bin/bash
 
-
-
 # The function that provides bash completions for the redo command.
 # To see debug messages, set DBG=true.
 __redo_completion () {
@@ -28,11 +26,10 @@ __redo_completion () {
     dbg "> start: first_run=$first_run this_word=$this_word"
 
 
-
     ##########################################
     # functions used in redo_completion_helper
     ##########################################
-    
+
     # takes in an argument, likely `what` or `what_predefined`
     redo_cmd_parsed () {
         redo "$1" 2>&1 | tail +2 | sed 's/^redo //' | sed 's/\n/ /' | echo "$(cat -)
@@ -85,7 +82,7 @@ what" | grep -v "^$"
     }
 
     dir_cache_save () {
-        local path=$1 
+        local path=$1
         mkdir -p ~/.cache/redo/ 2>/dev/null && echo "$path" >> ~/.cache/redo/what_cache_dirs.txt
     }
 
@@ -208,7 +205,7 @@ $(compgen -d "$full_arg" | grep -v '\bbuild\b' | sed 's/$/\//')" | grep -v '^$')
         local status=$?
 
         return $status
-    
+
     }
 
 
@@ -373,7 +370,7 @@ $(compgen -d "$full_arg" | grep -v '\bbuild\b' | sed 's/$/\//')" | grep -v '^$')
     ######################################
 
     # helps us figure out whether re-running `redo what` is a waste
-    # if first_run=true then the user might have run commands 
+    # if first_run=true then the user might have run commands
     # which might change the output of `redo what`
     if [ $first_run = true ]; then
         dir_cache_clean
@@ -394,7 +391,7 @@ $(compgen -d "$full_arg" | grep -v '\bbuild\b' | sed 's/$/\//')" | grep -v '^$')
 
     # helper function sets the RES variable
     if [ "$first_run" = false ] && try_cached_dir; then
-        # this saves a few recursions 
+        # this saves a few recursions
         # see recursion in helper function for when this gets cached
         dbg "> insta-recurse"
         redo_completion_helper "$subdir" "$trimmed_arg"
@@ -424,7 +421,7 @@ $(compgen -d "$full_arg" | grep -v '\bbuild\b' | sed 's/$/\//')" | grep -v '^$')
     fi
 
     unset -f redo_cmd_parsed what_parsed what_predef_parsed words_cache_ok words_cache_save dir_first_visit dir_cache_save dir_cache_clean save_last_confirmed_dir get_last_confirmed_dir prepend try_trim_leading_dir append_compgen_dirs synchronous_work async_work prepend_path redo_completion_helper try_cached_dir
-    
+
     # must be very last command, see top
     echo $special_arg > /dev/null
 }
@@ -432,5 +429,3 @@ $(compgen -d "$full_arg" | grep -v '\bbuild\b' | sed 's/$/\//')" | grep -v '^$')
 # the reason we can't use `complete -o dirnames` is that
 # we need to exclude ./build (and want to exclude hidden dirs)
 complete -o nospace -o nosort -F __redo_completion redo
-
-
