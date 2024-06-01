@@ -3,6 +3,7 @@ from database.database import DATABASE_MODE
 from time import time as curr_time
 from os import environ, sep
 from util import model_loader
+from database.util import get_database_file
 
 # The purpose of the model cache is to save off YAML file model load
 # data structures after they have been read from a file, validated, and
@@ -13,8 +14,17 @@ from util import model_loader
 
 
 def get_model_cache_filename():
-    cache_file = environ["ADAMANT_TMP_DIR"] + sep + "model_cache.db"
-    return cache_file
+    # Decide whether or not to use a persistent or non-persistent model cache.
+    # A persistent model cache that lasts over calls to redo is faster, but
+    # is not stable and potentially buggy. persistent model cache is disabled
+    # by default.
+    if "ENABLE_PERSISTENT_MODEL_CACHE" in environ:
+        # Model cache is persistent over calls to redo (faster):
+        cache_file = environ["ADAMANT_TMP_DIR"] + sep + "model_cache.db"
+        return cache_file
+    else:
+        # Model cache is recreated for each call to redo (safer):
+        return get_database_file("model_cache")
 
 
 class model_cache_database(database):
