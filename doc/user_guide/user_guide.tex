@@ -6005,7 +6005,42 @@ Since an executable assembly is usually used to build the final production binar
 
 \subsection{Assembly Ground System Integration}
 
-When an assembly is compiled into an executable binary and deployed to the target embedded system, often the only way to communicate with it is through some external system. In the domain of spacecraft flight software, this communication system is the ground. Since Adamant is model driven and generators can be constructed to produce any desired output, see Section \ref{Adding Generators}, it is conceivable that any ground system can be supported. Currently there is support for integration with the LASP-developed ground system Hydra, which is presented in this section.
+When an assembly is compiled into an executable binary and deployed to the target embedded system, often the only way to communicate with it is through some external system. In the domain of spacecraft flight software, this communication system is the ground. Since Adamant is model driven and generators can be constructed to produce any desired output, see Section \ref{Adding Generators}, it is conceivable that any ground system can be supported. Currently there is support for integration with OpenC3 COSMOS, or the LASP-developed ground system Hydra, both of which are presented in this section.
+
+\subsubsection{OpenC3 COSMOS Integration}
+
+\textit{OpenC3 COSMOS is publicly available at \href{https://openc3.com/}{\textcolor{blue}{https://openc3.com/}}.}
+
+Adamant provides support for OpenC3 COSMOS plugin generation, which allows interfacing with COSMOS. Any Adamant assembly can be controlled by COSMOS via commands and receive data from the Adamant system through the plugin interface configuration and packets. \\
+
+COSMOS plugins are configured via plaintext configuration files. Command and telemetry packet definitions can be generated from an Adamant assembly model. For example, we can run this from the \textit{science\_assembly} directory created in previous sections (some output omitted for brevity):
+
+\vspace{5mm} %5mm vertical space
+\begin{minted}{text}
+> redo what
+redo  what
+redo all
+redo clean
+redo clean_all
+redo templates
+redo publish
+redo targets
+redo prove
+redo analyze
+redo style
+redo pretty
+redo test_all
+redo coverage_all
+redo build/cosmos/plugin/science_assembly_ccsds_commands.txt
+redo build/cosmos/plugin/science_assembly_ccsds_telemetry.txt
+\end{minted}
+\vspace{5mm} %5mm vertical space
+
+As can be seen, two COSMOS configuration files are created in subdirectories of \textit{build/cosmos}. These configuration files can be used in conjunction with OpenC3 tools to generate and compile a COSMOS plugin, allowing COSMOS to parse and display telemetry from as well as send commands to an Adamant assembly. \\
+
+A fully functional configuration is provided in the \href{https://github.com/lasp/adamant_example/tree/main/src/assembly/linux/main/}{\textcolor{blue}{example repository}}. The COSMOS plugin can be configured, compiled, and installed with the \texttt{Linux} assembly by following the \href{https://github.com/lasp/adamant_example/tree/main/src/assembly/linux/main/README.md}{\textcolor{blue}{readme}}.
+
+By digging into the example project COSMOS configuration you can explore how it works and adapt it for your own system, or translate it for a different ground system.
 
 \subsubsection{Hydra Integration}
 
@@ -6013,7 +6048,7 @@ When an assembly is compiled into an executable binary and deployed to the targe
 
 Adamant provides support for interfacing with Hydra at the assembly level. Specifically, any assembly can be controlled by Hydra via commands and receive data from the Adamant system through data products and packets. \\
 
-Hydra is configured via special XML files. Many of these files can be generated from an Adamant assembly model. To see what is available we can run \texttt{redo what} from an assemnbly directory. For example, we can run this from the \textit{science\_assembly} directory created in previous sections (some output omitted for brevity):
+Hydra is configured via special XML files. Many of these files can be generated from an Adamant assembly model. To see what is available we can run \texttt{redo what} from an assembly directory. For example, we can run this from the \textit{science\_assembly} directory created in previous sections (some output omitted for brevity):
 
 \vspace{5mm} %5mm vertical space
 \begin{minted}{text}

@@ -29,6 +29,7 @@ This model is used to generate the structural code, documentation, unit test sca
  * Support for compiling and proving [SPARK](https://learn.adacore.com/courses/intro-to-spark/chapters/01_Overview.html#what-is-it) (a formally provable subset of Ada)
  * A growing library of ready-to-use [components](src/components)
  * An [AUnit](https://docs.adacore.com/live/wave/aunit/html/aunit_cb/aunit_cb.html)-based component test framework
+ * Command and telemetry integration with [OpenC3 COSMOS](https://github.com/OpenC3/cosmos)
  * Tooling for test coverage, coding style checks, code metrics, and more
 
 ## Getting Started

@@ -86,6 +86,18 @@ class assembly_hydra_generator(assembly_generator):
             return "build" + os.sep + "hydra" + os.sep + self.extension
 
 
+class assembly_cosmos_plugin_generator_base(assembly_generator):
+    def __init__(self, template, template_dir=None, subdir=None):
+        assembly_generator.__init__(self, template=template, template_dir=template_dir)
+        self._subdir = subdir
+
+    def _get_default_build_dir(self):
+        if self._subdir:
+            return "build" + os.sep + "cosmos" + os.sep + self._subdir
+        else:
+            return "build" + os.sep + "cosmos" + os.sep + self.extension
+
+
 ####################################################
 # Assembly generators:
 ####################################################
