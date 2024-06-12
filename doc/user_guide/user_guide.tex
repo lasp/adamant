@@ -267,7 +267,7 @@ This setup implies a flat structure, where the many repositories are stored with
 
 Now that we have the directory set up with the repositories, we need to set up the virtual development environment, described in the next section.
 
-\subsubsection{Virtual Development Environment}
+\subsubsection{Virtual Development Environment} \label{Virtual Development Environment}
 
 Adamant uses a virtual environment for development for a few reasons. First, using a virtual environment makes it easy to install all the necessary dependencies without cluttering up the host system. Secondly, it bypasses the classic ``it works on my machine" problem that is so prevalent in software development, since all developers are using the same exact machine. \\
 
@@ -462,9 +462,21 @@ redo build/obj/Linux/component.o
 \end{minted}
 \vspace{5mm} %5mm vertical space
 
-We can see that in this directory, \texttt{redo} has found a lot of valid build commands. We can run commands to compile an object, \textit{build/obj/Linux/component.o}, or even run some code metrics on a source code file, \textit{build/metric/Linux/component.adb.txt}
+We can see that in this directory, \texttt{redo what} has found a lot of valid build commands. We can run commands to compile an object, \textit{build/obj/Linux/component.o}, or even run some code metrics on a source code file, \textit{build/metric/Linux/component.adb.txt}. \\
 
-Adamant also provides a set of build commands that can be used in almost any project directory. These are described below:
+In the Adamant virtual environment, see Section \ref{Virtual Development Environment}, tab completion is available in Bash for redo commands, which, under the hood, uses \texttt{redo what}. This can be used to quickly discover and complete available \texttt{redo} commands without having to type out everything by hand. For instance, running:
+
+\vspace{5mm} %5mm vertical space
+\begin{minted}{text}
+> redo build/src/<TAB><TAB>
+build/src/component-example_component.adb
+build/src/component-example_component.ads
+\end{minted}
+\vspace{5mm} %5mm vertical space
+
+shows the available Ada files that can be generated via redo within the example component directory. \\
+
+In addition to specific commands, Adamant also provides a set of build commands that can be used in almost any project directory. These are described below:
 
 \vspace{5mm} %5mm vertical space
 \begin{spaceditemize}
@@ -6009,7 +6021,7 @@ When an assembly is compiled into an executable binary and deployed to the targe
 
 \subsubsection{OpenC3 COSMOS Integration}
 
-\textit{OpenC3 COSMOS is publicly available at \href{https://openc3.com/}{\textcolor{blue}{https://openc3.com/}}.}
+\textit{OpenC3 COSMOS is publicly available at \href{https://openc3.com/}{\textcolor{blue}{https://openc3.com/}}.} \\
 
 Adamant provides support for OpenC3 COSMOS plugin generation, which allows interfacing with COSMOS. Any Adamant assembly can be controlled by COSMOS via commands and receive data from the Adamant system through the plugin interface configuration and packets. \\
 
@@ -6038,7 +6050,7 @@ redo build/cosmos/plugin/science_assembly_ccsds_telemetry.txt
 
 As can be seen, two COSMOS configuration files are created in subdirectories of \textit{build/cosmos}. These configuration files can be used in conjunction with OpenC3 tools to generate and compile a COSMOS plugin, allowing COSMOS to parse and display telemetry from as well as send commands to an Adamant assembly. \\
 
-A fully functional configuration is provided in the \href{https://github.com/lasp/adamant_example/tree/main/src/assembly/linux/main/}{\textcolor{blue}{example repository}}. The COSMOS plugin can be configured, compiled, and installed with the \texttt{Linux} assembly by following the \href{https://github.com/lasp/adamant_example/tree/main/src/assembly/linux/main/README.md}{\textcolor{blue}{readme}}.
+A fully functional configuration is provided in the \href{https://github.com/lasp/adamant_example/tree/main/src/assembly/linux/main/}{\textcolor{blue}{example repository}}. The COSMOS plugin can be configured, compiled, and installed with the \texttt{Linux} assembly by following the \href{https://github.com/lasp/adamant_example/tree/main/src/assembly/linux/main/README.md}{\textcolor{blue}{README.md}}. \\
 
 By digging into the example project COSMOS configuration you can explore how it works and adapt it for your own system, or translate it for a different ground system.
 
