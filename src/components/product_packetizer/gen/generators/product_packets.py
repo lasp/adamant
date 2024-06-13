@@ -83,10 +83,10 @@ class product_packets_html(product_packets_gen, generator_base):
         output = p.render(self.template, template_path=self.template_dir)
 
         # Search output for html dependencies and depend on them:
-        from util import html
+        from util import html_util
 
         output_filename = self.output_filename(input_filename)
-        html.depend_on_html_links(output_filename, output)
+        html_util.depend_on_html_links(output_filename, output)
 
         # Produce the html:
         print(output)

@@ -1,6 +1,6 @@
 from base_classes.generator_base import generator_base
 from util import redo_arg
-from util import html
+from util import html_util
 from util import ada
 import os.path
 
@@ -264,7 +264,7 @@ class basic_generator(object):
         if self.extension == "html":
             # Search output for html dependencies and depend on them:
             output_filename = self.output_filename(input_filename)
-            html.depend_on_html_links(output_filename, output)
+            html_util.depend_on_html_links(output_filename, output)
 
         return output
 
