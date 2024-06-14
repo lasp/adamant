@@ -1,5 +1,7 @@
 import os
 import sys
+import ast
+import importlib.util
 from util import redo
 from database.py_source_database import py_source_database
 from base_classes.build_rule_base import build_rule_base
@@ -13,30 +15,38 @@ from util import shell
 # that were found in the source file, but could not be
 # found on the file system.
 def pydep(source_file, path=[]):
-    # monkey-patch broken modulefinder._find_module
-    # (https://github.com/python/cpython/issues/84530)
-    # in Python 3.8-3.10
-    #
-    # Found: https://github.com/thebjorn/pydeps/commit/17a09ac344cad06cc9a1e9129c08ffee02cb4b60
-    import modulefinder
-    if hasattr(modulefinder, '_find_module'):
-        from imp import find_module
-        modulefinder._find_module = find_module
-
     # If a path is not provided than just use the python
     # path variable:
     if not path:
         path = os.environ["PYTHONPATH"].split(":")
 
-    # Run the module finder script on the given
-    # python source file.
-    finder = modulefinder.ModuleFinder(path=path)
-    finder.run_script(source_file)
+    with open(source_file, "r") as f:
+        root = ast.parse(f.read())
 
-    # Collect and return the results:
-    existing_deps = finder.modules
-    nonexistant_deps = finder.badmodules
-    return existing_deps, nonexistant_deps
+    existing_deps = []
+    nonexistent_deps = []
+
+    for node in ast.walk(root):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                name = alias.name  # name of the module
+                spec = importlib.util.find_spec(name)
+                # if module (and its origin file) exists, append to the existing_deps
+                if spec is not None:
+                    existing_deps.append(name)
+                else:
+                    nonexistent_deps.append(name)
+
+        if isinstance(node, ast.ImportFrom):
+            name = node.module  # name of the module
+            if name:  # if name is not None
+                spec = importlib.util.find_spec(name)
+                if spec is not None:
+                    existing_deps.append(name)
+                else:
+                    nonexistent_deps.append(name)
+
+    return existing_deps, nonexistent_deps
 
 
 # Recursively build any missing python module dependencies for

@@ -4,7 +4,7 @@
 # For best results use the ./build_image.sh and ./create_container.sh scripts
 # provided in this directory.
 #
-FROM ubuntu:22.04 AS base
+FROM ubuntu:24.04 AS base
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -47,11 +47,9 @@ USER root
 RUN cat /dev/zero | ssh-keygen -q -N "" \
     && echo "vm.swappiness = 0" > /etc/sysctl.conf \
     && sudo ln -sf /usr/lib/x86_64-linux-gnu/libreadline.so.8 /usr/lib/x86_64-linux-gnu/libreadline.so.7 \
-    && DEBIAN_FRONTEND=noninteractive add-apt-repository -y ppa:linuxuprising/libpng12 \
     && apt install --reinstall -y software-properties-common \
-    && add-apt-repository ppa:linuxuprising/libpng12 \
     && DEBIAN_FRONTEND=noninteractive apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -yq socat graphviz libpng12-0 gawk xxd time psmisc python3-venv python3-dev \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -yq socat graphviz libpng-dev gawk xxd time psmisc python3-venv python3-dev \
     && DEBIAN_FRONTEND=noninteractive apt install -yq `DEBIAN_FRONTEND=noninteractive apt --assume-no install texlive-full | \
          awk '/The following additional packages will be installed/{f=1;next} /Suggested packages/{f=0} f' | \
          tr ' ' '\n' | \
