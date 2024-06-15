@@ -44,6 +44,11 @@ package Component.Product_Copier.Implementation.Tester is
       -- Event histories:
       Source_Not_Available_History : Source_Not_Available_History_Package.Instance;
       Source_Id_Out_Of_Range_History : Source_Id_Out_Of_Range_History_Package.Instance;
+      Case_1_Ctr : Integer := 0;
+      Case_2_Ctr : Integer := 0;
+      Case_3_Ctr : Integer := 0;
+      Case_4_Ctr : Integer := 0;
+      Case_5_Ctr : Integer := 0;
    end record;
    type Instance_Access is access all Instance;
 
