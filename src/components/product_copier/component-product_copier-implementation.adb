@@ -2,6 +2,9 @@
 -- Product_Copier Component Implementation Body
 --------------------------------------------------------------------------------
 
+with Data_Product_Types; use Data_Product_Types;
+with Data_Product_Enums;
+
 package body Component.Product_Copier.Implementation is
 
    --------------------------------------------------
@@ -28,9 +31,20 @@ package body Component.Product_Copier.Implementation is
    -- default.
    --
    overriding procedure Init (Self : in out Instance; Products_To_Copy : in Product_Mapping_Array_Access; Send_Event_On_Source_Id_Out_Of_Range : in Boolean := True; Send_Event_On_Source_Not_Available : in Boolean := False) is
-      -- TODO declarations
    begin
-      null; -- TODO statements
+      pragma Assert (Products_To_Copy /= null);
+      -- make sure no two destinations have the same ID, otherwise raise an error
+      for I in Products_To_Copy'Range loop
+         for J in I + 1 .. Products_To_Copy'Last loop
+            pragma Assert (
+               Products_To_Copy (I).Destination_Id /= Products_To_Copy (J).Destination_Id
+            );
+         end loop;
+      end loop;
+
+      Self.Send_Event_On_Source_Id_Out_Of_Range := Send_Event_On_Source_Id_Out_Of_Range;
+      Self.Send_Event_On_Source_Not_Available := Send_Event_On_Source_Not_Available;
+      Self.Mappings := Products_To_Copy;
    end Init;
 
    ---------------------------------------
@@ -38,9 +52,47 @@ package body Component.Product_Copier.Implementation is
    ---------------------------------------
    -- Triggers copying of data products (through request and send connectors).
    overriding procedure Tick_T_Recv_Sync (Self : in out Instance; Arg : in Tick.T) is
-      -- TODO declarations
+      use Data_Product_Enums;
+      use Data_Product_Enums.Fetch_Status; -- required for `=` operator
+      Dp_Return : Data_Product_Return.T;
    begin
-      null; -- TODO statements
+
+      for Mapping of Self.Mappings.all loop
+         -- fetch source
+         Dp_Return := Self.Data_Product_Fetch_T_Request ((Id => Mapping.Source_Id));
+
+         case Dp_Return.The_Status is
+            -- send error events if applicable
+            when Fetch_Status.Not_Available =>
+               if Self.Send_Event_On_Source_Not_Available then
+                  Self.Event_T_Send_If_Connected (
+                     Self.Events.Source_Not_Available (
+                        Self.Sys_Time_T_Get,
+                        (
+                           Tick => Arg.Count,
+                           Mapping => Mapping
+                        )
+                     )
+                  );
+               end if;
+            when Fetch_Status.Id_Out_Of_Range =>
+               if Self.Send_Event_On_Source_Id_Out_Of_Range then
+                  Self.Event_T_Send_If_Connected (
+                     Self.Events.Source_Id_Out_Of_Range (
+                        Self.Sys_Time_T_Get,
+                        (
+                           Tick => Arg.Count,
+                           Mapping => Mapping
+                        )
+                     )
+                  );
+               end if;
+
+            -- send to dest
+            when Fetch_Status.Success =>
+               Self.Data_Product_T_Send (Dp_Return.The_Data_Product);
+         end case;
+      end loop;
    end Tick_T_Recv_Sync;
 
 end Component.Product_Copier.Implementation;
