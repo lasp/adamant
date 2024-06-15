@@ -1,0 +1,10 @@
+---
+description: A source/destination ID pair that specifies where data products should be copied to/from
+fields:
+  # chose U16 to match Id in Data_Product_Header
+  - name: Source_Id
+    type: Data_Product_Types.Data_Product_Id
+    format: U16
+  - name: Destination_Id
+    type: Data_Product_Types.Data_Product_Id
+    format: U16

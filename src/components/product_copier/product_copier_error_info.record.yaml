@@ -1,0 +1,9 @@
+---
+description: To be sent in error events, specifying which source, destination, and tick caused the error.
+fields:
+  - name: Tick
+    description: The count of the tick that caused the error.
+    type: Interfaces.Unsigned_32 # these fields copy the format of tick.record.yaml
+    format: U32
+  - name: Mapping
+    type: Product_Mapping.T
