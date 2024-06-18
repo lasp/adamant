@@ -48,9 +48,9 @@ private
 
    -- The component class instance record:
    type Instance is new Product_Copier.Base_Instance with record
-      Send_Event_On_Source_Id_Out_Of_Range : Boolean;
-      Send_Event_On_Source_Not_Available : Boolean;
-      Mappings : Product_Mapping_Array_Access;
+      Send_Event_On_Source_Id_Out_Of_Range : Boolean := True;
+      Send_Event_On_Source_Not_Available : Boolean := False;
+      Mappings : Product_Mapping_Array_Access := null;
    end record;
 
    ---------------------------------------
