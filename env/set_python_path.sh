@@ -10,9 +10,9 @@ ROOT_DIR=$1
 # Function finds __init__.py files and forms a path.
 create_python_path()
 {
-  for init in `find $ROOT_DIR -not -path '*/\.*' -name "__init__.py"`
+  for init in `git -C $ROOT_DIR ls-files | grep "__init__.py$"`
   do
-    dirname $init
+    dirname "$ROOT_DIR/$init"
   done | tr '\n' ':'
 }
 
