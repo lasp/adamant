@@ -1,0 +1,11 @@
+---
+description: This is a set of unit tests for the Simple_Package package.
+tests:
+  - name: Test_Dest_Conflict
+    description: Tests whether two conflicting destinations raise an error.
+  - name: Test_Nominal_Tick
+    description: Tests the fetch and send operations caused by a tick.
+  - name: Test_Fetch_Fail_Behavior
+    description: Tests that no data products are sent to the destination when a fetch fails.
+  - name: Test_Fetch_Fail_Event
+    description: Makes sure an event is raised when a fetch operation fails and the corresponding init flag is set.

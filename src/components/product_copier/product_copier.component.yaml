@@ -1,0 +1,45 @@
+---
+description: |
+  Given two locations and a list of source/destination IDs, fetches Data_Product entries from one location and sends/copies them to another upon receiving a Tick.
+
+  A typical use case is for the two locations to be databases (e.g. Product_Database instances), and for this component to take snapshots of products in a source database at a fixed interval. While values stored in the source database may constantly be in flux, the destination database could provide a stable view of the source -- within a tick, the values in the destination database will not change between reads.
+execution: passive
+with:
+  - Product_Mapping
+preamble: |
+  type Product_Mapping_Array is array (Natural range <>) of Product_Mapping.T;
+  type Product_Mapping_Array_Access is access all Product_Mapping_Array;
+init:
+  description: |
+    At initialization, this component requires a list of source/destination pairs of data products to copy.
+  parameters:
+    - name: Products_To_Copy
+      type: Product_Mapping_Array_Access
+      description: The list of mappings to be copied by this component every tick. Raises an error on Init if the list is null, as well as if two mappings share a destination.
+    - name: Send_Event_On_Source_Id_Out_Of_Range
+      type: Boolean
+      default: "True"
+      description: When the status of a fetch is of Id_Out_Of_Range, specifies whether an error event should be sent. This could indicate misconfiguration, so sending error events is the default.
+    - name: Send_Event_On_Source_Not_Available
+      type: Boolean
+      default: "False"
+      description: When the status of a fetch is of Not_Available, specifies whether an error event should be sent. This might simply indicate that the product is not yet ready to be fetched, in which case this is expected behavior. Accordingly, not sending error events is the default.
+connectors:
+  # invokee
+  - type: Tick.T
+    kind: recv_sync
+    description: Triggers copying of data products (through request and send connectors).
+  # invokers
+  - type: Data_Product.T
+    kind: send
+    description: The destination for fetched data products to be sent to.
+  - type: Data_Product_Fetch.T
+    return_type: Data_Product_Return.T
+    kind: request
+    description: Where data products are copied from.
+  - type: Event.T
+    kind: send
+    description: Any produced events are sent out this connector.
+  - return_type: Sys_Time.T
+    kind: get
+    description: Time stamps for events are fetched via this connector.

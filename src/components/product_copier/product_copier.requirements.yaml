@@ -1,0 +1,7 @@
+---
+description: The requirements of the component.
+requirements:
+  - text: The component shall copy data products from one location to another, every time it is sent a Tick, given a list of source ID/destination ID mappings.
+  - text: The component shall fail at initialization when two mappings share the same destination ID.
+    description: When two mappings share the same destination, it's unclear which one should "win" and write to the destination first. If the user requires some kind of overwriting behavior, they can make this explicit by instantiating another of this component. (Assuming the send connector is connected to some kind of database write operation.)
+  - text: If fetching from the source results in the data product not being available or the requested ID is out of range, no data product will be copied, and execution will continue. It will raise an error event if configured to do so.
