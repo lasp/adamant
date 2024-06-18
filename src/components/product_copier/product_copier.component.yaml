@@ -2,7 +2,7 @@
 description: |
   Given two locations and a list of source/destination IDs, fetches Data_Product entries from one location and sends/copies them to another upon receiving a Tick.
 
-  The use case in mind was for the two locations to be databases (e.g. Product_Database instances), and for this component to take snapshots of a source database at a fixed interval. The idea is that if the values stored in source database is constantly in flux, then the destination database could provide a stable view of the source -- within a tick, the values in the destination database will not change between reads.
+  A typical use case is for the two locations to be databases (e.g. Product_Database instances), and for this component to take snapshots of products in a source database at a fixed interval. While values stored in the source database may constantly be in flux, the destination database could provide a stable view of the source -- within a tick, the values in the destination database will not change between reads.
 execution: passive
 with:
   - Product_Mapping
@@ -15,10 +15,7 @@ init:
   parameters:
     - name: Products_To_Copy
       type: Product_Mapping_Array_Access
-      description: |
-        The list of mappings to be copied by this component every tick. Raises an error on Init if the list is null, as well as if two mappings share a destination.
-
-        You must pass a reference (using 'Access) to this function, and as a consequence you can't declare your array of mappings within, say, a function's declarative region, since it must not be garbage collected. Either declare it in a package or use a dynamic allocation.
+      description: The list of mappings to be copied by this component every tick. Raises an error on Init if the list is null, as well as if two mappings share a destination.
     - name: Send_Event_On_Source_Id_Out_Of_Range
       type: Boolean
       default: "True"
@@ -42,5 +39,7 @@ connectors:
     description: Where data products are copied from.
   - type: Event.T
     kind: send
+    description: Any produced events are sent out this connector.
   - return_type: Sys_Time.T
     kind: get
+    description: Time stamps for events are fetched via this connector.
