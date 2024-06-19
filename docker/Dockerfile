@@ -1,7 +1,7 @@
 #
 # $ docker build -t $DOCKER_IMAGE_NAME -f Dockerfile .
 #
-# For best results use the ./build_image.sh and ./create_container.sh scripts
+# For best results use the ./adamant_env.sh script with the `build` and `start` arguments
 # provided in this directory.
 #
 FROM ubuntu:24.04 AS base

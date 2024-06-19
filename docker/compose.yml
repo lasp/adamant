@@ -1,0 +1,13 @@
+name: adamant
+services:
+    adamant:
+        container_name: adamant_container
+        volumes:
+            - type: bind
+              source: ../../adamant
+              target: /home/user/adamant
+        extra_hosts:
+            - host.docker.internal:host-gateway
+        network_mode: host
+        image: ghcr.io/lasp/adamant:latest
+        command: sleep infinity
