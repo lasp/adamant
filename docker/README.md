@@ -17,7 +17,7 @@ This procedure is used to create a new Docker container that hosts the Adamant b
    $ git clone https://github.com/lasp/adamant.git
    ```
 
- 3. Next, tell Docker to create a new container from the [pre-built image](https://github.com/lasp/adamant/pkgs/container/adamant). This make take a few minutes and ~3 GB of disk space. By default, the container created is named `adamant_container`. To change this, or the image that the container uses, modify `compose.yml` before running the commands below.
+ 3. Next, tell Docker to create a new container from the [pre-built image](https://github.com/lasp/adamant/pkgs/container/adamant). This make take a few minutes and ~3 GB of disk space. By default, the container created is named `adamant_container`. To change this, or the image that the container uses, modify `docker_config.sh` before running the commands below.
 
    ```
    $ cd adamant/docker
@@ -77,4 +77,4 @@ Next, you can create the Docker image by running:
    $ ./adamant_env.sh build
    ```
 
-This may take several minutes complete. By default, the image created is named `ghcr.io/lasp/adamant:latest`. To change this, modify `compose.yml` before running `./adamant_env.sh build`.
+This may take several minutes complete. By default, the image created is named `ghcr.io/lasp/adamant:latest`. To change this, modify `docker_config.sh` before running `./adamant_env.sh build`.
