@@ -7,40 +7,46 @@ import os
 import abc
 
 
-# This is the object model for a packed type. It is meant to be
-# the base class for more specific packed types like: record, array
-# and simple packed types (ie. type).
 class packed_type(base):
-    # Initialize the packed array object, ingest data, and check it by
-    # calling the base class init function.
+    """
+    This is the object model for a packed type. It is meant to be
+    the base class for more specific packed types like: record, array
+    and simple packed types (ie. type).
+    """
     def __init__(self, filename, template):
+        """
+        Initialize the packed array object, ingest data, and check it by
+        calling the base class init function.
+        """
         # Load the object from the file:
         super(packed_type, self).__init__(filename, template)
 
-    # Abstract method which does specific loading of the packed type.
-    # The load() method below does the common loading for all packed types
-    # and then calls this abstract method.
     @abc.abstractmethod
     def _load(self):
+        """
+        Abstract method which does specific loading of the packed type.
+        The load() method below does the common loading for all packed types
+        and then calls this abstract method.
+        """
         pass
 
-    # Get the model types, recursively:
     @abc.abstractmethod
     def get_all_types_recursive(self):
+        """Get the model types, recursively."""
         pass
 
-    # Get all type models, recursively:
     @abc.abstractmethod
     def get_all_type_models_recursive(self):
+        """Get all type models, recursively."""
         pass
 
-    # Set all the type ranges inside given a type ranges model.
     @abc.abstractmethod
     def set_type_ranges(self, type_ranges_model):
+        """Set all the type ranges inside given a type ranges model."""
         pass
 
-    # Load record specific data structures with information from YAML file.
     def load(self):
+        """Load record specific data structures with information from YAML file."""
         # Initialize object members:
         self.includes = []
         self.description = None
@@ -71,8 +77,8 @@ class packed_type(base):
             self.preamble = self.data["preamble"]
         self._load()
 
-    # Get model dependencies:
     def get_dependencies(self):
+        """Get model dependencies."""
         return super().get_dependencies() + self.deps_list
 
     def load_type_ranges(self):

@@ -7,12 +7,16 @@ import os.path
 from models.exceptions import ModelException, throw_exception_with_lineno
 
 
-# This is the object model for a data dependency suite. It extracts data from a
-# input file and stores the data as object member variables.
 class data_dependencies(component_submodel, ided_suite):
-    # Initialize the data dependencies object, ingest data, and check it by
-    # calling the base class init function.
+    """
+    This is the object model for a data dependency suite. It extracts data from a
+    input file and stores the data as object member variables.
+    """
     def __init__(self, filename):
+        """
+        Initialize the data dependencies object, ingest data, and check it by
+        calling the base class init function.
+        """
         # Load the object from the file:
         ided_suite.__init__(self)
         component_submodel.__init__(
@@ -117,9 +121,10 @@ class data_dependencies(component_submodel, ided_suite):
         return component_submodel.get_dependencies(self) + \
                ided_suite.get_dependencies(self)
 
-    # Called by component, which passes set_data_dependencies instance data.
     @throw_exception_with_lineno
     def set_data_dependencies_instance_data(self, set_data_dependencies_data):
+        """Called by component, which passes set_data_dependencies instance data."""
+
         # Load data dependency data into our subpgrograms.
         if set_data_dependencies_data:
             for data in set_data_dependencies_data:
@@ -152,10 +157,12 @@ class data_dependencies(component_submodel, ided_suite):
         # Check for missing:
         self.set_data_dependencies.check_for_missing_parameter_values()
 
-    # Called by assembly, which passes dictionary mapping full, component-instance-qualified data product names to
-    # the data product objects.
     @throw_exception_with_lineno
     def resolve_data_dependency_ids(self, dp_name_map):
+        """
+        Called by assembly, which passes dictionary mapping full, component-instance-qualified data product names to
+        the data product objects.
+        """
         # OK we already saved off the names of the data products in our dummy subprogram
         # "set_data_dependencies". Now we can use these names to get the actual data
         # product ids.

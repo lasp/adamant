@@ -22,19 +22,23 @@ import atexit
 # module imports.
 
 
-# Extended dictionary object mapping all directories in
-# the build path to the filenames found in that directory:
-#
-# The dictionary is ordered, since order matters for things like
-# c compilation. We want to include project specific paths last
-# so that they can overwrite things in the database last, taking
-# precedence over same-named things in the core framework.
-# ie. src/core/stuff.h in a project specific directory will be
-#     built/used instead of a src/core/stuff.h in a framework dir
 class _build_path(OrderedDict):
-    # Upon init construct the entire build path. This is the only
-    # public method of the class.
+    """
+    Extended dictionary object mapping all directories in
+    the build path to the filenames found in that directory:
+
+    The dictionary is ordered, since order matters for things like
+    c compilation. We want to include project specific paths last
+    so that they can overwrite things in the database last, taking
+    precedence over same-named things in the core framework.
+    ie. src/core/stuff.h in a project specific directory will be
+    built/used instead of a src/core/stuff.h in a framework dir
+    """
     def __init__(self, search_roots=[], targets=["all"], additional_path=[]):
+        """
+        Upon init construct the entire build path. This is the only
+        public method of the class.
+        """
         # If search roots were given then form a build path from each
         # of the roots:
         if search_roots:
@@ -66,8 +70,8 @@ class _build_path(OrderedDict):
                 except FileNotFoundError:
                     self[config_dir] = []
 
-    # Add a directory + filenames to the object
     def _add_to_path(self, directory, filenames):
+        """Add a directory + filenames to the object"""
         full_filenames = [
             os.path.join(directory, filename)
             for filename in filenames
@@ -75,11 +79,13 @@ class _build_path(OrderedDict):
         ]
         self[directory] = full_filenames
 
-    # Compute the build path given a search root and targets. This function
-    # recursively searches from the search root looking for ".all_path" and
-    # ".TARGET_path" files. Each directory with a file of that type located in
-    # it is added to the object.
     def _form_build_path(self, search_root, targets=["all"]):
+        """
+        Compute the build path given a search root and targets. This function
+        recursively searches from the search root looking for ".all_path" and
+        ".TARGET_path" files. Each directory with a file of that type located in
+        it is added to the object.
+        """
         def path_filename(target):
             return "." + target + "_path"
 
@@ -103,8 +109,8 @@ class _build_path(OrderedDict):
                     break
 
 
-# Get the root directory of the adamant repository.
 def _get_git_root(path):
+    """Get the root directory of the adamant repository."""
     try:
         git_repo = git.Repo(path, search_parent_directories=True)
         git_root = git_repo.git.rev_parse("--show-toplevel")
@@ -115,9 +121,11 @@ def _get_git_root(path):
     return git_root
 
 
-# Get a path from an environment variable. Return
-# the path as a list of directories.
 def _get_path_from_env(var):
+    """
+    Get a path from an environment variable. Return
+    the path as a list of directories.
+    """
     try:
         path = os.environ[var]
     except KeyError:
@@ -125,38 +133,46 @@ def _get_path_from_env(var):
     return [os.path.realpath(directory) for directory in path.split(":")]
 
 
-# Get the extra build path:
 def _get_extra_build_path():
+    """Get the extra build path."""
     return _get_path_from_env("EXTRA_BUILD_PATH")
 
 
-# Get the extra build roots:
 def _get_extra_build_roots():
+    """Get the extra build roots."""
     return _get_path_from_env("EXTRA_BUILD_ROOTS")
 
 
-# Get the total build path, as provided by
-# the user.
 def _get_user_build_path():
+    """
+    Get the total build path, as provided by
+    the user.
+    """
     return _get_path_from_env("BUILD_PATH")
 
 
-# Get the build roots, as provided by the
-# user.
 def _get_user_build_roots():
+    """
+    Get the build roots, as provided by the
+    user.
+    """
     return _get_path_from_env("BUILD_ROOTS")
 
 
-# Get the remove build path, as provided by the
-# user.
 def _get_user_remove_build_path():
+    """
+    Get the remove build path, as provided by the
+    user.
+    """
     return _get_path_from_env("REMOVE_BUILD_PATH")
 
 
-# Get the build roots from the user, or
-# assume some for ourselves if one is not
-# given.
 def _get_build_roots(cwd):
+    """
+    Get the build roots from the user, or
+    assume some for ourselves if one is not
+    given.
+    """
     # Return the user build root if it exists.
     user_build_roots = _get_user_build_roots()
     if user_build_roots:
@@ -178,9 +194,11 @@ def _get_build_roots(cwd):
         return list(set([adamant_root, current_root]))
 
 
-# Sanitize a list of directories, removing empty
-# strings and removing duplicates.
 def _sanitize_path(path):
+    """
+    Sanitize a list of directories, removing empty
+    strings and removing duplicates.
+    """
     path = list(filter(bool, path))
     path = list(set(path))
     return path
@@ -226,10 +244,12 @@ def _get_random_session_dir():
     return tempdir + os.sep + _get_random_session_id()
 
 
-# Method which sets up the databases for the build system.
-# This involves first constructing the current build path
-# and then using that path to populate the databases.
 def _setup(redo_1, redo_2, redo_3, sandbox=False):
+    """
+    Method which sets up the databases for the build system.
+    This involves first constructing the current build path
+    and then using that path to populate the databases.
+    """
     # Set up some temporary directories:
     # If this is a sandbox, we create a new temporary directory
     # with a random name. Otherwise, we use the existing directory
@@ -387,8 +407,8 @@ def _setup(redo_1, redo_2, redo_3, sandbox=False):
     create(path)
 
 
-# Remove temporary directory if it exists.
 def _cleanup():
+    """Remove temporary directory if it exists."""
     if not os.environ.get("ADAMANT_DISABLE_SESSION_CLEANUP"):
         temp_dir = _get_session_dir()
         if os.path.isdir(temp_dir):
@@ -397,15 +417,17 @@ def _cleanup():
             rmtree(temp_dir)
 
 
-# Remove temporary directory a few seconds after the build system detects that
-# no target is still using it. Because this build process may not know of other
-# build processes using the same temp directory, we use the delayed_cleanup.sh
-# script below, which checks to make sure no process is using the temp
-# directory for at least 5 seconds before removing it. Otherwise, we do not clean
-# the directory, and expect the process that is still using it to do so. We
-# can detect if a process is still using the temp directory by the presence of
-# *.running files in the directory.
 def _delayed_cleanup(redo_1, redo_2, redo_3):
+    """
+    Remove temporary directory a few seconds after the build system detects that
+    no target is still using it. Because this build process may not know of other
+    build processes using the same temp directory, we use the delayed_cleanup.sh
+    script below, which checks to make sure no process is using the temp
+    directory for at least 5 seconds before removing it. Otherwise, we do not clean
+    the directory, and expect the process that is still using it to do so. We
+    can detect if a process is still using the temp directory by the presence of
+    *.running files in the directory.
+    """
     if not os.environ.get("ADAMANT_DISABLE_SESSION_CLEANUP"):
         # First remove our .running file to signify to other processes that we are no
         # longer using the temporary directory, and from our perspective it can be cleaned.

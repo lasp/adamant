@@ -62,8 +62,8 @@ class datatype(object):
                 self.is_register_type = True
 
 
-# Class holding information related to an Ada variable
 class variable(object):
+    """Class holding information related to an Ada variable"""
     def __init__(self, name, type, description=None, value=None, default_value=None):
         self.name = ada.formatVariable(name)
         self.datatype = datatype(name=type)

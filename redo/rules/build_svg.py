@@ -7,9 +7,11 @@ from util import redo_arg
 from base_classes.build_rule_base import build_rule_base
 
 
-# This build rule is capable of turning any ".dot" (graphviz) file
-# into a ".svg" image, capable of being viewed in a web browser.
 class build_svg(build_rule_base):
+    """
+    This build rule is capable of turning any ".dot" (graphviz) file
+    into a ".svg" image, capable of being viewed in a web browser.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         if not redo_arg.in_build_svg_dir(redo_1):
             error.error_abort(
@@ -30,13 +32,15 @@ class build_svg(build_rule_base):
         filesystem.safe_makedir(svg_dir)
         shell.run_command("dot -Tsvg " + dot_file + " -o " + redo_3)
 
-    # Matches any ".dot" file.
     def input_file_regex(self):
+        """Matches any ".dot" file."""
         return r".*\.dot$"
 
-    # Produces an svg file with the same name as the ".dot"
-    # file in the build/svg directory.
     def output_filename(self, input_filename):
+        """
+        Produces an svg file with the same name as the ".dot"
+        file in the build/svg directory.
+        """
         base = redo_arg.get_base_no_ext(input_filename)
         directory = redo_arg.get_src_dir(input_filename)
         return os.path.join(

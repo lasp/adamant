@@ -7,10 +7,12 @@ from util import redo_arg
 # parsing tex.
 
 
-# Given a string of tex, find any tex links, ie.
-# \input{stuff.tex} and then redo_ifchange on those
-# files.
 def _depend_on_tex_links(tex, base_dir=None):
+    r"""
+    Given a string of tex, find any tex links, ie.
+    \input{stuff.tex} and then redo_ifchange on those
+    files.
+    """
     # Ignore comments:
     tex = re.sub(r"%.*\n", "\n", tex)
     # Search output for tex dependencies and depend on them:
@@ -25,10 +27,12 @@ def _depend_on_tex_links(tex, base_dir=None):
     return links
 
 
-# Given a string of tex, find any graphics links, ie.
-# \includegraphics{stuff.tex} and then redo_ifchange on those
-# files.
 def _depend_on_tex_graphics(tex, base_dir=None):
+    r"""
+    Given a string of tex, find any graphics links, ie.
+    \includegraphics{stuff.tex} and then redo_ifchange on those
+    files.
+    """
     # Ignore comments:
     tex = re.sub(r"%.*\n", "\n", tex)
     # Search output for tex dependencies and depend on them:
@@ -41,10 +45,12 @@ def _depend_on_tex_graphics(tex, base_dir=None):
     return links
 
 
-# Given a string of tex, find any lstinputlisting tags, ie.
-# \listinputlisting{stuff.yaml} and then redo_ifchange on those
-# files.
 def _depend_on_tex_lstinputlistings(tex, base_dir=None):
+    r"""
+    Given a string of tex, find any lstinputlisting tags, ie.
+    \listinputlisting{stuff.yaml} and then redo_ifchange on those
+    files.
+    """
     # Ignore comments:
     tex = re.sub(r"%.*\n", "\n", tex)
     # Search output for tex dependencies and depend on them:
@@ -60,8 +66,8 @@ def _depend_on_tex_lstinputlistings(tex, base_dir=None):
     return links
 
 
-# Recursive function that does proper dependency building of tex files:
 def depend_on_tex_file(tex_file, base_dir):
+    """Recursive function that does proper dependency building of tex files."""
     # Read the contents of the tex file:
     assert tex_file.endswith(
         ".tex"

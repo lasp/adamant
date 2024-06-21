@@ -7,10 +7,12 @@ from util import redo_arg
 from base_classes.build_rule_base import build_rule_base
 
 
-# This build rule runs a binary file. It matches any binary files
-# that are produced with the name "main.elf" and is able to
-# execute them.
 class build_run(build_rule_base):
+    """
+    This build rule runs a binary file. It matches any binary files
+    that are produced with the name "main.elf" and is able to
+    execute them.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         # Get targets for this directory:
         directory = os.path.dirname(redo_1)
@@ -37,14 +39,16 @@ class build_run(build_rule_base):
         # Run the binary and send its output to stderr:
         shell.run_command(binary + " >&2")
 
-    # Match files with the name "main.elf"
     def input_file_regex(self):
+        """Match files with the name "main.elf" """
         return r".*\/main\.elf$"
 
-    # The output "file" is not really a file, so it will
-    # produce no output. But this function gives "redo
-    # what" the ability to detect when a "redo run" rule
-    # is available on the system.
     def output_filename(self, input_filename):
+        """
+        The output "file" is not really a file, so it will
+        produce no output. But this function gives "redo
+        what" the ability to detect when a "redo run" rule
+        is available on the system.
+        """
         directory = redo_arg.get_src_dir(input_filename)
         return os.path.join(directory, "run")

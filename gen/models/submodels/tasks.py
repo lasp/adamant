@@ -3,8 +3,8 @@ from util import ada
 from collections import OrderedDict
 
 
-# This class holds data concerning a parameter:
 class task(object):
+    """This class holds data concerning a parameter."""
     def __init__(self, name, description=None):
         self.name = ada.formatType(name)
         self.description = description
@@ -26,10 +26,12 @@ class task(object):
 
 
 class tasks(object):
-    # To initialize the tasks object, component data must be
-    # passed in.
     @throw_exception_with_lineno
     def __init__(self, subtask_data=None, has_primary_task=False):
+        """
+        To initialize the tasks object, component data must be
+        passed in.
+        """
         # Load task list into internal dictionary
         self._tasks = OrderedDict()
         self._subtasks = OrderedDict()
@@ -127,10 +129,10 @@ class tasks(object):
     ################################
     # Methods:
     ################################
-    # Resolve data members from instance data found in assembly model:
     def set_instance_data(
         self, component_name, component_type, component_obj, instance_data, is_active
     ):
+        """Resolve data members from instance data found in assembly model."""
         # Extract primary task info:
         priority, stack_size, secondary_stack_size = (None, None, None)
         if "priority" in instance_data:

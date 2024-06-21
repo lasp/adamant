@@ -10,12 +10,14 @@ from models.exceptions import ModelException
 import sys
 
 
-# This private function runs a generator. It first inspects
-# the output filename and makes sure that it is a registered
-# product in the generator database. If it is, it retrieves the
-# appropriate generator, and runs it on the input file to
-# generate the output file.
 def _generate(output_filename):
+    """
+    This private function runs a generator. It first inspects
+    the output filename and makes sure that it is a registered
+    product in the generator database. If it is, it retrieves the
+    appropriate generator, and runs it on the input file to
+    generate the output file.
+    """
     # Make sure the output_filename is an absolute path:
     assert os.path.isabs(output_filename), (
         "Output file names given to the generic generator must be absolute paths. The given path is not absolute: "
@@ -104,10 +106,12 @@ def _generate(output_filename):
         error_print(generator, e)
 
 
-# This build rule runs a generator class. It does not provide
-# an input file regex, so should be called from a default.do
-# file.
 class build_via_generator(build_rule_base):
+    """
+    This build rule runs a generator class. It does not provide
+    an input file regex, so should be called from a default.do
+    file.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         _generate(redo_1)
 

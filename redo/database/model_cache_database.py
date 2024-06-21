@@ -28,13 +28,15 @@ def get_model_cache_filename():
 
 
 class model_cache_database(database):
-    # Initialize the database:
     def __init__(self, mode=DATABASE_MODE.READ_ONLY):
+        """Initialize the database."""
         super(model_cache_database, self).__init__(get_model_cache_filename(), mode)
 
-    # Store cached version of model object along with timestamp of save and session ID
-    # for save.
     def store_model(self, model_file, model_object):
+        """
+        Store cached version of model object along with timestamp of save and session ID
+        for save.
+        """
         self.store(model_file, model_object)
         self.store(model_file + "_time@st@@", curr_time())
         self.store(model_file + "_sess@id@@", environ["ADAMANT_SESSION_ID"])
@@ -42,13 +44,15 @@ class model_cache_database(database):
             submodel_paths = model_loader._get_model_file_paths(model_object.model_name)
             self.store(model_file + "_submod@paths@@", submodel_paths)
 
-    # Update the session ID for a model. We use this to indicate that a model has been
-    # fully validated (ie. not outdated) for this redo session.
     def mark_cached_model_up_to_date_for_session(self, model_file):
+        """
+        Update the session ID for a model. We use this to indicate that a model has been
+        fully validated (ie. not outdated) for this redo session.
+        """
         self.store(model_file + "_sess@id@@", environ["ADAMANT_SESSION_ID"])
 
-    # Getters for cached model, session id of save, and time of save
     def get_model(self, model_file):
+        """Getters for cached model, session id of save, and time of save"""
         return self.try_fetch(model_file)
 
     def get_model_session_id(self, model_file):
@@ -61,9 +65,11 @@ class model_cache_database(database):
         return self.try_fetch(model_file + "_submod@paths@@")
 
 
-# Create an empty model cache database file, if one does
-# not already exist:
 def touch_model_cache_database():
+    """
+    Create an empty model cache database file, if one does
+    not already exist:
+    """
     import os.path
 
     filename = get_model_cache_filename()

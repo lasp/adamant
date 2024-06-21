@@ -2,8 +2,8 @@ import abc
 from bitstring import BitStream
 
 
-# This is the base object for adamant based packed types.
 class PackedTypeBase(metaclass=abc.ABCMeta):
+    """This is the base object for adamant based packed types."""
     @abc.abstractmethod
     def _from_byte_array(self, stream):
         pass

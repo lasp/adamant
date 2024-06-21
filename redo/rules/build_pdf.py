@@ -14,10 +14,12 @@ from base_classes.build_rule_base import build_rule_base
 from database.redo_target_database import redo_target_database
 
 
-# This build rule compiles a PDF file from any .tex file found
-# in a non-"build" directory. It uses pdflatex under the hood
-# to accomplish this.
 class build_pdf(build_rule_base):
+    """
+    This build rule compiles a PDF file from any .tex file found
+    in a non-"build" directory. It uses pdflatex under the hood
+    to accomplish this.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         if not redo_arg.in_build_pdf_dir(redo_1):
             error.error_abort(
@@ -164,15 +166,17 @@ class build_pdf(build_rule_base):
 
         clean_up()
 
-    # Match any .tex file.
     def input_file_regex(self):
+        """Match any .tex file."""
         return r".*\.tex$"
 
-    # If the .tex file provided is in a "build" directory
-    # we ignore it and do not return an output name. If the
-    # .tex file is not in a "build" directory we return a
-    # pdf file with the same name in the build/pdf directory.
     def output_filename(self, input_filename):
+        """
+        If the .tex file provided is in a "build" directory
+        we ignore it and do not return an output name. If the
+        .tex file is not in a "build" directory we return a
+        pdf file with the same name in the build/pdf directory.
+        """
         # This rule only exists for tex files that are
         # in a regular directory or in the build/tex directory
         directory = None

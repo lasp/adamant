@@ -6,10 +6,12 @@ from base_classes.build_rule_base import build_rule_base
 from database.utility_database import utility_database
 
 
-# This build rule recursively runs "redo all" from the specified
-# directory and below. It ignores all directories that are not in
-# the build path.
 class build_recursive(build_rule_base):
+    """
+    This build rule recursively runs "redo all" from the specified
+    directory and below. It ignores all directories that are not in
+    the build path.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         import database.setup
 

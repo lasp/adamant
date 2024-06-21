@@ -56,9 +56,11 @@ def _get_git_info(path):
     return git_root, sha, changed, untracked
 
 
-# Get a path from an environment variable. Return
-# the path as a list of directories.
 def _safe_get_var(var):
+    """
+    Get a path from an environment variable. Return
+    the path as a list of directories.
+    """
     try:
         val = os.environ[var]
     except KeyError:

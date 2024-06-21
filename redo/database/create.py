@@ -69,20 +69,24 @@ import base_classes.build_rule_base
 #####################################################
 # Private functions:
 #####################################################
-# Given a list of strings, and a compiled regex object
-# return only strings in the list that the regex is able to match.
 def _filter_by_regex(compiled_regex, list_of_strings):
+    """
+    Given a list of strings, and a compiled regex object
+    return only strings in the list that the regex is able to match.
+    """
     return (string for string in list_of_strings if compiled_regex.match(string))
 
 
-# Add to dictionary that maps a regex string to a tuple of
-# the form:
-#
-# (compiled_regex, {object_instance1, object_instance2, etc.}
-#
-# This datastructure helps us only compile regex strings once
-# per unique regex string.
 def _add_to_regex_dict_of_sets(dic, regex, object_instance):
+    """
+    Add to dictionary that maps a regex string to a tuple of
+    the form:
+
+    (compiled_regex, {object_instance1, object_instance2, etc.}
+
+    This datastructure helps us only compile regex strings once
+    per unique regex string.
+    """
     if regex in dic:
         cregex, oi_set = dic[regex]
         oi_set.add(object_instance)
@@ -91,8 +95,8 @@ def _add_to_regex_dict_of_sets(dic, regex, object_instance):
         dic[regex] = (cregex, {object_instance})
 
 
-# Similar to above but add a regex + ".do"
 def _add_to_regex_dict_of_sets_w_do(dic, regex, object_instance):
+    """Similar to above but add a regex + ".do" """
     if regex in dic:
         cregex, do_cregex, oi_set = dic[regex]
         oi_set.add(object_instance)
@@ -105,10 +109,12 @@ def _add_to_regex_dict_of_sets_w_do(dic, regex, object_instance):
         dic[regex] = (cregex, do_cregex, {object_instance})
 
 
-# Find all the generators that have the generator_base class
-# as their parent, and return a dictionary that maps regex strings to
-# instances of the generator classes that use those regex strings.
 def _create_generator_regex_dict():
+    """
+    Find all the generators that have the generator_base class
+    as their parent, and return a dictionary that maps regex strings to
+    instances of the generator classes that use those regex strings.
+    """
     regex_dict = dict()
     # First find all the generators classes that have been imported:
     generator_classes = meta.get_all_subclasses_of(generator_base)
@@ -127,10 +133,12 @@ def _create_generator_regex_dict():
     return regex_dict
 
 
-# Find all the rules that have the rule_base base class
-# as their parent, and return a dictionary that maps regex strings to
-# instances of the rule classes that use those regex strings.
 def _create_rule_regex_dict():
+    """
+    Find all the rules that have the rule_base base class
+    as their parent, and return a dictionary that maps regex strings to
+    instances of the rule classes that use those regex strings.
+    """
     rule_dict = dict()
     # First find all the rule classes that have been imported:
     rule_classes = meta.get_all_subclasses_of(
@@ -156,10 +164,12 @@ def _create_rule_regex_dict():
     return rule_dict
 
 
-# Find all the targets that have the target_base base class
-# as their parent, and return a dictionary that maps the target
-# string name to instances of the target class
 def _create_target_name_dict():
+    """
+    Find all the targets that have the target_base base class
+    as their parent, and return a dictionary that maps the target
+    string name to instances of the target class
+    """
     target_dict = dict()
     # First find all the target classes that have been imported:
     target_classes = meta.get_all_subclasses_of(build_target_base)
@@ -178,9 +188,11 @@ def _create_target_name_dict():
     return target_dict
 
 
-# Print an error to the user when the output filename for a
-# generator or rule did not work correctly.
 def _output_filename_error(exception, object_instance, input_filename):
+    """
+    Print an error to the user when the output filename for a
+    generator or rule did not work correctly.
+    """
     import traceback
 
     error.error_print(
@@ -200,8 +212,8 @@ def _output_filename_error(exception, object_instance, input_filename):
     error.abort()
 
 
-# Format an output filename, making sure it is of absolute path.
 def _format_output_filename(output_filename, object_instance):
+    """Format an output filename, making sure it is of absolute path."""
     assert os.path.isabs(output_filename), (
         "Output file names produced by '"
         + str(object_instance.__class__)
@@ -211,28 +223,28 @@ def _format_output_filename(output_filename, object_instance):
     return output_filename
 
 
-# Determine if a filename is an yaml model file by its extension.
 def _is_yaml_source_file(filename):
+    """Determine if a filename is an yaml model file by its extension."""
     dirname, specific_name, model_name, model_type, ext = redo_arg.split_model_filename(
         filename
     )
     return model_name and model_type
 
 
-# Determine if a filename is an ada source file by its extension.
 def _is_ada_source_file(filename):
+    """Determine if a filename is an ada source file by its extension."""
     _, ext = os.path.splitext(filename)
     return ext in [".adb", ".ads"]
 
 
-# Determine if a filename is c/c++ or asm source file by its extension.
 def _is_c_source_file(filename):
+    """Determine if a filename is c/c++ or asm source file by its extension."""
     _, ext = os.path.splitext(filename)
     return ext in [".c", ".cpp", ".h", ".hpp", ".S", ".s"]
 
 
-# Determine if a filename is python source file by its extension.
 def _is_py_source_file(filename):
+    """Determine if a filename is python source file by its extension."""
     _, ext = os.path.splitext(filename)
     return ext == ".py"
 
@@ -240,23 +252,29 @@ def _is_py_source_file(filename):
 #####################################################
 # Private classes:
 #####################################################
-# This class extends a dictionary that maps all the
-# directories in the build path to a set of build
-# rules that are available for that directory, ie.
-#
-# "/path/to/dir" = {"build/src/source.adb", "build/obj/source.o", etc.}
-#
 class _redo_target_dictionary(dict):
-    # Create the dictionary:
+    """
+    This class extends a dictionary that maps all the
+    directories in the build path to a set of build
+    rules that are available for that directory, ie.
+
+    "/path/to/dir" = {"build/src/source.adb", "build/obj/source.o", etc.}
+
+    """
     def __init__(self):
+        """Create the dictionary."""
         pass
 
-    # Add a target to the dictionary for a certain
-    # directory.
     def add_target(self, directory, target):
-        # Add the value to the set associated with
-        # the dictionary key.
+        """
+        Add a target to the dictionary for a certain
+        directory.
+        """
         def _add_to_dict_of_sets(dic, key, value):
+            """
+            Add the value to the set associated with
+            the dictionary key.
+            """
             try:
                 dic[key].add(value)
             except Exception:
@@ -280,11 +298,13 @@ class _redo_target_dictionary(dict):
 #####################################################
 
 
-# Create new build system databases that do not depend on
-# the build path. We split this up because this operation can
-# be run even before the build path is calculated, which is
-# necessary for some operations.
 def create_pre_build_path():
+    """
+    Create new build system databases that do not depend on
+    the build path. We split this up because this operation can
+    be run even before the build path is calculated, which is
+    necessary for some operations.
+    """
     #######################################
     # Dynamic module import:
     #######################################
@@ -322,11 +342,13 @@ def create_pre_build_path():
             build_target_db.insert_build_target_instance(key, *values)
 
 
-# Create new build system databases from the build path:
-# The build_path is a dictionary object that maps each
-# directory in the build path to all the files
-# found in that directory.
 def create(build_path):
+    """
+    Create new build system databases from the build path:
+    The build_path is a dictionary object that maps each
+    directory in the build path to all the files
+    found in that directory.
+    """
     # The redo target dictionary objects for storing
     # the redo targets that exist for each directory
     # in the build path:
@@ -371,10 +393,12 @@ def create(build_path):
     ) as py_source_db, generator_database(
         mode=DATABASE_MODE.CREATE
     ) as generator_db:
-        # Using the generator regexes, add any autogenerated source
-        # to the source database. Add output_file -> generator map
-        # to the generator database.
         def compute_generated_files(all_input_files):
+            """
+            Using the generator regexes, add any autogenerated source
+            to the source database. Add output_file -> generator map
+            to the generator database.
+            """
             def _compute_generated_files(input_files):
                 generated_models = []
                 for regex_string, (cregex, generators) in generator_regex_dict.items():

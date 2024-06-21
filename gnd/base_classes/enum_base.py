@@ -1,10 +1,12 @@
 from enum import Enum, unique
 
 
-# Base class that all Adamant python enums should enherit from
-# It provides methods common to all enumerations.
 @unique
 class EnumBase(Enum):
+    """
+    Base class that all Adamant python enums should inherit from.
+    It provides methods common to all enumerations.
+    """
     def to_tuple_string(self):
         return self.name
 

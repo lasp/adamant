@@ -140,8 +140,8 @@ class tester_generator(basic_generator):
             self.model_cls = component.component
             basic_generator.generate(self, component_model_path)
 
-    # Depend on the component model and any commands, data products, events models that the component uses:
     def depends_on(self, input_filename):
+        """Depend on the component model and any commands, data products, events models that the component uses."""
         # Extract the name of the component from model file:
         dirname, specific_name, component_name, *ignore = self._split_input_filename(
             input_filename

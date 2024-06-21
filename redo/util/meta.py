@@ -5,31 +5,35 @@ import sys
 # This module provides useful meta programming tasks for python.
 
 
-# Given a list of directory names this function will search the python path
-# for those directory names. If a directory with that name is found in the path
-# as an immediate subdirectory, all python modules found within
-# that subdirectory are returned. For example, this function can be used to find
-# all python modules within the PYTHONPATH that exist in a subdirectory called
-# "test" or "tests"
 def get_modules_in_dir(dir_names=[]):
+    """
+    Given a list of directory names this function will search the python path
+    for those directory names. If a directory with that name is found in the path
+    as an immediate subdirectory, all python modules found within
+    that subdirectory are returned. For example, this function can be used to find
+    all python modules within the PYTHONPATH that exist in a subdirectory called
+    "test" or "tests"
+    """
     import glob
 
-    # Recursively grab python files in a given directory
     def py_files_in(directory):
+        """Recursively grab python files in a given directory"""
         for f in glob.iglob(
             directory + os.sep + "**" + os.sep + "*.py", recursive=True
         ):
             if os.path.isfile(f) and not f.endswith("__init__.py"):
                 yield f
 
-    # Recursively grab python module names in a given directory relative to a
-    # given module root:
     def py_modules_in(directory, module_root_dir):
+        """
+        Recursively grab python module names in a given directory relative to a
+        given module root:
+        """
         for f in py_files_in(directory):
             yield os.path.relpath(f, module_root_dir)[:-3].replace(os.sep, "."), f
 
-    # List immediate subdirs of a directory:
     def get_immediate_subdirectories(a_dir):
+        """List immediate subdirs of a directory."""
         def listdir_nohidden(path):
             for f in os.listdir(path):
                 if not f.startswith("."):
@@ -44,8 +48,8 @@ def get_modules_in_dir(dir_names=[]):
                 if os.path.isdir(os.path.join(a_dir, name))
             ]
 
-    # Function that returns True or False if a directory matches the expected name
     def is_matching_dir(directory):
+        """Function that returns True or False if a directory matches the expected name"""
         return any([directory.endswith(name) for name in dir_names])
 
     # Get the python path:
@@ -71,30 +75,36 @@ def get_modules_in_dir(dir_names=[]):
     return modules
 
 
-# Find all subclasses of a given class, recursively. This function
-# will only find subclasses that are currently imported into the
-# global namespace. So it is important to "import" all appropriate
-# modules before using this function to search for subclasses.
 def get_all_subclasses_of(cls):
+    """
+    Find all subclasses of a given class, recursively. This function
+    will only find subclasses that are currently imported into the
+    global namespace. So it is important to "import" all appropriate
+    modules before using this function to search for subclasses.
+    """
     return cls.__subclasses__() + [
         g for s in cls.__subclasses__() for g in get_all_subclasses_of(s)
     ]
 
 
-# Given a list of modules names, import them. These
-# modules must already be in the PYTHONPATH
 def import_modules(modules):
+    """
+    Given a list of modules names, import them. These
+    modules must already be in the PYTHONPATH
+    """
     # http://ballingt.com/import-invalidate-caches/
     importlib.invalidate_caches()
     for module in modules:
         importlib.import_module(module)
 
 
-# Import a python module via its filename path.
-# This is slightly faster than the import_modules function above
-# if you already know the filename path and module name.
-# See: https://docs.python.org/3/library/importlib.html#importing-a-source-file-directly
 def import_module_from_filename(py_file, module_name=None):
+    """
+    Import a python module via its filename path.
+    This is slightly faster than the import_modules function above
+    if you already know the filename path and module name.
+    See: https://docs.python.org/3/library/importlib.html#importing-a-source-file-directly
+    """
     if not module_name:
         module_name = os.path.splitext(os.path.basename(py_file))[0]
 

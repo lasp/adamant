@@ -5,9 +5,11 @@ from base_classes.build_rule_base import build_rule_base
 import re
 
 
-# This build rule builds all possible targets located
-# in a directory's "build/template" subdirectory.
 class build_templates(build_rule_base):
+    """
+    This build rule builds all possible targets located
+    in a directory's "build/template" subdirectory.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         # Get targets for this directory:
         directory = os.path.abspath(os.path.dirname(redo_1))

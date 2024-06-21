@@ -4,13 +4,15 @@ from util import model_loader
 from util import redo
 
 
-# This model is a specialized packet suite for the command sequencer packets. This
-# class inherits from the normal packets model but adds some extra functionality
-# needed to the sequence packet. In particular, the sequence packet's
-# type is derived from its initialization parameters
 class command_sequencer_packets(packets):
-    # This is just a "decorated" packet object, so make sure everyone treats it like that.
+    """
+    This model is a specialized packet suite for the command sequencer packets. This
+    class inherits from the normal packets model but adds some extra functionality
+    needed to the sequence packet. In particular, the sequence packet's
+    type is derived from its initialization parameters
+    """
     def submodel_name(self):
+        """This is just a "decorated" packet object, so make sure everyone treats it like that."""
         return "packets"
 
     def set_assembly(self, assembly):

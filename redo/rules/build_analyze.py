@@ -285,9 +285,11 @@ def _analyze_ada_sources(source_files, base_dir, build_target, binary_mode=False
     return ret
 
 
-# This build rule uses codepeer to analyze any code
-# found in the current directory.
 class build_analyze(build_rule_base):
+    """
+    This build rule uses codepeer to analyze any code
+    found in the current directory.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         # Define the special targets that exist everywhere...
         directory = os.path.abspath(os.path.dirname(redo_1))

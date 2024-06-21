@@ -5,19 +5,23 @@ from collections import OrderedDict
 import os
 
 
-# This is the object model for a packed record. It extracts data from a
-# input file and stores the data as object member variables.
 class record(packed_type):
-    # Initialize the events object, ingest data, and check it by
-    # calling the base class init function.
+    """
+    This is the object model for a packed record. It extracts data from a
+    input file and stores the data as object member variables.
+    """
     def __init__(self, filename):
+        """
+        Initialize the events object, ingest data, and check it by
+        calling the base class init function.
+        """
         # Load the object from the file:
         super(record, self).__init__(
             filename, os.environ["SCHEMAPATH"] + "/record.yaml"
         )
 
-    # Load record specific data structures with information from YAML file.
     def _load(self):
+        """Load record specific data structures with information from YAML file."""
         # Initialize object members:
         self.fields = OrderedDict()
         self.variable_length_fields = OrderedDict()
@@ -431,8 +435,8 @@ class record(packed_type):
             )
         )
 
-    # Get the model types, recursively delving into any fields that are of record type:
     def get_all_types_recursive(self):
+        """Get the model types, recursively delving into any fields that are of record type."""
         types = []
         for f in self.fields.values():
             types.append(f.type)
@@ -440,8 +444,8 @@ class record(packed_type):
                 types.extend(f.type_model.get_all_types_recursive())
         return list(OrderedDict.fromkeys(types))
 
-    # Get all type models, recursively delving into any fields that are of record type:
     def get_all_type_models_recursive(self):
+        """Get all type models, recursively delving into any fields that are of record type."""
         type_models = []
         for f in self.fields.values():
             if f.is_packed_type:
@@ -449,8 +453,8 @@ class record(packed_type):
                 type_models.extend(f.type_model.get_all_type_models_recursive())
         return list(OrderedDict.fromkeys(type_models))
 
-    # Get all enum models recursively delving into any fields that are of record type:
     def get_all_enum_models_recursive(self):
+        """Get all enum models recursively delving into any fields that are of record type."""
         enum_models = []
         for f in self.fields.values():
             if f.is_packed_type:
@@ -459,8 +463,8 @@ class record(packed_type):
                 enum_models.append(f.type_model)
         return list(OrderedDict.fromkeys(enum_models))
 
-    # Returns a flat ordered list of field objects that make up this record:
     def flatten(self):
+        """Returns a flat ordered list of field objects that make up this record."""
         from copy import copy
 
         fields = []
@@ -512,9 +516,11 @@ class record(packed_type):
                 )
         return descriptions
 
-    # Override this method so that we can also recursively load and set any type ranges for any
-    # packed types that this packed record may contain as fields.
     def load_type_ranges(self):
+        """
+        Override this method so that we can also recursively load and set any type ranges for any
+        packed types that this packed record may contain as fields.
+        """
         # Load the type ranges for any field that this record has that is also a packed
         # type.
         for f in self.fields.values():
@@ -544,16 +550,18 @@ class record(packed_type):
                     f.literals = type_range.literals
                 f.type_ranges_loaded = True
 
-    # Returns true if the packed type is always valid, meaning running
-    # 'Valid on the type will ALWAYS produce True. In other words, there
-    # is no bit representation of the type that could cause a constraint
-    # error when a range check is performed.
-    #
-    # To determine this we need to compare the type's type_range against
-    # the its bit layout (ie. format) to ensure that the maximum representable
-    # values in the format is also the maximum representable values in the
-    # type itself.
     def is_always_valid(self):
+        """
+        Returns true if the packed type is always valid, meaning running
+        'Valid on the type will ALWAYS produce True. In other words, there
+        is no bit representation of the type that could cause a constraint
+        error when a range check is performed.
+
+        To determine this we need to compare the type's type_range against
+        the its bit layout (ie. format) to ensure that the maximum representable
+        values in the format is also the maximum representable values in the
+        type itself.
+        """
         # First we need to load the type ranges for this type:
         self.load_type_ranges()
 
@@ -578,15 +586,17 @@ class record(packed_type):
                 names.append(a_field.name)
         return names
 
-    # This function will create a graph of all of the child fields of whatever data_product is calling it
-    # This function returns a dictionary in the form of:
-    # {
-    # "paths" : [[]],
-    # "graph": {}
-    # }
-    # Where "paths" is a 2D array that represents all of the paths from the graph (using the graphs keys)
-    # and graph is the graph itself (this allows jinja to access all information contained in a node)
     def create_record_graph(self):
+        """
+        This function will create a graph of all of the child fields of whatever data_product is calling it
+        This function returns a dictionary in the form of:
+        {
+        "paths" : [[]],
+        "graph": {}
+        }
+        Where "paths" is a 2D array that represents all of the paths from the graph (using the graphs keys)
+        and graph is the graph itself (this allows jinja to access all information contained in a node)
+        """
         queue = []
         # These lists exist so that we can find all of the paths in the order we care about
         starting_nodes = []
@@ -640,14 +650,14 @@ class record(packed_type):
 #####################
 
 
-# Function that returns a list of child fields from a parent
 def search_fields(a_record):
+    """Function that returns a list of child fields from a parent"""
     field_list = []
     for a_field in a_record.fields.values():
         field_list.append(a_field)
     return field_list
 
 
-# A template for an individual node in the data_product graph
 def fetch_node_template():
+    """A template for an individual node in the data_product graph"""
     return {"field": None, "children": []}

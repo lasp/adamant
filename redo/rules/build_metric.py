@@ -14,8 +14,8 @@ import re
 
 
 # Private helper functions:
-# Get the build target object instance.
 def _get_build_target_instance(target_name):
+    """Get the build target object instance."""
     try:
         with build_target_database() as db:
             instance, filename = db.get_build_target_instance(target_name)
@@ -30,17 +30,19 @@ def _get_build_target_instance(target_name):
         return instance, filename
 
 
-# Return the includes a list:
 def _get_include_list():
+    """Return the includes a list."""
     build_path = None
     with utility_database() as db:
         build_path = db.get_source_build_path()
     return build_path
 
 
-# This build rule is capable of using gnatmetric to generate a
-# metric file for any ada source code, object, or executable.
 class build_metric(build_rule_base):
+    """
+    This build rule is capable of using gnatmetric to generate a
+    metric file for any ada source code, object, or executable.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         if not redo_arg.in_build_metric_dir(redo_1):
             error.error_abort(
@@ -101,16 +103,18 @@ class build_metric(build_rule_base):
         # Add cargs string to command:
         cmd += " " + cargs_string
 
-        # Helper which runs the gnat metric command in a way that allows
-        # us to work around a problem when there is a large number of source
-        # files.
-        #
-        # Sometimes the number of arguments to gnatmetric can exceed the OS
-        # limit. To avoid this, we put all the source files in a temporary
-        # file and cat them into the command using "xargs".
         def run_cmd(cmd, source, string=None):
-            # Helper which actually runs the command:
+            """
+            Helper which runs the gnat metric command in a way that allows
+            us to work around a problem when there is a large number of source
+            files.
+
+            Sometimes the number of arguments to gnatmetric can exceed the OS
+            limit. To avoid this, we put all the source files in a temporary
+            file and cat them into the command using "xargs".
+            """
             def do_run_cmd(cmd, string=None):
+                """Helper which actually runs the command."""
                 if string:
                     sys.stdout.write(string + "\n")
                 sys.stdout.write("Sources analyzed:\n")

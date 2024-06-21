@@ -6,10 +6,12 @@ from util import ada
 import os.path
 
 
-# Split a model filename into its components and
-# check to make sure that is complies with the adamant
-# model file naming convention.
 def split_model_file_name(model_filename):
+    """
+    Split a model filename into its components and
+    check to make sure that is complies with the adamant
+    model file naming convention.
+    """
     def err(string):
         error.error_abort(
             "The model file name '" + model_filename + "' is invalid. " + string
@@ -54,24 +56,26 @@ def split_model_file_name(model_filename):
     return model_name, model_type, specific_name
 
 
-# This database is responsible for storing model files found in
-# the build path and showing how they relate together. The database
-# maps model names to the model files that describe them.
-#
-# The layout is described below:
-#
-# Key:          Value:
-# model_name    {"component" : [/path/to/model_name.component.yaml],
-#                "ut" : [/path/to/tests1.model_name.ut.yaml, /path/to/tests2.model_name.ut.yaml],
-#                "commands" : [/path/to/model_name.commands.yaml]}
-#
 class model_database(database):
-    # Initialize the database:
+    """
+    This database is responsible for storing model files found in
+    the build path and showing how they relate together. The database
+    maps model names to the model files that describe them.
+
+    The layout is described below:
+
+    Key:          Value:
+    model_name    {"component" : [/path/to/model_name.component.yaml],
+                   "ut" : [/path/to/tests1.model_name.ut.yaml, /path/to/tests2.model_name.ut.yaml],
+                   "commands" : [/path/to/model_name.commands.yaml]}
+
+    """
     def __init__(self, mode=DATABASE_MODE.READ_ONLY):
+        """Initialize the database."""
         super(model_database, self).__init__(util.get_database_file("models"), mode)
 
-    # Insert a new model into the database:
     def insert_model(self, model_filename):
+        """Insert a new model into the database."""
         def _add_to_list_entry(dic, key, value):
             try:
                 dic[key].append(value)
@@ -92,23 +96,23 @@ class model_database(database):
         # Store the updated record:
         self.store(model_name, record)
 
-    # Given a model name and type return the full path:
     def get_model_paths(self, model_name, model_type):
+        """Given a model name and type return the full path."""
         record = self.try_fetch(model_name.lower())
         if record:
             if model_type in record:
                 return record[model_type.lower()]
         return []
 
-    # Given a model name return a dictionary mapping types to paths:
     def get_model_dict(self, model_name):
+        """Given a model name return a dictionary mapping types to paths."""
         record = self.try_fetch(model_name.lower())
         if record:
             return record
         return {}
 
-    # Return a flat list of all (unique) yaml files stored in the database:
     def get_all_models(self):
+        """Return a flat list of all (unique) yaml files stored in the database."""
         models = []
         for key in self.keys():
             record = self.fetch(key)

@@ -3,19 +3,23 @@ from util import ada
 import os.path
 
 
-# This is the object model for a data_products suite. It extracts data from a
-# input file and stores the data as object member variables.
 class requirements(component_submodel):
-    # This is the object model for an requirements suite. It extracts data from a
-    # input file and stores the data as object member variables.
+    """
+    This is the object model for a data_products suite. It extracts data from a
+    input file and stores the data as object member variables.
+    """
     def __init__(self, filename):
+        """
+        This is the object model for an requirements suite. It extracts data from a
+        input file and stores the data as object member variables.
+        """
         # Load the object from the file:
         super(requirements, self).__init__(
             filename, os.environ["SCHEMAPATH"] + "/requirement.yaml"
         )
 
-    # Load requirements specific data structures with information from YAML file.
     def load(self):
+        """Load requirements specific data structures with information from YAML file."""
         # Call the component submodel load:
         component_submodel.load(self)
 
@@ -38,9 +42,11 @@ class requirements(component_submodel):
             self.description = self.data["description"]
         self.requirements = self.data["requirements"]
 
-    # Load test tables, load mapping from requirements unit tests, validate them,
-    # associate reqs with their tests in its respective ut model
     def load_tests(self):
+        """
+        Load test tables, load mapping from requirements unit tests, validate them,
+        associate reqs with their tests in its respective ut model
+        """
         # for each req
         # if there are tests
         # load model

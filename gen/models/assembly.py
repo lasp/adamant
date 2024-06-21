@@ -11,25 +11,31 @@ import os
 from collections import OrderedDict
 
 
-# This is the submodel class for an assembly . All assembly submodels
-# should inherit from this model.
 class assembly_submodel(base):
-    # Initialize some members. This base method should be called by inheriting classes
-    # load() methods.
+    """
+    This is the submodel class for an assembly . All assembly submodels
+    should inherit from this model.
+    """
     def load(self):
+        """
+        Initialize some members. This base method should be called by inheriting classes
+        load() methods.
+        """
         self.assembly = None
 
-    # Load an assembly model from disk. This is usually called by generators that need some assembly
-    # information inside the submodel prior to autocoding. Calling this function loads the assembly,
-    # which in turn is going to cause the set_assembly() function below to be called. By default, this
-    # function will update "self" with the new version of this object found in the loaded assembly.
-    # Because of this, if you need something special done to this object when loading the assembly, it
-    # is wise to override the set_assembly() method to achieve that.
-    #
-    # The shallow_load flag should almost always be set to false. Sometimes it is useful
-    # to set it to false to resolve a circular redo dependency that hangs the build system. You will
-    # know when that happens, and this flag can help.
     def load_assembly(self, shallow_load=False, shallow_load_component_list=[]):
+        """
+        Load an assembly model from disk. This is usually called by generators that need some assembly
+        information inside the submodel prior to autocoding. Calling this function loads the assembly,
+        which in turn is going to cause the set_assembly() function below to be called. By default, this
+        function will update "self" with the new version of this object found in the loaded assembly.
+        Because of this, if you need something special done to this object when loading the assembly, it
+        is wise to override the set_assembly() method to achieve that.
+
+        The shallow_load flag should almost always be set to false. Sometimes it is useful
+        to set it to false to resolve a circular redo dependency that hangs the build system. You will
+        know when that happens, and this flag can help.
+        """
         if not self.assembly:
             # If no assembly was provided, the load it.
             dirname, view_name, assembly_name, *ignore = redo_arg.split_model_filename(
@@ -66,10 +72,12 @@ class assembly_submodel(base):
                 # Update cache for speed next time this is loaded:
                 self.save_to_cache()
 
-    # Override this method to do something more specific. By default we set the assembly object
-    # and add ourselves to the assembly by class name.
     @throw_exception_with_filename
     def set_assembly(self, assembly):
+        """
+        Override this method to do something more specific. By default we set the assembly object
+        and add ourselves to the assembly by class name.
+        """
         # Set the assembly:
         self.assembly = assembly
         self.dependencies.append(self.assembly.full_filename)
@@ -84,28 +92,32 @@ class assembly_submodel(base):
         # in the load_assembly() method, should it be called.
         self.assembly.submodels[self.full_filename] = self
 
-    # Override this method to do something more specific at the end of
-    # the load process. final() is called after set_assembly
-    # once the entire load process is finished. Some things like IDed entity ID
-    # assignment does not occur until the very end of the assembly load. final()
-    # will get called after this, so may be useful if the component submodel
-    # needs access to the IDs. You should prefer using set_assembly
-    # where possible.
     def final(self):
+        """
+        Override this method to do something more specific at the end of
+        the load process. final() is called after set_assembly
+        once the entire load process is finished. Some things like IDed entity ID
+        assignment does not occur until the very end of the assembly load. final()
+        will get called after this, so may be useful if the component submodel
+        needs access to the IDs. You should prefer using set_assembly
+        where possible.
+        """
         pass
 
 
-# This class holds a connection. When instantiated the two connectors are
-# connected.
 class connection(object):
+    """
+    This class holds a connection. When instantiated the two connectors are
+    connected.
+    """
     def __init__(self, filename, data):
         self.connected = False
         self.ignored = False
         self.data = data
         self.lineno = data.lc.line
 
-    # Make the actual connection, connecting one connector to another.
     def connect(self, components):
+        """Make the actual connection, connecting one connector to another."""
         # Collect from-side info:
         from_component_name = ada.formatVariable(self.data["from_component"])
         from_connector_name = ada.formatType(self.data["from_connector"])
@@ -314,20 +326,24 @@ class connection(object):
                 )
             self.ignored = True
 
-    # Create a connection object from connection data found within an assembly model.
     @classmethod
     @throw_exception_with_lineno
     def from_connection_data(cls, filename, connection_data):
+        """Create a connection object from connection data found within an assembly model."""
         return cls(filename=filename, data=connection_data)
 
 
-# This is the object model for a assembly. It extracts data from a
-# .assembly.yaml input file and stores the data as object member
-# variables for use in file generation using templates.
 class subassembly(base):
-    # Initialize the assembly object, ingest data, and check it by
-    # calling the base class init function.
+    """
+    This is the object model for a assembly. It extracts data from a
+    .assembly.yaml input file and stores the data as object member
+    variables for use in file generation using templates.
+    """
     def __init__(self, filename=None):
+        """
+        Initialize the assembly object, ingest data, and check it by
+        calling the base class init function.
+        """
         # Load the object from the file:
         if filename:
             super(subassembly, self).__init__(
@@ -349,8 +365,8 @@ class subassembly(base):
             OrderedDict.fromkeys(c.full_filename for c in self.components.values())
         )
 
-    # Load assembly specific data structures with information from YAML file.
     def load(self):
+        """Load assembly specific data structures with information from YAML file."""
         # Initialize internal objects:
         self.components = (
             OrderedDict()
@@ -492,8 +508,8 @@ class subassembly(base):
         ]
 
 
-# Helper function for error printing:
 def _component_file_lineno(component_model):
+    """Helper function for error printing."""
     return (
         component_model.instance_assembly_model.full_filename
         + ":"
@@ -501,10 +517,12 @@ def _component_file_lineno(component_model):
     )
 
 
-# This is the object model for a assembly. It extracts data from a
-# .assembly.yaml input file and stores the data as object member
-# variables for use in file generation using templates.
 class assembly(subassembly):
+    """
+    This is the object model for a assembly. It extracts data from a
+    .assembly.yaml input file and stores the data as object member
+    variables for use in file generation using templates.
+    """
     def __init__(
         self,
         filename=None,
@@ -635,8 +653,8 @@ class assembly(subassembly):
         # the components and connections of this assembly model (not including subassemblies).
         super(assembly, self).load()
 
-        # Helper function for loading a subassembly into the subassembly dictionary:
         def load_subassembly(name):
+            """Helper function for loading a subassembly into the subassembly dictionary."""
             subassembly = name.lower()
             subassembly_model = model_loader.try_load_model_by_name(
                 subassembly, "assembly", is_subassembly=True
@@ -951,8 +969,8 @@ class assembly(subassembly):
             )  # sort name then by index
             self.arrayed_connections += to_connections
 
-            # Set all assembly dependencies:
             def subassembly_files(assem):
+                """Set all assembly dependencies."""
                 files = []
                 for a in assem.subassemblies.values():
                     files.extend(subassembly_files(a))
@@ -986,9 +1004,11 @@ class assembly(subassembly):
             #   sys.stderr.write(str(key) + ": " + str(value) + "\n")
 
     def _generate_component_ids(self):
-        # Find an open swath of IDs in the id list at the lowest
-        # position possible.
         def find_Open_Id_Base(id_List, num_Ids_To_Reserve, min_Id=1):
+            """
+            Find an open swath of IDs in the id list at the lowest
+            position possible.
+            """
             count = 0
             curr_Id = min_Id
             while count < num_Ids_To_Reserve:
@@ -1182,10 +1202,12 @@ class assembly(subassembly):
         # Call the final function:
         self.final()
 
-    # The final function for the assembly will be called as the last part of the load, giving submodels
-    # and components the ability to calculate any last data using the final state of the assembly before
-    # autocoding begins. This function will call final on all components in the assembly and all submodels.
     def final(self):
+        """
+        The final function for the assembly will be called as the last part of the load, giving submodels
+        and components the ability to calculate any last data using the final state of the assembly before
+        autocoding begins. This function will call final on all components in the assembly and all submodels.
+        """
         # We almost always want to run the following code, however there are very special times, to avoid
         # circular dependencies, that a generator might disable the running of this code. That is why
         # this flag exists.
@@ -1207,9 +1229,11 @@ class assembly(subassembly):
             submodel.final()
             submodel.save_to_cache()
 
-    # Special function to load all the complex types in the assembly. Most
-    # generators will not need this:
     def _load_complex_types(self):
+        """
+        Special function to load all the complex types in the assembly. Most
+        generators will not need this:
+        """
         # Load all additional types:
         complex_types = dict()
         for t in self.additional_types:
@@ -1275,12 +1299,14 @@ class assembly(subassembly):
     # additional data and can be expensive to run, so they each re-cache the
     # model after being run, so that they are not run more than once per build.
 
-    # Special function to load all the view model files in
-    # the assembly. This is only needed by a few templates, and is a costly
-    # operation, so it has been broken out into its own function. Generators
-    # that need this capability can call this function manually after init.
     @throw_exception_with_filename
     def load_view_models(self):
+        """
+        Special function to load all the view model files in
+        the assembly. This is only needed by a few templates, and is a costly
+        operation, so it has been broken out into its own function. Generators
+        that need this capability can call this function manually after init.
+        """
         # Only load models if they haven't been loaded already:
         if not self.view_models_loaded:
             self._load_view_models()
@@ -1295,20 +1321,26 @@ class assembly(subassembly):
         # Load view models:
         self.views = model_loader.try_load_models_by_name(self.name, model_types="view")
 
-    # This takes a long time, and most generators don't need it. It loads the type ranges
-    # for all the types used in the assembly model commands.
     def load_command_type_ranges(self):
+        """
+        This takes a long time, and most generators don't need it. It loads the type ranges
+        for all the types used in the assembly model commands.
+        """
         for command in self.commands.values():
             command.load_type_ranges()
 
-    # This takes a long time, and most generators don't need it. It loads the type ranges
-    # for all the types used in the assembly model packets.
     def load_packet_type_ranges(self):
+        """
+        This takes a long time, and most generators don't need it. It loads the type ranges
+        for all the types used in the assembly model packets.
+        """
         for packet in self.packets.values():
             packet.load_type_ranges()
 
-    # This takes a long time, and most generators don't need it. It loads the type ranges
-    # for all the types used in the assembly model data products.
     def load_data_product_type_ranges(self):
+        """
+        This takes a long time, and most generators don't need it. It loads the type ranges
+        for all the types used in the assembly model data products.
+        """
         for dp in self.data_products.values():
             dp.load_type_ranges()

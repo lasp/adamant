@@ -138,9 +138,11 @@ class data_product_entry(object):
         )
 
 
-# Create a packet item that is slightly modified for the product packets from the standard
-# packet items. This provides a different full_name and flattened_description method.
 class product_packet_item(packet_item):
+    """
+    Create a packet item that is slightly modified for the product packets from the standard
+    packet items. This provides a different full_name and flattened_description method.
+    """
     def __init__(self, data, dp, packet):
         self.__dict__ = data
         self.dp = dp
@@ -261,9 +263,11 @@ class product_packet(packet):
                 self.items.update({item.full_name: item})
                 pad_count += 1
 
-    # Override this method so we can load the type ranges for the data products
-    # that make up this packet:
     def load_type_ranges(self):
+        """
+        Override this method so we can load the type ranges for the data products
+        that make up this packet:
+        """
         for dp_entry in self.data_products:
             try:
                 dp_entry.data_product.type_model.load_type_ranges()
@@ -317,12 +321,16 @@ class dummy:
     pass
 
 
-# This is the object model for a packet suite. It extracts data from a
-# input file and stores the data as object member variables.
 class product_packets(assembly_submodel):
-    # Initialize the packet object, ingest data, and check it by
-    # calling the base class init function.
+    """
+    This is the object model for a packet suite. It extracts data from a
+    input file and stores the data as object member variables.
+    """
     def __init__(self, filename):
+        """
+        Initialize the packet object, ingest data, and check it by
+        calling the base class init function.
+        """
         # Load the object from the file:
         this_file_dir = os.path.dirname(os.path.realpath(__file__))
         schema_dir = os.path.join(this_file_dir, ".." + os.sep + "schemas")
@@ -330,8 +338,8 @@ class product_packets(assembly_submodel):
             filename, schema_dir + "/product_packets.yaml"
         )
 
-    # Load command specific data structures with information from YAML file.
     def load(self):
+        """Load command specific data structures with information from YAML file."""
         # Load the base class model:
         super(product_packets, self).load()
 
@@ -528,8 +536,8 @@ class product_packets(assembly_submodel):
 
         self.dependencies = list(set(self.dependencies))
 
-    # We use the final function to create the item list and resolve the data product IDS.
     def final(self):
+        """We use the final function to create the item list and resolve the data product IDS."""
         # Resolve the data products sizes now. We cannot resolve ids yet,
         # because at the time that this function is called, the assembly has
         # not yet set the ids.

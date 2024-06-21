@@ -5,11 +5,13 @@ from shutil import rmtree
 from base_classes.build_rule_base import build_rule_base
 
 
-# This build rule recursively "cleans" from the specified
-# directory and below. Cleaning involves removing any
-# "build" directories that are found, as well as running
-# any "clean.do" files found.
 class build_clean(build_rule_base):
+    """
+    This build rule recursively "cleans" from the specified
+    directory and below. Cleaning involves removing any
+    "build" directories that are found, as well as running
+    any "clean.do" files found.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         pass  # We are overriding build instead since
         # we don't need to usual build boilerplate

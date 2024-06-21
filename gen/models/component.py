@@ -16,27 +16,35 @@ import os
 from collections import OrderedDict
 
 
-# This is the submodel class for a component. All component submodels
-# should inherit from this model.
 class component_submodel(base):
-    # Initialize some members. This base method should be called by inheriting classes
-    # load() methods.
+    """
+    This is the submodel class for a component. All component submodels
+    should inherit from this model.
+    """
     def load(self):
+        """
+        Initialize some members. This base method should be called by inheriting classes
+        load() methods.
+        """
         self.component = None
         self.assembly = None
 
-    # The default name for the submodel. By default the submodel gets attached
-    # to the component with this name.
     def submodel_name(self):
+        """
+        The default name for the submodel. By default the submodel gets attached
+        to the component with this name.
+        """
         return self.__class__.__name__
 
-    # Load a component model from disk. This is usually called by generators that need some component
-    # information inside the submodel prior to autocoding. Calling this function loads the component,
-    # which in turn is going to cause the set_component() function below to be called. By default, this
-    # function will update "self" with the new version of this object found in the loaded assembly.
-    # Because of this, if you need something special done to this object when loading the assembly, it
-    # is wise to override the set_assembly() method to achieve that.
     def load_component(self):
+        """
+        Load a component model from disk. This is usually called by generators that need some component
+        information inside the submodel prior to autocoding. Calling this function loads the component,
+        which in turn is going to cause the set_component() function below to be called. By default, this
+        function will update "self" with the new version of this object found in the loaded assembly.
+        Because of this, if you need something special done to this object when loading the assembly, it
+        is wise to override the set_assembly() method to achieve that.
+        """
         if not self.component:
             # If no component was provided, the load it.
             dirname, view_name, component_name, *ignore = redo_arg.split_model_filename(
@@ -65,10 +73,12 @@ class component_submodel(base):
             # Update cache for speed next time this is loaded:
             self.save_to_cache()
 
-    # Override this method to do something more specific, if the
-    # submodel needs to alter the component that it is attached to
-    # or needs alter itself based on the component it is attached to.
     def set_component(self, component):
+        """
+        Override this method to do something more specific, if the
+        submodel needs to alter the component that it is attached to
+        or needs alter itself based on the component it is attached to.
+        """
         # Set the component:
         self.component = component
 
@@ -82,34 +92,40 @@ class component_submodel(base):
         # in the load_component() method, should it be called.
         self.component.submodels[self.full_filename] = self
 
-    # Override this method to do something more specific, if the
-    # submodel needs to be altered based on the assembly that it
-    # is part of.
     def set_assembly(self, assembly):
+        """
+        Override this method to do something more specific, if the
+        submodel needs to be altered based on the assembly that it
+        is part of.
+        """
         self.assembly = assembly
 
-    # Override this method to do something more specific at the end of
-    # the load process. final() is called after set_component and set_assembly
-    # once the entire load process is finished. Some things like IDed entity ID
-    # assignment does not occur until the very end of the assembly load. final()
-    # will get called after this, so may be useful if the component submodel
-    # needs access to the IDs. You should prefer using set_assembly and set_component
-    # where possible.
     def final(self):
+        """
+        Override this method to do something more specific at the end of
+        the load process. final() is called after set_component and set_assembly
+        once the entire load process is finished. Some things like IDed entity ID
+        assignment does not occur until the very end of the assembly load. final()
+        will get called after this, so may be useful if the component submodel
+        needs access to the IDs. You should prefer using set_assembly and set_component
+        where possible.
+        """
         pass
 
 
-# This is the object model for a component. It extracts data from a
-# input file and stores the data as object member variables.
 class component(base):
-    # Call the base class with the appropriate schema file.
+    """
+    This is the object model for a component. It extracts data from a
+    input file and stores the data as object member variables.
+    """
     def __init__(self, filename):
+        """Call the base class with the appropriate schema file."""
         super(component, self).__init__(
             filename, os.environ["SCHEMAPATH"] + "/component.yaml"
         )
 
-    # Load component specific data structures with information from YAML file.
     def load(self):
+        """Load component specific data structures with information from YAML file."""
         # Initialize internal objects:
         self.init_base = None
         self.init = None
@@ -610,12 +626,14 @@ class component(base):
             self.dependencies.extend([m.full_filename] + m.get_dependencies())
         self.dependencies = list(set(self.dependencies))
 
-    # Look for and load all unit tests associated with this component.
-    # Note: We cannot to this the standard way, ie. using the model loader, because unit tests
-    # by default are not expected to be in the global path, so they are undiscoverable via the
-    # model loader. Instead we search directories below this directory that include unit tests
-    # models of the correct name.
     def _load_unit_tests(self):
+        """
+        Look for and load all unit tests associated with this component.
+        Note: We cannot to this the standard way, ie. using the model loader, because unit tests
+        by default are not expected to be in the global path, so they are undiscoverable via the
+        model loader. Instead we search directories below this directory that include unit tests
+        models of the correct name.
+        """
         from models.tests import tests
         import glob
 
@@ -638,12 +656,14 @@ class component(base):
                         ut_model_files.append(t.full_filename)
         return ut_model_files
 
-    # This method should be called by the assembly to load assembly derived data about
-    # the component into the component model itself. This includes resolved identifiers,
-    # initialization parameters, resolved generic connectors, etc.
     def set_component_instance_data(
         self, component_instance_name, component_instance_data
     ):
+        """
+        This method should be called by the assembly to load assembly derived data about
+        the component into the component model itself. This includes resolved identifiers,
+        initialization parameters, resolved generic connectors, etc.
+        """
         self.instance_data = component_instance_data
         self.lineno = (
             component_instance_data.lc.line + 1
@@ -892,10 +912,12 @@ class component(base):
             # Load the assembly:
             m.set_assembly(assembly)
 
-    # The final function for the component will be called as the last part of an assembly load, giving submodels
-    # the ability to calculate any last data using the final state of the component and assembly before
-    # autocoding begins. This function will call final on all submodels of this component.
     def final(self):
+        """
+        The final function for the component will be called as the last part of an assembly load, giving submodels
+        the ability to calculate any last data using the final state of the component and assembly before
+        autocoding begins. This function will call final on all submodels of this component.
+        """
         # Load this assembly into all of the submodels:
         for m in self.submodels.values():
             # Load the assembly:

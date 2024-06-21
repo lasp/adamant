@@ -18,8 +18,8 @@ from database.build_target_database import build_target_database
 
 
 # Private helper functions:
-# Get the build target object instance.
 def _get_build_target_instance(target_name):
+    """Get the build target object instance."""
     try:
         with build_target_database() as db:
             instance, filename = db.get_build_target_instance(target_name)
@@ -34,10 +34,12 @@ def _get_build_target_instance(target_name):
         return instance, filename
 
 
-# Given a list of source files, redo-ifchange on all dependency
-# source files. This function is recursive, and will redo-ifchange
-# the entire dependency chain.
 def _build_all_ada_dependencies(ada_source_files, source_db):
+    """
+    Given a list of source files, redo-ifchange on all dependency
+    source files. This function is recursive, and will redo-ifchange
+    the entire dependency chain.
+    """
     deps = []
 
     #
@@ -178,9 +180,11 @@ def _build_all_ada_dependencies(ada_source_files, source_db):
     return deps
 
 
-# Given a C/C++ source file, use g++ to determine the dependencies that the
-# source file has.
 def get_c_source_dependencies(source_file, build_target_instance, c_source_db=None):
+    """
+    Given a C/C++ source file, use g++ to determine the dependencies that the
+    source file has.
+    """
 
     def _extract_from_deps_file(dependency_file, object_file):
         dependencies = []
@@ -309,8 +313,8 @@ def _run_gprbuild_command(build_target_instance, sources_to_compile, source_depe
 # Speed optimization functions:
 ####################################################
 
-# Returns the source file to compile for a given object:
 def _get_object_sources(object_file):
+    """Returns the source file to compile for a given object."""
     # Make sure the object is being built in the correct directory:
     if not redo_arg.in_build_obj_dir(object_file):
         error.error_abort(
@@ -452,9 +456,11 @@ def _precompile_objects(object_files):
         )
 
 
-# Returns true if the object has already been built. In this case the object is moved to
-# the final location and dependency tracking has been handled.
 def _handle_prebuilt_object(redo_1, redo_2, redo_3):
+    """
+    Returns true if the object has already been built. In this case the object is moved to
+    the final location and dependency tracking has been handled.
+    """
     # First see if the object has already been compiled and is in the object temp dir. This
     # is a speed optimization that may have already occurred.
     temp_object_dir = os.environ["OBJECT_PRE_BUILD_DIR"]
@@ -515,9 +521,11 @@ def _compile_single_object(redo_1, redo_2, redo_3, build_target_instance, source
         f.write("\n".join(deps))
 
 
-# This function compiles an ada object file from a given
-# source file.
 def _compile_ada_object(redo_1, redo_2, redo_3, source_files, db):
+    """
+    This function compiles an ada object file from a given
+    source file.
+    """
     # GCC wants an adb file if it exists, and an
     # ads file if an adb doesn't exist. Let's
     # give GCC what it wants.
@@ -551,9 +559,11 @@ def _compile_ada_object(redo_1, redo_2, redo_3, source_files, db):
     _compile_single_object(redo_1, redo_2, redo_3, build_target_instance, source_to_compile, deps)
 
 
-# This function compiles a c object file from a given
-# source file.
 def _compile_c_object(redo_1, redo_2, redo_3, source_files, db):
+    """
+    This function compiles a c object file from a given
+    source file.
+    """
     # GCC wants an c or cpp file if it exists, since we cannot
     # build an object from just a .h file.
     source_to_compile = None
@@ -587,14 +597,16 @@ def _compile_c_object(redo_1, redo_2, redo_3, source_files, db):
     _compile_single_object(redo_1, redo_2, redo_3, build_target_instance, source_to_compile, deps)
 
 
-# This build rule is capable of compiling object files from either
-# Ada or C/C++ source. It matches on any source file in the system
-# and produces objects of the same name as the source file in the
-# build/obj directory. If the source file is found in the Ada source
-# database, then it is compiled as Ada source. If the file is not found
-# in the Ada source database, but is found in the C/C++ source database
-# it is compiled as C source.
 class build_object(build_rule_base):
+    """
+    This build rule is capable of compiling object files from either
+    Ada or C/C++ source. It matches on any source file in the system
+    and produces objects of the same name as the source file in the
+    build/obj directory. If the source file is found in the Ada source
+    database, then it is compiled as Ada source. If the file is not found
+    in the Ada source database, but is found in the C/C++ source database
+    it is compiled as C source.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         # Optimization: If the object has already been built as part of a prebuild
         # routine along with other objects, then all we need to do is move the
@@ -657,15 +669,19 @@ class build_object(build_rule_base):
         # object, then we are out of luck. Alert the user.
         error.error_abort("No Ada or C/C++source files were found to build '" + redo_1 + "'.")
 
-    # Match any Ada source file, as any Ada source file can produce
-    # an object. In C/C++ only the .c or .cpp files produce object
-    # code, so ignore header files.
     def input_file_regex(self):
+        """
+        Match any Ada source file, as any Ada source file can produce
+        an object. In C/C++ only the .c or .cpp files produce object
+        code, so ignore header files.
+        """
         return [r"^((?!template/).)*\.ad[sb]$", r"^((?!template/).)*\.(h|hpp|c|cpp|s)$"]
 
-    # Output object files will always be stored with the same name
-    # as their source package, and in the build/obj directory.
     def output_filename(self, input_filename):
+        """
+        Output object files will always be stored with the same name
+        as their source package, and in the build/obj directory.
+        """
         base = redo_arg.get_base_no_ext(input_filename)
         directory = redo_arg.get_src_dir(input_filename)
         return os.path.join(

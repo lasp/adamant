@@ -5,23 +5,25 @@ from models.component import component_submodel
 import os
 
 
-# A class which holds a single unit test:
 class test(object):
+    """A class which holds a single unit test."""
     def __init__(self, name, description=None):
         self.name = ada.formatType(name)
         self.description = description
 
 
-# A class which holds a unit test suite:
 class tests(component_submodel):
-    # Initialize the unit test object, ingest data, and check it by
-    # calling the base class init function.
+    """A class which holds a unit test suite."""
     def __init__(self, filename):
+        """
+        Initialize the unit test object, ingest data, and check it by
+        calling the base class init function.
+        """
         # Load the object from the file:
         super(tests, self).__init__(filename, os.environ["SCHEMAPATH"] + "/tests.yaml")
 
-    # Load unit test specific data structures with information from YAML file.
     def load(self):
+        """Load unit test specific data structures with information from YAML file."""
         # Call the component submodel load:
         component_submodel.load(self)
 
@@ -72,11 +74,13 @@ class tests(component_submodel):
     def __len__(self):
         return len(self.tests)
 
-    # This unit test model may or may not have a component associated with it. So
-    # we override this function to allow for the case that a component could not
-    # be loaded. In that case, this is just a normal unit test, not a component
-    # unit test.
     def load_component(self):
+        """
+        This unit test model may or may not have a component associated with it. So
+        we override this function to allow for the case that a component could not
+        be loaded. In that case, this is just a normal unit test, not a component
+        unit test.
+        """
         try:
             # Do base class load:
             component_submodel.load_component(self)

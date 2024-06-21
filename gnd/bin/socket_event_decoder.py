@@ -101,8 +101,8 @@ if __name__ == "__main__":
         filename=args.log_file, filemode="a", format="%(message)s", level=logging.INFO
     )
 
-    # Define a useful print log function:
     def print_log(strn):
+        """Define a useful print log function."""
         print(strn)
         logging.info(strn)
 

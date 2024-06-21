@@ -8,20 +8,22 @@ from shutil import copyfile
 from base_classes.build_rule_base import build_rule_base
 
 
-# This build rule "publishes" PDF documentation. When PDFs
-# are built using the build_pdf rule, the are constructed in
-# a build/pdf directory. Since these directories are removed
-# upon cleaning, they are not permanently saved in the repository.
-# In order to permanently save PDF documentation, so that we
-# don't always have to recompile them to use them, this "publish"
-# rule was created.
-#
-# This rule recursively looks from the given directory down for
-# .tex file not located in a "build" directory. When it finds one
-# it builds the pdf file in the build/pdf directory, and then
-# moves it to the same directory as the original .tex file, thus
-# "publishing" it into a permanent directory.
 class build_publish(build_rule_base):
+    """
+    This build rule "publishes" PDF documentation. When PDFs
+    are built using the build_pdf rule, the are constructed in
+    a build/pdf directory. Since these directories are removed
+    upon cleaning, they are not permanently saved in the repository.
+    In order to permanently save PDF documentation, so that we
+    don't always have to recompile them to use them, this "publish"
+    rule was created.
+
+    This rule recursively looks from the given directory down for
+    .tex file not located in a "build" directory. When it finds one
+    it builds the pdf file in the build/pdf directory, and then
+    moves it to the same directory as the original .tex file, thus
+    "publishing" it into a permanent directory.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         pass  # We are overriding build instead since
         # we don't need to usual build boilerplate

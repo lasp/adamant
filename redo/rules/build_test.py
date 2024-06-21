@@ -10,19 +10,21 @@ from base_classes.build_rule_base import build_rule_base
 import re
 
 
-# Used to remove ansi characters from aunit output.
 def escape_ansi(line):
+    """Used to remove ansi characters from aunit output."""
     ansi_escape = re.compile(r"(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]")
     return ansi_escape.sub("", line)
 
 
-# This build rule runs a compiled test binary. If a binary
-# called test.elf is found for a certain directory, then
-# this rule will run that test binary. It will also inspect
-# the test output. If the output contains the word "FAIL"
-# then this rule will return 1 to the commandline. Otherwise
-# it will return 0.
 class build_test(build_rule_base):
+    """
+    This build rule runs a compiled test binary. If a binary
+    called test.elf is found for a certain directory, then
+    this rule will run that test binary. It will also inspect
+    the test output. If the output contains the word "FAIL"
+    then this rule will return 1 to the commandline. Otherwise
+    it will return 0.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         # Get targets for this directory:
         directory = os.path.abspath(os.path.dirname(redo_1))
@@ -74,12 +76,14 @@ class build_test(build_rule_base):
         ):
             error.abort()
 
-    # Match any binary file called "test.elf".
     def input_file_regex(self):
+        """Match any binary file called "test.elf"."""
         return r".*\/test\.elf$"
 
-    # There is no real output name here. This is a dummy name
-    # that will produce no content.
     def output_filename(self, input_filename):
+        """
+        There is no real output name here. This is a dummy name
+        that will produce no content.
+        """
         directory = redo_arg.get_src_dir(input_filename)
         return os.path.join(directory, "test")

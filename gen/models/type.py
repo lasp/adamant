@@ -6,17 +6,21 @@ from collections import OrderedDict
 import os
 
 
-# This is the object model for a packed type. It extracts data from a
-# input file and stores the data as object member variables.
 class type(packed_type):
-    # Initialize the packed type object, ingest data, and check it by
-    # calling the base class init function.
+    """
+    This is the object model for a packed type. It extracts data from a
+    input file and stores the data as object member variables.
+    """
     def __init__(self, filename, template=os.environ["SCHEMAPATH"] + "/type.yaml"):
+        """
+        Initialize the packed type object, ingest data, and check it by
+        calling the base class init function.
+        """
         # Load the object from the file:
         super(type, self).__init__(filename, template=template)
 
-    # Load record specific data structures with information from YAML file.
     def _load(self):
+        """Load record specific data structures with information from YAML file."""
         # Initialize object members:
         self.element = None
 
@@ -93,16 +97,16 @@ class type(packed_type):
             [self.element.type_package] if not self.element.is_packed_type else []
         )
 
-    # Get the model types, recursively delving into any types that are of record type:
     def get_all_types_recursive(self):
+        """Get the model types, recursively delving into any types that are of record type."""
         types = []
         types.append(self.element.type)
         if self.element.type_model:
             types.extend(self.element.type_model.get_all_types_recursive())
         return list(OrderedDict.fromkeys(types))
 
-    # Get all type models, recursively delving into any types that are of record type:
     def get_all_type_models_recursive(self):
+        """Get all type models, recursively delving into any types that are of record type."""
         type_models = []
         if self.element.is_packed_type:
             type_models.append(self.element.type_model)

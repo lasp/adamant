@@ -45,8 +45,8 @@ class extracted_products_ads(basic_generator, generator_base):
         print(p.render(self.template, template_path=self.template_dir))
 
 
-# Class for generating the adb file
 class extracted_products_adb(basic_generator, generator_base):
+    """Class for generating the adb file"""
     def __init__(self):
         this_file_dir = os.path.dirname(os.path.realpath(__file__))
         template_dir = os.path.join(this_file_dir, ".." + os.sep + "templates")

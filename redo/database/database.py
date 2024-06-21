@@ -33,12 +33,14 @@ _UNQLITE_OPEN_IN_MEMORY = 0x00000080
 _UNQLITE_OPEN_MMAP = 0x00000100
 
 
-# Init modes. This enumeration tells the database
-# class below what permissions a database object
-# should have. A "read_only" database object will be more
-# performant than a "read_write" or "create" database
-# object, so it should be preferred when possible.
 class DATABASE_MODE(Enum):
+    """
+    Init modes. This enumeration tells the database
+    class below what permissions a database object
+    should have. A "read_only" database object will be more
+    performant than a "read_write" or "create" database
+    object, so it should be preferred when possible.
+    """
     READ_ONLY = 0
     READ_WRITE = 1
     CREATE = 2
@@ -52,8 +54,8 @@ def _get_flock(filename):
     return FileLock(_get_flock_filename(filename), timeout=10)
 
 
-# Private helper functions for deleting/opening/creating an unqlite database:
 def _destroy(filename):
+    """Private helper functions for deleting/opening/creating an unqlite database."""
     try:
         os.remove(filename)
     except OSError:
@@ -97,11 +99,13 @@ def _open_rw(filename):
     return db, lock
 
 
-# Sometimes unqlite complains when you try to read from a database with
-# an exclusive lock. I think this happens when a database is currently
-# being created, while another thread tries to read. In this case
-# let's try 10 times before failing, sleeping a bit more each time.
 def _try_try_again(func):
+    """
+    Sometimes unqlite complains when you try to read from a database with
+    an exclusive lock. I think this happens when a database is currently
+    being created, while another thread tries to read. In this case
+    let's try 10 times before failing, sleeping a bit more each time.
+    """
     count = 0
     while True:
         try:
@@ -113,17 +117,21 @@ def _try_try_again(func):
             time.sleep(count * 0.05)
 
 
-# This is a basic database object which allows key/value storage
-# where the storage type can be any python data structure. Under
-# the hood it uses pickle to store python datastructures in an
-# unqlite NoSQL database.
 class database(object):
-    # Initialize the database object. It can be initialized in
-    # 3 different modes: read_only, read_write, and create.
-    # read_only is the default mode, and the most performant.
-    # create will destroy the old database file before instantiating
-    # a new one.
+    """
+    This is a basic database object which allows key/value storage
+    where the storage type can be any python data structure. Under
+    the hood it uses pickle to store python datastructures in an
+    unqlite NoSQL database.
+    """
     def __init__(self, filename, mode=DATABASE_MODE.READ_ONLY):
+        """
+        Initialize the database object. It can be initialized in
+        3 different modes: read_only, read_write, and create.
+        read_only is the default mode, and the most performant.
+        create will destroy the old database file before instantiating
+        a new one.
+        """
         self.filename = filename
         if mode == DATABASE_MODE.READ_ONLY:
             self.db, self.lock = _open_ro(filename)
@@ -136,36 +144,40 @@ class database(object):
                 "mode must be set to either READ_ONLY, READ_WRITE, or CREATE."
             )
 
-    # Close the database object. Note that because of the
-    # __enter__/__exit__ methods below, using a "with"
-    # statement with the database should be preferred to calling
-    # this close method manually.
     def close(self):
+        """
+        Close the database object. Note that because of the
+        __enter__/__exit__ methods below, using a "with"
+        statement with the database should be preferred to calling
+        this close method manually.
+        """
         try:
             self.db.close()
         except BaseException:
             pass
 
-    # Completely remote the database from the filesystem.
     def destroy(self):
+        """Completely remote the database from the filesystem."""
         self.close()
         _destroy(self.filename)
 
-    # Close the database.
     def __del__(self):
+        """Close the database."""
         self.close()
 
-    # Enter function for a python "with" statement.
     def __enter__(self):
+        """Enter function for a python "with" statement."""
         return self
 
-    # The exit function for a python "with" statement
-    # automatically handles closing the database.
     def __exit__(self, type, value, traceback):
+        """
+        The exit function for a python "with" statement
+        automatically handles closing the database.
+        """
         self.close()
 
-    # Store data in the database for a specific string key
     def store(self, key, data):
+        """Store data in the database for a specific string key"""
         def _do_store():
             try:
                 # We must have mutual exclusion on writes, so we use an external
@@ -182,13 +194,17 @@ class database(object):
 
         _try_try_again(_do_store)
 
-    # Extract data from the database for a specific string
-    # key. If the key does not exist, throw a KeyError
-    # exception.
     def fetch(self, key):
-        # Extract data from database and deserialize it into
-        # a python data structure:
+        """
+        Extract data from the database for a specific string
+        key. If the key does not exist, throw a KeyError
+        exception.
+        """
         def _do_fetch():
+            """
+            Extract data from database and deserialize it into
+            a python data structure:
+            """
             try:
                 sdata = self.db[key]
                 return pickle.loads(sdata)
@@ -199,12 +215,16 @@ class database(object):
 
         return _try_try_again(_do_fetch)
 
-    # Extract data from the database for a specific string
-    # key. If the key does not exist, None is returned.
     def try_fetch(self, key):
-        # Extract data from database and deserialize it into
-        # a python data structure:
+        """
+        Extract data from the database for a specific string
+        key. If the key does not exist, None is returned.
+        """
         def _do_try_fetch():
+            """
+            Extract data from database and deserialize it into
+            a python data structure:
+            """
             try:
                 sdata = self.db[key]
                 return pickle.loads(sdata)
@@ -213,33 +233,39 @@ class database(object):
 
         return _try_try_again(_do_try_fetch)
 
-    # Return a list of all the keys that exist in the database.
     def keys(self):
+        """Return a list of all the keys that exist in the database."""
         return list(self.db.keys())
 
-    # Return a list of all the values that exist in the database.
     def values(self):
+        """Return a list of all the values that exist in the database."""
         keys = self.keys()
         values = []
         for key in keys:
             values.append(self.fetch(key))
         return values
 
-    # Return True is a key exists in the database, otherwise
-    # return False.
     def does_key_exist(self, key):
+        """
+        Return True is a key exists in the database, otherwise
+        return False.
+        """
         return key in self.db
 
-    # Convert the entire database into a human readable
-    # string representation.
     def __repr__(self):
+        """
+        Convert the entire database into a human readable
+        string representation.
+        """
         string = ""
         for key, value in self.db.items():
             data = pickle.loads(value)
             string += str(key) + " : " + str(data) + "\n"
         return string
 
-    # Convert the entire database into a human readable
-    # string representation.
     def __str__(self):
+        """
+        Convert the entire database into a human readable
+        string representation.
+        """
         return self.__repr__()

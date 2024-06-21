@@ -5,9 +5,11 @@ from base_classes.build_rule_base import build_rule_base
 from database.utility_database import utility_database
 
 
-# This build rule runs "redo all" from every directory in the
-# build path.
 class build_path(build_rule_base):
+    """
+    This build rule runs "redo all" from every directory in the
+    build path.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         # Get the build path. We only want to build things
         # that are actually in the path.

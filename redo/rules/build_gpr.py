@@ -8,9 +8,11 @@ from database.utility_database import utility_database
 from util import model_loader
 
 
-# This build rule generates a gpr file from any executable found. It
-# uses the generator system to do the file generation.
 class build_gpr(build_rule_base):
+    """
+    This build rule generates a gpr file from any executable found. It
+    uses the generator system to do the file generation.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         if not redo_arg.in_build_gpr_dir(redo_1):
             error.error_abort(
@@ -44,13 +46,15 @@ class build_gpr(build_rule_base):
             gpr_dict["source_path"] = path
         print(jinja.render(gpr_dict, "/gpr/project.gpr"))
 
-    # Match any executable file.
     def input_file_regex(self):
+        """Match any executable file."""
         return [r".*\/main\.elf$", r".*\/test\.elf$"]
 
-    # Return a gpr file with the same name as the executable located in the
-    # build/gpr directory in the same build directory as the executable.
     def output_filename(self, input_filename):
+        """
+        Return a gpr file with the same name as the executable located in the
+        build/gpr directory in the same build directory as the executable.
+        """
         src_dir = redo_arg.get_src_dir(input_filename)
         base = redo_arg.get_base_no_ext(input_filename)
         return os.path.join(src_dir, "build" + os.sep + "gpr" + os.sep + base + ".gpr")

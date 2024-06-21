@@ -6,13 +6,15 @@ from util import redo
 # parsing HTML.
 
 
-#
-# Given an output filename and the html string that will be
-# written to it, search through the html text for html links
-# that are included in it.
-# ie. <a class="record_link" href="link.html">stuff</a>
-# And then return a list of those links
 def get_html_links(output_filename, html):
+    """
+
+    Given an output filename and the html string that will be
+    written to it, search through the html text for html links
+    that are included in it.
+    ie. <a class="record_link" href="link.html">stuff</a>
+    And then return a list of those links
+    """
     def relative_path_to_absolute(path_from, path_to):
         return os.path.abspath(os.path.join(path_from, path_to))
 
@@ -34,10 +36,12 @@ def get_html_links(output_filename, html):
     return abs_links
 
 
-# Given an output filename and the html string that will be
-# written to it, search through the html text for html links
-# that are included in it.
-# ie. <a class="record_link" href="link.html">stuff</a>
-# And then depend on those links using redo-ifchange.
 def depend_on_html_links(output_filename, html):
+    """
+    Given an output filename and the html string that will be
+    written to it, search through the html text for html links
+    that are included in it.
+    ie. <a class="record_link" href="link.html">stuff</a>
+    And then depend on those links using redo-ifchange.
+    """
     redo.redo_ifchange(get_html_links(output_filename, html))

@@ -45,12 +45,14 @@ _high_crc = [
 ]
 
 
-#
-# 16-bit CRC:
-#   Uses CCITT CRC polynomial: X^16 + X^12 + X^5 + 1.
-#   The accepted start value is 0xffff.
-#
 def crc_16(byte_array, seed=[0xFF, 0xFF]):
+    """
+
+    16-bit CRC:
+    Uses CCITT CRC polynomial: X^16 + X^12 + X^5 + 1.
+    The accepted start value is 0xffff.
+
+    """
     high_parity = seed[0]
     low_parity = seed[1]
     for byte in list(byte_array):
@@ -60,8 +62,8 @@ def crc_16(byte_array, seed=[0xFF, 0xFF]):
     return [high_parity, low_parity]
 
 
-# Simple 16-bit checksum.
 def checksum_16(byte_array, seed=[0x00, 0x00]):
+    """Simple 16-bit checksum."""
     assert (
         len(byte_array) % 2 == 0
     ), "Checksum 16 only works on even numbered byte arrays"

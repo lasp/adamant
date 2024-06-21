@@ -23,12 +23,16 @@ class data_product(ided_entity):
         return self
 
 
-# This is the object model for a data product suite. It extracts data from a
-# input file and stores the data as object member variables.
 class data_products(component_submodel, ided_suite):
-    # Initialize the data product object, ingest data, and check it by
-    # calling the base class init function.
+    """
+    This is the object model for a data product suite. It extracts data from a
+    input file and stores the data as object member variables.
+    """
     def __init__(self, filename):
+        """
+        Initialize the data product object, ingest data, and check it by
+        calling the base class init function.
+        """
         # Load the object from the file:
         ided_suite.__init__(self)
         component_submodel.__init__(

@@ -7,8 +7,8 @@ from generators.basic import add_basic_generators_to_module
 from models import assembly
 
 
-# Packet yaml type file
 class assembly_cpu_monitor_yaml(assembly_generator, generator_base):
+    """Packet yaml type file"""
     def __init__(self):
         this_file_dir = os.path.dirname(os.path.realpath(__file__))
         template_dir = os.path.join(this_file_dir, ".." + os.sep + "templates")
@@ -25,8 +25,8 @@ class assembly_cpu_monitor_yaml(assembly_generator, generator_base):
         return assem.get_dependencies()
 
 
-# Hydra file
 class assembly_cpu_monitor_xml(assembly_hydra_generator, generator_base):
+    """Hydra file"""
     def __init__(self):
         this_file_dir = os.path.dirname(os.path.realpath(__file__))
         template_dir = os.path.join(this_file_dir, ".." + os.sep + "templates")

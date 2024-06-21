@@ -7,8 +7,8 @@ from generators.basic import add_basic_generators_to_module
 from models import assembly
 
 
-# Packet yaml type file
 class assembly_command_sequencer_summary_yaml(assembly_generator, generator_base):
+    """Packet yaml type file"""
     def __init__(self):
         this_file_dir = os.path.dirname(os.path.realpath(__file__))
         template_dir = os.path.join(this_file_dir, ".." + os.sep + "templates")
@@ -36,8 +36,8 @@ class assembly_command_sequencer_summary_yaml(assembly_generator, generator_base
         return assem.get_dependencies()
 
 
-# Packet yaml type file
 class assembly_command_sequencer_details_yaml(assembly_generator, generator_base):
+    """Packet yaml type file"""
     def __init__(self):
         this_file_dir = os.path.dirname(os.path.realpath(__file__))
         template_dir = os.path.join(this_file_dir, ".." + os.sep + "templates")
@@ -82,8 +82,8 @@ add_basic_generators_to_module(
 )
 
 
-# Generator for SEQ command and telemetry configuration file:
 class assembly_seq_cmd_tlm_txt(assembly_generator, generator_base):
+    """Generator for SEQ command and telemetry configuration file."""
     def __init__(self):
         this_file_dir = os.path.dirname(os.path.realpath(__file__))
         template_dir = os.path.join(this_file_dir, ".." + os.sep + "templates")

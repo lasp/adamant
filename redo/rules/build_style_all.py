@@ -19,10 +19,12 @@ else:
     FAILED = BOLD + RED + "FAILED" + NO_COLOR
 
 
-# This build rule looks for source code in the directory
-# it is passed and recursively below. It then runs redo style
-# prints a report to the terminal as the style checks are run.
 class build_style_all(build_rule_base):
+    """
+    This build rule looks for source code in the directory
+    it is passed and recursively below. It then runs redo style
+    prints a report to the terminal as the style checks are run.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         pass  # We are overriding build instead since
         # we don't need to usual build boilerplate

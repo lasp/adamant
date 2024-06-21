@@ -80,8 +80,8 @@ class parameter_table_yaml(basic_generator, generator_base):
         print(p.render(self.template, template_path=self.template_dir))
 
 
-# Hydra page for parameter table:
 class parameter_table_xml(basic_generator, generator_base):
+    """Hydra page for parameter table."""
     def __init__(self):
         this_file_dir = os.path.dirname(os.path.realpath(__file__))
         template_dir = os.path.join(this_file_dir, ".." + os.sep + "templates")

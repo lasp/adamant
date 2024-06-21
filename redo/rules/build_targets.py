@@ -5,9 +5,11 @@ from database.build_target_database import build_target_database
 from os import environ
 
 
-# This build rule lists all the known redo build targets that
-# exist and can be used.
 class build_targets(build_rule_base):
+    """
+    This build rule lists all the known redo build targets that
+    exist and can be used.
+    """
     # We override build here for performance. With redo targets there is no
     # need to load the source code and models from then entire project,
     # we just need to build path to include the directory pointed to by

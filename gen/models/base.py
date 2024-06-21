@@ -36,11 +36,13 @@ def unique(lst):
     return list(set(lst))
 
 
-# Print a multiline string with the provided prefix and wrapped over the
-# maximum line length.
 def printMultiLine(stringList, prefix="   ", max_line_length=79):
-    # Remove trailing white spaces that appear right before endlines:
+    """
+    Print a multiline string with the provided prefix and wrapped over the
+    maximum line length.
+    """
     def remove_trailing_spaces(string):
+        """Remove trailing white spaces that appear right before endlines."""
         return re.sub(r"\s+\n", "\n", string)
 
     # Preserve any embedded newlines by splitting into list of lines:
@@ -56,19 +58,21 @@ def printMultiLine(stringList, prefix="   ", max_line_length=79):
     return ""
 
 
-#
-# This function can be used in a Jinja template to print to the console via:
-#  {{ debug_print("Hello, world!") }}
-#
 def debug_print(text):
+    """
+
+    This function can be used in a Jinja template to print to the console via:
+    {{ debug_print("Hello, world!") }}
+
+    """
     import sys
 
     sys.stderr.write(text + "\n")
     return ""
 
 
-# A class that has a render method, to render via jinja using a provided template:
 class renderable_object(object):
+    """A class that has a render method, to render via jinja using a provided template."""
     def __new__(cls, *args, **kwargs):
         # return super(renderable_object, cls).__new__(cls, *args, **kwargs)
         obj = super(renderable_object, cls).__new__(cls)
@@ -78,26 +82,30 @@ class renderable_object(object):
         obj.printMultiLine = printMultiLine
         return obj
 
-    # Render this object using jinja and the provided template.
-    # This method takes a provided template file and produces an output file
-    # based on it, filling in its contents with members from the child class
-    # object.
     def render(self, template_file, template_path=None):
+        """
+        Render this object using jinja and the provided template.
+        This method takes a provided template file and produces an output file
+        based on it, filling in its contents with members from the child class
+        object.
+        """
         return jinja.render(
             self.__dict__, template_file, template_path, extensions=["jinja2.ext.do"]
         )
 
 
-# We use this meta class to intercept calls to create a new "base" object. It
-# looks for arguments that should only be passed to __new__, currently this only
-# includes an option to ignore the model cache on load, and filters those arguments
-# before passing the remaining arguments to __init__. This differs slightly from the
-# default python behavior, and allows us to not propagate arguments like "ignore_cache"
-# through the __init__ for all model objects that inherit from base.
-#
-# This meta class also extends the abc.ABCMeta class, so we get the features from that
-# as well.
 class base_meta(abc.ABCMeta):
+    """
+    We use this meta class to intercept calls to create a new "base" object. It
+    looks for arguments that should only be passed to __new__, currently this only
+    includes an option to ignore the model cache on load, and filters those arguments
+    before passing the remaining arguments to __init__. This differs slightly from the
+    default python behavior, and allows us to not propagate arguments like "ignore_cache"
+    through the __init__ for all model objects that inherit from base.
+
+    This meta class also extends the abc.ABCMeta class, so we get the features from that
+    as well.
+    """
     def __call__(cls, *args, **kwargs):
         ignore_cache = kwargs.pop("ignore_cache", False)
         instance = cls.__new__(cls, *args, **kwargs, ignore_cache=ignore_cache)
@@ -105,9 +113,11 @@ class base_meta(abc.ABCMeta):
         return instance
 
 
-# The model base class. All python models that load yaml files should
-# inherit from this class.
 class base(renderable_object, metaclass=base_meta):
+    """
+    The model base class. All python models that load yaml files should
+    inherit from this class.
+    """
     #################################################
     # Model Caching:
     #################################################
@@ -212,10 +222,12 @@ class base(renderable_object, metaclass=base_meta):
     # Core class methods:
     #################################################
 
-    # Create a model object. This constructor will look for a version
-    # of this model that is already cached and return that, or if no
-    # cached version is found, will return a new object.
     def __new__(cls, filename, *args, **kwargs):
+        """
+        Create a model object. This constructor will look for a version
+        of this model that is already cached and return that, or if no
+        cached version is found, will return a new object.
+        """
         # Try to load the model from the cache:
         if filename:
             # See if we are requested to ignore the cache for this model
@@ -252,19 +264,23 @@ class base(renderable_object, metaclass=base_meta):
             self.do_save_to_cache = True
         return self
 
-    # This function provides the "filename" argument to pickle so
-    # that things get serialized correctly when pickle calls the
-    # __new__ function above.
     def __getnewargs__(self):
+        """
+        This function provides the "filename" argument to pickle so
+        that things get serialized correctly when pickle calls the
+        __new__ function above.
+        """
         return (None,)
 
-    # Initialize the base class. This includes validating the yaml file against
-    # its schema, opening the yaml file, loading it into the child class object
-    # and checking it for validity. Once this method finishes, you can be sure that
-    # the Yaml file has been fully loaded into its corresponding python object, is
-    # valid, and ready to use for output file generation.
     @throw_exception_with_filename
     def __init__(self, filename, schema):
+        """
+        Initialize the base class. This includes validating the yaml file against
+        its schema, opening the yaml file, loading it into the child class object
+        and checking it for validity. Once this method finishes, you can be sure that
+        the Yaml file has been fully loaded into its corresponding python object, is
+        valid, and ready to use for output file generation.
+        """
         # If model was found in cache, then just use it, do not
         # initialize:
         if not self.from_cache:
@@ -306,32 +322,38 @@ class base(renderable_object, metaclass=base_meta):
             if self.do_save_to_cache:
                 self.save_to_cache()
 
-    # Method provided to support sets of these models. Note that
-    # each python model corresponds uniquely to the file it was
-    # loaded from. So we can hash on that.
     def __hash__(self):
+        """
+        Method provided to support sets of these models. Note that
+        each python model corresponds uniquely to the file it was
+        loaded from. So we can hash on that.
+        """
         return hash(self.full_filename)
 
-    # Method provided to support sets of these models. Note that
-    # each python model corresponds uniquely to the file it was
-    # loaded from. So we can compare via that.
     def __eq__(self, other):
+        """
+        Method provided to support sets of these models. Note that
+        each python model corresponds uniquely to the file it was
+        loaded from. So we can compare via that.
+        """
         return self and other and self.full_filename == other.full_filename
 
-    # String representation of model class
     def __repr__(self):
+        """String representation of model class"""
         return "<class " + self.__class__.__name__ + "(" + self.basename + ")>"
 
     def __str__(self):
         return self.__repr__()
 
-    # Validate that the yaml file is valid yaml and run the linter to make sure it
-    # looks good, conforming to our linter configuration:
     def lint(self):
+        """
+        Validate that the yaml file is valid yaml and run the linter to make sure it
+        looks good, conforming to our linter configuration:
+        """
         self._lint(self.full_filename)
 
-    # Validate the yaml file against a schema to make sure it is formatted correctly.
     def validate(self):
+        """Validate the yaml file against a schema to make sure it is formatted correctly."""
         if self.full_schema:
             # Pykwalify requires a the yaml be stored in a file prior to validation. We may
             # have altered the contents of the yaml based on the adamant global configuration
@@ -365,10 +387,10 @@ class base(renderable_object, metaclass=base_meta):
                 # Make sure we clean up the temp file.
                 os.remove(temp_file)
 
-    # Open the yaml file, parse it, and store its contents in self.data:
     def openYaml(self):
-        # Helper function to load yaml using ruamel.yaml library:
+        """Open the yaml file, parse it, and store its contents in self.data."""
         def _loadYaml(yaml_text):
+            """Helper function to load yaml using ruamel.yaml library."""
             import ruamel.yaml as yaml
 
             # Turn off warnings for unsafe yaml loading. We don't care.
@@ -427,10 +449,10 @@ class base(renderable_object, metaclass=base_meta):
         self.file_contents = resolved_yaml
         self.data = _loadYaml(resolved_yaml)
 
-    # Method for sanitizing the self.data contents prior to calling load:
     def clean(self):
-        # Recursive function that strips all value strings:
+        """Method for sanitizing the self.data contents prior to calling load."""
         def _strip_values(item):
+            """Recursive function that strips all value strings."""
             if isinstance(item, str):
                 return item.strip(" \t\n")
             elif isinstance(item, dict):
@@ -443,22 +465,26 @@ class base(renderable_object, metaclass=base_meta):
         # Call recursive strip function:
         self.data = _strip_values(self.data)
 
-    # Function which returns the dependencies of the model. This is useful information
-    # for redo, so that if dependencies for a certain model change, then all autocode
-    # using that model can be rebuilt. By default, if this method is not overridden, then
-    # an empty list of dependencies is returned.
     def get_dependencies(self):
+        """
+        Function which returns the dependencies of the model. This is useful information
+        for redo, so that if dependencies for a certain model change, then all autocode
+        using that model can be rebuilt. By default, if this method is not overridden, then
+        an empty list of dependencies is returned.
+        """
         return self.dependencies
 
-    # Abstract method for load. Child classes should override this method and
-    # load data from self.data into object specific data structures that will be
-    # useful for file generation with the templates. It is also recommended
-    # that you perform a check of the input YAML file data to ensure that it is
-    # valid. Schema validation does a good job at checking most issues with
-    # YAML files, however, there is certain things that a schema just cannot
-    # check. Use this method to check those things.
     @abc.abstractmethod
     def load(self):
+        """
+        Abstract method for load. Child classes should override this method and
+        load data from self.data into object specific data structures that will be
+        useful for file generation with the templates. It is also recommended
+        that you perform a check of the input YAML file data to ensure that it is
+        valid. Schema validation does a good job at checking most issues with
+        YAML files, however, there is certain things that a schema just cannot
+        check. Use this method to check those things.
+        """
         pass
 
     # def render(self, template_file, template_path=None):
@@ -476,12 +502,12 @@ class base(renderable_object, metaclass=base_meta):
     def warning(self, string, line_number=None):
         system_error.warning_print("Warning " + self._error_str(string, line_number))
 
-    # Warning message for model:
     def warn(self, string, line_number=None):
+        """Warning message for model."""
         sys.stderr.write("Warning " + self._error_str(string, line_number) + "\n")
 
-    # Helper function to get file paths:
     def get_path_from(self, path_from):
+        """Helper function to get file paths."""
         # Return the following:
         #  relative path to this model file from the provided path
         return os.path.relpath(self.full_filename, path_from)

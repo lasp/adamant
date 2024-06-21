@@ -4,15 +4,17 @@ from util import model_loader
 from util import redo
 
 
-# This model is a specialized data product suite for the fault correction component.
-# This class inherits from the normal data product model but adds some extra functionality
-# needed for the fault correction component. In particular, one of the data products for
-# the fault correction component derives its type from its autocoded input parameters.
-# The code below stuffs this derived type into the correct data product at assembly
-# load time.
 class fault_correction_commands(commands):
-    # This is just a "decorated" data product object, so make sure everyone treats it like that.
+    """
+    This model is a specialized data product suite for the fault correction component.
+    This class inherits from the normal data product model but adds some extra functionality
+    needed for the fault correction component. In particular, one of the data products for
+    the fault correction component derives its type from its autocoded input parameters.
+    The code below stuffs this derived type into the correct data product at assembly
+    load time.
+    """
     def submodel_name(self):
+        """This is just a "decorated" data product object, so make sure everyone treats it like that."""
         return "commands"
 
     def set_assembly(self, assembly):

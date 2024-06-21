@@ -4,17 +4,21 @@ from base_classes.build_rule_base import build_rule_base
 from database.model_cache_database import model_cache_database
 
 
-# This build rule remove the model cache from the filesystem
-# so it will need to be recreated from scratch for the next build.
-# This can be useful if an output is not generating correctly, and
-# a dependency is missing to the yaml file being modified.
 class build_clear_cache(build_rule_base):
-    # We override build here for performance. With redo clear_cache there is no
-    # need to load the source code and models from then entire project, so
-    # we just need to build path to include the directory pointed to by
-    # redo_1. So set that in the environment for speed, then call the
-    # normal implementation of build.
+    """
+    This build rule remove the model cache from the filesystem
+    so it will need to be recreated from scratch for the next build.
+    This can be useful if an output is not generating correctly, and
+    a dependency is missing to the yaml file being modified.
+    """
     def build(self, redo_1, redo_2, redo_3):
+        """
+        We override build here for performance. With redo clear_cache there is no
+        need to load the source code and models from then entire project, so
+        we just need to build path to include the directory pointed to by
+        redo_1. So set that in the environment for speed, then call the
+        normal implementation of build.
+        """
         directory = os.path.dirname(os.path.abspath(redo_1))
         environ["BUILD_PATH"] = directory + os.pathsep + directory + os.sep + ".."
         super(build_clear_cache, self).build(redo_1, redo_2, redo_3)

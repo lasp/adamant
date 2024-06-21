@@ -5,8 +5,8 @@ from util import error
 import git
 
 
-# Get the root directory of the adamant repository.
 def _get_git_root(path):
+    """Get the root directory of the adamant repository."""
     try:
         git_repo = git.Repo(path, search_parent_directories=True)
         git_root = git_repo.git.rev_parse("--show-toplevel")
@@ -17,11 +17,13 @@ def _get_git_root(path):
     return git_root
 
 
-# This build rule recursively "cleans" from the top of the
-# git repository that the command is run in. Cleaning involves
-# removing any "build" directories that are found, as well as
-# running any "clean.do" files found.
 class build_clean_all(build_rule_base):
+    """
+    This build rule recursively "cleans" from the top of the
+    git repository that the command is run in. Cleaning involves
+    removing any "build" directories that are found, as well as
+    running any "clean.do" files found.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         pass  # We are overriding build instead since
         # we don't need to usual build boilerplate

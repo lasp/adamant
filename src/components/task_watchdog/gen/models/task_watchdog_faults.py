@@ -4,16 +4,20 @@ from models.submodels.ided_suite import ided_suite
 from util import model_loader
 
 
-# This model is a specialized data product suite for the product extractor data products. This
-# class inherits from the normal data products model but adds extra data products based on the user's model input.
 class task_watchdog_faults(faults):
-    # This is just a "decorated" fault object, so make sure everyone treats it like that.
+    """
+    This model is a specialized data product suite for the product extractor data products. This
+    class inherits from the normal data products model but adds extra data products based on the user's model input.
+    """
     def submodel_name(self):
+        """This is just a "decorated" fault object, so make sure everyone treats it like that."""
         return "faults"
 
-    # We override this because we DO NOT want to add a Fault_Id_Base argument to the component Set_Id_Base initialization
-    # procedure. Watchdog faults are always defined in the model and never derived from a base.
     def set_component(self, component):
+        """
+        We override this because we DO NOT want to add a Fault_Id_Base argument to the component Set_Id_Base initialization
+        procedure. Watchdog faults are always defined in the model and never derived from a base.
+        """
         self._set_component_no_id_bases(component)
 
     def set_assembly(self, assembly):

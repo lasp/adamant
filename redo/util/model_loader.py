@@ -12,10 +12,12 @@ from models.exceptions import ModelException
 # models allows us to write more expressive templates.
 
 
-# Given a model name and model type, return the full path to that model name. This function
-# will thrown an error if more than one file is found containing the same model
-# name and same model type:
 def _get_model_file_paths(model_name, model_types=[]):
+    """
+    Given a model name and model type, return the full path to that model name. This function
+    will thrown an error if more than one file is found containing the same model
+    name and same model type:
+    """
     # Fetch the record from the model database:
     with database.model_database.model_database() as db:
         model_dict = db.get_model_dict(model_name)
@@ -34,18 +36,22 @@ def _get_model_file_paths(model_name, model_types=[]):
     return model_files
 
 
-# Given a model name and types, return all the full paths to models of that name and
-# with matching types:
 def get_model_file_paths(model_name, model_types=[]):
+    """
+    Given a model name and types, return all the full paths to models of that name and
+    with matching types:
+    """
     if model_types and isinstance(model_types, str):
         model_types = [model_types]
     return _get_model_file_paths(model_name, model_types)
 
 
-# Given a model name, return the full path to that model name. This function
-# will thrown an error if more than one file is found containing the same model
-# name.
 def get_model_file_path(model_name, model_types=[]):
+    """
+    Given a model name, return the full path to that model name. This function
+    will thrown an error if more than one file is found containing the same model
+    name.
+    """
     model_files = get_model_file_paths(model_name=model_name, model_types=model_types)
     # Make sure only one model file was found:
     if model_files:
@@ -88,10 +94,12 @@ def _get_model_class(model_filename):
     return getattr(module, model_type)
 
 
-# Load a model from a given yaml file name. The extension on the filename is used
-# to figure out which model class to use. The file extension must match the model
-# class name.
 def load_model(model_filename, *args, **kwargs):
+    """
+    Load a model from a given yaml file name. The extension on the filename is used
+    to figure out which model class to use. The file extension must match the model
+    class name.
+    """
     model_class = _get_model_class(model_filename)
     return model_class(model_filename, *args, **kwargs)
 
@@ -103,10 +111,12 @@ def try_load_model_of_subclass(model_filename, parent_class, *args, **kwargs):
     return None
 
 
-# Try to load a model with the given name and optional type(s). If no model is found
-# than None is returned. This function will throw an error to the user if multiple
-# files are found with the same model name and type.
 def try_load_model_by_name(model_name, model_types=[], *args, **kwargs):
+    """
+    Try to load a model with the given name and optional type(s). If no model is found
+    than None is returned. This function will throw an error to the user if multiple
+    files are found with the same model name and type.
+    """
     # Get the model file paths from the database:
     model_file = get_model_file_path(model_name, model_types)
 
@@ -116,9 +126,11 @@ def try_load_model_by_name(model_name, model_types=[], *args, **kwargs):
     return None
 
 
-# Try to load all models with a given name and optional type(s). If no model is found
-# than an empty list is returned. Otherwise a list of all loaded models is returned.
 def try_load_models_by_name(model_name, model_types=[], *args, **kwargs):
+    """
+    Try to load all models with a given name and optional type(s). If no model is found
+    than an empty list is returned. Otherwise a list of all loaded models is returned.
+    """
     # Get the model file paths from the database:
     model_files = get_model_file_paths(model_name, model_types)
 
@@ -129,8 +141,8 @@ def try_load_models_by_name(model_name, model_types=[], *args, **kwargs):
     return to_return
 
 
-# Helper to load the default adamant configuration file (*.configuration.yaml)
 def load_project_configuration():
+    """Helper to load the default adamant configuration file (*.configuration.yaml)"""
     # Load the configuration file from the environment variable:
     config_file = None
     if "ADAMANT_CONFIGURATION_YAML" in os.environ:

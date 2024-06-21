@@ -87,8 +87,8 @@ class enum(object):
                 raise ModelException("Error encountered loading literal: " + str(e))
         return cls(name=name, literals=literals, description=description, suite=suite)
 
-    # Helper function to get file paths:
     def get_path_from(self, path_from):
+        """Helper function to get file paths."""
         # Return the following:
         #  relative path to this model file from the provided path
         return os.path.relpath(self.full_filename, path_from)
@@ -102,17 +102,21 @@ class enum(object):
         return redo_arg.get_src_dir(self.get_path_from(path_from))
 
 
-# This is the object model for a suite of enumerations. It extracts data from an
-# input file and stores the data as object member variables.
 class enums(base):
-    # Initialize the packed type object, ingest data, and check it by
-    # calling the base class init function.
+    """
+    This is the object model for a suite of enumerations. It extracts data from an
+    input file and stores the data as object member variables.
+    """
     def __init__(self, filename):
+        """
+        Initialize the packed type object, ingest data, and check it by
+        calling the base class init function.
+        """
         # Load the object from the file:
         super(enums, self).__init__(filename, os.environ["SCHEMAPATH"] + "/enums.yaml")
 
-    # Load record specific data structures with information from YAML file.
     def load(self):
+        """Load record specific data structures with information from YAML file."""
         # Initialize object members:
         self.name = None
         self.description = None

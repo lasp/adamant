@@ -7,37 +7,41 @@ from util import target
 import os.path
 
 
-# This database is responsible for storing C/C++ source files found in
-# the build path. The database maps the source filename with the extension
-# removed to the source code location, as well as any model files that
-# are used to generate that source code. An example is shown below:
-#
-# Key:       Value:
-# c_filename ([/path/to/c_filename.c, \
-#              /path/to/c_filename.h], \
-#              /path/to/some_c_model.yaml)
-#
-# This database is useful for figuring out where c source is located
-# in the system given just a base name (which may be all that is included
-# in the "#include" dependencies of a C source file). Note that all
-# entries in this database must be unique, meaning that C files in the
-# build path of the same name, but in different directories are not
-# allowed in Adamant, because of the interface with Ada, even though
-# this pattern is allowed by the C language specification.
 class c_source_database(database):
-    # Initialize the database:
+    """
+    This database is responsible for storing C/C++ source files found in
+    the build path. The database maps the source filename with the extension
+    removed to the source code location, as well as any model files that
+    are used to generate that source code. An example is shown below:
+
+    Key:       Value:
+    c_filename ([/path/to/c_filename.c, \
+    /path/to/c_filename.h], \
+    /path/to/some_c_model.yaml)
+
+    This database is useful for figuring out where c source is located
+    in the system given just a base name (which may be all that is included
+    in the "#include" dependencies of a C source file). Note that all
+    entries in this database must be unique, meaning that C files in the
+    build path of the same name, but in different directories are not
+    allowed in Adamant, because of the interface with Ada, even though
+    this pattern is allowed by the C language specification.
+    """
     def __init__(self, mode=DATABASE_MODE.READ_ONLY):
+        """Initialize the database."""
         super(c_source_database, self).__init__(
             util.get_database_file("c_source"), mode
         )
 
-    # Insert a source file into the database (and the associated model file, if
-    # there is one). Note that for a given basename name (which is derived from the
-    # passed in source code) only a single .c and a single .h file may be added.
-    # If adding another file is attempted, the function will error and warn the user
-    # that every source in the build path must have a unique filename. This is a
-    # restriction of coding in C/C++ within Adamant do to the Ada interface.
     def insert_source(self, source_filename, model_filename=None):
+        """
+        Insert a source file into the database (and the associated model file, if
+        there is one). Note that for a given basename name (which is derived from the
+        passed in source code) only a single .c and a single .h file may be added.
+        If adding another file is attempted, the function will error and warn the user
+        that every source in the build path must have a unique filename. This is a
+        restriction of coding in C/C++ within Adamant do to the Ada interface.
+        """
 
         # Error functions:
         def _duplicate_source_error(file1, file2):
@@ -105,20 +109,22 @@ class c_source_database(database):
         # Insert record into database:
         self.store(key, record)
 
-    # Given a basename, return the associated source files:
     def get_source(self, basename):
+        """Given a basename, return the associated source files."""
         return self.fetch(basename.lower())[0]
 
-    # Given a basename, try to return the associated source files
-    # otherwise return an empty list.
     def try_get_source(self, basename):
+        """
+        Given a basename, try to return the associated source files
+        otherwise return an empty list.
+        """
         try:
             return self.get_source(basename)
         except KeyError:
             return []
 
-    # Given a list of basenames, return the associated source files:
     def get_sources(self, basenames):
+        """Given a list of basenames, return the associated source files."""
         sources = []
         if isinstance(basenames, str):
             basenames = [basenames]
@@ -126,8 +132,8 @@ class c_source_database(database):
             sources.extend(self.get_source(name))
         return list(sources)
 
-    # Given a list of basenames, return the associated source files:
     def try_get_sources(self, basenames):
+        """Given a list of basenames, return the associated source files."""
         sources = []
         if isinstance(basenames, str):
             basenames = [basenames]
@@ -135,8 +141,8 @@ class c_source_database(database):
             sources.extend(self.try_get_source(name))
         return list(sources)
 
-    # Given a list of package names return the associated object files:
     def get_objects(self, names, the_target=None):
+        """Given a list of package names return the associated object files."""
         if the_target is None:
             the_target = target.get_default_target()
         objects = []
@@ -171,16 +177,18 @@ class c_source_database(database):
                 )
         return list(objects)
 
-    # Given a basename, return the associated model file:
     def get_model(self, basename):
+        """Given a basename, return the associated model file."""
         source_record = self.try_fetch(basename)
         if source_record:
             return source_record[1]
         return None
 
-    # Get all the object files that can be created by all the
-    # source stored in the database:
     def get_all_objects(self, target):
+        """
+        Get all the object files that can be created by all the
+        source stored in the database:
+        """
         all_source = [a[0] for a in self.values()]
         flat_source_list = [item for sublist in all_source for item in sublist]
         all_objects = [
