@@ -10,4 +10,6 @@ services:
             - host.docker.internal:host-gateway
         network_mode: host
         image: ${DOCKER_IMAGE_NAME}
+        build:
+            context: .
         command: sleep infinity

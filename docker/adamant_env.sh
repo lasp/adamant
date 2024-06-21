@@ -46,6 +46,10 @@ usage() {
 case $1 in
   start )
     execute "${DOCKER_COMPOSE_COMMAND} -f ${DOCKER_COMPOSE_CONFIG} up -d"
+    execute "${DOCKER_COMPOSE_COMMAND} -f ${DOCKER_COMPOSE_CONFIG} exec ${PROJECT_NAME} bash -c \"\
+      if [ ! -f /home/user/.initialized ]; \
+      then source /home/user/adamant/env/activate && touch /home/user/.initialized; \
+      fi;\""
     echo ""
     echo "Run \"./adamant_env.sh login\" to log in."
     ;;
@@ -56,7 +60,7 @@ case $1 in
     execute "${DOCKER_COMPOSE_COMMAND} -f ${DOCKER_COMPOSE_CONFIG} exec -it -u user ${PROJECT_NAME} //bin//bash"
     ;;
   push )
-    execute "${DOCKER_COMPOSE_COMMAND} -f ${DOCKER_COMPOSE_CONFIG} push ${DOCKER_IMAGE_NAME}"
+    execute "${DOCKER_COMPOSE_COMMAND} -f ${DOCKER_COMPOSE_CONFIG} push"
     ;;
   build )
     execute "${DOCKER_COMPOSE_COMMAND} -f ${DOCKER_COMPOSE_CONFIG} build"
