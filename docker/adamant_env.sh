@@ -19,7 +19,6 @@ fi
 
 set -e
 
-. ${this_dir}/docker_config.sh
 PROJECT_NAME=${this_dir%/*}
 PROJECT_NAME=${PROJECT_NAME##*/}
 DOCKER_COMPOSE_COMMAND="docker compose"
@@ -31,6 +30,12 @@ ${DOCKER_COMPOSE_COMMAND} version &> /dev/null
 if [ "$?" -ne 0 ]; then
   export DOCKER_COMPOSE_COMMAND="docker-compose"
 fi
+
+# Helper function to print out command as executed:
+execute () {
+  echo "$ $@"
+  eval "$@"
+}
 
 usage() {
   echo "Usage: $1 [start, stop, login, push, build, remove]" >&2
@@ -45,7 +50,7 @@ usage() {
 
 case $1 in
   start )
-    execute "${DOCKER_COMPOSE_COMMAND} -f ${DOCKER_COMPOSE_CONFIG} up -d"
+    execute "${DOCKER_COMPOSE_COMMAND} -f ${DOCKER_COMPOSE_CONFIG} up --pull \"missing\" -d"
     execute "${DOCKER_COMPOSE_COMMAND} -f ${DOCKER_COMPOSE_CONFIG} exec ${PROJECT_NAME} bash -c \"\
       if [ ! -f /home/user/.initialized ]; \
       then source /home/user/adamant/env/activate && touch /home/user/.initialized; \
