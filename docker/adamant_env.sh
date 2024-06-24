@@ -22,7 +22,7 @@ set -e
 PROJECT_NAME=${this_dir%/*}
 PROJECT_NAME=${PROJECT_NAME##*/}
 DOCKER_COMPOSE_COMMAND="docker compose"
-DOCKER_COMPOSE_CONFIG="${this_dir}/compose.yml"
+DOCKER_COMPOSE_CONFIG="${this_dir}/docker-compose.yml"
 export PROJECT_NAME
 export DOCKER_COMPOSE_COMMAND
 export DOCKER_COMPOSE_CONFIG
