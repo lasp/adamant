@@ -17,17 +17,17 @@ This procedure is used to create a new Docker container that hosts the Adamant b
    $ git clone https://github.com/lasp/adamant.git
    ```
 
- 3. Next, tell Docker to create a new container from the [pre-built image](https://github.com/lasp/adamant/pkgs/container/adamant). This make take a few minutes and ~3 GB of disk space. By default, the container created is named `adamant_container`. To change this, or the image that the container uses, modify `docker_config.sh` before running the commands below.
+ 3. Next, tell Docker to create a new container from the [pre-built image](https://github.com/lasp/adamant/pkgs/container/adamant). This make take a few minutes and ~3 GB of disk space. By default, the container created is named `adamant_container`. To change this, or the image that the container uses, modify `docker-compose.yml` before running the commands below.
 
    ```
    $ cd adamant/docker
-   $ ./create_container.sh
+   $ ./adamant_env.sh start
    ```
 
  4. Finally, you can log into the container by running.
 
    ```
-   $ ./login_container.sh
+   $ ./adamant_env.sh login
    ```
 
 The first time you log in, the environment will be set up automatically. This can take a few minutes. Note that the `adamant/` directory on your host is shared with the docker container at `~/adamant/`. This allows you to modify files on your host and compile those same files on the container.
@@ -37,13 +37,13 @@ The first time you log in, the environment will be set up automatically. This ca
 Once you have created a container using the section above, you can stop it by running.
 
   ```
-  $ ./stop_container.sh
+  $ ./adamant_env.sh stop
   ```
 
 To start the container up again, run:
 
   ```
-  $ ./start_container.sh
+  $ ./adamant_env.sh start
   ```
 
 ## Testing the Environment
@@ -51,7 +51,7 @@ To start the container up again, run:
 We can make sure the environment is set up correctly by running a component unit test. Below, we login to the container and run the unit test for the Command Router.
 
   ```
-  $ ./login_container.sh
+  $ ./adamant_env.sh login
   ```
 
 From within the container run:
@@ -74,7 +74,7 @@ Next, you can create the Docker image by running:
 
    ```
    $ cd adamant/docker
-   $ ./build_image.sh
+   $ ./adamant_env.sh build
    ```
 
-This may take several minutes complete. By default, the image created is named `ghcr.io/lasp/adamant:latest`. To change this, modify `docker_config.sh` before running `./build_image.sh`.
+This may take several minutes complete. By default, the image created is named `ghcr.io/lasp/adamant:latest`. To change this, modify `docker-compose.yml` before running `./adamant_env.sh build`.
