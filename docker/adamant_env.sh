@@ -53,7 +53,7 @@ case $1 in
     execute "${DOCKER_COMPOSE_COMMAND} -f ${DOCKER_COMPOSE_CONFIG} up --pull \"missing\" -d"
     execute "${DOCKER_COMPOSE_COMMAND} -f ${DOCKER_COMPOSE_CONFIG} exec ${PROJECT_NAME} bash -c \"\
       if [ ! -f /home/user/.initialized ]; \
-      then source /home/user/adamant/env/activate && touch /home/user/.initialized; \
+      then source /home/user/${PROJECT_NAME}/env/activate && touch /home/user/.initialized; \
       fi;\""
     echo ""
     echo "Run \"./adamant_env.sh login\" to log in."
