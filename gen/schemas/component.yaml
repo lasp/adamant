@@ -132,6 +132,10 @@ mapping:
               default:
                 type: str
                 required: False
+              # Whether a parameter can be set to null.
+              not_null:
+                type: bool
+                required: False
         required: False
     required: False
   # If the component services an interrupt, it should be documented here.
