@@ -159,18 +159,6 @@ package body Sequence_Store_Tests.Implementation is
             Assert (False, "Nominal init failed!");
       end Init_Nominal;
 
-      procedure Init_Null is
-      begin
-         -- Empty list not ok.
-         Self.Tester.Component_Instance.Init (Sequence_Slots => null, Check_Slots_At_Startup => False, Dump_Slot_Summary_At_Startup => True);
-         -- Should never get here:
-         Assert (False, "Null slots did not produce exception!");
-      exception
-         -- Expecting exception to be thrown:
-         when others =>
-            null;
-      end Init_Null;
-
       procedure Init_None is
       begin
          -- Empty list not ok.
@@ -311,8 +299,6 @@ package body Sequence_Store_Tests.Implementation is
       -- Test different start-up scenarios:
       T.Component_Instance.Final;
       Init_Nominal;
-      T.Component_Instance.Final;
-      Init_Null;
       T.Component_Instance.Final;
       Init_None;
       T.Component_Instance.Final;

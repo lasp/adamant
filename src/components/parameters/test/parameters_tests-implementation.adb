@@ -78,16 +78,6 @@ package body Parameters_Tests.Implementation is
             Assert (False, "Nominal init failed!");
       end Init_Nominal;
 
-      procedure Init_Null is
-      begin
-         T.Component_Instance.Init (null, False);
-         Assert (False, "Null init failed!");
-      exception
-         -- Expecting exception to be thrown:
-         when others =>
-            null;
-      end Init_Null;
-
       procedure Init_Nonunique_Ids is
          -- A list of the parameter table entries for use by the component.
          Parameter_Table_Entries : aliased Parameters_Component_Types.Parameter_Table_Entry_List :=
@@ -160,7 +150,6 @@ package body Parameters_Tests.Implementation is
    begin
       -- Test different start-up scenarios:
       Init_Nominal;
-      Init_Null;
       Init_Nonunique_Ids;
       Init_Bad_Component_Id;
       Init_Unconnected_Component_Id;

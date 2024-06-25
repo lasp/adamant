@@ -21,7 +21,7 @@ package Component.Parameter_Store.Implementation is
    -- bytes : Basic_Types.Byte_Array_Access - A pointer to an allocation of bytes to be used for storing the parameter table. The size of this byte array MUST be the exact size of the parameter table to be stored, or updating or fetch the table will be rejected with a length error.
    -- dump_Parameters_On_Change : Boolean - If set to True, the component will dump the current parameter values any time a memory region is received to change the parameter table. If set to False, parameters will only be dumped when requested by command.
    --
-   overriding procedure Init (Self : in out Instance; Bytes : in Basic_Types.Byte_Array_Access; Dump_Parameters_On_Change : in Boolean := False);
+   overriding procedure Init (Self : in out Instance; Bytes : in not null Basic_Types.Byte_Array_Access; Dump_Parameters_On_Change : in Boolean := False);
 
 private
 

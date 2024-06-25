@@ -75,28 +75,6 @@ package body Memory_Stuffer_Tests.Implementation is
             Assert (False, "Nominal init failed!");
       end Init_Nominal;
 
-      procedure Init_Null_Region is
-      begin
-         T.Component_Instance.Init (null, Protection_List'Access);
-         -- Should never get here:
-         Assert (False, "Null regions did not produce exception!");
-      exception
-         -- Expecting exception to be thrown:
-         when others =>
-            null;
-      end Init_Null_Region;
-
-      procedure Init_Null_Region_2 is
-      begin
-         T.Component_Instance.Init (null, null);
-         -- Should never get here:
-         Assert (False, "Null regions 2 did not produce exception!");
-      exception
-         -- Expecting exception to be thrown:
-         when others =>
-            null;
-      end Init_Null_Region_2;
-
       procedure Init_Nominal_No_Protection is
       begin
          T.Component_Instance.Init (Regions'Access, null);
@@ -139,8 +117,6 @@ package body Memory_Stuffer_Tests.Implementation is
 
       -- Test different start-up scenarios:
       Init_Nominal;
-      Init_Null_Region;
-      Init_Null_Region_2;
       Init_Nominal_No_Protection;
       Init_Size_Mismatch;
       Init_Size_Mismatch_2;

@@ -6,6 +6,7 @@ init:
   parameters:
     - name: Exception_Data
       type: Packed_Exception_Occurrence.T_Access
+      not_null: true
       description: The copy of the exception data that is updated by the last chance handler, presumably in a nonvolatile memory region.
     - name: Dump_Exception_Data_At_Startup
       type: Boolean

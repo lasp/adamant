@@ -270,10 +270,9 @@ package body Component.Sequence_Store.Implementation is
    -- Check_Slots_At_Startup : Boolean - If True, then check the validity of the sequences in all slots by computing CRCs over them at startup.
    -- Dump_Slot_Summary_At_Startup : Boolean - If True, then the slot summaries will be dumped at startup.
    --
-   overriding procedure Init (Self : in out Instance; Sequence_Slots : in Sequence_Slot_Array_Access; Check_Slots_At_Startup : in Boolean; Dump_Slot_Summary_At_Startup : in Boolean) is
+   overriding procedure Init (Self : in out Instance; Sequence_Slots : in not null Sequence_Slot_Array_Access; Check_Slots_At_Startup : in Boolean; Dump_Slot_Summary_At_Startup : in Boolean) is
    begin
       -- Make sure the sequence slots exist:
-      pragma Assert (Sequence_Slots /= null, "The slot array must not be null.");
       pragma Assert (Sequence_Slots.all'First = 0, "Slots must be zero indexed. This is so there is no conflict with the ground.");
       pragma Assert (Sequence_Slots.all'Length >= 1, "There must be at least one slot.");
       pragma Assert (Sequence_Slots.all'Last >= 0, "There must be at least one slot.");

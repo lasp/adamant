@@ -24,15 +24,13 @@ package body Component.Cpu_Monitor.Implementation is
    -- packet_Period : Interfaces.Unsigned_16 - The period (in ticks) of how often to send out the cpu execution packet. A value of zero disable sending of the packet.
    --
    overriding procedure Init
-      (Self : in out Instance; Task_List : in Task_Types.Task_Info_List_Access; Interrupt_List : in Interrupt_Types.Interrupt_Id_List_Access; Execution_Periods : in Execution_Periods_Type := (1, 6, 30); Packet_Period : in Interfaces.Unsigned_16 := 1)
+      (Self : in out Instance; Task_List : in not null Task_Types.Task_Info_List_Access; Interrupt_List : in not null Interrupt_Types.Interrupt_Id_List_Access; Execution_Periods : in Execution_Periods_Type := (1, 6, 30); Packet_Period : in Interfaces.Unsigned_16 := 1)
    is
       use Task_Types;
       use Interrupt_Types;
       Period : Natural;
       Current_Up_Time : constant Time := Ada.Real_Time.Clock;
    begin
-      pragma Assert (Task_List /= null, "The task_List cannot be null.");
-      pragma Assert (Interrupt_List /= null, "The interrupt_List cannot be null.");
 
       -- Set component variables:
       Self.Tasks := Task_List;

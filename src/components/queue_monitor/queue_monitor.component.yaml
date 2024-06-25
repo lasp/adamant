@@ -7,6 +7,7 @@ init:
   parameters:
     - name: Queued_Component_List
       type: Component.Component_List_Access
+      not_null: true
       description: A list of components to monitor.
     - name: Packet_Period
       type: Interfaces.Unsigned_16

@@ -8,6 +8,7 @@ discriminant:
     - name: Packet_List
       type: Product_Packet_Types.Packet_Description_List_Access_Type
       description: The list of packets to packetize.
+      not_null: true
 init:
   description: This initialization function is used to initialize the roll-over value for the packetizer's internal counter. It is calculated as the largest 32-bit multiple of all the provided periods in the packet_List. This ensures that no packets are skipped or sent too often when a rollover occurs. Note, that this only guarantees expected roll-over behavior if the period of the packets are not changed during runtime via command. If this happens, then the user accepts that a rollover may cause unwanted behavior.
   parameters:

@@ -21,16 +21,13 @@ package body Component.Parameters.Implementation is
    -- parameter_Entries : Parameters_Component_Types.Parameter_Entry_List_Access - A pointer to an autocoded list of parameter entries. This table tells the parameter manager how the parameters are laid out in memory, so that it knows how to construct parameter types to update downstream components.
    -- dump_Parameters_On_Change : Boolean - If set to True, the component will dump the current parameter values any time a command or memory region is received to alter one or more parameter values. If set to False, parameters will only be dumped when requested by command.
    --
-   overriding procedure Init (Self : in out Instance; Parameter_Table_Entries : in Parameters_Component_Types.Parameter_Table_Entry_List_Access; Dump_Parameters_On_Change : in Boolean := False) is
+   overriding procedure Init (Self : in out Instance; Parameter_Table_Entries : in not null Parameters_Component_Types.Parameter_Table_Entry_List_Access; Dump_Parameters_On_Change : in Boolean := False) is
       use Parameter_Types;
       use Parameters_Component_Types;
       Current_Byte : Natural := 0;
    begin
       -- Initialize internal variables:
       Self.Dump_Parameters_On_Change := Dump_Parameters_On_Change;
-
-      -- Make sure the parameter entries is a valid access type. We can't do anything without this:
-      pragma Assert (Parameter_Table_Entries /= null, "parameter_Table_Entries must not be null!");
       Self.Entries := Parameter_Table_Entries;
 
       --

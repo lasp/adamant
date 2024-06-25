@@ -15,6 +15,7 @@ init:
   parameters:
     - name: Products_To_Copy
       type: Product_Mapping_Array_Access
+      not_null: true
       description: The list of mappings to be copied by this component every tick. Raises an error on Init if the list is null, as well as if two mappings share a destination.
     - name: Send_Event_On_Source_Id_Out_Of_Range
       type: Boolean

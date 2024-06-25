@@ -13,9 +13,11 @@ init:
   parameters:
     - name: task_List
       type: Task_Types.Task_Info_List_Access
+      not_null: true
       description: A list of task info records to monitor.
     - name: interrupt_List
       type: Interrupt_Types.Interrupt_Id_List_Access
+      not_null: true
       description: A list of task info records to monitor.
     - name: execution_Periods
       type: Execution_Periods_Type

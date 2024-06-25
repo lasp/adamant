@@ -7,6 +7,7 @@ init:
   parameters:
     - name: parameter_Table_Entries
       type: Parameters_Component_Types.Parameter_Table_Entry_List_Access
+      not_null: true
       description: "A pointer to an autocoded list of parameter table entries. This table tells the parameter manager how the parameters are laid out in memory, so that it knows how to construct parameter types to update downstream components."
     - name: dump_Parameters_On_Change
       type: Boolean

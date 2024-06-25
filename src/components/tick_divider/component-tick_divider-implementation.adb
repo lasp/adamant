@@ -9,11 +9,9 @@ package body Component.Tick_Divider.Implementation is
    ---------------------------------------
    -- This initialization function is used to set the divider values for the component. An entry of 0 disables that connector from ever being invoked.
    --
-   overriding procedure Init (Self : in out Instance; Dividers : in Divider_Array_Type_Access) is
+   overriding procedure Init (Self : in out Instance; Dividers : in not null Divider_Array_Type_Access) is
       Divider : Natural;
    begin
-      -- Check the dividers to make sure they are of the correct size:
-      pragma Assert (Dividers /= null, "Make sure access type is not null.");
       pragma Assert (Dividers'First = Self.Connector_Tick_T_Send'First, "The length of the dividers array must match the length of the connector array!");
       pragma Assert (Dividers'Last = Self.Connector_Tick_T_Send'Last, "The length of the dividers array must match the length of the connector array!");
       pragma Assert (Dividers'Length = Self.Connector_Tick_T_Send'Length, "The length of the dividers array must match the length of the connector array!");

@@ -18,7 +18,7 @@ package Component.Product_Packetizer.Implementation is
    -- Discriminant Parameters:
    -- packet_List : Product_Packet_Types.Packet_Description_List_Access_Type - The list of packets to packetize.
    --
-   type Instance (Packet_List : Product_Packet_Types.Packet_Description_List_Access_Type) is new Product_Packetizer.Base_Instance with private;
+   type Instance (Packet_List : not null Product_Packet_Types.Packet_Description_List_Access_Type) is new Product_Packetizer.Base_Instance with private;
 
    --------------------------------------------------
    -- Subprogram for implementation init method:
@@ -37,7 +37,7 @@ private
    -- Discriminant Parameters:
    -- packet_List : Product_Packet_Types.Packet_Description_List_Access_Type - The list of packets to packetize.
    --
-   type Instance (Packet_List : Product_Packet_Types.Packet_Description_List_Access_Type) is new Product_Packetizer.Base_Instance with record
+   type Instance (Packet_List : not null Product_Packet_Types.Packet_Description_List_Access_Type) is new Product_Packetizer.Base_Instance with record
       Count : Positive := 1; -- The count is rolled over manually in adb
       Roll_Over_Value : Roll_Over_Natural := Roll_Over_Natural'Last; -- This will change to a more appropriate value via the init function.
       Commands_Dispatched_Per_Tick : Positive := 3;

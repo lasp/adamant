@@ -34,7 +34,7 @@ package Component.Command_Sequencer.Implementation is
    -- Timeout_Limit : Natural - The number of ticks to wait before timing out sequencer operations such as waiting on a command response or subsequence load. If a timeout of this type occurs the engine will transition to an error state. A value of zero disables these timeouts.
    -- Instruction_Limit : Positive - The maximum number of sequence instructions we allow the sequence to execute without hitting a pausing action such as sending a command, waiting on telemetry, or waiting for a relative or absolute time. The purpose of this parameter is to prevent a sequence from entering an infinite execution loop which would cause the entire component task to hang indefinitely. You should set the value to some maximum number of instructions that you never expect any of your compiled sequences to hit.
    --
-   overriding procedure Init (Self : in out Instance; Num_Engines : in Seq_Types.Num_Engines_Type; Stack_Size : in Seq_Types.Stack_Depth_Type; Create_Sequence_Load_Command_Function : in Create_Sequence_Load_Command_Access; Packet_Period : in Interfaces.Unsigned_16; Continue_On_Command_Failure : in Boolean; Timeout_Limit : in Natural; Instruction_Limit : in Positive);
+   overriding procedure Init (Self : in out Instance; Num_Engines : in Seq_Types.Num_Engines_Type; Stack_Size : in Seq_Types.Stack_Depth_Type; Create_Sequence_Load_Command_Function : in not null Create_Sequence_Load_Command_Access; Packet_Period : in Interfaces.Unsigned_16; Continue_On_Command_Failure : in Boolean; Timeout_Limit : in Natural; Instruction_Limit : in Positive);
    not overriding procedure Final (Self : in out Instance);
 
 private

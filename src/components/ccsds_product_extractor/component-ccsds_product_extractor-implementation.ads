@@ -20,7 +20,7 @@ package Component.Ccsds_Product_Extractor.Implementation is
    -- Init Parameters:
    -- Data_Product_Extraction_List : Product_Extractor_Types.Extracted_Product_List_Access - The list of data products that will be extracted from packets.
    --
-   overriding procedure Init (Self : in out Instance; Data_Product_Extraction_List : in Product_Extractor_Types.Extracted_Product_List_Access);
+   overriding procedure Init (Self : in out Instance; Data_Product_Extraction_List : in not null Product_Extractor_Types.Extracted_Product_List_Access);
 
    function Less_Than (Left, Right : Ccsds_Product_Apid_List) return Boolean with
       Inline => True;

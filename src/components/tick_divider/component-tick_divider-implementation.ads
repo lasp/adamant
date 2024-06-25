@@ -11,7 +11,7 @@ package Component.Tick_Divider.Implementation is
 
    -- Initialization function to set the divider values for the component
    -- An entry of 0 disables that connector from ever being invoked.
-   overriding procedure Init (Self : in out Instance; Dividers : in Divider_Array_Type_Access);
+   overriding procedure Init (Self : in out Instance; Dividers : in not null Divider_Array_Type_Access);
 
 private
 

@@ -26,7 +26,7 @@ package Component.Cpu_Monitor.Implementation is
    -- execution_Periods : Execution_Periods_Type - The period (in ticks) that specify the duration of time that each CPU measurement is taken over.
    -- packet_Period : Interfaces.Unsigned_16 - The period (in ticks) of how often to send out the cpu execution packet. A value of zero disable sending of the packet.
    --
-   overriding procedure Init (Self : in out Instance; Task_List : in Task_Types.Task_Info_List_Access; Interrupt_List : in Interrupt_Types.Interrupt_Id_List_Access; Execution_Periods : in Execution_Periods_Type := (1, 6, 30); Packet_Period : in Interfaces.Unsigned_16 := 1);
+   overriding procedure Init (Self : in out Instance; Task_List : in not null Task_Types.Task_Info_List_Access; Interrupt_List : in not null Interrupt_Types.Interrupt_Id_List_Access; Execution_Periods : in Execution_Periods_Type := (1, 6, 30); Packet_Period : in Interfaces.Unsigned_16 := 1);
 
 private
 

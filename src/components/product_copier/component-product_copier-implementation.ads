@@ -42,7 +42,7 @@ package Component.Product_Copier.Implementation is
    -- this is expected behavior. Accordingly, not sending error events is the
    -- default.
    --
-   overriding procedure Init (Self : in out Instance; Products_To_Copy : in Product_Mapping_Array_Access; Send_Event_On_Source_Id_Out_Of_Range : in Boolean := True; Send_Event_On_Source_Not_Available : in Boolean := False);
+   overriding procedure Init (Self : in out Instance; Products_To_Copy : in not null Product_Mapping_Array_Access; Send_Event_On_Source_Id_Out_Of_Range : in Boolean := True; Send_Event_On_Source_Not_Available : in Boolean := False);
 
 private
 
