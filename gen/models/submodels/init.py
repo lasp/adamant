@@ -3,13 +3,17 @@ from models.submodels.subprogram import subprogram
 from models.exceptions import throw_exception_with_lineno
 
 
-# This model holds a component's init() data and allows
-# easy access to its members:
 class init(subprogram):
-    # To initialize the init object, component data must be
-    # passed in.
+    """
+    This model holds a component's init() data and allows
+    easy access to its members:
+    """
     @throw_exception_with_lineno
     def __init__(self, init_data):
+        """
+        To initialize the init object, component data must be
+        passed in.
+        """
         # Load the discriminant parameters into list:
         parameters = []
         description = None

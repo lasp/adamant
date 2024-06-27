@@ -17,8 +17,8 @@ from util import meta
 
 
 class build_target_database(database):
-    # Initialize the database:
     def __init__(self, mode=DATABASE_MODE.READ_ONLY):
+        """Initialize the database."""
         super(build_target_database, self).__init__(
             util.get_database_file("build_target"), mode
         )
@@ -26,14 +26,18 @@ class build_target_database(database):
     def insert_build_target_instance(self, target_name, module_name, filename):
         self.store(target_name, (module_name, filename))
 
-    # For a given target name, like "Linux" provide information
-    # needed for creating an object of that target.
     def get_build_target_info(self, target_name):
+        """
+        For a given target name, like "Linux" provide information
+        needed for creating an object of that target.
+        """
         return self.fetch(target_name)
 
-    # For a given target name, like "Linux" provide the build
-    # target object instance.
     def get_build_target_instance(self, target_name):
+        """
+        For a given target name, like "Linux" provide the build
+        target object instance.
+        """
         module_name, filename = self.get_build_target_info(target_name)
         # Import the module:
         mod = meta.import_module_from_filename(filename, module_name)

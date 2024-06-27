@@ -6,13 +6,15 @@ from base_classes.build_rule_base import build_rule_base
 import re
 
 
-# This build rule builds all possible targets located
-# in a directory's "build" subdirectory. This usually
-# amounts to compiling all objects and generating all
-# possible source code within that directory.
-# Note that metrics for source and object files are not
-# automatically compiled by redo all.
 class build_all(build_rule_base):
+    """
+    This build rule builds all possible targets located
+    in a directory's "build" subdirectory. This usually
+    amounts to compiling all objects and generating all
+    possible source code within that directory.
+    Note that metrics for source and object files are not
+    automatically compiled by redo all.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         # Get targets for this directory:
         directory = os.path.abspath(os.path.dirname(redo_1))

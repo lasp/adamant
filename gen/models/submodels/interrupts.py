@@ -4,8 +4,8 @@ from util import ada
 from collections import OrderedDict
 
 
-# This class holds data concerning a parameter:
 class interrupt(object):
+    """This class holds data concerning a parameter."""
     def __init__(self, name, description=None, priority=None, id=None):
         self.name = ada.formatVariable(name)
         self.description = description
@@ -40,10 +40,12 @@ class interrupt(object):
 
 
 class interrupts(object):
-    # To initialize the interrupts object, component data must be
-    # passed in.
     @throw_exception_with_lineno
     def __init__(self, interrupt_data):
+        """
+        To initialize the interrupts object, component data must be
+        passed in.
+        """
         # Load interrupt list into internal dictionary
         self._interrupts = OrderedDict()
 

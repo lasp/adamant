@@ -9,8 +9,8 @@ from util import model_loader
 from models.exceptions import ModelException
 
 
-# Helper which loads a product packet model, fully resolved by the assembly it is a part of:
 def load_product_packet_model(input_filename):
+    """Helper which loads a product packet model, fully resolved by the assembly it is a part of."""
     p = product_packets.product_packets(input_filename)
     dirname, view_name, assembly_name, *ignore = redo_arg.split_model_filename(
         p.full_filename

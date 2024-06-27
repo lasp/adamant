@@ -4,8 +4,8 @@ from util import ada
 import re
 
 
-# Class holding information related to an Ada variable
 class formal_parameter(object):
+    """Class holding information related to an Ada variable"""
     def __init__(
         self, name, formal_type=None, description=None, type=None, optional=False
     ):
@@ -72,14 +72,16 @@ class formal_parameter(object):
             self.type_package = ada.getPackage(self.type)
 
 
-# This class holds data concerning an Ada generic unit
 class generic_unit(object):
+    """This class holds data concerning an Ada generic unit"""
     ################################
     # Initialization:
     ################################
-    # To initialize the subprogram object, component data must be
-    # passed in.
     def __init__(self, formal_parameters=[], description=None):
+        """
+        To initialize the subprogram object, component data must be
+        passed in.
+        """
         self._description = description
         self._formal_parameters = OrderedDict()
 
@@ -210,9 +212,9 @@ class generic_unit(object):
     def optional_formal_parameter_names(self):
         return [k.name for k in list(self._formal_parameters.values()) if k.optional]
 
-    # Return unique include list:
     @property
     def includes(self):
+        """Return unique include list."""
         includes = []
         includes.extend(
             [
@@ -244,9 +246,11 @@ class generic_unit(object):
                 + "' does not exist in generic unit."
             )
 
-    # Raises exception with appropriate error message if values
-    # don't check out, or if one is missing.
     def check_for_missing_instantiations(self):
+        """
+        Raises exception with appropriate error message if values
+        don't check out, or if one is missing.
+        """
         missing_vals = []
         for par in self._formal_parameters.values():
             if not par.type and not par.optional:
@@ -259,9 +263,11 @@ class generic_unit(object):
                 + str(list(self.required_formal_parameter_names))
             )
 
-    # May raise ModelException if the set values do not match the
-    # names already contained within the object.
     def instantiate_types(self, assembly_component_parameters_data):
+        """
+        May raise ModelException if the set values do not match the
+        names already contained within the object.
+        """
         # If we are trying to set values for a component that doesn't have
         # an init, then throw an error.
         if not self._formal_parameters and assembly_component_parameters_data:

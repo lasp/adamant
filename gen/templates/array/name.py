@@ -87,9 +87,11 @@ class {{ name }}(PackedTypeBase):
     def serialized_length(self):  # in bytes
         return self._size_in_bytes
 
-    # Special __eq__ function when you only want to compare a certain number of elements in the array
-    # not every element in the array.
     def is_equal(self, other, num_elements_to_compare=None):
+        """
+        Special __eq__ function when you only want to compare a certain number of elements in the array
+        not every element in the array.
+        """
         if num_elements_to_compare is None:
             num_elements_to_compare = self.length
         return isinstance(other, self.__class__) and \

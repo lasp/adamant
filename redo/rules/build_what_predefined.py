@@ -4,7 +4,7 @@ import sys
 
 
 def get_predefined_targets() -> list:
-    '''List of `redo` targets that can be run from anywhere in the repository.'''
+    """List of `redo` targets that can be run from anywhere in the repository."""
     return [
         "all",
         # "path",
@@ -26,12 +26,12 @@ def get_predefined_targets() -> list:
 
 
 class build_what_predefined(build_rule_base):
-    '''Lists all redo targets which will be available in any subdirectory
+    """Lists all redo targets which will be available in any subdirectory
     of the project base folder. See `build_what`.
-    '''
+    """
 
-    # no need to access database
     def build(self, redo_1, redo_2, redo_3):
+        """no need to access database"""
         self._build(redo_1, redo_2, redo_3)
 
     def _build(self, redo_1, redo_2, redo_3):

@@ -10,16 +10,18 @@ import re
 import glob
 
 
-# This command is the equivalent of turning on style checking
-# and recompiling all objects within the current directory. ie.
-#
-#  $ export CHECK_STYLE=True
-#  $ redo object_1.o object_2.o etc.
-#
-# Using "redo style" is quicker and more convenient for checking
-# that source code meets the style requirements than using the
-# environment variable directly.
 class build_style(build_rule_base):
+    """
+    This command is the equivalent of turning on style checking
+    and recompiling all objects within the current directory. ie.
+
+    $ export CHECK_STYLE=True
+    $ redo object_1.o object_2.o etc.
+
+    Using "redo style" is quicker and more convenient for checking
+    that source code meets the style requirements than using the
+    environment variable directly.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         # Get targets for this directory:
         directory = os.path.abspath(os.path.dirname(redo_1))
@@ -101,8 +103,8 @@ class build_style(build_rule_base):
                           + build_directory
                           + codespell_suffix)
 
-        # Finally lint any YAML files:
         def _yaml_lint(filenames=[]):
+            """Finally lint any YAML files."""
             cmd = (
                 "yamllint -f parsable -c "
                 + os.environ["SCHEMAPATH"]

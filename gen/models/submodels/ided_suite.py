@@ -5,11 +5,13 @@ from models.exceptions import ModelException, throw_exception_with_lineno
 from models.base import renderable_object
 
 
-# Much of the functionality of Adamant is based off of
-# entities that include and ID and a type, ie. commands,
-# events, data products, etc. This base class holds the common
-# functionality between those type of objects.
 class ided_entity(renderable_object):
+    """
+    Much of the functionality of Adamant is based off of
+    entities that include and ID and a type, ie. commands,
+    events, data products, etc. This base class holds the common
+    functionality between those type of objects.
+    """
     def __init__(
         self,
         name,
@@ -127,11 +129,13 @@ class ided_entity(renderable_object):
         else:
             return self.name
 
-    # Load the ranges for the type of this entity. This is not done by default because
-    # it can add a lot of time to the autocoding process. Only a few generators need
-    # the type ranges, so this is broken out into a function that can be used by those
-    # few generators.
     def load_type_ranges(self):
+        """
+        Load the ranges for the type of this entity. This is not done by default because
+        it can add a lot of time to the autocoding process. Only a few generators need
+        the type ranges, so this is broken out into a function that can be used by those
+        few generators.
+        """
         if self.type_model:
             self.type_model.load_type_ranges()
 
@@ -189,8 +193,8 @@ def _extract_from_suite_data(
     return entities, description
 
 
-# A class which holdes a suite (collection) of ided entities:
 class ided_suite(renderable_object):
+    """A class which holdes a suite (collection) of ided entities."""
     def __init__(
         self, name=None, entity_name=None, entities=[], description=None, component=None
     ):

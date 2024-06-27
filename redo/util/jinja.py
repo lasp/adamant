@@ -1,8 +1,8 @@
 import os
 
 
-# Public function for redering using Jinja templates:
 def render(dictionary, template_file, template_path=None, extensions=[]):
+    """Public function for redering using Jinja templates."""
     def _render(env):
         return env.get_template(template_file).render(dictionary)
 

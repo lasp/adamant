@@ -15,12 +15,14 @@ PASSED = BOLD + GREEN + "PASSED" + NO_COLOR
 FAILED = BOLD + RED + "FAILED" + NO_COLOR
 
 
-# This build rule looks for unit tests in the directory
-# it is passed and recursively below. It then runs all the
-# tests in sequence and prints a test report to the terminal
-# as the tests are run. Tests are matched by finding either a
-# "test.adb" file or a "test.do" file a directory.
 class build_coverage_all(build_rule_base):
+    """
+    This build rule looks for unit tests in the directory
+    it is passed and recursively below. It then runs all the
+    tests in sequence and prints a test report to the terminal
+    as the tests are run. Tests are matched by finding either a
+    "test.adb" file or a "test.do" file a directory.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         pass  # We are overriding build instead since
         # we don't need to usual build boilerplate

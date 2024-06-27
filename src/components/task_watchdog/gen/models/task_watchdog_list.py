@@ -53,12 +53,16 @@ class task_watchdog_entry(object):
             self.description = ""
 
 
-# This is the object model for the ccsds_downsampler. It extracts data from a
-# input file and stores the data as object member variables.
 class task_watchdog_list(assembly_submodel):
-    # Initialize the products object, ingest data, and check it by
-    # calling the base class init function.
+    """
+    This is the object model for the ccsds_downsampler. It extracts data from a
+    input file and stores the data as object member variables.
+    """
     def __init__(self, filename):
+        """
+        Initialize the products object, ingest data, and check it by
+        calling the base class init function.
+        """
         # Load the object from the file:
         this_file_dir = os.path.dirname(os.path.realpath(__file__))
         schema_dir = os.path.join(this_file_dir, ".." + os.sep + "schemas")
@@ -197,10 +201,12 @@ class task_watchdog_list(assembly_submodel):
         # Remove duplicate dependencies
         self.dependencies = list(set(self.dependencies))
 
-    # Public function to resolve all of the connector ids, given
-    # an assembly model.
     @throw_exception_with_filename
     def set_assembly(self, assembly):
+        """
+        Public function to resolve all of the connector ids, given
+        an assembly model.
+        """
         # Make sure an assembly is set by the base class implementation.
         super(task_watchdog_list, self).set_assembly(assembly)
 

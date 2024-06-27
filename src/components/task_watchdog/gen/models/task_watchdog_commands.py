@@ -4,13 +4,15 @@ from util import model_loader
 from util import redo
 
 
-# This model is a specialized command suite for the task watchdog component.
-# This class inherits from the normal component model but adds a enumeration type to
-# some of the command arguments which can be more easily understood by ops than a
-# connector index.
 class task_watchdog_commands(commands):
-    # This is just a "decorated" data product object, so make sure everyone treats it like that.
+    """
+    This model is a specialized command suite for the task watchdog component.
+    This class inherits from the normal component model but adds a enumeration type to
+    some of the command arguments which can be more easily understood by ops than a
+    connector index.
+    """
     def submodel_name(self):
+        """This is just a "decorated" data product object, so make sure everyone treats it like that."""
         return "commands"
 
     def set_assembly(self, assembly):

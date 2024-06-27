@@ -7,10 +7,12 @@ from util import redo_arg
 from base_classes.build_rule_base import build_rule_base
 
 
-# This build rule is capable of turning any ".dot" (graphviz) file
-# into a ".eps" image, capable of being embedded inside
-# a PDF document.
 class build_eps(build_rule_base):
+    """
+    This build rule is capable of turning any ".dot" (graphviz) file
+    into a ".eps" image, capable of being embedded inside
+    a PDF document.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         if not redo_arg.in_build_eps_dir(redo_1):
             error.error_abort(

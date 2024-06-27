@@ -7,8 +7,8 @@ from models.submodels.field import field
 import os.path
 
 
-# A flattened packet item is a "field" with a few extra capabilities:
 class packet_item(field):
+    """A flattened packet item is a "field" with a few extra capabilities."""
     def __init__(self, data, name, start_bit, entity=None, description=None):
         self.__dict__ = data
         self.packet_start_bit = start_bit
@@ -40,9 +40,11 @@ class packet_item(field):
     def full_name(self):
         return (self.entity.full_name + "." if self.entity else "") + self.flat_name
 
-    # By loading the containing object's type ranges the packet item (which is a field of the
-    # containing object's packed type) will get its type ranges filled in.
     def load_type_ranges(self):
+        """
+        By loading the containing object's type ranges the packet item (which is a field of the
+        containing object's packed type) will get its type ranges filled in.
+        """
         self.entity.load_type_ranges()
 
 
@@ -66,8 +68,8 @@ def _items_from_record(record, start_bit=0, container_obj=None):
     return OrderedDict(zip(packet_item_names, packet_items)), bit
 
 
-# Create a list of flattened packet items from an IDed Entity with a type.
 def items_list_from_ided_entity(entity, start_bit=0):
+    """Create a list of flattened packet items from an IDed Entity with a type."""
     items = []
     names = []
 
@@ -84,9 +86,11 @@ def items_list_from_ided_entity(entity, start_bit=0):
     return OrderedDict(zip(names, items)), start_bit
 
 
-# A packet is an IDed entity that also includes an attribute called "items" which list
-# the flattened packet type.
 class packet(ided_entity):
+    """
+    A packet is an IDed entity that also includes an attribute called "items" which list
+    the flattened packet type.
+    """
     def __init__(self, name, type=None, description=None, id=None, suite=None):
         super(packet, self).__init__(
             name,
@@ -106,9 +110,11 @@ class packet(ided_entity):
         self.items, ignore = items_list_from_ided_entity(self)
         return self
 
-    # Special load type ranges that also makes sure the type ranges are loaded for all
-    # the packet items.
     def load_type_ranges(self):
+        """
+        Special load type ranges that also makes sure the type ranges are loaded for all
+        the packet items.
+        """
         if not self.type_ranges_loaded:
             # Call the base class type ranges load:
             super(packet, self).load_type_ranges()
@@ -118,12 +124,16 @@ class packet(ided_entity):
                 item.load_type_ranges()
 
 
-# This is the object model for a data product suite. It extracts data from a
-# input file and stores the data as object member variables.
 class packets(component_submodel, ided_suite):
-    # Initialize the data product object, ingest data, and check it by
-    # calling the base class init function.
+    """
+    This is the object model for a data product suite. It extracts data from a
+    input file and stores the data as object member variables.
+    """
     def __init__(self, filename):
+        """
+        Initialize the data product object, ingest data, and check it by
+        calling the base class init function.
+        """
         # Load the object from the file:
         ided_suite.__init__(self)
         component_submodel.__init__(
@@ -164,9 +174,11 @@ class packets(component_submodel, ided_suite):
                 self.typeless_packet = True
                 break
 
-    # Override this method. If we have a packet suite with static ids, then we do not want to call the base class,
-    # otherwise we do.
     def set_id_base(self, start_id):
+        """
+        Override this method. If we have a packet suite with static ids, then we do not want to call the base class,
+        otherwise we do.
+        """
         if not self.ids:
             ided_suite.set_id_base(self, start_id)
 

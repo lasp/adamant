@@ -5,12 +5,12 @@ from base_classes.gprbuild_target_base import gprbuild_target_base
 
 
 class riscv_bare_board(gprbuild_target_base):
-    # RISCV bare board targets contain the 32bit and bb (bareboard) path files.
     def path_files(self):
+        """RISCV bare board targets contain the 32bit and bb (bareboard) path files."""
         return super(riscv_bare_board, self).path_files() + ["32bit", "bb"]
 
-    # gatmetric info for riscv bare board implementations:
     def gnatmetric_info(self, target=""):
+        """gatmetric info for riscv bare board implementations."""
         # Return a tuple of:
         # gnatmetric prefix (ie. "riscv32-elf-")
         prefix = "riscv32-elf-"

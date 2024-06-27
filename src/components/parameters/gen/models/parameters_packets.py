@@ -4,14 +4,16 @@ from util import model_loader
 from util import redo
 
 
-# This model is a specialized packet suite for the Parameters packet. This
-# class inherits from the normal packets model but adds some extra functionality
-# needed to the parameters packet. In particular, the parameters packet's
-# type is derived from data within the assembly that the packet is a part of. The
-# type itself gets filled in in the "load_assembly" method.
 class parameters_packets(packets):
-    # This is just a "decorated" packet object, so make sure everyone treats it like that.
+    """
+    This model is a specialized packet suite for the Parameters packet. This
+    class inherits from the normal packets model but adds some extra functionality
+    needed to the parameters packet. In particular, the parameters packet's
+    type is derived from data within the assembly that the packet is a part of. The
+    type itself gets filled in in the "load_assembly" method.
+    """
     def submodel_name(self):
+        """This is just a "decorated" packet object, so make sure everyone treats it like that."""
         return "packets"
 
     def set_assembly(self, assembly):

@@ -91,9 +91,11 @@ class array_tex(doc_generator, generator_base):
         )
 
 
-# Special enum generator for matlab that splits the output into multiple files, one per class
-# as required by matlab.
 class enum_m_generator(basic_generator, generator_base):
+    """
+    Special enum generator for matlab that splits the output into multiple files, one per class
+    as required by matlab.
+    """
     def __init__(self):
         basic_generator.__init__(
             self,

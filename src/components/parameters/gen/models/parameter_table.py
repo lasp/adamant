@@ -60,12 +60,16 @@ class parameter_table_entry(object):
         self.component_id = None
 
 
-# This is the object model for a parameter table. It extracts data from a
-# input file and stores the data as object member variables.
 class parameter_table(assembly_submodel):
-    # Initialize the packet object, ingest data, and check it by
-    # calling the base class init function.
+    """
+    This is the object model for a parameter table. It extracts data from a
+    input file and stores the data as object member variables.
+    """
     def __init__(self, filename):
+        """
+        Initialize the packet object, ingest data, and check it by
+        calling the base class init function.
+        """
         # Load the object from the file:
         this_file_dir = os.path.dirname(os.path.realpath(__file__))
         schema_dir = os.path.join(this_file_dir, ".." + os.sep + "schemas")
@@ -73,8 +77,8 @@ class parameter_table(assembly_submodel):
             filename, schema_dir + "/parameter_table.yaml"
         )
 
-    # Load command specific data structures with information from YAML file.
     def load(self):
+        """Load command specific data structures with information from YAML file."""
         # Load the base class model:
         super(parameter_table, self).load()
 
@@ -324,10 +328,12 @@ class parameter_table(assembly_submodel):
         # Remove duplicate dependencies
         self.dependencies = list(set(self.dependencies))
 
-    # Public function to resolve all of the parameter ids, given
-    # an assembly model.
     @throw_exception_with_filename
     def set_assembly(self, assembly):
+        """
+        Public function to resolve all of the parameter ids, given
+        an assembly model.
+        """
         # Make sure an assembly is set by the base class implementation.
         super(parameter_table, self).set_assembly(assembly)
 

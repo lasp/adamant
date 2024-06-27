@@ -6,9 +6,11 @@ from util import error
 # programs via the commandline shell from python.
 
 
-# Try to run a command, and return the resulting
-# return code.
 def try_run_command(command_string, debug=True):
+    """
+    Try to run a command, and return the resulting
+    return code.
+    """
     if debug:
         debug_module.debug_print(command_string)
     # close_fds must be "False" otherwise the file descriptors used by redo
@@ -18,10 +20,12 @@ def try_run_command(command_string, debug=True):
     return process.returncode
 
 
-# Try to run a command, and return the resulting
-# return code as well as all captured output
-# on both stdout and stderr.
 def try_run_command_capture_output(command_string, debug=True):
+    """
+    Try to run a command, and return the resulting
+    return code as well as all captured output
+    on both stdout and stderr.
+    """
     if debug:
         debug_module.debug_print(command_string)
     # close_fds must be "False" otherwise the file descriptors used by redo
@@ -38,9 +42,11 @@ def try_run_command_capture_output(command_string, debug=True):
     return process.returncode, stdout, stderr
 
 
-# Run a command. If the return code is not 0,
-# abort execution of the program.
 def run_command(command_string, debug=True):
+    """
+    Run a command. If the return code is not 0,
+    abort execution of the program.
+    """
     status = try_run_command(command_string, debug)
     if status != 0:
         error.abort(status)

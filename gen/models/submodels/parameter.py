@@ -1,8 +1,8 @@
 from models.submodels.variable import variable
 
 
-# This class holds data concerning a parameter:
 class parameter(variable):
+    """This class holds data concerning a parameter."""
     def __init__(
         self, name, type, description=None, mode="in", value=None, default_value=None
     ):

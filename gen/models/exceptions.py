@@ -1,6 +1,8 @@
-# Exception class for handling an error within a model. If a filename
-# and linenumber are provided then those are printed as well.
 class ModelException(Exception):
+    """
+    Exception class for handling an error within a model. If a filename
+    and linenumber are provided then those are printed as well.
+    """
     def __init__(self, message, filename=None, lineno=None):
         self.message = message
         self.filename = filename
@@ -15,10 +17,12 @@ class ModelException(Exception):
         )
 
 
-# Decorator which catches a model exception with a called
-# function and adds "full_filename" to the error message
-# if "full_filename" exists within the calling object
 def throw_exception_with_filename(func):
+    """
+    Decorator which catches a model exception with a called
+    function and adds "full_filename" to the error message
+    if "full_filename" exists within the calling object
+    """
     def inner(*args, **kwargs):
         try:
             return func(*args, **kwargs)
@@ -33,11 +37,13 @@ def throw_exception_with_filename(func):
     return inner
 
 
-# Decorator which catches a model exception and adds
-# a line number if the argument of the function contains
-# an attribute "lc.line" which is the line number attribute
-# of a round trip loaded yaml dictionary from ruamel.yaml
 def throw_exception_with_lineno(func):
+    """
+    Decorator which catches a model exception and adds
+    a line number if the argument of the function contains
+    an attribute "lc.line" which is the line number attribute
+    of a round trip loaded yaml dictionary from ruamel.yaml
+    """
     def inner(*args, **kwargs):
         try:
             return func(*args, **kwargs)

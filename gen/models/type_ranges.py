@@ -53,12 +53,16 @@ class type_number(object):
         return cls(name=name, min=min, max=max)
 
 
-# This is the object model for a set of type ranges enumerations. It extracts data from an
-# input file and stores the data as object member variables.
 class type_ranges(base):
-    # Initialize the packed type object, ingest data, and check it by
-    # calling the base class init function.
+    """
+    This is the object model for a set of type ranges enumerations. It extracts data from an
+    input file and stores the data as object member variables.
+    """
     def __init__(self, filename):
+        """
+        Initialize the packed type object, ingest data, and check it by
+        calling the base class init function.
+        """
         try:
             # Load the object from the file:
             super(type_ranges, self).__init__(
@@ -75,8 +79,8 @@ class type_ranges(base):
                 + "Check your packed type yaml file."
             )
 
-    # Load record specific data structures with information from YAML file.
     def load(self):
+        """Load record specific data structures with information from YAML file."""
         # Initialize object members:
         self.name = None
         self.types = OrderedDict()

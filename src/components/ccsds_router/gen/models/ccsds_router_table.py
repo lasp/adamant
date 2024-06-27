@@ -45,12 +45,16 @@ class router_table_entry(object):
         )
 
 
-# This is the object model for a router table. It extracts data from a
-# input file and stores the data as object member variables.
 class ccsds_router_table(assembly_submodel):
-    # Initialize the table object, ingest data, and check it by
-    # calling the base class init function.
+    """
+    This is the object model for a router table. It extracts data from a
+    input file and stores the data as object member variables.
+    """
     def __init__(self, filename):
+        """
+        Initialize the table object, ingest data, and check it by
+        calling the base class init function.
+        """
         # Load the object from the file:
         this_file_dir = os.path.dirname(os.path.realpath(__file__))
         schema_dir = os.path.join(this_file_dir, ".." + os.sep + "schemas")
@@ -58,8 +62,8 @@ class ccsds_router_table(assembly_submodel):
             filename, schema_dir + "/ccsds_router_table.yaml"
         )
 
-    # Load command specific data structures with information from YAML file.
     def load(self):
+        """Load command specific data structures with information from YAML file."""
         # Initialize members:
         self.name = None
         self.description = None
@@ -93,9 +97,9 @@ class ccsds_router_table(assembly_submodel):
             else:
                 self.table[entry.apid] = entry
 
-    # Public function to resolve all of the router destinations to the correct connector indexes.
     @throw_exception_with_filename
     def resolve_router_destinations(self, assm):
+        """Public function to resolve all of the router destinations to the correct connector indexes."""
         # Verify that the ccsds router component instance that this router table is being constructed
         # for actually exists in the assembly and is a Ccsds_Router component type.
         self.ccsds_router_instance_model = assm.get_component_with_name(

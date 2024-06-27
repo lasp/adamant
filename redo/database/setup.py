@@ -20,11 +20,13 @@ def _do_setup(redo_1, redo_2, redo_3, sandbox=False):
     os.environ["ADAMANT_SETUP"] = "TRUE"
 
 
-# This function sets up the databases for the build system if
-# they have not been setup yet. In this way, this function can be
-# called by each instance of "redo" but will only actually
-# setup the database during the first call.
 def setup(redo_1, redo_2, redo_3):
+    """
+    This function sets up the databases for the build system if
+    they have not been setup yet. In this way, this function can be
+    called by each instance of "redo" but will only actually
+    setup the database during the first call.
+    """
     # If there if a local environment, run that
     # first:
     _run_env_file(redo_1, redo_2, redo_3)
@@ -48,21 +50,25 @@ def setup(redo_1, redo_2, redo_3):
     return did_setup
 
 
-# This function alerts the build system that the database
-# is not currently setup. After calling the function, a
-# suspequent call to "setup()" above, will recreate the
-# databases.
 def reset():
+    """
+    This function alerts the build system that the database
+    is not currently setup. After calling the function, a
+    suspequent call to "setup()" above, will recreate the
+    databases.
+    """
     try:
         del os.environ["ADAMANT_SETUP"]
     except BaseException:
         pass
 
 
-# This function does any necessary build system cleanup.
-# It will only do the cleanup if this is the top level
-# instantiation of redo.
 def cleanup(redo_1, redo_2, redo_3):
+    """
+    This function does any necessary build system cleanup.
+    It will only do the cleanup if this is the top level
+    instantiation of redo.
+    """
     if "TOP_LEVEL_TARGET" in os.environ and os.environ["TOP_LEVEL_TARGET"] == redo_1:
         from database import _setup
 
@@ -76,11 +82,13 @@ def immediate_cleanup(redo_1, redo_2, redo_3):
         _setup._cleanup()
 
 
-# This creates a separate instance of the build system, constructed
-# off the current target. This can be useful if you need to hardcode
-# a certain target during building, regardless of what the root
-# target was.
 def create_sandbox(redo_1, redo_2, redo_3, target_to_set=None):
+    """
+    This creates a separate instance of the build system, constructed
+    off the current target. This can be useful if you need to hardcode
+    a certain target during building, regardless of what the root
+    target was.
+    """
     # Save off the current target and set the new one.
     from util import target
 

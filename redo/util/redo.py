@@ -7,8 +7,8 @@ import os
 # commandline program.
 
 
-# Form call args:
 def __form_call_args(command, args):
+    """Form call args."""
     if isinstance(args, str):
         args = [args]
     call = [command] + args
@@ -16,17 +16,19 @@ def __form_call_args(command, args):
     return call_str
 
 
-# Private function which invokes a redo-like command:
 def __invoke_redo_subprocess(command, args=[]):
+    """Private function which invokes a redo-like command."""
     if args:
         # Sometimes the number of arguments to redo can exceed the OS
         # limit. To avoid this, if there is over 1000 arguments we will
         # chunk the redo command up into multiple commands with 1000
         # arguments (or less) each.
         if len(args) > 1000:
-            # Yield successive n-sized
-            # chunks from l.
             def divide_chunks(things, num):
+                """
+                Yield successive n-sized
+                chunks from l.
+                """
                 # looping till length l
                 for i in range(0, len(things), num):
                     yield things[i:i + num]
@@ -41,29 +43,31 @@ def __invoke_redo_subprocess(command, args=[]):
             shell.run_command(call_str)
 
 
-# Call redo with a list of targets.
 def redo(args):
+    """Call redo with a list of targets."""
     __invoke_redo_subprocess("redo", args)
 
 
-# Call redo-ifchange with a list of targets.
 def redo_ifchange(args):
+    """Call redo-ifchange with a list of targets."""
     __invoke_redo_subprocess("redo-ifchange", args)
 
 
-# Call redo-ifcreate with a list of targets.
 def redo_ifcreate(args):
+    """Call redo-ifcreate with a list of targets."""
     __invoke_redo_subprocess("redo-ifcreate", args)
 
 
-# Call redo-always with a list of targets.
 def redo_always(args):
+    """Call redo-always with a list of targets."""
     __invoke_redo_subprocess("redo-always", args)
 
 
-# Call redo-ood with a list of targets. This call returns the
-# targets that are out of date as a list.
 def redo_ood(args):
+    """
+    Call redo-ood with a list of targets. This call returns the
+    targets that are out of date as a list.
+    """
     if args:
         call_str = __form_call_args("redo-ood", args)
         (
@@ -89,16 +93,16 @@ def redo_ood(args):
     return []
 
 
-# Print an error to the screen.
 def info_print(string):
+    """Print an error to the screen."""
     GREEN = "\033[32m"
     NO_COLOR = "\033[0m"
     sys.stderr.write(GREEN + "redo  " + string + "\n" + NO_COLOR)
     sys.stderr.flush()
 
 
-# Print an error to the screen.
 def info_print_bold(string):
+    """Print an error to the screen."""
     GREEN = "\033[32m"
     BOLD = "\033[1m"
     NO_COLOR = "\033[0m"

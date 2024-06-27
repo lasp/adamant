@@ -11,8 +11,8 @@ from base_classes.build_rule_base import build_rule_base
 from rules.build_object import _build_all_c_dependencies, _get_build_target_instance
 
 
-# This function generates Ada bindings for a given C/C++ source file
 def _generate_bindings(redo_1, redo_2, redo_3, source_file, c_source_db):
+    """This function generates Ada bindings for a given C/C++ source file"""
 
     # First build all the dependencies for this source file and for the include
     # string for those dependencies:
@@ -64,14 +64,16 @@ def _generate_bindings(redo_1, redo_2, redo_3, source_file, c_source_db):
     rmtree(template_temp_dir)
 
 
-# This build rule is capable of compiling object files from either
-# Ada or C/C++ source. It matches on any source file in the system
-# and produces objects of the same name as the source file in the
-# build/obj directory. If the source file is found in the Ada source
-# database, then it is compiled as Ada source. If the file is not found
-# in the Ada source database, but is found in the C/C++ source database
-# it is compiled as C source.
 class build_bindings(build_rule_base):
+    """
+    This build rule is capable of compiling object files from either
+    Ada or C/C++ source. It matches on any source file in the system
+    and produces objects of the same name as the source file in the
+    build/obj directory. If the source file is found in the Ada source
+    database, then it is compiled as Ada source. If the file is not found
+    in the Ada source database, but is found in the C/C++ source database
+    it is compiled as C source.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         # Make sure the binding is being built in the correct directory:
         if not redo_arg.in_build_template_target_dir(redo_1):
@@ -124,13 +126,15 @@ class build_bindings(build_rule_base):
         # object, then we are out of luck. Alert the user.
         error.error_abort("No C/C++ source files were found to generate bindings in '" + redo_1 + "'.")
 
-    # Match any C header source file
     def input_file_regex(self):
+        """Match any C header source file"""
         return [r"^((?!template/).)*\.hp?p?$"]
 
-    # Output object files will always be stored with the same name
-    # as their source package, and in the build/obj directory.
     def output_filename(self, input_filename):
+        """
+        Output object files will always be stored with the same name
+        as their source package, and in the build/obj directory.
+        """
         _, base, ext = redo_arg.split_full_filename(input_filename)
         directory = redo_arg.get_src_dir(input_filename)
         return os.path.join(

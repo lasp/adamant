@@ -10,13 +10,15 @@ from util import target as tgt
 from base_classes.build_rule_base import build_rule_base
 
 
-# This build rule runs a compiled test binary. If a binary
-# called test.elf is found for a certain directory, then
-# this rule will run that test binary. It will also inspect
-# the test output. If the output contains the word "FAIL"
-# then this rule will return 1 to the commandline. Otherwise
-# it will return 0.
 class build_coverage(build_rule_base):
+    """
+    This build rule runs a compiled test binary. If a binary
+    called test.elf is found for a certain directory, then
+    this rule will run that test binary. It will also inspect
+    the test output. If the output contains the word "FAIL"
+    then this rule will return 1 to the commandline. Otherwise
+    it will return 0.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         # The coverage build rule requires the default coverage target to be set.
         tgt.set_default_coverage_target()
@@ -102,12 +104,14 @@ class build_coverage(build_rule_base):
         sys.stderr.write("Output text file can be found here: " + coverage_file + "\n")
         sys.stderr.write("Output html files can be found in: " + output_html + "\n")
 
-    # Match any binary file called "test.elf".
     def input_file_regex(self):
+        """Match any binary file called "test.elf"."""
         return r".*\/test\.elf$"
 
-    # There is no real output name here. This is a dummy name
-    # that will produce no content.
     def output_filename(self, input_filename):
+        """
+        There is no real output name here. This is a dummy name
+        that will produce no content.
+        """
         directory = redo_arg.get_src_dir(input_filename)
         return os.path.join(directory, "coverage")

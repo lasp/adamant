@@ -9,8 +9,8 @@ import sys
 # GREEN='\033[32m'
 
 
-# Print an error to the screen.
 def error_print(string):
+    """Print an error to the screen."""
     RED = "\033[31m"
     BOLD = "\033[1m"
     NO_COLOR = "\033[0m"
@@ -18,20 +18,24 @@ def error_print(string):
     sys.stderr.flush()
 
 
-# Print a warning to the screen:
 def warning_print(string):
+    """Print a warning to the screen."""
     sys.stderr.write(string + "\n")
     sys.stderr.flush()
 
 
-# Quit execution, and exit with a
-# specific error code.
 def abort(code=1):
+    """
+    Quit execution, and exit with a
+    specific error code.
+    """
     sys.exit(code)
 
 
-# Print an error message and then exit
-# with a specific error code.
 def error_abort(string, code=1):
+    """
+    Print an error message and then exit
+    with a specific error code.
+    """
     error_print(string)
     abort(code)

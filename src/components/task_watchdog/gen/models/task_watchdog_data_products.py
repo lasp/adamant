@@ -4,11 +4,13 @@ from util import model_loader
 from util import redo
 
 
-# This model is a specialized data product suite for the product extractor data products. This
-# class inherits from the normal data products model but adds extra data products based on the user's model input.
 class task_watchdog_data_products(data_products):
-    # This is just a "decorated" data product object, so make sure everyone treats it like that.
+    """
+    This model is a specialized data product suite for the product extractor data products. This
+    class inherits from the normal data products model but adds extra data products based on the user's model input.
+    """
     def submodel_name(self):
+        """This is just a "decorated" data product object, so make sure everyone treats it like that."""
         return "data_products"
 
     def set_assembly(self, assembly):

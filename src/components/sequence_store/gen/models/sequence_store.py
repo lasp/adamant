@@ -89,12 +89,16 @@ class slot(object):
                 self.includes.append(ada.getPackage(self.length))
 
 
-# This is the object model for a sequence store. It extracts data from a
-# input file and stores the data as object member variables.
 class sequence_store(base):
-    # Initialize the packet object, ingest data, and check it by
-    # calling the base class init function.
+    """
+    This is the object model for a sequence store. It extracts data from a
+    input file and stores the data as object member variables.
+    """
     def __init__(self, filename):
+        """
+        Initialize the packet object, ingest data, and check it by
+        calling the base class init function.
+        """
         # Load the object from the file:
         this_file_dir = os.path.dirname(os.path.realpath(__file__))
         schema_dir = os.path.join(this_file_dir, ".." + os.sep + "schemas")
@@ -102,8 +106,8 @@ class sequence_store(base):
             filename, schema_dir + "/sequence_store.yaml"
         )
 
-    # Load command specific data structures with information from YAML file.
     def load(self):
+        """Load command specific data structures with information from YAML file."""
         # Load the base class model:
         super(sequence_store, self).load()
 

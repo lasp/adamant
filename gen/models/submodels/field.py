@@ -4,8 +4,8 @@ from util import ada
 import re
 
 
-# Returns size, unit_type, unit_size, and count for a format string
 def parse_format(format_string):
+    """Returns size, unit_type, unit_size, and count for a format string"""
     def extractNumber(string):
         return int("".join(filter(lambda x: x.isdigit(), string)))
 
@@ -293,9 +293,11 @@ class field(variable):
 
         self.end_bit = self.start_bit + self.size - 1
 
-    # Verify that the variable length field exists in the record itself,
-    # and set up the field so that it can easily access the length field:
     def resolve_variable_length_field(self, record_obj):
+        """
+        Verify that the variable length field exists in the record itself,
+        and set up the field so that it can easily access the length field:
+        """
         saved_record_obj = None
         if self.variable_length:
             split_field_name = self.variable_length.split(".")
@@ -367,19 +369,21 @@ class field(variable):
             skip_validation=skip_validation,
         )
 
-    # Returns true if the type is always valid, meaning running
-    # 'Valid on the type will ALWAYS produce True. In other words, there
-    # is no bit representation of the type that could cause a constraint
-    # error when a range check is performed.
-    #
-    # To determine this we need to compare the type's type_range against
-    # the its bit layout (ie. format) to ensure that the maximum representable
-    # values in the format is also the maximum representable values in the
-    # type itself.
-    #
-    # Note: The caller of this must have already loaded the outside packed type
-    # (packed array or record) type_ranges or the function call will fail.
     def is_always_valid(self):
+        """
+        Returns true if the type is always valid, meaning running
+        'Valid on the type will ALWAYS produce True. In other words, there
+        is no bit representation of the type that could cause a constraint
+        error when a range check is performed.
+
+        To determine this we need to compare the type's type_range against
+        the its bit layout (ie. format) to ensure that the maximum representable
+        values in the format is also the maximum representable values in the
+        type itself.
+
+        Note: The caller of this must have already loaded the outside packed type
+        (packed array or record) type_ranges or the function call will fail.
+        """
         # If this field is a packed type then just call its is_always_valid method:
         if self.is_packed_type:
             return self.type_model.is_always_valid()

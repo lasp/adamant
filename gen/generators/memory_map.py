@@ -26,8 +26,8 @@ add_basic_generators_to_module(
 )
 
 
-# Base class for generating a memory/register map and running GNATprove on the result.
 class map_ads_generator(basic_generator):
+    """Base class for generating a memory/register map and running GNATprove on the result."""
     def __init__(self, model_class, template_filename):
         basic_generator.__init__(
             self, model_class=model_class, template_filename=template_filename

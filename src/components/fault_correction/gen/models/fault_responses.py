@@ -30,8 +30,6 @@ def _get_data_product_buffer_size():
 
 
 class fault_response(object):
-    # To initialize the component object, connector data must be
-    # passed in.
     def __init__(
         self,
         fault_name,
@@ -41,6 +39,10 @@ class fault_response(object):
         command_arg=None,
         description=None,
     ):
+        """
+        To initialize the component object, connector data must be
+        passed in.
+        """
         # Store the fault name:
         self.full_fault_name = ada.formatType(fault_name)
         self.full_fault_name_str = self.full_fault_name.replace(".", "_")
@@ -107,12 +109,16 @@ class fault_response(object):
         )
 
 
-# This is the object model for a fault response set. It extracts data from a
-# input file and stores the data as object member variables.
 class fault_responses(assembly_submodel):
-    # Initialize the packet object, ingest data, and check it by
-    # calling the base class init function.
+    """
+    This is the object model for a fault response set. It extracts data from a
+    input file and stores the data as object member variables.
+    """
     def __init__(self, filename):
+        """
+        Initialize the packet object, ingest data, and check it by
+        calling the base class init function.
+        """
         # Load the object from the file:
         this_file_dir = os.path.dirname(os.path.realpath(__file__))
         schema_dir = os.path.join(this_file_dir, ".." + os.sep + "schemas")
@@ -120,8 +126,8 @@ class fault_responses(assembly_submodel):
             filename, schema_dir + "/fault_responses.yaml"
         )
 
-    # Load command specific data structures with information from YAML file.
     def load(self):
+        """Load command specific data structures with information from YAML file."""
         # Load the base class model:
         super(fault_responses, self).load()
 
@@ -161,9 +167,9 @@ class fault_responses(assembly_submodel):
                 + " bytes)."
             )
 
-    # Public function to resolve all of the fault and command IDs to their correct values from the names.
     @throw_exception_with_filename
     def resolve_fault_and_command_ids(self, assm):
+        """Public function to resolve all of the fault and command IDs to their correct values from the names."""
         self.has_command_args = False
         # Go through all the responses and resolve fault and command IDs:
         for response in self.responses:

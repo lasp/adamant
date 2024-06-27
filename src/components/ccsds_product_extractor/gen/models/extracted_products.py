@@ -6,8 +6,8 @@ from collections import OrderedDict
 from util import model_loader
 
 
-# Class to extract the details of each data product in the model list
 class data_product_entry(object):
+    """Class to extract the details of each data product in the model list"""
     def __init__(self, product_data):
         self.name = ada.formatVariable(product_data["name"])
         self.apid = product_data["apid"]
@@ -45,12 +45,16 @@ class data_product_entry(object):
             self.description = product_data["description"]
 
 
-# This is the object model for the product extractor. It extracts data from a
-# input file and stores the data as object member variables.
 class extracted_products(base):
-    # Initialize the products object, ingest data, and check it by
-    # calling the base class init function.
+    """
+    This is the object model for the product extractor. It extracts data from a
+    input file and stores the data as object member variables.
+    """
     def __init__(self, filename):
+        """
+        Initialize the products object, ingest data, and check it by
+        calling the base class init function.
+        """
         # Load the object from the file:
         this_file_dir = os.path.dirname(os.path.realpath(__file__))
         schema_dir = os.path.join(this_file_dir, ".." + os.sep + "schemas")

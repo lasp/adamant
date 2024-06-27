@@ -5,9 +5,11 @@ import shutil
 # This module provides common filesystem related functions.
 
 
-# Make a directory, and its parents, if it does not already
-# exist. If the directory already exists, don't complain.
 def safe_makedir(directory):
+    """
+    Make a directory, and its parents, if it does not already
+    exist. If the directory already exists, don't complain.
+    """
     import pathlib
 
     pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
@@ -33,10 +35,12 @@ def safe_symlink(filename, link_filename, overwrite=False):
             do_link()
 
 
-# This generator is a modified version of os.walk, except that it
-# ignores "build" and "alire" directories (by default) and hidden directories
-# as it recurses. This improves performance of a recursive search.
 def recurse_through_repo(directory, ignore=["build", "alire"]):
+    """
+    This generator is a modified version of os.walk, except that it
+    ignores "build" and "alire" directories (by default) and hidden directories
+    as it recurses. This improves performance of a recursive search.
+    """
     # Walk recursively through the repository, ignoring hidden directories and build directories:
     for root, dirnames, filenames in os.walk(directory):
         # Don't traverse into hidden directories:
@@ -48,8 +52,8 @@ def recurse_through_repo(directory, ignore=["build", "alire"]):
         yield root, dirnames, filenames
 
 
-# Return a list of all the files found in a directory.
 def get_files_in_dir(directory):
+    """Return a list of all the files found in a directory."""
     files = []
     for f in os.listdir(directory):
         full_file = os.path.join(directory, f)

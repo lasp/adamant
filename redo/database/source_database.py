@@ -8,31 +8,35 @@ from util import error
 import os.path
 
 
-# This database is responsible for storing ada source files found in
-# the build path. The database maps the ada package name to the source
-# code used to build that package name, as well as any model files that
-# are used to generate that source code. An example is shown below:
-#
-# Key:             Value:
-# some.ada.package ([/path/to/some-ada-package.ads, \
-#                    /path/to/some-ada-package.adb], \
-#                    /path/to/some_ada_model.yaml)
-#
-# This database is useful for figuring out where ada source is located
-# in the system given just a package name (which is all that is included
-# in the "with" dependencies of an Ada source file).
 class source_database(database):
-    # Initialize the database:
+    """
+    This database is responsible for storing ada source files found in
+    the build path. The database maps the ada package name to the source
+    code used to build that package name, as well as any model files that
+    are used to generate that source code. An example is shown below:
+
+    Key:             Value:
+    some.ada.package ([/path/to/some-ada-package.ads, \
+    /path/to/some-ada-package.adb], \
+    /path/to/some_ada_model.yaml)
+
+    This database is useful for figuring out where ada source is located
+    in the system given just a package name (which is all that is included
+    in the "with" dependencies of an Ada source file).
+    """
     def __init__(self, mode=DATABASE_MODE.READ_ONLY):
+        """Initialize the database."""
         super(source_database, self).__init__(util.get_database_file("source"), mode)
 
-    # Insert a source file into the database (and the associated model file, if
-    # there is one). Note that for a given package name (which is derived from the
-    # passed in source code) only a single .ads and a single .adb file may be added.
-    # If adding another file is attempted, the function will error and warn the user
-    # that every source in the build path must have a unique filename, and thus a
-    # unique package name.
     def insert_source(self, source_filename, model_filename=None):
+        """
+        Insert a source file into the database (and the associated model file, if
+        there is one). Note that for a given package name (which is derived from the
+        passed in source code) only a single .ads and a single .adb file may be added.
+        If adding another file is attempted, the function will error and warn the user
+        that every source in the build path must have a unique filename, and thus a
+        unique package name.
+        """
         # Error functions:
         def _duplicate_source_error(file1, file2):
             error.error_abort(
@@ -95,20 +99,22 @@ class source_database(database):
         # Insert record into database:
         self.store(package_name, record)
 
-    # Given a package name, return the associated source files:
     def get_source(self, package_name):
+        """Given a package name, return the associated source files."""
         return self.fetch(package_name.lower())[0]
 
-    # Given a package name, try to return the associated source files
-    # otherwise return an empty list.
     def try_get_source(self, package_name):
+        """
+        Given a package name, try to return the associated source files
+        otherwise return an empty list.
+        """
         try:
             return self.get_source(package_name)
         except KeyError:
             return []
 
-    # Given a list of package names, return the associated source files:
     def get_sources(self, package_names):
+        """Given a list of package names, return the associated source files."""
         sources = []
         if isinstance(package_names, str):
             package_names = [package_names]
@@ -116,8 +122,8 @@ class source_database(database):
             sources.extend(self.get_source(name))
         return list(sources)
 
-    # Given a list of package names, try to return the associated source files:
     def try_get_sources(self, package_names):
+        """Given a list of package names, try to return the associated source files."""
         sources = []
         if isinstance(package_names, str):
             package_names = [package_names]
@@ -125,8 +131,8 @@ class source_database(database):
             sources.extend(self.try_get_source(name))
         return list(sources)
 
-    # Given a list of package names return the associated object files:
     def get_objects(self, names, the_target=None):
+        """Given a list of package names return the associated object files."""
         if the_target is None:
             the_target = target.get_default_target()
         objects = []
@@ -157,8 +163,8 @@ class source_database(database):
                 )
         return list(objects)
 
-    # Given a package name, return the associated model file:
     def get_model(self, package_name):
+        """Given a package name, return the associated model file."""
         source_record = self.try_fetch(package_name.lower())
         if source_record:
             return source_record[1]

@@ -1,14 +1,18 @@
-# This function is a class constructor (via closure). It creates an event class
-# that is specific to a given component's event. The class is parameterized
-# by the component's name, the event's name, and the parameter class, which
-# is usually an autocoded python class inheriting from PackedTypeBase.
 def create_event_cls(component_instance_name, event_name, param_type_cls):
+    """
+    This function is a class constructor (via closure). It creates an event class
+    that is specific to a given component's event. The class is parameterized
+    by the component's name, the event's name, and the parameter class, which
+    is usually an autocoded python class inheriting from PackedTypeBase.
+    """
     from event import Event
 
     class SpecificEvent(Event):
-        # Override the __init__ function so that we can accept the
-        # actual parameter of type param_type_cls:
         def __init__(self, Header=None, Param=None):
+            """
+            Override the __init__ function so that we can accept the
+            actual parameter of type param_type_cls:
+            """
             # Store the event name:
             self.component_instance_name = component_instance_name
             self.event_name = event_name
@@ -32,9 +36,11 @@ def create_event_cls(component_instance_name, event_name, param_type_cls):
                 Header=Header, Param_Buffer=param_buffer
             )
 
-        # Override the _from_byte_array method so that we can also
-        # decode the argument:
         def _from_byte_array(self, stream):
+            """
+            Override the _from_byte_array method so that we can also
+            decode the argument:
+            """
             # First call the base class decoder:
             super(SpecificEvent, self)._from_byte_array(stream)
 

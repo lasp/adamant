@@ -142,9 +142,11 @@ def _prove_ada_sources(source_files, base_dir):
     return ret
 
 
-# This build rule uses gnatprove to analyze any SPARK code
-# found in the current directory.
 class build_prove(build_rule_base):
+    """
+    This build rule uses gnatprove to analyze any SPARK code
+    found in the current directory.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         # Define the special targets that exist everywhere...
         directory = os.path.abspath(os.path.dirname(redo_1))

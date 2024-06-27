@@ -139,9 +139,11 @@ def _check_kind(name, kind, type, return_type):
         )
 
 
-# This model holds a connector and allows
-# easy access to its members:
 class connector(subprogram):
+    """
+    This model holds a connector and allows
+    easy access to its members:
+    """
     # To initialize the component object, connector data must be
     # passed in.
     def __init__(
@@ -405,9 +407,9 @@ class connector(subprogram):
     def mode(self):
         return self.parameter.mode
 
-    # Return unique include list:
     @property
     def type_includes(self):
+        """Return unique include list."""
         return self._type_includes
 
     @property
@@ -704,8 +706,8 @@ class connector(subprogram):
                 self._connections[index - 1] = "ignore"
 
 
-# Component interface class, holds a set of connectors:
 class connectors(object):
+    """Component interface class, holds a set of connectors."""
     def __init__(self, connector_dict=OrderedDict(), create_cache=False):
         self._connectors = connector_dict
         self._cache = {}
@@ -793,18 +795,20 @@ class connectors(object):
     def names(self):
         return self._connectors.keys()
 
-    # Return unique include list:
     @property
     def includes(self):
+        """Return unique include list."""
         includes = []
         for con in self._connectors.values():
             includes.extend(con.includes)
         return list(OrderedDict.fromkeys(includes))
 
-    # Generic components cannot use the Common_Connectors package, and
-    # instead must use the connector specific connector package.
     @property
     def includes_for_generic(self):
+        """
+        Generic components cannot use the Common_Connectors package, and
+        instead must use the connector specific connector package.
+        """
         includes = []
         for con in self._connectors.values():
             includes.extend(con.includes + [con.connector_package])
@@ -815,9 +819,9 @@ class connectors(object):
             pass
         return to_return
 
-    # Return unique include list:
     @property
     def type_includes(self):
+        """Return unique include list."""
         includes = []
         for con in self._connectors.values():
             includes.extend(con.type_includes)
@@ -830,9 +834,9 @@ class connectors(object):
             includes.extend(con.type_representation_includes)
         return list(OrderedDict.fromkeys(includes))
 
-    # Return unique include list:
     @property
     def types(self):
+        """Return unique include list."""
         types = []
         for con in self._connectors.values():
             if con.type:
@@ -841,9 +845,9 @@ class connectors(object):
                 types.append(con.return_type)
         return list(OrderedDict.fromkeys(types))
 
-    # Return all connector types
     @property
     def basic_types(self):
+        """Return all connector types"""
         types = []
         for con in self._connectors.values():
             # Variable sized generics are not treated like basic types in the autocode.
@@ -858,9 +862,9 @@ class connectors(object):
             type_models.extend(con.type_models)
         return list(OrderedDict.fromkeys(type_models))
 
-    # Return all variable length types
     @property
     def variable_length_types(self):
+        """Return all variable length types"""
         types = []
         for type_model in self.type_models:
             if type_model.variable_length:
@@ -935,14 +939,18 @@ class connectors(object):
     def arrayed_invokee(self):
         return self.invokee().arrayed()
 
-    # Returns True if the connectors specify that the component needs
-    # an internal queue, otherwise returns false:
     def requires_queue(self):
+        """
+        Returns True if the connectors specify that the component needs
+        an internal queue, otherwise returns false:
+        """
         return bool(self.of_kind("recv_async"))
 
-    # Returns True if the connectors specify that the component needs
-    # an internal priority queue, otherwise returns false:
     def requires_priority_queue(self):
+        """
+        Returns True if the connectors specify that the component needs
+        an internal priority queue, otherwise returns false:
+        """
         recv_async_connectors = self.of_kind("recv_async")
         if recv_async_connectors:
             priorities = [conn.priority for conn in recv_async_connectors]
@@ -950,10 +958,12 @@ class connectors(object):
             return not bool(len(set(priorities)) == 1)
         return False
 
-    # Return either the set of invokee connectors,
-    # or the set of invoker connectors, whichever has
-    # more.
     def max(self):
+        """
+        Return either the set of invokee connectors,
+        or the set of invoker connectors, whichever has
+        more.
+        """
         if "max" not in self._cache:
             invokee = self.invokee()
             invoker = self.invoker()
@@ -980,8 +990,8 @@ class connectors(object):
             self._cache["generic_types"] = types
         return self._cache["generic_types"]
 
-    # Non cached filters:
     def of_name(self, name):
+        """Non cached filters."""
         name = ada.formatType(name)
         try:
             return self._connectors[name]

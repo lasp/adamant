@@ -689,16 +689,20 @@ class Filter(object):
         return cls(name=name, type=type, item_list=item_list, list_type=list_type)
 
 
-# This is the object model for a view. It extracts data from a
-# input file and stores the data as object member variables.
 class view(models.base.base):
+    """
+    This is the object model for a view. It extracts data from a
+    input file and stores the data as object member variables.
+    """
     #################################################
     # View model:
     ##################################################
 
-    # Initialize the view object, ingest data, and check it by
-    # calling the base class init function.
     def __init__(self, filename):
+        """
+        Initialize the view object, ingest data, and check it by
+        calling the base class init function.
+        """
         # This is sort of a hack, but allows us to not have to pass this class
         # everywhere just to print proper warnings. I would say that the use of
         # a global here is simpler than the visual noise that the alternative
@@ -710,8 +714,8 @@ class view(models.base.base):
         # Load the object from the file:
         super(view, self).__init__(filename, os.environ["SCHEMAPATH"] + "/view.yaml")
 
-    # Load view specific data structures with information from YAML file.
     def load(self):
+        """Load view specific data structures with information from YAML file."""
         # Initialize object members:
         self.name = None
         self.prettyname = None
@@ -933,8 +937,8 @@ class view(models.base.base):
             )
 
     def apply(self, assm):
-        # Create new assembly object from a YAML data object:
         def new_assembly(data):
+            """Create new assembly object from a YAML data object."""
             # Create new assembly
             a = models.assembly.assembly(filename=None, is_subassembly=True)
             # Add things to assembly from view to help out templates:

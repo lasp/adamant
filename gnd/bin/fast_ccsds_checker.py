@@ -287,9 +287,11 @@ def parseCcsds(
 # reports any errors that it finds and prints some statistics
 # to the commandline:
 if __name__ == "__main__":
-    # Arparse extend definition:
-    # https://stackoverflow.com/questions/41152799/argparse-flatten-the-result-of-action-append
     class ExtendAction(argparse.Action):
+        """
+        Arparse extend definition:
+        https://stackoverflow.com/questions/41152799/argparse-flatten-the-result-of-action-append
+        """
         def __call__(self, parser, namespace, values, option_string=None):
             items = getattr(namespace, self.dest) or []
             items.extend(values)
@@ -395,8 +397,8 @@ if __name__ == "__main__":
             total_bytes_to_parse = args.b
         idx = args.num_pre_bytes
 
-        # Print summary of results for user.
         def print_summary():
+            """Print summary of results for user."""
             print("")
             print(
                 "---------------------------------------------------------------------------------"
@@ -460,8 +462,8 @@ if __name__ == "__main__":
             )
             print("")
 
-        # Register control C to just print the summary so far and exit.
         def print_summary_exit(*args):
+            """Register control C to just print the summary so far and exit."""
             print("")
             print("Exiting after printing current parse summary...")
             print_summary()

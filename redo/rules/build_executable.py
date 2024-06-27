@@ -18,8 +18,8 @@ from database.c_source_database import c_source_database
 from collections import OrderedDict
 
 
-# Get the build target object instance.
 def _get_build_target_instance(target_name):
+    """Get the build target object instance."""
     try:
         with build_target_database() as db:
             instance, filename = db.get_build_target_instance(target_name)
@@ -34,12 +34,14 @@ def _get_build_target_instance(target_name):
         return instance, filename
 
 
-# Given a list of object files, redo-ifchange on all dependency
-# object files. This function is recursive, and will redo-ifchange
-# the entire dependency chain.
 def _build_all_ada_object_dependencies(
     ada_object_file, source_db, build_target, custom_object_link_dir
 ):
+    """
+    Given a list of object files, redo-ifchange on all dependency
+    object files. This function is recursive, and will redo-ifchange
+    the entire dependency chain.
+    """
     deps = []
 
     def sym_link_objects(objects):
@@ -122,11 +124,13 @@ def _build_all_ada_object_dependencies(
     return deps
 
 
-# This build rule builds an executable out of compiled object files.
-# It matches Ada source files that are named either "test.adb" or
-# "main.adb". Files with these names are expected to produce the
-# main function for an executable in the Adamant framework.
 class build_executable(build_rule_base):
+    """
+    This build rule builds an executable out of compiled object files.
+    It matches Ada source files that are named either "test.adb" or
+    "main.adb". Files with these names are expected to produce the
+    main function for an executable in the Adamant framework.
+    """
     def _build(self, redo_1, redo_2, redo_3):
         # Make sure the executable is being built in the correct directory:
         if not redo_arg.in_build_bin_dir(redo_1):
@@ -333,13 +337,15 @@ class build_executable(build_rule_base):
                 )
                 sys.stderr.write(traceback.format_exc() + "\n")
 
-    # Match source code named test.adb or main.adb
     def input_file_regex(self):
+        """Match source code named test.adb or main.adb"""
         return [r".*\/test\.adb$", r".*\/main\.adb$", r".*\/.*_type_ranges.adb"]
 
-    # Output binaries always go in the build/bin folder and the
-    # filename is appended with ".elf"
     def output_filename(self, input_filename):
+        """
+        Output binaries always go in the build/bin folder and the
+        filename is appended with ".elf"
+        """
         base = redo_arg.get_base_no_ext(input_filename)
         directory = redo_arg.get_src_dir(input_filename)
         return os.path.join(

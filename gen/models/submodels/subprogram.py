@@ -4,14 +4,16 @@ from collections import OrderedDict
 from util import ada
 
 
-# This class holds data concerning an Ada subprogram
 class subprogram(object):
+    """This class holds data concerning an Ada subprogram"""
     ################################
     # Initialization:
     ################################
-    # To initialize the subprogram object, component data must be
-    # passed in.
     def __init__(self, name, description=None, parameters=[], return_value=None):
+        """
+        To initialize the subprogram object, component data must be
+        passed in.
+        """
         self._name = ada.formatType(name)
         self._description = description
         self._return_value = return_value
@@ -138,24 +140,24 @@ class subprogram(object):
     def parameter_names(self):
         return list(self._parameters.keys())
 
-    # Return all parameter names without a default value set:
     @property
     def required_parameter_names(self):
+        """Return all parameter names without a default value set."""
         return [key for key, val in self._parameters.items() if not val.default_value]
 
-    # Return all parameter names with a default value set:
     @property
     def not_required_parameter_names(self):
+        """Return all parameter names with a default value set."""
         return [key for key, val in self._parameters.items() if val.default_value]
 
-    # Return unique include list:
     @property
     def includes(self):
+        """Return unique include list."""
         return self._includes
 
-    # Return all the types used in the subprogram
     @property
     def types(self):
+        """Return all the types used in the subprogram"""
         types = []
         for par in self.parameters:
             if par.type:
@@ -174,9 +176,9 @@ class subprogram(object):
             types.append(self._return_value.type)
         return types
 
-    # Return all the type models used in the subprogram
     @property
     def type_models(self):
+        """Return all the type models used in the subprogram"""
         type_models = []
         for par in self.parameters:
             if par.type_model:
@@ -232,9 +234,11 @@ class subprogram(object):
                 + "'."
             )
 
-    # Raises exception with appropriate error message if values
-    # don't check out, or if one is missing.
     def check_for_missing_parameter_values(self):
+        """
+        Raises exception with appropriate error message if values
+        don't check out, or if one is missing.
+        """
         missing_vals = []
         for par in self._parameters.values():
             if not par.value and not par.default_value:
@@ -249,9 +253,11 @@ class subprogram(object):
                 + str(list(self.required_parameter_names))
             )
 
-    # May raise ModelException if the set values do not match the
-    # names already contained within the object.
     def set_values(self, assembly_component_parameters_data):
+        """
+        May raise ModelException if the set values do not match the
+        names already contained within the object.
+        """
         # If we are trying to set values for a component that doesn't have
         # an init, then throw an error.
         if not self._parameters and assembly_component_parameters_data:

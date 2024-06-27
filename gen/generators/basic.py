@@ -5,8 +5,6 @@ from util import ada
 import os.path
 
 
-# Special helper function which allows you to dynamically create a basic generator at
-# runtime. You can specify the module that you would like the generator to be part of.
 def create_basic_generator(
     model_class,
     template_name,
@@ -16,6 +14,10 @@ def create_basic_generator(
     camel_case_filename=False,
     ignore_cache=False
 ):
+    """
+    Special helper function which allows you to dynamically create a basic generator at
+    runtime. You can specify the module that you would like the generator to be part of.
+    """
     #
     # Dynamically generate a class of the form:
     #
@@ -50,13 +52,14 @@ def create_basic_generator(
     )
 
 
-# Add a class to a specific module. By default, calling this will add the generator to
-# the module you called the function from.
 def add_class_to_module(cls, module=globals()):
+    """
+    Add a class to a specific module. By default, calling this will add the generator to
+    the module you called the function from.
+    """
     module[cls.__name__] = cls
 
 
-# Add a basic generator to a specific module:
 def add_basic_generator_to_module(
     model_class,
     template,
@@ -66,6 +69,9 @@ def add_basic_generator_to_module(
     camel_case_filename=False,
     ignore_cache=False
 ):
+    """
+    Add a basic generator to a specific module:
+    """
     module_name = module["__name__"]
     cls = create_basic_generator(
         model_class,
@@ -79,7 +85,6 @@ def add_basic_generator_to_module(
     add_class_to_module(cls, module)
 
 
-# Add a list of basic generators to specific module, where each generator has a different output template.
 def add_basic_generators_to_module(
     model_class,
     templates,
@@ -89,6 +94,9 @@ def add_basic_generators_to_module(
     camel_case_filename=False,
     ignore_cache=False
 ):
+    """
+    Add a list of basic generators to specific module, where each generator has a different output template.
+    """
     for template in templates:
         add_basic_generator_to_module(
             model_class,
@@ -101,42 +109,44 @@ def add_basic_generators_to_module(
         )
 
 
-#
-# This package contains a basic generator which implements a generator pattern
-# common for most Adamant generators. Generators should create a child class inheriting from
-# both this class and generator_base. ie. something like this:
-#
-#   class new_generator(basic_generator, generator_base):
-#     def __init__(self):
-#       basic_generator.__init__(self, model_class=new_model.new_model, template_filename="name_cool_file.ads")
-#
-# where model_class is the python class that contains the generator model and template_filename contains
-# the filename of the template used to render the output file.
-#
-# Most generators will work as expected if the follow the Adamant generator pattern. Besides implementing
-# the generator as shown above, the template file name should exactly mimic the format of the output
-# filename with the string "name" substituted in for the model name that generates the output. For example
-# if the model name is something like awesome.component.yaml then the following template names will
-# result in the shown output names:
-#
-#   name.html -> awesome.html
-#   whatever.ads -> whatever.ads
-#   component-name-implementation.adb -> component-awesome-implementation.adb
-#
-# Output files will be constructed relative to the input model file in their default adamant directories.
-# The rules are outlined below:
-#
-#   files extension ".tex" -> doc/build/tex
-#   files extension ".ad[s,b]" -> build/src
-#   files ending in "[main, test, -implementation, -implementation-tester].ad[s,b]" -> build/template
-#   all others -> build/<file extension>
-#
-# If this behavior doesn't fit your generator you have two choices:
-#
-#   1) Override the methods of basic_generator where you need different behavior
-#   2) Write your generator from scratch inheriting from generator_base
-#
 class basic_generator(object):
+    """
+
+    This package contains a basic generator which implements a generator pattern
+    common for most Adamant generators. Generators should create a child class inheriting from
+    both this class and generator_base. ie. something like this:
+
+    class new_generator(basic_generator, generator_base):
+    def __init__(self):
+    basic_generator.__init__(self, model_class=new_model.new_model, template_filename="name_cool_file.ads")
+
+    where model_class is the python class that contains the generator model and template_filename contains
+    the filename of the template used to render the output file.
+
+    Most generators will work as expected if the follow the Adamant generator pattern. Besides implementing
+    the generator as shown above, the template file name should exactly mimic the format of the output
+    filename with the string "name" substituted in for the model name that generates the output. For example
+    if the model name is something like awesome.component.yaml then the following template names will
+    result in the shown output names:
+
+    name.html -> awesome.html
+    whatever.ads -> whatever.ads
+    component-name-implementation.adb -> component-awesome-implementation.adb
+
+    Output files will be constructed relative to the input model file in their default adamant directories.
+    The rules are outlined below:
+
+    files extension ".tex" -> doc/build/tex
+    files extension ".ad[s,b]" -> build/src
+    files ending in "[main, test, -implementation, -implementation-tester].ad[s,b]" -> build/template
+    all others -> build/<file extension>
+
+    If this behavior doesn't fit your generator you have two choices:
+
+    1) Override the methods of basic_generator where you need different behavior
+    2) Write your generator from scratch inheriting from generator_base
+
+    """
     def __init__(
         self,
         model_class,
@@ -167,8 +177,8 @@ class basic_generator(object):
         self.extension = ext[1:]
         self.descriptor = name.split("name")[-1]
 
-    # Cache model object for speed:
     def model_object(self, input_filename):
+        """Cache model object for speed."""
         if input_filename not in self._model_obj:
             self._model_obj[input_filename] = self.model_cls(input_filename, ignore_cache=self.ignore_cache)
         return self._model_obj[input_filename]
@@ -176,17 +186,21 @@ class basic_generator(object):
     def input_file_regex(self):
         return r".*\." + self.model_type + r"\.yaml$"
 
-    # Extracts useful info from the input filename. Examples:
-    #
-    # /path/to/my_component.component.yaml -> (/path/to, None, my_component, component, yaml)
-    # /path/to/my_test.my_component.tests.yaml -> (/path/to, my_test, my_component, tests, yaml)
-    #
     def _split_input_filename(self, input_filename):
+        """
+        Extracts useful info from the input filename. Examples:
+
+        /path/to/my_component.component.yaml -> (/path/to, None, my_component, component, yaml)
+        /path/to/my_test.my_component.tests.yaml -> (/path/to, my_test, my_component, tests, yaml)
+
+        """
         return redo_arg.split_model_filename(input_filename, self.model_type)
 
-    # Return the default build directory for this generator based on the
-    # template's file extension and name.
     def _get_default_build_dir(self):
+        """
+        Return the default build directory for this generator based on the
+        template's file extension and name.
+        """
         # Set defaults:
         build_dir = "build"
         sub_dir = self.extension
@@ -211,9 +225,11 @@ class basic_generator(object):
 
         return build_dir + os.sep + sub_dir
 
-    # The default output filename is the name of the template with last instance of the string "name"
-    # replaced with the name of the specific model we are using as input file.
     def _get_default_output_filename(self, model_name):
+        """
+        The default output filename is the name of the template with last instance of the string "name"
+        replaced with the name of the specific model we are using as input file.
+        """
         a = self.template_basename.rsplit("name", maxsplit=1)
         name = model_name.join(a)
         if self.camel_case_filename:
@@ -223,9 +239,11 @@ class basic_generator(object):
             name = ".".join(split_name)
         return name
 
-    # Override this if it does not work for your specific generator. This function basically
-    # uses the basic generator defaults for output file location and name.
     def output_filename(self, input_filename):
+        """
+        Override this if it does not work for your specific generator. This function basically
+        uses the basic generator defaults for output file location and name.
+        """
         # Get info from input filename:
         dirname, specific_name, model_name, *ignore = self._split_input_filename(
             input_filename
@@ -277,8 +295,8 @@ class basic_generator(object):
             )
         )
 
-    # Depend on the primary model dependencies:
     def depends_on(self, input_filename):
+        """Depend on the primary model dependencies."""
         if self.has_dependencies:
             m = self.model_object(input_filename)
             if hasattr(m, "get_dependencies"):

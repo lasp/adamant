@@ -20,8 +20,8 @@ class Linux_Base(gprbuild_target_base):
 #
 
 
-# This is the standard debug Linux target.
 class Linux_Debug(Linux_Base):
+    """This is the standard debug Linux target."""
     def description(self):
         return ("This native 64-bit Linux target has no optimization, compiles with debug flags "
                 "enabled, and enforces the Ravenscar profile.")
@@ -33,14 +33,14 @@ class Linux_Debug(Linux_Base):
         )
 
 
-# This is the default Linux target.
 class Linux(Linux_Debug):
+    """This is the default Linux target."""
     def description(self):
         return "The default Linux target. This is simply a rename of Linux_Debug."
 
 
-# Test target which links in aunit:
 class Linux_Test(Linux_Base):
+    """Test target which links in aunit."""
     def description(self):
         return ("Same as Linux_Debug except it does not enforce the Ravenscar profile and links "
                 "with AUnit.")
@@ -52,8 +52,8 @@ class Linux_Test(Linux_Base):
         )
 
 
-# Coverage target which works with gcov:
 class Linux_Coverage(Linux_Base):
+    """Coverage target which works with gcov."""
     def description(self):
         return ("Same as Linux_Test except it adds compilation flags to assist with coverage analysis "
                 "via gcov.")
@@ -74,7 +74,7 @@ class Linux_Coverage(Linux_Base):
         )
 
 
-# This is the target used with GNATprove to verify SPARK code.
 class Linux_Prove(Linux_Debug):
+    """This is the target used with GNATprove to verify SPARK code."""
     def description(self):
         return "This target is used to generate the path for calls to GNATprove to analyze SPARK code."

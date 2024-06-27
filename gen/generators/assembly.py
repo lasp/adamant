@@ -130,8 +130,8 @@ class hydra_packet_pages_prc(assembly_hydra_generator, generator_base):
 type_format_dictionary = {"U": "%d", "I": "%d", "F": "%f"}
 
 
-# Function which produces a format string to print an Ada type:
 def create_type_print_strings(theAssembly):
+    """Function which produces a format string to print an Ada type."""
     for name, model in theAssembly.complex_types.items():
         string = ""
         model_type = type(model).__name__
@@ -165,9 +165,11 @@ def create_type_print_strings(theAssembly):
             assert False, "Cannot handle models of type: " + str(model_type)
 
 
-# Function which produces a type field string for all types
-# in the assembly mode.
 def create_type_field_strings(theAssembly):
+    """
+    Function which produces a type field string for all types
+    in the assembly mode.
+    """
     def form_field_strings(top_model, model, prefix=""):
         model_type = type(model).__name__
         if model_type in ["record", "array"]:
@@ -250,8 +252,8 @@ class assembly_view_dot(basic_generator, generator_base):
         a = v.apply(a)
         print(a.render(self.template))
 
-    # Depend on any commands, data products, events models that this component uses:
     def depends_on(self, input_filename):
+        """Depend on any commands, data products, events models that this component uses."""
         dirname, view_name, assembly_name, *ignore = self._split_input_filename(
             input_filename
         )

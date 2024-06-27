@@ -6,8 +6,8 @@ from models.base import base
 from models.submodels.variable import variable
 
 
-# A memory map item. This is basically a variable, but with a few added fields.
 class map_item(variable):
+    """A memory map item. This is basically a variable, but with a few added fields."""
     def __init__(self, name, type, address=None, description=None):
         self.address = address
         self.prev_item = None
@@ -43,19 +43,23 @@ class map_item(variable):
         return cls(name=name, type=type, address=address, description=description)
 
 
-# This is the object model for a memory map. It extracts data from an
-# input file and stores the data as object member variables.
 class memory_map(base):
-    # Initialize the packed type object, ingest data, and check it by
-    # calling the base class init function.
+    """
+    This is the object model for a memory map. It extracts data from an
+    input file and stores the data as object member variables.
+    """
     def __init__(self, filename):
+        """
+        Initialize the packed type object, ingest data, and check it by
+        calling the base class init function.
+        """
         # Load the object from the file:
         super(memory_map, self).__init__(
             filename, os.environ["SCHEMAPATH"] + "/memory_map.yaml"
         )
 
-    # Load record specific data structures with information from YAML file.
     def load(self):
+        """Load record specific data structures with information from YAML file."""
         # Initialize object members:
         self.name = None
         self.description = None

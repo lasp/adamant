@@ -4,12 +4,16 @@ from models.submodels.interrupts import interrupts
 from models.exceptions import ModelException
 
 
-# This model holds a component's discriminant data and allows
-# easy access to its members:
 class discriminant(subprogram):
-    # To initialize the discriminant object, component data must be
-    # passed in.
+    """
+    This model holds a component's discriminant data and allows
+    easy access to its members:
+    """
     def __init__(self, component_data, the_interrupts):
+        """
+        To initialize the discriminant object, component data must be
+        passed in.
+        """
         try:
             # Fill in data:
             self._data = component_data

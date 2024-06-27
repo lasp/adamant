@@ -4,10 +4,10 @@ from collections import OrderedDict
 import re
 
 
-# Open the yaml file, parse it, and store its contents in self.data:
 def _openYaml(yaml_file):
-    # Helper function to load yaml using ruamel.yaml library:
+    """Open the yaml file, parse it, and store its contents in self.data."""
     def _loadYaml(yaml_text):
+        """Helper function to load yaml using ruamel.yaml library."""
         import ruamel.yaml as yaml
 
         # Turn off warnings for unsafe yaml loading. We don't care.
@@ -28,9 +28,11 @@ def _openYaml(yaml_file):
     return _loadYaml(yaml_text)
 
 
-# Return the number of keys in a dictionary (of dictionaries, of lists, etc.),
-# recursively, until the leaf item is no longer a dictionary or list.
 def countYamlKeys(yaml_dict):
+    """
+    Return the number of keys in a dictionary (of dictionaries, of lists, etc.),
+    recursively, until the leaf item is no longer a dictionary or list.
+    """
     count = 0
     if isinstance(yaml_dict, dict):
         keys = list(yaml_dict.keys())
@@ -62,9 +64,11 @@ def countSLOC(yaml_files):
 # line. When run it reports the total source lines of code
 # found in a list of YAML files.
 if __name__ == "__main__":
-    # Arparse extend definition:
-    # https://stackoverflow.com/questions/41152799/argparse-flatten-the-result-of-action-append
     class ExtendAction(argparse.Action):
+        """
+        Arparse extend definition:
+        https://stackoverflow.com/questions/41152799/argparse-flatten-the-result-of-action-append
+        """
         def __call__(self, parser, namespace, values, option_string=None):
             items = getattr(namespace, self.dest) or []
             items.extend(values)

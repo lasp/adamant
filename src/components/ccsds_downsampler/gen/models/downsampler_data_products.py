@@ -3,12 +3,14 @@ from models.exceptions import ModelException
 from util import model_loader
 
 
-# This model is a specialized data product suite for the CCSDS Downsampler component.
-# This class inherits from the normal data product model and adds data products for each
-# item in the list that the downsampler could end up downsampling.
 class downsampler_data_products(data_products):
-    # This is just a "decorated" packet object, so make sure everyone treats it like that.
+    """
+    This model is a specialized data product suite for the CCSDS Downsampler component.
+    This class inherits from the normal data product model and adds data products for each
+    item in the list that the downsampler could end up downsampling.
+    """
     def submodel_name(self):
+        """This is just a "decorated" packet object, so make sure everyone treats it like that."""
         return "data_products"
 
     def set_assembly(self, assembly):
