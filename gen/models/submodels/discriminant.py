@@ -26,12 +26,16 @@ class discriminant(subprogram):
                     description = self._data["discriminant"]["description"]
                 if "parameters" in self._data["discriminant"]:
                     for par in self._data["discriminant"]["parameters"]:
+                        par_not_null = False
+                        if "not_null" in par:
+                            par_not_null = par["not_null"]
                         parameters.append(
                             parameter(
                                 name=par["name"],
                                 type=par["type"],
                                 value=None,
                                 description=par["description"],
+                                not_null=par_not_null,
                             )
                         )
 
