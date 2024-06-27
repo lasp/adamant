@@ -18,18 +18,7 @@ generic
 package Component.{{ name }}.Implementation is
 
    -- The component class instance record:
-{% if discriminant.description %}
-{{ printMultiLine(discriminant.description, '   -- ') }}
-{% endif %}
-{% if discriminant.parameters %}
-   --
-{{ printMultiLine("Discriminant Parameters:", '   -- ') }}
-{% for p in discriminant.parameters %}
-{{ printMultiLine(p.name + " : " + p.type + ((" - " + p.description) if (p.description) else ""), '   -- ') }}
-{% endfor %}
-   --
-{% endif %}
-   type Instance{% if discriminant.parameters %} ({{ discriminant.parameter_declaration_string(include_mode=False) }}){% endif %} is new {{ name }}.Base_Instance with private;
+   type Instance is new {{ name }}.Base_Instance with private;
 
 {% if init %}
    --------------------------------------------------
@@ -52,18 +41,7 @@ package Component.{{ name }}.Implementation is
 private
 
    -- The component class instance record:
-{% if discriminant.description %}
-{{ printMultiLine(discriminant.description, '   -- ') }}
-{% endif %}
-{% if discriminant.parameters %}
-   --
-{{ printMultiLine("Discriminant Parameters:", '   -- ') }}
-{% for p in discriminant.parameters %}
-{{ printMultiLine(p.name + " : " + p.type + ((" - " + p.description) if (p.description) else ""), '   -- ') }}
-{% endfor %}
-   --
-{% endif %}
-   type Instance{% if discriminant.parameters %} ({{ discriminant.parameter_declaration_string(include_mode=False) }}){% endif %} is new {{ name }}.Base_Instance with record
+   type Instance is new {{ name }}.Base_Instance with record
       null; -- TODO
    end record;
 

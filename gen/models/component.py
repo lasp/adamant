@@ -472,11 +472,16 @@ class component(base):
                 + (self.includes)
             )
         )
-        self.base_ads_includes = [
-            inc
-            for inc in self.base_ads_includes
-            if inc not in self.do_not_includes and inc != "Component"
-        ]
+        self.base_ads_includes = list(
+            OrderedDict.fromkeys(
+                [
+                    inc
+                    for inc in self.base_ads_includes
+                    if inc not in self.do_not_includes and inc != "Component"
+                ]
+                + (self.discriminant.includes if self.discriminant else [])
+            )
+        )
 
         self.base_adb_includes = list(
             OrderedDict.fromkeys(
@@ -506,8 +511,7 @@ class component(base):
 
         self.template_ads_includes = list(
             OrderedDict.fromkeys(
-                (self.discriminant.includes if self.discriminant else [])
-                + (
+                (
                     self.connectors.invokee().type_includes
                     if self.connectors.invokee().includes
                     else []

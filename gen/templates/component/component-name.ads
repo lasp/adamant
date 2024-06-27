@@ -44,7 +44,18 @@ package Component.{{ name }} is
 {% endif %}
 
    -- Base class instance:
-   type Base_Instance is abstract new Component.Core_Instance with private;
+{% if discriminant.description %}
+{{ printMultiLine(discriminant.description, '   -- ') }}
+{% endif %}
+{% if discriminant.parameters %}
+   --
+{{ printMultiLine("Discriminant Parameters:", '   -- ') }}
+{% for p in discriminant.parameters %}
+{{ printMultiLine(p.name + " : " + p.type + ((" - " + p.description) if (p.description) else ""), '   -- ') }}
+{% endfor %}
+   --
+{% endif %}
+   type Base_Instance{% if discriminant.parameters %} ({{ discriminant.parameter_declaration_string(include_mode=False) }}){% endif %} is abstract new Component.Core_Instance with private;
    type Base_Class_Access is access all Base_Instance'Class;
 
 {% if connectors.requires_queue() %}
@@ -655,7 +666,18 @@ private
    -------------------------------------------
    -- The base class instance record:
    -------------------------------------------
-   type Base_Instance is abstract new Component.Core_Instance with record
+{% if discriminant.description %}
+{{ printMultiLine(discriminant.description, '   -- ') }}
+{% endif %}
+{% if discriminant.parameters %}
+   --
+{{ printMultiLine("Discriminant Parameters:", '   -- ') }}
+{% for p in discriminant.parameters %}
+{{ printMultiLine(p.name + " : " + p.type + ((" - " + p.description) if (p.description) else ""), '   -- ') }}
+{% endfor %}
+   --
+{% endif %}
+   type Base_Instance {% if discriminant.parameters %} ({{ discriminant.parameter_declaration_string(include_mode=False) }}){% endif %} is abstract new Component.Core_Instance with record
 {% if connectors.requires_queue() or connectors.invoker() or connectors.invokee().n_arrayed() or data_products or commands or events or packets or parameters or faults %}
 {% if connectors.requires_queue() %}
       -- Internal asynchronous connector queue:
