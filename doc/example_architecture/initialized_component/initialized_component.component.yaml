@@ -11,6 +11,8 @@ init:
     - name: Packets_Per_Tick
       # Required - parameter type
       type: Natural
+      # Optional - puts "not null" in front of the type. Defaults to false, and only should be used for access types
+      not_null: false
       # Optional - parameter description
       description: The number of packets to send every time the Tick_T_Recv_Sync connector is invoked.
     - name: Enabled_At_Startup
