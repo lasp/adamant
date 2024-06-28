@@ -63,7 +63,7 @@ RUN cat /dev/zero | ssh-keygen -q -N "" \
 
 # Install Alire:
 FROM base AS install_alire
-ENV ALIRE_VERSION="1.2.2"
+ENV ALIRE_VERSION="2.0.1"
 ENV ALIRE_FILE=alr-$ALIRE_VERSION-bin-x86_64-linux.zip
 ENV ALIRE_URL=https://github.com/alire-project/alire/releases/download/v$ALIRE_VERSION/$ALIRE_FILE
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq wget unzip \
