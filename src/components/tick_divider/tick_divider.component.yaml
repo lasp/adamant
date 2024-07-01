@@ -13,6 +13,7 @@ init:
   parameters:
     - name: dividers
       type: Divider_Array_Type_Access
+      not_null: true
       description: An access to an array of dividers used to determine the tick rate of each Tick_T_Send connector.
 connectors:
   - description: This connector receives a periodic Tick from an external component.

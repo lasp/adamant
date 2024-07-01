@@ -81,10 +81,9 @@ package body Component.Ccsds_Downsampler.Implementation is
    -- Init Parameters:
    -- Downsample_List : Ccsds_Downsampler_Types.Ccsds_Downsample_Packet_List_Access - The list of APIDs that are to be downsampled and the initial filter factor associated with those APIDs.
    --
-   overriding procedure Init (Self : in out Instance; Downsample_List : in Ccsds_Downsampler_Types.Ccsds_Downsample_Packet_List_Access) is
+   overriding procedure Init (Self : in out Instance; Downsample_List : in not null Ccsds_Downsampler_Types.Ccsds_Downsample_Packet_List_Access) is
    begin
-      -- Make sure that we have an initial list and that its not null
-      pragma Assert (Downsample_List /= null, "Downsampler init list cannot be null.");
+      -- Make sure that we have an non-empty initial list
       pragma Assert (Downsample_List'Length /= 0, "Downsampler init list cannot be empty.");
       -- For each item in the list, add the apid and filter factor to the internal tree
       Self.Apid_Entries.Init (Downsample_List);

@@ -100,6 +100,10 @@ mapping:
               type:
                 type: str
                 required: True
+              # Whether the initialization parameter can be set to null.
+              not_null:
+                type: bool
+                required: False
         required: False
     required: False
   # User defined initialization method. This method should allocate any memory on the heap
@@ -131,6 +135,10 @@ mapping:
               # The default value for the parameter.
               default:
                 type: str
+                required: False
+              # Whether the parameter can be set to null.
+              not_null:
+                type: bool
                 required: False
         required: False
     required: False

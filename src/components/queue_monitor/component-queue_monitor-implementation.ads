@@ -21,7 +21,7 @@ package Component.Queue_Monitor.Implementation is
    -- queued_Component_List : Component.Component_List_Access - A list of components to monitor.
    -- packet_Period : Interfaces.Unsigned_16 - The period (in ticks) of how often to send out the queue usage packet. A value of zero disable sending of the packet.
    --
-   overriding procedure Init (Self : in out Instance; Queued_Component_List : in Component.Component_List_Access; Packet_Period : in Interfaces.Unsigned_16 := 1);
+   overriding procedure Init (Self : in out Instance; Queued_Component_List : in not null Component.Component_List_Access; Packet_Period : in Interfaces.Unsigned_16 := 1);
 
 private
 

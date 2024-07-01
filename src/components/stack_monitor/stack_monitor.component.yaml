@@ -7,6 +7,7 @@ init:
   parameters:
     - name: task_List
       type: Task_Types.Task_Info_List_Access
+      not_null: true
       description: A list of task info records to monitor.
     - name: packet_Period
       type: Interfaces.Unsigned_16

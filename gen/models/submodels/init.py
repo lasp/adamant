@@ -27,6 +27,9 @@ class init(subprogram):
                 par_desc = None
                 if "description" in par:
                     par_desc = par["description"]
+                par_not_null = False
+                if "not_null" in par:
+                    par_not_null = par["not_null"]
                 parameters.append(
                     parameter(
                         name=par["name"],
@@ -34,6 +37,7 @@ class init(subprogram):
                         value=None,
                         default_value=default_value,
                         description=par_desc,
+                        not_null=par_not_null,
                     )
                 )
 

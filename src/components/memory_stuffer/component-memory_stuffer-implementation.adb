@@ -19,11 +19,10 @@ package body Component.Memory_Stuffer.Implementation is
    -- Memory_Regions : Memory_Manager_Types.Memory_Region_Array_Access - An access to a list of memory regions.
    -- Memory_Region_Protection_List : Memory_Manager_Types.Memory_Protection_Array_Access - An access to a list of the protected/unprotected state of each memory region. The index in this array corresponds to the index of the memory region affected in the previous parameter. If the array is null, then it is assumed that all memory regions are unprotected.
    --
-   overriding procedure Init (Self : in out Instance; Memory_Regions : in Memory_Manager_Types.Memory_Region_Array_Access; Memory_Region_Protection_List : in Memory_Manager_Types.Memory_Protection_Array_Access := null) is
+   overriding procedure Init (Self : in out Instance; Memory_Regions : in not null Memory_Manager_Types.Memory_Region_Array_Access; Memory_Region_Protection_List : in Memory_Manager_Types.Memory_Protection_Array_Access := null) is
       use Memory_Manager_Types;
    begin
       -- Set the regions:
-      pragma Assert (Memory_Regions /= null, "Memory regions list cannot be null");
       Self.Regions := Memory_Regions;
       -- Set the memory region protection list:
       if Memory_Region_Protection_List /= null then

@@ -10,6 +10,7 @@ init:
   parameters:
     - name: Data_Product_Extraction_List
       type: Product_Extractor_Types.Extracted_Product_List_Access
+      not_null: true
       description: The list of data products that will be extracted from packets.
 connectors:
   - description: The connector that will receive the CCSDS space packets and extract data products if necessary

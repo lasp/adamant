@@ -7,6 +7,7 @@ init:
   parameters:
     - name: memory_Regions
       type: Memory_Manager_Types.Memory_Region_Array_Access
+      not_null: true
       description: An access to a list of memory regions.
     - name: memory_Region_Protection_List
       type: Memory_Manager_Types.Memory_Protection_Array_Access

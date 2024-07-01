@@ -16,10 +16,8 @@ package body Component.Last_Chance_Manager.Implementation is
    -- Exception_Data : Packed_Exception_Occurrence.T_Access - The copy of the exception data that is updated by the last chance handler, presumably in a nonvolatile memory region.
    -- Dump_Exception_Data_At_Startup : Boolean - If True, then the exception data will be dumped in packet at startup.
    --
-   overriding procedure Init (Self : in out Instance; Exception_Data : in Packed_Exception_Occurrence.T_Access; Dump_Exception_Data_At_Startup : in Boolean) is
-      use Packed_Exception_Occurrence;
+   overriding procedure Init (Self : in out Instance; Exception_Data : in not null Packed_Exception_Occurrence.T_Access; Dump_Exception_Data_At_Startup : in Boolean) is
    begin
-      pragma Assert (Exception_Data /= null, "Exception data cannot be null.");
       Self.Exception_Data := Exception_Data;
       Self.Dump_Exception_Data_At_Startup := Dump_Exception_Data_At_Startup;
    end Init;

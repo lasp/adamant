@@ -30,6 +30,7 @@ init:
       description: The size of the stack allocated for each engine in entries. Each stack entry contains a single running sequence, and additional stack entries can be used for subsequence calls. A value of 5 here would allow a sequence to call subsequences up to 5 levels deep.
     - name: Create_Sequence_Load_Command_Function
       type: Create_Sequence_Load_Command_Access
+      not_null: true
       description: When a sequence loads or spans or calls another sequence, the command sequencer will call this function to formulate the correct sequence load command for the assembly. Since the specifics of sequence loading often varies on a mission by mission basis, this function allows the encoding of that mission specific behavior by the user.
     - name: Packet_Period
       type: Interfaces.Unsigned_16

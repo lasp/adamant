@@ -24,7 +24,7 @@ package Component.Ccsds_Downsampler.Implementation is
    -- Init Parameters:
    -- Downsample_List : Ccsds_Downsampler_Types.Ccsds_Downsample_Packet_List_Access - The list of APIDs that are to be downsampled and the initial filter factor associated with those APIDs.
    --
-   overriding procedure Init (Self : in out Instance; Downsample_List : in Ccsds_Downsampler_Types.Ccsds_Downsample_Packet_List_Access);
+   overriding procedure Init (Self : in out Instance; Downsample_List : in not null Ccsds_Downsampler_Types.Ccsds_Downsample_Packet_List_Access);
 
 private
    -- Helper procedure that will take a tree entry and create a data product for the filter factor

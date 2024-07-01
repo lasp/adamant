@@ -64,7 +64,7 @@ class datatype(object):
 
 class variable(object):
     """Class holding information related to an Ada variable"""
-    def __init__(self, name, type, description=None, value=None, default_value=None):
+    def __init__(self, name, type, description=None, value=None, default_value=None, not_null=False):
         self.name = ada.formatVariable(name)
         self.datatype = datatype(name=type)
         self.description = description
@@ -73,6 +73,7 @@ class variable(object):
         # Default value of variable, usually set by model, and used as default initialization
         # in subprogram definitions:
         self.default_value = ada.formatValue(default_value)
+        self.not_null = not_null
 
     ################################
     # Properties:
@@ -160,6 +161,7 @@ class variable(object):
         return (
             self.name
             + " : "
+            + ("not null " if self.not_null else "")
             + self.type
             + (" := " + str(self.default_value) if str(self.default_value) else "")
         )

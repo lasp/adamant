@@ -27,14 +27,12 @@ package body Component.Ccsds_Product_Extractor.Implementation is
    -- Init Parameters:
    -- Data_Product_Extraction_List : Product_Extractor_Types.Extracted_Product_List_Access - The list of data products that will be extracted from packets.
    --
-   overriding procedure Init (Self : in out Instance; Data_Product_Extraction_List : in Product_Extractor_Types.Extracted_Product_List_Access) is
+   overriding procedure Init (Self : in out Instance; Data_Product_Extraction_List : in not null Product_Extractor_Types.Extracted_Product_List_Access) is
       Add_Status : Boolean;
       Search_Status : Boolean;
       Fetched_Entry : Ccsds_Product_Apid_List;
       Ignore : Positive;
    begin
-      -- First make sure the list is not null
-      pragma Assert (Data_Product_Extraction_List /= null, "Initialization list for the product extractor cannot be null.");
       -- Allocate space for the table:
       Self.Extracted_Products_Tree.Init (Data_Product_Extraction_List'Length);
 

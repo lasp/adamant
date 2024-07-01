@@ -16,10 +16,8 @@ package body Component.Memory_Dumper.Implementation is
    -- Init Parameters:
    -- memory_Regions : Memory_Manager_Types.Memory_Region_Array_Access - An access to a list of memory regions.
    --
-   overriding procedure Init (Self : in out Instance; Memory_Regions : in Memory_Manager_Types.Memory_Region_Array_Access) is
-      use Memory_Manager_Types;
+   overriding procedure Init (Self : in out Instance; Memory_Regions : in not null Memory_Manager_Types.Memory_Region_Array_Access) is
    begin
-      pragma Assert (Memory_Regions /= null, "Memory regions list cannot be null");
       Self.Regions := Memory_Regions;
    end Init;
 

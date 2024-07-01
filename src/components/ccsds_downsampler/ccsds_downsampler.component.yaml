@@ -10,6 +10,7 @@ init:
   parameters:
     - name: Downsample_List
       type: Ccsds_Downsampler_Types.Ccsds_Downsample_Packet_List_Access
+      not_null: true
       description: The list of APIDs that are to be downsampled and the initial filter factor associated with those APIDs.
 connectors:
   - description: This connector is the input connector for the packets that are coming in. This is where packets are checked for filtering.
