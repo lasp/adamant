@@ -42,6 +42,7 @@ usage() {
   echo "*  start: create and start the ${PROJECT_NAME} container" >&2
   echo "*  stop: stop the running ${PROJECT_NAME} container" >&2
   echo "*  login: login to the ${PROJECT_NAME} container" >&2
+  echo "*  pull: pull the latest image from the Docker registry" >&2
   echo "*  push: push the image to the Docker registry" >&2
   echo "*  build: build the image from the Dockerfile" >&2
   echo "*  remove: remove network and volumes for ${PROJECT_NAME}" >&2
@@ -63,6 +64,9 @@ case $1 in
     ;;
   login )
     execute "${DOCKER_COMPOSE_COMMAND} -f ${DOCKER_COMPOSE_CONFIG} exec -it -u user ${PROJECT_NAME} //bin//bash"
+    ;;
+  pull )
+    execute "${DOCKER_COMPOSE_COMMAND} -f ${DOCKER_COMPOSE_CONFIG} pull"
     ;;
   push )
     execute "${DOCKER_COMPOSE_COMMAND} -f ${DOCKER_COMPOSE_CONFIG} push"
