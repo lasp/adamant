@@ -121,7 +121,7 @@ fi
 echo ""
 echo "Configuring build roots: ${paths[@]}"
 for path in "${paths[@]}"; do
-  echo -n "  Setting up $path...  "
+  echo "Setting up $path...  "
   cd $path
 
   # Mark path as safe git directory if it is not already marked.
@@ -129,14 +129,9 @@ for path in "${paths[@]}"; do
     git config --global --add safe.directory "$path"
   fi
 
-  # Set up alire configuration if it is not yet set up. We already did this for
-  # Adamant (the alire/ directory exists), so only do this for project directories.
-  if ! test -d "$path/alire"
-  then
-    echo "Building alire dependencies..."
-    alr -n build --release
-    echo "Done."
-  fi
+  # Set up alire configuration if it is not yet set up.
+  echo "Building alire dependencies..."
+  alr -n build --release
 
   # This runs "export GPR_PROJECT_PATH=etc" which sets the GPR_PROJECT_PATH
   # to whatever alr thinks it should be for the Adamant project crate.
@@ -162,7 +157,6 @@ for path in "${paths[@]}"; do
   . $ADAMANT_DIR/env/set_python_path.sh $path
 
   cd - &> /dev/null
-  echo "Done."
 done
 
 echo "Done."
