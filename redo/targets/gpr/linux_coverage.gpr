@@ -22,12 +22,7 @@ project linux_coverage extends all "a_linux_debug_base.gpr" is
       -- Add preprocessor definitions and configuration pragma switches:
       for Switches ("Ada") use a_linux_debug_base.Compiler'Switches ("Ada") &
          -- gcov instrumentation flags
-         ("-fprofile-arcs", "-ftest-coverage") &
-         -- Add support for gnat2022 for unit test logging, but
-         -- ignore warnings like:
-         --    warning: array aggregate using () is an obsolescent syntax, use [] instead [-gnatwj]
-         -- until gnat2022 becomes standard.
-         ("-gnat2022", "-gnatwJ");
+         ("-fprofile-arcs", "-ftest-coverage");
    end Compiler;
 
    package Linker is
