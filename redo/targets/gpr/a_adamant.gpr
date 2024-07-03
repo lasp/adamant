@@ -42,11 +42,14 @@ abstract project a_adamant is
       -- -gnatw.o - modified but unreferenced out parameters warnings
       -- -gnatwt - deleted conditional code
       -- -gnatw.X - disable warnings for No_Exception_Propagation mode, since this is usable in Linux
+      -- -gnat2022- add support for gnat2022 features
+      -- -gnatwJ ignore warnings (for now) like:
+      --    warning: array aggregate using () is an obsolescent syntax, use [] instead [-gnatwj]
       --
       -- Note: I did not turn on gnatwd, because writing "all" all the time makes things
       -- less readable.
       --
-      ADA_FLAGS := ("-gnatf", "-gnatwa", "-gnatwl", "-gnatw.o", "-gnatwt", "-gnatw.X");
+      ADA_FLAGS := ("-gnatf", "-gnatwa", "-gnatwl", "-gnatw.o", "-gnatwt", "-gnatw.X", "-gnat2022", "-gnatwJ");
       COMMON_C_FLAGS := ("-Wall", "-Wextra", "-pedantic");
       C_FLAGS := COMMON_C_FLAGS & ("-std=gnu99");
       CPP_FLAGS := COMMON_C_FLAGS & ("-std=c++0x");
