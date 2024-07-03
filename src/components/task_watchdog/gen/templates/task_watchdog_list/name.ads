@@ -7,7 +7,7 @@ with Task_Watchdog_Enums; use Task_Watchdog_Enums;
 {% endif %}
 package {{ name }} is
    -- The initial list for the task watchdog component
-   Task_Watchdog_Entry_Init_List : aliased Task_Watchdog_Init_List := (
+   Task_Watchdog_Entry_Init_List : aliased Task_Watchdog_Init_List := [
 {% for petter in watchdog_list.values() %}
    {% if petter.description %}
 {{ printMultiLine(petter.description, '   -- ') }}
@@ -24,6 +24,6 @@ package {{ name }} is
          Petter_Has_Fault => {{ petter.has_fault }}
       ){{ "," if not loop.last }}
 {% endfor %}
-   );
+   ];
 
 end {{ name }};

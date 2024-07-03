@@ -222,7 +222,7 @@ package body Component.Sequence_Store.Implementation is
             -- Create byte array to hold summaries. We know that this byte array will fit into a packet, since we checked at
             -- initialization.
             subtype Summary_Byte_Array is Basic_Types.Byte_Array (0 .. Packed_Slot_Summary.Size_In_Bytes * Self.Slots.all'Length - 1);
-            Summary_Bytes : Summary_Byte_Array := (others => 0);
+            Summary_Bytes : Summary_Byte_Array := [others => 0];
             Idx : Natural := Summary_Bytes'First;
          begin
             -- For each slot, grab the header and put relevant data into the

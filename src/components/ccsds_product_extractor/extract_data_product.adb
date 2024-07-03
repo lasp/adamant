@@ -11,7 +11,7 @@ package body Extract_Data_Product is
             Id => Id,
             Buffer_Length => Length
          ),
-         Buffer => (others => 0)
+         Buffer => [others => 0]
       );
 
       -- Dont try to read if its going to overflow out of the packet.

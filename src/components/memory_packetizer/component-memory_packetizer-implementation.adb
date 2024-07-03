@@ -154,7 +154,7 @@ package body Component.Memory_Packetizer.Implementation is
                      Sequence_Count => Sequence_Count,
                      Buffer_Length => Buffer_Length + Mem_Header_Length
                   ),
-                  Buffer => (others => 0)
+                  Buffer => [others => 0]
                );
             begin
                -- Serialize the slice into a memory region packed record that includes address and length information:

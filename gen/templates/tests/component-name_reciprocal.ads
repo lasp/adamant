@@ -325,11 +325,11 @@ package Component.{{ name }}_Reciprocal is
    -- Procedure lookup table for dispatching to correct connector handler:
    type Dispatch_Event_Procedure is access procedure (Self : in out Base_Instance; Evnt : in Event.T);
    type Event_Table_T is array ({{ events.name }}.Local_Event_Id_Type) of Dispatch_Event_Procedure;
-   Event_Id_Table : Event_Table_T := (
+   Event_Id_Table : Event_Table_T := [
 {% for event in events %}
       {{ events.name }}.{{ event.name }}_Id => Dispatch_{{ event.name }}'Access{{ "," if not loop.last }}
 {% endfor %}
-   );
+   ];
 
 {% endif %}
 {% if data_products %}
@@ -361,11 +361,11 @@ package Component.{{ name }}_Reciprocal is
    -- Procedure lookup table for dispatching to correct connector handler:
    type Dispatch_Data_Product_Procedure is access procedure (Self : in out Base_Instance; Dp : in Data_Product.T);
    type Data_Product_Table_T is array ({{ data_products.name }}.Local_Data_Product_Id_Type) of Dispatch_Data_Product_Procedure;
-   Data_Product_Id_Table : Data_Product_Table_T := (
+   Data_Product_Id_Table : Data_Product_Table_T := [
 {% for dp in data_products %}
       {{ data_products.name }}.{{ dp.name }}_Id => Dispatch_{{ dp.name }}'Access{{ "," if not loop.last }}
 {% endfor %}
-   );
+   ];
 
 {% endif %}
 {% if packets %}
@@ -428,11 +428,11 @@ package Component.{{ name }}_Reciprocal is
    -- Procedure lookup table for dispatching to correct connector handler:
    type Dispatch_Fault_Procedure is access procedure (Self : in out Base_Instance; Flt : in Fault.T);
    type Fault_Table_T is array ({{ faults.name }}.Local_Fault_Id_Type) of Dispatch_Fault_Procedure;
-   Fault_Id_Table : Fault_Table_T := (
+   Fault_Id_Table : Fault_Table_T := [
 {% for fault in faults %}
       {{ faults.name }}.{{ fault.name }}_Id => Dispatch_{{ fault.name }}'Access{{ "," if not loop.last }}
 {% endfor %}
-   );
+   ];
 
 {% endif %}
    ---------------------------------------

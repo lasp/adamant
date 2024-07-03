@@ -68,8 +68,8 @@ package body Parameters_Tests.Implementation is
       procedure Init_Nominal is
          -- A list of the parameter table entries for use by the component.
          Parameter_Table_Entries : aliased Parameters_Component_Types.Parameter_Table_Entry_List :=
-            ((Id => 2, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Component_Id => 1, Start_Index => 16, End_Index => 17),
-             (Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Component_Id => 2, Start_Index => 20, End_Index => 23));
+            [(Id => 2, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Component_Id => 1, Start_Index => 16, End_Index => 17),
+             (Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Component_Id => 2, Start_Index => 20, End_Index => 23)];
       begin
          T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
       exception
@@ -81,8 +81,8 @@ package body Parameters_Tests.Implementation is
       procedure Init_Nonunique_Ids is
          -- A list of the parameter table entries for use by the component.
          Parameter_Table_Entries : aliased Parameters_Component_Types.Parameter_Table_Entry_List :=
-            ((Id => 2, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Component_Id => 1, Start_Index => 16, End_Index => 17),
-             (Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 2, Component_Id => 2, Start_Index => 20, End_Index => 23));
+            [(Id => 2, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Component_Id => 1, Start_Index => 16, End_Index => 17),
+             (Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 2, Component_Id => 2, Start_Index => 20, End_Index => 23)];
       begin
          T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
          Assert (False, "Unique Id init failed!");
@@ -95,8 +95,8 @@ package body Parameters_Tests.Implementation is
       procedure Init_Bad_Component_Id is
          -- A list of the parameter table entries for use by the component.
          Parameter_Table_Entries : aliased Parameters_Component_Types.Parameter_Table_Entry_List :=
-            ((Id => 2, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Component_Id => 1, Start_Index => 16, End_Index => 17),
-             (Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Component_Id => 5, Start_Index => 20, End_Index => 23));
+            [(Id => 2, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Component_Id => 1, Start_Index => 16, End_Index => 17),
+             (Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Component_Id => 5, Start_Index => 20, End_Index => 23)];
       begin
          T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
          Assert (False, "Component Id init failed!");
@@ -109,8 +109,8 @@ package body Parameters_Tests.Implementation is
       procedure Init_Unconnected_Component_Id is
          -- A list of the parameter table entries for use by the component.
          Parameter_Table_Entries : aliased Parameters_Component_Types.Parameter_Table_Entry_List :=
-            ((Id => 2, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Component_Id => 1, Start_Index => 16, End_Index => 17),
-             (Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Component_Id => 4, Start_Index => 20, End_Index => 23));
+            [(Id => 2, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Component_Id => 1, Start_Index => 16, End_Index => 17),
+             (Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Component_Id => 4, Start_Index => 20, End_Index => 23)];
       begin
          T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
          Assert (False, "Unconnected Component Id init failed!");
@@ -123,8 +123,8 @@ package body Parameters_Tests.Implementation is
       procedure Init_Bad_Layout_1 is
          -- A list of the parameter table entries for use by the component.
          Parameter_Table_Entries : aliased Parameters_Component_Types.Parameter_Table_Entry_List :=
-            ((Id => 2, Component_Id => 1, Start_Index => 2, End_Index => 0), (Id => 5, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Component_Id => 1, Start_Index => 16, End_Index => 17),
-             (Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Component_Id => 2, Start_Index => 20, End_Index => 23));
+            [(Id => 2, Component_Id => 1, Start_Index => 2, End_Index => 0), (Id => 5, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Component_Id => 1, Start_Index => 16, End_Index => 17),
+             (Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Component_Id => 2, Start_Index => 20, End_Index => 23)];
       begin
          T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
          Assert (False, "Bad Layout 2 init failed!");
@@ -137,8 +137,8 @@ package body Parameters_Tests.Implementation is
       procedure Init_Bad_Layout_2 is
          -- A list of the parameter table entries for use by the component.
          Parameter_Table_Entries : aliased Parameters_Component_Types.Parameter_Table_Entry_List :=
-            ((Id => 2, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Component_Id => 1, Start_Index => 16, End_Index => 17),
-             (Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Component_Id => 2, Start_Index => 21, End_Index => 23));
+            [(Id => 2, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Component_Id => 1, Start_Index => 16, End_Index => 17),
+             (Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Component_Id => 2, Start_Index => 21, End_Index => 23)];
       begin
          T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
          Assert (False, "Bad Layout 2 init failed!");
@@ -184,12 +184,12 @@ package body Parameters_Tests.Implementation is
       -- Check packet contents:
       Table_Bytes :=
          Test_Parameter_Table_Record.Serialization.To_Byte_Array
-            ((Crc_Calculated => (0, 0), Header => (Crc_Table => (0, 0), Version => 0.0), Component_A_Parameter_I32 => (Value => -56), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 15),
+            ((Crc_Calculated => [0, 0], Header => (Crc_Table => [0, 0], Version => 0.0), Component_A_Parameter_I32 => (Value => -56), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 15),
                Component_B_Parameter_I32 => (Value => -56)));
       Crc := Crc_16.Compute_Crc_16 (Table_Bytes (Table_Bytes'First + Crc_16.Crc_16_Type'Length + Parameter_Table_Header.Crc_Section_Length .. Table_Bytes'Last));
       Table_Bytes :=
          Test_Parameter_Table_Record.Serialization.To_Byte_Array
-            ((Crc_Calculated => Crc, Header => (Crc_Table => (0, 0), Version => 0.0), Component_A_Parameter_I32 => (Value => -56), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 15),
+            ((Crc_Calculated => Crc, Header => (Crc_Table => [0, 0], Version => 0.0), Component_A_Parameter_I32 => (Value => -56), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 15),
                Component_B_Parameter_I32 => (Value => -56)));
       Byte_Array_Assert.Eq (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1), Table_Bytes);
 
@@ -225,7 +225,7 @@ package body Parameters_Tests.Implementation is
    overriding procedure Test_Nominal_Update_Parameters (Self : in out Instance) is
       T : Component.Parameters.Implementation.Tester.Instance_Access renames Self.Tester;
       Pkt : Packet.T;
-      Param : Parameter.T := (Header => (Id => 3, Buffer_Length => 2), Buffer => (0 => 0, 1 => 17, others => 0));
+      Param : Parameter.T := (Header => (Id => 3, Buffer_Length => 2), Buffer => [0 => 0, 1 => 17, others => 0]);
       Cmd : Command.T;
       Table_Bytes : Test_Parameter_Table_Record.Serialization.Byte_Array;
       Crc : Crc_16.Crc_16_Type;
@@ -256,17 +256,17 @@ package body Parameters_Tests.Implementation is
       -- Check packet contents:
       Table_Bytes :=
          Test_Parameter_Table_Record.Serialization.To_Byte_Array
-            ((Crc_Calculated => (0, 0), Header => (Crc_Table => (0, 0), Version => 0.0), Component_A_Parameter_I32 => (Value => -56), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 17),
+            ((Crc_Calculated => [0, 0], Header => (Crc_Table => [0, 0], Version => 0.0), Component_A_Parameter_I32 => (Value => -56), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 17),
                Component_B_Parameter_I32 => (Value => -56)));
       Crc := Crc_16.Compute_Crc_16 (Table_Bytes (Table_Bytes'First + Crc_16.Crc_16_Type'Length + Parameter_Table_Header.Crc_Section_Length .. Table_Bytes'Last));
       Table_Bytes :=
          Test_Parameter_Table_Record.Serialization.To_Byte_Array
-            ((Crc_Calculated => Crc, Header => (Crc_Table => (0, 0), Version => 0.0), Component_A_Parameter_I32 => (Value => -56), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 17),
+            ((Crc_Calculated => Crc, Header => (Crc_Table => [0, 0], Version => 0.0), Component_A_Parameter_I32 => (Value => -56), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 17),
                Component_B_Parameter_I32 => (Value => -56)));
       Byte_Array_Assert.Eq (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1), Table_Bytes);
 
       -- Send another command to update a parameter value:
-      Param := (Header => (Id => 2, Buffer_Length => 4), Buffer => (0 => 0, 1 => 0, 2 => 0, 3 => 99, others => 0));
+      Param := (Header => (Id => 2, Buffer_Length => 4), Buffer => [0 => 0, 1 => 0, 2 => 0, 3 => 99, others => 0]);
       pragma Assert (T.Commands.Update_Parameter (Param, Cmd) = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -292,12 +292,12 @@ package body Parameters_Tests.Implementation is
       -- Check packet contents:
       Table_Bytes :=
          Test_Parameter_Table_Record.Serialization.To_Byte_Array
-            ((Crc_Calculated => (0, 0), Header => (Crc_Table => (0, 0), Version => 0.0), Component_A_Parameter_I32 => (Value => 99), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 17),
+            ((Crc_Calculated => [0, 0], Header => (Crc_Table => [0, 0], Version => 0.0), Component_A_Parameter_I32 => (Value => 99), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 17),
                Component_B_Parameter_I32 => (Value => -56)));
       Crc := Crc_16.Compute_Crc_16 (Table_Bytes (Table_Bytes'First + Crc_16.Crc_16_Type'Length + Parameter_Table_Header.Crc_Section_Length .. Table_Bytes'Last));
       Table_Bytes :=
          Test_Parameter_Table_Record.Serialization.To_Byte_Array
-            ((Crc_Calculated => Crc, Header => (Crc_Table => (0, 0), Version => 0.0), Component_A_Parameter_I32 => (Value => 99), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 17),
+            ((Crc_Calculated => Crc, Header => (Crc_Table => [0, 0], Version => 0.0), Component_A_Parameter_I32 => (Value => 99), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 17),
                Component_B_Parameter_I32 => (Value => -56)));
       Byte_Array_Assert.Eq (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1), Table_Bytes);
    end Test_Nominal_Update_Parameters;
@@ -309,7 +309,7 @@ package body Parameters_Tests.Implementation is
       -- Create a memory region that holds the parameter table data.
       Table : aliased Test_Parameter_Table_Record.Serialization.Byte_Array :=
          Test_Parameter_Table_Record.Serialization.To_Byte_Array
-            ((Crc_Calculated => (0, 0), Header => (Crc_Table => (0, 0), Version => 1.0), Component_A_Parameter_I32 => (Value => 99), Component_C_The_Tick => ((3, 2), 8), Component_A_Parameter_U16 => (Value => 19), Component_B_Parameter_U16 => (Value => 12),
+            ((Crc_Calculated => [0, 0], Header => (Crc_Table => [0, 0], Version => 1.0), Component_A_Parameter_I32 => (Value => 99), Component_C_The_Tick => ((3, 2), 8), Component_A_Parameter_U16 => (Value => 19), Component_B_Parameter_U16 => (Value => 12),
                Component_B_Parameter_I32 => (Value => -22)));
       Crc : constant Crc_16.Crc_16_Type := Crc_16.Compute_Crc_16 (Table (Table'First + Crc_16.Crc_16_Type'Length + Parameter_Table_Header.Crc_Section_Length .. Table'Last));
       Region : constant Memory_Region.T := (Address => Table'Address + Crc_16.Crc_16_Type'Length, Length => Test_Parameter_Table_Record.Serialization.Serialized_Length - Crc_16.Crc_16_Type'Length);
@@ -359,15 +359,15 @@ package body Parameters_Tests.Implementation is
       -- A variable that contains the expected table values to compare against
       Dump : constant Test_Parameter_Table_Record.Serialization.Byte_Array :=
          Test_Parameter_Table_Record.Serialization.To_Byte_Array
-            ((Crc_Calculated => (0, 0), Header => (Crc_Table => (0, 0), Version => 0.0), Component_A_Parameter_I32 => (Value => -56), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 15),
+            ((Crc_Calculated => [0, 0], Header => (Crc_Table => [0, 0], Version => 0.0), Component_A_Parameter_I32 => (Value => -56), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 15),
                Component_B_Parameter_I32 => (Value => -56)));
       Table : Basic_Types.Byte_Array (0 .. Test_Parameter_Table_Record.Size_In_Bytes - Crc_16.Crc_16_Type'Length - 1) := Dump (Dump'First + Crc_16.Crc_16_Type'Length .. Dump'Last);
       -- Create a memory region that will hold the parameter table data.
-      Memory : aliased Basic_Types.Byte_Array (0 .. Test_Parameter_Table_Record.Serialization.Serialized_Length - Crc_16.Crc_16_Type'Length - 1) := (others => 0);
+      Memory : aliased Basic_Types.Byte_Array (0 .. Test_Parameter_Table_Record.Serialization.Serialized_Length - Crc_16.Crc_16_Type'Length - 1) := [others => 0];
       Region : constant Memory_Region.T := (Address => Memory'Address, Length => Memory'Length);
    begin
       -- Set the CRC:
-      Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => (0, 0), Version => 0.0));
+      Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => [0, 0], Version => 0.0));
 
       -- Send the memory region to the component with a get request:
       T.Parameters_Memory_Region_T_Send ((Region => Region, Operation => Get));
@@ -422,7 +422,7 @@ package body Parameters_Tests.Implementation is
       Byte_Array_Assert.Neq
          (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1),
           Test_Parameter_Table_Record.Serialization.To_Byte_Array
-             ((Crc_Calculated => (0, 0), Header => (Crc_Table => (0, 0), Version => 0.0), Component_A_Parameter_I32 => (Value => -56), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 15),
+             ((Crc_Calculated => [0, 0], Header => (Crc_Table => [0, 0], Version => 0.0), Component_A_Parameter_I32 => (Value => -56), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 15),
                 Component_B_Parameter_I32 => (Value => -56))));
 
       -- Check events:
@@ -455,7 +455,7 @@ package body Parameters_Tests.Implementation is
       Byte_Array_Assert.Neq
          (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1),
           Test_Parameter_Table_Record.Serialization.To_Byte_Array
-             ((Crc_Calculated => (0, 0), Header => (Crc_Table => (0, 0), Version => 0.0), Component_A_Parameter_I32 => (Value => -56), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 15),
+             ((Crc_Calculated => [0, 0], Header => (Crc_Table => [0, 0], Version => 0.0), Component_A_Parameter_I32 => (Value => -56), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 15),
                 Component_B_Parameter_I32 => (Value => -56))));
 
       -- Check events:
@@ -476,7 +476,7 @@ package body Parameters_Tests.Implementation is
       use Parameter_Enums.Parameter_Operation_Type;
       T : Component.Parameters.Implementation.Tester.Instance_Access renames Self.Tester;
       Pkt : Packet.T;
-      Param : Parameter.T := (Header => (Id => 99, Buffer_Length => 2), Buffer => (0 => 0, 1 => 17, others => 0));
+      Param : Parameter.T := (Header => (Id => 99, Buffer_Length => 2), Buffer => [0 => 0, 1 => 17, others => 0]);
       Cmd : Command.T;
    begin
       -- Send a command to update a parameter value with bad ID.
@@ -580,7 +580,7 @@ package body Parameters_Tests.Implementation is
       -- Create a memory region that holds the parameter table data.
       Dump : constant Test_Parameter_Table_Record.Serialization.Byte_Array :=
          Test_Parameter_Table_Record.Serialization.To_Byte_Array
-            ((Crc_Calculated => (0, 0), Header => (Crc_Table => (0, 0), Version => 1.0), Component_A_Parameter_I32 => (Value => 99), Component_C_The_Tick => ((3, 2), 8), Component_A_Parameter_U16 => (Value => 19), Component_B_Parameter_U16 => (Value => 12),
+            ((Crc_Calculated => [0, 0], Header => (Crc_Table => [0, 0], Version => 1.0), Component_A_Parameter_I32 => (Value => 99), Component_C_The_Tick => ((3, 2), 8), Component_A_Parameter_U16 => (Value => 19), Component_B_Parameter_U16 => (Value => 12),
                Component_B_Parameter_I32 => (Value => -22)));
       Table : aliased Basic_Types.Byte_Array (0 .. Test_Parameter_Table_Record.Size_In_Bytes - Crc_16.Crc_16_Type'Length - 1) := Dump (Dump'First + Crc_16.Crc_16_Type'Length .. Dump'Last);
       Crc : constant Crc_16.Crc_16_Type := Crc_16.Compute_Crc_16 (Table (Table'First + Parameter_Table_Header.Crc_Section_Length .. Table'Last));
@@ -630,7 +630,7 @@ package body Parameters_Tests.Implementation is
       --
       -- Send the memory region to the component with a get request, but with bad CRC:
       --
-      Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => (6, 7), Version => 1.0));
+      Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => [6, 7], Version => 1.0));
       T.Parameters_Memory_Region_T_Send ((Region => (Address => Table'Address, Length => Table'Length), Operation => Set));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
@@ -638,7 +638,7 @@ package body Parameters_Tests.Implementation is
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 10);
       Natural_Assert.Eq (T.Memory_Region_Crc_Invalid_History.Get_Count, 1);
       Invalid_Parameters_Memory_Region_Crc_Assert.Eq
-         (T.Memory_Region_Crc_Invalid_History.Get (1), (Parameters_Region => (Region => (Address => Table'Address, Length => Table'Length), Operation => Set), Header => (Crc_Table => (6, 7), Version => 1.0), Computed_Crc => Crc));
+         (T.Memory_Region_Crc_Invalid_History.Get (1), (Parameters_Region => (Region => (Address => Table'Address, Length => Table'Length), Operation => Set), Header => (Crc_Table => [6, 7], Version => 1.0), Computed_Crc => Crc));
 
       -- A packet should not have been automatically dumped.
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
@@ -657,11 +657,11 @@ package body Parameters_Tests.Implementation is
       -- A variable that contains the expected table values to compare against
       Table : aliased Test_Parameter_Table_Record.Serialization.Byte_Array :=
          Test_Parameter_Table_Record.Serialization.To_Byte_Array
-            ((Crc_Calculated => (0, 0), Header => (Crc_Table => (0, 0), Version => 0.0), Component_A_Parameter_I32 => (Value => -56), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 15),
+            ((Crc_Calculated => [0, 0], Header => (Crc_Table => [0, 0], Version => 0.0), Component_A_Parameter_I32 => (Value => -56), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 15),
                Component_B_Parameter_I32 => (Value => -56)));
       Crc : constant Crc_16.Crc_16_Type := Crc_16.Compute_Crc_16 (Table (Table'First + Crc_16.Crc_16_Type'Length + Parameter_Table_Header.Crc_Section_Length .. Table'Last));
       -- Create a memory region that will hold the parameter table data.
-      Memory : aliased Basic_Types.Byte_Array (0 .. Test_Parameter_Table_Record.Serialization.Serialized_Length - Crc_16.Crc_16_Type'Length - 1) := (others => 0);
+      Memory : aliased Basic_Types.Byte_Array (0 .. Test_Parameter_Table_Record.Serialization.Serialized_Length - Crc_16.Crc_16_Type'Length - 1) := [others => 0];
       Region : constant Memory_Region.T := (Address => Memory'Address, Length => Memory'Length);
    begin
       -- Set the CRC:
@@ -753,12 +753,12 @@ package body Parameters_Tests.Implementation is
       use Parameter_Enums.Parameter_Table_Operation_Type;
       use Parameter_Enums.Parameter_Table_Update_Status;
       T : Component.Parameters.Implementation.Tester.Instance_Access renames Self.Tester;
-      Param : constant Parameter.T := (Header => (Id => 3, Buffer_Length => 2), Buffer => (0 => 0, 1 => 17, others => 0));
+      Param : constant Parameter.T := (Header => (Id => 3, Buffer_Length => 2), Buffer => [0 => 0, 1 => 17, others => 0]);
       Cmd : Command.T;
       -- Create a memory region that holds the parameter table data.
       Dump : constant Test_Parameter_Table_Record.Serialization.Byte_Array :=
          Test_Parameter_Table_Record.Serialization.To_Byte_Array
-            ((Crc_Calculated => (0, 0), Header => (Crc_Table => (0, 0), Version => 0.0), Component_A_Parameter_I32 => (Value => 99), Component_C_The_Tick => ((3, 2), 8), Component_A_Parameter_U16 => (Value => 19), Component_B_Parameter_U16 => (Value => 12),
+            ((Crc_Calculated => [0, 0], Header => (Crc_Table => [0, 0], Version => 0.0), Component_A_Parameter_I32 => (Value => 99), Component_C_The_Tick => ((3, 2), 8), Component_A_Parameter_U16 => (Value => 19), Component_B_Parameter_U16 => (Value => 12),
                Component_B_Parameter_I32 => (Value => -22)));
       Table : aliased Basic_Types.Byte_Array (0 .. Test_Parameter_Table_Record.Size_In_Bytes - Crc_16.Crc_16_Type'Length - 1) := Dump (Dump'First + Crc_16.Crc_16_Type'Length .. Dump'Last);
       Crc : constant Crc_16.Crc_16_Type := Crc_16.Compute_Crc_16 (Table (Table'First + Parameter_Table_Header.Crc_Section_Length .. Table'Last));
@@ -809,10 +809,10 @@ package body Parameters_Tests.Implementation is
       use Parameter_Enums.Parameter_Table_Operation_Type;
       T : Component.Parameters.Implementation.Tester.Instance_Access renames Self.Tester;
       -- Create maximum size parameter to fill queue.
-      Param : constant Parameter.T := (Header => (Id => 3, Buffer_Length => Parameter_Types.Parameter_Buffer_Length_Type'Last), Buffer => (0 => 0, 1 => 17, others => 0));
+      Param : constant Parameter.T := (Header => (Id => 3, Buffer_Length => Parameter_Types.Parameter_Buffer_Length_Type'Last), Buffer => [0 => 0, 1 => 17, others => 0]);
       Cmd : Command.T;
       -- Create a memory region that will hold the parameter table data.
-      Memory : aliased Basic_Types.Byte_Array (0 .. Test_Parameter_Table_Record.Serialization.Serialized_Length - Crc_16.Crc_16_Type'Length - 1) := (others => 0);
+      Memory : aliased Basic_Types.Byte_Array (0 .. Test_Parameter_Table_Record.Serialization.Serialized_Length - Crc_16.Crc_16_Type'Length - 1) := [others => 0];
       Region : constant Memory_Region.T := (Address => Memory'Address + Crc_16.Crc_16_Type'Length, Length => Memory'Length);
    begin
       -- Send 3 commands to fill up queue.
@@ -862,7 +862,7 @@ package body Parameters_Tests.Implementation is
       -- Make sure some events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Dump_Parameters_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 22)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Dump_Parameters_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 22]));
    end Test_Invalid_Command;
 
 end Parameters_Tests.Implementation;

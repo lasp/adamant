@@ -6,7 +6,7 @@ procedure Main is
    -- A packed version of the type.
    Packed_Type_1 : constant Example_Record.T := (Value_1 => 2, Value_2 => -1, Value_3 => Green, Value_4 => 0.5);
    -- Deserialize a byte array of all 0xFF into the record.
-   Packed_Type_2 : constant Example_Record.T := Example_Record.Serialization.From_Byte_Array ((255, 255, 255, 255, 255, 255));
+   Packed_Type_2 : constant Example_Record.T := Example_Record.Serialization.From_Byte_Array ([255, 255, 255, 255, 255, 255]);
    Errant_Field : Unsigned_32 := 0;
 begin
    if Example_Record.Validation.Valid (Packed_Type_1, Errant_Field) then

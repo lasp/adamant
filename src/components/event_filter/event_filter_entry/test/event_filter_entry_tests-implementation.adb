@@ -45,7 +45,7 @@ package body Event_Filter_Entry_Tests.Implementation is
    begin
       Num_Events := (Natural (Stop_Id - Start_Id) + 8) / 8;
       Event_Array := new Basic_Types.Byte_Array (0 .. Num_Events - 1);
-      Event_Array.all := (others => Event_Filter_Entry_Type.Serialization.To_Byte_Array ((
+      Event_Array.all := [others => Event_Filter_Entry_Type.Serialization.To_Byte_Array ((
          State_0 => Event_Filter_State.Unfiltered,
          State_1 => Event_Filter_State.Unfiltered,
          State_2 => Event_Filter_State.Unfiltered,
@@ -54,7 +54,7 @@ package body Event_Filter_Entry_Tests.Implementation is
          State_5 => Event_Filter_State.Unfiltered,
          State_6 => Event_Filter_State.Unfiltered,
          State_7 => Event_Filter_State.Unfiltered
-      )) (0));
+      )) (0)];
       for Event_Id_State_Change of Event_Filter_List loop
          declare
             Event_Id_In : constant Natural := Natural (Event_Id_State_Change - Start_Id) / 8;
@@ -94,13 +94,13 @@ package body Event_Filter_Entry_Tests.Implementation is
    overriding procedure Test_Init_List (Self : in out Instance) is
       Ignore_Self : Instance renames Self;
       Event_Filter : Event_Filter_Entry.Instance;
-      Event_Start_List : constant Event_Id_List := (3, 4);
-      Event_Start_Empty_List : constant Event_Id_List := (1 .. 0 => 0);
+      Event_Start_List : constant Event_Id_List := [3, 4];
+      Event_Start_Empty_List : constant Event_Id_List := [1 .. 0 => 0];
       State_Return_Status : Filter_Status;
 
       -- Test setup for catching an invalid input range
       procedure Invalid_Init_Range is
-         Start_List : constant Event_Id_List := (2, 5);
+         Start_List : constant Event_Id_List := [2, 5];
       begin
          Event_Filter.Init (Event_Id_Start => 7, Event_Id_Stop => 2, Event_Filter_List => Start_List);
       exception
@@ -218,7 +218,7 @@ package body Event_Filter_Entry_Tests.Implementation is
    overriding procedure Test_Set_Event_State (Self : in out Instance) is
       Ignore_Self : Instance renames Self;
       Event_Filter : Event_Filter_Entry.Instance;
-      Event_Start_List : constant Event_Id_List := (3, 4);
+      Event_Start_List : constant Event_Id_List := [3, 4];
       Entry_State : Event_Entry_Status;
       State_Filter_Status : Filter_Status;
    begin
@@ -283,7 +283,7 @@ package body Event_Filter_Entry_Tests.Implementation is
    overriding procedure Test_Event_Filtered_Count (Self : in out Instance) is
       Ignore_Self : Instance renames Self;
       Event_Filter : Event_Filter_Entry.Instance;
-      Event_Start_List : constant Event_Id_List := (3, 5);
+      Event_Start_List : constant Event_Id_List := [3, 5];
       State_Filter_Status : Filter_Status;
       Filter_Count : Interfaces.Unsigned_32;
    begin
@@ -427,7 +427,7 @@ package body Event_Filter_Entry_Tests.Implementation is
    overriding procedure Test_Event_Unfiltered_Count (Self : in out Instance) is
       Ignore_Self : Instance renames Self;
       Event_Filter : Event_Filter_Entry.Instance;
-      Event_Start_List : constant Event_Id_List := (6, 7, 9, 10);
+      Event_Start_List : constant Event_Id_List := [6, 7, 9, 10];
       State_Filter_Status : Filter_Status;
       Unfiltered_Count : Interfaces.Unsigned_32;
    begin
@@ -574,7 +574,7 @@ package body Event_Filter_Entry_Tests.Implementation is
       Ignore_Self : Instance renames Self;
       use Event_Types;
       Event_Filter : Event_Filter_Entry.Instance;
-      Event_Start_List : constant Event_Id_List := (3, 5);
+      Event_Start_List : constant Event_Id_List := [3, 5];
       Start_Id : Event_Id;
       Stop_Id : Event_Id;
    begin
@@ -599,7 +599,7 @@ package body Event_Filter_Entry_Tests.Implementation is
    overriding procedure Test_Global_Enable_Switch (Self : in out Instance) is
       Ignore_Self : Instance renames Self;
       Event_Filter : Event_Filter_Entry.Instance;
-      Event_Start_List : constant Event_Id_List := (4, 7);
+      Event_Start_List : constant Event_Id_List := [4, 7];
       Global_State : Global_Filter_State.E;
       State_Filter_Status : Filter_Status;
    begin
@@ -635,8 +635,8 @@ package body Event_Filter_Entry_Tests.Implementation is
       use Event_Types;
       Event_Filter : Event_Filter_Entry.Instance;
       Entry_State : Event_Entry_Status;
-      Event_Start_List : constant Event_Id_List := (3, 5);
-      Event_End_List : constant Event_Id_List := (0, 3, 5, 10);
+      Event_Start_List : constant Event_Id_List := [3, 5];
+      Event_End_List : constant Event_Id_List := [0, 3, 5, 10];
       Start_Id : constant Event_Id := 0;
       Stop_Id : constant Event_Id := 10;
       Event_Array : Basic_Types.Byte_Array_Access := null;

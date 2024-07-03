@@ -32,10 +32,10 @@ package body Cpu_Monitor_Tests.Implementation is
    Priority => 0, Stack_Address => System.Null_Address, Stack_Size => 0, Secondary_Stack_Address => System.Null_Address, Secondary_Stack_Size => 0, Secondary_Stack_Max_Usage => 0);
 
    -- List of task infos for all tasks:
-   Task_List : aliased Task_Types.Task_Info_List := (0 => Task_Info_1'Access, 1 => Task_Info_2'Access);
+   Task_List : aliased Task_Types.Task_Info_List := [0 => Task_Info_1'Access, 1 => Task_Info_2'Access];
 
    -- List of all interrupts used in the system:
-   Interrupt_List : aliased Interrupt_Types.Interrupt_Id_List := (0 => Ada.Interrupts.Names.SIGUSR1, 1 => Ada.Interrupts.Names.SIGUSR2);
+   Interrupt_List : aliased Interrupt_Types.Interrupt_Id_List := [0 => Ada.Interrupts.Names.SIGUSR1, 1 => Ada.Interrupts.Names.SIGUSR2];
 
    -------------------------------------------------------------------------
    -- Fixtures:
@@ -50,7 +50,7 @@ package body Cpu_Monitor_Tests.Implementation is
       Self.Tester.Connect;
 
       -- Call component init here.
-      Self.Tester.Component_Instance.Init (Task_List => Task_List'Access, Interrupt_List => Interrupt_List'Access, Execution_Periods => (1, 5, 10), Packet_Period => 1);
+      Self.Tester.Component_Instance.Init (Task_List => Task_List'Access, Interrupt_List => Interrupt_List'Access, Execution_Periods => [1, 5, 10], Packet_Period => 1);
    end Set_Up_Test;
 
    overriding procedure Tear_Down_Test (Self : in out Instance) is
@@ -160,7 +160,7 @@ package body Cpu_Monitor_Tests.Implementation is
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Packet_Period_Set_History.Get_Count, 0);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Set_Packet_Period_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 0)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Set_Packet_Period_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 0]));
    end Test_Invalid_Command;
 
 end Cpu_Monitor_Tests.Implementation;

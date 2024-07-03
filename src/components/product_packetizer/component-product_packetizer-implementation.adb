@@ -75,7 +75,7 @@ package body Component.Product_Packetizer.Implementation is
       use Data_Product_Enums.Fetch_Status;
 
       -- Initialize the packet with the correct ID and sequence count.
-      The_Packet : Packet.T := ((Time => Tick_Time, Id => Packet_Desc.Id, Sequence_Count => Packet_Desc.Count, Buffer_Length => 0), Buffer => (others => 0));
+      The_Packet : Packet.T := ((Time => Tick_Time, Id => Packet_Desc.Id, Sequence_Count => Packet_Desc.Count, Buffer_Length => 0), Buffer => [others => 0]);
 
       -- Other local variables:
       D_Prod_Ret : Data_Product_Return.T;
@@ -103,7 +103,7 @@ package body Component.Product_Packetizer.Implementation is
                         Id => Item.Data_Product_Id,
                         Buffer_Length => Packed_Natural.Size_In_Bytes
                      ),
-                     Buffer => (others => 0)
+                     Buffer => [others => 0]
                   )
                );
                declare

@@ -611,7 +611,7 @@ package body Component.Command_Sequencer.Implementation is
                      Sequence_Id => Engine.Get_Lowest_Child_Id,
                      Print_Type => Print_From_Engine.Print_Type
                   ),
-                  Print_String => (others => 0)
+                  Print_String => [others => 0]
                );
             begin
                -- Safe copy print from engine to event. This truncates the string if necessary:
@@ -1323,7 +1323,7 @@ package body Component.Command_Sequencer.Implementation is
                -- OK, now we are good to load arguments into the engine.
                declare
                   -- Initialize the arguments as zero.
-                  Args : Variable_Array := (others => (Value => (others => 0)));
+                  Args : Variable_Array := [others => (Value => [others => 0])];
                begin
                   -- This implementation assumes that the variable array is of length 16 and the number
                   -- of arguments provided in Packed_Variable_Array.T is also 16. If this is not true, then

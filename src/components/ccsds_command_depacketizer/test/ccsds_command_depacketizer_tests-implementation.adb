@@ -52,7 +52,7 @@ package body Ccsds_Command_Depacketizer_Tests.Implementation is
    -- Construct a CCSDS packet with the given variable parameters:
    function Construct_Packet (Data : Byte_Array; Packet_Type : Ccsds_Packet_Type.E := Ccsds_Packet_Type.Telecommand; Secondary_Header : Ccsds_Secondary_Header_Indicator.E := Ccsds_Secondary_Header_Indicator.Secondary_Header_Present; Apid : Ccsds_Apid_Type := 0; Sequence_Count : Ccsds_Sequence_Count_Type := 0) return Ccsds_Space_Packet.T is
       -- Define packet:
-      Packet : Ccsds_Space_Packet.T := (Header => (Version => 0, Packet_Type => Packet_Type, Secondary_Header => Secondary_Header, Apid => Apid, Sequence_Flag => Ccsds_Sequence_Flag.Unsegmented, Sequence_Count => Sequence_Count, Packet_Length => Data'Length - 1), Data => (others => 0));
+      Packet : Ccsds_Space_Packet.T := (Header => (Version => 0, Packet_Type => Packet_Type, Secondary_Header => Secondary_Header, Apid => Apid, Sequence_Flag => Ccsds_Sequence_Flag.Unsegmented, Sequence_Count => Sequence_Count, Packet_Length => Data'Length - 1), Data => [others => 0]);
    begin
       -- Set data:
       Packet.Data (Packet.Data'First .. Packet.Data'First + Data'Length - 1) := Data;
@@ -60,7 +60,7 @@ package body Ccsds_Command_Depacketizer_Tests.Implementation is
    end Construct_Packet;
 
    -- Construct a CCSDS command packet with the given variable parameters:
-   function Construct_Command_Packet (Cmd_Id : Command_Types.Command_Id; Data : Byte_Array := (1 .. 0 => 0); Packet_Type : Ccsds_Packet_Type.E := Ccsds_Packet_Type.Telecommand; Secondary_Header : Ccsds_Secondary_Header_Indicator.E := Ccsds_Secondary_Header_Indicator.Secondary_Header_Present; Apid : Ccsds_Apid_Type := 0; Sequence_Count : Ccsds_Sequence_Count_Type := 0; Checksum_Seed : Xor_8.Xor_8_Type := 255; Function_Code : Ccsds_Command_Secondary_Header.Function_Code_Type := 0; Packet_Length_Adjustment : Integer := 0) return Ccsds_Space_Packet.T is
+   function Construct_Command_Packet (Cmd_Id : Command_Types.Command_Id; Data : Byte_Array := [1 .. 0 => 0]; Packet_Type : Ccsds_Packet_Type.E := Ccsds_Packet_Type.Telecommand; Secondary_Header : Ccsds_Secondary_Header_Indicator.E := Ccsds_Secondary_Header_Indicator.Secondary_Header_Present; Apid : Ccsds_Apid_Type := 0; Sequence_Count : Ccsds_Sequence_Count_Type := 0; Checksum_Seed : Xor_8.Xor_8_Type := 255; Function_Code : Ccsds_Command_Secondary_Header.Function_Code_Type := 0; Packet_Length_Adjustment : Integer := 0) return Ccsds_Space_Packet.T is
       -- Define secondary header:
       The_Secondary_Header : Ccsds_Command_Secondary_Header.T := (Reserved => 0, Function_Code => Function_Code, Checksum => 0);
       -- Construct packet:
@@ -86,7 +86,7 @@ package body Ccsds_Command_Depacketizer_Tests.Implementation is
 
    function Construct_Command (Id : Command_Types.Command_Id; Arg_Buffer : Byte_Array) return Command.T is
       -- Construct the command:
-      Cmd : Command.T := (Header => (Source_Id => 0, Id => Id, Arg_Buffer_Length => Arg_Buffer'Length), Arg_Buffer => (others => 0));
+      Cmd : Command.T := (Header => (Source_Id => 0, Id => Id, Arg_Buffer_Length => Arg_Buffer'Length), Arg_Buffer => [others => 0]);
    begin
       -- Set the argument buffer:
       Cmd.Arg_Buffer (Cmd.Arg_Buffer'First .. Cmd.Arg_Buffer'First + Cmd.Header.Arg_Buffer_Length - 1) := Arg_Buffer;
@@ -99,10 +99,10 @@ package body Ccsds_Command_Depacketizer_Tests.Implementation is
 
    overriding procedure Test_Nominal_Depacketization (Self : in out Instance) is
       T : Component.Ccsds_Command_Depacketizer.Implementation.Tester.Instance_Access renames Self.Tester;
-      Packet : constant Ccsds_Space_Packet.T := Construct_Command_Packet (17, (0 => 16));
+      Packet : constant Ccsds_Space_Packet.T := Construct_Command_Packet (17, [0 => 16]);
       Packet2 : constant Ccsds_Space_Packet.T := Construct_Command_Packet (22, Sequence_Count => 1);
-      Cmd : constant Command.T := Construct_Command (Id => 17, Arg_Buffer => (Command_Types.Command_Arg_Buffer_Type'First => 16));
-      Cmd2 : constant Command.T := Construct_Command (Id => 22, Arg_Buffer => (1 .. 0 => 0));
+      Cmd : constant Command.T := Construct_Command (Id => 17, Arg_Buffer => [Command_Types.Command_Arg_Buffer_Type'First => 16]);
+      Cmd2 : constant Command.T := Construct_Command (Id => 22, Arg_Buffer => [1 .. 0 => 0]);
    begin
       -- Send the packet:
       T.Ccsds_Space_Packet_T_Send (Packet);
@@ -140,7 +140,7 @@ package body Ccsds_Command_Depacketizer_Tests.Implementation is
 
    overriding procedure Test_Invalid_Packet_Checksum (Self : in out Instance) is
       T : Component.Ccsds_Command_Depacketizer.Implementation.Tester.Instance_Access renames Self.Tester;
-      Packet : constant Ccsds_Space_Packet.T := Construct_Command_Packet (17, (0 => 16), Checksum_Seed => 0);
+      Packet : constant Ccsds_Space_Packet.T := Construct_Command_Packet (17, [0 => 16], Checksum_Seed => 0);
       Invalid_Checksum_Info : constant Invalid_Packet_Xor8_Info.T := (Ccsds_Header => (Packet.Header, (0, 0, 221)), Computed_Checksum => 255, Expected_Checksum => 221);
    begin
       -- Send the packet many times:
@@ -173,7 +173,7 @@ package body Ccsds_Command_Depacketizer_Tests.Implementation is
 
    overriding procedure Test_Invalid_Packet_Type (Self : in out Instance) is
       T : Component.Ccsds_Command_Depacketizer.Implementation.Tester.Instance_Access renames Self.Tester;
-      Packet : constant Ccsds_Space_Packet.T := Construct_Command_Packet (17, (0 => 16), Packet_Type => Ccsds_Packet_Type.Telemetry);
+      Packet : constant Ccsds_Space_Packet.T := Construct_Command_Packet (17, [0 => 16], Packet_Type => Ccsds_Packet_Type.Telemetry);
    begin
       -- Send the packet many times:
       T.Ccsds_Space_Packet_T_Send (Packet);
@@ -272,7 +272,7 @@ package body Ccsds_Command_Depacketizer_Tests.Implementation is
 
    overriding procedure Test_Packet_Too_Large (Self : in out Instance) is
       T : Component.Ccsds_Command_Depacketizer.Implementation.Tester.Instance_Access renames Self.Tester;
-      Bytes : constant Byte_Array := (0 .. 997 => 1);
+      Bytes : constant Byte_Array := [0 .. 997 => 1];
       Packet : Ccsds_Space_Packet.T := Construct_Command_Packet (16#0101#, Bytes);
    begin
       -- Send the packet many times:
@@ -339,7 +339,7 @@ package body Ccsds_Command_Depacketizer_Tests.Implementation is
 
    overriding procedure Test_Packet_Without_Secondary_Header (Self : in out Instance) is
       T : Component.Ccsds_Command_Depacketizer.Implementation.Tester.Instance_Access renames Self.Tester;
-      Packet : constant Ccsds_Space_Packet.T := Construct_Command_Packet (17, (0 => 16), Secondary_Header => Ccsds_Secondary_Header_Indicator.Secondary_Header_Not_Present);
+      Packet : constant Ccsds_Space_Packet.T := Construct_Command_Packet (17, [0 => 16], Secondary_Header => Ccsds_Secondary_Header_Indicator.Secondary_Header_Not_Present);
    begin
       -- Send the packet many times:
       T.Ccsds_Space_Packet_T_Send (Packet);
@@ -371,10 +371,10 @@ package body Ccsds_Command_Depacketizer_Tests.Implementation is
 
    overriding procedure Test_Pad_Bytes (Self : in out Instance) is
       T : Component.Ccsds_Command_Depacketizer.Implementation.Tester.Instance_Access renames Self.Tester;
-      Packet_1 : constant Ccsds_Space_Packet.T := Construct_Command_Packet (17, (0 => 16), Sequence_Count => 0, Function_Code => 5);
-      Packet_2 : constant Ccsds_Space_Packet.T := Construct_Command_Packet (17, (0 => 16), Sequence_Count => 1, Function_Code => 127);
-      Packet_3 : constant Ccsds_Space_Packet.T := Construct_Command_Packet (17, (0 => 16), Sequence_Count => 2, Function_Code => 20);
-      Cmd : constant Command.T := Construct_Command (Id => 17, Arg_Buffer => (Command_Types.Command_Arg_Buffer_Type'First => 16));
+      Packet_1 : constant Ccsds_Space_Packet.T := Construct_Command_Packet (17, [0 => 16], Sequence_Count => 0, Function_Code => 5);
+      Packet_2 : constant Ccsds_Space_Packet.T := Construct_Command_Packet (17, [0 => 16], Sequence_Count => 1, Function_Code => 127);
+      Packet_3 : constant Ccsds_Space_Packet.T := Construct_Command_Packet (17, [0 => 16], Sequence_Count => 2, Function_Code => 20);
+      Cmd : constant Command.T := Construct_Command (Id => 17, Arg_Buffer => [Command_Types.Command_Arg_Buffer_Type'First => 16]);
    begin
       -- Send the packet:
       T.Ccsds_Space_Packet_T_Send (Packet_1);
@@ -452,7 +452,7 @@ package body Ccsds_Command_Depacketizer_Tests.Implementation is
       -- Make sure some events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Reset_Counts_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 5)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Reset_Counts_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 5]));
    end Test_Invalid_Command;
 
 end Ccsds_Command_Depacketizer_Tests.Implementation;

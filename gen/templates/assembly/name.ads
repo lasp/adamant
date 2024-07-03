@@ -118,16 +118,16 @@ package {{ name }} is
 
 {% endfor %}
    -- List of task infos for all tasks:
-   Task_List : aliased Task_Types.Task_Info_List := (
+   Task_List : aliased Task_Types.Task_Info_List := [
 {% for task in task_list %}
       -- {{ task.component_name }}.{{ task.name }}:
       {{ task.number }} => {{ task.component_name }}_{{ task.name }}_Task_Info'Access{{ "," if not loop.last }}
 {% endfor %}
-   );
+   ];
 
 {% else %}
    -- List of task infos for all tasks:
-   Task_List : aliased Task_Types.Task_Info_List := (1 .. 0 => null); -- empty
+   Task_List : aliased Task_Types.Task_Info_List := [1 .. 0 => null]; -- empty
 
 {% endif %}
 {% if interrupt_list %}
@@ -135,32 +135,32 @@ package {{ name }} is
    pragma Style_Checks ("-rn");
 
    -- List of all interrupts used in the system:
-   Interrupt_List : aliased Interrupt_Types.Interrupt_Id_List := (
+   Interrupt_List : aliased Interrupt_Types.Interrupt_Id_List := [
 {% for interrupt in interrupt_list %}
       -- {{ interrupt.component_name }}.{{ interrupt.name }}:
       {{ loop.index0 }} => {{ interrupt.id }}{{ "," if not loop.last }}
 {% endfor %}
-   );
+   ];
 
    -- Remove some reference style checking to deal with incorrect capitalization in system packages.
    pragma Style_Checks ("+rn");
 
 {% else %}
    -- List of all interrupts used in the system:
-   Interrupt_List : aliased Interrupt_Types.Interrupt_Id_List := (1 .. 0 => 0); -- empty
+   Interrupt_List : aliased Interrupt_Types.Interrupt_Id_List := [1 .. 0 => 0]; -- empty
 
 {% endif %}
 {% if component_kind_dict["queued"] %}
    -- List of all components with positive queue sizes in the system:
-   Queued_Component_List : aliased Component.Component_List := (
+   Queued_Component_List : aliased Component.Component_List := [
 {% for component in component_kind_dict["queued"] %}
       {{ loop.index0 }} => {{ component.instance_name }}'Access{{ "," if not loop.last }}
 {% endfor %}
-   );
+   ];
 
 {% else %}
    -- List of all components with positive queue sizes in the system:
-   Queued_Component_List : aliased Component.Component_List := (1 .. 0 => null); -- empty
+   Queued_Component_List : aliased Component.Component_List := [1 .. 0 => null]; -- empty
 
 {% endif %}
 end {{ name }};

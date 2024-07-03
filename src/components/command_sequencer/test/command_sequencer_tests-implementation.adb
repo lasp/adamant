@@ -74,7 +74,7 @@ package body Command_Sequencer_Tests.Implementation is
             Id => 59,
             Arg_Buffer_Length => Unit_Test_Sequence_Load_Type.Size_In_Bytes
          ),
-         Arg_Buffer => (others => 0)
+         Arg_Buffer => [others => 0]
       );
    begin
       -- Serialize the data into the buffer:
@@ -1976,7 +1976,7 @@ package body Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Invalid_Sequence_Length_History.Get_Count, 2);
       Sequence_Length_Error_Assert.Eq (T.Invalid_Sequence_Length_History.Get (2), (
          Load => (Engine_Request => Specific_Engine, Engine_Id => 0, Sequence_Region => Sequence_Region),
-         Header => ((0, 0), 0, 0, 0, 0) -- Header cannot be extracted, too small, so zeros.
+         Header => ([0, 0], 0, 0, 0, 0) -- Header cannot be extracted, too small, so zeros.
       ));
 
       -- Make the length field in header smaller than a sequence header;
@@ -2004,7 +2004,7 @@ package body Command_Sequencer_Tests.Implementation is
 
       -- Make the CRC bad.
       Header.Length := Sequence_Size;
-      Header.Crc := (1, 1);
+      Header.Crc := [1, 1];
 
       -- Load a simple sequence:
       T.Sequence_Load_T_Send ((Engine_Request => Specific_Engine, Engine_Id => 0, Sequence_Region => Sequence_Region));
@@ -2635,7 +2635,7 @@ package body Command_Sequencer_Tests.Implementation is
 
    overriding procedure Test_Issue_Details_Packet (Self : in out Instance) is
       T : Component.Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
-      Buffer : Packet_Types.Packet_Buffer_Type := (others => 0);
+      Buffer : Packet_Types.Packet_Buffer_Type := [others => 0];
    begin
       -- Send the command to issue the details.
       T.Command_T_Send (T.Commands.Issue_Details_Packet ((Engine_Id => 0)));
@@ -2667,7 +2667,7 @@ package body Command_Sequencer_Tests.Implementation is
          )) &
          Sequence_Details_Type.Serialization.To_Byte_Array ((
             Header => (
-               Crc => (0, 0),
+               Crc => [0, 0],
                Version => 0,
                Category => 0,
                Id => 0,
@@ -2681,7 +2681,7 @@ package body Command_Sequencer_Tests.Implementation is
          )) &
          Sequence_Details_Type.Serialization.To_Byte_Array ((
             Header => (
-               Crc => (0, 0),
+               Crc => [0, 0],
                Version => 0,
                Category => 0,
                Id => 0,
@@ -2695,7 +2695,7 @@ package body Command_Sequencer_Tests.Implementation is
          )) &
          Sequence_Details_Type.Serialization.To_Byte_Array ((
             Header => (
-               Crc => (0, 0),
+               Crc => [0, 0],
                Version => 0,
                Category => 0,
                Id => 0,
@@ -2841,7 +2841,7 @@ package body Command_Sequencer_Tests.Implementation is
             )) &
             Sequence_Details_Type.Serialization.To_Byte_Array ((
                Header => (
-                  Crc => (0, 0),
+                  Crc => [0, 0],
                   Version => 0,
                   Category => 0,
                   Id => 0,
@@ -2921,7 +2921,7 @@ package body Command_Sequencer_Tests.Implementation is
 
    overriding procedure Test_Set_Summary_Packet_Period (Self : in out Instance) is
       T : Component.Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
-      Buffer : Packet_Types.Packet_Buffer_Type := (others => 0);
+      Buffer : Packet_Types.Packet_Buffer_Type := [others => 0];
    begin
       -- Only setup data products:
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
@@ -3136,7 +3136,7 @@ package body Command_Sequencer_Tests.Implementation is
       -- Make sure some events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Set_Summary_Packet_Period_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 0)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Set_Summary_Packet_Period_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 0]));
    end Test_Invalid_Command;
 
    overriding procedure Test_Queue_Overflow (Self : in out Instance) is
@@ -3244,7 +3244,7 @@ package body Command_Sequencer_Tests.Implementation is
       Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (1), Component_A_Commands.Command_1);
 
       -- OK, now corrupt the sequence to that it errors internally.
-      Sequence_Buffer (12 .. 99999) := (others => 255);
+      Sequence_Buffer (12 .. 99999) := [others => 255];
 
       -- Send the command response to the sequencer:
       T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0, Command_Id => Component_A_Commands.Get_Command_1_Id, Status => Success));
@@ -3679,7 +3679,7 @@ package body Command_Sequencer_Tests.Implementation is
       Component_B_Commands : Test_Component_Commands.Instance;
 
       function Create_Print_String (Str : in String) return Seq_Print_Event_Record.Print_String_Type is
-         To_Return : Seq_Print_Event_Record.Print_String_Type := (others => 0);
+         To_Return : Seq_Print_Event_Record.Print_String_Type := [others => 0];
          pragma Warnings (Off, "overlay changes scalar storage order");
          Overlay : Basic_Types.Byte_Array (1 .. Str'Length) with Import, Convention => Ada, Address => Str'Address;
          pragma Warnings (On, "overlay changes scalar storage order");

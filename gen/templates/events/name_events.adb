@@ -51,7 +51,7 @@ package body {{ name }} is
       package Param_Serializer is new Serializer ({{ event.type }});
 {% endif %}
 {% endif %}
-      Evnt : {% if not event.type %}constant {% endif %}Event.T := (Header => (Id => Self.Get_{{ event.name }}_Id, Time => Timestamp, Param_Buffer_Length => {% if event.type %}Param_Serializer.Serialized_Length{% else %}0{% endif %}), Param_Buffer => (others => 0));
+      Evnt : {% if not event.type %}constant {% endif %}Event.T := (Header => (Id => Self.Get_{{ event.name }}_Id, Time => Timestamp, Param_Buffer_Length => {% if event.type %}Param_Serializer.Serialized_Length{% else %}0{% endif %}), Param_Buffer => [others => 0]);
    begin
 {% if event.type %}
       Evnt.Param_Buffer (Evnt.Param_Buffer'First .. Evnt.Param_Buffer'First + Param_Serializer.Serialized_Length - 1) := Param_Serializer.To_Byte_Array (Param);

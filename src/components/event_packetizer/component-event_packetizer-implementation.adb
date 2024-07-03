@@ -38,7 +38,7 @@ package body Component.Event_Packetizer.Implementation is
 
          -- Zero out the packet memory, and set the ids:
          for Idx in Packets'Range loop
-            Packets (Idx) := (Header => (Time => (0, 0), Id => 0, Sequence_Count => 0, Buffer_Length => 0), Buffer => (others => 0));
+            Packets (Idx) := (Header => (Time => (0, 0), Id => 0, Sequence_Count => 0, Buffer_Length => 0), Buffer => [others => 0]);
          end loop;
 
          Initialized := True;

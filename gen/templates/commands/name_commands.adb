@@ -76,7 +76,7 @@ package body {{ name }} is
          pragma Annotate (CodePeer, False_Positive, "dead code",
             "Some CodePeer can prove the Len can never be too large so this code does not execute. This is OK.");
       end if;
-      Cmd := (Header => (Source_Id => Self.Source_Id, Id => Self.Get_{{ command.name }}_Id, Arg_Buffer_Length => Len), Arg_Buffer => (others => 0));
+      Cmd := (Header => (Source_Id => Self.Source_Id, Id => Self.Get_{{ command.name }}_Id, Arg_Buffer_Length => Len), Arg_Buffer => [others => 0]);
 
       -- Serialize the argument onto the buffer:
       Stat := {{ command.type_package }}.Serialization.To_Byte_Array (Cmd.Arg_Buffer, Arg, Ignore);
@@ -94,9 +94,9 @@ package body {{ name }} is
 {% else %}
       package Arg_Serializer is new Serializer ({{ command.type }});
 {% endif %}
-      Cmd : {% if not command.type %}constant {% endif %}Command.T := (Header => (Source_Id => Self.Source_Id, Id => Self.Get_{{ command.name }}_Id, Arg_Buffer_Length => Arg_Serializer.Serialized_Length), Arg_Buffer => (others => 0));
+      Cmd : {% if not command.type %}constant {% endif %}Command.T := (Header => (Source_Id => Self.Source_Id, Id => Self.Get_{{ command.name }}_Id, Arg_Buffer_Length => Arg_Serializer.Serialized_Length), Arg_Buffer => [others => 0]);
 {% else %}
-      Cmd : {% if not command.type %}constant {% endif %}Command.T := (Header => (Source_Id => Self.Source_Id, Id => Self.Get_{{ command.name }}_Id, Arg_Buffer_Length => 0), Arg_Buffer => (others => 0));
+      Cmd : {% if not command.type %}constant {% endif %}Command.T := (Header => (Source_Id => Self.Source_Id, Id => Self.Get_{{ command.name }}_Id, Arg_Buffer_Length => 0), Arg_Buffer => [others => 0]);
 {% endif %}
    begin
 {% if command.type %}

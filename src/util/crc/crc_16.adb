@@ -4,12 +4,12 @@ package body Crc_16 is
 
    -- Function to compute CRC on a variable array of bytes. A CRC of the whole
    -- array is computed.
-   function Compute_Crc_16 (Bytes : in Basic_Types.Byte_Array; Seed : in Crc_16_Type := (0 => 16#FF#, 1 => 16#FF#)) return Crc_16_Type is
+   function Compute_Crc_16 (Bytes : in Basic_Types.Byte_Array; Seed : in Crc_16_Type := [0 => 16#FF#, 1 => 16#FF#]) return Crc_16_Type is
 
       -- Constants:
       type Byte_Array_Byte_Index is array (Basic_Types.Byte) of Basic_Types.Byte;
 
-      Low_Crc : constant Byte_Array_Byte_Index := (
+      Low_Crc : constant Byte_Array_Byte_Index := [
          16#00#, 16#21#, 16#42#, 16#63#, 16#84#, 16#a5#, 16#c6#, 16#e7#, 16#08#, 16#29#, 16#4a#, 16#6b#, 16#8c#,
          16#ad#, 16#ce#, 16#ef#, 16#31#, 16#10#, 16#73#, 16#52#, 16#b5#, 16#94#, 16#f7#, 16#d6#, 16#39#, 16#18#,
          16#7b#, 16#5a#, 16#bd#, 16#9c#, 16#ff#, 16#de#, 16#62#, 16#43#, 16#20#, 16#01#, 16#e6#, 16#c7#, 16#a4#,
@@ -30,9 +30,9 @@ package body Crc_16 is
          16#d0#, 16#b3#, 16#92#, 16#2e#, 16#0f#, 16#6c#, 16#4d#, 16#aa#, 16#8b#, 16#e8#, 16#c9#, 16#26#, 16#07#,
          16#64#, 16#45#, 16#a2#, 16#83#, 16#e0#, 16#c1#, 16#1f#, 16#3e#, 16#5d#, 16#7c#, 16#9b#, 16#ba#, 16#d9#,
          16#f8#, 16#17#, 16#36#, 16#55#, 16#74#, 16#93#, 16#b2#, 16#d1#, 16#f0#
-      );
+      ];
 
-      High_Crc : constant Byte_Array_Byte_Index := (
+      High_Crc : constant Byte_Array_Byte_Index := [
          16#00#, 16#10#, 16#20#, 16#30#, 16#40#, 16#50#, 16#60#, 16#70#, 16#81#, 16#91#, 16#a1#, 16#b1#, 16#c1#,
          16#d1#, 16#e1#, 16#f1#, 16#12#, 16#02#, 16#32#, 16#22#, 16#52#, 16#42#, 16#72#, 16#62#, 16#93#, 16#83#,
          16#b3#, 16#a3#, 16#d3#, 16#c3#, 16#f3#, 16#e3#, 16#24#, 16#34#, 16#04#, 16#14#, 16#64#, 16#74#, 16#44#,
@@ -53,7 +53,7 @@ package body Crc_16 is
          16#1a#, 16#2a#, 16#3a#, 16#fd#, 16#ed#, 16#dd#, 16#cd#, 16#bd#, 16#ad#, 16#9d#, 16#8d#, 16#7c#, 16#6c#,
          16#5c#, 16#4c#, 16#3c#, 16#2c#, 16#1c#, 16#0c#, 16#ef#, 16#ff#, 16#cf#, 16#df#, 16#af#, 16#bf#, 16#8f#,
          16#9f#, 16#6e#, 16#7e#, 16#4e#, 16#5e#, 16#2e#, 16#3e#, 16#0e#, 16#1e#
-      );
+      ];
 
       -- Local parity variables:
       High_Parity : Basic_Types.Byte := Seed (Crc_16_Type'First);
@@ -68,10 +68,10 @@ package body Crc_16 is
          end;
       end loop;
 
-      return (Crc_16_Type'First => High_Parity, Crc_16_Type'First + 1 => Low_Parity);
+      return [Crc_16_Type'First => High_Parity, Crc_16_Type'First + 1 => Low_Parity];
    end Compute_Crc_16;
 
-   function Compute_Crc_16 (Byte_Ptr : in Byte_Array_Pointer.Instance; Seed : in Crc_16_Type := (0 => 16#FF#, 1 => 16#FF#)) return Crc_16_Type is
+   function Compute_Crc_16 (Byte_Ptr : in Byte_Array_Pointer.Instance; Seed : in Crc_16_Type := [0 => 16#FF#, 1 => 16#FF#]) return Crc_16_Type is
       use Byte_Array_Pointer;
       subtype Safe_Byte_Array_Type is Basic_Types.Byte_Array (0 .. Length (Byte_Ptr) - 1);
       -- Perform overlay manually instead of using Byte_Array_Pointer.Pointer to avoid Byte_Array_Access range checking.

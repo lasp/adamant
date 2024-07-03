@@ -43,9 +43,9 @@ package body Event_Packetizer_Tests.Implementation is
    -- Global Event Definitions:
    -------------------------------------------------------------------------
 
-   Event_1 : constant Event.T := (Header => ((1, 2), 1, 0), Param_Buffer => (others => 0)); -- Same size as event header, 14 bytes.
-   Event_2 : constant Event.T := (Header => ((1, 2), 2, 6), Param_Buffer => (0 => 1, 1 => 2, 2 => 3, 3 => 4, 4 => 5, 5 => 6, others => 0)); -- Event header + 6 bytes, 20 bytes.
-   Event_3 : constant Event.T := (Header => ((1, 2), 3, 3), Param_Buffer => (0 => 1, 1 => 2, 2 => 3, 3 => 4, 4 => 5, 5 .. 11 => 6, others => 0)); -- Event header + 3 bytes, 14 bytes.
+   Event_1 : constant Event.T := (Header => ((1, 2), 1, 0), Param_Buffer => [others => 0]); -- Same size as event header, 14 bytes.
+   Event_2 : constant Event.T := (Header => ((1, 2), 2, 6), Param_Buffer => [0 => 1, 1 => 2, 2 => 3, 3 => 4, 4 => 5, 5 => 6, others => 0]); -- Event header + 6 bytes, 20 bytes.
+   Event_3 : constant Event.T := (Header => ((1, 2), 3, 3), Param_Buffer => [0 => 1, 1 => 2, 2 => 3, 3 => 4, 4 => 5, 5 .. 11 => 6, others => 0]); -- Event header + 3 bytes, 14 bytes.
 
    -------------------------------------------------------------------------
    -- Helper function:
@@ -53,7 +53,7 @@ package body Event_Packetizer_Tests.Implementation is
    -- Function which extracts an event from the packet at the given index, and checks it against,
    -- the passed in event. The next unchecked index into the packet is returned.
    function Check_Event (The_Packet : in Packet.T; Evt : in Event.T; Current_Index : in Natural) return Natural is
-      Extracted_Event : Event.T := (((0, 0), 0, 0), (others => 0));
+      Extracted_Event : Event.T := (((0, 0), 0, 0), [others => 0]);
       Param_Index : constant Natural := Current_Index + Event_Header.Serialization.Serialized_Length;
       Next_Index : Natural := Param_Index;
    begin

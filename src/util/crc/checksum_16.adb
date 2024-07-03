@@ -21,12 +21,12 @@ package body Checksum_16 is
       return To_Return;
    end Compute_Checksum_16;
 
-   function Compute_Checksum_16 (Bytes : in Basic_Types.Byte_Array; Seed : in Checksum_16_Type := (0 => 16#00#, 1 => 16#00#)) return Checksum_16_Type is
+   function Compute_Checksum_16 (Bytes : in Basic_Types.Byte_Array; Seed : in Checksum_16_Type := [0 => 16#00#, 1 => 16#00#]) return Checksum_16_Type is
       Seed_Number : constant Unsigned_16 := Unsigned_16 (Seed (0)) * 256 + Unsigned_16 (Seed (1));
       Result : constant Unsigned_16 := Compute_Checksum_16 (Bytes, Seed_Number);
    begin
       -- Return the result as array of bytes:
-      return (0 => Unsigned_8 (Result / 16#100#), 1 => Unsigned_8 (Result mod 16#100#));
+      return [0 => Unsigned_8 (Result / 16#100#), 1 => Unsigned_8 (Result mod 16#100#)];
    end Compute_Checksum_16;
 
 end Checksum_16;

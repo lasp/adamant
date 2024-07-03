@@ -758,7 +758,7 @@ package body Component.{{ name }} is
          else
             -- Id is not valid for component, so call the invalid command handler and return the the error status:
             declare
-               P_Type : Basic_Types.Poly_Type := (others => 0);
+               P_Type : Basic_Types.Poly_Type := [others => 0];
             begin
                -- Copy id into poly type:
                Byte_Array_Util.Safe_Right_Copy (P_Type, Command_Id.Serialization.To_Byte_Array ((Id => Cmd.Header.Id)));
@@ -807,7 +807,7 @@ package body Component.{{ name }} is
    end Register_Commands;
 
    not overriding procedure Handle_Command_Length_Error (Self : in out Base_Instance; Cmd : in Command.T) is
-      P_Type : Basic_Types.Poly_Type := (others => 0);
+      P_Type : Basic_Types.Poly_Type := [others => 0];
    begin
       -- Copy length into poly type:
       Byte_Array_Util.Safe_Right_Copy (P_Type, Command_Arg_Buffer_Length.Serialization.To_Byte_Array ((Arg_Buffer_Length => Cmd.Header.Arg_Buffer_Length)));
@@ -881,7 +881,7 @@ package body Component.{{ name }} is
 {% if command.type_model %}
                   P_Type : constant Basic_Types.Poly_Type := {{ command.type_package }}.Validation.Get_Field (Args, Errant_Field);
 {% else %}
-                  P_Type : Basic_Types.Poly_Type := (others => 0);
+                  P_Type : Basic_Types.Poly_Type := [others => 0];
 {% endif %}
                begin
 {% if not command.type_model %}
@@ -980,7 +980,7 @@ package body Component.{{ name }} is
          else
             -- Id is not valid for component, so call the invalid parameter handler and return the the error status:
             declare
-               P_Type : Basic_Types.Poly_Type := (others => 0);
+               P_Type : Basic_Types.Poly_Type := [others => 0];
             begin
                -- Copy id into poly type:
                Byte_Array_Util.Safe_Right_Copy (P_Type, Parameter_Id.Serialization.To_Byte_Array ((Id => Par.Header.Id)));
@@ -992,7 +992,7 @@ package body Component.{{ name }} is
    end Stage_Parameter;
 
    not overriding procedure Handle_Parameter_Length_Error (Self : in out Base_Instance; Par : in Parameter.T) is
-      P_Type : Basic_Types.Poly_Type := (others => 0);
+      P_Type : Basic_Types.Poly_Type := [others => 0];
    begin
       -- Copy length into poly type:
       Byte_Array_Util.Safe_Right_Copy (P_Type, Parameter_Buffer_Length.Serialization.To_Byte_Array ((Buffer_Length => Par.Header.Buffer_Length)));
@@ -1041,7 +1041,7 @@ package body Component.{{ name }} is
 {% if par.type_model %}
                   P_Type : constant Basic_Types.Poly_Type := {{ par.type_package }}.Validation.Get_Field (Par_To_Stage, Errant_Field);
 {% else %}
-                  P_Type : Basic_Types.Poly_Type := (others => 0);
+                  P_Type : Basic_Types.Poly_Type := [others => 0];
 {% endif %}
                begin
 {% if not par.type_model %}

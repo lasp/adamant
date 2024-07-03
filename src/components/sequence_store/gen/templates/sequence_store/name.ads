@@ -26,11 +26,11 @@ package {{ name }} is
    -- The slots type which is a list of all the slots:
    --
 
-   Slots : aliased Component.Sequence_Store.Sequence_Slot_Array := (
+   Slots : aliased Component.Sequence_Store.Sequence_Slot_Array := [
 {% for slot in slots %}
       {{ loop.index0 }} => Slot_{{ slot.number }}{{ "," if not loop.last }}
 {% endfor %}
-   );
+   ];
 
    Slots_Access : constant Component.Sequence_Store.Sequence_Slot_Array_Access
       := Slots'Access;

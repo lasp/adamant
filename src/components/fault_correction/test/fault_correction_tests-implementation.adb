@@ -59,9 +59,9 @@ package body Fault_Correction_Tests.Implementation is
       procedure Init_None is
       begin
          -- Empty list not ok.
-         Self.Tester.Component_Instance.Init (Fault_Response_Configurations => (
+         Self.Tester.Component_Instance.Init (Fault_Response_Configurations => [
             1 .. 0 => Test_Assembly_Fault_Responses.Component_A_Fault_1_Response
-         ));
+         ]);
          -- Should never get here:
          Assert (False, "Init none did not produce exception!");
       exception
@@ -73,12 +73,12 @@ package body Fault_Correction_Tests.Implementation is
       procedure Init_Duplicate is
       begin
          -- Empty list not ok.
-         Self.Tester.Component_Instance.Init (Fault_Response_Configurations => (
+         Self.Tester.Component_Instance.Init (Fault_Response_Configurations => [
             0 => Test_Assembly_Fault_Responses.Component_A_Fault_1_Response,
             1 => Test_Assembly_Fault_Responses.Component_A_Fault_2_Response,
             2 => Test_Assembly_Fault_Responses.Component_B_Fault_1_Response,
             3 => Test_Assembly_Fault_Responses.Component_A_Fault_1_Response
-         ));
+         ]);
          -- Should never get here:
          Assert (False, "Init dupe dupe did not produce exception!");
       exception
@@ -90,9 +90,9 @@ package body Fault_Correction_Tests.Implementation is
       procedure Init_Too_Many is
       begin
          -- Empty list not ok.
-         Self.Tester.Component_Instance.Init (Fault_Response_Configurations => (
+         Self.Tester.Component_Instance.Init (Fault_Response_Configurations => [
             0 .. 5000 => Test_Assembly_Fault_Responses.Component_A_Fault_1_Response
-         ));
+         ]);
          -- Should never get here:
          Assert (False, "Init dupe dupe did not produce exception!");
       exception
@@ -147,7 +147,7 @@ package body Fault_Correction_Tests.Implementation is
       T : Component.Fault_Correction.Implementation.Tester.Instance_Access renames Self.Tester;
    begin
       -- OK send the component a fault that is enabled:
-      T.Fault_T_Send ((((15, 12), Test_Assembly_Faults.Component_A_Fault_1, 0), (others => 55)));
+      T.Fault_T_Send ((((15, 12), Test_Assembly_Faults.Component_A_Fault_1, 0), [others => 55]));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       -- Make sure response was sent out:
@@ -163,7 +163,7 @@ package body Fault_Correction_Tests.Implementation is
       -- Make sure we get some events:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
       Natural_Assert.Eq (T.Fault_Received_History.Get_Count, 1);
-      Fault_Static_Assert.Eq (T.Fault_Received_History.Get (1), (((15, 12), Test_Assembly_Faults.Component_A_Fault_1, 0), (others => 0)));
+      Fault_Static_Assert.Eq (T.Fault_Received_History.Get (1), (((15, 12), Test_Assembly_Faults.Component_A_Fault_1, 0), [others => 0]));
       Natural_Assert.Eq (T.Fault_Response_Sent_History.Get_Count, 1);
       Command_Header_Assert.Eq (T.Fault_Response_Sent_History.Get (1), (
          Source_Id => 0,
@@ -199,7 +199,7 @@ package body Fault_Correction_Tests.Implementation is
       );
 
       -- OK send the component the same fault again:
-      T.Fault_T_Send ((((15, 12), Test_Assembly_Faults.Component_A_Fault_1, 0), (others => 55)));
+      T.Fault_T_Send ((((15, 12), Test_Assembly_Faults.Component_A_Fault_1, 0), [others => 55]));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       -- Make sure response was sent out:
@@ -210,7 +210,7 @@ package body Fault_Correction_Tests.Implementation is
       -- Make sure we get some events:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 4);
       Natural_Assert.Eq (T.Fault_Received_History.Get_Count, 2);
-      Fault_Static_Assert.Eq (T.Fault_Received_History.Get (2), (((15, 12), Test_Assembly_Faults.Component_A_Fault_1, 0), (others => 0)));
+      Fault_Static_Assert.Eq (T.Fault_Received_History.Get (2), (((15, 12), Test_Assembly_Faults.Component_A_Fault_1, 0), [others => 0]));
       Natural_Assert.Eq (T.Fault_Response_Sent_History.Get_Count, 2);
       Command_Header_Assert.Eq (T.Fault_Response_Sent_History.Get (2),
          Test_Assembly_Fault_Responses.Component_A_Fault_1_Response.Command_Response.Header);
@@ -226,7 +226,7 @@ package body Fault_Correction_Tests.Implementation is
       Natural_Assert.Eq (T.Fault_Response_Statuses_History.Get_Count, 1); -- no change
 
       -- OK send the component a latching fault:
-      T.Fault_T_Send ((((16, 12), Test_Assembly_Faults.Component_A_Fault_2, 0), (others => 55)));
+      T.Fault_T_Send ((((16, 12), Test_Assembly_Faults.Component_A_Fault_2, 0), [others => 55]));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       -- Make sure response was sent out:
@@ -237,7 +237,7 @@ package body Fault_Correction_Tests.Implementation is
       -- Make sure we get some events:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 6);
       Natural_Assert.Eq (T.Fault_Received_History.Get_Count, 3);
-      Fault_Static_Assert.Eq (T.Fault_Received_History.Get (3), (((16, 12), Test_Assembly_Faults.Component_A_Fault_2, 0), (others => 0)));
+      Fault_Static_Assert.Eq (T.Fault_Received_History.Get (3), (((16, 12), Test_Assembly_Faults.Component_A_Fault_2, 0), [others => 0]));
       Natural_Assert.Eq (T.Fault_Response_Sent_History.Get_Count, 3);
       Command_Header_Assert.Eq (T.Fault_Response_Sent_History.Get (3),
          Test_Assembly_Fault_Responses.Component_A_Fault_2_Response.Command_Response.Header);
@@ -268,7 +268,7 @@ package body Fault_Correction_Tests.Implementation is
       );
 
       -- OK send the component same latching fault again:
-      T.Fault_T_Send ((((17, 12), Test_Assembly_Faults.Component_A_Fault_2, 1), (others => 55)));
+      T.Fault_T_Send ((((17, 12), Test_Assembly_Faults.Component_A_Fault_2, 1), [others => 55]));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       -- Make sure response was sent out:
@@ -277,7 +277,7 @@ package body Fault_Correction_Tests.Implementation is
       -- Make sure we get some events:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 7);
       Natural_Assert.Eq (T.Fault_Received_History.Get_Count, 4);
-      Fault_Static_Assert.Eq (T.Fault_Received_History.Get (4), (((17, 12), Test_Assembly_Faults.Component_A_Fault_2, 1), (0 => 55, others => 0)));
+      Fault_Static_Assert.Eq (T.Fault_Received_History.Get (4), (((17, 12), Test_Assembly_Faults.Component_A_Fault_2, 1), [0 => 55, others => 0]));
       Natural_Assert.Eq (T.Fault_Response_Sent_History.Get_Count, 3); -- No change, latched
 
       -- Make sure we get some data products:
@@ -291,7 +291,7 @@ package body Fault_Correction_Tests.Implementation is
       Natural_Assert.Eq (T.Fault_Response_Statuses_History.Get_Count, 2); -- No change, latched
 
       -- OK send a disabled fault:
-      T.Fault_T_Send ((((17, 12), Test_Assembly_Faults.Component_B_Fault_1, 1), (others => 55)));
+      T.Fault_T_Send ((((17, 12), Test_Assembly_Faults.Component_B_Fault_1, 1), [others => 55]));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       -- Make sure response was sent out:
@@ -300,7 +300,7 @@ package body Fault_Correction_Tests.Implementation is
       -- Make sure we get some events:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 8);
       Natural_Assert.Eq (T.Fault_Received_History.Get_Count, 5);
-      Fault_Static_Assert.Eq (T.Fault_Received_History.Get (5), (((17, 12), Test_Assembly_Faults.Component_B_Fault_1, 1), (0 => 55, others => 0)));
+      Fault_Static_Assert.Eq (T.Fault_Received_History.Get (5), (((17, 12), Test_Assembly_Faults.Component_B_Fault_1, 1), [0 => 55, others => 0]));
       Natural_Assert.Eq (T.Fault_Response_Sent_History.Get_Count, 3); -- No change, disabled
 
       -- Make sure we get some data products:
@@ -318,7 +318,7 @@ package body Fault_Correction_Tests.Implementation is
       T : Component.Fault_Correction.Implementation.Tester.Instance_Access renames Self.Tester;
    begin
       -- OK send a disabled fault:
-      T.Fault_T_Send ((((17, 12), Test_Assembly_Faults.Component_B_Fault_1, 1), (others => 55)));
+      T.Fault_T_Send ((((17, 12), Test_Assembly_Faults.Component_B_Fault_1, 1), [others => 55]));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       -- Make sure response was sent out:
@@ -327,7 +327,7 @@ package body Fault_Correction_Tests.Implementation is
       -- Make sure we get some events:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Fault_Received_History.Get_Count, 1);
-      Fault_Static_Assert.Eq (T.Fault_Received_History.Get (1), (((17, 12), Test_Assembly_Faults.Component_B_Fault_1, 1), (0 => 55, others => 0)));
+      Fault_Static_Assert.Eq (T.Fault_Received_History.Get (1), (((17, 12), Test_Assembly_Faults.Component_B_Fault_1, 1), [0 => 55, others => 0]));
       Natural_Assert.Eq (T.Fault_Response_Sent_History.Get_Count, 0); -- No change, disabled
 
       -- Make sure we get some data products:
@@ -371,7 +371,7 @@ package body Fault_Correction_Tests.Implementation is
       );
 
       -- OK send fault again:
-      T.Fault_T_Send ((((17, 12), Test_Assembly_Faults.Component_B_Fault_1, 1), (others => 55)));
+      T.Fault_T_Send ((((17, 12), Test_Assembly_Faults.Component_B_Fault_1, 1), [others => 55]));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       -- Make sure response was sent out:
@@ -382,7 +382,7 @@ package body Fault_Correction_Tests.Implementation is
       -- Make sure we get some events:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 4);
       Natural_Assert.Eq (T.Fault_Received_History.Get_Count, 2);
-      Fault_Static_Assert.Eq (T.Fault_Received_History.Get (2), (((17, 12), Test_Assembly_Faults.Component_B_Fault_1, 1), (0 => 55, others => 0)));
+      Fault_Static_Assert.Eq (T.Fault_Received_History.Get (2), (((17, 12), Test_Assembly_Faults.Component_B_Fault_1, 1), [0 => 55, others => 0]));
       Natural_Assert.Eq (T.Fault_Response_Sent_History.Get_Count, 1);
       Command_Header_Assert.Eq (T.Fault_Response_Sent_History.Get (1),
          Test_Assembly_Fault_Responses.Component_B_Fault_1_Response.Command_Response.Header);
@@ -443,7 +443,7 @@ package body Fault_Correction_Tests.Implementation is
       );
 
       -- OK send fault again:
-      T.Fault_T_Send ((((17, 12), Test_Assembly_Faults.Component_B_Fault_1, 1), (others => 55)));
+      T.Fault_T_Send ((((17, 12), Test_Assembly_Faults.Component_B_Fault_1, 1), [others => 55]));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       -- Make sure response was sent out:
@@ -452,7 +452,7 @@ package body Fault_Correction_Tests.Implementation is
       -- Make sure we get some events:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 6);
       Natural_Assert.Eq (T.Fault_Received_History.Get_Count, 3);
-      Fault_Static_Assert.Eq (T.Fault_Received_History.Get (3), (((17, 12), Test_Assembly_Faults.Component_B_Fault_1, 1), (0 => 55, others => 0)));
+      Fault_Static_Assert.Eq (T.Fault_Received_History.Get (3), (((17, 12), Test_Assembly_Faults.Component_B_Fault_1, 1), [0 => 55, others => 0]));
 
       -- Make sure we get some data products:
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 12);
@@ -499,9 +499,9 @@ package body Fault_Correction_Tests.Implementation is
       T : Component.Fault_Correction.Implementation.Tester.Instance_Access renames Self.Tester;
    begin
       -- OK send a few faults:
-      T.Fault_T_Send ((((15, 12), Test_Assembly_Faults.Component_A_Fault_1, 0), (others => 55)));
-      T.Fault_T_Send ((((16, 12), Test_Assembly_Faults.Component_A_Fault_2, 0), (others => 55)));
-      T.Fault_T_Send ((((16, 12), Test_Assembly_Faults.Component_B_Fault_3, 0), (others => 55)));
+      T.Fault_T_Send ((((15, 12), Test_Assembly_Faults.Component_A_Fault_1, 0), [others => 55]));
+      T.Fault_T_Send ((((16, 12), Test_Assembly_Faults.Component_A_Fault_2, 0), [others => 55]));
+      T.Fault_T_Send ((((16, 12), Test_Assembly_Faults.Component_B_Fault_3, 0), [others => 55]));
       Natural_Assert.Eq (T.Dispatch_All, 3);
 
       -- Check latest state data product:
@@ -635,9 +635,9 @@ package body Fault_Correction_Tests.Implementation is
       );
 
       -- Load up a few more faults:
-      T.Fault_T_Send ((((15, 12), Test_Assembly_Faults.Component_A_Fault_1, 0), (others => 55)));
-      T.Fault_T_Send ((((16, 12), Test_Assembly_Faults.Component_A_Fault_2, 0), (others => 55)));
-      T.Fault_T_Send ((((16, 12), Test_Assembly_Faults.Component_B_Fault_3, 0), (others => 55)));
+      T.Fault_T_Send ((((15, 12), Test_Assembly_Faults.Component_A_Fault_1, 0), [others => 55]));
+      T.Fault_T_Send ((((16, 12), Test_Assembly_Faults.Component_A_Fault_2, 0), [others => 55]));
+      T.Fault_T_Send ((((16, 12), Test_Assembly_Faults.Component_B_Fault_3, 0), [others => 55]));
       Natural_Assert.Eq (T.Dispatch_All, 3);
 
       -- Check latest state data product:
@@ -745,7 +745,7 @@ package body Fault_Correction_Tests.Implementation is
       Packed_Fault_Id_Assert.Eq (T.Unrecognized_Fault_Id_History.Get (3), (Id => 99));
 
       -- Send unrecognized fault:
-      T.Fault_T_Send ((((15, 12), 99, 0), (others => 55)));
+      T.Fault_T_Send ((((15, 12), 99, 0), [others => 55]));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       -- Check events:
@@ -775,7 +775,7 @@ package body Fault_Correction_Tests.Implementation is
 
       -- OK, let's try to send a fault:
       T.Expect_Fault_T_Send_Dropped := True;
-      T.Fault_T_Send ((((15, 12), 99, 0), (others => 55)));
+      T.Fault_T_Send ((((15, 12), 99, 0), [others => 55]));
 
       -- Make sure event thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
@@ -799,7 +799,7 @@ package body Fault_Correction_Tests.Implementation is
       -- Make sure some events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Disable_Fault_Response_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 0)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Disable_Fault_Response_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 0]));
    end Test_Invalid_Command;
 
 end Fault_Correction_Tests.Implementation;

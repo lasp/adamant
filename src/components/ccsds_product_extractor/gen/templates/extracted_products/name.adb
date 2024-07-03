@@ -28,7 +28,7 @@ package body {{ name }} is
       Invalid_Data_Product := (
          Id => Data_Product_Types.Data_Product_Id'First,
          Errant_Field_Number => 0,
-         Errant_Field => (others => 0)
+         Errant_Field => [others => 0]
       );
 
       -- Use the generic extraction function using the autocoded values from the YAML file to get the information needed from the packet
@@ -62,7 +62,7 @@ package body {{ name }} is
             when False =>
                -- When there is a validation error, fill in a data structure with the relevant information for the component to use to send an event.
                declare
-                  P_Type : Basic_Types.Poly_Type := (others => 0);
+                  P_Type : Basic_Types.Poly_Type := [others => 0];
                begin
                   -- Copy extracted value into poly type
                   Byte_Array_Util.Safe_Right_Copy (P_Type, Pkt.Data ({{data_product.offset}} .. {{data_product.offset}} + {{ data_product.product_type }}.Size_In_Bytes - 1));

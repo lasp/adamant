@@ -55,7 +55,7 @@ package body Ccsds_Router_Tests.Implementation is
          Sequence_Count => Ccsds_Sequence_Count_Type (53),
          Packet_Length => 0
       ),
-      Data => (others => 0)
+      Data => [others => 0]
    );
    Packet_1 : Ccsds_Space_Packet.T := (
       Header => (
@@ -67,7 +67,7 @@ package body Ccsds_Router_Tests.Implementation is
          Sequence_Count => Ccsds_Sequence_Count_Type (53),
          Packet_Length => 6
       ),
-      Data => (1, 2, 3, 4, 5, 6, 7, others => 0)
+      Data => [1, 2, 3, 4, 5, 6, 7, others => 0]
    );
    Packet_2 : Ccsds_Space_Packet.T := (
       Header => (
@@ -79,7 +79,7 @@ package body Ccsds_Router_Tests.Implementation is
          Sequence_Count => Ccsds_Sequence_Count_Type (12),
          Packet_Length => Ccsds_Space_Packet.Ccsds_Data_Type'Length - 1
       ),
-      Data => (others => 99)
+      Data => [others => 99]
    );
    Packet_3 : Ccsds_Space_Packet.T := (
       Header => (
@@ -91,7 +91,7 @@ package body Ccsds_Router_Tests.Implementation is
          Sequence_Count => Ccsds_Sequence_Count_Type (1),
          Packet_Length => 17
       ),
-      Data => (1, 2, 3, 4, 5, 6, 7, others => 255)
+      Data => [1, 2, 3, 4, 5, 6, 7, others => 255]
    );
    Packet_4 : Ccsds_Space_Packet.T := (
       Header => (
@@ -103,7 +103,7 @@ package body Ccsds_Router_Tests.Implementation is
          Sequence_Count => Ccsds_Sequence_Count_Type (53),
          Packet_Length => 4
       ),
-      Data => (others => 4)
+      Data => [others => 4]
    );
    Packet_5 : Ccsds_Space_Packet.T := (
       Header => (
@@ -115,7 +115,7 @@ package body Ccsds_Router_Tests.Implementation is
          Sequence_Count => Ccsds_Sequence_Count_Type (53),
          Packet_Length => 5
       ),
-      Data => (others => 5)
+      Data => [others => 5]
    );
    Packet_6 : Ccsds_Space_Packet.T := (
       Header => (
@@ -127,7 +127,7 @@ package body Ccsds_Router_Tests.Implementation is
          Sequence_Count => Ccsds_Sequence_Count_Type (53),
          Packet_Length => 6
       ),
-      Data => (others => 6)
+      Data => [others => 6]
    );
    Packet_7 : Ccsds_Space_Packet.T := (
       Header => (
@@ -139,7 +139,7 @@ package body Ccsds_Router_Tests.Implementation is
          Sequence_Count => Ccsds_Sequence_Count_Type (53),
          Packet_Length => 7
       ),
-      Data => (others => 7)
+      Data => [others => 7]
    );
    Packet_8 : Ccsds_Space_Packet.T := (
       Header => (
@@ -151,7 +151,7 @@ package body Ccsds_Router_Tests.Implementation is
          Sequence_Count => Ccsds_Sequence_Count_Type (53),
          Packet_Length => 8
       ),
-      Data => (others => 8)
+      Data => [others => 8]
    );
    Packet_9 : Ccsds_Space_Packet.T := (
       Header => (
@@ -163,7 +163,7 @@ package body Ccsds_Router_Tests.Implementation is
          Sequence_Count => Ccsds_Sequence_Count_Type (53),
          Packet_Length => 9
       ),
-      Data => (others => 9)
+      Data => [others => 9]
    );
 
    procedure Check_Routing
@@ -189,14 +189,14 @@ package body Ccsds_Router_Tests.Implementation is
 
       procedure Init_Nominal is
          -- Router table entries:
-         Router_Table : constant Router_Table_Entry_Array :=
-            (
-         -- Table entry for APID: 1
-         0 => (Apid => 1, Destinations => null, Sequence_Count_Mode => No_Check),
-         -- Table entry for APID: 2
-         1 => (Apid => 2, Destinations => null, Sequence_Count_Mode => No_Check),
-         -- Table entry for APID: 3
-         2 => (Apid => 3, Destinations => null, Sequence_Count_Mode => Warn));
+         Router_Table : constant Router_Table_Entry_Array := [
+            -- Table entry for APID: 1
+            0 => (Apid => 1, Destinations => null, Sequence_Count_Mode => No_Check),
+            -- Table entry for APID: 2
+            1 => (Apid => 2, Destinations => null, Sequence_Count_Mode => No_Check),
+            -- Table entry for APID: 3
+            2 => (Apid => 3, Destinations => null, Sequence_Count_Mode => Warn)
+         ];
       begin
          T.Component_Instance.Init (Router_Table);
       exception
@@ -206,16 +206,16 @@ package body Ccsds_Router_Tests.Implementation is
       end Init_Nominal;
 
       procedure Init_Index_Out_Of_Range_1 is
-         Destination_Table_1 : aliased Destination_Table := (0 => 100);
+         Destination_Table_1 : aliased Destination_Table := [0 => 100];
          -- Router table entries:
-         Router_Table : constant Router_Table_Entry_Array :=
-            (
-         -- Table entry for APID: 1
-         0 => (Apid => 1, Destinations => Destination_Table_1'Unchecked_Access, Sequence_Count_Mode => No_Check),
-         -- Table entry for APID: 2
-         1 => (Apid => 2, Destinations => null, Sequence_Count_Mode => No_Check),
-         -- Table entry for APID: 3
-         2 => (Apid => 3, Destinations => null, Sequence_Count_Mode => Warn));
+         Router_Table : constant Router_Table_Entry_Array := [
+            -- Table entry for APID: 1
+            0 => (Apid => 1, Destinations => Destination_Table_1'Unchecked_Access, Sequence_Count_Mode => No_Check),
+            -- Table entry for APID: 2
+            1 => (Apid => 2, Destinations => null, Sequence_Count_Mode => No_Check),
+            -- Table entry for APID: 3
+            2 => (Apid => 3, Destinations => null, Sequence_Count_Mode => Warn)
+         ];
       begin
          T.Component_Instance.Init (Router_Table);
          -- Should never get here:
@@ -227,16 +227,16 @@ package body Ccsds_Router_Tests.Implementation is
       end Init_Index_Out_Of_Range_1;
 
       procedure Init_Index_Out_Of_Range_2 is
-         Destination_Table_1 : aliased Destination_Table := (0 => 7);
+         Destination_Table_1 : aliased Destination_Table := [0 => 7];
          -- Router table entries:
-         Router_Table : constant Router_Table_Entry_Array :=
-            (
-         -- Table entry for APID: 1
-         0 => (Apid => 1, Destinations => null, Sequence_Count_Mode => No_Check),
-         -- Table entry for APID: 2
-         1 => (Apid => 2, Destinations => Destination_Table_1'Unchecked_Access, Sequence_Count_Mode => No_Check),
-         -- Table entry for APID: 3
-         2 => (Apid => 3, Destinations => null, Sequence_Count_Mode => Warn));
+         Router_Table : constant Router_Table_Entry_Array := [
+            -- Table entry for APID: 1
+            0 => (Apid => 1, Destinations => null, Sequence_Count_Mode => No_Check),
+            -- Table entry for APID: 2
+            1 => (Apid => 2, Destinations => Destination_Table_1'Unchecked_Access, Sequence_Count_Mode => No_Check),
+            -- Table entry for APID: 3
+            2 => (Apid => 3, Destinations => null, Sequence_Count_Mode => Warn)
+         ];
       begin
          T.Component_Instance.Init (Router_Table);
          -- Should never get here:
@@ -249,14 +249,14 @@ package body Ccsds_Router_Tests.Implementation is
 
       procedure Init_Duplicate is
          -- Router table entries:
-         Router_Table : constant Router_Table_Entry_Array :=
-            (
-         -- Table entry for APID: 1
-         0 => (Apid => 1, Destinations => null, Sequence_Count_Mode => No_Check),
-         -- Table entry for APID: 2
-         1 => (Apid => 2, Destinations => null, Sequence_Count_Mode => No_Check),
-         -- Table entry for APID: 3
-         2 => (Apid => 2, Destinations => null, Sequence_Count_Mode => Warn));
+         Router_Table : constant Router_Table_Entry_Array := [
+            -- Table entry for APID: 1
+            0 => (Apid => 1, Destinations => null, Sequence_Count_Mode => No_Check),
+            -- Table entry for APID: 2
+            1 => (Apid => 2, Destinations => null, Sequence_Count_Mode => No_Check),
+            -- Table entry for APID: 3
+            2 => (Apid => 2, Destinations => null, Sequence_Count_Mode => Warn)
+         ];
       begin
          T.Component_Instance.Init (Router_Table);
          -- Should never get here:

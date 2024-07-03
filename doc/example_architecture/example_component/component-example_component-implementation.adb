@@ -24,7 +24,7 @@ package body Component.Example_Component.Implementation is
             Sequence_Count => 0,
             Buffer_Length => 1      -- We are using 1 byte of data.
          ),
-         Buffer => (others => 0)
+         Buffer => [others => 0]
       );
    begin
       -- Set the packet data:

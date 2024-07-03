@@ -43,7 +43,7 @@ package body Component.Ccsds_Packetizer.Implementation is
           Sequence_Count => Ccsds_Sequence_Count_Type (P.Header.Sequence_Count),
           Packet_Length => Unsigned_16 (Sys_Time.Serialization.Serialized_Length + P.Header.Buffer_Length + Crc_16_Type'Length - 1)
        ),
-       Data => (others => 0)
+       Data => [others => 0]
     );
    begin
       -- Copy the timestamp:

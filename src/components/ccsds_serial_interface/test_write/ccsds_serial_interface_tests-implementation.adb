@@ -41,7 +41,7 @@ package body Ccsds_Serial_Interface_Tests.Implementation is
          (Header =>
              (Version => 0, Packet_Type => Ccsds_Packet_Type.Telecommand, Secondary_Header => Ccsds_Secondary_Header_Indicator.Secondary_Header_Not_Present, Apid => Ccsds_Apid_Type (15), Sequence_Flag => Ccsds_Sequence_Flag.Unsegmented,
                Sequence_Count => Ccsds_Sequence_Count_Type (22), Packet_Length => 10 - 1),
-          Data => (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, others => 0));
+          Data => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, others => 0]);
    begin
       -- Put_Line("Starting test.");
 

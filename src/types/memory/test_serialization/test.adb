@@ -16,7 +16,7 @@ procedure Test is
    -- Local vars:
    Heap_Ptr : Byte_Array_Pointer.Instance;
    Data_Ptr : Byte_Array_Pointer.Instance;
-   B_Array : aliased Byte_Array := (0 .. 49 => 0);
+   B_Array : aliased Byte_Array := [0 .. 49 => 0];
 
    procedure Go (Ptr : in out Byte_Array_Pointer.Instance) is
       The_Slice : Byte_Array_Pointer.Instance;
@@ -31,9 +31,9 @@ procedure Test is
 
       -- Vars:
       Static_Var : aliased Static.T := (3, 2, 1);
-      Variable_Var : aliased Simple_Variable.T := (Length => 6, Buffer => (10, 9, 8, 7, 6, 5, others => 255));
-      Variable_Var_Bad : aliased Simple_Variable.T := (Length => 255, Buffer => (10, 9, 8, 7, 6, 5, others => 255));
-      Variable_Var2 : Simple_Variable.T := (Length => 0, Buffer => (others => 0));
+      Variable_Var : aliased Simple_Variable.T := (Length => 6, Buffer => [10, 9, 8, 7, 6, 5, others => 255]);
+      Variable_Var_Bad : aliased Simple_Variable.T := (Length => 255, Buffer => [10, 9, 8, 7, 6, 5, others => 255]);
+      Variable_Var2 : Simple_Variable.T := (Length => 0, Buffer => [others => 0]);
       Bytes : Simple_Variable.Serialization.Byte_Array;
       Stat : Serialization_Status;
       Num_Bytes : Natural;

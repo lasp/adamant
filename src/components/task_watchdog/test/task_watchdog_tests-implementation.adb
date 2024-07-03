@@ -55,7 +55,7 @@ package body Task_Watchdog_Tests.Implementation is
 
    -- Helper function to build the limit DPs to compare to the output
    function Test_Create_Dp_Limit_Type (Id : in Data_Product_Types.Data_Product_Id; Limit_Value : in Interfaces.Unsigned_16) return Data_Product.T is
-      Dp : Data_Product.T := (Header => (Id => Id, Time => (0, 0), Buffer_Length => Packed_U16.Serialization.Serialized_Length), Buffer => (others => 0));
+      Dp : Data_Product.T := (Header => (Id => Id, Time => (0, 0), Buffer_Length => Packed_U16.Serialization.Serialized_Length), Buffer => [others => 0]);
    begin
       Dp.Buffer (Dp.Buffer'First .. Dp.Buffer'First + Packed_U16.Serialization.Serialized_Length - 1) := Packed_U16.Serialization.To_Byte_Array ((Value => Limit_Value));
       return Dp;
@@ -63,7 +63,7 @@ package body Task_Watchdog_Tests.Implementation is
 
    -- Helper function to build the limit DPs to compare to the output
    function Test_Create_Fault (Id : in Fault_Types.Fault_Id; Idx : in Connector_Types.Connector_Index_Type) return Fault.T is
-      New_Fault : Fault.T := (Header => (Id => Id, Time => (0, 0), Param_Buffer_Length => Packed_Connector_Index.Serialization.Serialized_Length), Param_Buffer => (others => 16#FF#));
+      New_Fault : Fault.T := (Header => (Id => Id, Time => (0, 0), Param_Buffer_Length => Packed_Connector_Index.Serialization.Serialized_Length), Param_Buffer => [others => 16#FF#]);
    begin
       New_Fault.Param_Buffer (New_Fault.Param_Buffer'First .. New_Fault.Param_Buffer'First + Packed_Connector_Index.Serialization.Serialized_Length - 1) := Packed_Connector_Index.Serialization.To_Byte_Array ((Index => Idx));
       return New_Fault;
@@ -173,7 +173,7 @@ package body Task_Watchdog_Tests.Implementation is
       T : Component.Task_Watchdog.Implementation.Tester.Instance_Access renames Self.Tester;
       Input_Tick : constant Tick.T := ((0, 0), 0);
       Input_Pet : constant Pet.T := (Count => 0);
-      Test_State_Data_Product : Data_Product.T := (Header => (Id => 0, Time => (0, 0), Buffer_Length => Packed_Byte.Serialization.Serialized_Length), Buffer => (others => 16#FF#));
+      Test_State_Data_Product : Data_Product.T := (Header => (Id => 0, Time => (0, 0), Buffer_Length => Packed_Byte.Serialization.Serialized_Length), Buffer => [others => 16#FF#]);
    begin
       Put_Line ("");
       Put_Line ("----------------------------------");
@@ -306,7 +306,7 @@ package body Task_Watchdog_Tests.Implementation is
       T : Component.Task_Watchdog.Implementation.Tester.Instance_Access renames Self.Tester;
       Input_Tick : constant Tick.T := ((0, 0), 0);
       Input_Pet : constant Pet.T := (Count => 0);
-      Test_Action_Data_Product : Data_Product.T := (Header => (Id => 1, Time => (0, 0), Buffer_Length => Packed_Byte.Serialization.Serialized_Length), Buffer => (others => 0));
+      Test_Action_Data_Product : Data_Product.T := (Header => (Id => 1, Time => (0, 0), Buffer_Length => Packed_Byte.Serialization.Serialized_Length), Buffer => [others => 0]);
    begin
       Put_Line ("");
       Put_Line ("----------------------------------");
@@ -478,7 +478,7 @@ package body Task_Watchdog_Tests.Implementation is
       T : Component.Task_Watchdog.Implementation.Tester.Instance_Access renames Self.Tester;
       Input_Tick : constant Tick.T := ((0, 0), 0);
       Input_Pet : constant Pet.T := (Count => 0);
-      Test_Limit_Data_Product : Data_Product.T := (Header => (Id => 2, Time => (0, 0), Buffer_Length => Packed_U16.Serialization.Serialized_Length), Buffer => (others => 0));
+      Test_Limit_Data_Product : Data_Product.T := (Header => (Id => 2, Time => (0, 0), Buffer_Length => Packed_U16.Serialization.Serialized_Length), Buffer => [others => 0]);
    begin
       Put_Line ("");
       Put_Line ("----------------------------------");
@@ -518,7 +518,7 @@ package body Task_Watchdog_Tests.Implementation is
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
       Natural_Assert.Eq (T.Watchdog_Limit_Set_History.Get_Count, 1);
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, Init_Dp_Count + 1);
-      Test_Limit_Data_Product.Buffer (0 .. 1) := (0, 5);
+      Test_Limit_Data_Product.Buffer (0 .. 1) := [0, 5];
       Data_Product_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get (Init_Dp_Count + 1), Test_Limit_Data_Product);
 
       -- Reset the critical petter
@@ -565,7 +565,7 @@ package body Task_Watchdog_Tests.Implementation is
       Natural_Assert.Eq (T.Watchdog_Limit_Set_History.Get_Count, 2);
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, Init_Dp_Count + 2);
       Test_Limit_Data_Product.Header.Id := 3;
-      Test_Limit_Data_Product.Buffer (0 .. 1) := (0, 4);
+      Test_Limit_Data_Product.Buffer (0 .. 1) := [0, 4];
       Data_Product_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get (Init_Dp_Count + 2), Test_Limit_Data_Product);
 
       T.Tick_T_Send (Input_Tick);
@@ -624,7 +624,7 @@ package body Task_Watchdog_Tests.Implementation is
       -- Make sure some events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Set_Watchdog_Limit_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 0)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Set_Watchdog_Limit_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 0]));
    end Test_Invalid_Command;
 
 end Task_Watchdog_Tests.Implementation;

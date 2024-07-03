@@ -58,7 +58,7 @@ package body Event_Filter_Tests.Implementation is
 
    overriding procedure Test_Received_Event (Self : in out Instance) is
       T : Component.Event_Filter.Implementation.Tester.Instance_Access renames Self.Tester;
-      Event_Filter_Init_List : constant Event_Id_List := (3, 6);
+      Event_Filter_Init_List : constant Event_Id_List := [3, 6];
       Incoming_Event : Event.T;
    begin
       Put_Line ("");
@@ -124,7 +124,7 @@ package body Event_Filter_Tests.Implementation is
 
    overriding procedure Test_Data_Products (Self : in out Instance) is
       T : Component.Event_Filter.Implementation.Tester.Instance_Access renames Self.Tester;
-      Event_Filter_Init_List : constant Event_Id_List := (2, 5);
+      Event_Filter_Init_List : constant Event_Id_List := [2, 5];
       Incoming_Event : Event.T;
       Input_Tick : constant Tick.T := ((0, 0), 0);
    begin
@@ -237,7 +237,7 @@ package body Event_Filter_Tests.Implementation is
 
    overriding procedure Test_Issue_State_Packet (Self : in out Instance) is
       T : Component.Event_Filter.Implementation.Tester.Instance_Access renames Self.Tester;
-      Event_Filter_Init_List : constant Event_Id_List := (2, 5, 9, 16, 20);
+      Event_Filter_Init_List : constant Event_Id_List := [2, 5, 9, 16, 20];
       Input_Tick : constant Tick.T := ((0, 0), 0);
    begin
       Put_Line ("");
@@ -262,7 +262,7 @@ package body Event_Filter_Tests.Implementation is
       T.Tick_T_Send (Input_Tick);
       Natural_Assert.Eq (T.Event_Filter_State_Packet_History.Get_Count, 1);
 
-      Packet_Assert.Eq (T.Event_Filter_State_Packet_History.Get (1), (Header => (Time => (0, 0), Id => T.Packets.Get_Event_Filter_State_Packet_Id, Sequence_Count => 0, Buffer_Length => 3), Buffer => (0 => 36, 1 => 64, 2 => 136, others => 0)));
+      Packet_Assert.Eq (T.Event_Filter_State_Packet_History.Get (1), (Header => (Time => (0, 0), Id => T.Packets.Get_Event_Filter_State_Packet_Id, Sequence_Count => 0, Buffer_Length => 3), Buffer => [0 => 36, 1 => 64, 2 => 136, others => 0]));
 
       -- Now change some of the states and issue the packet again
       T.Command_T_Send (T.Commands.Filter_Event ((Event_To_Update => (Id => 4), Issue_State_Packet => Issue_Packet_Type.No_Issue)));
@@ -298,7 +298,7 @@ package body Event_Filter_Tests.Implementation is
       T.Tick_T_Send (Input_Tick);
       Natural_Assert.Eq (T.Event_Filter_State_Packet_History.Get_Count, 2);
 
-      Packet_Assert.Eq (T.Event_Filter_State_Packet_History.Get (2), (Header => (Time => (0, 0), Id => T.Packets.Get_Event_Filter_State_Packet_Id, Sequence_Count => 1, Buffer_Length => 3), Buffer => (0 => 16#2C#, 1 => 16#68#, 2 => 16#88#, others => 0)));
+      Packet_Assert.Eq (T.Event_Filter_State_Packet_History.Get (2), (Header => (Time => (0, 0), Id => T.Packets.Get_Event_Filter_State_Packet_Id, Sequence_Count => 1, Buffer_Length => 3), Buffer => [0 => 16#2C#, 1 => 16#68#, 2 => 16#88#, others => 0]));
 
       -- Now unfilter a range and check the packet one more time. Issue the packet with the command for this one.
       T.Command_T_Send (T.Commands.Unfilter_Event_Range ((Start_Event_Id => (Id => 2), Stop_Event_Id => (Id => 12), Issue_State_Packet => Issue_Packet_Type.Issue)));
@@ -314,13 +314,13 @@ package body Event_Filter_Tests.Implementation is
       T.Tick_T_Send (Input_Tick);
       Natural_Assert.Eq (T.Event_Filter_State_Packet_History.Get_Count, 3);
 
-      Packet_Assert.Eq (T.Event_Filter_State_Packet_History.Get (3), (Header => (Time => (0, 0), Id => T.Packets.Get_Event_Filter_State_Packet_Id, Sequence_Count => 2, Buffer_Length => 3), Buffer => (0 => 0, 1 => 0, 2 => 16#88#, others => 0)));
+      Packet_Assert.Eq (T.Event_Filter_State_Packet_History.Get (3), (Header => (Time => (0, 0), Id => T.Packets.Get_Event_Filter_State_Packet_Id, Sequence_Count => 2, Buffer_Length => 3), Buffer => [0 => 0, 1 => 0, 2 => 16#88#, others => 0]));
 
    end Test_Issue_State_Packet;
 
    overriding procedure Test_Command_Single_State_Change (Self : in out Instance) is
       T : Component.Event_Filter.Implementation.Tester.Instance_Access renames Self.Tester;
-      Event_Filter_Init_List : constant Event_Id_List := (5, 8);
+      Event_Filter_Init_List : constant Event_Id_List := [5, 8];
       Incoming_Event : Event.T;
       Input_Tick : constant Tick.T := ((0, 0), 0);
    begin
@@ -362,7 +362,7 @@ package body Event_Filter_Tests.Implementation is
       -- Issue the packet through a tick
       T.Tick_T_Send (Input_Tick);
       Natural_Assert.Eq (T.Event_Filter_State_Packet_History.Get_Count, 1);
-      Packet_Assert.Eq (T.Event_Filter_State_Packet_History.Get (1), (Header => (Time => (0, 0), Id => T.Packets.Get_Event_Filter_State_Packet_Id, Sequence_Count => 0, Buffer_Length => 2), Buffer => (0 => 228, others => 0)));
+      Packet_Assert.Eq (T.Event_Filter_State_Packet_History.Get (1), (Header => (Time => (0, 0), Id => T.Packets.Get_Event_Filter_State_Packet_Id, Sequence_Count => 0, Buffer_Length => 2), Buffer => [0 => 228, others => 0]));
 
       -- Enable event filtering for a range of the events that are not filtered right now
       T.Command_T_Send (T.Commands.Unfilter_Event ((Event_To_Update => (Id => 4), Issue_State_Packet => Issue_Packet_Type.No_Issue)));
@@ -392,7 +392,7 @@ package body Event_Filter_Tests.Implementation is
       -- Issue the packet through a tick
       T.Tick_T_Send (Input_Tick);
       Natural_Assert.Eq (T.Event_Filter_State_Packet_History.Get_Count, 2);
-      Packet_Assert.Eq (T.Event_Filter_State_Packet_History.Get (2), (Header => (Time => (0, 0), Id => T.Packets.Get_Event_Filter_State_Packet_Id, Sequence_Count => 1, Buffer_Length => 2), Buffer => (0 => 36, others => 0)));
+      Packet_Assert.Eq (T.Event_Filter_State_Packet_History.Get (2), (Header => (Time => (0, 0), Id => T.Packets.Get_Event_Filter_State_Packet_Id, Sequence_Count => 1, Buffer_Length => 2), Buffer => [0 => 36, others => 0]));
 
       -- Finally send invalid events
       T.Command_T_Send (T.Commands.Filter_Event ((Event_To_Update => (Id => 2), Issue_State_Packet => Issue_Packet_Type.No_Issue)));
@@ -413,7 +413,7 @@ package body Event_Filter_Tests.Implementation is
 
    overriding procedure Test_Command_Range_State_Change (Self : in out Instance) is
       T : Component.Event_Filter.Implementation.Tester.Instance_Access renames Self.Tester;
-      Event_Filter_Init_List : constant Event_Id_List := (1, 9);
+      Event_Filter_Init_List : constant Event_Id_List := [1, 9];
       Incoming_Event : Event.T;
       Input_Tick : constant Tick.T := ((0, 0), 0);
    begin
@@ -540,7 +540,7 @@ package body Event_Filter_Tests.Implementation is
       -- Issue the packet through a tick
       T.Tick_T_Send (Input_Tick);
       Natural_Assert.Eq (T.Event_Filter_State_Packet_History.Get_Count, 1);
-      Packet_Assert.Eq (T.Event_Filter_State_Packet_History.Get (1), (Header => (Time => (0, 0), Id => T.Packets.Get_Event_Filter_State_Packet_Id, Sequence_Count => 0, Buffer_Length => 2), Buffer => (0 => 158, 1 => 128, others => 0)));
+      Packet_Assert.Eq (T.Event_Filter_State_Packet_History.Get (1), (Header => (Time => (0, 0), Id => T.Packets.Get_Event_Filter_State_Packet_Id, Sequence_Count => 0, Buffer_Length => 2), Buffer => [0 => 158, 1 => 128, others => 0]));
 
       -- Back to the start with a packet issue this time
       T.Command_T_Send (T.Commands.Unfilter_Event_Range ((Start_Event_Id => (Id => 4), Stop_Event_Id => (Id => 7), Issue_State_Packet => Issue_Packet_Type.Issue)));
@@ -553,7 +553,7 @@ package body Event_Filter_Tests.Implementation is
 
       T.Tick_T_Send (Input_Tick);
       Natural_Assert.Eq (T.Event_Filter_State_Packet_History.Get_Count, 2);
-      Packet_Assert.Eq (T.Event_Filter_State_Packet_History.Get (2), (Header => (Time => (0, 0), Id => T.Packets.Get_Event_Filter_State_Packet_Id, Sequence_Count => 1, Buffer_Length => 2), Buffer => (0 => 128, 1 => 128, others => 0)));
+      Packet_Assert.Eq (T.Event_Filter_State_Packet_History.Get (2), (Header => (Time => (0, 0), Id => T.Packets.Get_Event_Filter_State_Packet_Id, Sequence_Count => 1, Buffer_Length => 2), Buffer => [0 => 128, 1 => 128, others => 0]));
 
       -- Finally give some invalid ranges for both commands.
       T.Command_T_Send (T.Commands.Filter_Event_Range ((Start_Event_Id => (Id => 0), Stop_Event_Id => (Id => 7), Issue_State_Packet => Issue_Packet_Type.Issue)));
@@ -603,7 +603,7 @@ package body Event_Filter_Tests.Implementation is
 
    overriding procedure Test_Command_Component_State_Change (Self : in out Instance) is
       T : Component.Event_Filter.Implementation.Tester.Instance_Access renames Self.Tester;
-      Event_Filter_Init_List : constant Event_Id_List := (4, 9);
+      Event_Filter_Init_List : constant Event_Id_List := [4, 9];
       Incoming_Event : Event.T;
    begin
       Put_Line ("");
@@ -734,7 +734,7 @@ package body Event_Filter_Tests.Implementation is
       -- Make sure some events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Unfilter_Event_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 0)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Unfilter_Event_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 0]));
    end Test_Invalid_Command;
 
 end Event_Filter_Tests.Implementation;

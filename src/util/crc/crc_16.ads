@@ -32,7 +32,7 @@ package Crc_16 is
    --
    --       Converted to Ada and added seed capability by Kevin Dinkel, Summer, 2018.
    --
-   function Compute_Crc_16 (Bytes : in Basic_Types.Byte_Array; Seed : in Crc_16_Type := (0 => 16#FF#, 1 => 16#FF#)) return Crc_16_Type;
-   function Compute_Crc_16 (Byte_Ptr : in Byte_Array_Pointer.Instance; Seed : in Crc_16_Type := (0 => 16#FF#, 1 => 16#FF#)) return Crc_16_Type;
+   function Compute_Crc_16 (Bytes : in Basic_Types.Byte_Array; Seed : in Crc_16_Type := [0 => 16#FF#, 1 => 16#FF#]) return Crc_16_Type;
+   function Compute_Crc_16 (Byte_Ptr : in Byte_Array_Pointer.Instance; Seed : in Crc_16_Type := [0 => 16#FF#, 1 => 16#FF#]) return Crc_16_Type;
 
 end Crc_16;

@@ -12,14 +12,14 @@ procedure Test is
    -- Local vars:
    Heap_Ptr : Byte_Array_Pointer.Instance;
    Data_Ptr : Byte_Array_Pointer.Instance;
-   B_Array : aliased Byte_Array := (0, 0, 0, 0, 0);
-   Data_In : constant Byte_Array (0 .. 9) := (1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
-   Data_Out : Byte_Array (0 .. 9) := (others => 0);
+   B_Array : aliased Byte_Array := [0, 0, 0, 0, 0];
+   Data_In : constant Byte_Array (0 .. 9) := [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+   Data_Out : Byte_Array (0 .. 9) := [others => 0];
 
    procedure Go (Ptr : in out Byte_Array_Pointer.Instance) is
       procedure Reset_Buffer is
       begin
-         Copy_To (Ptr, (0, 0, 0, 0, 0));
+         Copy_To (Ptr, [0, 0, 0, 0, 0]);
       end Reset_Buffer;
 
       procedure Print_Data is
@@ -29,7 +29,7 @@ procedure Test is
 
       procedure Reset_Data is
       begin
-         Data_Out := (others => 0);
+         Data_Out := [others => 0];
       end Reset_Data;
       The_Slice : Byte_Array_Pointer.Instance;
    begin
@@ -37,7 +37,7 @@ procedure Test is
       Put_Line ("Test copy to ptr full");
       Copy_To (Ptr, Data_In (0 .. 4));
       Put_Line (Byte_Array_Pointer.Representation.Image (Ptr));
-      Byte_Array_Pointer_Assert.Eq (Ptr, (1, 2, 3, 4, 5));
+      Byte_Array_Pointer_Assert.Eq (Ptr, [1, 2, 3, 4, 5]);
       Reset_Buffer;
       Put_Line ("Passed.");
       New_Line;
@@ -46,36 +46,36 @@ procedure Test is
       The_Slice := Slice (Ptr, 0, 3);
       Copy_To (The_Slice, Data_In (0 .. 3));
       Put_Line (Byte_Array_Pointer.Representation.Image (Ptr));
-      Byte_Array_Pointer_Assert.Eq (Ptr, (1, 2, 3, 4, 0));
+      Byte_Array_Pointer_Assert.Eq (Ptr, [1, 2, 3, 4, 0]);
       Reset_Buffer;
       Put_Line ("Passed.");
       New_Line;
 
       Put_Line ("Test copy to buffer beginning");
       The_Slice := Slice (Ptr, 0, 2);
-      Copy_To (The_Slice, (1, 2, 3));
+      Copy_To (The_Slice, [1, 2, 3]);
       Put_Line (Byte_Array_Pointer.Representation.Image (Ptr));
-      Byte_Array_Pointer_Assert.Eq (Ptr, (1, 2, 3, 0, 0));
+      Byte_Array_Pointer_Assert.Eq (Ptr, [1, 2, 3, 0, 0]);
       Reset_Buffer;
       Put_Line ("Passed.");
       New_Line;
 
       Put_Line ("Test copy to buffer middle");
       The_Slice := Slice (Ptr, 1);
-      Copy_To (The_Slice, (1, 2, 3, 0));
+      Copy_To (The_Slice, [1, 2, 3, 0]);
       Put_Line (Byte_Array_Pointer.Representation.Image (Ptr));
-      Byte_Array_Pointer_Assert.Eq (The_Slice, (1, 2, 3, 0));
-      Byte_Array_Pointer_Assert.Eq (Ptr, (0, 1, 2, 3, 0));
+      Byte_Array_Pointer_Assert.Eq (The_Slice, [1, 2, 3, 0]);
+      Byte_Array_Pointer_Assert.Eq (Ptr, [0, 1, 2, 3, 0]);
       Reset_Buffer;
       Put_Line ("Passed.");
       New_Line;
 
       Put_Line ("Test copy to buffer end");
       The_Slice := Slice (Ptr, 3);
-      Copy_To (The_Slice, (1, 2));
+      Copy_To (The_Slice, [1, 2]);
       Put_Line (Byte_Array_Pointer.Representation.Image (Ptr));
-      Byte_Array_Pointer_Assert.Eq (The_Slice, (1, 2));
-      Byte_Array_Pointer_Assert.Eq (Ptr, (0, 0, 0, 1, 2));
+      Byte_Array_Pointer_Assert.Eq (The_Slice, [1, 2]);
+      Byte_Array_Pointer_Assert.Eq (Ptr, [0, 0, 0, 1, 2]);
       Reset_Buffer;
       Put_Line ("Passed.");
       New_Line;
@@ -84,7 +84,7 @@ procedure Test is
       The_Slice := Slice (Ptr, 3, 3);
       Copy_To (The_Slice, Data_In (4 .. 4));
       Put_Line (Byte_Array_Pointer.Representation.Image (Ptr));
-      Byte_Array_Pointer_Assert.Eq (Ptr, (0, 0, 0, 5, 0));
+      Byte_Array_Pointer_Assert.Eq (Ptr, [0, 0, 0, 5, 0]);
       Reset_Buffer;
       Put_Line ("Passed.");
       New_Line;
@@ -93,12 +93,12 @@ procedure Test is
       The_Slice := Slice (Ptr, 3, 2);
       Copy_To (The_Slice, Data_In (4 .. 3));
       Put_Line (Byte_Array_Pointer.Representation.Image (Ptr));
-      Byte_Array_Pointer_Assert.Eq (Ptr, (0, 0, 0, 0, 0));
+      Byte_Array_Pointer_Assert.Eq (Ptr, [0, 0, 0, 0, 0]);
       Reset_Buffer;
       The_Slice := Slice (Ptr, 19, 2);
       Copy_To (The_Slice, Data_In (4 .. 3));
       Put_Line (Byte_Array_Pointer.Representation.Image (Ptr));
-      Byte_Array_Pointer_Assert.Eq (Ptr, (0, 0, 0, 0, 0));
+      Byte_Array_Pointer_Assert.Eq (Ptr, [0, 0, 0, 0, 0]);
       Reset_Buffer;
       Put_Line ("Passed.");
       New_Line;
@@ -107,14 +107,14 @@ procedure Test is
       The_Slice := Slice (Ptr, 0, 4);
       Copy_To (The_Slice, Data_In (0 .. 4));
       Put_Line (Byte_Array_Pointer.Representation.Image (Ptr));
-      Byte_Array_Pointer_Assert.Eq (Ptr, (1, 2, 3, 4, 5));
+      Byte_Array_Pointer_Assert.Eq (Ptr, [1, 2, 3, 4, 5]);
       Put_Line ("Passed.");
       New_Line;
 
       Put_Line ("Test copy from buffer full");
       Data_Out (0 .. 4) := To_Byte_Array (Ptr);
       Print_Data;
-      pragma Assert (Data_Out = (1, 2, 3, 4, 5, 0, 0, 0, 0, 0));
+      pragma Assert (Data_Out = [1, 2, 3, 4, 5, 0, 0, 0, 0, 0]);
       Reset_Data;
       Put_Line ("Passed.");
       New_Line;
@@ -123,7 +123,7 @@ procedure Test is
       The_Slice := Slice (Ptr, 0, 4);
       Data_Out (0 .. 4) := To_Byte_Array (The_Slice);
       Print_Data;
-      pragma Assert (Data_Out = (1, 2, 3, 4, 5, 0, 0, 0, 0, 0));
+      pragma Assert (Data_Out = [1, 2, 3, 4, 5, 0, 0, 0, 0, 0]);
       Reset_Data;
       Put_Line ("Passed.");
       New_Line;
@@ -132,7 +132,7 @@ procedure Test is
       The_Slice := Slice (Ptr, 0, 3);
       Data_Out (0 .. 3) := To_Byte_Array (The_Slice);
       Print_Data;
-      pragma Assert (Data_Out = (1, 2, 3, 4, 0, 0, 0, 0, 0, 0));
+      pragma Assert (Data_Out = [1, 2, 3, 4, 0, 0, 0, 0, 0, 0]);
       Reset_Data;
       Put_Line ("Passed.");
       New_Line;
@@ -141,7 +141,7 @@ procedure Test is
       The_Slice := Slice (Ptr, 1, 3);
       Data_Out (1 .. 3) := To_Byte_Array (The_Slice);
       Print_Data;
-      pragma Assert (Data_Out = (0, 2, 3, 4, 0, 0, 0, 0, 0, 0));
+      pragma Assert (Data_Out = [0, 2, 3, 4, 0, 0, 0, 0, 0, 0]);
       Reset_Data;
       Put_Line ("Passed.");
       New_Line;
@@ -153,7 +153,7 @@ procedure Test is
       Put_Line (Natural'Image (To_Byte_Array (The_Slice)'Last));
       Data_Out (0 .. 1) := To_Byte_Array (The_Slice);
       Print_Data;
-      pragma Assert (Data_Out = (4, 5, 0, 0, 0, 0, 0, 0, 0, 0));
+      pragma Assert (Data_Out = [4, 5, 0, 0, 0, 0, 0, 0, 0, 0]);
       Reset_Data;
       Put_Line ("Passed.");
       New_Line;

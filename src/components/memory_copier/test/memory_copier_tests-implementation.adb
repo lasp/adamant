@@ -73,7 +73,7 @@ package body Memory_Copier_Tests.Implementation is
    type Boolean_Access is access all Boolean;
    task type Simulator_Task (Class_Self : Class_Access; Task_Exit : Boolean_Access);
 
-   Sim_Bytes : aliased Basic_Types.Byte_Array := (0 .. 99 => 12);
+   Sim_Bytes : aliased Basic_Types.Byte_Array := [0 .. 99 => 12];
 
    task body Simulator_Task is
       Ignore : Natural;
@@ -115,8 +115,8 @@ package body Memory_Copier_Tests.Implementation is
       T : Component.Memory_Copier.Implementation.Tester.Instance_Access renames Self.Tester;
       Task_Exit : aliased Boolean := False;
       Sim_Task : Simulator_Task (Self'Unchecked_Access, Task_Exit'Unchecked_Access);
-      Dest : Basic_Types.Byte_Array (0 .. 99) := (others => 44);
-      Dest2 : Basic_Types.Byte_Array (0 .. 99) := (others => 55);
+      Dest : Basic_Types.Byte_Array (0 .. 99) := [others => 44];
+      Dest2 : Basic_Types.Byte_Array (0 .. 99) := [others => 55];
    begin
       -- Send command to copy region:
       T.Command_T_Send (T.Commands.Copy_Memory_Region ((Source_Address => 5, Source_Length => 6, Destination_Address => Dest'Address)));
@@ -177,7 +177,7 @@ package body Memory_Copier_Tests.Implementation is
       T : Component.Memory_Copier.Implementation.Tester.Instance_Access renames Self.Tester;
       Task_Exit : aliased Boolean := False;
       Sim_Task : Simulator_Task (Self'Unchecked_Access, Task_Exit'Unchecked_Access);
-      Dest : Basic_Types.Byte_Array (0 .. 99) := (others => 44);
+      Dest : Basic_Types.Byte_Array (0 .. 99) := [others => 44];
    begin
       -- Send command to copy region 1 byte too large:
       T.Command_T_Send (T.Commands.Copy_Memory_Region ((Source_Address => 0, Source_Length => 5, Destination_Address => Dest'Address)));
@@ -213,7 +213,7 @@ package body Memory_Copier_Tests.Implementation is
       T : Component.Memory_Copier.Implementation.Tester.Instance_Access renames Self.Tester;
       Task_Exit : aliased Boolean := False;
       Sim_Task : Simulator_Task (Self'Unchecked_Access, Task_Exit'Unchecked_Access);
-      Dest : Basic_Types.Byte_Array (0 .. 99) := (others => 44);
+      Dest : Basic_Types.Byte_Array (0 .. 99) := [others => 44];
    begin
       -- Send command to copy region 1 byte too large:
       T.Command_T_Send (T.Commands.Copy_Memory_Region ((Source_Address => 0, Source_Length => T.Scratch'Length, Destination_Address => Dest'Address)));
@@ -247,7 +247,7 @@ package body Memory_Copier_Tests.Implementation is
       T : Component.Memory_Copier.Implementation.Tester.Instance_Access renames Self.Tester;
       Task_Exit : aliased Boolean := False;
       Sim_Task : Simulator_Task (Self'Unchecked_Access, Task_Exit'Unchecked_Access);
-      Dest : Basic_Types.Byte_Array (0 .. 99) := (others => 44);
+      Dest : Basic_Types.Byte_Array (0 .. 99) := [others => 44];
    begin
       -- Set scratch return status:
       T.Scratch_Return_Status := Memory_Manager_Enums.Memory_Request_Status.Failure;
@@ -282,7 +282,7 @@ package body Memory_Copier_Tests.Implementation is
       T : Component.Memory_Copier.Implementation.Tester.Instance_Access renames Self.Tester;
       Task_Exit : aliased Boolean := False;
       Sim_Task : Simulator_Task (Self'Unchecked_Access, Task_Exit'Unchecked_Access);
-      Dest : Basic_Types.Byte_Array (0 .. 99) := (others => 44);
+      Dest : Basic_Types.Byte_Array (0 .. 99) := [others => 44];
    begin
       -- Send command to copy region 1 byte too large:
       T.Command_T_Send (T.Commands.Copy_Memory_Region ((Source_Address => 0, Source_Length => T.Scratch'Length + 1, Destination_Address => Dest'Address)));
@@ -373,7 +373,7 @@ package body Memory_Copier_Tests.Implementation is
       -- Make sure some events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Copy_Memory_Region_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 22)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Copy_Memory_Region_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 22]));
    end Test_Invalid_Command;
 
 end Memory_Copier_Tests.Implementation;

@@ -19,7 +19,7 @@ package Seq_Config is
 
    -- Command parameter definitions:
    type Seq_Cmd_Param_Def is record
-      Name : Seq_String := (others => ASCII.NUL);
+      Name : Seq_String := [others => ASCII.NUL];
       Offset : Natural := 0;
       Size : Positive := 1;
       Data_Type : Seq_Param_Type;
@@ -29,14 +29,14 @@ package Seq_Config is
 
    -- Command definition:
    type Seq_Cmd_Def is record
-      Name : Seq_String := (others => ASCII.NUL);
+      Name : Seq_String := [others => ASCII.NUL];
       Parameters : Seq_Cmd_Param_Array_Access := null;
       Command_Def : Command.T;
    end record;
 
    -- Telemetry definition:
    type Seq_Tlm_Def is record
-      Name : Seq_String := (others => ASCII.NUL);
+      Name : Seq_String := [others => ASCII.NUL];
       Id : Data_Product_Types.Data_Product_Id;
    end record;
 

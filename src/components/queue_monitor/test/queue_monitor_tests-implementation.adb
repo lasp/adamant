@@ -19,7 +19,7 @@ package body Queue_Monitor_Tests.Implementation is
    Queued_Component_2 : aliased Component.Queued_Component.Implementation.Instance;
    Queued_Component_3 : aliased Component.Queued_Component.Implementation.Instance;
 
-   Queued_Component_List : aliased Component.Component_List := (Queued_Component_1'Access, Queued_Component_2'Access, Queued_Component_3'Access);
+   Queued_Component_List : aliased Component.Component_List := [Queued_Component_1'Access, Queued_Component_2'Access, Queued_Component_3'Access];
 
    -------------------------------------------------------------------------
    -- Fixtures:
@@ -60,7 +60,7 @@ package body Queue_Monitor_Tests.Implementation is
    overriding procedure Test_Queue_Monitoring (Self : in out Instance) is
       T : Component.Queue_Monitor.Implementation.Tester.Instance_Access renames Self.Tester;
       A_Tick : constant Tick.T := ((0, 0), 0);
-      Pkt : Packet.T := (Header => (Time => (0, 0), Id => T.Packets.Get_Queue_Usage_Packet_Id, Sequence_Count => 0, Buffer_Length => 6), Buffer => (others => 0));
+      Pkt : Packet.T := (Header => (Time => (0, 0), Id => T.Packets.Get_Queue_Usage_Packet_Id, Sequence_Count => 0, Buffer_Length => 6), Buffer => [others => 0]);
    begin
       -- Send a tick and expect a packet.
       T.Tick_T_Send (A_Tick);
@@ -273,7 +273,7 @@ package body Queue_Monitor_Tests.Implementation is
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Packet_Period_Set_History.Get_Count, 0);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Set_Packet_Period_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 0)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Set_Packet_Period_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 0]));
    end Test_Invalid_Command;
 
 end Queue_Monitor_Tests.Implementation;

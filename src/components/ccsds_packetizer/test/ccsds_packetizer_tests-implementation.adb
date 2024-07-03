@@ -85,7 +85,7 @@ package body Ccsds_Packetizer_Tests.Implementation is
    overriding procedure Test_Nominal_Packetization (Self : in out Instance) is
       use Packet_Types;
       T : Component.Ccsds_Packetizer.Implementation.Tester.Instance_Access renames Self.Tester;
-      P : Packet.T := (Header => (Time => (10, 55), Id => 77, Sequence_Count => 99, Buffer_Length => 5), Buffer => (1, 2, 3, 4, 5, others => 0));
+      P : Packet.T := (Header => (Time => (10, 55), Id => 77, Sequence_Count => 99, Buffer_Length => 5), Buffer => [1, 2, 3, 4, 5, others => 0]);
    begin
       -- Send a few packets:
       P.Header.Sequence_Count := P.Header.Sequence_Count + 1;
@@ -117,7 +117,7 @@ package body Ccsds_Packetizer_Tests.Implementation is
       T : Component.Ccsds_Packetizer.Implementation.Tester.Instance_Access renames Self.Tester;
       P : Packet.T :=
          (Header => (Time => (10, 55), Id => 77, Sequence_Count => 13, Buffer_Length => Packet_Types.Packet_Buffer_Type'Length),
-          Buffer => (0 => 1, 1 => 2, 2 => 3, 3 => 4, 4 => 5, 5 .. Packet_Types.Packet_Buffer_Type'Last - 1 => 22, Packet_Types.Packet_Buffer_Type'Last => 9));
+          Buffer => [0 => 1, 1 => 2, 2 => 3, 3 => 4, 4 => 5, 5 .. Packet_Types.Packet_Buffer_Type'Last - 1 => 22, Packet_Types.Packet_Buffer_Type'Last => 9]);
    begin
       -- Send a few packets:
       P.Header.Sequence_Count := P.Header.Sequence_Count + 1;
@@ -147,7 +147,7 @@ package body Ccsds_Packetizer_Tests.Implementation is
    overriding procedure Test_Min_Size_Packetization (Self : in out Instance) is
       use Packet_Types;
       T : Component.Ccsds_Packetizer.Implementation.Tester.Instance_Access renames Self.Tester;
-      P : Packet.T := (Header => (Time => (10, 55), Id => 13, Sequence_Count => 77, Buffer_Length => 0), Buffer => (0 => 1, 1 => 2, 2 => 3, 3 => 4, 4 => 5, 5 .. Packet_Types.Packet_Buffer_Type'Last - 1 => 22, Packet_Types.Packet_Buffer_Type'Last => 9));
+      P : Packet.T := (Header => (Time => (10, 55), Id => 13, Sequence_Count => 77, Buffer_Length => 0), Buffer => [0 => 1, 1 => 2, 2 => 3, 3 => 4, 4 => 5, 5 .. Packet_Types.Packet_Buffer_Type'Last - 1 => 22, Packet_Types.Packet_Buffer_Type'Last => 9]);
    begin
       -- Send a few packets:
       P.Header.Sequence_Count := P.Header.Sequence_Count + 1;

@@ -16,9 +16,7 @@ with Basic_Types;
 {% endif %}
 
 package body {{ name }} is
-
    use Packet_Types;
-
 {% if not ids %}
    -----------------------------------------------
    -- Getter/setter subprograms for packet ID base:
@@ -76,7 +74,7 @@ package body {{ name }} is
             Sequence_Count => Self.{{ p.name }}_Sequence_Count,
             Buffer_Length => 0
          ),
-         Buffer => (others => 0)
+         Buffer => [others => 0]
       );
       -- Copy over the data:
       Stat := Packet_Serializer.To_Byte_Array (Pkt.Buffer, Item, Num_Bytes_Serialized);
@@ -99,7 +97,7 @@ package body {{ name }} is
             Sequence_Count => Self.{{ p.name }}_Sequence_Count,
             Buffer_Length => 0
          ),
-         Buffer => (others => 0)
+         Buffer => [others => 0]
       );
       Stat : Serialization_Status;
       Num_Bytes_Serialized : Natural;
@@ -143,7 +141,7 @@ package body {{ name }} is
             Sequence_Count => Self.{{ p.name }}_Sequence_Count,
             Buffer_Length => Packet_Serializer.Serialized_Length
          ),
-         Buffer => (others => 0)
+         Buffer => [others => 0]
       );
    begin
       P.Buffer (P.Buffer'First .. P.Buffer'First + Packet_Serializer.Serialized_Length - 1) := Packet_Serializer.To_Byte_Array (Item);
@@ -190,7 +188,7 @@ package body {{ name }} is
             Sequence_Count => Self.{{ p.name }}_Sequence_Count,
             Buffer_Length => 0
          ),
-         Buffer => (others => 0)
+         Buffer => [others => 0]
       );
    begin
       -- Increment the sequence count:

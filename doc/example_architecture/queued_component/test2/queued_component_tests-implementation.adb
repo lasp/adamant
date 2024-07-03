@@ -42,7 +42,7 @@ package body Queued_Component_Tests.Implementation is
             Sequence_Count => 0,
             Buffer_Length => 1
          ),
-         Buffer => (others => 0)
+         Buffer => [others => 0]
       );
    begin
       -- Put some data in the component's queue:

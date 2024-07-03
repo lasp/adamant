@@ -226,7 +226,7 @@ private
       Current : Max_Seq_Num := Max_Seq_Num'First;
       Source_Id : Command_Source_Id := Command_Source_Id'First;
       Engine_To_Load : Sequence_Engine_Id := Sequence_Engine_Id'First;
-      Arguments : Variable_Array := (others => (Value => (others => 0)));
+      Arguments : Variable_Array := [others => (Value => [others => 0])];
       Engine_Id : Sequence_Engine_Id := Sequence_Engine_Id'First;
       Commands_Sent : Interfaces.Unsigned_16 := 0;
       Last_Command_Id : Command_Id := 0;

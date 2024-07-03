@@ -40,7 +40,7 @@ package body Component.Ccsds_Socket_Interface.Implementation is
    begin
       -- Set object variables:
       pragma Assert (Addr'Length <= Self.Addr'Length, "Address string is too long.");
-      Self.Addr := (others => ' '); -- clear the string
+      Self.Addr := [others => ' ']; -- clear the string
       Self.Addr (Self.Addr'First .. Self.Addr'First + Addr'Length - 1) := Addr; -- copy addr over
       Self.Port := Port;
 

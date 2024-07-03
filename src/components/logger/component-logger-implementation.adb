@@ -152,7 +152,7 @@ package body Component.Logger.Implementation is
          Self.Buffer.Init (Self.Bytes, Self.Meta_Data);
       else
          Self.Bytes := new Basic_Types.Byte_Array (0 .. Size - 1);
-         Self.Bytes.all := (others => 0); -- Initialize to zeros if this is on the heap.
+         Self.Bytes.all := [others => 0]; -- Initialize to zeros if this is on the heap.
          pragma Assert (Meta_Data = null, "This should never happen.");
          Self.Meta_Data := new Circular_Buffer_Meta.T;
          -- Initialize circular buffer with bytes following the meta data storage:

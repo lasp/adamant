@@ -25,7 +25,7 @@ package body Seq_Config is
       L    : Natural := 0;
       I    : Natural := 1;
       Whitespace : constant Character_Set := To_Set (' ');
-      To_Return : String_Array := (others => (others => ASCII.NUL));
+      To_Return : String_Array := [others => [others => ASCII.NUL]];
       End_Idx : Natural := S'Last;
    begin
       Words_Parsed := Natural'First;
@@ -117,7 +117,7 @@ package body Seq_Config is
                         Name : constant Seq_String := Parsed_Line (1);
                         Pattern_Str : constant Seq_String := Parsed_Line (3);
                         Pattern_Idx : Natural := Pattern_Str'First;
-                        Command_Bytes : Command.Serialization.Byte_Array := (others => 0);
+                        Command_Bytes : Command.Serialization.Byte_Array := [others => 0];
                         Command_Bytes_Idx : Natural := Command_Bytes'First;
                         The_Command : Command.T := (
                            Header => (
@@ -125,7 +125,7 @@ package body Seq_Config is
                               Id => 0,
                               Arg_Buffer_Length => 0
                            ),
-                           Arg_Buffer => (others => 0)
+                           Arg_Buffer => [others => 0]
                         );
                         Stat : Serialization_Status;
                      begin

@@ -188,7 +188,7 @@ package body Seq is
 
       -- Reset some important state:
       Self.Current := Max_Seq_Num'First;
-      Self.Arguments := (others => (Value => (others => 0)));
+      Self.Arguments := [others => (Value => [others => 0])];
       Self.Last_Command_Id := 0;
       Self.Reserved_Sequence_Id := Sequence_Types.Sequence_Id'First;
       Self.Last_Execute_State := Seq_Execute_State.Unloaded;
@@ -221,7 +221,7 @@ package body Seq is
 
       -- Load the new sequence
       Self.Stack.all (Self.Current).Give_Arguments (Self.Arguments);
-      Self.Arguments := (others => (Value => (others => 0))); -- Reset engine argument buffer
+      Self.Arguments := [others => (Value => [others => 0])]; -- Reset engine argument buffer
 
       -- Load the sequence
       Load_State := Self.Stack.all (Self.Current).Load_New_Sequence (Sequence_Region);

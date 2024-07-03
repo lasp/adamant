@@ -11,7 +11,7 @@ package {{ name[0]|upper }}{{ name[1:] }} is
    Parameter_Table_Size_In_Bytes : constant Natural := {{ size }};
 
    -- A list of the parameter table entries for use by the {{ parameters_instance_name }} component.
-   Parameter_Table_Entries : aliased Parameter_Table_Entry_List := (
+   Parameter_Table_Entries : aliased Parameter_Table_Entry_List := [
 {% for table_entry in parameters.values() %}
       -- Parameter {{ table_entry.name }}, size of {{ (table_entry.size/8)|int }} byte(s).
       {{ loop.index0 }} => (
@@ -21,6 +21,6 @@ package {{ name[0]|upper }}{{ name[1:] }} is
          End_Index => {{ table_entry.end_index}}
       ){{ "," if not loop.last }}
 {% endfor %}
-   );
+   ];
 
 end {{ name[0]|upper }}{{ name[1:] }};

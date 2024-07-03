@@ -19,7 +19,7 @@ package body Component.Active_Component.Implementation is
             Sequence_Count => 0,
             Buffer_Length => Packed_Byte.Serialization.Serialized_Length
          ),
-         Buffer => (others => 0)
+         Buffer => [others => 0]
       );
    begin
       -- Set the packet data:
@@ -38,7 +38,7 @@ package body Component.Active_Component.Implementation is
             Id => 0, Sequence_Count => 0,
             Buffer_Length => Packed_U16.Serialization.Serialized_Length
          ),
-         Buffer => (others => 0)
+         Buffer => [others => 0]
       );
    begin
       -- Set the packet data:

@@ -29,7 +29,7 @@ private
    type Instance is new Parameters.Base_Instance with record
       Entries : Parameters_Component_Types.Parameter_Table_Entry_List_Access := null;
       Dump_Parameters_On_Change : Boolean := False;
-      Stored_Crc : Crc_16.Crc_16_Type := (0, 0);
+      Stored_Crc : Crc_16.Crc_16_Type := [0, 0];
       Table_Version : Short_Float := 0.0;
       -- Some useful constants calculated in Init:
       Parameter_Table_Data_Length : Natural := 0;

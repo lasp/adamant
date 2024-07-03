@@ -27,7 +27,7 @@ package Component.Event_Limiter.Implementation is
    -- event_Limit_Persistence : Two_Counter_Entry.Persistence_Type - The initial persistence of the number of events to allow before limiting them between ticks (1 to 7)
    --
    overriding procedure Init
-      (Self : in out Instance; Event_Id_Start : in Event_Types.Event_Id; Event_Id_Stop : in Event_Types.Event_Id; Event_Disable_List : in Two_Counter_Entry.Event_Id_List := (1 .. 0 => 0); Event_Limit_Persistence : in Two_Counter_Entry.Persistence_Type);
+      (Self : in out Instance; Event_Id_Start : in Event_Types.Event_Id; Event_Id_Stop : in Event_Types.Event_Id; Event_Disable_List : in Two_Counter_Entry.Event_Id_List := [1 .. 0 => 0]; Event_Limit_Persistence : in Two_Counter_Entry.Persistence_Type);
 
 private
 

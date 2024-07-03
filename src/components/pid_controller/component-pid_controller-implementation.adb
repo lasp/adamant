@@ -70,7 +70,7 @@ package body Component.Pid_Controller.Implementation is
       end if;
 
       -- Set the packet data to a clean packet
-      Self.Diagnostic_Packet := (Header => (Time => (0, 0), Id => Self.Packets.Get_Pid_Controller_Diagnostic_Packet_Id, Sequence_Count => 0, Buffer_Length => 0), Buffer => (others => 0));
+      Self.Diagnostic_Packet := (Header => (Time => (0, 0), Id => Self.Packets.Get_Pid_Controller_Diagnostic_Packet_Id, Sequence_Count => 0, Buffer_Length => 0), Buffer => [others => 0]);
 
    end Init;
 

@@ -61,7 +61,7 @@ package body Tests.Implementation is
 
    procedure Check_Packet_1 (Self : in Instance; To_Compare : Packet.T; Expected_Sequence_Count : Packet_Types.Sequence_Count_Mod_Type; Filename : in String := Smart_Assert.Sinfo.File; Line : in Natural := Smart_Assert.Sinfo.Line) is
       T : Component.Product_Packetizer.Implementation.Tester.Instance_Access renames Self.Tester;
-      Expected : Packet.T := (Header => (Time => T.System_Time, Id => 7, Sequence_Count => Expected_Sequence_Count, Buffer_Length => 0), Buffer => (others => 0));
+      Expected : Packet.T := (Header => (Time => T.System_Time, Id => 7, Sequence_Count => Expected_Sequence_Count, Buffer_Length => 0), Buffer => [others => 0]);
       Idx : Natural := Expected.Buffer'First;
       End_Idx : Natural := 0;
    begin
@@ -89,7 +89,7 @@ package body Tests.Implementation is
 
    procedure Check_Packet_Zeros (Self : in Instance; To_Compare : Packet.T; Expected_Sequence_Count : Packet_Types.Sequence_Count_Mod_Type; Filename : in String := Smart_Assert.Sinfo.File; Line : in Natural := Smart_Assert.Sinfo.Line) is
       T : Component.Product_Packetizer.Implementation.Tester.Instance_Access renames Self.Tester;
-      Expected : Packet.T := (Header => (Time => T.System_Time, Id => 7, Sequence_Count => Expected_Sequence_Count, Buffer_Length => 0), Buffer => (others => 0));
+      Expected : Packet.T := (Header => (Time => T.System_Time, Id => 7, Sequence_Count => Expected_Sequence_Count, Buffer_Length => 0), Buffer => [others => 0]);
       Idx : Natural := Expected.Buffer'First;
       End_Idx : Natural := 0;
    begin
@@ -117,7 +117,7 @@ package body Tests.Implementation is
 
    procedure Check_Packet_2 (Self : in Instance; To_Compare : Packet.T; Expected_Sequence_Count : Packet_Types.Sequence_Count_Mod_Type; Filename : in String := Smart_Assert.Sinfo.File; Line : in Natural := Smart_Assert.Sinfo.Line) is
       Ignore : Component.Product_Packetizer.Implementation.Tester.Instance_Access renames Self.Tester;
-      Expected : Packet.T := (Header => (Time => (5, 11), Id => 9, Sequence_Count => Expected_Sequence_Count, Buffer_Length => 0), Buffer => (others => 0));
+      Expected : Packet.T := (Header => (Time => (5, 11), Id => 9, Sequence_Count => Expected_Sequence_Count, Buffer_Length => 0), Buffer => [others => 0]);
       Idx : Natural := Expected.Buffer'First;
       End_Idx : Natural := 0;
    begin
@@ -140,7 +140,7 @@ package body Tests.Implementation is
 
    procedure Check_Packet_3 (Self : in Instance; To_Compare : Packet.T; Expected_Sequence_Count : Packet_Types.Sequence_Count_Mod_Type; Filename : in String := Smart_Assert.Sinfo.File; Line : in Natural := Smart_Assert.Sinfo.Line) is
       T : Component.Product_Packetizer.Implementation.Tester.Instance_Access renames Self.Tester;
-      Expected : Packet.T := (Header => (Time => T.System_Time, Id => 8, Sequence_Count => Expected_Sequence_Count, Buffer_Length => 0), Buffer => (others => 0));
+      Expected : Packet.T := (Header => (Time => T.System_Time, Id => 8, Sequence_Count => Expected_Sequence_Count, Buffer_Length => 0), Buffer => [others => 0]);
       Idx : Natural := Expected.Buffer'First;
       End_Idx : Natural := 0;
    begin
@@ -168,13 +168,13 @@ package body Tests.Implementation is
 
    procedure Check_Packet_4 (Self : in Instance; To_Compare : Packet.T; The_Time : Sys_Time.T; Expected_Sequence_Count : Packet_Types.Sequence_Count_Mod_Type; Filename : in String := Smart_Assert.Sinfo.File; Line : in Natural := Smart_Assert.Sinfo.Line) is
       Ignore : Instance renames Self;
-      Expected : Packet.T := (Header => (Time => The_Time, Id => 12, Sequence_Count => Expected_Sequence_Count, Buffer_Length => 0), Buffer => (others => 0));
+      Expected : Packet.T := (Header => (Time => The_Time, Id => 12, Sequence_Count => Expected_Sequence_Count, Buffer_Length => 0), Buffer => [others => 0]);
       Idx : Natural := Expected.Buffer'First;
       End_Idx : Natural := 0;
    begin
       -- First serialize 5 pad bytes:
       End_Idx := Idx + 5 - 1;
-      Expected.Buffer (Idx .. End_Idx) := (0 .. 5 - 1 => 0);
+      Expected.Buffer (Idx .. End_Idx) := [0 .. 5 - 1 => 0];
       Idx := End_Idx + 1;
 
       -- Next Serialize Data product A:
@@ -184,7 +184,7 @@ package body Tests.Implementation is
 
       -- Next serialize 3 pad bytes:
       End_Idx := Idx + 3 - 1;
-      Expected.Buffer (Idx .. End_Idx) := (0 .. 3 - 1 => 0);
+      Expected.Buffer (Idx .. End_Idx) := [0 .. 3 - 1 => 0];
       Idx := End_Idx + 1;
 
       -- Calculate packet length:
@@ -199,7 +199,7 @@ package body Tests.Implementation is
        Line : in Natural := Smart_Assert.Sinfo.Line)
    is
       T : Component.Product_Packetizer.Implementation.Tester.Instance_Access renames Self.Tester;
-      Expected : Packet.T := (Header => (Time => T.System_Time, Id => 15, Sequence_Count => Expected_Sequence_Count, Buffer_Length => 0), Buffer => (others => 0));
+      Expected : Packet.T := (Header => (Time => T.System_Time, Id => 15, Sequence_Count => Expected_Sequence_Count, Buffer_Length => 0), Buffer => [others => 0]);
       Idx : Natural := Expected.Buffer'First;
       End_Idx : Natural := 0;
    begin
@@ -859,8 +859,7 @@ package body Tests.Implementation is
       Invalid_Packet_Id_Assert.Eq (T.Invalid_Packet_Id_Commanded_History.Get (4), (Packet_Id => 5, Command_Id => Commands.Get_Send_Packet_Id));
 
       -- Send command with packet period over the size of a natural and expect the command argument validation to fail:
-      --t.Command_T_Send(commands.Send_Packet(Packet_Id.Serialization.From_Byte_Array((255, 255))));
-      T.Command_T_Send (Commands.Set_Packet_Period (Packet_Period.Serialization.From_Byte_Array ((255, 255, 255, 255, 255, 255))));
+      T.Command_T_Send (Commands.Set_Packet_Period (Packet_Period.Serialization.From_Byte_Array ([255, 255, 255, 255, 255, 255])));
 
       -- Send tick, expect event:
       T.Tick_T_Send (The_Tick);
@@ -868,7 +867,7 @@ package body Tests.Implementation is
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (5), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Set_Packet_Period_Id, Status => Validation_Error));
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 5);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => Commands.Get_Set_Packet_Period_Id, Errant_Field_Number => 2, Errant_Field => (0, 0, 0, 0, 255, 255, 255, 255)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => Commands.Get_Set_Packet_Period_Id, Errant_Field_Number => 2, Errant_Field => [0, 0, 0, 0, 255, 255, 255, 255]));
    end Test_Bad_Commands;
 
    overriding procedure Test_Send_Packet_Command (Self : in out Instance) is
@@ -1120,7 +1119,7 @@ package body Tests.Implementation is
    overriding procedure Test_Full_Queue (Self : in out Instance) is
       T : Component.Product_Packetizer.Implementation.Tester.Instance_Access renames Self.Tester;
       -- Define full sized command:
-      Buffer : constant Command_Types.Command_Arg_Buffer_Type := (0 => 56, 1 => 57, others => 92);
+      Buffer : constant Command_Types.Command_Arg_Buffer_Type := [0 => 56, 1 => 57, others => 92];
       A_Command : constant Command.T := ((Source_Id => 0, Id => 15, Arg_Buffer_Length => Buffer'Length), Arg_Buffer => Buffer);
 
       procedure Fill_Queue (N : in Natural := 3) is

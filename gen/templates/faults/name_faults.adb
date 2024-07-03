@@ -63,7 +63,7 @@ package body {{ name }} is
       package Param_Serializer is new Serializer ({{ fault.type }});
 {% endif %}
 {% endif %}
-      Flt : {% if not fault.type %}constant {% endif %}Fault.T := (Header => (Id => Self.Get_{{ fault.name }}_Id, Time => Timestamp, Param_Buffer_Length => {% if fault.type %}Param_Serializer.Serialized_Length{% else %}0{% endif %}), Param_Buffer => (others => 0));
+      Flt : {% if not fault.type %}constant {% endif %}Fault.T := (Header => (Id => Self.Get_{{ fault.name }}_Id, Time => Timestamp, Param_Buffer_Length => {% if fault.type %}Param_Serializer.Serialized_Length{% else %}0{% endif %}), Param_Buffer => [others => 0]);
    begin
 {% if fault.type %}
       Flt.Param_Buffer (Flt.Param_Buffer'First .. Flt.Param_Buffer'First + Param_Serializer.Serialized_Length - 1) := Param_Serializer.To_Byte_Array (Param);

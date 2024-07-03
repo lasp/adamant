@@ -49,7 +49,7 @@ package body {{ name }} is
 {% else %}
       package Arg_Serializer is new Serializer ({{ param.type }});
 {% endif %}
-      Param : Parameter.T := (Header => (Id => Self.Get_{{ param.name }}_Id, Buffer_Length => Arg_Serializer.Serialized_Length), Buffer => (others => 0));
+      Param : Parameter.T := (Header => (Id => Self.Get_{{ param.name }}_Id, Buffer_Length => Arg_Serializer.Serialized_Length), Buffer => [others => 0]);
    begin
       Param.Buffer (Param.Buffer'First .. (Param.Buffer'First + Arg_Serializer.Serialized_Length - 1)) := Arg_Serializer.To_Byte_Array (Arg);
       return Param;

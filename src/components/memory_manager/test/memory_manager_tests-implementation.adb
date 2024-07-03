@@ -36,7 +36,7 @@ package body Memory_Manager_Tests.Implementation is
    -------------------------------------------------------------------------
    -- 100 byte region. By declaring this outside the component we can
    -- easily view the internal memory region.
-   Memory : aliased Basic_Types.Byte_Array := (0 .. 99 => 0);
+   Memory : aliased Basic_Types.Byte_Array := [0 .. 99 => 0];
 
    -------------------------------------------------------------------------
    -- Fixtures:
@@ -45,7 +45,7 @@ package body Memory_Manager_Tests.Implementation is
    overriding procedure Set_Up_Test (Self : in out Instance) is
    begin
       -- Reset memory to zeros:
-      Memory := (others => 0);
+      Memory := [others => 0];
 
       -- Allocate heap memory to component:
       Self.Tester.Init_Base (Queue_Size => Self.Tester.Component_Instance.Get_Max_Queue_Element_Size * 3);
@@ -128,7 +128,7 @@ package body Memory_Manager_Tests.Implementation is
       Natural_Assert.Eq (T.Crc_Report_History.Get_Count, 1);
       Natural_Assert.Eq (T.Memory_Region_Status_History.Get_Count, 1);
       Natural_Assert.Eq (T.Memory_Location_History.Get_Count, 1);
-      Virtual_Memory_Region_Crc_Assert.Eq (T.Crc_Report_History.Get (1), (Region => (Address => 0, Length => 0), Crc => (0, 0)));
+      Virtual_Memory_Region_Crc_Assert.Eq (T.Crc_Report_History.Get (1), (Region => (Address => 0, Length => 0), Crc => [0, 0]));
       Memory_Manager_State_Assert.Eq (T.Memory_Region_Status_History.Get (1), (State => Available));
       Memory_Region_Assert.Eq (T.Memory_Location_History.Get (1), (Memory'Address, Memory'Length));
 
@@ -142,18 +142,18 @@ package body Memory_Manager_Tests.Implementation is
       Memory_Manager_State_Assert.Eq (T.Memory_Region_Status_History.Get (2), (State => In_Use));
 
       -- Check the memory region
-      Byte_Array_Assert.Eq (Memory, (0 .. Memory'Length - 1 => 0));
+      Byte_Array_Assert.Eq (Memory, [0 .. Memory'Length - 1 => 0]);
 
       -- Fill the pointer:
       declare
          use Byte_Array_Pointer.Packed;
          Ptr : constant Byte_Array_Pointer.Instance := Unpack (Request.Ided_Region.Region);
       begin
-         Byte_Array_Pointer.Copy_To (Ptr, (0 .. Memory'Length - 1 => 55));
+         Byte_Array_Pointer.Copy_To (Ptr, [0 .. Memory'Length - 1 => 55]);
       end;
 
       -- Check the memory region:
-      Byte_Array_Assert.Eq (Memory, (0 .. Memory'Length - 1 => 55));
+      Byte_Array_Assert.Eq (Memory, [0 .. Memory'Length - 1 => 55]);
 
       -- Release the memory region:
       T.Ided_Memory_Region_T_Release_Reciprocal (Request.Ided_Region);
@@ -173,18 +173,18 @@ package body Memory_Manager_Tests.Implementation is
       Memory_Manager_State_Assert.Eq (T.Memory_Region_Status_History.Get (4), (State => In_Use));
 
       -- Check the memory region
-      Byte_Array_Assert.Eq (Memory, (0 .. Memory'Length - 1 => 55));
+      Byte_Array_Assert.Eq (Memory, [0 .. Memory'Length - 1 => 55]);
 
       -- Fill the pointer:
       declare
          use Byte_Array_Pointer.Packed;
          Ptr : constant Byte_Array_Pointer.Instance := Unpack (Request.Ided_Region.Region);
       begin
-         Byte_Array_Pointer.Copy_To (Ptr, (0 .. Memory'Length - 1 => 22));
+         Byte_Array_Pointer.Copy_To (Ptr, [0 .. Memory'Length - 1 => 22]);
       end;
 
       -- Check the memory region:
-      Byte_Array_Assert.Eq (Memory, (0 .. Memory'Length - 1 => 22));
+      Byte_Array_Assert.Eq (Memory, [0 .. Memory'Length - 1 => 22]);
 
       -- Release the memory region:
       T.Ided_Memory_Region_T_Release_Reciprocal (Request.Ided_Region);
@@ -209,7 +209,7 @@ package body Memory_Manager_Tests.Implementation is
       Natural_Assert.Eq (T.Crc_Report_History.Get_Count, 1);
       Natural_Assert.Eq (T.Memory_Region_Status_History.Get_Count, 1);
       Natural_Assert.Eq (T.Memory_Location_History.Get_Count, 1);
-      Virtual_Memory_Region_Crc_Assert.Eq (T.Crc_Report_History.Get (1), (Region => (Address => 0, Length => 0), Crc => (0, 0)));
+      Virtual_Memory_Region_Crc_Assert.Eq (T.Crc_Report_History.Get (1), (Region => (Address => 0, Length => 0), Crc => [0, 0]));
       Memory_Manager_State_Assert.Eq (T.Memory_Region_Status_History.Get (1), (State => Available));
       Memory_Region_Assert.Eq (T.Memory_Location_History.Get (1), (Memory'Address, Memory'Length));
 
@@ -236,18 +236,18 @@ package body Memory_Manager_Tests.Implementation is
       Memory_Manager_State_Assert.Eq (T.Memory_Region_Status_History.Get (2), (State => In_Use));
 
       -- Check the memory region
-      Byte_Array_Assert.Eq (Memory, (0 .. Memory'Length - 1 => 0));
+      Byte_Array_Assert.Eq (Memory, [0 .. Memory'Length - 1 => 0]);
 
       -- Fill the pointer:
       declare
          use Byte_Array_Pointer.Packed;
          Ptr : constant Byte_Array_Pointer.Instance := Unpack (Request.Ided_Region.Region);
       begin
-         Byte_Array_Pointer.Copy_To (Ptr, (0 .. Memory'Length - 1 => 22));
+         Byte_Array_Pointer.Copy_To (Ptr, [0 .. Memory'Length - 1 => 22]);
       end;
 
       -- Check the memory region:
-      Byte_Array_Assert.Eq (Memory, (0 .. Memory'Length - 1 => 22));
+      Byte_Array_Assert.Eq (Memory, [0 .. Memory'Length - 1 => 22]);
 
       --
       -- Request the memory region again:
@@ -301,7 +301,7 @@ package body Memory_Manager_Tests.Implementation is
       Dump : Memory_Packetizer_Types.Memory_Dump;
    begin
       -- Set bytes to pattern to make testing easier:
-      Memory := (0 => 0, 1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5, 6 => 6, 7 => 7, 8 => 8, 9 => 9, 10 => 10, 11 => 11, 12 => 12, 13 => 13, 14 => 14, 15 => 15, 16 .. 50 => 33, 51 .. 99 => 55);
+      Memory := [0 => 0, 1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5, 6 => 6, 7 => 7, 8 => 8, 9 => 9, 10 => 10, 11 => 11, 12 => 12, 13 => 13, 14 => 14, 15 => 15, 16 .. 50 => 33, 51 .. 99 => 55];
 
       -- Send command to dump region:
       T.Command_T_Send (T.Commands.Dump_Memory_Region);
@@ -341,7 +341,7 @@ package body Memory_Manager_Tests.Implementation is
 
       -- Check dump id and data:
       Natural_Assert.Eq (Natural (Dump.Id), Natural (T.Packets.Get_Memory_Region_Packet_Id));
-      Byte_Array_Assert.Eq (To_Byte_Array (Dump.Memory_Pointer), (0 => 0, 1 => 1, 2 => 2, 3 => 3, 4 => 4));
+      Byte_Array_Assert.Eq (To_Byte_Array (Dump.Memory_Pointer), [0 => 0, 1 => 1, 2 => 2, 3 => 3, 4 => 4]);
 
       -- Send command to dump part of region:
       T.Command_T_Send (T.Commands.Dump_Memory_Region_Bytes ((Address => 13, Length => 8)));
@@ -360,7 +360,7 @@ package body Memory_Manager_Tests.Implementation is
 
       -- Check dump id and data:
       Natural_Assert.Eq (Natural (Dump.Id), Natural (T.Packets.Get_Memory_Region_Packet_Id));
-      Byte_Array_Assert.Eq (To_Byte_Array (Dump.Memory_Pointer), (0 => 13, 1 => 14, 2 => 15, 3 .. 7 => 33));
+      Byte_Array_Assert.Eq (To_Byte_Array (Dump.Memory_Pointer), [0 => 13, 1 => 14, 2 => 15, 3 .. 7 => 33]);
 
       -- Send command to dump part of region:
       T.Command_T_Send (T.Commands.Dump_Memory_Region_Bytes ((Address => 98, Length => 2)));
@@ -379,7 +379,7 @@ package body Memory_Manager_Tests.Implementation is
 
       -- Check dump id and data:
       Natural_Assert.Eq (Natural (Dump.Id), Natural (T.Packets.Get_Memory_Region_Packet_Id));
-      Byte_Array_Assert.Eq (To_Byte_Array (Dump.Memory_Pointer), (0 => 55, 1 => 55));
+      Byte_Array_Assert.Eq (To_Byte_Array (Dump.Memory_Pointer), [0 => 55, 1 => 55]);
 
       -- No data products except the ones at initialization.
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 3);
@@ -393,7 +393,7 @@ package body Memory_Manager_Tests.Implementation is
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 3);
 
       -- Set bytes to pattern to make testing easier:
-      Memory := (0 => 0, 1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5, 6 => 6, 7 => 7, 8 => 8, 9 => 9, 10 => 10, 11 => 11, 12 => 12, 13 => 13, 14 => 14, 15 => 15, 16 .. 50 => 33, 51 .. 99 => 55);
+      Memory := [0 => 0, 1 => 1, 2 => 2, 3 => 3, 4 => 4, 5 => 5, 6 => 6, 7 => 7, 8 => 8, 9 => 9, 10 => 10, 11 => 11, 12 => 12, 13 => 13, 14 => 14, 15 => 15, 16 .. 50 => 33, 51 .. 99 => 55];
 
       -- Send command to dump region:
       T.Command_T_Send (T.Commands.Crc_Memory_Region_Bytes ((Address => 0, Length => Memory'Length)));
@@ -480,7 +480,7 @@ package body Memory_Manager_Tests.Implementation is
       Cmd : Command.T;
    begin
       -- Send command to write start of region:
-      pragma Assert (T.Commands.Write_Memory_Region ((Address => 0, Length => 5, Data => (others => 15)), Cmd) = Success);
+      pragma Assert (T.Commands.Write_Memory_Region ((Address => 0, Length => 5, Data => [others => 15]), Cmd) = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
@@ -494,11 +494,11 @@ package body Memory_Manager_Tests.Implementation is
       Virtual_Memory_Region_Assert.Eq (T.Memory_Written_History.Get (1), (Address => 0, Length => 5));
 
       -- Check the memory region to make sure it was written to:
-      Byte_Array_Assert.Eq (Memory (0 .. 4), (0 .. 4 => 15));
-      Byte_Array_Assert.Eq (Memory (5 .. Memory'Last), (5 .. Memory'Last => 0));
+      Byte_Array_Assert.Eq (Memory (0 .. 4), [0 .. 4 => 15]);
+      Byte_Array_Assert.Eq (Memory (5 .. Memory'Last), [5 .. Memory'Last => 0]);
 
       -- Send command to write middle of region:
-      pragma Assert (T.Commands.Write_Memory_Region ((Address => 40, Length => 11, Data => (others => 12)), Cmd) = Success);
+      pragma Assert (T.Commands.Write_Memory_Region ((Address => 40, Length => 11, Data => [others => 12]), Cmd) = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 2);
@@ -512,12 +512,12 @@ package body Memory_Manager_Tests.Implementation is
       Virtual_Memory_Region_Assert.Eq (T.Memory_Written_History.Get (2), (Address => 40, Length => 11));
 
       -- Check the memory region to make sure it was written to:
-      Byte_Array_Assert.Eq (Memory (0 .. 4), (0 .. 4 => 15));
-      Byte_Array_Assert.Eq (Memory (40 .. 50), (40 .. 50 => 12));
-      Byte_Array_Assert.Eq (Memory (51 .. Memory'Last), (51 .. Memory'Last => 0));
+      Byte_Array_Assert.Eq (Memory (0 .. 4), [0 .. 4 => 15]);
+      Byte_Array_Assert.Eq (Memory (40 .. 50), [40 .. 50 => 12]);
+      Byte_Array_Assert.Eq (Memory (51 .. Memory'Last), [51 .. Memory'Last => 0]);
 
       -- Send command to write end of region:
-      pragma Assert (T.Commands.Write_Memory_Region ((Address => 98, Length => 2, Data => (others => 44)), Cmd) = Success);
+      pragma Assert (T.Commands.Write_Memory_Region ((Address => 98, Length => 2, Data => [others => 44]), Cmd) = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 3);
@@ -531,13 +531,13 @@ package body Memory_Manager_Tests.Implementation is
       Virtual_Memory_Region_Assert.Eq (T.Memory_Written_History.Get (3), (Address => 98, Length => 2));
 
       -- Check the memory region to make sure it was written to:
-      Byte_Array_Assert.Eq (Memory (0 .. 4), (0 .. 4 => 15));
-      Byte_Array_Assert.Eq (Memory (40 .. 50), (40 .. 50 => 12));
-      Byte_Array_Assert.Eq (Memory (51 .. Memory'Last - 2), (51 .. Memory'Last - 2 => 0));
-      Byte_Array_Assert.Eq (Memory (98 .. Memory'Last), (98 .. Memory'Last => 44));
+      Byte_Array_Assert.Eq (Memory (0 .. 4), [0 .. 4 => 15]);
+      Byte_Array_Assert.Eq (Memory (40 .. 50), [40 .. 50 => 12]);
+      Byte_Array_Assert.Eq (Memory (51 .. Memory'Last - 2), [51 .. Memory'Last - 2 => 0]);
+      Byte_Array_Assert.Eq (Memory (98 .. Memory'Last), [98 .. Memory'Last => 44]);
 
       -- Send command to write end of region:
-      pragma Assert (T.Commands.Write_Memory_Region ((Address => 98, Length => 1, Data => (others => 18)), Cmd) = Success);
+      pragma Assert (T.Commands.Write_Memory_Region ((Address => 98, Length => 1, Data => [others => 18]), Cmd) = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 4);
@@ -551,11 +551,11 @@ package body Memory_Manager_Tests.Implementation is
       Virtual_Memory_Region_Assert.Eq (T.Memory_Written_History.Get (4), (Address => 98, Length => 1));
 
       -- Check the memory region to make sure it was written to:
-      Byte_Array_Assert.Eq (Memory (0 .. 4), (0 .. 4 => 15));
-      Byte_Array_Assert.Eq (Memory (40 .. 50), (40 .. 50 => 12));
-      Byte_Array_Assert.Eq (Memory (51 .. Memory'Last - 2), (51 .. Memory'Last - 2 => 0));
-      Byte_Array_Assert.Eq (Memory (98 .. 98), (98 .. 98 => 18));
-      Byte_Array_Assert.Eq (Memory (99 .. Memory'Last), (99 .. Memory'Last => 44));
+      Byte_Array_Assert.Eq (Memory (0 .. 4), [0 .. 4 => 15]);
+      Byte_Array_Assert.Eq (Memory (40 .. 50), [40 .. 50 => 12]);
+      Byte_Array_Assert.Eq (Memory (51 .. Memory'Last - 2), [51 .. Memory'Last - 2 => 0]);
+      Byte_Array_Assert.Eq (Memory (98 .. 98), [98 .. 98 => 18]);
+      Byte_Array_Assert.Eq (Memory (99 .. Memory'Last), [99 .. Memory'Last => 44]);
    end Test_Nominal_Memory_Write;
 
    overriding procedure Test_Write_Unreleased_Region (Self : in out Instance) is
@@ -574,7 +574,7 @@ package body Memory_Manager_Tests.Implementation is
       Memory_Manager_State_Assert.Eq (T.Memory_Region_Status_History.Get (2), (State => In_Use));
 
       -- Send command to write start of region, expect failure:
-      pragma Assert (T.Commands.Write_Memory_Region ((Address => 0, Length => 5, Data => (others => 15)), Cmd) = Success);
+      pragma Assert (T.Commands.Write_Memory_Region ((Address => 0, Length => 5, Data => [others => 15]), Cmd) = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
@@ -587,7 +587,7 @@ package body Memory_Manager_Tests.Implementation is
       Natural_Assert.Eq (T.Memory_Unavailable_History.Get_Count, 1);
 
       -- Check the memory region to make sure it was written to:
-      Byte_Array_Assert.Eq (Memory (0 .. Memory'Last), (0 .. Memory'Last => 0));
+      Byte_Array_Assert.Eq (Memory (0 .. Memory'Last), [0 .. Memory'Last => 0]);
 
       -- Now release the region so it becomes available.
       T.Ided_Memory_Region_T_Release_Reciprocal (Request.Ided_Region);
@@ -598,7 +598,7 @@ package body Memory_Manager_Tests.Implementation is
       Memory_Manager_State_Assert.Eq (T.Memory_Region_Status_History.Get (3), (State => Available));
 
       -- Send command to write start of region, expect success:
-      pragma Assert (T.Commands.Write_Memory_Region ((Address => 0, Length => 5, Data => (others => 15)), Cmd) = Success);
+      pragma Assert (T.Commands.Write_Memory_Region ((Address => 0, Length => 5, Data => [others => 15]), Cmd) = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 2);
@@ -613,8 +613,8 @@ package body Memory_Manager_Tests.Implementation is
       Virtual_Memory_Region_Assert.Eq (T.Memory_Written_History.Get (1), (Address => 0, Length => 5));
 
       -- Check the memory region to make sure it was written to:
-      Byte_Array_Assert.Eq (Memory (0 .. 4), (0 .. 4 => 15));
-      Byte_Array_Assert.Eq (Memory (5 .. Memory'Last), (5 .. Memory'Last => 0));
+      Byte_Array_Assert.Eq (Memory (0 .. 4), [0 .. 4 => 15]);
+      Byte_Array_Assert.Eq (Memory (5 .. Memory'Last), [5 .. Memory'Last => 0]);
    end Test_Write_Unreleased_Region;
 
    overriding procedure Test_Dump_Invalid_Region (Self : in out Instance) is
@@ -737,8 +737,8 @@ package body Memory_Manager_Tests.Implementation is
    begin
       -- Send command to write part too big of region:
       declare
-         Bytes : constant Virtual_Memory_Region_Write.Serialization.Byte_Array := (0, 0, 0, 0, 100, 100, others => 255);
-         Temp : constant Virtual_Memory_Region_Write.T := (0, 0, (others => 0));
+         Bytes : constant Virtual_Memory_Region_Write.Serialization.Byte_Array := [0, 0, 0, 0, 100, 100, others => 255];
+         Temp : constant Virtual_Memory_Region_Write.T := (0, 0, [others => 0]);
       begin
          pragma Assert (T.Commands.Write_Memory_Region (Temp, Cmd) = Success);
          -- Overwrite with invalid bytes.
@@ -752,10 +752,10 @@ package body Memory_Manager_Tests.Implementation is
       -- Make sure some events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Write_Memory_Region_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 6)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Write_Memory_Region_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 6]));
 
       -- Send command to write part of region:
-      pragma Assert (T.Commands.Write_Memory_Region ((Address => 100, Length => 0, Data => (others => 255)), Cmd) = Success);
+      pragma Assert (T.Commands.Write_Memory_Region ((Address => 100, Length => 0, Data => [others => 255]), Cmd) = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 2);
@@ -767,7 +767,7 @@ package body Memory_Manager_Tests.Implementation is
       Invalid_Virtual_Memory_Region_Assert.Eq (T.Invalid_Memory_Region_History.Get (1), (Invalid_Region => (Address => 100, Length => 0), Managed_Region => (Address => 0, Length => Memory'Length)));
 
       -- Send command to write part of region:
-      pragma Assert (T.Commands.Write_Memory_Region ((Address => 50, Length => 51, Data => (others => 255)), Cmd) = Success);
+      pragma Assert (T.Commands.Write_Memory_Region ((Address => 50, Length => 51, Data => [others => 255]), Cmd) = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 3);
@@ -779,7 +779,7 @@ package body Memory_Manager_Tests.Implementation is
       Invalid_Virtual_Memory_Region_Assert.Eq (T.Invalid_Memory_Region_History.Get (2), (Invalid_Region => (Address => 50, Length => 51), Managed_Region => (Address => 0, Length => Memory'Length)));
 
       -- Send command to write part of region:
-      pragma Assert (T.Commands.Write_Memory_Region ((Address => 0, Length => 0, Data => (others => 255)), Cmd) = Success);
+      pragma Assert (T.Commands.Write_Memory_Region ((Address => 0, Length => 0, Data => [others => 255]), Cmd) = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 4);
@@ -794,7 +794,7 @@ package body Memory_Manager_Tests.Implementation is
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 3);
 
       -- Check the memory region to make sure it was never written to:
-      Byte_Array_Assert.Eq (Memory, (0 .. Memory'Length - 1 => 0));
+      Byte_Array_Assert.Eq (Memory, [0 .. Memory'Length - 1 => 0]);
    end Test_Write_Invalid_Region;
 
    overriding procedure Test_Force_Release_Command (Self : in out Instance) is
@@ -805,7 +805,7 @@ package body Memory_Manager_Tests.Implementation is
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 3);
       Natural_Assert.Eq (T.Crc_Report_History.Get_Count, 1);
       Natural_Assert.Eq (T.Memory_Region_Status_History.Get_Count, 1);
-      Virtual_Memory_Region_Crc_Assert.Eq (T.Crc_Report_History.Get (1), (Region => (Address => 0, Length => 0), Crc => (0, 0)));
+      Virtual_Memory_Region_Crc_Assert.Eq (T.Crc_Report_History.Get (1), (Region => (Address => 0, Length => 0), Crc => [0, 0]));
       Memory_Manager_State_Assert.Eq (T.Memory_Region_Status_History.Get (1), (State => Available));
 
       -- Send command to force release region:
@@ -909,7 +909,7 @@ package body Memory_Manager_Tests.Implementation is
       -- Make sure some events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Force_Release_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 13)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Force_Release_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 13]));
    end Test_Invalid_Command;
 
 end Memory_Manager_Tests.Implementation;

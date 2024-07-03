@@ -32,7 +32,7 @@ package body Component.Parameter_Component.Implementation.Tester is
    not overriding function Fetch_Parameter (Self : in out Instance; Id : in Parameter_Types.Parameter_Id; Par : out Parameter.T) return Parameter_Update_Status.E is
       use Parameter_Enums.Parameter_Update_Status;
       use Parameter_Enums.Parameter_Operation_Type;
-      Param_Update : Parameter_Update.T := (Operation => Fetch, Status => Success, Param => (Header => (Id => Id, Buffer_Length => 0), Buffer => (others => 0)));
+      Param_Update : Parameter_Update.T := (Operation => Fetch, Status => Success, Param => (Header => (Id => Id, Buffer_Length => 0), Buffer => [others => 0]));
    begin
       -- Set the ID to fetch:
       Param_Update.Param.Header.Id := Id;
@@ -44,7 +44,7 @@ package body Component.Parameter_Component.Implementation.Tester is
    not overriding function Update_Parameters (Self : in out Instance) return Parameter_Update_Status.E is
       use Parameter_Enums.Parameter_Update_Status;
       use Parameter_Enums.Parameter_Operation_Type;
-      Param_Update : Parameter_Update.T := (Operation => Update, Status => Success, Param => ((0, 0), (others => 0)));
+      Param_Update : Parameter_Update.T := (Operation => Update, Status => Success, Param => ((0, 0), [others => 0]));
    begin
       Self.Parameter_Update_T_Provide (Param_Update);
       return Param_Update.Status;

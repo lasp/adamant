@@ -3,7 +3,7 @@ with Example_Array.Representation;
 
 procedure Main is
    -- A packed version of the type.
-   Packed_Type_1 : constant Example_Array.T := (11, 22, 33, 44, 55, 66, 77, 88);
+   Packed_Type_1 : constant Example_Array.T := [11, 22, 33, 44, 55, 66, 77, 88];
 begin
    -- Print the packed array to the terminal in human readable form:
    Put_Line ("Human readable:");

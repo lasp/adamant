@@ -18,7 +18,7 @@ package body Two_Counter_Entry is
       Self.Bytes := new Basic_Types.Byte_Array (0 .. Num_Event_Bytes - 1);
 
       -- Init the array so that all events are enabled by default and the counts are set to 0.
-      Self.Bytes.all := (others => Two_Counter_Entry_Type.Serialization.To_Byte_Array ((Top_Event_Enabled_State => Event_State_Type.Enabled, Top_Event_Count => 0, Bottom_Event_Enabled_State => Event_State_Type.Enabled, Bottom_Event_Count => 0)) (0));
+      Self.Bytes.all := [others => Two_Counter_Entry_Type.Serialization.To_Byte_Array ((Top_Event_Enabled_State => Event_State_Type.Enabled, Top_Event_Count => 0, Bottom_Event_Enabled_State => Event_State_Type.Enabled, Bottom_Event_Count => 0)) (0)];
 
       -- Then disable the event based on our disable list
       for Event_Id_To_Disable of Event_Disable_List loop

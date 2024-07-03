@@ -24,7 +24,7 @@ package body Component.Cpu_Monitor.Implementation is
    -- packet_Period : Interfaces.Unsigned_16 - The period (in ticks) of how often to send out the cpu execution packet. A value of zero disable sending of the packet.
    --
    overriding procedure Init
-      (Self : in out Instance; Task_List : in not null Task_Types.Task_Info_List_Access; Interrupt_List : in not null Interrupt_Types.Interrupt_Id_List_Access; Execution_Periods : in Execution_Periods_Type := (1, 6, 30); Packet_Period : in Interfaces.Unsigned_16 := 1)
+      (Self : in out Instance; Task_List : in not null Task_Types.Task_Info_List_Access; Interrupt_List : in not null Interrupt_Types.Interrupt_Id_List_Access; Execution_Periods : in Execution_Periods_Type := [1, 6, 30]; Packet_Period : in Interfaces.Unsigned_16 := 1)
    is
       use Task_Types;
       use Interrupt_Types;
@@ -41,13 +41,13 @@ package body Component.Cpu_Monitor.Implementation is
       -- Allocate space on the heap to store the last measured CPU time for all of
       -- the tasks and interrupts.
       Self.Task_Cpu_Time_List := new Last_Cpu_Time_Array (Self.Tasks'Range);
-      Self.Task_Cpu_Time_List.all := (others => (others => Time_Of (0)));
+      Self.Task_Cpu_Time_List.all := [others => [others => Time_Of (0)]];
       Self.Task_Up_Time_List := new Last_Time_Array (Self.Tasks'Range);
-      Self.Task_Up_Time_List.all := (others => (others => Current_Up_Time));
+      Self.Task_Up_Time_List.all := [others => [others => Current_Up_Time]];
       Self.Interrupt_Cpu_Time_List := new Last_Cpu_Time_Array (Self.Interrupts'Range);
-      Self.Interrupt_Cpu_Time_List.all := (others => (others => Time_Of (0)));
+      Self.Interrupt_Cpu_Time_List.all := [others => [others => Time_Of (0)]];
       Self.Interrupt_Up_Time_List := new Last_Time_Array (Self.Interrupts'Range);
-      Self.Interrupt_Up_Time_List.all := (others => (others => Current_Up_Time));
+      Self.Interrupt_Up_Time_List.all := [others => [others => Current_Up_Time]];
 
       -- Set the packet length. Each data point for
       -- cpu usage is a percentage that is 1 byte large. We store 3 of these per
@@ -59,7 +59,7 @@ package body Component.Cpu_Monitor.Implementation is
             Sequence_Count => 0,
             Buffer_Length => Self.Execution_Periods'Length * (Self.Task_Cpu_Time_List'Length + Self.Interrupt_Cpu_Time_List'Length)
          ),
-         Buffer => (others => 0)
+         Buffer => [others => 0]
       );
 
       -- Calculate the max_Count. This is the rollover value for count. To make sure

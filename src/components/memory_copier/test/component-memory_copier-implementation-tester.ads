@@ -66,7 +66,7 @@ package Component.Memory_Copier.Implementation.Tester is
       Expect_Command_T_Send_Dropped : Boolean := False;
       Command_T_Send_Dropped_Count : Natural := 0;
       -- Memory regions for simulation:
-      Scratch : Basic_Types.Byte_Array (0 .. 99) := (others => 15);
+      Scratch : Basic_Types.Byte_Array (0 .. 99) := [others => 15];
       Scratch_Return_Status : Memory_Manager_Enums.Memory_Request_Status.E := Memory_Manager_Enums.Memory_Request_Status.Success;
    end record;
    type Instance_Access is access all Instance;

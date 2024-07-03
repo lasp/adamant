@@ -138,7 +138,7 @@ package body Component.Memory_Manager.Implementation is
    begin
       -- Update the data products:
       Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Memory_Region_Status (The_Time, (State => Self.Arbiter.Get_State)));
-      Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Crc_Report (The_Time, (Region => (Address => 0, Length => 0), Crc => (0, 0))));
+      Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Crc_Report (The_Time, (Region => (Address => 0, Length => 0), Crc => [0, 0])));
       Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Memory_Location (The_Time, Self.Region));
    end Set_Up;
 

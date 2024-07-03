@@ -19,7 +19,7 @@ init:
     - name: event_Filter_List
       type: Event_Filter_Entry.Event_Id_List
       description: A list of event IDs that are filtered by default
-      default: "(1 .. 0 => 0)"
+      default: "[1 .. 0 => 0]"
 connectors:
   - description: This is the base tick for the component. Upon reception the component will record the number of events that have been filtered and send the state packet if it was requested.
     type: Tick.T

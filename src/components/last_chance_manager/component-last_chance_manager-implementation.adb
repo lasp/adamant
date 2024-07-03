@@ -89,7 +89,7 @@ package body Component.Last_Chance_Manager.Implementation is
       The_Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
    begin
       -- Clear all the data:
-      Self.Exception_Data.all := (Exception_Name => (others => 0), Exception_Message => (others => 0), Stack_Trace_Depth => 0, Stack_Trace => (others => (Address => To_Address (Integer_Address (0)))));
+      Self.Exception_Data.all := (Exception_Name => [others => 0], Exception_Message => [others => 0], Stack_Trace_Depth => 0, Stack_Trace => [others => (Address => To_Address (Integer_Address (0)))]);
 
       -- Send out our data:
       Self.Send_Out_Packet_And_Data_Product (The_Time);

@@ -40,8 +40,8 @@ package body Two_Counter_Entry_Tests.Implementation is
    overriding procedure Test_Init_List (Self : in out Instance) is
       Ignore_Self : Instance renames Self;
       My_Counter : Two_Counter_Entry.Instance;
-      Event_Start_List : constant Two_Counter_Entry.Event_Id_List := (4, 5);
-      Event_Start_Empty_List : constant Two_Counter_Entry.Event_Id_List := (1 .. 0 => 0);
+      Event_Start_List : constant Two_Counter_Entry.Event_Id_List := [4, 5];
+      Event_Start_Empty_List : constant Two_Counter_Entry.Event_Id_List := [1 .. 0 => 0];
       Event_State : Event_State_Type.E;
       State_Return_Status : Two_Counter_Entry.Enable_State_Status;
    begin
@@ -154,7 +154,7 @@ package body Two_Counter_Entry_Tests.Implementation is
    overriding procedure Test_Increment_Count (Self : in out Instance) is
       Ignore_Self : Instance renames Self;
       My_Counter : Two_Counter_Entry.Instance;
-      Event_Start_List : constant Two_Counter_Entry.Event_Id_List := (1, 2, 3);
+      Event_Start_List : constant Two_Counter_Entry.Event_Id_List := [1, 2, 3];
       Return_Status : Two_Counter_Entry.Count_Status;
       Event_State : Event_State_Type.E;
       State_Return_Status : Two_Counter_Entry.Enable_State_Status;
@@ -292,7 +292,7 @@ package body Two_Counter_Entry_Tests.Implementation is
    overriding procedure Test_Decrement_Count (Self : in out Instance) is
       Ignore_Self : Instance renames Self;
       My_Counter : Two_Counter_Entry.Instance;
-      Event_Start_List : constant Two_Counter_Entry.Event_Id_List := (7, 8);
+      Event_Start_List : constant Two_Counter_Entry.Event_Id_List := [7, 8];
       Return_Status : Two_Counter_Entry.Count_Status;
       Event_State : Event_State_Type.E;
       State_Return_Status : Two_Counter_Entry.Enable_State_Status;
@@ -509,7 +509,7 @@ package body Two_Counter_Entry_Tests.Implementation is
    overriding procedure Test_Set_Enable_State (Self : in out Instance) is
       Ignore_Self : Instance renames Self;
       My_Counter : Two_Counter_Entry.Instance;
-      Event_Start_List : constant Two_Counter_Entry.Event_Id_List := (3, 5);
+      Event_Start_List : constant Two_Counter_Entry.Event_Id_List := [3, 5];
       State_Return_Status : Two_Counter_Entry.Enable_State_Status;
       Event_State : Event_State_Type.E;
    begin
@@ -575,7 +575,7 @@ package body Two_Counter_Entry_Tests.Implementation is
       Event_State : Event_State_Type.E;
       Persistence : Two_Counter_Entry.Persistence_Type;
       State_Return_Status : Two_Counter_Entry.Enable_State_Status;
-      Event_Start_Empty_List : constant Two_Counter_Entry.Event_Id_List := (1 .. 0 => 0);
+      Event_Start_Empty_List : constant Two_Counter_Entry.Event_Id_List := [1 .. 0 => 0];
    begin
       My_Counter.Init (Event_Id_Start => 0, Event_Id_Stop => 6, Event_Disable_List => Event_Start_Empty_List, Event_Limit_Persistence => 7);
 
@@ -725,7 +725,7 @@ package body Two_Counter_Entry_Tests.Implementation is
       Ignore_Self : Instance renames Self;
       My_Counter : Two_Counter_Entry.Instance;
       Return_Status : Two_Counter_Entry.Count_Status;
-      Event_Start_Empty_List : constant Two_Counter_Entry.Event_Id_List := (1 .. 0 => 0);
+      Event_Start_Empty_List : constant Two_Counter_Entry.Event_Id_List := [1 .. 0 => 0];
       Test_Limit_Count : Interfaces.Unsigned_16 := 0;
    begin
       My_Counter.Init (Event_Id_Start => 0, Event_Id_Stop => 6, Event_Disable_List => Event_Start_Empty_List, Event_Limit_Persistence => 2);
@@ -793,7 +793,7 @@ package body Two_Counter_Entry_Tests.Implementation is
       Ignore_Self : Instance renames Self;
       use Event_Types;
       My_Counter : Two_Counter_Entry.Instance;
-      Event_Start_List : constant Two_Counter_Entry.Event_Id_List := (4, 5);
+      Event_Start_List : constant Two_Counter_Entry.Event_Id_List := [4, 5];
       Start_Id : Event_Id;
       Stop_Id : Event_Id;
    begin
@@ -818,7 +818,7 @@ package body Two_Counter_Entry_Tests.Implementation is
    overriding procedure Test_Master_Enable_Switch (Self : in out Instance) is
       Ignore_Self : Instance renames Self;
       My_Counter : Two_Counter_Entry.Instance;
-      Event_Start_List : constant Two_Counter_Entry.Event_Id_List := (4, 5);
+      Event_Start_List : constant Two_Counter_Entry.Event_Id_List := [4, 5];
       Master_State : Event_State_Type.E;
    begin
       My_Counter.Init (Event_Id_Start => 0, Event_Id_Stop => 5, Event_Disable_List => Event_Start_List, Event_Limit_Persistence => 7);

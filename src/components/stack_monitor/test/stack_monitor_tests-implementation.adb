@@ -23,7 +23,7 @@ package body Stack_Monitor_Tests.Implementation is
    -- Fixtures:
    -------------------------------------------------------------------------
 
-   Task_1_Stack : aliased Basic_Types.Byte_Array (0 .. 999) := (others => 16#CC#);
+   Task_1_Stack : aliased Basic_Types.Byte_Array (0 .. 999) := [others => 16#CC#];
    Task_1_Info : aliased Task_Types.Task_Info := (
       Number => 1,
       Id => Ada.Task_Identification.Null_Task_Id,
@@ -34,7 +34,7 @@ package body Stack_Monitor_Tests.Implementation is
       Secondary_Stack_Max_Usage => 0
    );
 
-   Task_2_Stack : aliased Basic_Types.Byte_Array (0 .. 1_999) := (others => 16#CC#);
+   Task_2_Stack : aliased Basic_Types.Byte_Array (0 .. 1_999) := [others => 16#CC#];
    Task_2_Info : aliased Task_Types.Task_Info := (
       Number => 2,
       Id => Ada.Task_Identification.Null_Task_Id,
@@ -46,7 +46,7 @@ package body Stack_Monitor_Tests.Implementation is
       Secondary_Stack_Max_Usage => 0
    );
 
-   Task_List : aliased Task_Types.Task_Info_List := (0 => Task_1_Info'Access, 1 => Task_2_Info'Access);
+   Task_List : aliased Task_Types.Task_Info_List := [0 => Task_1_Info'Access, 1 => Task_2_Info'Access];
 
    overriding procedure Set_Up_Test (Self : in out Instance) is
    begin
@@ -57,8 +57,8 @@ package body Stack_Monitor_Tests.Implementation is
       Self.Tester.Connect;
 
       -- Make sure the stacks are pristine:
-      Task_1_Stack := (others => 16#CC#);
-      Task_2_Stack := (others => 16#CC#);
+      Task_1_Stack := [others => 16#CC#];
+      Task_2_Stack := [others => 16#CC#];
       Task_1_Info.Secondary_Stack_Max_Usage := 0;
       Task_2_Info.Secondary_Stack_Max_Usage := 0;
 
@@ -82,7 +82,7 @@ package body Stack_Monitor_Tests.Implementation is
    overriding procedure Test_Stack_Monitoring (Self : in out Instance) is
       T : Component.Stack_Monitor.Implementation.Tester.Instance_Access renames Self.Tester;
       A_Tick : constant Tick.T := ((0, 0), 0);
-      Pkt : Packet.T := (Header => (Time => (0, 0), Id => T.Packets.Get_Stack_Usage_Packet_Id, Sequence_Count => 0, Buffer_Length => 4), Buffer => (others => 0));
+      Pkt : Packet.T := (Header => (Time => (0, 0), Id => T.Packets.Get_Stack_Usage_Packet_Id, Sequence_Count => 0, Buffer_Length => 4), Buffer => [others => 0]);
    begin
       -- Send a tick and expect a packet.
       T.Tick_T_Send (A_Tick);
@@ -159,7 +159,7 @@ package body Stack_Monitor_Tests.Implementation is
 
       -- A little white box testing. The internal index in the component for
       -- caching should be the last possible index.
-      T.Check_Stack_Indexes ((Task_1_Stack'Last, Task_2_Stack'Last));
+      T.Check_Stack_Indexes ([Task_1_Stack'Last, Task_2_Stack'Last]);
 
       -- Send a tick and expect a packet.
       T.Tick_T_Send (A_Tick);
@@ -182,7 +182,7 @@ package body Stack_Monitor_Tests.Implementation is
 
       -- A little white box testing. The internal index in the component for
       -- caching should be at the last location where the stack ended.
-      T.Check_Stack_Indexes ((Task_1_Stack'Last - 638, Task_2_Stack'Last - 638));
+      T.Check_Stack_Indexes ([Task_1_Stack'Last - 638, Task_2_Stack'Last - 638]);
 
       -- Send a tick and expect a packet.
       T.Tick_T_Send (A_Tick);
@@ -204,7 +204,7 @@ package body Stack_Monitor_Tests.Implementation is
 
       -- A little white box testing. The internal index in the component for
       -- caching should be at the last location where the stack ended.
-      T.Check_Stack_Indexes ((Task_1_Stack'Last - 902, Task_2_Stack'Last - 1_002));
+      T.Check_Stack_Indexes ([Task_1_Stack'Last - 902, Task_2_Stack'Last - 1_002]);
 
       -- Send a tick and expect a packet.
       T.Tick_T_Send (A_Tick);
@@ -218,7 +218,7 @@ package body Stack_Monitor_Tests.Implementation is
 
       -- A little white box testing. The internal index in the component for
       -- caching should be at the last location where the stack ended.
-      T.Check_Stack_Indexes ((0, 0));
+      T.Check_Stack_Indexes ([0, 0]);
 
       -- Send a tick and expect a packet.
       T.Tick_T_Send (A_Tick);
@@ -230,7 +230,7 @@ package body Stack_Monitor_Tests.Implementation is
 
       -- A little white box testing. The internal index in the component for
       -- caching should be at the last location where the stack ended.
-      T.Check_Stack_Indexes ((0, 0));
+      T.Check_Stack_Indexes ([0, 0]);
 
       -- OK let's test some special cases.
       Task_1_Info.Stack_Size := 99;
@@ -248,7 +248,7 @@ package body Stack_Monitor_Tests.Implementation is
 
       -- A little white box testing. The internal index in the component for
       -- caching should be at the last location where the stack ended.
-      T.Check_Stack_Indexes ((0, 0));
+      T.Check_Stack_Indexes ([0, 0]);
 
       -- No events should have been sent unless a command was sent. No commands were sent.
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
@@ -344,7 +344,7 @@ package body Stack_Monitor_Tests.Implementation is
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Packet_Period_Set_History.Get_Count, 0);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Set_Packet_Period_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 0)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Set_Packet_Period_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 0]));
    end Test_Invalid_Command;
 
 end Stack_Monitor_Tests.Implementation;

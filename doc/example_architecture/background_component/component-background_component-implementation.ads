@@ -28,7 +28,7 @@ private
       -- Fetch the data.
       function Get_Data return Two_Byte_Array;
    private
-      Data : Basic_Types.Byte_Array (0 .. 1) := (0, 0);
+      Data : Basic_Types.Byte_Array (0 .. 1) := [0, 0];
    end Protected_Data;
 
    -- The component class instance record:

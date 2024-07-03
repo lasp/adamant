@@ -47,7 +47,7 @@ package body Ccsds_Downsampler_Tests.Implementation is
 
    -- Helper function to create data product definitions
    function Test_Dp_Recieved (Id : in Data_Product_Types.Data_Product_Id; Product_Value : in Unsigned_16) return Data_Product.T is
-      Dp : Data_Product.T := (Header => (Id => Id, Time => (0, 0), Buffer_Length => Packed_U16.Serialization.Serialized_Length), Buffer => (others => 0));
+      Dp : Data_Product.T := (Header => (Id => Id, Time => (0, 0), Buffer_Length => Packed_U16.Serialization.Serialized_Length), Buffer => [others => 0]);
    begin
       Dp.Buffer (Dp.Buffer'First .. Dp.Buffer'First + Packed_U16.Serialization.Serialized_Length - 1) := Packed_U16.Serialization.To_Byte_Array ((Value => Product_Value));
       return Dp;
@@ -387,7 +387,7 @@ package body Ccsds_Downsampler_Tests.Implementation is
       -- Make sure some events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Modify_Filter_Factor_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 0)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Modify_Filter_Factor_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 0]));
    end Test_Invalid_Command;
 
 end Ccsds_Downsampler_Tests.Implementation;
