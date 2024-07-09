@@ -40,7 +40,7 @@ package {{ name }} is
          Arg_Buffer => (
 {% if response.command.type_model %}
             {{ response.command_arg_type_model.name }}.Serialization.To_Byte_Array ({{ response.command_arg }}) &
-            (0 .. Command_Types.Command_Arg_Buffer_Type'Length - {{ response.command_arg_type_model.name }}.Size_In_Bytes - 1 => 0)
+            [0 .. Command_Types.Command_Arg_Buffer_Type'Length - {{ response.command_arg_type_model.name }}.Size_In_Bytes - 1 => 0]
 {% else %}
             others => 0
 {% endif %}
@@ -53,10 +53,10 @@ package {{ name }} is
    -- The fault response configuration list:
    --
 
-   Fault_Response_List : constant Fault_Correction_Types.Fault_Response_Config_List := (
+   Fault_Response_List : constant Fault_Correction_Types.Fault_Response_Config_List := [
 {% for response in responses %}
       {{ loop.index0 }} => {{ response.full_fault_name_str }}_Response{{ "," if not loop.last }}
 {% endfor %}
-   );
+   ];
 
 end {{ name }};
