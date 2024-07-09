@@ -424,12 +424,12 @@ private
    -- Procedure lookup table for dispatching to correct connector handler:
    type Dispatch_Procedure is not null access procedure (Self : in out Base_Instance;{% if connectors.arrayed_invokee() %} Index : in Connector_Index_Type;{% endif %} Bytes : in Basic_Types.Byte_Array);
    type Dispatch_Table_T is array (Connector_Identifier_Enum) of Dispatch_Procedure;
-   Dispatch_Table : constant Dispatch_Table_T := (
+   Dispatch_Table : constant Dispatch_Table_T := [
       Quit =>   Dispatch_Quit'Access,
 {% for connector in connectors.of_kind('recv_async') %}
       {{ connector.name }} => Dispatch_{{ connector.name }}'Access{{ "," if not loop.last }}
 {% endfor %}
-   );
+   ];
 
    ---------------------------------------
    -- Private methods for a component queue
@@ -546,11 +546,11 @@ private
    -- Procedure lookup table for dispatching to correct command handler:
    type Execute_Function is not null access function (Self : in out Base_Instance; Cmd : in Command.T) return Command_Response_Status.E;
    type Command_Table_T is array ({{ commands.name }}.Local_Command_Id_Type) of Execute_Function;
-   Command_Id_Table : constant Command_Table_T := (
+   Command_Id_Table : constant Command_Table_T := [
 {% for command in commands %}
       {{ commands.name }}.{{ command.name }}_Id => Execute_{{ command.name }}'Access{{ "," if not loop.last }}
 {% endfor %}
-   );
+   ];
 
 {% endif %}
 {% if parameters %}
@@ -585,20 +585,20 @@ private
    -- Procedure lookup table for dispatching to parameter stage handler:
    type Stage_Function is not null access function (Self : in out Base_Instance; Par : in Parameter.T) return Parameter_Update_Status.E;
    type Parameter_Table_T is array ({{ parameters.name }}.Local_Parameter_Id_Type) of Stage_Function;
-   Parameter_Id_Table : constant Parameter_Table_T := (
+   Parameter_Id_Table : constant Parameter_Table_T := [
 {% for par in parameters %}
       {{ parameters.name }}.{{ par.name }}_Id => Stage_{{ par.name }}'Access{{ "," if not loop.last }}
 {% endfor %}
-   );
+   ];
 
    -- Procedure lookup table for dispatching to parameter fetch handler:
    type Fetch_Function is not null access function (Self : in out Base_Instance; Par : in out Parameter.T) return Parameter_Update_Status.E;
    type Parameter_Fetch_Table_T is array ({{ parameters.name }}.Local_Parameter_Id_Type) of Fetch_Function;
-   Parameter_Id_Fetch_Table : constant Parameter_Fetch_Table_T := (
+   Parameter_Id_Fetch_Table : constant Parameter_Fetch_Table_T := [
 {% for par in parameters %}
       {{ parameters.name }}.{{ par.name }}_Id => Fetch_{{ par.name }}'Access{{ "," if not loop.last }}
 {% endfor %}
-   );
+   ];
 
    -- A protected object is used to store the component's staged parameters. This is because
    -- the staged parameters are accessed by both the execution thread of the component and the

@@ -45,35 +45,35 @@ package body Ccsds_Product_Extractor_Tests.Implementation is
 
    -- Helper function to create data product definitions
    function Test_Dp_Recieved_Natural (Id : in Data_Product_Types.Data_Product_Id; Product_Value : in Natural; Timestamp : in Sys_Time.T) return Data_Product.T is
-      Dp : Data_Product.T := (Header => (Id => Id, Time => Timestamp, Buffer_Length => Packed_Natural.Serialization.Serialized_Length), Buffer => (others => 16#FF#));
+      Dp : Data_Product.T := (Header => (Id => Id, Time => Timestamp, Buffer_Length => Packed_Natural.Serialization.Serialized_Length), Buffer => [others => 16#FF#]);
    begin
       Dp.Buffer (Dp.Buffer'First .. Dp.Buffer'First + Packed_Natural.Serialization.Serialized_Length - 1) := Packed_Natural.Serialization.To_Byte_Array ((Value => Product_Value));
       return Dp;
    end Test_Dp_Recieved_Natural;
 
    function Test_Dp_Recieved_Natural_Le (Id : in Data_Product_Types.Data_Product_Id; Product_Value : in Natural; Timestamp : in Sys_Time.T) return Data_Product.T is
-      Dp : Data_Product.T := (Header => (Id => Id, Time => Timestamp, Buffer_Length => Packed_Natural.Serialization_Le.Serialized_Length), Buffer => (others => 16#FF#));
+      Dp : Data_Product.T := (Header => (Id => Id, Time => Timestamp, Buffer_Length => Packed_Natural.Serialization_Le.Serialized_Length), Buffer => [others => 16#FF#]);
    begin
       Dp.Buffer (Dp.Buffer'First .. Dp.Buffer'First + Packed_Natural.Serialization_Le.Serialized_Length - 1) := Packed_Natural.Serialization_Le.To_Byte_Array ((Value => Product_Value));
       return Dp;
    end Test_Dp_Recieved_Natural_Le;
 
    function Test_Dp_Recieved_U32 (Id : in Data_Product_Types.Data_Product_Id; Product_Value : in Unsigned_32; Timestamp : in Sys_Time.T) return Data_Product.T is
-      Dp : Data_Product.T := (Header => (Id => Id, Time => Timestamp, Buffer_Length => Packed_U32.Serialization.Serialized_Length), Buffer => (others => 16#FF#));
+      Dp : Data_Product.T := (Header => (Id => Id, Time => Timestamp, Buffer_Length => Packed_U32.Serialization.Serialized_Length), Buffer => [others => 16#FF#]);
    begin
       Dp.Buffer (Dp.Buffer'First .. Dp.Buffer'First + Packed_U32.Serialization.Serialized_Length - 1) := Packed_U32.Serialization.To_Byte_Array ((Value => Product_Value));
       return Dp;
    end Test_Dp_Recieved_U32;
 
    function Test_Dp_Recieved_U16 (Id : in Data_Product_Types.Data_Product_Id; Product_Value : in Unsigned_16; Timestamp : in Sys_Time.T) return Data_Product.T is
-      Dp : Data_Product.T := (Header => (Id => Id, Time => Timestamp, Buffer_Length => Packed_U16.Serialization.Serialized_Length), Buffer => (others => 16#FF#));
+      Dp : Data_Product.T := (Header => (Id => Id, Time => Timestamp, Buffer_Length => Packed_U16.Serialization.Serialized_Length), Buffer => [others => 16#FF#]);
    begin
       Dp.Buffer (Dp.Buffer'First .. Dp.Buffer'First + Packed_U16.Serialization.Serialized_Length - 1) := Packed_U16.Serialization.To_Byte_Array ((Value => Product_Value));
       return Dp;
    end Test_Dp_Recieved_U16;
 
    function Test_Dp_Recieved_U8 (Id : in Data_Product_Types.Data_Product_Id; Product_Value : in Unsigned_8; Timestamp : in Sys_Time.T) return Data_Product.T is
-      Dp : Data_Product.T := (Header => (Id => Id, Time => Timestamp, Buffer_Length => Packed_Byte.Serialization.Serialized_Length), Buffer => (others => 16#FF#));
+      Dp : Data_Product.T := (Header => (Id => Id, Time => Timestamp, Buffer_Length => Packed_Byte.Serialization.Serialized_Length), Buffer => [others => 16#FF#]);
    begin
       Dp.Buffer (Dp.Buffer'First .. Dp.Buffer'First + Packed_Byte.Serialization.Serialized_Length - 1) := Packed_Byte.Serialization.To_Byte_Array ((Value => Product_Value));
       return Dp;
@@ -102,19 +102,19 @@ package body Ccsds_Product_Extractor_Tests.Implementation is
       -- Setup some basic packet info. Start with 0 values just to make sure things are working first.
       Incoming_Packet_Apid_100.Header.Apid := 100;
       Incoming_Packet_Apid_100.Header.Packet_Length := 50;
-      Incoming_Packet_Apid_100.Data := (others => 0);
+      Incoming_Packet_Apid_100.Data := [others => 0];
 
       Incoming_Packet_Apid_200.Header.Apid := 200;
       Incoming_Packet_Apid_200.Header.Packet_Length := 30;
-      Incoming_Packet_Apid_200.Data := (others => 0);
+      Incoming_Packet_Apid_200.Data := [others => 0];
 
       Incoming_Packet_Apid_300.Header.Apid := 300;
       Incoming_Packet_Apid_300.Header.Packet_Length := 20;
-      Incoming_Packet_Apid_300.Data := (others => 0);
+      Incoming_Packet_Apid_300.Data := [others => 0];
 
       Incoming_Packet_Apid_400.Header.Apid := 400;
       Incoming_Packet_Apid_400.Header.Packet_Length := 5;
-      Incoming_Packet_Apid_400.Data := (others => 0);
+      Incoming_Packet_Apid_400.Data := [others => 0];
 
       -- First time through, make sure the data products are 0
       T.Ccsds_Space_Packet_T_Send (Incoming_Packet_Apid_100);

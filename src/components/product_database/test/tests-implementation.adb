@@ -63,13 +63,13 @@ package body Tests.Implementation is
 
    overriding procedure Test_Nominal_Scenario (Self : in out Instance) is
       T : Component.Product_Database.Implementation.Tester.Instance_Access renames Self.Tester;
-      D_Prod : Data_Product.T := (Header => (Time => (1, 17), Id => 1, Buffer_Length => 4), Buffer => (others => 3));
+      D_Prod : Data_Product.T := (Header => (Time => (1, 17), Id => 1, Buffer_Length => 4), Buffer => [others => 3]);
       D_Prod_Return : Data_Product_Return.T;
    begin
       -- Store some data:
       for Id in Min_Id .. Max_Id loop
          D_Prod.Header.Id := Id;
-         D_Prod.Buffer := (others => Basic_Types.Byte (Id));
+         D_Prod.Buffer := [others => Basic_Types.Byte (Id)];
          T.Data_Product_T_Send (D_Prod);
       end loop;
 
@@ -79,7 +79,7 @@ package body Tests.Implementation is
       -- Fetch some data:
       for Id in Min_Id .. Max_Id loop
          D_Prod.Header.Id := Id;
-         D_Prod.Buffer := (others => Basic_Types.Byte (Id));
+         D_Prod.Buffer := [others => Basic_Types.Byte (Id)];
          D_Prod_Return := T.Data_Product_Fetch_T_Request ((Id => Id));
          -- Check return data:
          The_Status_Assert.Eq (D_Prod_Return.The_Status, Fetch_Status.Success);
@@ -96,7 +96,7 @@ package body Tests.Implementation is
       T : Component.Product_Database.Implementation.Tester.Instance_Access renames Self.Tester;
       Cmd : Command.T;
       D_Prod_Return : Data_Product_Return.T;
-      D_Prod : Data_Product.T := (Header => (Time => (1, 17), Id => Min_Id, Buffer_Length => 4), Buffer => (others => 3));
+      D_Prod : Data_Product.T := (Header => (Time => (1, 17), Id => Min_Id, Buffer_Length => 4), Buffer => [others => 3]);
    begin
       -- Setup the component:
       Self.Tester.Component_Instance.Set_Up;
@@ -117,9 +117,9 @@ package body Tests.Implementation is
             Id => Min_Id,
             Buffer_Length => 9
          ),
-         Buffer => (
+         Buffer => [
             others => 99
-         )), Cmd) = Success);
+         ]), Cmd) = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Override_Id, Status => Success));
@@ -147,9 +147,9 @@ package body Tests.Implementation is
             Id => Min_Id,
             Buffer_Length => 9
          ),
-         Buffer => (
+         Buffer => [
             others => 99
-         )
+         ]
       ));
 
       -- Update the overridden data product, expect no change in fetch.
@@ -164,9 +164,9 @@ package body Tests.Implementation is
             Id => Min_Id,
             Buffer_Length => 9
          ),
-         Buffer => (
+         Buffer => [
             others => 99
-         )
+         ]
       ));
 
       -- Clear the override status for this ID.
@@ -203,9 +203,9 @@ package body Tests.Implementation is
             Id => Min_Id + 1,
             Buffer_Length => 12
          ),
-         Buffer => (
+         Buffer => [
             others => 88
-         )), Cmd) = Success);
+         ]), Cmd) = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 3);
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (3), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Override_Id, Status => Success));
@@ -233,9 +233,9 @@ package body Tests.Implementation is
             Id => Min_Id + 1,
             Buffer_Length => 12
          ),
-         Buffer => (
+         Buffer => [
             others => 88
-         )
+         ]
       ));
 
       -- Send command to override another data product:
@@ -245,9 +245,9 @@ package body Tests.Implementation is
             Id => Min_Id + 2,
             Buffer_Length => 11
          ),
-         Buffer => (
+         Buffer => [
             others => 77
-         )), Cmd) = Success);
+         ]), Cmd) = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 4);
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (4), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Override_Id, Status => Success));
@@ -275,9 +275,9 @@ package body Tests.Implementation is
             Id => Min_Id + 2,
             Buffer_Length => 11
          ),
-         Buffer => (
+         Buffer => [
             others => 77
-         )
+         ]
       ));
 
       -- Update three data products (last two which are overridden):
@@ -303,9 +303,9 @@ package body Tests.Implementation is
             Id => Min_Id + 1,
             Buffer_Length => 12
          ),
-         Buffer => (
+         Buffer => [
             others => 88
-         )
+         ]
       ));
 
       -- Fetch and check the overridden data product:
@@ -317,9 +317,9 @@ package body Tests.Implementation is
             Id => Min_Id + 2,
             Buffer_Length => 11
          ),
-         Buffer => (
+         Buffer => [
             others => 77
-         )
+         ]
       ));
 
       -- Clear the override condition for all.
@@ -366,13 +366,13 @@ package body Tests.Implementation is
 
    overriding procedure Test_Nominal_Dump (Self : in out Instance) is
       T : Component.Product_Database.Implementation.Tester.Instance_Access renames Self.Tester;
-      D_Prod : Data_Product.T := (Header => (Time => (1, 17), Id => 1, Buffer_Length => 4), Buffer => (others => 3));
+      D_Prod : Data_Product.T := (Header => (Time => (1, 17), Id => 1, Buffer_Length => 4), Buffer => [others => 3]);
       Cnt : Natural := 1;
    begin
       -- Store some data:
       for Id in Min_Id .. Max_Id loop
          D_Prod.Header.Id := Id;
-         D_Prod.Buffer := (others => Basic_Types.Byte (Id));
+         D_Prod.Buffer := [others => Basic_Types.Byte (Id)];
          T.Data_Product_T_Send (D_Prod);
       end loop;
 
@@ -382,7 +382,7 @@ package body Tests.Implementation is
       -- Dump some data:
       for Id in Min_Id .. Max_Id loop
          D_Prod.Header.Id := Id;
-         D_Prod.Buffer := (others => Basic_Types.Byte (Id));
+         D_Prod.Buffer := [others => Basic_Types.Byte (Id)];
 
          -- Dump data product:
          T.Command_T_Send (T.Commands.Dump ((Id => Id)));
@@ -404,13 +404,13 @@ package body Tests.Implementation is
 
    overriding procedure Test_Nominal_Dump_Poly (Self : in out Instance) is
       T : Component.Product_Database.Implementation.Tester.Instance_Access renames Self.Tester;
-      D_Prod : Data_Product.T := (Header => (Time => (1, 17), Id => 1, Buffer_Length => 4), Buffer => (others => 3));
+      D_Prod : Data_Product.T := (Header => (Time => (1, 17), Id => 1, Buffer_Length => 4), Buffer => [others => 3]);
       Cnt : Natural := 1;
    begin
       -- Store some data:
       for Id in Min_Id .. Max_Id loop
          D_Prod.Header.Id := Id;
-         D_Prod.Buffer := (others => Basic_Types.Byte (Id));
+         D_Prod.Buffer := [others => Basic_Types.Byte (Id)];
          T.Data_Product_T_Send (D_Prod);
       end loop;
 
@@ -420,7 +420,7 @@ package body Tests.Implementation is
       -- Dump some data:
       for Id in Min_Id .. Max_Id loop
          D_Prod.Header.Id := Id;
-         D_Prod.Buffer := (others => Basic_Types.Byte (Id));
+         D_Prod.Buffer := [others => Basic_Types.Byte (Id)];
 
          -- Dump data product:
          T.Command_T_Send (T.Commands.Dump_Poly_Type ((Id => Id, Offset => 8, Size => 8)));
@@ -432,12 +432,12 @@ package body Tests.Implementation is
          Natural_Assert.Eq (T.Dumping_Data_Product_Poly_Type_History.Get_Count, Cnt);
          Data_Product_Poly_Extract_Assert.Eq (T.Dumping_Data_Product_Poly_Type_History.Get (Cnt), (Id => Id, Offset => 8, Size => 8));
          Natural_Assert.Eq (T.Dumped_Data_Product_Poly_Type_History.Get_Count, Cnt);
-         Data_Product_Poly_Event_Assert.Eq (T.Dumped_Data_Product_Poly_Type_History.Get (Cnt), (Header => D_Prod.Header, Data => (0, 0, 0, Basic_Types.Byte (Id))));
+         Data_Product_Poly_Event_Assert.Eq (T.Dumped_Data_Product_Poly_Type_History.Get (Cnt), (Header => D_Prod.Header, Data => [0, 0, 0, Basic_Types.Byte (Id)]));
 
          -- Check data product:
          Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, Cnt);
          Natural_Assert.Eq (T.Data_Product_Poly_Type_Dump_History.Get_Count, Cnt);
-         Data_Product_Poly_Type_Assert.Eq (T.Data_Product_Poly_Type_Dump_History.Get (Cnt), (Time => D_Prod.Header.Time, Id => Id, Data => (0, 0, 0, Basic_Types.Byte (Id))));
+         Data_Product_Poly_Type_Assert.Eq (T.Data_Product_Poly_Type_Dump_History.Get (Cnt), (Time => D_Prod.Header.Time, Id => Id, Data => [0, 0, 0, Basic_Types.Byte (Id)]));
          Cnt := Cnt + 1;
       end loop;
 
@@ -457,7 +457,7 @@ package body Tests.Implementation is
 
    overriding procedure Test_Data_Not_Available (Self : in out Instance) is
       T : Component.Product_Database.Implementation.Tester.Instance_Access renames Self.Tester;
-      D_Prod : Data_Product.T := (Header => (Time => (1, 17), Id => 1, Buffer_Length => 4), Buffer => (others => 3));
+      D_Prod : Data_Product.T := (Header => (Time => (1, 17), Id => 1, Buffer_Length => 4), Buffer => [others => 3]);
       D_Prod_Return : Data_Product_Return.T;
       Cnt : Natural := 1;
    begin
@@ -467,7 +467,7 @@ package body Tests.Implementation is
       -- Fetch some data, expect error:
       for Id in Min_Id .. Max_Id loop
          D_Prod.Header.Id := Id;
-         D_Prod.Buffer := (others => Basic_Types.Byte (Id));
+         D_Prod.Buffer := [others => Basic_Types.Byte (Id)];
          D_Prod_Return := T.Data_Product_Fetch_T_Request ((Id => Id));
          -- Check return data:
          The_Status_Assert.Eq (D_Prod_Return.The_Status, Fetch_Status.Not_Available);
@@ -513,7 +513,7 @@ package body Tests.Implementation is
       -- Store some data:
       for Id in Min_Id .. Max_Id loop
          D_Prod.Header.Id := Id;
-         D_Prod.Buffer := (others => Basic_Types.Byte (Id));
+         D_Prod.Buffer := [others => Basic_Types.Byte (Id)];
          T.Data_Product_T_Send (D_Prod);
       end loop;
 
@@ -523,7 +523,7 @@ package body Tests.Implementation is
       -- Fetch some data and expect to get valid data:
       for Id in Min_Id .. Max_Id loop
          D_Prod.Header.Id := Id;
-         D_Prod.Buffer := (others => Basic_Types.Byte (Id));
+         D_Prod.Buffer := [others => Basic_Types.Byte (Id)];
          D_Prod_Return := T.Data_Product_Fetch_T_Request ((Id => Id));
          -- Check return data:
          The_Status_Assert.Eq (D_Prod_Return.The_Status, Fetch_Status.Success);
@@ -538,13 +538,13 @@ package body Tests.Implementation is
       use Data_Product_Types;
       use Serializer_Types;
       T : Component.Product_Database.Implementation.Tester.Instance_Access renames Self.Tester;
-      D_Prod : Data_Product.T := (Header => (Time => (1, 17), Id => 1, Buffer_Length => 4), Buffer => (others => 3));
+      D_Prod : Data_Product.T := (Header => (Time => (1, 17), Id => 1, Buffer_Length => 4), Buffer => [others => 3]);
       D_Prod_Return : Data_Product_Return.T;
       Cmd : Command.T;
    begin
       -- Try to store data with bad id:
       D_Prod.Header.Id := Max_Max_Id + Data_Product_Types.Data_Product_Id (1);
-      D_Prod.Buffer := (others => Basic_Types.Byte (2));
+      D_Prod.Buffer := [others => Basic_Types.Byte (2)];
       T.Data_Product_T_Send (D_Prod);
       T.Data_Product_T_Send (D_Prod);
       T.Data_Product_T_Send (D_Prod);
@@ -598,7 +598,7 @@ package body Tests.Implementation is
 
       -- Try to override data with bad id:
       D_Prod.Header.Id := 1;
-      D_Prod.Buffer := (others => Basic_Types.Byte (2));
+      D_Prod.Buffer := [others => Basic_Types.Byte (2)];
       pragma Assert (T.Commands.Override (D_Prod, Cmd) = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 4);
@@ -623,7 +623,7 @@ package body Tests.Implementation is
       -- Make sure some events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Dump_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 0)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Dump_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 0]));
    end Test_Invalid_Command;
 
 end Tests.Implementation;

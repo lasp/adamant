@@ -17,7 +17,7 @@ package body Event_Filter_Entry is
       Self.Events := new Basic_Types.Byte_Array (0 .. Num_Event_Bytes - 1);
 
       -- Init the array so that all events are enabled by default and the counts are set to 0.
-      Self.Events.all := (others => Event_Filter_Entry_Type.Serialization.To_Byte_Array ((
+      Self.Events.all := [others => Event_Filter_Entry_Type.Serialization.To_Byte_Array ((
          State_0 => Event_Filter_State.Unfiltered,
          State_1 => Event_Filter_State.Unfiltered,
          State_2 => Event_Filter_State.Unfiltered,
@@ -26,7 +26,7 @@ package body Event_Filter_Entry is
          State_5 => Event_Filter_State.Unfiltered,
          State_6 => Event_Filter_State.Unfiltered,
          State_7 => Event_Filter_State.Unfiltered
-      )) (0));
+      )) (0)];
 
       -- Then disable the event based on our disable list
       for Event_Id_To_Filter of Event_Filter_List loop

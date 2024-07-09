@@ -28,7 +28,7 @@ package body Component.Stack_Monitor.Implementation is
       -- Dynamically create a list of cached indexes to speed up the calculation of the stack size. This
       -- list is the same size as the task list passed in.
       Self.Stack_Indexes := new Index_Array_Type (Task_List.all'First .. Task_List.all'Last);
-      Self.Stack_Indexes.all := (others => 0);
+      Self.Stack_Indexes.all := [others => 0];
 
       -- Set the packet length. Each data point for
       -- stack usage is a percentage that is 1 byte large. We store 2 of these per
@@ -40,7 +40,7 @@ package body Component.Stack_Monitor.Implementation is
             Sequence_Count => 0,
             Buffer_Length => 2 * Self.Tasks.all'Length
          ),
-         Buffer => (others => 0)
+         Buffer => [others => 0]
       );
    end Init;
 

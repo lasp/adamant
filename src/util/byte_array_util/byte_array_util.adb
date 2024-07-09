@@ -75,7 +75,7 @@ package body Byte_Array_Util is
    function Extract_Poly_Type (Src : in Byte_Array; Offset : in Natural; Size : in Positive; Is_Signed : in Boolean; Value : out Poly_32_Type) return Extract_Poly_Type_Status is
    begin
       -- Initialize out parameter:
-      Value := (0, 0, 0, 0);
+      Value := [0, 0, 0, 0];
 
       -- Validate offset and size. Size must be <= 32 bits. The size + offset must not overflow
       -- the size of the byte array. Size must be greater than zero.
@@ -184,12 +184,12 @@ package body Byte_Array_Util is
                declare
                   Value_Int_Trunc : constant Unsigned_32 := Value_Int and Limit;
                begin
-                  Value_To_Set := (
+                  Value_To_Set := [
                      3 => Unsigned_8 (Value_Int_Trunc and 16#FF#),
                      2 => Unsigned_8 (Shift_Right (Value_Int_Trunc, 8) and 16#FF#),
                      1 => Unsigned_8 (Shift_Right (Value_Int_Trunc, 16) and 16#FF#),
                      0 => Unsigned_8 (Shift_Right (Value_Int_Trunc, 24) and 16#FF#)
-                  );
+                  ];
                end;
             else
                return Truncation_Error;

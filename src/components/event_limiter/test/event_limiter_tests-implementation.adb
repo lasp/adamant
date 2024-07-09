@@ -67,7 +67,7 @@ package body Event_Limiter_Tests.Implementation is
          -- One bit per a status so mod to find which bit in the byte it is
          Bit_Location := Bit_Num (Natural (Event_Num - Start_Id) mod 8);
 
-         Event_Bitmap := Event_Id_Limiter_State_Type.Serialization.From_Byte_Array ((0 => State_Packet.Buffer (Byte_Num)));
+         Event_Bitmap := Event_Id_Limiter_State_Type.Serialization.From_Byte_Array ([0 => State_Packet.Buffer (Byte_Num)]);
 
          case Bit_Location is
             when 0 =>
@@ -99,7 +99,7 @@ package body Event_Limiter_Tests.Implementation is
          -- One bit per a status so mod to find which bit in the byte it is
          Bit_Location := Bit_Num (Natural (Event_Num - Start_Id) mod 8);
 
-         Event_Bitmap := Event_Id_Limiter_State_Type.Serialization.From_Byte_Array ((0 => State_Packet.Buffer (Byte_Num)));
+         Event_Bitmap := Event_Id_Limiter_State_Type.Serialization.From_Byte_Array ([0 => State_Packet.Buffer (Byte_Num)]);
 
          case Bit_Location is
             when 0 =>
@@ -132,7 +132,7 @@ package body Event_Limiter_Tests.Implementation is
       T : Component.Event_Limiter.Implementation.Tester.Instance_Access renames Self.Tester;
       Incoming_Event : Event.T;
       Input_Tick : constant Tick.T := ((0, 0), 0);
-      Event_Start_List : constant Event_Id_List := (3, 6);
+      Event_Start_List : constant Event_Id_List := [3, 6];
    begin
       Put_Line ("");
       Put_Line ("----------------------------------");
@@ -187,7 +187,7 @@ package body Event_Limiter_Tests.Implementation is
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Event_Assert.Eq
          (T.Event_T_Recv_Sync_History.Get (1),
-          (Header => (Time => (0, 0), Id => T.Events.Get_Events_Limited_Since_Last_Tick_Id, Param_Buffer_Length => 23), Param_Buffer => (0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)));
+          (Header => (Time => (0, 0), Id => T.Events.Get_Events_Limited_Since_Last_Tick_Id, Param_Buffer_Length => 23), Param_Buffer => [0, 3, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
 
       -- Now do it again at the top of the range
       T.Event_Forward_T_Recv_Sync_History.Clear;
@@ -228,7 +228,7 @@ package body Event_Limiter_Tests.Implementation is
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
       Event_Assert.Eq
          (T.Event_T_Recv_Sync_History.Get (2),
-          (Header => (Time => (0, 0), Id => T.Events.Get_Events_Limited_Since_Last_Tick_Id, Param_Buffer_Length => 23), Param_Buffer => (0, 5, 1, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)));
+          (Header => (Time => (0, 0), Id => T.Events.Get_Events_Limited_Since_Last_Tick_Id, Param_Buffer_Length => 23), Param_Buffer => [0, 5, 1, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
 
       -- Now perform the operation on a disabled event. Should be no limiting and no data product with it
       T.Event_Forward_T_Recv_Sync_History.Clear;
@@ -266,7 +266,7 @@ package body Event_Limiter_Tests.Implementation is
    overriding procedure Test_Decrement_Event_Count (Self : in out Instance) is
       T : Component.Event_Limiter.Implementation.Tester.Instance_Access renames Self.Tester;
       Input_Tick : constant Tick.T := ((0, 0), 0);
-      Event_Start_List : constant Event_Id_List := (2, 8);
+      Event_Start_List : constant Event_Id_List := [2, 8];
       Incoming_Event : Event.T;
    begin
       Put_Line ("");
@@ -396,7 +396,7 @@ package body Event_Limiter_Tests.Implementation is
       Natural_Assert.Eq (T.Events_Limited_Since_Last_Tick_History.Get_Count, 4);
       Event_Assert.Eq
          (T.Event_T_Recv_Sync_History.Get (1),
-          (Header => (Time => (0, 0), Id => T.Events.Get_Events_Limited_Since_Last_Tick_Id, Param_Buffer_Length => 23), Param_Buffer => (0, 6, 4, 0, 1, 0, 7, 0, 10, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)));
+          (Header => (Time => (0, 0), Id => T.Events.Get_Events_Limited_Since_Last_Tick_Id, Param_Buffer_Length => 23), Param_Buffer => [0, 6, 4, 0, 1, 0, 7, 0, 10, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
 
       -- Now test if there is an event being limited, that each tick there is one event that we get between each tick
       T.Event_Forward_T_Recv_Sync_History.Clear;
@@ -423,7 +423,7 @@ package body Event_Limiter_Tests.Implementation is
       Natural_Assert.Eq (T.Events_Limited_Since_Last_Tick_History.Get_Count, 5);
       Event_Assert.Eq
          (T.Event_T_Recv_Sync_History.Get (2),
-          (Header => (Time => (0, 0), Id => T.Events.Get_Events_Limited_Since_Last_Tick_Id, Param_Buffer_Length => 23), Param_Buffer => (0, 1, 1, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)));
+          (Header => (Time => (0, 0), Id => T.Events.Get_Events_Limited_Since_Last_Tick_Id, Param_Buffer_Length => 23), Param_Buffer => [0, 1, 1, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
       -- Now make sure we get only one more event
       T.Event_T_Send (Incoming_Event);
       Natural_Assert.Eq (T.Event_Forward_T_Recv_Sync_History.Get_Count, 4);
@@ -443,7 +443,7 @@ package body Event_Limiter_Tests.Implementation is
       Natural_Assert.Eq (T.Events_Limited_Since_Last_Tick_History.Get_Count, 6);
       Event_Assert.Eq
          (T.Event_T_Recv_Sync_History.Get (3),
-          (Header => (Time => (0, 0), Id => T.Events.Get_Events_Limited_Since_Last_Tick_Id, Param_Buffer_Length => 23), Param_Buffer => (0, 2, 1, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)));
+          (Header => (Time => (0, 0), Id => T.Events.Get_Events_Limited_Since_Last_Tick_Id, Param_Buffer_Length => 23), Param_Buffer => [0, 2, 1, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
 
       T.Event_T_Send (Incoming_Event);
       Natural_Assert.Eq (T.Event_Forward_T_Recv_Sync_History.Get_Count, 5);
@@ -457,13 +457,13 @@ package body Event_Limiter_Tests.Implementation is
    overriding procedure Test_Issue_State_Packet (Self : in out Instance) is
       T : Component.Event_Limiter.Implementation.Tester.Instance_Access renames Self.Tester;
       Input_Tick : constant Tick.T := ((0, 0), 0);
-      Event_Start_List : constant Event_Id_List := (2, 4, 6, 8, 10);
-      Event_Final_Disable_Range_List : constant Event_Id_List := (2, 4, 6, 8, 10, 14, 15, 16);
-      Event_Final_Enable_Range_List : constant Event_Id_List := (0, 1, 3, 5, 7, 9, 11, 12, 13);
-      Event_Disable_List_2 : constant Event_Id_List := (2, 4, 6);
-      Event_Enable_List_2 : constant Event_Id_List := (0, 1, 3, 5, 7);
-      Event_Disable_List_3 : constant Event_Id_List := (5, 9, 13);
-      Event_Enable_List_3 : constant Event_Id_List := (6, 7, 8, 10, 11, 12);
+      Event_Start_List : constant Event_Id_List := [2, 4, 6, 8, 10];
+      Event_Final_Disable_Range_List : constant Event_Id_List := [2, 4, 6, 8, 10, 14, 15, 16];
+      Event_Final_Enable_Range_List : constant Event_Id_List := [0, 1, 3, 5, 7, 9, 11, 12, 13];
+      Event_Disable_List_2 : constant Event_Id_List := [2, 4, 6];
+      Event_Enable_List_2 : constant Event_Id_List := [0, 1, 3, 5, 7];
+      Event_Disable_List_3 : constant Event_Id_List := [5, 9, 13];
+      Event_Enable_List_3 : constant Event_Id_List := [6, 7, 8, 10, 11, 12];
       -- Test starting the id at a non-zero value
       Start_Id : Event_Types.Event_Id := 0;
    begin
@@ -522,8 +522,8 @@ package body Event_Limiter_Tests.Implementation is
       T : Component.Event_Limiter.Implementation.Tester.Instance_Access renames Self.Tester;
       Incoming_Event : Event.T;
       Input_Tick : constant Tick.T := ((0, 0), 0);
-      Event_Start_List : constant Event_Id_List := (3, 6);
-      Event_Empty_List : constant Event_Id_List := (1 .. 0 => 0);
+      Event_Start_List : constant Event_Id_List := [3, 6];
+      Event_Empty_List : constant Event_Id_List := [1 .. 0 => 0];
       Start_Id : constant Event_Types.Event_Id := 0;
    begin
       Put_Line ("");
@@ -633,10 +633,10 @@ package body Event_Limiter_Tests.Implementation is
       T : Component.Event_Limiter.Implementation.Tester.Instance_Access renames Self.Tester;
       Incoming_Event : Event.T;
       Input_Tick : constant Tick.T := ((0, 0), 0);
-      Event_Start_List : constant Event_Id_List := (2, 8);
-      Event_Final_Disable_Range_List : constant Event_Id_List := (3, 4, 5, 6, 7);
-      Event_Final_Enable_Range_List : constant Event_Id_List := (3, 7);
-      Event_Empty_List : constant Event_Id_List := (1 .. 0 => 0);
+      Event_Start_List : constant Event_Id_List := [2, 8];
+      Event_Final_Disable_Range_List : constant Event_Id_List := [3, 4, 5, 6, 7];
+      Event_Final_Enable_Range_List : constant Event_Id_List := [3, 7];
+      Event_Empty_List : constant Event_Id_List := [1 .. 0 => 0];
       -- Test starting the id at a non-zero value
       Start_Id : constant Event_Types.Event_Id := 2;
    begin
@@ -770,9 +770,9 @@ package body Event_Limiter_Tests.Implementation is
       T : Component.Event_Limiter.Implementation.Tester.Instance_Access renames Self.Tester;
       Incoming_Event : Event.T;
       Input_Tick : constant Tick.T := ((0, 0), 0);
-      Event_Start_List : constant Event_Id_List := (2, 5, 8, 10);
-      Event_Disabled_List : constant Event_Id_List := (2, 5, 8, 10, 12, 13, 14, 15, 16);
-      Event_Enabled_List : constant Event_Id_List := (1, 3, 4, 6, 7, 9, 11);
+      Event_Start_List : constant Event_Id_List := [2, 5, 8, 10];
+      Event_Disabled_List : constant Event_Id_List := [2, 5, 8, 10, 12, 13, 14, 15, 16];
+      Event_Enabled_List : constant Event_Id_List := [1, 3, 4, 6, 7, 9, 11];
       Component_Enable_State : Two_Counter_Entry_Enums.Event_State_Type.E;
       -- Test starting the id at a non-zero value
       Start_Id : constant Event_Types.Event_Id := 1;
@@ -1010,7 +1010,7 @@ package body Event_Limiter_Tests.Implementation is
       -- Make sure some events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Disable_Event_Limit_Range_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 0)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Disable_Event_Limit_Range_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 0]));
    end Test_Invalid_Command;
 
 end Event_Limiter_Tests.Implementation;

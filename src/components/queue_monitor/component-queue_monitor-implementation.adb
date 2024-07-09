@@ -30,7 +30,7 @@ package body Component.Queue_Monitor.Implementation is
             Sequence_Count => 0,
             Buffer_Length => Self.Queued_Component_List'Length * 2
          ),
-         Buffer => (others => 0)
+         Buffer => [others => 0]
       );
 
       -- Initialize the packet period:

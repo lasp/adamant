@@ -180,8 +180,8 @@ package body Command_Router_Tests.Implementation is
    overriding procedure Test_Nominal_Registration (Self : in out Instance) is
       use Command_Response_Status;
       T : Component.Command_Router.Implementation.Tester.Instance_Access renames Self.Tester;
-      Buffer1 : constant Command_Types.Command_Arg_Buffer_Type := (0 => 56, 1 => 57, others => 0);
-      Buffer2 : constant Command_Types.Command_Arg_Buffer_Type := (0 => 13, 1 => 14, others => 0);
+      Buffer1 : constant Command_Types.Command_Arg_Buffer_Type := [0 => 56, 1 => 57, others => 0];
+      Buffer2 : constant Command_Types.Command_Arg_Buffer_Type := [0 => 13, 1 => 14, others => 0];
       A_Command : Command.T;
       Reg_Cmds : Registration_Commands.Instance;
       Ignore : Natural;
@@ -238,13 +238,13 @@ package body Command_Router_Tests.Implementation is
       use Command_Response_Status;
       T : Component.Command_Router.Implementation.Tester.Instance_Access renames Self.Tester;
       Ignore : Natural;
-      Buffer1 : constant Command_Types.Command_Arg_Buffer_Type := (0 => 56, 1 => 57, others => 0);
+      Buffer1 : constant Command_Types.Command_Arg_Buffer_Type := [0 => 56, 1 => 57, others => 0];
       A_Command : Command.T;
    begin
       T.Command_T_Recv_Sync_History.Clear; -- clear registration commands from history
 
       -- Test sending a command that is not registered.
-      T.Command_T_To_Route_Send (((Source_Id => 0, Id => 99, Arg_Buffer_Length => 19), Arg_Buffer => (others => 0)));
+      T.Command_T_To_Route_Send (((Source_Id => 0, Id => 99, Arg_Buffer_Length => 19), Arg_Buffer => [others => 0]));
       Ignore := Self.Tester.Dispatch_All;
       Natural_Assert.Eq (T.Command_Received_History.Get_Count, 1);
       Command_Header_Assert.Eq (T.Command_Received_History.Get (1), (Source_Id => 0, Id => 99, Arg_Buffer_Length => 19));
@@ -295,7 +295,7 @@ package body Command_Router_Tests.Implementation is
       -- Execute component and make sure command was executed:
       Natural_Assert.Eq (Self.Tester.Dispatch_All, 1);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => 27, Errant_Field_Number => Unsigned_32'Last - 1, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 27)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => 27, Errant_Field_Number => Unsigned_32'Last - 1, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 27]));
 
       -- Execute component and make sure response was sent:
       Natural_Assert.Eq (Self.Tester.Dispatch_All, 1);
@@ -353,7 +353,7 @@ package body Command_Router_Tests.Implementation is
    overriding procedure Test_Full_Queue_Errors (Self : in out Instance) is
       use Command_Response_Status;
       T : Component.Command_Router.Implementation.Tester.Instance_Access renames Self.Tester;
-      Buffer : constant Command_Types.Command_Arg_Buffer_Type := (0 => 56, 1 => 57, others => 92);
+      Buffer : constant Command_Types.Command_Arg_Buffer_Type := [0 => 56, 1 => 57, others => 92];
       A_Command : constant Command.T := ((Source_Id => 2, Id => 15, Arg_Buffer_Length => Buffer'Length), Arg_Buffer => Buffer);
 
       procedure Fill_Queue (N : Natural := 10) is
@@ -464,7 +464,7 @@ package body Command_Router_Tests.Implementation is
       Natural_Assert.Eq (T.Noop_Received_History.Get_Count, 0);
       -- Make sure an invalid command event was sent.
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Noop_Id, Errant_Field_Number => Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 5)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Noop_Id, Errant_Field_Number => Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 5]));
 
       -- Execute component and make sure response was sent:
       Natural_Assert.Eq (Self.Tester.Dispatch_All, 1);
@@ -500,7 +500,7 @@ package body Command_Router_Tests.Implementation is
       Natural_Assert.Eq (T.Noop_Arg_Received_History.Get_Count, 0);
       -- Make sure an invalid command event was sent.
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 2);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (2), (Id => T.Commands.Get_Noop_Arg_Id, Errant_Field_Number => Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 0)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (2), (Id => T.Commands.Get_Noop_Arg_Id, Errant_Field_Number => Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 0]));
 
       -- Execute component and make sure response was sent:
       Natural_Assert.Eq (Self.Tester.Dispatch_All, 1);
@@ -546,7 +546,7 @@ package body Command_Router_Tests.Implementation is
       Natural_Assert.Eq (T.Noop_Arg_Received_History.Get_Count, 0);
       -- Make sure an invalid command event was sent.
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Noop_Arg_Id, Errant_Field_Number => 1, Errant_Field => (0, 0, 0, 0, 16#e8#, 16#3#, 0, 0)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Noop_Arg_Id, Errant_Field_Number => 1, Errant_Field => [0, 0, 0, 0, 16#e8#, 16#3#, 0, 0]));
 
       -- Execute component and make sure response was sent:
       Natural_Assert.Eq (Self.Tester.Dispatch_All, 1);
@@ -828,8 +828,8 @@ package body Command_Router_Tests.Implementation is
       T : Component.Command_Router.Implementation.Tester.Instance_Access renames Self.Tester;
       Ignore : Natural;
       A_Command : Command.T;
-      Buffer1 : constant Command_Types.Command_Arg_Buffer_Type := (0 => 56, 1 => 57, others => 0);
-      Buffer2 : constant Command_Types.Command_Arg_Buffer_Type := (0 => 13, 1 => 14, others => 0);
+      Buffer1 : constant Command_Types.Command_Arg_Buffer_Type := [0 => 56, 1 => 57, others => 0];
+      Buffer2 : constant Command_Types.Command_Arg_Buffer_Type := [0 => 13, 1 => 14, others => 0];
    begin
       -- Register two new commands:
       T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 2, Command_Id => 27, Status => Register));

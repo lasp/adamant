@@ -24,7 +24,7 @@ package Component.Event_Filter.Implementation is
    -- event_Id_End_Range : Event_Types.Event_Id - The event ID that ends the range of ids that the component will include for filtering of events.
    -- event_Filter_List : Event_Filter_Entry.Event_Id_List - A list of event IDs that are filtered by default
    --
-   overriding procedure Init (Self : in out Instance; Event_Id_Start_Range : in Event_Types.Event_Id; Event_Id_End_Range : in Event_Types.Event_Id; Event_Filter_List : in Event_Filter_Entry.Event_Id_List := (1 .. 0 => 0));
+   overriding procedure Init (Self : in out Instance; Event_Id_Start_Range : in Event_Types.Event_Id; Event_Id_End_Range : in Event_Types.Event_Id; Event_Filter_List : in Event_Filter_Entry.Event_Id_List := [1 .. 0 => 0]);
 
 private
 

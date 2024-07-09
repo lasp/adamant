@@ -149,9 +149,9 @@ package body Seq_Runtime is
       -- Reset all important state for the runtime except for internal variables.
       Self.Sequence_Region := (Length => 0, Address => System.Null_Address);
       Self.Position := 0;
-      Self.Seq_Header := (Crc => (0, 0), Version => 0, Category => 0, Id => 0, Length => 0);
-      Self.Internals := (others => (Value => (0, 0, 0, 0)));
-      Self.Out_Arguments := (others => (Value => (0, 0, 0, 0)));
+      Self.Seq_Header := (Crc => [0, 0], Version => 0, Category => 0, Id => 0, Length => 0);
+      Self.Internals := [others => (Value => [0, 0, 0, 0])];
+      Self.Out_Arguments := [others => (Value => [0, 0, 0, 0])];
       Self.Telemetry_Timeout := (0, 0);
       Self.Timeout_Set := False;
       Self.Wake_Time := (0, 0);
@@ -163,7 +163,7 @@ package body Seq_Runtime is
       Self.Errant_Field := 0;
       Self.State := Unloaded;
       Self.Next_Position := 0;
-      Self.Bit_Pattern := (Header => (Source_Id => 0, Id => 0, Arg_Buffer_Length => 0), Arg_Buffer => (others => 0));
+      Self.Bit_Pattern := (Header => (Source_Id => 0, Id => 0, Arg_Buffer_Length => 0), Arg_Buffer => [others => 0]);
       Self.Telemetry_Request := (Id => 0, Offset => 0, Size => 1, Tlm_Type => Seq_Data_Format.Unsigned_Byte, New_Value_Required => False);
       Self.Telemetry_Destination := Seq_Internal.Timeout;
       Self.Kill_Engine_Start := Sequence_Engine_Id'First;
@@ -262,7 +262,7 @@ package body Seq_Runtime is
       Temp : constant Variable_Array := Self.Out_Arguments;
    begin
       -- Reset arguments,
-      Self.Out_Arguments := (others => (Value => (0, 0, 0, 0)));
+      Self.Out_Arguments := [others => (Value => [0, 0, 0, 0])];
       -- Return the copy.
       return Temp;
    end Get_And_Reset_Arguments;
@@ -737,7 +737,7 @@ package body Seq_Runtime is
       Ignore : Seq_Position;
    begin
       -- Initialize out parameter:
-      Var := (Value => (others => 0));
+      Var := (Value => [others => 0]);
 
       -- Set the source to either in sequence data or local var data
       case Var_Info.Var_Type is
@@ -1583,7 +1583,7 @@ package body Seq_Runtime is
       -- can the be fetched by the caller.
       Self.String_To_Print := (
          Print_Type => Instruction.Print_Type,
-         Encoded_String => (others => 0)    -- Clear this with zeros.
+         Encoded_String => [others => 0]    -- Clear this with zeros.
       );
       -- Perform copy of string.
       Safe_Left_Copy (
@@ -1617,7 +1617,7 @@ package body Seq_Runtime is
       -- can the be fetched by the caller.
       Self.String_To_Print := (
          Print_Type => Instruction.Print_Type,
-         Encoded_String => (others => 0)    -- Clear this with zeros.
+         Encoded_String => [others => 0]    -- Clear this with zeros.
       );
 
       -- Get the variable:

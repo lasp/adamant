@@ -55,11 +55,11 @@ package body Sequence_Store_Tests.Implementation is
    Slot_Overlap_2 : constant Memory_Region.T := (Address => Slot_3_Memory'Address + Storage_Offset (6), Length => 90);
 
    -- For testing bad initialization conditions:
-   Slots_Empty : aliased Component.Sequence_Store.Sequence_Slot_Array := (1 .. 0 => Slot_0_Region);
-   Slots_Weird_Index : aliased Component.Sequence_Store.Sequence_Slot_Array := (1 => Slot_0_Region, 2 => Slot_1_Region, 3 => Slot_2_Region, 4 => Slot_3_Region);
-   Slots_Too_Small : aliased Component.Sequence_Store.Sequence_Slot_Array := (Slot_0_Region, Slot_Too_Small, Slot_2_Region, Slot_3_Region);
-   Slots_Overlap_1 : aliased Component.Sequence_Store.Sequence_Slot_Array := (Slot_0_Region, Slot_1_Region, Slot_Overlap_1, Slot_3_Region);
-   Slots_Overlap_2 : aliased Component.Sequence_Store.Sequence_Slot_Array := (Slot_0_Region, Slot_1_Region, Slot_3_Region, Slot_Overlap_2);
+   Slots_Empty : aliased Component.Sequence_Store.Sequence_Slot_Array := [1 .. 0 => Slot_0_Region];
+   Slots_Weird_Index : aliased Component.Sequence_Store.Sequence_Slot_Array := [1 => Slot_0_Region, 2 => Slot_1_Region, 3 => Slot_2_Region, 4 => Slot_3_Region];
+   Slots_Too_Small : aliased Component.Sequence_Store.Sequence_Slot_Array := [Slot_0_Region, Slot_Too_Small, Slot_2_Region, Slot_3_Region];
+   Slots_Overlap_1 : aliased Component.Sequence_Store.Sequence_Slot_Array := [Slot_0_Region, Slot_1_Region, Slot_Overlap_1, Slot_3_Region];
+   Slots_Overlap_2 : aliased Component.Sequence_Store.Sequence_Slot_Array := [Slot_0_Region, Slot_1_Region, Slot_3_Region, Slot_Overlap_2];
 
    -------------------------------------------------------------------------
    -- Fixtures:
@@ -99,7 +99,7 @@ package body Sequence_Store_Tests.Implementation is
             Sequence_Count => Sequence_Count,
             Buffer_Length => Packed_Slot_Summary.Size_In_Bytes * Test_Sequence_Store.Slots'Length
          ),
-         Buffer => (others => 0)
+         Buffer => [others => 0]
       );
       Idx : Natural := Pkt.Buffer'First;
    begin
@@ -225,9 +225,9 @@ package body Sequence_Store_Tests.Implementation is
       begin
          -- Initialize slot headers:
          -- Garbage
-         Slot_0_Header := (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 33, Length => 18));
+         Slot_0_Header := (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 33, Length => 18));
          -- Garbage
-         Slot_1_Header := (Slot_Info => (Reserved => 11, State => Active, Validity => Undefined), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 44, Length => 18));
+         Slot_1_Header := (Slot_Info => (Reserved => 11, State => Active, Validity => Undefined), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 44, Length => 18));
          -- Good
          Slot_2_Header :=
             (Slot_Info => (Reserved => 9, State => Active, Validity => Invalid),
@@ -241,18 +241,18 @@ package body Sequence_Store_Tests.Implementation is
                 (Crc => Crc_16.Compute_Crc_16 (Slot_2_Memory (Slot_2_Memory'First + Sequence_Store_Slot_Metadata.Size_In_Bytes + 2 .. Slot_2_Memory'First + Sequence_Store_Slot_Metadata.Size_In_Bytes + 18 - 1)), Version => 0,
                   Category => 0, Id => 55, Length => 18));
          -- Too long:
-         Slot_3_Header := (Slot_Info => (Reserved => 12, State => Active, Validity => Valid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 66, Length => 100));
+         Slot_3_Header := (Slot_Info => (Reserved => 12, State => Active, Validity => Valid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 66, Length => 100));
          -- Call init:
          Self.Tester.Component_Instance.Init (Sequence_Slots => Test_Sequence_Store.Slots_Access, Check_Slots_At_Startup => True, Dump_Slot_Summary_At_Startup => True);
          -- Check headers now:
-         Sequence_Store_Slot_Header_Assert.Eq (Slot_0_Header, (Slot_Info => (Reserved => 22, State => Inactive, Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 33, Length => 18)));
+         Sequence_Store_Slot_Header_Assert.Eq (Slot_0_Header, (Slot_Info => (Reserved => 22, State => Inactive, Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 33, Length => 18)));
          -- Check headers now:
-         Sequence_Store_Slot_Header_Assert.Eq (Slot_1_Header, (Slot_Info => (Reserved => 11, State => Active, Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 44, Length => 18)));
+         Sequence_Store_Slot_Header_Assert.Eq (Slot_1_Header, (Slot_Info => (Reserved => 11, State => Active, Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 44, Length => 18)));
          Sequence_Store_Slot_Header_Assert.Eq (Slot_2_Header, (Slot_Info => (Reserved => 9, State => Active, Validity => Valid), Seq_Header => (
             Crc => Crc_16.Compute_Crc_16 (Slot_2_Memory (Slot_2_Memory'First + Sequence_Store_Slot_Metadata.Size_In_Bytes + 2 .. Slot_2_Memory'First + Sequence_Store_Slot_Metadata.Size_In_Bytes + 18 - 1)), Version => 0,
             Category => 0, Id => 55, Length => 18
          )));
-         Sequence_Store_Slot_Header_Assert.Eq (Slot_3_Header, (Slot_Info => (Reserved => 12, State => Active, Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 66, Length => 100)));
+         Sequence_Store_Slot_Header_Assert.Eq (Slot_3_Header, (Slot_Info => (Reserved => 12, State => Active, Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 66, Length => 100)));
       exception
          -- Should never get here:
          when others =>
@@ -264,19 +264,19 @@ package body Sequence_Store_Tests.Implementation is
          use Sequence_Store_Enums.Slot_Valid_Type;
       begin
          -- Initialize slot headers:
-         Slot_0_Header := (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 22, Length => 10));
+         Slot_0_Header := (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 22, Length => 10));
          -- Activated
-         Slot_1_Header := (Slot_Info => (Reserved => 11, State => Active, Validity => Undefined), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 22, Length => 10));
+         Slot_1_Header := (Slot_Info => (Reserved => 11, State => Active, Validity => Undefined), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 22, Length => 10));
          -- Should be deactivated
-         Slot_2_Header := (Slot_Info => (Reserved => 9, State => Active, Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 22, Length => 10));
-         Slot_3_Header := (Slot_Info => (Reserved => 12, State => Active, Validity => Valid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 23, Length => 100));
+         Slot_2_Header := (Slot_Info => (Reserved => 9, State => Active, Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 22, Length => 10));
+         Slot_3_Header := (Slot_Info => (Reserved => 12, State => Active, Validity => Valid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 23, Length => 100));
          -- Call init:
          Self.Tester.Component_Instance.Init (Sequence_Slots => Test_Sequence_Store.Slots_Access, Check_Slots_At_Startup => False, Dump_Slot_Summary_At_Startup => True);
          -- Check headers now:
-         Sequence_Store_Slot_Header_Assert.Eq (Slot_0_Header, (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 22, Length => 10)));
-         Sequence_Store_Slot_Header_Assert.Eq (Slot_1_Header, (Slot_Info => (Reserved => 11, State => Active, Validity => Undefined), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 22, Length => 10)));
-         Sequence_Store_Slot_Header_Assert.Eq (Slot_2_Header, (Slot_Info => (Reserved => 9, State => Inactive, Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 22, Length => 10)));
-         Sequence_Store_Slot_Header_Assert.Eq (Slot_3_Header, (Slot_Info => (Reserved => 12, State => Active, Validity => Valid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 23, Length => 100)));
+         Sequence_Store_Slot_Header_Assert.Eq (Slot_0_Header, (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 22, Length => 10)));
+         Sequence_Store_Slot_Header_Assert.Eq (Slot_1_Header, (Slot_Info => (Reserved => 11, State => Active, Validity => Undefined), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 22, Length => 10)));
+         Sequence_Store_Slot_Header_Assert.Eq (Slot_2_Header, (Slot_Info => (Reserved => 9, State => Inactive, Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 22, Length => 10)));
+         Sequence_Store_Slot_Header_Assert.Eq (Slot_3_Header, (Slot_Info => (Reserved => 12, State => Active, Validity => Valid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 23, Length => 100)));
       exception
          -- Should never get here:
          when others =>
@@ -337,10 +337,10 @@ package body Sequence_Store_Tests.Implementation is
       Natural_Assert.Eq (T.Dumped_Slot_Summary_History.Get_Count, 1);
 
       -- Set the slot metadata to something different:
-      Slot_0_Header := (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 22, Length => 10));
-      Slot_1_Header := (Slot_Info => (Reserved => 11, State => Active, Validity => Undefined), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 15, Length => 10));
-      Slot_2_Header := (Slot_Info => (Reserved => 9, State => Active, Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 33, Length => 10));
-      Slot_3_Header := (Slot_Info => (Reserved => 12, State => Active, Validity => Valid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 23, Length => 100));
+      Slot_0_Header := (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 22, Length => 10));
+      Slot_1_Header := (Slot_Info => (Reserved => 11, State => Active, Validity => Undefined), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 15, Length => 10));
+      Slot_2_Header := (Slot_Info => (Reserved => 9, State => Active, Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 33, Length => 10));
+      Slot_3_Header := (Slot_Info => (Reserved => 12, State => Active, Validity => Valid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 23, Length => 100));
 
       -- Send command to dump summary:
       T.Command_T_Send (T.Commands.Dump_Summary);
@@ -365,10 +365,10 @@ package body Sequence_Store_Tests.Implementation is
       T : Component.Sequence_Store.Implementation.Tester.Instance_Access renames Self.Tester;
    begin
       -- Set the slot metadata to something:
-      Slot_0_Header := (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 22, Length => 10));
-      Slot_1_Header := (Slot_Info => (Reserved => 11, State => Active, Validity => Undefined), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 15, Length => 10));
-      Slot_2_Header := (Slot_Info => (Reserved => 9, State => Inactive, Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 33, Length => 10));
-      Slot_3_Header := (Slot_Info => (Reserved => 12, State => Active, Validity => Valid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 23, Length => 100));
+      Slot_0_Header := (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 22, Length => 10));
+      Slot_1_Header := (Slot_Info => (Reserved => 11, State => Active, Validity => Undefined), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 15, Length => 10));
+      Slot_2_Header := (Slot_Info => (Reserved => 9, State => Inactive, Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 33, Length => 10));
+      Slot_3_Header := (Slot_Info => (Reserved => 12, State => Active, Validity => Valid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 23, Length => 100));
 
       -- Re-initialize so we start fresh:
       Self.Tester.Component_Instance.Final;
@@ -381,7 +381,7 @@ package body Sequence_Store_Tests.Implementation is
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Activate_Slot_Id, Status => Success));
 
       -- Expect slot_0 to now be active:
-      Sequence_Store_Slot_Header_Assert.Eq (Slot_0_Header, (Slot_Info => (Reserved => 22, State => Active, Validity => Unchecked), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 22, Length => 10)));
+      Sequence_Store_Slot_Header_Assert.Eq (Slot_0_Header, (Slot_Info => (Reserved => 22, State => Active, Validity => Unchecked), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 22, Length => 10)));
 
       -- Expect a packet to be produced:
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
@@ -402,7 +402,7 @@ package body Sequence_Store_Tests.Implementation is
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (2), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Activate_Slot_Id, Status => Success));
 
       -- Expect slot_0 to now be active:
-      Sequence_Store_Slot_Header_Assert.Eq (Slot_0_Header, (Slot_Info => (Reserved => 22, State => Active, Validity => Unchecked), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 22, Length => 10)));
+      Sequence_Store_Slot_Header_Assert.Eq (Slot_0_Header, (Slot_Info => (Reserved => 22, State => Active, Validity => Unchecked), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 22, Length => 10)));
 
       -- Do NOT expect a packet to be produced, since nothing changed:
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
@@ -415,14 +415,14 @@ package body Sequence_Store_Tests.Implementation is
       -- Test activating another slot:
 
       -- First make sure slot 2 unchanged.
-      Sequence_Store_Slot_Header_Assert.Eq (Slot_2_Header, (Slot_Info => (Reserved => 9, State => Inactive, Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 33, Length => 10)));
+      Sequence_Store_Slot_Header_Assert.Eq (Slot_2_Header, (Slot_Info => (Reserved => 9, State => Inactive, Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 33, Length => 10)));
       T.Command_T_Send (T.Commands.Activate_Slot ((Slot => 2)));
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 3);
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (3), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Activate_Slot_Id, Status => Success));
 
       -- Expect slot_2 to now be active:
-      Sequence_Store_Slot_Header_Assert.Eq (Slot_2_Header, (Slot_Info => (Reserved => 9, State => Active, Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 33, Length => 10)));
+      Sequence_Store_Slot_Header_Assert.Eq (Slot_2_Header, (Slot_Info => (Reserved => 9, State => Active, Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 33, Length => 10)));
 
       -- Expect a packet to be produced:
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 2);
@@ -443,7 +443,7 @@ package body Sequence_Store_Tests.Implementation is
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (4), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Deactivate_Slot_Id, Status => Success));
 
       -- Expect slot_2 to now be inactive:
-      Sequence_Store_Slot_Header_Assert.Eq (Slot_2_Header, (Slot_Info => (Reserved => 9, State => Inactive, Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 33, Length => 10)));
+      Sequence_Store_Slot_Header_Assert.Eq (Slot_2_Header, (Slot_Info => (Reserved => 9, State => Inactive, Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 33, Length => 10)));
 
       -- Expect a packet to be produced:
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 3);
@@ -461,7 +461,7 @@ package body Sequence_Store_Tests.Implementation is
       -- Test deactivating another slot
 
       -- Expect slot_0 to still be active:
-      Sequence_Store_Slot_Header_Assert.Eq (Slot_0_Header, (Slot_Info => (Reserved => 22, State => Active, Validity => Unchecked), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 22, Length => 10)));
+      Sequence_Store_Slot_Header_Assert.Eq (Slot_0_Header, (Slot_Info => (Reserved => 22, State => Active, Validity => Unchecked), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 22, Length => 10)));
 
       T.Command_T_Send (T.Commands.Deactivate_Slot ((Slot => 0)));
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -469,7 +469,7 @@ package body Sequence_Store_Tests.Implementation is
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (5), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Deactivate_Slot_Id, Status => Success));
 
       -- Expect slot_0 to now be inactive:
-      Sequence_Store_Slot_Header_Assert.Eq (Slot_0_Header, (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 22, Length => 10)));
+      Sequence_Store_Slot_Header_Assert.Eq (Slot_0_Header, (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 22, Length => 10)));
 
       -- Expect a packet to be produced:
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 4);
@@ -491,7 +491,7 @@ package body Sequence_Store_Tests.Implementation is
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (6), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Deactivate_Slot_Id, Status => Success));
 
       -- Expect slot_0 to now be inactive:
-      Sequence_Store_Slot_Header_Assert.Eq (Slot_0_Header, (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 22, Length => 10)));
+      Sequence_Store_Slot_Header_Assert.Eq (Slot_0_Header, (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 22, Length => 10)));
 
       -- Do not expect a packet to be produced:
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 4);
@@ -508,10 +508,10 @@ package body Sequence_Store_Tests.Implementation is
       T : Component.Sequence_Store.Implementation.Tester.Instance_Access renames Self.Tester;
    begin
       -- Set the slot metadata to something:
-      Slot_0_Header := (Slot_Info => (Reserved => 22, State => Active, Validity => Unchecked), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 22, Length => 10));
-      Slot_1_Header := (Slot_Info => (Reserved => 11, State => Active, Validity => Undefined), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 15, Length => 10));
-      Slot_2_Header := (Slot_Info => (Reserved => 9, State => Inactive, Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 22, Length => 10));
-      Slot_3_Header := (Slot_Info => (Reserved => 12, State => Active, Validity => Valid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 23, Length => 100));
+      Slot_0_Header := (Slot_Info => (Reserved => 22, State => Active, Validity => Unchecked), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 22, Length => 10));
+      Slot_1_Header := (Slot_Info => (Reserved => 11, State => Active, Validity => Undefined), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 15, Length => 10));
+      Slot_2_Header := (Slot_Info => (Reserved => 9, State => Inactive, Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 22, Length => 10));
+      Slot_3_Header := (Slot_Info => (Reserved => 12, State => Active, Validity => Valid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 23, Length => 100));
 
       -- Re-initialize so we start fresh:
       Self.Tester.Component_Instance.Final;
@@ -554,7 +554,7 @@ package body Sequence_Store_Tests.Implementation is
       Packed_Sequence_Id_Assert.Eq (T.Cannot_Activate_Duplicate_Sequence_Id_History.Get (1), (Id => 22));
 
       -- Make sure slot 2 still inactive:
-      Sequence_Store_Slot_Header_Assert.Eq (Slot_2_Header, (Slot_Info => (Reserved => 9, State => Inactive, Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 22, Length => 10)));
+      Sequence_Store_Slot_Header_Assert.Eq (Slot_2_Header, (Slot_Info => (Reserved => 9, State => Inactive, Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 22, Length => 10)));
 
       -- OK now let's deactivate the first duplicate and try again.
       T.Command_T_Send (T.Commands.Deactivate_Slot ((Slot => 0)));
@@ -571,7 +571,7 @@ package body Sequence_Store_Tests.Implementation is
       Natural_Assert.Eq (T.Dumped_Slot_Summary_History.Get_Count, 1);
 
       -- Make sure slot 0 still inactive:
-      Sequence_Store_Slot_Header_Assert.Eq (Slot_0_Header, (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 22, Length => 10)));
+      Sequence_Store_Slot_Header_Assert.Eq (Slot_0_Header, (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 22, Length => 10)));
 
       -- OK now we should be able to activate slot 2:
       T.Command_T_Send (T.Commands.Activate_Slot ((Slot => 2)));
@@ -587,7 +587,7 @@ package body Sequence_Store_Tests.Implementation is
       Natural_Assert.Eq (T.Dumped_Slot_Summary_History.Get_Count, 2);
 
       -- Make sure slot 2 active:
-      Sequence_Store_Slot_Header_Assert.Eq (Slot_2_Header, (Slot_Info => (Reserved => 9, State => Active, Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 22, Length => 10)));
+      Sequence_Store_Slot_Header_Assert.Eq (Slot_2_Header, (Slot_Info => (Reserved => 9, State => Active, Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 22, Length => 10)));
 
       -- OK now we should fail to activate slot 0.
       T.Command_T_Send (T.Commands.Activate_Slot ((Slot => 0)));
@@ -602,7 +602,7 @@ package body Sequence_Store_Tests.Implementation is
       Packed_Sequence_Id_Assert.Eq (T.Cannot_Activate_Duplicate_Sequence_Id_History.Get (2), (Id => 22));
 
       -- Make sure slot 0 inctive:
-      Sequence_Store_Slot_Header_Assert.Eq (Slot_0_Header, (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 22, Length => 10)));
+      Sequence_Store_Slot_Header_Assert.Eq (Slot_0_Header, (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 22, Length => 10)));
    end Test_Activate_Deactivate_Slot_Fail;
 
    overriding procedure Test_Check_Slot (Self : in out Instance) is
@@ -612,9 +612,9 @@ package body Sequence_Store_Tests.Implementation is
    begin
       -- Initialize slot headers:
       -- Garbage
-      Slot_0_Header := (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 33, Length => 10));
+      Slot_0_Header := (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 33, Length => 10));
       -- Garbage
-      Slot_1_Header := (Slot_Info => (Reserved => 11, State => Active, Validity => Undefined), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 44, Length => 10));
+      Slot_1_Header := (Slot_Info => (Reserved => 11, State => Active, Validity => Undefined), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 44, Length => 10));
       -- Good
       Slot_2_Header :=
          (Slot_Info => (Reserved => 9, State => Active, Validity => Invalid),
@@ -628,7 +628,7 @@ package body Sequence_Store_Tests.Implementation is
              (Crc => Crc_16.Compute_Crc_16 (Slot_2_Memory (Slot_2_Memory'First + Sequence_Store_Slot_Metadata.Size_In_Bytes + 2 .. Slot_2_Memory'First + Sequence_Store_Slot_Metadata.Size_In_Bytes + Sequence_Header.Size_In_Bytes + 10 - 1)), Version => 0,
                Category => 0, Id => 55, Length => 10 + Sequence_Header.Size_In_Bytes));
       -- Too long:
-      Slot_3_Header := (Slot_Info => (Reserved => 12, State => Active, Validity => Valid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 66, Length => 100));
+      Slot_3_Header := (Slot_Info => (Reserved => 12, State => Active, Validity => Valid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 66, Length => 100));
 
       -- Send command to check first slot:
       T.Command_T_Send (T.Commands.Check_Slot ((Slot => 0)));
@@ -637,7 +637,7 @@ package body Sequence_Store_Tests.Implementation is
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Check_Slot_Id, Status => Success));
 
       -- Check slot:
-      Sequence_Store_Slot_Header_Assert.Eq (Slot_0_Header, (Slot_Info => (Reserved => 22, State => Inactive, Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 33, Length => 10)));
+      Sequence_Store_Slot_Header_Assert.Eq (Slot_0_Header, (Slot_Info => (Reserved => 22, State => Inactive, Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 33, Length => 10)));
 
       -- Check packet:
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
@@ -652,7 +652,7 @@ package body Sequence_Store_Tests.Implementation is
       Natural_Assert.Eq (T.Dumped_Slot_Summary_History.Get_Count, 1);
 
       -- Make sure second slot unchanged:
-      Sequence_Store_Slot_Header_Assert.Eq (Slot_1_Header, (Slot_Info => (Reserved => 11, State => Active, Validity => Undefined), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 44, Length => 10)));
+      Sequence_Store_Slot_Header_Assert.Eq (Slot_1_Header, (Slot_Info => (Reserved => 11, State => Active, Validity => Undefined), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 44, Length => 10)));
 
       -- Send command to check second slot:
       T.Command_T_Send (T.Commands.Check_Slot ((Slot => 1)));
@@ -661,7 +661,7 @@ package body Sequence_Store_Tests.Implementation is
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (2), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Check_Slot_Id, Status => Success));
 
       -- Check slot:
-      Sequence_Store_Slot_Header_Assert.Eq (Slot_1_Header, (Slot_Info => (Reserved => 11, State => Active, Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 44, Length => 10)));
+      Sequence_Store_Slot_Header_Assert.Eq (Slot_1_Header, (Slot_Info => (Reserved => 11, State => Active, Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 44, Length => 10)));
 
       -- Check packet:
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 2);
@@ -708,7 +708,7 @@ package body Sequence_Store_Tests.Implementation is
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (4), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Check_Slot_Id, Status => Success));
 
       -- Check slot:
-      Sequence_Store_Slot_Header_Assert.Eq (Slot_3_Header, (Slot_Info => (Reserved => 12, State => Active, Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 66, Length => 100)));
+      Sequence_Store_Slot_Header_Assert.Eq (Slot_3_Header, (Slot_Info => (Reserved => 12, State => Active, Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 66, Length => 100)));
 
       -- Check packet:
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 4);
@@ -744,9 +744,9 @@ package body Sequence_Store_Tests.Implementation is
    begin
       -- Initialize slot headers:
       -- Garbage
-      Slot_0_Header := (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 33, Length => 10));
+      Slot_0_Header := (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 33, Length => 10));
       -- Garbage
-      Slot_1_Header := (Slot_Info => (Reserved => 11, State => Active, Validity => Undefined), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 44, Length => 10));
+      Slot_1_Header := (Slot_Info => (Reserved => 11, State => Active, Validity => Undefined), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 44, Length => 10));
       -- Good
       Slot_2_Header :=
          (Slot_Info => (Reserved => 9, State => Active, Validity => Invalid),
@@ -760,7 +760,7 @@ package body Sequence_Store_Tests.Implementation is
              (Crc => Crc_16.Compute_Crc_16 (Slot_2_Memory (Slot_2_Memory'First + Sequence_Store_Slot_Metadata.Size_In_Bytes + 2 .. Slot_2_Memory'First + Sequence_Store_Slot_Metadata.Size_In_Bytes + Sequence_Header.Size_In_Bytes + 10 - 1)), Version => 0,
                Category => 0, Id => 55, Length => 10 + Sequence_Header.Size_In_Bytes));
       -- Too long:
-      Slot_3_Header := (Slot_Info => (Reserved => 12, State => Active, Validity => Valid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 66, Length => 100));
+      Slot_3_Header := (Slot_Info => (Reserved => 12, State => Active, Validity => Valid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 66, Length => 100));
 
       -- Send command to check all slots:
       T.Command_T_Send (T.Commands.Check_All_Slots);
@@ -769,10 +769,10 @@ package body Sequence_Store_Tests.Implementation is
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Check_All_Slots_Id, Status => Success));
 
       -- Check slot:
-      Sequence_Store_Slot_Header_Assert.Eq (Slot_0_Header, (Slot_Info => (Reserved => 22, State => Inactive, Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 33, Length => 10)));
+      Sequence_Store_Slot_Header_Assert.Eq (Slot_0_Header, (Slot_Info => (Reserved => 22, State => Inactive, Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 33, Length => 10)));
 
       -- Check slot:
-      Sequence_Store_Slot_Header_Assert.Eq (Slot_1_Header, (Slot_Info => (Reserved => 11, State => Active, Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 44, Length => 10)));
+      Sequence_Store_Slot_Header_Assert.Eq (Slot_1_Header, (Slot_Info => (Reserved => 11, State => Active, Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 44, Length => 10)));
 
       -- Check slot:
       Sequence_Store_Slot_Header_Assert.Eq
@@ -783,7 +783,7 @@ package body Sequence_Store_Tests.Implementation is
                 Category => 0, Id => 55, Length => 10 + Sequence_Header.Size_In_Bytes)));
 
       -- Check slot:
-      Sequence_Store_Slot_Header_Assert.Eq (Slot_3_Header, (Slot_Info => (Reserved => 12, State => Active, Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 66, Length => 100)));
+      Sequence_Store_Slot_Header_Assert.Eq (Slot_3_Header, (Slot_Info => (Reserved => 12, State => Active, Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 66, Length => 100)));
 
       -- Check packet:
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
@@ -804,7 +804,7 @@ package body Sequence_Store_Tests.Implementation is
       T : Component.Sequence_Store.Implementation.Tester.Instance_Access renames Self.Tester;
 
       -- Create a sequence to send:
-      Sequence_Source_Memory : Basic_Types.Byte_Array (0 .. 999) := (others => 88);
+      Sequence_Source_Memory : Basic_Types.Byte_Array (0 .. 999) := [others => 88];
       -- Sequence header:
       Seq_Header : Sequence_Header.T with
          Import,
@@ -814,11 +814,11 @@ package body Sequence_Store_Tests.Implementation is
       Seq_Region : Memory_Region.T := (Address => Sequence_Source_Memory'Address, Length => 0);
    begin
       -- Initialize slot headers:
-      Slot_0_Header := (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 33, Length => 10 + Sequence_Header.Size_In_Bytes));
+      Slot_0_Header := (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 33, Length => 10 + Sequence_Header.Size_In_Bytes));
 
       -- OK let's set the sequence header such that it looks like a valid
       -- sequence:
-      Seq_Header := (Crc => (0, 0), Version => 0, Category => 0, Id => 77, Length => 10 + Sequence_Header.Size_In_Bytes);
+      Seq_Header := (Crc => [0, 0], Version => 0, Category => 0, Id => 77, Length => 10 + Sequence_Header.Size_In_Bytes);
       Seq_Header.Crc := Crc_16.Compute_Crc_16 (Sequence_Source_Memory (Sequence_Source_Memory'First + 2 .. Sequence_Source_Memory'First + Sequence_Header.Size_In_Bytes + 10 - 1));
 
       -- Set the slot region length correctly:
@@ -858,13 +858,13 @@ package body Sequence_Store_Tests.Implementation is
       --
 
       -- Initialize slot headers:
-      Slot_3_Header := (Slot_Info => (Reserved => 22, State => Inactive, Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 33, Length => 70 - Sequence_Store_Slot_Header.Size_In_Bytes + Sequence_Header.Size_In_Bytes));
+      Slot_3_Header := (Slot_Info => (Reserved => 22, State => Inactive, Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 33, Length => 70 - Sequence_Store_Slot_Header.Size_In_Bytes + Sequence_Header.Size_In_Bytes));
 
       -- OK let's set the sequence header such that it looks like a valid
       -- sequence:
       Seq_Header :=
          (Crc =>
-             (0, 0), Version => 14, Category => 3, Id => 1_008, Length => 70 - Sequence_Store_Slot_Header.Size_In_Bytes -- maximum size that should fit
+             [0, 0], Version => 14, Category => 3, Id => 1_008, Length => 70 - Sequence_Store_Slot_Header.Size_In_Bytes -- maximum size that should fit
       );
       Seq_Header.Crc := Crc_16.Compute_Crc_16 (Sequence_Source_Memory (Sequence_Source_Memory'First + 2 .. Sequence_Source_Memory'First + (70 - Sequence_Store_Slot_Header.Size_In_Bytes) - 1));
 
@@ -908,7 +908,7 @@ package body Sequence_Store_Tests.Implementation is
       T : Component.Sequence_Store.Implementation.Tester.Instance_Access renames Self.Tester;
 
       -- Create a sequence to send:
-      Sequence_Source_Memory : Basic_Types.Byte_Array (0 .. 999) := (others => 88);
+      Sequence_Source_Memory : Basic_Types.Byte_Array (0 .. 999) := [others => 88];
       -- Sequence header:
       Seq_Header : Sequence_Header.T with
          Import,
@@ -919,7 +919,7 @@ package body Sequence_Store_Tests.Implementation is
    begin
       -- OK let's set the sequence header such that it looks like a valid
       -- sequence:
-      Seq_Header := (Crc => (0, 0), Version => 0, Category => 0, Id => 77, Length => 10 + Sequence_Header.Size_In_Bytes);
+      Seq_Header := (Crc => [0, 0], Version => 0, Category => 0, Id => 77, Length => 10 + Sequence_Header.Size_In_Bytes);
       Seq_Header.Crc := Crc_16.Compute_Crc_16 (Sequence_Source_Memory (Sequence_Source_Memory'First + 2 .. Sequence_Source_Memory'First + Sequence_Header.Size_In_Bytes + 10 - 1));
 
       -- Set the slot region length correctly:
@@ -970,7 +970,7 @@ package body Sequence_Store_Tests.Implementation is
          (Slot_Info =>
              (Reserved => 22,
                State => Active, -- in use
-               Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 33, Length => 12));
+               Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 33, Length => 12));
 
       -- OK, first let's try to send a sequence with an:
       T.Sequence_Store_Memory_Region_Store_T_Send ((Slot => 2, Sequence_Region => Seq_Region));
@@ -996,7 +996,7 @@ package body Sequence_Store_Tests.Implementation is
           (Slot_Info =>
                (Reserved => 22,
                 State => Active, -- in use
-                Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 33, Length => 12)));
+                Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 33, Length => 12)));
 
       -- Again
 
@@ -1005,7 +1005,7 @@ package body Sequence_Store_Tests.Implementation is
          (Slot_Info =>
              (Reserved => 11,
                State => Active, -- in use
-               Validity => Undefined), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 54, Length => 12));
+               Validity => Undefined), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 54, Length => 12));
 
       -- OK, first let's try to send a sequence:
       T.Sequence_Store_Memory_Region_Store_T_Send ((Slot => 1, Sequence_Region => Seq_Region));
@@ -1031,7 +1031,7 @@ package body Sequence_Store_Tests.Implementation is
           (Slot_Info =>
                (Reserved => 11,
                 State => Active, -- in use
-                Validity => Undefined), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 54, Length => 12)));
+                Validity => Undefined), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 54, Length => 12)));
 
       --
       -- OK, now let's test a CRC error.
@@ -1042,7 +1042,7 @@ package body Sequence_Store_Tests.Implementation is
          (Slot_Info =>
              (Reserved => 11,
                State => Inactive, -- not in use
-               Validity => Undefined), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 54, Length => 12));
+               Validity => Undefined), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 54, Length => 12));
 
       -- Corrupt CRC
       Seq_Header.Crc (1) := Seq_Header.Crc (1) + 1;
@@ -1073,7 +1073,7 @@ package body Sequence_Store_Tests.Implementation is
           (Slot_Info =>
                (Reserved => 11,
                 State => Inactive, -- not in use
-                Validity => Undefined), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 54, Length => 12)));
+                Validity => Undefined), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 54, Length => 12)));
 
       -- Again
       -- Fix CRC
@@ -1108,7 +1108,7 @@ package body Sequence_Store_Tests.Implementation is
           (Slot_Info =>
                (Reserved => 11,
                 State => Inactive, -- not in use
-                Validity => Undefined), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 54, Length => 12)));
+                Validity => Undefined), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 54, Length => 12)));
 
       --
       -- OK, now we need to check for length error handling
@@ -1142,7 +1142,7 @@ package body Sequence_Store_Tests.Implementation is
       Natural_Assert.Eq (T.Writing_Sequence_To_Slot_History.Get_Count, 7);
       Sequence_Store_Memory_Region_Store_Assert.Eq (T.Writing_Sequence_To_Slot_History.Get (7), (Slot => 1, Sequence_Region => Seq_Region));
       Natural_Assert.Eq (T.Invalid_Sequence_Crc_History.Get_Count, 3);
-      Invalid_Sequence_Crc_Info_Assert.Eq (T.Invalid_Sequence_Crc_History.Get (3), (Store => (Slot => 1, Sequence_Region => Seq_Region), Header => Seq_Header, Computed_Crc => (0, 0)));
+      Invalid_Sequence_Crc_Info_Assert.Eq (T.Invalid_Sequence_Crc_History.Get (3), (Store => (Slot => 1, Sequence_Region => Seq_Region), Header => Seq_Header, Computed_Crc => [0, 0]));
 
       -- Check packet:
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
@@ -1153,7 +1153,7 @@ package body Sequence_Store_Tests.Implementation is
           (Slot_Info =>
                (Reserved => 11,
                 State => Inactive, -- not in use
-                Validity => Undefined), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 54, Length => 12)));
+                Validity => Undefined), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 54, Length => 12)));
 
       -- OK, now set the sequence region so small that it cannot hold a header.
       Seq_Region.Length := 2;
@@ -1177,7 +1177,7 @@ package body Sequence_Store_Tests.Implementation is
       Natural_Assert.Eq (T.Writing_Sequence_To_Slot_History.Get_Count, 8);
       Sequence_Store_Memory_Region_Store_Assert.Eq (T.Writing_Sequence_To_Slot_History.Get (8), (Slot => 1, Sequence_Region => Seq_Region));
       Natural_Assert.Eq (T.Invalid_Sequence_Crc_History.Get_Count, 4);
-      Invalid_Sequence_Crc_Info_Assert.Eq (T.Invalid_Sequence_Crc_History.Get (4), (Store => (Slot => 1, Sequence_Region => Seq_Region), Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 0, Length => 0), Computed_Crc => (0, 0)));
+      Invalid_Sequence_Crc_Info_Assert.Eq (T.Invalid_Sequence_Crc_History.Get (4), (Store => (Slot => 1, Sequence_Region => Seq_Region), Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 0, Length => 0), Computed_Crc => [0, 0]));
 
       -- Check packet:
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
@@ -1188,7 +1188,7 @@ package body Sequence_Store_Tests.Implementation is
           (Slot_Info =>
                (Reserved => 11,
                 State => Inactive, -- not in use
-                Validity => Undefined), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 54, Length => 12)));
+                Validity => Undefined), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 54, Length => 12)));
 
       --
       -- Ok now we test a different class of length errors, where
@@ -1200,12 +1200,11 @@ package body Sequence_Store_Tests.Implementation is
          (Slot_Info =>
              (Reserved => 11,
                State => Inactive, -- not in use
-               Validity => Undefined), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 54, Length => 12));
+               Validity => Undefined), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 54, Length => 12));
 
       Seq_Header :=
          (Crc =>
-             (0,
-               0), Version => 0, Category => 0, Id => 77, Length => Slot_2_Memory'Length - Sequence_Store_Slot_Header.Size_In_Bytes + Sequence_Header.Size_In_Bytes + 1 -- one byte too large to fit
+             [0, 0], Version => 0, Category => 0, Id => 77, Length => Slot_2_Memory'Length - Sequence_Store_Slot_Header.Size_In_Bytes + Sequence_Header.Size_In_Bytes + 1 -- one byte too large to fit
       );
       Seq_Header.Crc := Crc_16.Compute_Crc_16 (Sequence_Source_Memory (Sequence_Source_Memory'First + 2 .. Sequence_Source_Memory'First + Seq_Header.Length - 1));
 
@@ -1236,12 +1235,12 @@ package body Sequence_Store_Tests.Implementation is
           (Slot_Info =>
                (Reserved => 11,
                 State => Inactive, -- not in use
-                Validity => Undefined), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 54, Length => 12)));
+                Validity => Undefined), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 54, Length => 12)));
 
       -- Again with larger length
       Seq_Header :=
          (Crc =>
-             (0, 0), Version =>
+             [0, 0], Version =>
              0, Category =>
              0, Id =>
              77, Length =>
@@ -1276,14 +1275,14 @@ package body Sequence_Store_Tests.Implementation is
           (Slot_Info =>
                (Reserved => 11,
                 State => Inactive, -- not in use
-                Validity => Undefined), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 54, Length => 12)));
+                Validity => Undefined), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 54, Length => 12)));
 
       -- Test where region is larger than slot, but sequence is small enough
       -- that it will still fit, this should work fine.
 
       Seq_Header :=
          (Crc =>
-             (0, 0), Version =>
+             [0, 0], Version =>
              0, Category =>
              0, Id =>
              77, Length => 10 + Sequence_Header.Size_In_Bytes -- one byte too large to fit
@@ -1331,10 +1330,10 @@ package body Sequence_Store_Tests.Implementation is
       T : Component.Sequence_Store.Implementation.Tester.Instance_Access renames Self.Tester;
    begin
       -- Set the slot metadata to something:
-      Slot_0_Header := (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 22, Length => 10));
-      Slot_1_Header := (Slot_Info => (Reserved => 11, State => Active, Validity => Undefined), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 22, Length => 10));
-      Slot_2_Header := (Slot_Info => (Reserved => 9, State => Inactive, Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 33, Length => 10));
-      Slot_3_Header := (Slot_Info => (Reserved => 12, State => Active, Validity => Valid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 23, Length => 100));
+      Slot_0_Header := (Slot_Info => (Reserved => 22, State => Inactive, Validity => Unchecked), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 22, Length => 10));
+      Slot_1_Header := (Slot_Info => (Reserved => 11, State => Active, Validity => Undefined), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 22, Length => 10));
+      Slot_2_Header := (Slot_Info => (Reserved => 9, State => Inactive, Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 33, Length => 10));
+      Slot_3_Header := (Slot_Info => (Reserved => 12, State => Active, Validity => Valid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 23, Length => 100));
 
       -- Re-initialize so we start fresh:
       Self.Tester.Component_Instance.Final;
@@ -1361,7 +1360,7 @@ package body Sequence_Store_Tests.Implementation is
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Activate_Slot_Id, Status => Success));
 
       -- Expect slot_2 to now be active:
-      Sequence_Store_Slot_Header_Assert.Eq (Slot_2_Header, (Slot_Info => (Reserved => 9, State => Active, Validity => Invalid), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 33, Length => 10)));
+      Sequence_Store_Slot_Header_Assert.Eq (Slot_2_Header, (Slot_Info => (Reserved => 9, State => Active, Validity => Invalid), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 33, Length => 10)));
 
       -- Expect a packet to be produced:
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
@@ -1386,7 +1385,7 @@ package body Sequence_Store_Tests.Implementation is
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (2), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Deactivate_Slot_Id, Status => Success));
 
       -- Expect slot_1 to now be inactive:
-      Sequence_Store_Slot_Header_Assert.Eq (Slot_1_Header, (Slot_Info => (Reserved => 11, State => Inactive, Validity => Undefined), Seq_Header => (Crc => (0, 0), Version => 0, Category => 0, Id => 22, Length => 10)));
+      Sequence_Store_Slot_Header_Assert.Eq (Slot_1_Header, (Slot_Info => (Reserved => 11, State => Inactive, Validity => Undefined), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 22, Length => 10)));
 
       -- Expect a packet to be produced:
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 2);
@@ -1455,7 +1454,7 @@ package body Sequence_Store_Tests.Implementation is
       -- Make sure some events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Activate_Slot_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 0)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Activate_Slot_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 0]));
    end Test_Invalid_Command;
 
 end Sequence_Store_Tests.Implementation;

@@ -51,7 +51,7 @@ package body Component.Background_Component.Implementation is
                Sequence_Count => 0,
                Buffer_Length => 2
             ),
-            Buffer => (others => 0)
+            Buffer => [others => 0]
          );
       begin
          -- Set the packet data:

@@ -27,7 +27,7 @@ package body Component.Initialized_Component.Implementation is
       -- Other computations can be performed here too!
       -- Let's set the packet data to 5 + the packets_Per_Tick
       Self.Pkt.Header.Buffer_Length := 7;
-      Self.Pkt.Buffer := (others => 5 + Unsigned_8 (Self.Packets_Per_Tick));
+      Self.Pkt.Buffer := [others => 5 + Unsigned_8 (Self.Packets_Per_Tick)];
    end Init;
 
    ---------------------------------------

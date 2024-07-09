@@ -21,7 +21,7 @@ package body Command_Protector_Tests.Implementation is
    -------------------------------------------------------------------------
    -- Globals:
    -------------------------------------------------------------------------
-   Protected_Command_Id_List : constant Component.Command_Protector.Command_Id_List := (4, 19, 77, 78);
+   Protected_Command_Id_List : constant Component.Command_Protector.Command_Id_List := [4, 19, 77, 78];
 
    -------------------------------------------------------------------------
    -- Fixtures:
@@ -57,7 +57,7 @@ package body Command_Protector_Tests.Implementation is
 
       procedure Init_Nominal is
       begin
-         T.Component_Instance.Init (Protected_Command_Id_List => (1, 2, 3, 4));
+         T.Component_Instance.Init (Protected_Command_Id_List => [1, 2, 3, 4]);
       exception
          -- Not expecting exception to be thrown:
          when others =>
@@ -67,7 +67,7 @@ package body Command_Protector_Tests.Implementation is
       procedure Init_None is
       begin
          -- Empty list not ok.
-         T.Component_Instance.Init (Protected_Command_Id_List => (1 .. 0 => 0));
+         T.Component_Instance.Init (Protected_Command_Id_List => [1 .. 0 => 0]);
          -- Should never get here:
          Assert (False, "Index out of range did not produce exception!");
       exception
@@ -78,7 +78,7 @@ package body Command_Protector_Tests.Implementation is
 
       procedure Init_Duplicate is
       begin
-         T.Component_Instance.Init (Protected_Command_Id_List => (1, 2, 3, 2));
+         T.Component_Instance.Init (Protected_Command_Id_List => [1, 2, 3, 2]);
          -- Should never get here:
          Assert (False, "Duplicate ID did not produce exception!");
       exception
@@ -120,7 +120,7 @@ package body Command_Protector_Tests.Implementation is
 
    overriding procedure Test_Unprotected_Command_Accept (Self : in out Instance) is
       T : Component.Command_Protector.Implementation.Tester.Instance_Access renames Self.Tester;
-      Cmd : Command.T := (Header => (Source_Id => 0, Id => 2, Arg_Buffer_Length => 19), Arg_Buffer => (others => 88));
+      Cmd : Command.T := (Header => (Source_Id => 0, Id => 2, Arg_Buffer_Length => 19), Arg_Buffer => [others => 88]);
    begin
       -- Send a command not in the proteced list:
       T.Command_T_To_Forward_Send (Cmd);
@@ -224,7 +224,7 @@ package body Command_Protector_Tests.Implementation is
 
    overriding procedure Test_Protected_Command_Accept (Self : in out Instance) is
       T : Component.Command_Protector.Implementation.Tester.Instance_Access renames Self.Tester;
-      Cmd : Command.T := (Header => (Source_Id => 0, Id => 2, Arg_Buffer_Length => 19), Arg_Buffer => (others => 88));
+      Cmd : Command.T := (Header => (Source_Id => 0, Id => 2, Arg_Buffer_Length => 19), Arg_Buffer => [others => 88]);
    begin
       -- OK now arm the component:
       T.Command_T_Send (T.Commands.Arm ((Timeout => 55)));
@@ -309,7 +309,7 @@ package body Command_Protector_Tests.Implementation is
 
    overriding procedure Test_Protected_Command_Reject (Self : in out Instance) is
       T : Component.Command_Protector.Implementation.Tester.Instance_Access renames Self.Tester;
-      Cmd : Command.T := (Header => (Source_Id => 0, Id => 2, Arg_Buffer_Length => 19), Arg_Buffer => (others => 88));
+      Cmd : Command.T := (Header => (Source_Id => 0, Id => 2, Arg_Buffer_Length => 19), Arg_Buffer => [others => 88]);
    begin
       -- OK dont arm the component:
       Cmd.Header.Id := 4;
@@ -356,7 +356,7 @@ package body Command_Protector_Tests.Implementation is
 
    overriding procedure Test_Protected_Command_Reject_Timeout (Self : in out Instance) is
       T : Component.Command_Protector.Implementation.Tester.Instance_Access renames Self.Tester;
-      Cmd : Command.T := (Header => (Source_Id => 0, Id => 2, Arg_Buffer_Length => 19), Arg_Buffer => (others => 88));
+      Cmd : Command.T := (Header => (Source_Id => 0, Id => 2, Arg_Buffer_Length => 19), Arg_Buffer => [others => 88]);
    begin
       -- OK now arm the component:
       T.Command_T_Send (T.Commands.Arm ((Timeout => 3)));
@@ -531,7 +531,7 @@ package body Command_Protector_Tests.Implementation is
       -- Make sure some events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Arm_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 0)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Arm_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 0]));
    end Test_Invalid_Command;
 
 end Command_Protector_Tests.Implementation;

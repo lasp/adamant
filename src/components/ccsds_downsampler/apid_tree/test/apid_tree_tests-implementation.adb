@@ -40,7 +40,7 @@ package body Apid_Tree_Tests.Implementation is
       First_Index : Positive;
       Last_Index : Natural;
       Tree_Entry : Ccsds_Downsampler_Tree_Entry;
-      Apid_Start_List : aliased Ccsds_Downsample_Packet_List := ((Apid => 2, Filter_Factor => 0), (Apid => 3, Filter_Factor => 3), (Apid => 4, Filter_Factor => 1));
+      Apid_Start_List : aliased Ccsds_Downsample_Packet_List := [(Apid => 2, Filter_Factor => 0), (Apid => 3, Filter_Factor => 3), (Apid => 4, Filter_Factor => 1)];
    begin
       Tree.Init (Apid_Start_List'Unchecked_Access);
       -- "Filter" each Id and make sure we get the correct values and expected filter pairs
@@ -116,7 +116,7 @@ package body Apid_Tree_Tests.Implementation is
       Set_Status : Filter_Factor_Set_Status;
       Ignore : Unsigned_16;
       Tree_Index : Positive;
-      Apid_Start_List : aliased Ccsds_Downsample_Packet_List := ((Apid => 1, Filter_Factor => 0), (Apid => 3, Filter_Factor => 1), (Apid => 5, Filter_Factor => 7));
+      Apid_Start_List : aliased Ccsds_Downsample_Packet_List := [(Apid => 1, Filter_Factor => 0), (Apid => 3, Filter_Factor => 1), (Apid => 5, Filter_Factor => 7)];
    begin
       Tree.Init (Apid_Start_List'Unchecked_Access);
 
@@ -231,7 +231,7 @@ package body Apid_Tree_Tests.Implementation is
       Tree : Apid_Tree.Instance;
       Status : Filter_Action_Status;
       Cnt : Unsigned_16;
-      Apid_Start_List : aliased Ccsds_Downsample_Packet_List := ((Apid => 0, Filter_Factor => 1), (Apid => 1, Filter_Factor => 0), (Apid => 2, Filter_Factor => 3), (Apid => 5, Filter_Factor => 2));
+      Apid_Start_List : aliased Ccsds_Downsample_Packet_List := [(Apid => 0, Filter_Factor => 1), (Apid => 1, Filter_Factor => 0), (Apid => 2, Filter_Factor => 3), (Apid => 5, Filter_Factor => 2)];
    begin
       Tree.Init (Apid_Start_List'Unchecked_Access);
 

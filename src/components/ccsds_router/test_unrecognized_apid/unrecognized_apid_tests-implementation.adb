@@ -34,9 +34,9 @@ package body Unrecognized_Apid_Tests.Implementation is
       Self.Tester.Final_Base;
    end Tear_Down_Test;
 
-   Packet_0 : Ccsds_Space_Packet.T := (Header => (Version => 0, Packet_Type => Ccsds_Packet_Type.Telecommand, Secondary_Header => Ccsds_Secondary_Header_Indicator.Secondary_Header_Not_Present, Apid => Ccsds_Apid_Type (0), Sequence_Flag => Ccsds_Sequence_Flag.Unsegmented, Sequence_Count => Ccsds_Sequence_Count_Type (53), Packet_Length => 0), Data => (others => 0));
+   Packet_0 : Ccsds_Space_Packet.T := (Header => (Version => 0, Packet_Type => Ccsds_Packet_Type.Telecommand, Secondary_Header => Ccsds_Secondary_Header_Indicator.Secondary_Header_Not_Present, Apid => Ccsds_Apid_Type (0), Sequence_Flag => Ccsds_Sequence_Flag.Unsegmented, Sequence_Count => Ccsds_Sequence_Count_Type (53), Packet_Length => 0), Data => [others => 0]);
 
-   Packet_9 : Ccsds_Space_Packet.T := (Header => (Version => 0, Packet_Type => Ccsds_Packet_Type.Telecommand, Secondary_Header => Ccsds_Secondary_Header_Indicator.Secondary_Header_Not_Present, Apid => Ccsds_Apid_Type (9), Sequence_Flag => Ccsds_Sequence_Flag.Unsegmented, Sequence_Count => Ccsds_Sequence_Count_Type (53), Packet_Length => 9), Data => (others => 9));
+   Packet_9 : Ccsds_Space_Packet.T := (Header => (Version => 0, Packet_Type => Ccsds_Packet_Type.Telecommand, Secondary_Header => Ccsds_Secondary_Header_Indicator.Secondary_Header_Not_Present, Apid => Ccsds_Apid_Type (9), Sequence_Flag => Ccsds_Sequence_Flag.Unsegmented, Sequence_Count => Ccsds_Sequence_Count_Type (53), Packet_Length => 9), Data => [others => 9]);
 
    procedure Check_Routing (Self : in out Instance; Count_1 : in Natural; Count_2 : in Natural; Count_3 : in Natural; Count_4 : in Natural; Count_5 : in Natural; Count_6 : in Natural; Filename : in String := Smart_Assert.Sinfo.File; Line : in Natural := Smart_Assert.Sinfo.Line) is
       T : Component.Ccsds_Router.Implementation.Tester.Instance_Access renames Self.Tester;

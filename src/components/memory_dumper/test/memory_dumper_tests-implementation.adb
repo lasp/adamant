@@ -24,11 +24,11 @@ with Interfaces;
 
 package body Memory_Dumper_Tests.Implementation is
 
-   Region_1 : aliased Basic_Types.Byte_Array := (1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+   Region_1 : aliased Basic_Types.Byte_Array := [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
    Region_1_Address : constant System.Address := Region_1'Address;
-   Region_2 : aliased Basic_Types.Byte_Array := (98, 97, 96, 95, 94, 93, 92, 91, 90, 89, 88, 87, 86, 85, 84, 83, 82, 81, 80, 79);
+   Region_2 : aliased Basic_Types.Byte_Array := [98, 97, 96, 95, 94, 93, 92, 91, 90, 89, 88, 87, 86, 85, 84, 83, 82, 81, 80, 79];
    Region_2_Address : constant System.Address := Region_2'Address;
-   Regions : aliased Memory_Manager_Types.Memory_Region_Array := ((Region_1_Address, Region_1'Length), (Region_2_Address, Region_2'Length));
+   Regions : aliased Memory_Manager_Types.Memory_Region_Array := [(Region_1_Address, Region_1'Length), (Region_2_Address, Region_2'Length)];
 
    -------------------------------------------------------------------------
    -- Fixtures:
@@ -95,7 +95,7 @@ package body Memory_Dumper_Tests.Implementation is
 
       -- Check memory dump:
       Packet_Id_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get (1).Id, Packets.Get_Memory_Dump_Packet_Id);
-      Byte_Array_Pointer_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get (1).Memory_Pointer, (1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+      Byte_Array_Pointer_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get (1).Memory_Pointer, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
 
       -- Send command to dump entire second region:
       Region := (Address => Region_2_Address, Length => Region_2'Length);
@@ -124,7 +124,7 @@ package body Memory_Dumper_Tests.Implementation is
 
       -- Check memory dump:
       Packet_Id_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get (2).Id, Packets.Get_Memory_Dump_Packet_Id);
-      Byte_Array_Pointer_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get (2).Memory_Pointer, (98, 97, 96, 95, 94, 93, 92, 91, 90, 89, 88, 87, 86, 85, 84, 83, 82, 81, 80, 79));
+      Byte_Array_Pointer_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get (2).Memory_Pointer, [98, 97, 96, 95, 94, 93, 92, 91, 90, 89, 88, 87, 86, 85, 84, 83, 82, 81, 80, 79]);
 
       -- Send command to dump partial first region:
       Region := (Address => Region_1_Address, Length => 5);
@@ -147,7 +147,7 @@ package body Memory_Dumper_Tests.Implementation is
 
       -- Check memory dump:
       Packet_Id_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get (3).Id, Packets.Get_Memory_Dump_Packet_Id);
-      Byte_Array_Pointer_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get (3).Memory_Pointer, (1, 2, 3, 4, 5));
+      Byte_Array_Pointer_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get (3).Memory_Pointer, [1, 2, 3, 4, 5]);
 
       -- Send command to dump partial second region:
       Region := (Address => Region_2_Address + Storage_Offset (12), Length => 6);
@@ -170,7 +170,7 @@ package body Memory_Dumper_Tests.Implementation is
 
       -- Check memory dump:
       Packet_Id_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get (4).Id, Packets.Get_Memory_Dump_Packet_Id);
-      Byte_Array_Pointer_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get (4).Memory_Pointer, (86, 85, 84, 83, 82, 81));
+      Byte_Array_Pointer_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get (4).Memory_Pointer, [86, 85, 84, 83, 82, 81]);
    end Test_Nominal_Dumping;
 
    overriding procedure Test_Memory_Crc (Self : in out Instance) is
@@ -270,11 +270,11 @@ package body Memory_Dumper_Tests.Implementation is
       Natural_Assert.Eq (T.Memory_Crc_History.Get_Count, 3);
       Put_Line ("CRC:");
       Put_Line (Memory_Region_Crc.Representation.Image (T.Memory_Crc_History.Get (3)));
-      Memory_Region_Crc_Assert.Eq (T.Memory_Crc_History.Get (3), (Region => (Region.Address, Region.Length), Crc => Crc_16.Compute_Crc_16 ((3, 4, 5, 6))));
+      Memory_Region_Crc_Assert.Eq (T.Memory_Crc_History.Get (3), (Region => (Region.Address, Region.Length), Crc => Crc_16.Compute_Crc_16 ([3, 4, 5, 6])));
 
       -- Check data product:
       Natural_Assert.Eq (T.Crc_Report_History.Get_Count, 3);
-      Memory_Region_Crc_Assert.Eq (T.Crc_Report_History.Get (3), (Region => (Region.Address, Region.Length), Crc => Crc_16.Compute_Crc_16 ((3, 4, 5, 6))));
+      Memory_Region_Crc_Assert.Eq (T.Crc_Report_History.Get (3), (Region => (Region.Address, Region.Length), Crc => Crc_16.Compute_Crc_16 ([3, 4, 5, 6])));
 
       -- Send command to crc partial second region:
       Region := (Address => Region_2_Address + Storage_Offset (12), Length => 8);
@@ -298,11 +298,11 @@ package body Memory_Dumper_Tests.Implementation is
       Natural_Assert.Eq (T.Memory_Crc_History.Get_Count, 4);
       Put_Line ("CRC:");
       Put_Line (Memory_Region_Crc.Representation.Image (T.Memory_Crc_History.Get (4)));
-      Memory_Region_Crc_Assert.Eq (T.Memory_Crc_History.Get (4), (Region => (Region.Address, Region.Length), Crc => Crc_16.Compute_Crc_16 ((86, 85, 84, 83, 82, 81, 80, 79))));
+      Memory_Region_Crc_Assert.Eq (T.Memory_Crc_History.Get (4), (Region => (Region.Address, Region.Length), Crc => Crc_16.Compute_Crc_16 ([86, 85, 84, 83, 82, 81, 80, 79])));
 
       -- Check data product:
       Natural_Assert.Eq (T.Crc_Report_History.Get_Count, 4);
-      Memory_Region_Crc_Assert.Eq (T.Crc_Report_History.Get (4), (Region => (Region.Address, Region.Length), Crc => Crc_16.Compute_Crc_16 ((86, 85, 84, 83, 82, 81, 80, 79))));
+      Memory_Region_Crc_Assert.Eq (T.Crc_Report_History.Get (4), (Region => (Region.Address, Region.Length), Crc => Crc_16.Compute_Crc_16 ([86, 85, 84, 83, 82, 81, 80, 79])));
    end Test_Memory_Crc;
 
    overriding procedure Test_Invalid_Address (Self : in out Instance) is
@@ -476,7 +476,7 @@ package body Memory_Dumper_Tests.Implementation is
       -- Make sure some events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Crc_Memory_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 0)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Crc_Memory_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 0]));
    end Test_Invalid_Command;
 
 end Memory_Dumper_Tests.Implementation;

@@ -161,7 +161,7 @@ package body Circular_Buffer is
          end;
       end if;
 
-      return (Byte_Array_Pointer.Null_Pointer, Byte_Array_Pointer.Null_Pointer);
+      return [Byte_Array_Pointer.Null_Pointer, Byte_Array_Pointer.Null_Pointer];
    end Dump_Newest;
 
    function Dump_Oldest (Self : in Base; Num_Bytes_To_Dump : in Natural) return Pointer_Dump is
@@ -182,7 +182,7 @@ package body Circular_Buffer is
          end;
       end if;
 
-      return (Byte_Array_Pointer.Null_Pointer, Byte_Array_Pointer.Null_Pointer);
+      return [Byte_Array_Pointer.Null_Pointer, Byte_Array_Pointer.Null_Pointer];
    end Dump_Oldest;
 
    function Dump_Memory (Self : in Base) return Pointer_Dump is

@@ -21,7 +21,7 @@ private
       -- The length of the packet data to send out:
       Data_Length : Packet_Buffer_Length_Type := 0;
       -- The content of the packet data to send out:
-      Data : Basic_Types.Byte_Array (0 .. 1) := (0, 0);
+      Data : Basic_Types.Byte_Array (0 .. 1) := [0, 0];
    end record;
 
    ---------------------------------------

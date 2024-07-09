@@ -255,12 +255,12 @@ private
       Position : Seq_Position := 0;
       Next_Position : Seq_Position := 0;
       Bit_Pattern : Command.T;
-      Seq_Header : Sequence_Header.T := (Crc => (0, 0), Version => 0, Category => 0, Id => 0, Length => 0);
-      Internals : Internal_Array := (others => (Value => (0, 0, 0, 0)));
-      Local_Variable_Array : Variable_Array := (others => (Value => (0, 0, 0, 0)));
+      Seq_Header : Sequence_Header.T := (Crc => [0, 0], Version => 0, Category => 0, Id => 0, Length => 0);
+      Internals : Internal_Array := [others => (Value => [0, 0, 0, 0])];
+      Local_Variable_Array : Variable_Array := [others => (Value => [0, 0, 0, 0])];
       -- We are not supporting strings yet...
-      -- Local_String_Pool : String_Pool := (others => (others => Character'Val (0))); -- This is a null initialization
-      Out_Arguments : Variable_Array := (others => (Value => (0, 0, 0, 0)));
+      -- Local_String_Pool : String_Pool := [others => (others => Character'Val (0])); -- This is a null initialization
+      Out_Arguments : Variable_Array := [others => (Value => [0, 0, 0, 0])];
       Telemetry_Request : Telemetry_Record.T := (Id => 0, Offset => 0, Size => 1, Tlm_Type => Seq_Data_Format.Unsigned_Byte, New_Value_Required => False);
       Telemetry_Destination : Seq_Internal.E := Seq_Internal.Timeout;
       Telemetry_Timeout : Sys_Time.T := (0, 0);
@@ -278,7 +278,7 @@ private
       Seq_Id_To_Load : Sequence_Types.Sequence_Id := Sequence_Types.Sequence_Id'First;
       Spawn_Destination : Sequence_Engine_Id := Sequence_Engine_Id'First;
       Errant_Field : Interfaces.Unsigned_32 := 0;
-      String_To_Print : Seq_Print.T := (Print_Type => Print_Type.Debug, Encoded_String => (others => 0));
+      String_To_Print : Seq_Print.T := (Print_Type => Print_Type.Debug, Encoded_String => [others => 0]);
    end record;
 
 end Seq_Runtime;

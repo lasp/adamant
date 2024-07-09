@@ -11,7 +11,7 @@ with Ada.Task_Identification;
 package Component.Ccsds_Serial_Interface.Implementation is
 
    -- Sync pattern for serial. Made public so it can be used elsewhere.
-   Sync_Pattern : constant Basic_Types.Byte_Array := (0 => 16#FE#, 1 => 16#D4#, 2 => 16#AF#, 3 => 16#EE#);
+   Sync_Pattern : constant Basic_Types.Byte_Array := [0 => 16#FE#, 1 => 16#D4#, 2 => 16#AF#, 3 => 16#EE#];
 
    -- The component class instance record:
    type Instance is new Ccsds_Serial_Interface.Base_Instance with private;

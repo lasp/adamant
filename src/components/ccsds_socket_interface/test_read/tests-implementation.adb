@@ -52,7 +52,7 @@ package body Tests.Implementation is
       use Ccsds_Primary_Header;
       use Interfaces;
       T : Component.Ccsds_Socket_Interface.Implementation.Tester.Instance_Access renames Self.Tester;
-      Address : constant Socket_Address.T := (Ip_Address => (127, 0, 0, 1), Port => Self.Port);
+      Address : constant Socket_Address.T := (Ip_Address => [127, 0, 0, 1], Port => Self.Port);
       -- Start the socket internal listener thread:
       Socket_Listener_Task_Signal : aliased Ada.Synchronous_Task_Control.Suspension_Object;
       Socket_Listener_Task_Info : aliased Task_Types.Task_Info;
@@ -62,7 +62,7 @@ package body Tests.Implementation is
          (Header =>
              (Version => 0, Packet_Type => Ccsds_Packet_Type.Telecommand, Secondary_Header => Ccsds_Secondary_Header_Indicator.Secondary_Header_Not_Present, Apid => Ccsds_Apid_Type (15), Sequence_Flag => Ccsds_Sequence_Flag.Unsegmented,
                Sequence_Count => Ccsds_Sequence_Count_Type (22), Packet_Length => 8 - 1),
-          Data => (1, 2, 3, 4, 5, 6, 7, 8, others => 0));
+          Data => [1, 2, 3, 4, 5, 6, 7, 8, others => 0]);
    begin
       -- Expected to get packet:
       Put_Line ("Expected to get packet:");

@@ -8,7 +8,7 @@ package {{ name }} is
    -- Size of the initial list of the downsampler
    Downsample_List_Size_In_Bytes : constant Natural := {{ size }};
    -- The initial list for the downsampler
-   Downsample_List : aliased Ccsds_Downsample_Packet_List := (
+   Downsample_List : aliased Ccsds_Downsample_Packet_List := [
 {% for apid in filter_products.values() %}
       -- {{ apid.name }}
    {% if apid.description %}
@@ -19,7 +19,7 @@ package {{ name }} is
          Filter_Factor => {{ apid.filter_factor}}
       ){{ "," if not loop.last }}
 {% endfor %}
-   );
+   ];
 
    -- Access for the downsample list
    Downsample_List_Access : Ccsds_Downsample_Packet_List_Access := Downsample_List'Access;

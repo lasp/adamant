@@ -129,8 +129,8 @@ procedure Test is
 
    procedure Test_Errant_Serialization is
       package Myserializer is new Serializer (Test_Record.T);
-      Good_Bytes : constant Byte_Array := (0, 7, 0, 0, 0, 15, 63, 185, 153, 153, 153, 153, 153, 154);
-      Bad_Bytes : constant Byte_Array := (255, 7, 0, 0, 0, 15, 63, 185, 153, 153, 153, 153, 153, 154);
+      Good_Bytes : constant Byte_Array := [0, 7, 0, 0, 0, 15, 63, 185, 153, 153, 153, 153, 153, 154];
+      Bad_Bytes : constant Byte_Array := [255, 7, 0, 0, 0, 15, 63, 185, 153, 153, 153, 153, 153, 154];
       Rec : Test_Record.T;
    begin
       Rec := Myserializer.From_Byte_Array (Good_Bytes);
@@ -153,9 +153,9 @@ procedure Test is
 
    procedure Test_Copy_By_Reference is
       package Myserializer is new Serializer (Command.T);
-      Buffer : constant Command_Types.Command_Arg_Buffer_Type := (0 => 56, 1 => 57, others => 19);
+      Buffer : constant Command_Types.Command_Arg_Buffer_Type := [0 => 56, 1 => 57, others => 19];
       A_Command : constant Command.T := ((Source_Id => 0, Id => 15, Arg_Buffer_Length => 2), Arg_Buffer => Buffer);
-      A_Byte_Array : Myserializer.Byte_Array := (others => 50);
+      A_Byte_Array : Myserializer.Byte_Array := [others => 50];
 
       procedure Some_Inner_Subprogram (Bytes : in Basic_Types.Byte_Array) is
       begin
@@ -196,10 +196,10 @@ procedure Test is
    procedure Test_Variable_Serializer is
       package Myserializer is new Variable_Serializer (Command.T, Command.Serialized_Length, Command.Serialized_Length);
       Ignore_Stat : Serialization_Status;
-      Buffer : constant Command_Types.Command_Arg_Buffer_Type := (0 => 56, 1 => 57, others => 19);
+      Buffer : constant Command_Types.Command_Arg_Buffer_Type := [0 => 56, 1 => 57, others => 19];
       A_Command : constant Command.T := ((Source_Id => 0, Id => 15, Arg_Buffer_Length => 2), Arg_Buffer => Buffer);
       Num_Bytes_Serialized : Natural;
-      Dest : Basic_Types.Byte_Array := (4 .. 0 => 0);
+      Dest : Basic_Types.Byte_Array := [4 .. 0 => 0];
    begin
       Put_Line ("now");
       Put_Line ("'First " & Integer'Image (Dest'First));

@@ -3,7 +3,7 @@ with Packed_U32.Validation;
 package body Seq_Runtime.Tester is
 
    procedure Reset_Instance (Self : in out Instance) is
-      Header : constant Sequence_Header.T := (Crc => (0, 0), Version => 0, Category => 0, Id => 0, Length => 99);
+      Header : constant Sequence_Header.T := (Crc => [0, 0], Version => 0, Category => 0, Id => 0, Length => 99);
    begin
       Self.Unload;
       Self.Seq_Header := Header;

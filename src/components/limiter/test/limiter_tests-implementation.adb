@@ -314,7 +314,7 @@ package body Limiter_Tests.Implementation is
       -- Make sure some events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Sends_Per_Tick_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 0)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Sends_Per_Tick_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 0]));
    end Test_Invalid_Command;
 
    overriding procedure Test_Invalid_Parameter (Self : in out Instance) is
@@ -332,7 +332,7 @@ package body Limiter_Tests.Implementation is
       -- Make sure some events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Invalid_Parameter_Received_History.Get_Count, 1);
-      Invalid_Parameter_Info_Assert.Eq (T.Invalid_Parameter_Received_History.Get (1), (Id => T.Parameters.Get_Max_Sends_Per_Tick_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 0)));
+      Invalid_Parameter_Info_Assert.Eq (T.Invalid_Parameter_Received_History.Get (1), (Id => T.Parameters.Get_Max_Sends_Per_Tick_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 0]));
 
       -- Make the parameter invalid by setting a crazy id;
       Param.Header.Id := 1_001;
@@ -345,7 +345,7 @@ package body Limiter_Tests.Implementation is
       -- Make sure some events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
       Natural_Assert.Eq (T.Invalid_Parameter_Received_History.Get_Count, 2);
-      Invalid_Parameter_Info_Assert.Eq (T.Invalid_Parameter_Received_History.Get (2), (Id => 1_001, Errant_Field_Number => Interfaces.Unsigned_32'Last - 1, Errant_Field => (0, 0, 0, 0, 0, 0, 16#03#, 16#E9#)));
+      Invalid_Parameter_Info_Assert.Eq (T.Invalid_Parameter_Received_History.Get (2), (Id => 1_001, Errant_Field_Number => Interfaces.Unsigned_32'Last - 1, Errant_Field => [0, 0, 0, 0, 0, 0, 16#03#, 16#E9#]));
    end Test_Invalid_Parameter;
 
 end Limiter_Tests.Implementation;

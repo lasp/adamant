@@ -22,7 +22,7 @@ init:
     - name: Event_Disable_List
       type: Two_Counter_Entry.Event_Id_List
       description: A list of event IDs that are enabled by default
-      default: "(1 .. 0 => 0)"
+      default: "[1 .. 0 => 0]"
     - name: Event_Limit_Persistence
       type: Two_Counter_Entry.Persistence_Type
       description: The initial persistence of the number of events to allow before limiting them between ticks (1 to 7)

@@ -38,7 +38,7 @@ package body Tests.Implementation is
    overriding procedure Nominal (Self : in out Instance) is
       T : Component.Tick_Divider.Implementation.Tester.Instance_Access renames Self.Tester;
       Systime : constant Sys_Time.T := (Seconds => 15, Subseconds => 26);
-      Dividers : aliased Component.Tick_Divider.Divider_Array_Type := (1 => 5, 2 => 0, 3 => 7, 4 => 2);
+      Dividers : aliased Component.Tick_Divider.Divider_Array_Type := [1 => 5, 2 => 0, 3 => 7, 4 => 2];
    begin
       -- Init component:
       T.Component_Instance.Init (Dividers'Unchecked_Access);
@@ -93,7 +93,7 @@ package body Tests.Implementation is
       T : Component.Tick_Divider.Implementation.Tester.Instance_Access renames Self.Tester;
 
       procedure Init_Nominal is
-         Dividers : aliased Component.Tick_Divider.Divider_Array_Type := (1 => 0, 2 => 1, 3 => 0, 4 => 67);
+         Dividers : aliased Component.Tick_Divider.Divider_Array_Type := [1 => 0, 2 => 1, 3 => 0, 4 => 67];
       begin
          T.Component_Instance.Init (Dividers'Unchecked_Access);
       exception
@@ -103,7 +103,7 @@ package body Tests.Implementation is
       end Init_Nominal;
 
       procedure Init_Too_Few_Arguments is
-         Dividers : aliased Component.Tick_Divider.Divider_Array_Type := (0, 1, 3);
+         Dividers : aliased Component.Tick_Divider.Divider_Array_Type := [0, 1, 3];
       begin
          T.Component_Instance.Init (Dividers'Unchecked_Access);
          -- Should never get here:
@@ -115,7 +115,7 @@ package body Tests.Implementation is
       end Init_Too_Few_Arguments;
 
       procedure Init_Too_Many_Arguments is
-         Dividers : aliased Component.Tick_Divider.Divider_Array_Type := (0, 1, 2, 3, 5, 6);
+         Dividers : aliased Component.Tick_Divider.Divider_Array_Type := [0, 1, 2, 3, 5, 6];
       begin
          T.Component_Instance.Init (Dividers'Unchecked_Access);
          -- Should never get here:
@@ -127,7 +127,7 @@ package body Tests.Implementation is
       end Init_Too_Many_Arguments;
 
       procedure Init_Bad_Index is
-         Dividers : aliased Component.Tick_Divider.Divider_Array_Type := (2 => 0, 3 => 1, 4 => 0, 5 => 7);
+         Dividers : aliased Component.Tick_Divider.Divider_Array_Type := [2 => 0, 3 => 1, 4 => 0, 5 => 7];
       begin
          T.Component_Instance.Init (Dividers'Unchecked_Access);
          -- Should never get here:
@@ -148,7 +148,7 @@ package body Tests.Implementation is
    overriding procedure Full_Queue (Self : in out Instance) is
       T : Component.Tick_Divider.Implementation.Tester.Instance_Access renames Self.Tester;
       Thetick1 : constant Tick.T := (Time => (0, 0), Count => 1);
-      Dividers : aliased Component.Tick_Divider.Divider_Array_Type := (1 => 1, 2 => 0, 3 => 2, 4 => 0);
+      Dividers : aliased Component.Tick_Divider.Divider_Array_Type := [1 => 1, 2 => 0, 3 => 2, 4 => 0];
    begin
       -- Init component:
       T.Component_Instance.Init (Dividers'Unchecked_Access);

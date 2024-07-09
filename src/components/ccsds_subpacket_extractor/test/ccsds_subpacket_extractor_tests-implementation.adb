@@ -61,25 +61,25 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       (Header =>
           (Version => 0, Packet_Type => Ccsds_Packet_Type.Telecommand, Secondary_Header => Ccsds_Secondary_Header_Indicator.Secondary_Header_Not_Present, Apid => Ccsds_Apid_Type (17), Sequence_Flag => Ccsds_Sequence_Flag.Unsegmented,
             Sequence_Count => Ccsds_Sequence_Count_Type (53), Packet_Length => 6),
-       Data => (1, 2, 3, 4, 5, 6, 7, others => 0));
+       Data => [1, 2, 3, 4, 5, 6, 7, others => 0]);
    -- Max size packet:
    Packet_2 : constant Ccsds_Space_Packet.T :=
       (Header =>
           (Version => 0, Packet_Type => Ccsds_Packet_Type.Telecommand, Secondary_Header => Ccsds_Secondary_Header_Indicator.Secondary_Header_Not_Present, Apid => Ccsds_Apid_Type (22), Sequence_Flag => Ccsds_Sequence_Flag.Unsegmented,
             Sequence_Count => Ccsds_Sequence_Count_Type (12), Packet_Length => Unsigned_16 (Ccsds_Space_Packet.Ccsds_Data_Type'Length) - Unsigned_16 (Ccsds_Primary_Header.Size_In_Bytes) - 1),
-       Data => (others => 99));
+       Data => [others => 99]);
    -- Another normal small packet:
    Packet_3 : constant Ccsds_Space_Packet.T :=
       (Header =>
           (Version => 0, Packet_Type => Ccsds_Packet_Type.Telecommand, Secondary_Header => Ccsds_Secondary_Header_Indicator.Secondary_Header_Not_Present, Apid => Ccsds_Apid_Type (13), Sequence_Flag => Ccsds_Sequence_Flag.Unsegmented,
             Sequence_Count => Ccsds_Sequence_Count_Type (1), Packet_Length => 17),
-       Data => (1, 2, 3, 4, 5, 6, 7, others => 255));
+       Data => [1, 2, 3, 4, 5, 6, 7, others => 255]);
 
    overriding procedure Nominal_Extraction (Self : in out Instance) is
       T : Component.Ccsds_Subpacket_Extractor.Implementation.Tester.Instance_Access renames Self.Tester;
    begin
       -- Send over the sync connector first:
-      T.Ccsds_Space_Packet_T_Send (Create_Packet ((0 => Packet_1)));
+      T.Ccsds_Space_Packet_T_Send (Create_Packet ([0 => Packet_1]));
 
       -- Expect no events to be thrown and one packet to be received:
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 1);
@@ -90,7 +90,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       Ccsds_Space_Packet_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get (1), Packet_1);
 
       -- Now try the async connector:
-      T.Ccsds_Space_Packet_T_Send_2 (Create_Packet ((0 => Packet_1)));
+      T.Ccsds_Space_Packet_T_Send_2 (Create_Packet ([0 => Packet_1]));
 
       -- Expect no change, since we have not drained the queue:
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 1);
@@ -109,7 +109,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       Ccsds_Space_Packet_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get (2), Packet_1);
 
       -- Send over the sync connector first:
-      T.Ccsds_Space_Packet_T_Send (Create_Packet ((0 => Packet_2)));
+      T.Ccsds_Space_Packet_T_Send (Create_Packet ([0 => Packet_2]));
 
       -- Expect no events to be thrown and one packet to be received:
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 3);
@@ -120,7 +120,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       Ccsds_Space_Packet_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get (3), Packet_2);
 
       -- Now try the async connector:
-      T.Ccsds_Space_Packet_T_Send_2 (Create_Packet ((0 => Packet_2)));
+      T.Ccsds_Space_Packet_T_Send_2 (Create_Packet ([0 => Packet_2]));
 
       -- Expect no change, since we have not drained the queue:
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 3);
@@ -139,7 +139,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       Ccsds_Space_Packet_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get (4), Packet_2);
 
       -- Send over the sync connector first:
-      T.Ccsds_Space_Packet_T_Send (Create_Packet ((0 => Packet_1, 1 => Packet_3, 2 => Packet_1, 3 => Packet_3)));
+      T.Ccsds_Space_Packet_T_Send (Create_Packet ([0 => Packet_1, 1 => Packet_3, 2 => Packet_1, 3 => Packet_3]));
 
       -- Expect no events to be thrown and one packet to be received:
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 8);
@@ -153,7 +153,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       Ccsds_Space_Packet_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get (8), Packet_3);
 
       -- Now try the async connector:
-      T.Ccsds_Space_Packet_T_Send_2 (Create_Packet ((0 => Packet_3, 1 => Packet_1, 2 => Packet_3, 3 => Packet_1)));
+      T.Ccsds_Space_Packet_T_Send_2 (Create_Packet ([0 => Packet_3, 1 => Packet_1, 2 => Packet_3, 3 => Packet_1]));
 
       -- Expect no events to be thrown and one packet to be received:
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 8);
@@ -184,7 +184,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       --
 
       -- Send over the sync connector first:
-      Packet := Create_Packet ((0 => Packet_1));
+      Packet := Create_Packet ([0 => Packet_1]);
       -- Override packet header to make it too small:
       Packet.Header.Packet_Length := Unsigned_16 (Ccsds_Primary_Header.Size_In_Bytes) - 2;
       T.Ccsds_Space_Packet_T_Send (Packet);
@@ -199,7 +199,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       Ccsds_Space_Packet_Assert.Eq (T.Error_Packet_History.Get (1), Packet);
 
       -- Send over the sync connector first:
-      Packet := Create_Packet ((0 => Packet_2));
+      Packet := Create_Packet ([0 => Packet_2]);
       -- Override packet header to make it too small:
       Packet.Header.Packet_Length := 0;
       T.Ccsds_Space_Packet_T_Send_2 (Packet);
@@ -224,7 +224,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       --
 
       -- Send over the sync connector first:
-      Packet := Create_Packet ((0 => Packet_2));
+      Packet := Create_Packet ([0 => Packet_2]);
       -- Override packet header to make it too large:
       Packet.Header.Packet_Length := Packet.Data'Length * 8;
       T.Ccsds_Space_Packet_T_Send (Packet);
@@ -239,7 +239,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       Ccsds_Primary_Header_Assert.Eq (T.Error_Packet_History.Get (3).Header, Packet.Header);
 
       -- Send over the sync connector first:
-      Packet := Create_Packet ((0 => Packet_2));
+      Packet := Create_Packet ([0 => Packet_2]);
       -- Override packet header to make it too large:
       Packet.Header.Packet_Length := Packet.Data'Length;
       T.Ccsds_Space_Packet_T_Send (Packet);
@@ -254,7 +254,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       Ccsds_Primary_Header_Assert.Eq (T.Error_Packet_History.Get (4).Header, Packet.Header);
 
       -- Send over the async connector:
-      Packet := Create_Packet ((0 => Packet_3));
+      Packet := Create_Packet ([0 => Packet_3]);
       -- Override packet header to make it too large:
       Packet.Header.Packet_Length := Packet.Data'Length;
 
@@ -282,7 +282,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       Packet : Ccsds_Space_Packet.T;
    begin
       -- Send over the sync connector first:
-      Packet := Create_Packet ((0 => Packet_1, 1 => Packet_3));
+      Packet := Create_Packet ([0 => Packet_1, 1 => Packet_3]);
       -- Override packet header to make it too small:
       Packet.Header.Packet_Length := Packet.Header.Packet_Length - 1;
       T.Ccsds_Space_Packet_T_Send (Packet);
@@ -305,7 +305,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       Ccsds_Space_Packet_Assert.Eq (T.Error_Packet_History.Get (1), Packet);
 
       -- Send over the sync connector first:
-      Packet := Create_Packet ((0 => Packet_2));
+      Packet := Create_Packet ([0 => Packet_2]);
       -- Override packet header to make it way too small:
       Packet.Header.Packet_Length := Packet.Header.Packet_Length - Unsigned_16 (Ccsds_Primary_Header.Size_In_Bytes);
       T.Ccsds_Space_Packet_T_Send_2 (Packet);
@@ -333,7 +333,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       Packet : Ccsds_Space_Packet.T;
    begin
       -- Send over the sync connector first:
-      Packet := Create_Packet ((0 => Packet_1, 1 => Packet_3));
+      Packet := Create_Packet ([0 => Packet_1, 1 => Packet_3]);
       -- Override packet header to make it too large by a little:
       Packet.Header.Packet_Length := Packet.Header.Packet_Length + 1;
       T.Ccsds_Space_Packet_T_Send (Packet);
@@ -352,9 +352,9 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       Ccsds_Space_Packet_Assert.Eq (T.Error_Packet_History.Get (1), Packet);
 
       -- Send over the async connector:
-      Packet := Create_Packet ((0 => Packet_3));
+      Packet := Create_Packet ([0 => Packet_3]);
       -- Override packet header to make it too large by a lot:
-      Packet.Data (Natural (Packet.Header.Packet_Length) + 1 .. Packet.Data'Last) := (others => 99);
+      Packet.Data (Natural (Packet.Header.Packet_Length) + 1 .. Packet.Data'Last) := [others => 99];
       Packet.Header.Packet_Length := Packet.Header.Packet_Length + Unsigned_16 (Ccsds_Primary_Header.Size_In_Bytes);
       T.Ccsds_Space_Packet_T_Send_2 (Packet);
       Natural_Assert.Eq (Self.Tester.Dispatch_All, 1);
@@ -367,7 +367,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
       Natural_Assert.Eq (T.Dropped_Trailing_Bytes_History.Get_Count, 1);
       Natural_Assert.Eq (T.Invalid_Extracted_Packet_Length_History.Get_Count, 1);
-      Invalid_Packet_Length_Assert.Eq (T.Invalid_Extracted_Packet_Length_History.Get (1), (Ccsds_Primary_Header.Serialization.From_Byte_Array ((others => 16#63#)), 16#6363#, Ccsds_Primary_Header.Size_In_Bytes));
+      Invalid_Packet_Length_Assert.Eq (T.Invalid_Extracted_Packet_Length_History.Get (1), (Ccsds_Primary_Header.Serialization.From_Byte_Array ([others => 16#63#]), 16#6363#, Ccsds_Primary_Header.Size_In_Bytes));
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 2);
       Natural_Assert.Eq (T.Error_Packet_History.Get_Count, 2);
       Ccsds_Space_Packet_Assert.Eq (T.Error_Packet_History.Get (2), Packet);
@@ -378,13 +378,13 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       Packet : Ccsds_Space_Packet.T;
    begin
       -- Send packets out of the async connector:
-      T.Ccsds_Space_Packet_T_Send_2 (Create_Packet ((0 => Packet_2)));
-      T.Ccsds_Space_Packet_T_Send_2 (Create_Packet ((0 => Packet_2)));
-      T.Ccsds_Space_Packet_T_Send_2 (Create_Packet ((0 => Packet_2)));
-      T.Ccsds_Space_Packet_T_Send (Create_Packet ((0 => Packet_3)));
+      T.Ccsds_Space_Packet_T_Send_2 (Create_Packet ([0 => Packet_2]));
+      T.Ccsds_Space_Packet_T_Send_2 (Create_Packet ([0 => Packet_2]));
+      T.Ccsds_Space_Packet_T_Send_2 (Create_Packet ([0 => Packet_2]));
+      T.Ccsds_Space_Packet_T_Send (Create_Packet ([0 => Packet_3]));
       -- We should overflow here:
       T.Expect_Ccsds_Space_Packet_T_Send_2_Dropped := True;
-      Packet := Create_Packet ((0 => Packet_1));
+      Packet := Create_Packet ([0 => Packet_1]);
       T.Ccsds_Space_Packet_T_Send_2 (Packet);
 
       -- Expect event to be thrown and no packet extracted.
@@ -418,7 +418,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       T.Component_Instance.Init (Start_Offset => 4, Stop_Offset => 6);
 
       -- Send over the sync connector first:
-      T.Ccsds_Space_Packet_T_Send (Create_Packet ((0 => Packet_1), Start_Offset => 4, Stop_Offset => 6));
+      T.Ccsds_Space_Packet_T_Send (Create_Packet ([0 => Packet_1], Start_Offset => 4, Stop_Offset => 6));
 
       -- Expect no events to be thrown and one packet to be received:
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 1);
@@ -429,7 +429,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       Ccsds_Space_Packet_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get (1), Packet_1);
 
       -- Send over the sync connector first:
-      T.Ccsds_Space_Packet_T_Send (Create_Packet ((0 => Packet_1, 1 => Packet_3, 2 => Packet_1, 3 => Packet_3), Start_Offset => 4, Stop_Offset => 6));
+      T.Ccsds_Space_Packet_T_Send (Create_Packet ([0 => Packet_1, 1 => Packet_3, 2 => Packet_1, 3 => Packet_3], Start_Offset => 4, Stop_Offset => 6));
 
       -- Expect no events to be thrown and one packet to be received:
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 5);
@@ -443,7 +443,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       Ccsds_Space_Packet_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get (5), Packet_3);
 
       -- Send over the sync connector first:
-      Packet := Create_Packet ((0 => Packet_1, 1 => Packet_3), Start_Offset => 4, Stop_Offset => 6);
+      Packet := Create_Packet ([0 => Packet_1, 1 => Packet_3], Start_Offset => 4, Stop_Offset => 6);
       -- Override packet header to make it too large by a little:
       Packet.Header.Packet_Length := Packet.Header.Packet_Length + 1;
       T.Ccsds_Space_Packet_T_Send (Packet);
@@ -462,7 +462,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       Ccsds_Space_Packet_Assert.Eq (T.Error_Packet_History.Get (1), Packet);
 
       -- Send over the sync connector first:
-      Packet := Create_Packet ((0 => Packet_1), Start_Offset => 4, Stop_Offset => 6);
+      Packet := Create_Packet ([0 => Packet_1], Start_Offset => 4, Stop_Offset => 6);
       -- Override packet header to make it too small:
       Packet.Header.Packet_Length := Unsigned_16 (Ccsds_Primary_Header.Size_In_Bytes) - 2;
       T.Ccsds_Space_Packet_T_Send (Packet);
@@ -477,7 +477,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       Ccsds_Space_Packet_Assert.Eq (T.Error_Packet_History.Get (2), Packet);
 
       -- Send over the sync connector first:
-      Packet := Create_Packet ((0 => Packet_1), Start_Offset => 4, Stop_Offset => 6);
+      Packet := Create_Packet ([0 => Packet_1], Start_Offset => 4, Stop_Offset => 6);
       -- Override packet header to make it too large:
       Packet.Header.Packet_Length := Packet.Data'Length * 8;
       T.Ccsds_Space_Packet_T_Send (Packet);
@@ -492,7 +492,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       Ccsds_Primary_Header_Assert.Eq (T.Error_Packet_History.Get (3).Header, Packet.Header);
 
       -- Send over the sync connector first, make offsets so big nothing can be extracted:
-      Packet := Create_Packet ((0 => Packet_1));
+      Packet := Create_Packet ([0 => Packet_1]);
       -- Override packet header to make it too small:
       Packet.Header.Packet_Length := 1;
       T.Ccsds_Space_Packet_T_Send (Packet);
@@ -515,7 +515,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       T.Component_Instance.Init (Max_Subpackets_To_Extract => 0);
 
       -- Send large packet:
-      T.Ccsds_Space_Packet_T_Send (Create_Packet ((0 => Packet_1, 1 => Packet_3, 2 => Packet_1, 3 => Packet_3)));
+      T.Ccsds_Space_Packet_T_Send (Create_Packet ([0 => Packet_1, 1 => Packet_3, 2 => Packet_1, 3 => Packet_3]));
 
       -- Expect no events to be thrown and no packets to be received:
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 0);
@@ -526,7 +526,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       T.Component_Instance.Init (Max_Subpackets_To_Extract => 2);
 
       -- Send large packet containing 4 subpackets:
-      T.Ccsds_Space_Packet_T_Send (Create_Packet ((0 => Packet_1, 1 => Packet_3, 2 => Packet_1, 3 => Packet_3)));
+      T.Ccsds_Space_Packet_T_Send (Create_Packet ([0 => Packet_1, 1 => Packet_3, 2 => Packet_1, 3 => Packet_3]));
 
       -- Expect no events to be thrown and two packets to be received:
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 2);
@@ -541,7 +541,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       T.Component_Instance.Init (Max_Subpackets_To_Extract => 1);
 
       -- Send large packet containing 4 subpackets:
-      T.Ccsds_Space_Packet_T_Send (Create_Packet ((0 => Packet_3, 1 => Packet_1, 2 => Packet_3)));
+      T.Ccsds_Space_Packet_T_Send (Create_Packet ([0 => Packet_3, 1 => Packet_1, 2 => Packet_3]));
 
       -- Expect no events to be thrown and two packets to be received:
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 3);
@@ -555,7 +555,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       T.Component_Instance.Init (Max_Subpackets_To_Extract => 3);
 
       -- Send large packet containing 3 subpackets:
-      T.Ccsds_Space_Packet_T_Send (Create_Packet ((0 => Packet_3, 1 => Packet_1, 2 => Packet_3)));
+      T.Ccsds_Space_Packet_T_Send (Create_Packet ([0 => Packet_3, 1 => Packet_1, 2 => Packet_3]));
 
       -- Expect no events to be thrown and two packets to be received:
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 6);
@@ -571,7 +571,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       T.Component_Instance.Init (Max_Subpackets_To_Extract => 18);
 
       -- Send large packet containing 3 subpackets:
-      T.Ccsds_Space_Packet_T_Send (Create_Packet ((0 => Packet_3, 1 => Packet_1, 2 => Packet_3)));
+      T.Ccsds_Space_Packet_T_Send (Create_Packet ([0 => Packet_3, 1 => Packet_1, 2 => Packet_3]));
 
       -- Expect no events to be thrown and two packets to be received:
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 9);

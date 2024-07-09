@@ -25,7 +25,7 @@ package body Byte_Array_Pointer is
       Data := new Basic_Types.Byte_Array (0 .. (Size - 1));
 
       if Init_To_Zero then
-         Data.all := (others => 0);
+         Data.all := [others => 0];
       end if;
 
       -- Convert the Byte array access to a

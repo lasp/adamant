@@ -44,8 +44,8 @@ package body Packet_Component_Tests.Implementation is
 
       -- Make sure 2 Counter packets were sent:
       Natural_Assert.Eq (Self.Tester.Counter_History.Get_Count, 2);
-      Byte_Array_Assert.Eq (Self.Tester.Counter_History.Get (1).Buffer (0 .. 1), (0, 0));
-      Byte_Array_Assert.Eq (Self.Tester.Counter_History.Get (2).Buffer (0 .. 1), (0, 1));
+      Byte_Array_Assert.Eq (Self.Tester.Counter_History.Get (1).Buffer (0 .. 1), [0, 0]);
+      Byte_Array_Assert.Eq (Self.Tester.Counter_History.Get (2).Buffer (0 .. 1), [0, 1]);
 
       -- Make sure 2 Last_Tick_Received packets were sent:
       Natural_Assert.Eq (Self.Tester.Last_Tick_Received_History.Get_Count, 2);

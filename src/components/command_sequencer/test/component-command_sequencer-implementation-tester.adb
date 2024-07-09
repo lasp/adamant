@@ -177,7 +177,7 @@ package body Component.Command_Sequencer.Implementation.Tester is
                Id => Arg.Id,
                Buffer_Length => 0
             ),
-            Buffer => (others => 0)
+            Buffer => [others => 0]
          )
       );
    begin

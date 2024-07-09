@@ -236,7 +236,7 @@ package body Product_Copier_Tests.Implementation is
       -- test that the 12 products are: 5 1 4 1 4 5 1 4 3 1 4 3
       -- TODO do we care about the order within ticks?
       Check_Product_Ids : declare
-         Counts : array (1 .. 5) of Natural := (others => 0);
+         Counts : array (1 .. 5) of Natural := [others => 0];
          Id : Natural;
          Mod_Id : Natural;
       begin

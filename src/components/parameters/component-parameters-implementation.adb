@@ -97,7 +97,7 @@ package body Component.Parameters.Implementation is
             Param_Update : Parameter_Update.T := (
                Operation => Fetch,
                Status => Success,
-               Param => (Header => (Id => Param_Entry.Id, Buffer_Length => 0), Buffer => (others => 0)
+               Param => (Header => (Id => Param_Entry.Id, Buffer_Length => 0), Buffer => [others => 0]
             ));
             -- Calculate expected parameter length:
             Param_Length : constant Parameter_Types.Parameter_Buffer_Length_Type := Param_Entry.End_Index - Param_Entry.Start_Index + 1;
@@ -266,7 +266,7 @@ package body Component.Parameters.Implementation is
       Param_Update : Parameter_Update.T := (
          Operation => Stage,
          Status => Success,
-         Param => (Header => (Id => Param_Entry.Id, Buffer_Length => Param_Length), Buffer => (others => 0)
+         Param => (Header => (Id => Param_Entry.Id, Buffer_Length => Param_Length), Buffer => [others => 0]
       ));
       -- Component index:
       Idx : constant Parameter_Update_T_Provide_Index := Parameter_Update_T_Provide_Index (Param_Entry.Component_Id);
@@ -298,7 +298,7 @@ package body Component.Parameters.Implementation is
       Param_Update : Parameter_Update.T := (
          Operation => Update,
          Status => Success,
-         Param => (Header => (Id => 0, Buffer_Length => 0), Buffer => (others => 0)
+         Param => (Header => (Id => 0, Buffer_Length => 0), Buffer => [others => 0]
       ));
       -- Component index:
       Idx : constant Parameter_Update_T_Provide_Index := Parameter_Update_T_Provide_Index (Component_Id);
@@ -354,7 +354,7 @@ package body Component.Parameters.Implementation is
                End_Index => Param_Entry.End_Index
             );
             -- Create a temporary buffer to hold the parameter value:
-            Value : Parameter_Types.Parameter_Buffer_Type := (others => 0);
+            Value : Parameter_Types.Parameter_Buffer_Type := [others => 0];
          begin
             -- Copy the bytes from the pointer into a temporary buffer that is the maximum
             -- size of a parameter buffer:

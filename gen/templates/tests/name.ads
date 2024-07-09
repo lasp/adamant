@@ -47,11 +47,11 @@ package {{ name }} is
    type Test_Name_List_Type is array (Natural range 0 .. Num_Tests - 1) of Unbounded_String;
 
    Test_Name_List : constant Test_Name_List_Type :=
-   (
+   [
 {% for test in tests.values() %}
       {{ loop.index0 }} => To_Unbounded_String ("{{ test.name }}"){{ "," if not loop.last }}
 {% endfor %}
-   );
+   ];
 
 private
    -- Logging procedures:

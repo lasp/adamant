@@ -86,43 +86,43 @@ package body Variable_Tests.Implementation is
       use Serializer_Types;
       T : Component_Tester_Package.Instance_Access renames Self.Tester;
       Var : Simple_Variable.T;
-      Bytes : Basic_Types.Byte_Array := (0 .. 99 => 0);
-      Bytes_To_Compare : Basic_Types.Byte_Array := (0 .. 99 => 0);
+      Bytes : Basic_Types.Byte_Array := [0 .. 99 => 0];
+      Bytes_To_Compare : Basic_Types.Byte_Array := [0 .. 99 => 0];
       Ptr : Byte_Array_Pointer.Instance;
       Idx : Natural := 0;
       Len : Natural := 0;
-      Log_Bytes : aliased Basic_Types.Byte_Array := (0 .. 49 => 0);
+      Log_Bytes : aliased Basic_Types.Byte_Array := [0 .. 49 => 0];
       Meta_Data : aliased Circular_Buffer_Meta.T := (0, 0, 0);
    begin
       -- Initialize the component:
       T.Component_Instance.Init (Bytes => Log_Bytes'Unchecked_Access, Meta_Data => Meta_Data'Unchecked_Access, Initial_Mode => Logger_Mode.Enabled);
 
       -- Send some data to the logger while it is disabled:
-      Var := (0, (0 => 1, 1 => 2, 2 => 3, others => 9));
+      Var := (0, [0 => 1, 1 => 2, 2 => 3, others => 9]);
       T.T_Send (Var);
       Put_Line (Basic_Types.Representation.Image (Log_Bytes));
       pragma Assert (Simple_Variable.Serialized_Length (Var, Len) = Success);
       pragma Assert (Simple_Variable.Serialization.To_Byte_Array (Bytes_To_Compare (Idx .. Idx + Len - 1), Var) = Success);
       Idx := Idx + Len;
-      Var := (1, (0 => 1, others => 9));
+      Var := (1, [0 => 1, others => 9]);
       T.T_Send (Var);
       Put_Line (Basic_Types.Representation.Image (Log_Bytes));
       pragma Assert (Simple_Variable.Serialized_Length (Var, Len) = Success);
       pragma Assert (Simple_Variable.Serialization.To_Byte_Array (Bytes_To_Compare (Idx .. Idx + Len - 1), Var) = Success);
       Idx := Idx + Len;
-      Var := (2, (0 => 2, 1 => 3, others => 9));
+      Var := (2, [0 => 2, 1 => 3, others => 9]);
       T.T_Send (Var);
       Put_Line (Basic_Types.Representation.Image (Log_Bytes));
       pragma Assert (Simple_Variable.Serialized_Length (Var, Len) = Success);
       pragma Assert (Simple_Variable.Serialization.To_Byte_Array (Bytes_To_Compare (Idx .. Idx + Len - 1), Var) = Success);
       Idx := Idx + Len;
-      Var := (3, (0 => 4, 1 => 5, 2 => 6, others => 9));
+      Var := (3, [0 => 4, 1 => 5, 2 => 6, others => 9]);
       T.T_Send (Var);
       Put_Line (Basic_Types.Representation.Image (Log_Bytes));
       pragma Assert (Simple_Variable.Serialized_Length (Var, Len) = Success);
       pragma Assert (Simple_Variable.Serialization.To_Byte_Array (Bytes_To_Compare (Idx .. Idx + Len - 1), Var) = Success);
       Idx := Idx + Len;
-      Var := (4, (0 => 7, 1 => 8, 2 => 9, 3 => 10, others => 9));
+      Var := (4, [0 => 7, 1 => 8, 2 => 9, 3 => 10, others => 9]);
       T.T_Send (Var);
       Put_Line (Basic_Types.Representation.Image (Log_Bytes));
       pragma Assert (Simple_Variable.Serialized_Length (Var, Len) = Success);
@@ -240,30 +240,30 @@ package body Variable_Tests.Implementation is
       T : Component_Tester_Package.Instance_Access renames Self.Tester;
       Var : Simple_Variable.T;
       Len : Natural := 0;
-      Log_Bytes : aliased Basic_Types.Byte_Array := (0 .. 49 => 0);
+      Log_Bytes : aliased Basic_Types.Byte_Array := [0 .. 49 => 0];
       Meta_Data : aliased Circular_Buffer_Meta.T := (0, 0, 0);
    begin
       -- Initialize the component:
       T.Component_Instance.Init (Bytes => Log_Bytes'Unchecked_Access, Meta_Data => Meta_Data'Unchecked_Access, Initial_Mode => Logger_Mode.Enabled);
 
       -- Send good log data:
-      Var := (3, (others => 9));
+      Var := (3, [others => 9]);
       T.T_Send (Var);
 
       -- Send some bad log data:
-      Var := (21, (0 => 1, 1 => 2, 2 => 3, others => 9));
+      Var := (21, [0 => 1, 1 => 2, 2 => 3, others => 9]);
       T.T_Send (Var);
       Put_Line (Basic_Types.Representation.Image (Log_Bytes));
       pragma Assert (Simple_Variable.Serialized_Length (Var, Len) = Failure);
-      Var := (255, (0 => 1, others => 9));
+      Var := (255, [0 => 1, others => 9]);
       T.T_Send (Var);
       Put_Line (Basic_Types.Representation.Image (Log_Bytes));
       pragma Assert (Simple_Variable.Serialized_Length (Var, Len) = Failure);
-      Var := (22, (0 => 2, 1 => 3, others => 9));
+      Var := (22, [0 => 2, 1 => 3, others => 9]);
       T.T_Send (Var);
       Put_Line (Basic_Types.Representation.Image (Log_Bytes));
       pragma Assert (Simple_Variable.Serialized_Length (Var, Len) = Failure);
-      Var := (23, (0 => 4, 1 => 5, 2 => 6, others => 9));
+      Var := (23, [0 => 4, 1 => 5, 2 => 6, others => 9]);
       T.T_Send (Var);
       Put_Line (Basic_Types.Representation.Image (Log_Bytes));
       pragma Assert (Simple_Variable.Serialized_Length (Var, Len) = Failure);
@@ -292,16 +292,16 @@ package body Variable_Tests.Implementation is
       T.Component_Instance.Init (Size => 5, Initial_Mode => Logger_Mode.Enabled);
 
       -- Send some good log data:
-      Var := (4, (others => 9));
+      Var := (4, [others => 9]);
       T.T_Send (Var);
       Put_Line (Basic_Types.Representation.Image (Log_Bytes));
 
       -- Send some bad log data:
-      Var := (5, (others => 8));
+      Var := (5, [others => 8]);
       T.T_Send (Var);
-      Var := (6, (others => 8));
+      Var := (6, [others => 8]);
       T.T_Send (Var);
-      Var := (255, (others => 8));
+      Var := (255, [others => 8]);
       T.T_Send (Var);
 
       -- Make sure 4 error events were thrown:
@@ -340,7 +340,7 @@ package body Variable_Tests.Implementation is
       Natural_Assert.Eq (T.Dumping_Log_Memory_History.Get_Count, 0);
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Dump_Oldest_Data_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 0)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Dump_Oldest_Data_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 0]));
    end Test_Invalid_Command;
 
 end Variable_Tests.Implementation;

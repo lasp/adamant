@@ -252,7 +252,7 @@ package body Component.Fault_Correction.Implementation is
          -- data products as necessary.
          declare
             The_Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
-            Param_Buffer : Fault_Types.Parameter_Buffer_Type := (others => 0);
+            Param_Buffer : Fault_Types.Parameter_Buffer_Type := [others => 0];
          begin
             -- Copy over info from fault into statically sized fault type for serialization into info event:
             Param_Buffer (Param_Buffer'First .. Param_Buffer'First + Arg.Header.Param_Buffer_Length - 1) :=

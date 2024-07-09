@@ -84,8 +84,8 @@ package body Logger_Tests.Implementation is
       use Byte_Array_Pointer.Packed;
       T : Component_Tester_Package.Instance_Access renames Self.Tester;
       The_Tick : Tick.T;
-      Bytes : Basic_Types.Byte_Array := (0 .. 99 => 0);
-      Bytes_To_Compare : Basic_Types.Byte_Array := (0 .. 99 => 0);
+      Bytes : Basic_Types.Byte_Array := [0 .. 99 => 0];
+      Bytes_To_Compare : Basic_Types.Byte_Array := [0 .. 99 => 0];
       Ptr : Byte_Array_Pointer.Instance;
       Idx : Natural := 0;
    begin
@@ -329,8 +329,8 @@ package body Logger_Tests.Implementation is
       use Byte_Array_Pointer.Packed;
       T : Component_Tester_Package.Instance_Access renames Self.Tester;
       The_Tick : Tick.T;
-      Bytes : Basic_Types.Byte_Array := (0 .. 99 => 0);
-      Bytes_To_Compare : Basic_Types.Byte_Array := (0 .. 99 => 0);
+      Bytes : Basic_Types.Byte_Array := [0 .. 99 => 0];
+      Bytes_To_Compare : Basic_Types.Byte_Array := [0 .. 99 => 0];
       Ptr : Byte_Array_Pointer.Instance;
       Idx : Natural := 0;
       Len : Natural := 0;
@@ -690,7 +690,7 @@ package body Logger_Tests.Implementation is
       end Init_Nominal_Heap;
 
       procedure Init_Nominal_Static is
-         Bytes : aliased Basic_Types.Byte_Array := (0 .. 50 => 0);
+         Bytes : aliased Basic_Types.Byte_Array := [0 .. 50 => 0];
          Meta_Data : aliased Circular_Buffer_Meta.T;
       begin
          T.Component_Instance.Init (Bytes => Bytes'Unchecked_Access, Meta_Data => Meta_Data'Unchecked_Access);
@@ -701,7 +701,7 @@ package body Logger_Tests.Implementation is
       end Init_Nominal_Static;
 
       procedure Init_Nominal_Mode is
-         Bytes : aliased Basic_Types.Byte_Array := (0 .. 50 => 0);
+         Bytes : aliased Basic_Types.Byte_Array := [0 .. 50 => 0];
          Meta_Data : aliased Circular_Buffer_Meta.T;
       begin
          T.Component_Instance.Init (Bytes => Bytes'Unchecked_Access, Meta_Data => Meta_Data'Unchecked_Access, Initial_Mode => Logger_Mode.Enabled);
@@ -712,7 +712,7 @@ package body Logger_Tests.Implementation is
       end Init_Nominal_Mode;
 
       procedure Init_Everything is
-         Bytes : aliased Basic_Types.Byte_Array := (0 .. 50 => 0);
+         Bytes : aliased Basic_Types.Byte_Array := [0 .. 50 => 0];
          Meta_Data : aliased Circular_Buffer_Meta.T;
       begin
          T.Component_Instance.Init (Bytes => Bytes'Unchecked_Access, Meta_Data => Meta_Data'Unchecked_Access, Size => 50);
@@ -736,7 +736,7 @@ package body Logger_Tests.Implementation is
       end Init_Nothing;
 
       procedure Init_Some_1 is
-         Bytes : aliased Basic_Types.Byte_Array := (0 .. 50 => 0);
+         Bytes : aliased Basic_Types.Byte_Array := [0 .. 50 => 0];
       begin
          T.Component_Instance.Init (Bytes => Bytes'Unchecked_Access);
          -- Should never get here:
@@ -760,7 +760,7 @@ package body Logger_Tests.Implementation is
       end Init_Some_2;
 
       procedure Init_Some_3 is
-         Bytes : aliased Basic_Types.Byte_Array := (0 .. 50 => 0);
+         Bytes : aliased Basic_Types.Byte_Array := [0 .. 50 => 0];
       begin
          T.Component_Instance.Init (Bytes => Bytes'Unchecked_Access, Size => 40);
          -- Should never get here:
@@ -810,7 +810,7 @@ package body Logger_Tests.Implementation is
       Natural_Assert.Eq (T.Dumping_Log_Memory_History.Get_Count, 0);
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Dump_Oldest_Data_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 0)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Dump_Oldest_Data_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 0]));
    end Test_Invalid_Command;
 
 end Logger_Tests.Implementation;

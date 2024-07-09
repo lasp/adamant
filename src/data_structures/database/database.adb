@@ -7,7 +7,7 @@ package body Database is
       Self.Db_Table := new Database_Table (Database_Index'First .. Database_Index'First + Max_Num_Values - 1);
       Self.Index_Table := new Index_Lookup_Table (Minimum_Id .. Maximum_Id);
       -- Initialize this table to zero, to signify unallocated entries:
-      Self.Index_Table.all := (others => 0);
+      Self.Index_Table.all := [others => 0];
    end Init;
 
    procedure Destroy (Self : in out Instance) is

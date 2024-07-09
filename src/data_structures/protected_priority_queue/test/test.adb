@@ -14,8 +14,8 @@ procedure Test is
    -- Other vars:
    Len : Natural;
    Static_Var : Static.T := (others => 0);
-   Variable_Var : constant Simple_Variable.T := (Length => 6, Buffer => (10, 9, 8, 7, 6, 5, others => 255));
-   Variable_Var2 : Simple_Variable.T := (Length => 0, Buffer => (others => 0));
+   Variable_Var : constant Simple_Variable.T := (Length => 6, Buffer => [10, 9, 8, 7, 6, 5, others => 255]);
+   Variable_Var2 : Simple_Variable.T := (Length => 0, Buffer => [others => 0]);
    Queue_Size : constant Positive := Simple_Variable.Size_In_Bytes * 3;
    Bytes : Basic_Types.Byte_Array (0 .. 100);
    Pri_Data : Data;
@@ -39,7 +39,7 @@ begin
 
    Put_Line ("Filling queue test... ");
    Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
-   Push_Assert.Eq (Queue.Push ((Pri => 1, Data_Type => Bytes_Type), (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)), Success);
+   Push_Assert.Eq (Queue.Push ((Pri => 1, Data_Type => Bytes_Type), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), Success);
    Natural_Assert.Eq (Queue.Num_Elements, 1);
    Natural_Assert.Eq (Queue.Max_Num_Elements, 1);
    Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
@@ -49,7 +49,7 @@ begin
    Natural_Assert.Eq (Queue.Max_Num_Elements, 2);
    Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
    -- Push a variable type:
-   Push_Variable_Length_Type_Assert.Eq (Push_Simple_Variable (Queue, (Pri => 0, Data_Type => Variable_Type), (Length => 21, Buffer => (others => 233))), Serialization_Failure);
+   Push_Variable_Length_Type_Assert.Eq (Push_Simple_Variable (Queue, (Pri => 0, Data_Type => Variable_Type), (Length => 21, Buffer => [others => 233])), Serialization_Failure);
    Push_Variable_Length_Type_Assert.Eq (Push_Simple_Variable (Queue, (Pri => 3, Data_Type => Variable_Type), Variable_Var), Success);
    Natural_Assert.Eq (Queue.Num_Elements, 3);
    Natural_Assert.Eq (Queue.Max_Num_Elements, 3);
@@ -59,11 +59,11 @@ begin
 
    Put_Line ("Blocking push test... ");
    -- Push some bytes:
-   Push_Assert.Eq (Queue.Push ((Pri => 100, Data_Type => Bytes_Type), (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)), Full);
+   Push_Assert.Eq (Queue.Push ((Pri => 100, Data_Type => Bytes_Type), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), Full);
    Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
    Put_Line ("Waiting on full queue... ");
    The_Action.Set (Pop_Variable);
-   Push_Block_Assert.Eq (Queue.Push_Block ((Pri => 0, Data_Type => Bytes_Type), (11, 12, 13, 14, 15, 16, 17, 18, 19, 20)), Success);
+   Push_Block_Assert.Eq (Queue.Push_Block ((Pri => 0, Data_Type => Bytes_Type), [11, 12, 13, 14, 15, 16, 17, 18, 19, 20]), Success);
    Put_Line ("pushed item.");
    Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
    Natural_Assert.Eq (Queue.Num_Elements, 3);
@@ -84,7 +84,7 @@ begin
    Push_Variable_Length_Type_Assert.Eq (Push_Simple_Variable (Queue, (Pri => 99, Data_Type => Variable_Type), Variable_Var), Full);
    Put_Line ("Waiting on full queue... ");
    The_Action.Set (Pop_Static);
-   Push_Variable_Length_Type_Block_Assert.Eq (Push_Simple_Variable_Block (Queue, (Pri => 3, Data_Type => Variable_Type), (9, (8, 8, 8, 8, 8, 8, 8, 8, 8, others => 255))), Success);
+   Push_Variable_Length_Type_Block_Assert.Eq (Push_Simple_Variable_Block (Queue, (Pri => 3, Data_Type => Variable_Type), (9, [8, 8, 8, 8, 8, 8, 8, 8, 8, others => 255])), Success);
    Put_Line ("pushed item.");
    Natural_Assert.Eq (Queue.Num_Elements, 3);
    Natural_Assert.Eq (Queue.Max_Num_Elements, 3);
@@ -99,7 +99,7 @@ begin
    Natural_Assert.Eq (Len, 10);
    Pop_Type_Assert.Eq (Pop_Simple_Variable (Queue, Pri_Data, Variable_Var2), Success);
    pragma Assert (Pri_Data = (Pri => 3, Data_Type => Variable_Type));
-   Simple_Variable_Assert.Eq (Variable_Var2, (9, (8, 8, 8, 8, 8, 8, 8, 8, 8, others => 0)));
+   Simple_Variable_Assert.Eq (Variable_Var2, (9, [8, 8, 8, 8, 8, 8, 8, 8, 8, others => 0]));
    Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
    Natural_Assert.Eq (Queue.Num_Elements, 2);
    Natural_Assert.Eq (Queue.Max_Num_Elements, 3);
@@ -110,7 +110,7 @@ begin
    Pop_Assert.Eq (Queue.Pop (Pri_Data, Bytes, Len), Success);
    pragma Assert (Pri_Data = (Pri => 1, Data_Type => Bytes_Type));
    Natural_Assert.Eq (Len, 10);
-   Byte_Array_Assert.Eq (Bytes (0 .. Len - 1), (1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+   Byte_Array_Assert.Eq (Bytes (0 .. Len - 1), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
    Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
    Natural_Assert.Eq (Queue.Num_Elements, 1);
    Natural_Assert.Eq (Queue.Max_Num_Elements, 3);
@@ -121,7 +121,7 @@ begin
    Pop_Assert.Eq (Queue.Pop (Pri_Data, Bytes, Len), Success);
    pragma Assert (Pri_Data = (Pri => 0, Data_Type => Bytes_Type));
    Natural_Assert.Eq (Len, 10);
-   Byte_Array_Assert.Eq (Bytes (0 .. Len - 1), (11, 12, 13, 14, 15, 16, 17, 18, 19, 20));
+   Byte_Array_Assert.Eq (Bytes (0 .. Len - 1), [11, 12, 13, 14, 15, 16, 17, 18, 19, 20]);
    Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
    Natural_Assert.Eq (Queue.Num_Elements, 0);
    Natural_Assert.Eq (Queue.Max_Num_Elements, 3);
@@ -139,7 +139,7 @@ begin
    pragma Assert (Pri_Data = (Pri => 1, Data_Type => Bytes_Type));
    Put_Line ("len: " & Natural'Image (Len));
    Natural_Assert.Eq (Len, 10);
-   Byte_Array_Assert.Eq (Bytes (0 .. Len - 1), (4, 4, 4, 4, 4, 5, 5, 5, 5, 5));
+   Byte_Array_Assert.Eq (Bytes (0 .. Len - 1), [4, 4, 4, 4, 4, 5, 5, 5, 5, 5]);
    Natural_Assert.Eq (Queue.Num_Elements, 0);
    Natural_Assert.Eq (Queue.Max_Num_Elements, 3);
    Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
@@ -150,7 +150,7 @@ begin
    Put_Line ("item popped.");
    Put_Line ("len: " & Natural'Image (Len));
    Natural_Assert.Eq (Len, 10);
-   Byte_Array_Assert.Eq (Bytes (0 .. Len - 1), (4, 4, 4, 4, 4, 5, 5, 5, 5, 5));
+   Byte_Array_Assert.Eq (Bytes (0 .. Len - 1), [4, 4, 4, 4, 4, 5, 5, 5, 5, 5]);
    Natural_Assert.Eq (Queue.Num_Elements, 0);
    Natural_Assert.Eq (Queue.Max_Num_Elements, 3);
    Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
@@ -164,7 +164,7 @@ begin
    Put_Line ("item popped.");
    Put_Line ("len: " & Natural'Image (Len));
    Natural_Assert.Eq (Len, 10);
-   Byte_Array_Assert.Eq (Bytes (0 .. Len - 1), (4, 4, 4, 4, 4, 5, 5, 5, 5, 5));
+   Byte_Array_Assert.Eq (Bytes (0 .. Len - 1), [4, 4, 4, 4, 4, 5, 5, 5, 5, 5]);
    Natural_Assert.Eq (Queue.Num_Elements, 0);
    Natural_Assert.Eq (Queue.Max_Num_Elements, 3);
    Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
@@ -184,7 +184,7 @@ begin
    Put_Line ("item popped.");
    Put_Line ("len: " & Natural'Image (Len));
    Natural_Assert.Eq (Len, 10);
-   Byte_Array_Assert.Eq (Bytes (0 .. Len - 1), (4, 4, 4, 4, 4, 5, 5, 5, 5, 5));
+   Byte_Array_Assert.Eq (Bytes (0 .. Len - 1), [4, 4, 4, 4, 4, 5, 5, 5, 5, 5]);
    Natural_Assert.Eq (Queue.Num_Elements, 0);
    Natural_Assert.Eq (Queue.Max_Num_Elements, 3);
    Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
@@ -217,7 +217,7 @@ begin
    Pop_Type_Block_Assert.Eq (Pop_Simple_Variable_Block (Queue, Pri_Data, Variable_Var2), Success);
    pragma Assert (Pri_Data = (Pri => 3, Data_Type => Variable_Type));
    Put_Line ("item popped.");
-   Simple_Variable_Assert.Eq (Variable_Var2, (3, (99, 99, 99, others => 0)));
+   Simple_Variable_Assert.Eq (Variable_Var2, (3, [99, 99, 99, others => 0]));
    Natural_Assert.Eq (Queue.Num_Elements, 0);
    Natural_Assert.Eq (Queue.Max_Num_Elements, 3);
    Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
@@ -233,7 +233,7 @@ begin
    Pop_Type_Block_Assert.Eq (Pop_Simple_Variable_Block (Queue, Pri_Data, Variable_Var2), Success);
    pragma Assert (Pri_Data = (Pri => 3, Data_Type => Variable_Type));
    Put_Line ("item popped.");
-   Simple_Variable_Assert.Eq (Variable_Var2, (3, (99, 99, 99, others => 0)));
+   Simple_Variable_Assert.Eq (Variable_Var2, (3, [99, 99, 99, others => 0]));
    Natural_Assert.Eq (Queue.Num_Elements, 0);
    Natural_Assert.Eq (Queue.Max_Num_Elements, 3);
    Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
@@ -250,7 +250,7 @@ begin
    Put_Line ("item popped.");
    Put_Line ("len: " & Natural'Image (Len));
    Natural_Assert.Eq (Len, 6);
-   Byte_Array_Assert.Eq (Bytes (0 .. Len - 1), (6, 6, 6, 7, 7, 8));
+   Byte_Array_Assert.Eq (Bytes (0 .. Len - 1), [6, 6, 6, 7, 7, 8]);
    Natural_Assert.Eq (Queue.Num_Elements, 0);
    Natural_Assert.Eq (Queue.Max_Num_Elements, 3);
    Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
@@ -259,7 +259,7 @@ begin
 
    Put_Line ("Filling queue test 2... ");
    Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
-   Push_Assert.Eq (Queue.Push ((Pri => 11, Data_Type => Bytes_Type), (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)), Success);
+   Push_Assert.Eq (Queue.Push ((Pri => 11, Data_Type => Bytes_Type), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), Success);
    Natural_Assert.Eq (Queue.Num_Elements, 1);
    Natural_Assert.Eq (Queue.Max_Num_Elements, 3);
    Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
@@ -269,7 +269,7 @@ begin
    Natural_Assert.Eq (Queue.Max_Num_Elements, 3);
    Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
    -- Push a variable type:
-   Push_Variable_Length_Type_Assert.Eq (Push_Simple_Variable (Queue, (Pri => 0, Data_Type => Static_Type), (Length => 21, Buffer => (others => 233))), Serialization_Failure);
+   Push_Variable_Length_Type_Assert.Eq (Push_Simple_Variable (Queue, (Pri => 0, Data_Type => Static_Type), (Length => 21, Buffer => [others => 233])), Serialization_Failure);
    Push_Variable_Length_Type_Assert.Eq (Push_Simple_Variable (Queue, (Pri => 12, Data_Type => Static_Type), Variable_Var), Success);
    Natural_Assert.Eq (Queue.Num_Elements, 3);
    Natural_Assert.Eq (Queue.Max_Num_Elements, 3);
@@ -279,11 +279,11 @@ begin
 
    Put_Line ("Blocking push error test... ");
    -- Push some bytes:
-   Push_Assert.Eq (Queue.Push ((Pri => 11, Data_Type => Bytes_Type), (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)), Full);
+   Push_Assert.Eq (Queue.Push ((Pri => 11, Data_Type => Bytes_Type), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]), Full);
    Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
    Put_Line ("Waiting on full queue... ");
    The_Action.Set (Push_Error);
-   Push_Block_Assert.Eq (Queue.Push_Block ((Pri => 12, Data_Type => Bytes_Type), (11, 12, 13, 14, 15, 16, 17, 18, 19, 20)), Success);
+   Push_Block_Assert.Eq (Queue.Push_Block ((Pri => 12, Data_Type => Bytes_Type), [11, 12, 13, 14, 15, 16, 17, 18, 19, 20]), Success);
    Put_Line ("pushed item.");
    Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
    Natural_Assert.Eq (Queue.Num_Elements, 3);
@@ -300,7 +300,7 @@ begin
    Push_Variable_Length_Type_Assert.Eq (Push_Simple_Variable (Queue, (Pri => 11, Data_Type => Variable_Type), Variable_Var), Full);
    Put_Line ("Waiting on full queue... ");
    The_Action.Set (Push_Error);
-   Push_Variable_Length_Type_Block_Assert.Eq (Push_Simple_Variable_Block (Queue, (Pri => 11, Data_Type => Variable_Type), (9, (8, 8, 8, 8, 8, 8, 8, 8, 8, others => 255))), Success);
+   Push_Variable_Length_Type_Block_Assert.Eq (Push_Simple_Variable_Block (Queue, (Pri => 11, Data_Type => Variable_Type), (9, [8, 8, 8, 8, 8, 8, 8, 8, 8, others => 255])), Success);
    Put_Line ("pushed item.");
    Natural_Assert.Eq (Queue.Num_Elements, 3);
    Natural_Assert.Eq (Queue.Max_Num_Elements, 3);

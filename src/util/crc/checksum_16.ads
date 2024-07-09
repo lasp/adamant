@@ -14,6 +14,6 @@ package Checksum_16 is
    -- This function adds all the 16-bit words in the given byte array, starting with the given seed, and returns the
    -- result. If the number of bytes in the array is odd, then the the calculation assumes a pad byte is added to the end with
    -- a value of 0x00. The addition and result is in big endian.
-   function Compute_Checksum_16 (Bytes : in Basic_Types.Byte_Array; Seed : in Checksum_16_Type := (0 => 16#00#, 1 => 16#00#)) return Checksum_16_Type;
+   function Compute_Checksum_16 (Bytes : in Basic_Types.Byte_Array; Seed : in Checksum_16_Type := [0 => 16#00#, 1 => 16#00#]) return Checksum_16_Type;
 
 end Checksum_16;

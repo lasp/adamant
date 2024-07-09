@@ -49,7 +49,7 @@ package body {{ name }} is
 {% else %}
       package Data_Product_Serializer is new Serializer ({{ dp.type }});
 {% endif %}
-      Dp : Data_Product.T := (Header => (Id => Self.Get_{{ dp.name }}_Id, Time => Timestamp, Buffer_Length => Data_Product_Serializer.Serialized_Length), Buffer => (others => 0));
+      Dp : Data_Product.T := (Header => (Id => Self.Get_{{ dp.name }}_Id, Time => Timestamp, Buffer_Length => Data_Product_Serializer.Serialized_Length), Buffer => [others => 0]);
    begin
       Dp.Buffer (Dp.Buffer'First .. Dp.Buffer'First + Data_Product_Serializer.Serialized_Length - 1) := Data_Product_Serializer.To_Byte_Array (Item);
       return Dp;

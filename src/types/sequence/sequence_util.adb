@@ -5,8 +5,8 @@ package body Sequence_Util is
    function Crc_Sequence_Memory_Region (Region : in Memory_Region.T; Seq_Header : out Sequence_Header.T; Computed_Crc : out Crc_16.Crc_16_Type) return Crc_Status is
    begin
       -- Initialize CRC output params:
-      Seq_Header := (Crc => (0, 0), Version => 0, Category => 0, Id => 0, Length => 0);
-      Computed_Crc := (0, 0);
+      Seq_Header := (Crc => [0, 0], Version => 0, Category => 0, Id => 0, Length => 0);
+      Computed_Crc := [0, 0];
 
       -- Check the length and make sure it is large enough to hold a sequence header:
       if Region.Length < Sequence_Header.Size_In_Bytes then

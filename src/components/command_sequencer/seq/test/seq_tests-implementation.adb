@@ -457,7 +457,7 @@ package body Seq_Tests.Implementation is
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry);
          Sys_Time_Assert.Eq (Engine.Get_Telemetry_Timeout, (1_000, 0));
-         Engine.Set_Telemetry ((0, 0, 0, 0));
+         Engine.Set_Telemetry ([0, 0, 0, 0]);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry_Relative);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry_Relative);
          Sys_Time_Assert.Eq (Engine.Get_Telemetry_Timeout, (5, 0));
@@ -465,11 +465,11 @@ package body Seq_Tests.Implementation is
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry);
          Sys_Time_Assert.Eq (Engine.Get_Telemetry_Timeout, (5, 0));
-         Engine.Set_Telemetry ((0, 0, 0, 0));
+         Engine.Set_Telemetry ([0, 0, 0, 0]);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry);
          Sys_Time_Assert.Eq (Engine.Get_Telemetry_Timeout, (2_000, 0));
-         Engine.Set_Telemetry ((0, 0, 0, 1));
+         Engine.Set_Telemetry ([0, 0, 0, 1]);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry_Relative);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry_Relative);
          Sys_Time_Assert.Eq (Engine.Get_Telemetry_Timeout, (10, 0));
@@ -477,7 +477,7 @@ package body Seq_Tests.Implementation is
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry);
          Sys_Time_Assert.Eq (Engine.Get_Telemetry_Timeout, (10, 0));
-         Engine.Set_Telemetry ((0, 0, 0, 1));
+         Engine.Set_Telemetry ([0, 0, 0, 1]);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry_Relative);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry_Relative);
          Sys_Time_Assert.Eq (Engine.Get_Telemetry_Timeout, (5, 0));
@@ -485,7 +485,7 @@ package body Seq_Tests.Implementation is
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry);
          Sys_Time_Assert.Eq (Engine.Get_Telemetry_Timeout, (5, 0));
-         Engine.Set_Telemetry ((0, 0, 0, 3));
+         Engine.Set_Telemetry ([0, 0, 0, 3]);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry_Relative);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry_Relative);
          Engine.Change_Relative_Timeout_To_Absolute (Time);
@@ -494,7 +494,7 @@ package body Seq_Tests.Implementation is
          Engine.Change_Relative_Timeout_To_Absolute (Time);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry);
-         Engine.Set_Telemetry ((0, 0, 0, 10));
+         Engine.Set_Telemetry ([0, 0, 0, 10]);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Unloaded);
          Engine.Destroy;
          pragma Unreferenced (Engine);
@@ -520,17 +520,17 @@ package body Seq_Tests.Implementation is
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry);
          -- wrong value and then timeout:
-         Engine.Set_Telemetry ((0, 0, 0, 18));
+         Engine.Set_Telemetry ([0, 0, 0, 18]);
          Time := (1_000, 0);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry_Relative);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry_Relative);
          Engine.Change_Relative_Timeout_To_Absolute (Time);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry);
-         Engine.Set_Telemetry ((0, 0, 0, 2));
+         Engine.Set_Telemetry ([0, 0, 0, 2]);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry);
-         Engine.Set_Telemetry ((0, 0, 0, 1));
+         Engine.Set_Telemetry ([0, 0, 0, 1]);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry_Relative);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry_Relative);
          Engine.Change_Relative_Timeout_To_Absolute (Time);
@@ -543,7 +543,7 @@ package body Seq_Tests.Implementation is
          Engine.Change_Relative_Timeout_To_Absolute (Time);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry);
-         Engine.Set_Telemetry ((0, 0, 0, 4));
+         Engine.Set_Telemetry ([0, 0, 0, 4]);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry_Relative);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry_Relative);
          Engine.Change_Relative_Timeout_To_Absolute (Time);
@@ -552,7 +552,7 @@ package body Seq_Tests.Implementation is
          Engine.Change_Relative_Timeout_To_Absolute (Time);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Wait_Telemetry);
-         Engine.Set_Telemetry ((0, 0, 0, 10));
+         Engine.Set_Telemetry ([0, 0, 0, 10]);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Unloaded);
          Engine.Destroy;
          pragma Unreferenced (Engine);
@@ -602,7 +602,7 @@ package body Seq_Tests.Implementation is
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Set_Telemetry);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Set_Telemetry);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Set_Telemetry);
-         Engine.Set_Telemetry ((0, 0, 0, 0));
+         Engine.Set_Telemetry ([0, 0, 0, 0]);
          Exec_State_Assert.Eq (Engine.Execute (1_000, Time), Seq_Execute_State.Unloaded);
          Engine.Destroy;
          pragma Unreferenced (Engine);
@@ -773,7 +773,7 @@ package body Seq_Tests.Implementation is
          Time : constant Sys_Time.T := (0, 0);
 
          function Create_Print_String (Str : in String) return Seq_Types.Seq_String is
-            To_Return : Seq_Types.Seq_String := (others => 0);
+            To_Return : Seq_Types.Seq_String := [others => 0];
             pragma Warnings (Off, "overlay changes scalar storage order");
             Overlay : Basic_Types.Byte_Array (1 .. Str'Length) with
               Import, Convention => Ada, Address => Str'Address;
@@ -886,14 +886,14 @@ package body Seq_Tests.Implementation is
    end Instruction_Overflow;
 
    overriding procedure Set_Bit_Pattern (Self : in out Instance) is
-      Header : constant Sequence_Header.T := (Crc => (0, 0), Version => 0, Category => 0, Id => 0, Length => 30);
+      Header : constant Sequence_Header.T := (Crc => [0, 0], Version => 0, Category => 0, Id => 0, Length => 30);
       Sbp_Record : constant Set_Bit_Record.T := (Opcode => 0, Pad => 0, Length => 0);
       Instruction : constant Basic_Types.Byte_Array := Set_Bit_Record.Serialization.To_Byte_Array (Sbp_Record);
 
-      Instruction_With_Long_Command : constant Basic_Types.Byte_Array (0 .. 35) := (0, 0, 0, 33, 0, 1, 0, 2, 28, others => 0);
-      Instruction_With_Wrong_Size : constant Basic_Types.Byte_Array (0 .. 35) := (0, 0, 0, 33, 0, 1, 0, 2, 20, others => 0);
+      Instruction_With_Long_Command : constant Basic_Types.Byte_Array (0 .. 35) := [0, 0, 0, 33, 0, 1, 0, 2, 28, others => 0];
+      Instruction_With_Wrong_Size : constant Basic_Types.Byte_Array (0 .. 35) := [0, 0, 0, 33, 0, 1, 0, 2, 20, others => 0];
 
-      Instruction_Valid : constant Basic_Types.Byte_Array (0 .. 35) := (0, 0, 0, 20, 0, 1, 0, 2, 15, others => 0);
+      Instruction_Valid : constant Basic_Types.Byte_Array (0 .. 35) := [0, 0, 0, 20, 0, 1, 0, 2, 15, others => 0];
    begin
       -- Cause a command serialization failure (zero value)
       Seq_Position_Assert.Eq (Seq_Runtime.Tester.Call_Set_Bit_Pattern (Self.Wb_Runner, Header, Instruction), 0);
@@ -925,9 +925,9 @@ package body Seq_Tests.Implementation is
    overriding procedure Update_Bit_Pattern (Self : in out Instance) is
       -- U8 - U8 - U16 - U32 | Opcode - Pad - Offset - Length
       -- cannot offset of zero, that would overwrite command header.
-      Bad_Offset_Bit_Pattern : constant Basic_Types.Byte_Array := (2, 0, 0, 0, 0, 0, 0, 0);
-      Bad_Length_Bit_Pattern : constant Basic_Types.Byte_Array := (2, 0, 250, 0, 255, 255, 255, 255);
-      Bad_Combined_Bit_Pattern : constant Basic_Types.Byte_Array := (2, 0, 250, 0, 0, 0, 0, 33);
+      Bad_Offset_Bit_Pattern : constant Basic_Types.Byte_Array := [2, 0, 0, 0, 0, 0, 0, 0];
+      Bad_Length_Bit_Pattern : constant Basic_Types.Byte_Array := [2, 0, 250, 0, 255, 255, 255, 255];
+      Bad_Combined_Bit_Pattern : constant Basic_Types.Byte_Array := [2, 0, 250, 0, 0, 0, 0, 33];
    begin
       -- Bad offset test
       Seq_Position_Assert.Eq (Seq_Runtime.Tester.Call_Update_Bit_Pattern (Self.Wb_Runner, Bad_Offset_Bit_Pattern), 0);
@@ -1021,7 +1021,7 @@ package body Seq_Tests.Implementation is
 
       Add_Instruction : constant Basic_Types.Byte_Array := Eval_Record.Serialization.To_Byte_Array (Add_Record);
       Sub_Instruction : constant Basic_Types.Byte_Array := Eval_Record.Serialization.To_Byte_Array (Sub_Record);
-      Invalid_Instruction : constant Basic_Types.Byte_Array := (7, 0, 0, 0);
+      Invalid_Instruction : constant Basic_Types.Byte_Array := [7, 0, 0, 0];
    begin
       -- Instruction parse error
       Seq_Position_Assert.Eq (Seq_Runtime.Tester.Call_Eval (Self.Wb_Runner, Invalid_Instruction), 0);
@@ -1062,8 +1062,8 @@ package body Seq_Tests.Implementation is
       Id1 : constant Packed_U32.T := (Value => 2);
       Id2 : constant Packed_U32.T := (Value => 3);
       Badid : constant Packed_U32.T := (Value => 30);
-      Test_Seq_Vara : constant Packed_Poly_32_Type.T := (Value => (0, 0, 0, 22));
-      Test_Seq_Varb : constant Packed_Poly_32_Type.T := (Value => (255, 255, 255, 255));
+      Test_Seq_Vara : constant Packed_Poly_32_Type.T := (Value => [0, 0, 0, 22]);
+      Test_Seq_Varb : constant Packed_Poly_32_Type.T := (Value => [255, 255, 255, 255]);
       Constantvarrecorda : constant Var_Record.T := (Id => Value1.Value, Var_Type => In_Sequence, Pad => 0);
       Constantvarrecordb : constant Var_Record.T := (Id => Value2.Value, Var_Type => In_Sequence, Pad => 0);
       Localvarrecorda : constant Var_Record.T := (Id => Id1.Value, Var_Type => Local, Pad => 0);
@@ -1277,7 +1277,7 @@ package body Seq_Tests.Implementation is
    end Wait;
 
    overriding procedure Seq_Goto (Self : in out Instance) is
-      Header : constant Sequence_Header.T := (Crc => (0, 0), Version => 0, Category => 0, Id => 0, Length => 10);
+      Header : constant Sequence_Header.T := (Crc => [0, 0], Version => 0, Category => 0, Id => 0, Length => 10);
 
       Position_Valid : constant Packed_U16.T := (Value => 6);
       Position_Invalid_High : constant Packed_U16.T := (Value => 15);
@@ -1302,7 +1302,7 @@ package body Seq_Tests.Implementation is
    overriding procedure Jump_If_Zero (Self : in out Instance) is
       Zero : constant Packed_U32.T := (Value => 0);
       Nonzero : constant Packed_U32.T := (Value => 123);
-      Header : constant Sequence_Header.T := (Crc => (0, 0), Version => 0, Category => 0, Id => 0, Length => 99);
+      Header : constant Sequence_Header.T := (Crc => [0, 0], Version => 0, Category => 0, Id => 0, Length => 99);
       Zerovar : constant Var_Record.T := (Id => Zero.Value, Var_Type => In_Sequence, Pad => 0);
       Nonzerovar : constant Var_Record.T := (Id => Nonzero.Value, Var_Type => In_Sequence, Pad => 0);
       Fetchzero : constant Fetch_Var_Record.T := (Opcode => 8, Pad1 => 0, Pad2 => 0, Pad3 => 0, Var_Info => Zerovar);
@@ -1337,7 +1337,7 @@ package body Seq_Tests.Implementation is
    overriding procedure Jump_Not_Zero (Self : in out Instance) is
       Zero : constant Packed_U32.T := (Value => 0);
       Nonzero : constant Packed_U32.T := (Value => 123);
-      Header : constant Sequence_Header.T := (Crc => (0, 0), Version => 0, Category => 0, Id => 0, Length => 99);
+      Header : constant Sequence_Header.T := (Crc => [0, 0], Version => 0, Category => 0, Id => 0, Length => 99);
       Zerovar : constant Var_Record.T := (Id => Zero.Value, Var_Type => In_Sequence, Pad => 0);
       Nonzerovar : constant Var_Record.T := (Id => Nonzero.Value, Var_Type => In_Sequence, Pad => 0);
       Fetchzero : constant Fetch_Var_Record.T := (Opcode => 8, Pad1 => 0, Pad2 => 0, Pad3 => 0, Var_Info => Zerovar);
@@ -1370,7 +1370,7 @@ package body Seq_Tests.Implementation is
    end Jump_Not_Zero;
 
    overriding procedure Jump_If_Equal (Self : in out Instance) is
-      Header : constant Sequence_Header.T := (Crc => (0, 0), Version => 0, Category => 0, Id => 0, Length => 99);
+      Header : constant Sequence_Header.T := (Crc => [0, 0], Version => 0, Category => 0, Id => 0, Length => 99);
       Val1 : constant Packed_U32.T := (Value => 12);
       Val2 : constant Packed_U32.T := (Value => 32_432);
       Var1 : constant Var_Record.T := (Id => Val1.Value, Var_Type => In_Sequence, Pad => 0);
@@ -1405,7 +1405,7 @@ package body Seq_Tests.Implementation is
    end Jump_If_Equal;
 
    overriding procedure Jump_Not_Equal (Self : in out Instance) is
-      Header : constant Sequence_Header.T := (Crc => (0, 0), Version => 0, Category => 0, Id => 0, Length => 99);
+      Header : constant Sequence_Header.T := (Crc => [0, 0], Version => 0, Category => 0, Id => 0, Length => 99);
       Val1 : constant Packed_U32.T := (Value => 12);
       Val2 : constant Packed_U32.T := (Value => 32_432);
       Var1 : constant Var_Record.T := (Id => Val1.Value, Var_Type => In_Sequence, Pad => 0);
@@ -1446,11 +1446,11 @@ package body Seq_Tests.Implementation is
    end Seq_Return;
 
    overriding procedure Wait_If_Zero (Self : in out Instance) is
-      Header : constant Sequence_Header.T := (Crc => (0, 0), Version => 0, Category => 0, Id => 0, Length => 20);
+      Header : constant Sequence_Header.T := (Crc => [0, 0], Version => 0, Category => 0, Id => 0, Length => 20);
       -- U8 - E8 - U16 - U32 | Opcode - waitType - Position - Timeout
-      Parseerror : constant Basic_Types.Byte_Array := (21, 0, 0, 0, 0, 0, 0, 0);
-      Waiterror : constant Basic_Types.Byte_Array := (21, 1, 0, 0, 0, 0, 0, 0);
-      Jumperror : constant Basic_Types.Byte_Array := (21, 2, 0, 40, 0, 0, 0, 0);
+      Parseerror : constant Basic_Types.Byte_Array := [21, 0, 0, 0, 0, 0, 0, 0];
+      Waiterror : constant Basic_Types.Byte_Array := [21, 1, 0, 0, 0, 0, 0, 0];
+      Jumperror : constant Basic_Types.Byte_Array := [21, 2, 0, 40, 0, 0, 0, 0];
    begin
       -- Parse Error
       Seq_Position_Assert.Eq (Seq_Runtime.Tester.Call_Wait_If_Zero (Self.Wb_Runner, Header, Parseerror), 0);
@@ -1473,9 +1473,9 @@ package body Seq_Tests.Implementation is
    end Wait_If_Zero;
 
    overriding procedure Eval_Flt (Self : in out Instance) is
-      Add_Instruction : constant Basic_Types.Byte_Array := (27, 43, 0, 0);
-      Invalid_Instruction : constant Basic_Types.Byte_Array := (27, 0, 0, 0);
-      Invalid_Op_Instruction : constant Basic_Types.Byte_Array := (27, 124, 0, 0);
+      Add_Instruction : constant Basic_Types.Byte_Array := [27, 43, 0, 0];
+      Invalid_Instruction : constant Basic_Types.Byte_Array := [27, 0, 0, 0];
+      Invalid_Op_Instruction : constant Basic_Types.Byte_Array := [27, 124, 0, 0];
    begin
 
       -- Instruction parse error
@@ -1533,9 +1533,9 @@ package body Seq_Tests.Implementation is
    end Eval_Flt;
 
    overriding procedure Cast_F_To_U (Self : in out Instance) is
-      Negative : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ((191, 153, 153, 154)); -- -1.2 other values that would cause are (255,255,255,255)
-      Positive : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ((67, 106, 87, 10)); -- 234.34
-      Neg_Inf : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ((255, 16#80#, 0, 0)); -- negative infinity
+      Negative : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ([191, 153, 153, 154]); -- -1.2 other values that would cause are (255,255,255,255)
+      Positive : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ([67, 106, 87, 10]); -- 234.34
+      Neg_Inf : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ([255, 16#80#, 0, 0]); -- negative infinity
       Neg_Var : constant Var_Record.T := (Id => Negative.Value, Var_Type => In_Sequence, Pad => 0);
       Pos_Var : constant Var_Record.T := (Id => Positive.Value, Var_Type => In_Sequence, Pad => 0);
       Neg_Inf_Var : constant Var_Record.T := (Id => Neg_Inf.Value, Var_Type => In_Sequence, Pad => 0);
@@ -1647,10 +1647,10 @@ package body Seq_Tests.Implementation is
    end Cast_U_To_F;
 
    overriding procedure Eval_S (Self : in out Instance) is
-      Add_Instruction : constant Basic_Types.Byte_Array := (27, 43, 0, 0);
-      Sub_Instruction : constant Basic_Types.Byte_Array := (30, 45, 0, 0);
+      Add_Instruction : constant Basic_Types.Byte_Array := [27, 43, 0, 0];
+      Sub_Instruction : constant Basic_Types.Byte_Array := [30, 45, 0, 0];
       -- sub_instruction : Basic_Types.Byte_Array := Eval_Record.Serialization.To_Byte_Array (sub_record);
-      Parseerror : constant Basic_Types.Byte_Array := (27, 0, 0, 0);
+      Parseerror : constant Basic_Types.Byte_Array := [27, 0, 0, 0];
    begin
       -- Parse Error
       Seq_Position_Assert.Eq (Seq_Runtime.Tester.Call_Eval_S (Self.Wb_Runner, Parseerror), 0);
@@ -1679,8 +1679,8 @@ package body Seq_Tests.Implementation is
    end Eval_S;
 
    overriding procedure Cast_S_To_U (Self : in out Instance) is
-      Negative : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ((255, 255, 255, 255)); -- -1 so will cause a casting error
-      Positive : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ((0, 0, 0, 100)); -- 100, will not cause any issues
+      Negative : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ([255, 255, 255, 255]); -- -1 so will cause a casting error
+      Positive : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ([0, 0, 0, 100]); -- 100, will not cause any issues
       Neg_Var : constant Var_Record.T := (Id => Negative.Value, Var_Type => In_Sequence, Pad => 0);
       Pos_Var : constant Var_Record.T := (Id => Positive.Value, Var_Type => In_Sequence, Pad => 0);
       Neg_Fetch : constant Fetch_Var_Record.T := (Opcode => 8, Pad1 => 0, Pad2 => 0, Pad3 => 0, Var_Info => Neg_Var);
@@ -1734,8 +1734,8 @@ package body Seq_Tests.Implementation is
    end Cast_S_To_U;
 
    overriding procedure Cast_U_To_S (Self : in out Instance) is
-      Negative : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ((255, 255, 255, 255)); -- u32 max, will cause an error
-      Positive : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ((0, 0, 0, 100)); -- 100, will not cause any issues
+      Negative : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ([255, 255, 255, 255]); -- u32 max, will cause an error
+      Positive : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ([0, 0, 0, 100]); -- 100, will not cause any issues
       Neg_Var : constant Var_Record.T := (Id => Negative.Value, Var_Type => In_Sequence, Pad => 0);
       Pos_Var : constant Var_Record.T := (Id => Positive.Value, Var_Type => In_Sequence, Pad => 0);
       Neg_Fetch : constant Fetch_Var_Record.T := (Opcode => 8, Pad1 => 0, Pad2 => 0, Pad3 => 0, Var_Info => Neg_Var);
@@ -1791,9 +1791,9 @@ package body Seq_Tests.Implementation is
 
    overriding procedure Cast_F_To_S (Self : in out Instance) is
       -- nifty float converter: https://www.h-schmidt.net/FloatConverter/IEEE754.html
-      Negative : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ((16#cf#, 16#9d#, 16#cd#, 16#65#)); -- -5294967296 float
-      Positive : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ((67, 106, 87, 10)); -- 234.34
-      Nan : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ((255, 255, 255, 255)); -- nan
+      Negative : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ([16#cf#, 16#9d#, 16#cd#, 16#65#]); -- -5294967296 float
+      Positive : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ([67, 106, 87, 10]); -- 234.34
+      Nan : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ([255, 255, 255, 255]); -- nan
       Neg_Var : constant Var_Record.T := (Id => Negative.Value, Var_Type => In_Sequence, Pad => 0);
       Pos_Var : constant Var_Record.T := (Id => Positive.Value, Var_Type => In_Sequence, Pad => 0);
       Nan_Var : constant Var_Record.T := (Id => Nan.Value, Var_Type => In_Sequence, Pad => 0);
@@ -1861,7 +1861,7 @@ package body Seq_Tests.Implementation is
    end Cast_F_To_S;
 
    overriding procedure Cast_S_To_F (Self : in out Instance) is
-      Val : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ((255, 255, 255, 255)); -- -1 signed
+      Val : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ([255, 255, 255, 255]); -- -1 signed
       Var : constant Var_Record.T := (Id => Val.Value, Var_Type => In_Sequence, Pad => 0);
       Fetch : constant Fetch_Var_Record.T := (Opcode => 8, Pad1 => 0, Pad2 => 0, Pad3 => 0, Var_Info => Var);
       Cast_Record_A : constant Cast_Record.T := (Opcode => 28, Id => Seq_Internal.A, Pad1 => 0, Pad2 => 0);
@@ -1911,24 +1911,24 @@ package body Seq_Tests.Implementation is
       Seq_Runtime.Tester.Reset_Instance (Self.Wb_Runner);
 
       -- Can be relative
-      Seq_Runtime.Tester.Update_Internal (Self.Wb_Runner, Seq_Internal.B, Packed_U32.Serialization.From_Byte_Array ((0, 0, 0, 10)));
+      Seq_Runtime.Tester.Update_Internal (Self.Wb_Runner, Seq_Internal.B, Packed_U32.Serialization.From_Byte_Array ([0, 0, 0, 10]));
       Seq_Position_Assert.Eq (Seq_Runtime.Tester.Call_Wait_On_B (Self.Wb_Runner, Relativeinstruction), 4);
       State_Assert.Eq (Self.Wb_Runner.Get_State, Wait_Relative);
       Seq_Runtime.Tester.Reset_Instance (Self.Wb_Runner);
 
       -- Can be absolute
-      Seq_Runtime.Tester.Update_Internal (Self.Wb_Runner, Seq_Internal.B, Packed_U32.Serialization.From_Byte_Array ((0, 0, 0, 10)));
+      Seq_Runtime.Tester.Update_Internal (Self.Wb_Runner, Seq_Internal.B, Packed_U32.Serialization.From_Byte_Array ([0, 0, 0, 10]));
       Seq_Position_Assert.Eq (Seq_Runtime.Tester.Call_Wait_On_B (Self.Wb_Runner, Absoluteinstruction), 4);
       State_Assert.Eq (Self.Wb_Runner.Get_State, Wait_Absolute);
       Seq_Runtime.Tester.Reset_Instance (Self.Wb_Runner);
    end Wait_On_B;
 
    overriding procedure Wait_If_Zero_On_B (Self : in out Instance) is
-      Header : constant Sequence_Header.T := (Crc => (0, 0), Version => 0, Category => 0, Id => 0, Length => 20);
+      Header : constant Sequence_Header.T := (Crc => [0, 0], Version => 0, Category => 0, Id => 0, Length => 20);
       -- U8 - E8 - U16 | Opcode - Wait Type - Position
-      Parseerror : constant Basic_Types.Byte_Array := (21, 0, 0, 0);
-      Waiterror : constant Basic_Types.Byte_Array := (21, 1, 0, 0);
-      Jumperror : constant Basic_Types.Byte_Array := (21, 1, 0, 40);
+      Parseerror : constant Basic_Types.Byte_Array := [21, 0, 0, 0];
+      Waiterror : constant Basic_Types.Byte_Array := [21, 1, 0, 0];
+      Jumperror : constant Basic_Types.Byte_Array := [21, 1, 0, 40];
    begin
       -- Parse Error
       Seq_Position_Assert.Eq (Seq_Runtime.Tester.Call_Wait_If_Zero_On_B (Self.Wb_Runner, Header, Parseerror), 0);
@@ -1953,10 +1953,10 @@ package body Seq_Tests.Implementation is
    -- A test for the Cmd Print instruction
    overriding procedure Cmd_Print (Self : in out Instance) is
       use Basic_Types;
-      The_String : constant Basic_Types.Byte_Array (0 .. 64) := (0 => 72, 1 => 73, others => 0);
+      The_String : constant Basic_Types.Byte_Array (0 .. 64) := [0 => 72, 1 => 73, others => 0];
       -- U8 - E8 - U8 - U8 - U8xN
-      Good_Instruction : constant Basic_Types.Byte_Array := (0, 1, 0, 0) & The_String;
-      The_Bad_Instruction : constant Basic_Types.Byte_Array := (0, 254, 0, 0) & The_String;
+      Good_Instruction : constant Basic_Types.Byte_Array := [0, 1, 0, 0] & The_String;
+      The_Bad_Instruction : constant Basic_Types.Byte_Array := [0, 254, 0, 0] & The_String;
    begin
       -- Bad parse
       Seq_Position_Assert.Eq (Seq_Runtime.Tester.Call_Print (Self.Wb_Runner, The_Bad_Instruction), 0);
@@ -1975,14 +1975,14 @@ package body Seq_Tests.Implementation is
       use Seq_Enums.Seq_Data_Type;
 
       -- U8 - E8 - E8 - U8 - var record
-      Bad_Instruction1 : constant Basic_Types.Byte_Array := (0, 254, 0, 0);
-      Bad_Instruction2 : constant Basic_Types.Byte_Array := (0, 0, 254, 0);
+      Bad_Instruction1 : constant Basic_Types.Byte_Array := [0, 254, 0, 0];
+      Bad_Instruction2 : constant Basic_Types.Byte_Array := [0, 0, 254, 0];
 
       Max_Var : constant Var_Record.T := (Id => 4_294_967_295, Var_Type => Local, Pad => 0);
       Max_Fetch : constant Print_Var_Record.T := (Opcode => 8, Print_Type => Debug, Data_Type => Unsigned, Pad => 0, Var_Info => Max_Var);
       Max_Fetch_Instruction : constant Basic_Types.Byte_Array := Print_Var_Record.Serialization.To_Byte_Array (Max_Fetch);
 
-      Nan : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ((255, 255, 255, 255)); -- nan
+      Nan : constant Packed_U32.T := Packed_U32.Serialization.From_Byte_Array ([255, 255, 255, 255]); -- nan
       Nan_Var : constant Var_Record.T := (Id => Nan.Value, Var_Type => In_Sequence, Pad => 0);
       Nan_Fetch : constant Fetch_Var_Record.T := (Opcode => 8, Pad1 => 0, Pad2 => 0, Pad3 => 0, Var_Info => Nan_Var);
       Instructionnan : constant Basic_Types.Byte_Array := Fetch_Var_Record.Serialization.To_Byte_Array (Nan_Fetch);
@@ -2022,7 +2022,7 @@ package body Seq_Tests.Implementation is
 
    -- A test for the Cmd Str Alloc instruction. This is essentially a noop for Adamant, and is tested as such.
    overriding procedure Cmd_Str_Alloc (Self : in out Instance) is
-      Doesnt_Matter : constant Basic_Types.Byte_Array := (0, 0, 0, 0);
+      Doesnt_Matter : constant Basic_Types.Byte_Array := [0, 0, 0, 0];
    begin
       -- This is just a noop. Adamant does not implement allocation
       Seq_Position_Assert.Eq (Seq_Runtime.Tester.Call_Str_Alloc (Self.Wb_Runner, Doesnt_Matter), 4);

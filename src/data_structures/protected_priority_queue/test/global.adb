@@ -25,7 +25,7 @@ package body Global is
       One_Second_Later : Ada.Real_Time.Time;
       Len : Natural;
       Static_Var : Static.T := (others => 0);
-      Variable_Var : Simple_Variable.T := (Length => 0, Buffer => (others => 0));
+      Variable_Var : Simple_Variable.T := (Length => 0, Buffer => [others => 0]);
       Bytes : Basic_Types.Byte_Array (0 .. 100);
       Pri_Data : Data;
       use Ada.Real_Time;
@@ -47,7 +47,7 @@ package body Global is
                Pop_Assert.Eq (Queue.Pop (Priority => Pri_Data, Bytes => Bytes, Length => Len), Success);
                pragma Assert (Pri_Data = (Pri => 1, Data_Type => Bytes_Type));
                Natural_Assert.Eq (Len, 9);
-               Byte_Array_Assert.Eq (Bytes (0 .. Len - 1), (2, 3, 4, 5, 6, 7, 8, 9, 10));
+               Byte_Array_Assert.Eq (Bytes (0 .. Len - 1), [2, 3, 4, 5, 6, 7, 8, 9, 10]);
                Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
             when Pop_Static =>
                The_Action.Set (Nothing);
@@ -69,16 +69,16 @@ package body Global is
                pragma Assert (Pri_Data = (Pri => 3, Data_Type => Variable_Type));
                Put_Line ("len: " & Natural'Image (Len));
                Natural_Assert.Eq (Len, 7);
-               Variable_Var := (0, (others => 0));
+               Variable_Var := (0, [others => 0]);
                Pop_Type_Assert.Eq (Pop_Simple_Variable (Queue, Priority => Pri_Data, Dest => Variable_Var), Success);
                pragma Assert (Pri_Data = (Pri => 3, Data_Type => Variable_Type));
-               Simple_Variable_Assert.Eq (Variable_Var, (6, (10, 9, 8, 7, 6, 5, others => 0)));
+               Simple_Variable_Assert.Eq (Variable_Var, (6, [10, 9, 8, 7, 6, 5, others => 0]));
                Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
             when Push =>
                The_Action.Set (Nothing);
                delay until One_Second_Later;
                Put_Line ("Handler adding item to queue.");
-               Push_Assert.Eq (Queue.Push ((Pri => 1, Data_Type => Bytes_Type), (4, 4, 4, 4, 4, 5, 5, 5, 5, 5)), Success);
+               Push_Assert.Eq (Queue.Push ((Pri => 1, Data_Type => Bytes_Type), [4, 4, 4, 4, 4, 5, 5, 5, 5, 5]), Success);
                Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
             when Push_Static =>
                The_Action.Set (Nothing);
@@ -90,7 +90,7 @@ package body Global is
                The_Action.Set (Nothing);
                delay until One_Second_Later;
                Put_Line ("Handler adding variable item to queue.");
-               Push_Variable_Length_Type_Assert.Eq (Push_Simple_Variable (Queue, (Pri => 3, Data_Type => Variable_Type), (3, (99, 99, 99, 99, others => 255))), Success);
+               Push_Variable_Length_Type_Assert.Eq (Push_Simple_Variable (Queue, (Pri => 3, Data_Type => Variable_Type), (3, [99, 99, 99, 99, others => 255])), Success);
                Put_Line (Natural'Image (Queue.Num_Bytes_Free) & " bytes free in queue.");
             when Pop_Error =>
                The_Action.Set (Nothing);
@@ -101,14 +101,14 @@ package body Global is
                Pop_Type_Block_Assert.Eq (Pop_Simple_Variable_Block (Queue, Priority => Pri_Data, Dest => Variable_Var), Error);
                Peek_Block_Assert.Eq (Queue.Peek_Length_Block (Priority => Pri_Data, Length => Len), Error);
                Put_Line ("Error received, now pushing to unblock other task.");
-               Push_Assert.Eq (Queue.Push ((Pri => 1, Data_Type => Bytes_Type), (6, 6, 6, 7, 7, 8)), Success);
+               Push_Assert.Eq (Queue.Push ((Pri => 1, Data_Type => Bytes_Type), [6, 6, 6, 7, 7, 8]), Success);
             when Push_Error =>
                The_Action.Set (Nothing);
                delay until One_Second_Later;
                Put_Line ("Handler pushing from a queue where another task is already blocked.");
-               Push_Block_Assert.Eq (Queue.Push_Block ((Pri => 1, Data_Type => Bytes_Type), (4, 4, 4, 4, 4, 5, 5, 5, 5, 5)), Error);
+               Push_Block_Assert.Eq (Queue.Push_Block ((Pri => 1, Data_Type => Bytes_Type), [4, 4, 4, 4, 4, 5, 5, 5, 5, 5]), Error);
                Push_Block_Assert.Eq (Push_Static_Block (Queue, (Pri => 1, Data_Type => Static_Type), (One => 7, Two => 8, Three => 9)), Error);
-               Push_Variable_Length_Type_Block_Assert.Eq (Push_Simple_Variable_Block (Queue, (Pri => 1, Data_Type => Variable_Type), (3, (99, 99, 99, 99, others => 255))), Error);
+               Push_Variable_Length_Type_Block_Assert.Eq (Push_Simple_Variable_Block (Queue, (Pri => 1, Data_Type => Variable_Type), (3, [99, 99, 99, 99, others => 255])), Error);
                Put_Line ("Error received, now popping to unblock other task.");
                Pop_Assert.Eq (Queue.Pop (Priority => Pri_Data, Bytes => Bytes, Length => Len), Success);
             when Quit =>

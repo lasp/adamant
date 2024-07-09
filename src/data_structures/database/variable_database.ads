@@ -67,7 +67,7 @@ private
    -- stored.
    type Database_Entry is record
       State : Entry_State := Empty;
-      Data : T_Serializer.Byte_Array := (others => 0);
+      Data : T_Serializer.Byte_Array := [others => 0];
    end record;
 
    -- Database table type which maps the index type (unconstrained)

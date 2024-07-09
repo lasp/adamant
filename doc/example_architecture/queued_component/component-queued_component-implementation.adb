@@ -33,7 +33,7 @@ package body Component.Queued_Component.Implementation is
                Sequence_Count => 0,
                Buffer_Length => Self.Data_Length
             ),
-            Buffer => (others => 0)
+            Buffer => [others => 0]
          );
       begin
          -- Set the packet data:

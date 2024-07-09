@@ -105,7 +105,7 @@ package body Component.Event_Limiter.Implementation is
    -- event_Limit_Persistence : Two_Counter_Entry.Persistence_Type - The initial persistence of the number of events to allow before limiting them between ticks (1 to 7)
    --
    overriding procedure Init
-      (Self : in out Instance; Event_Id_Start : in Event_Types.Event_Id; Event_Id_Stop : in Event_Types.Event_Id; Event_Disable_List : in Two_Counter_Entry.Event_Id_List := (1 .. 0 => 0); Event_Limit_Persistence : in Two_Counter_Entry.Persistence_Type)
+      (Self : in out Instance; Event_Id_Start : in Event_Types.Event_Id; Event_Id_Stop : in Event_Types.Event_Id; Event_Disable_List : in Two_Counter_Entry.Event_Id_List := [1 .. 0 => 0]; Event_Limit_Persistence : in Two_Counter_Entry.Persistence_Type)
    is
    begin
       Self.Event_Array.Init (Event_Id_Start, Event_Id_Stop, Event_Disable_List, Event_Limit_Persistence);
@@ -135,7 +135,7 @@ package body Component.Event_Limiter.Implementation is
       Send_Packet : constant Boolean := Self.Send_Event_State_Packet.Get_Var;
       Component_State : constant Event_State_Type.E := Self.Event_Array.Get_Master_Enable_State;
       -- Event to indicate the number of events limited and a set of ID's
-      Num_Event_Limited_Event : Event_Limiter_Num_Events_Type.T := (Num_Event_Ids => 0, Num_Events_Limited => 0, Event_Id_Limited_Array => (others => 0));
+      Num_Event_Limited_Event : Event_Limiter_Num_Events_Type.T := (Num_Event_Ids => 0, Num_Events_Limited => 0, Event_Id_Limited_Array => [others => 0]);
       Id_Stop : Event_Types.Event_Id;
       Id_Start : constant Event_Types.Event_Id := Self.Event_Array.Get_Event_Start_Stop_Range (Id_Stop);
    begin
@@ -166,7 +166,7 @@ package body Component.Event_Limiter.Implementation is
             use Serializer_Types;
             use Packet;
             -- Byte array for the packet
-            Event_State_Array : Basic_Types.Byte_Array (0 .. Self.State_Packet_Size - 1) := (others => 16#FF#);
+            Event_State_Array : Basic_Types.Byte_Array (0 .. Self.State_Packet_Size - 1) := [others => 16#FF#];
             State_Packet : Packet.T;
             State_Packet_Status : Serialization_Status;
             Byte_Num : Natural := 0;

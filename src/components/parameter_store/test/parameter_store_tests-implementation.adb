@@ -26,7 +26,7 @@ package body Parameter_Store_Tests.Implementation is
    -- Globals:
    -------------------------------------------------------------------------
    -- Declare memory store data:
-   Bytes : aliased Basic_Types.Byte_Array := (0 .. 99 => 0);
+   Bytes : aliased Basic_Types.Byte_Array := [0 .. 99 => 0];
 
    -------------------------------------------------------------------------
    -- Fixtures:
@@ -41,7 +41,7 @@ package body Parameter_Store_Tests.Implementation is
       Self.Tester.Connect;
 
       -- Call component init here.
-      Bytes := (others => 0);
+      Bytes := [others => 0];
       Bytes (1) := 1;
       Bytes (2) := 2;
       Bytes (3) := 3;
@@ -121,15 +121,15 @@ package body Parameter_Store_Tests.Implementation is
       use Parameter_Enums.Parameter_Table_Operation_Type;
       T : Component.Parameter_Store.Implementation.Tester.Instance_Access renames Self.Tester;
       -- Create a memory region that holds the parameter table data.
-      Table : aliased Basic_Types.Byte_Array := (0 .. 99 => 17);
+      Table : aliased Basic_Types.Byte_Array := [0 .. 99 => 17];
       Crc : Crc_16.Crc_16_Type;
       Region : constant Memory_Region.T := (Address => Table'Address, Length => Table'Length);
       Pkt : Packet.T;
       Expected_Packet_Data : Basic_Types.Byte_Array (0 .. 99) := Table;
    begin
       -- Set the version:
-      Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => (0, 0), Version => 1.0));
-      Expected_Packet_Data (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => (0, 0), Version => 1.0));
+      Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => [0, 0], Version => 1.0));
+      Expected_Packet_Data (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => [0, 0], Version => 1.0));
 
       -- Set the CRC:
       Crc := Crc_16.Compute_Crc_16 (Table (Table'First + Parameter_Table_Header.Crc_Section_Length .. Table'Last));
@@ -172,13 +172,13 @@ package body Parameter_Store_Tests.Implementation is
       use Parameter_Enums.Parameter_Table_Operation_Type;
       T : Component.Parameter_Store.Implementation.Tester.Instance_Access renames Self.Tester;
       -- Create a memory region that will hold the parameter table data.
-      Memory : aliased Basic_Types.Byte_Array (0 .. 99) := (others => 0);
+      Memory : aliased Basic_Types.Byte_Array (0 .. 99) := [others => 0];
       Region : constant Memory_Region.T := (Address => Memory'Address, Length => Memory'Length);
       Crc : Crc_16.Crc_16_Type;
    begin
       -- Set the version:
-      Bytes := (others => 17);
-      Bytes (Bytes'First .. Bytes'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => (0, 0), Version => 1.0));
+      Bytes := [others => 17];
+      Bytes (Bytes'First .. Bytes'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => [0, 0], Version => 1.0));
 
       -- Set the CRC:
       Crc := Crc_16.Compute_Crc_16 (Bytes (Bytes'First + Parameter_Table_Header.Crc_Section_Length .. Bytes'Last));
@@ -209,7 +209,7 @@ package body Parameter_Store_Tests.Implementation is
       use Parameter_Enums.Parameter_Table_Operation_Type;
       T : Component.Parameter_Store.Implementation.Tester.Instance_Access renames Self.Tester;
       -- Create a memory region that holds the parameter table data.
-      Table : aliased Basic_Types.Byte_Array := (0 .. 99 => 17);
+      Table : aliased Basic_Types.Byte_Array := [0 .. 99 => 17];
       Region : Memory_Region.T := (Address => Table'Address, Length => Table'Length - 1);
       Before_Bytes : Basic_Types.Byte_Array (0 .. 99);
    begin
@@ -263,7 +263,7 @@ package body Parameter_Store_Tests.Implementation is
       use Parameter_Enums.Parameter_Table_Operation_Type;
       T : Component.Parameter_Store.Implementation.Tester.Instance_Access renames Self.Tester;
       -- Create a memory region that holds the parameter table data.
-      Table : aliased Basic_Types.Byte_Array := (0 .. 99 => 17);
+      Table : aliased Basic_Types.Byte_Array := [0 .. 99 => 17];
       Crc : Crc_16.Crc_16_Type;
       Region : constant Memory_Region.T := (Address => Table'Address, Length => Table'Length);
       Before_Bytes : Basic_Types.Byte_Array (0 .. 99);
@@ -272,9 +272,9 @@ package body Parameter_Store_Tests.Implementation is
       Before_Bytes := Bytes;
 
       -- Calculate and set an invalid crc:
-      Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => (0, 0), Version => 1.0));
+      Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => [0, 0], Version => 1.0));
       Crc := Crc_16.Compute_Crc_16 (Table (Table'First + Parameter_Table_Header.Crc_Section_Length .. Table'Last));
-      Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => (98, 97), Version => 1.0));
+      Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => [98, 97], Version => 1.0));
 
       -- Send the memory region to the component:
       T.Parameters_Memory_Region_T_Send ((Region => Region, Operation => Set));
@@ -284,7 +284,7 @@ package body Parameter_Store_Tests.Implementation is
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Memory_Region_Crc_Invalid_History.Get_Count, 1);
       Invalid_Parameters_Memory_Region_Crc_Assert.Eq
-         (T.Memory_Region_Crc_Invalid_History.Get (1), (Parameters_Region => (Region => (Address => Table'Address, Length => Table'Length), Operation => Set), Header => (Crc_Table => (98, 97), Version => 1.0), Computed_Crc => Crc));
+         (T.Memory_Region_Crc_Invalid_History.Get (1), (Parameters_Region => (Region => (Address => Table'Address, Length => Table'Length), Operation => Set), Header => (Crc_Table => [98, 97], Version => 1.0), Computed_Crc => Crc));
 
       -- A packet should not have been automatically dumped.
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
@@ -303,7 +303,7 @@ package body Parameter_Store_Tests.Implementation is
       use Parameter_Enums.Parameter_Table_Operation_Type;
       T : Component.Parameter_Store.Implementation.Tester.Instance_Access renames Self.Tester;
       -- Create a memory region that holds the parameter table data.
-      Table : aliased Basic_Types.Byte_Array := (0 .. 99 => 17);
+      Table : aliased Basic_Types.Byte_Array := [0 .. 99 => 17];
       Region : Memory_Region.T := (Address => Table'Address, Length => Table'Length - 1);
       Before_Bytes : Basic_Types.Byte_Array (0 .. 99);
    begin
@@ -357,7 +357,7 @@ package body Parameter_Store_Tests.Implementation is
       use Parameter_Enums.Parameter_Table_Operation_Type;
       T : Component.Parameter_Store.Implementation.Tester.Instance_Access renames Self.Tester;
       -- Create a memory region that holds the parameter table data.
-      Table : aliased Basic_Types.Byte_Array := (0 .. 99 => 17);
+      Table : aliased Basic_Types.Byte_Array := [0 .. 99 => 17];
       Crc : Crc_16.Crc_16_Type;
       Region : constant Memory_Region.T := (Address => Table'Address, Length => Table'Length);
       Expected_Packet_Data : Basic_Types.Byte_Array (0 .. 99) := Table;
@@ -366,8 +366,8 @@ package body Parameter_Store_Tests.Implementation is
       Self.Tester.Component_Instance.Init (Bytes => Bytes'Access, Dump_Parameters_On_Change => False);
 
       -- Set the version:
-      Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => (0, 0), Version => 1.0));
-      Expected_Packet_Data (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => (0, 0), Version => 1.0));
+      Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => [0, 0], Version => 1.0));
+      Expected_Packet_Data (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => [0, 0], Version => 1.0));
 
       -- Set the CRC:
       Crc := Crc_16.Compute_Crc_16 (Table (Table'First + Parameter_Table_Header.Crc_Section_Length .. Table'Last));
@@ -400,7 +400,7 @@ package body Parameter_Store_Tests.Implementation is
       T : Component.Parameter_Store.Implementation.Tester.Instance_Access renames Self.Tester;
       Cmd : Command.T;
       -- Create a memory region that will hold the parameter table data.
-      Memory : aliased Basic_Types.Byte_Array (0 .. 99) := (others => 0);
+      Memory : aliased Basic_Types.Byte_Array (0 .. 99) := [others => 0];
       Region : constant Memory_Region.T := (Address => Memory'Address, Length => Memory'Length);
    begin
       -- Send 3 commands to fill up queue.
@@ -449,7 +449,7 @@ package body Parameter_Store_Tests.Implementation is
       -- Make sure some events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Dump_Parameter_Store_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => (0, 0, 0, 0, 0, 0, 0, 22)));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Dump_Parameter_Store_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 22]));
    end Test_Invalid_Command;
 
 end Parameter_Store_Tests.Implementation;
