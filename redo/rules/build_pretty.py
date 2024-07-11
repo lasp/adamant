@@ -7,6 +7,13 @@ from util import filesystem
 import sys
 
 
+def gnatpp_cmd_prefix():
+    return "gnatpp -j0 --no-compact --no-alignment --indentation=3 --indent-continuation=2 \
+            --max-line-length=5000 --name-mixed-case --attribute-mixed-case \
+            --keyword-lower-case --enum-mixed-case --type-mixed-case --eol=unix \
+            --comments-unchanged "
+
+
 class build_pretty(build_rule_base):
     def _build(self, redo_1, redo_2, redo_3):
         # Get targets for this directory:
@@ -37,12 +44,7 @@ class build_pretty(build_rule_base):
             # Form gnatpp command:
             filesystem.safe_makedir(out_dir)
             gnatpp_cmd = (
-                "gnatpp -j0 --no-compact --no-alignment --indentation=3 --indent-continuation=2 \
-                        --max-line-length=5000 --name-mixed-case --attribute-mixed-case \
-                        --keyword-lower-case --enum-mixed-case --type-mixed-case --eol=unix \
-                        --comments-unchanged --output-dir "
-                + out_dir
-                + " "
+                gnatpp_cmd_prefix() + " --output-dir " + + out_dir + " "
                 + " ".join(handwritten_source)
             )
             shell.run_command(gnatpp_cmd)
