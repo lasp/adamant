@@ -9,6 +9,7 @@ from util import shell
 from util import debug
 from base_classes.build_rule_base import build_rule_base
 from rules.build_object import _build_all_c_dependencies, _get_build_target_instance
+from rules.build_pretty import gnatpp_cmd_prefix
 
 
 def _generate_bindings(redo_1, redo_2, redo_3, source_file, c_source_db):
@@ -55,10 +56,17 @@ def _generate_bindings(redo_1, redo_2, redo_3, source_file, c_source_db):
     filesystem.safe_makedir(template_temp_dir)
     os.chdir(template_temp_dir)
     shell.run_command_suppress_output(compile_cmd)
+
+    # The bindings file does not meet our coding style, so we use
+    # gnatpp to reformat it.
+    temp_output = os.path.join(template_temp_dir, os.path.basename(redo_1))
+    gnatpp_cmd = (
+        gnatpp_cmd_prefix() + " " + temp_output
+    )
+    shell.run_command_suppress_output(gnatpp_cmd)
     os.chdir(cwd)
 
     # Move the temporary binding over to the final location:
-    temp_output = os.path.join(template_temp_dir, os.path.basename(redo_1))
     debug.debug_print("mv " + temp_output + " " + redo_3)
     move(temp_output, redo_3)
     rmtree(template_temp_dir)
