@@ -943,12 +943,31 @@ package body Component.{{ name }} is
 
    not overriding procedure Process_Parameter_Update (Self : in out Base_Instance; Par_Update : in out Parameter_Update.T) is
       use Parameter_Operation_Type;
+      use Parameter_Validation_Status;
+      use Parameter_Update_Status;
       Status : Parameter_Update_Status.E := Parameter_Update_Status.Success;
    begin
       case Par_Update.Operation is
          when Stage =>
             -- Stage this parameter.
             Status := Self.Stage_Parameter (Par_Update.Param);
+         when Validate =>
+            -- Pass the staged parameters to the user defined validation function.
+            -- Note that type ranges have already been validated as part of staging
+            -- each parameter individually. This function is used for extended,
+            -- user-implemented validation.
+            case Base_Instance'Class (Self).Validate_Parameters (
+{% for par in parameters %}
+               {{ par.name }} => Self.Staged_Parameters.Get_{{ par.name }}{{ "," if not loop.last }}
+{% endfor %}
+            ) is
+               when Valid =>
+                  -- Set status:
+                  Status := Success;
+               when Invalid =>
+                  -- Set status:
+                  Status := Validation_Error;
+            end case;
          when Update =>
             -- All parameters have been staged, we can now update our local parameters:
             Self.Staged_Parameters.Set_Parameters_Staged;

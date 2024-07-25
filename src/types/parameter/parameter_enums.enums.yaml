@@ -13,8 +13,11 @@ enums:
       - name: Fetch
         value: 2
         description: Fetch the parameter.
+      - name: Validate
+        value: 3
+        description: Validate the parameter.
   - name: Parameter_Update_Status
-    description: This status enumerations provides information on the success/failure of a parameter operation.
+    description: This status enumeration provides information on the success/failure of a parameter operation.
     literals:
       - name: Success
         value: 0
@@ -38,7 +41,7 @@ enums:
         value: 1
         description: Set the current values of the parameters.
   - name: Parameter_Table_Update_Status
-    description: This status enumerations provides information on the success/failure of a parameter table update.
+    description: This status enumeration provides information on the success/failure of a parameter table update.
     literals:
       - name: Success
         value: 0
@@ -55,3 +58,12 @@ enums:
       - name: Dropped
         value: 4
         description: The operation could not be performed because it was dropped from a full queue.
+  - name: Parameter_Validation_Status
+    description: This status enumeration provides information on the result of validating a set of parameters.
+    literals:
+      - name: Valid
+        value: 0
+        description: Parameters were validated.
+      - name: Invalid
+        value: 1
+        description: Parameters were found to be invalid.
