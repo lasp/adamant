@@ -161,7 +161,7 @@ class c_source_database(database):
                 else:
                     root_dir = os.path.dirname(source)
                 basename, ext = os.path.splitext(source)
-                basename = os.path.basename(basename).lower()
+                basename = os.path.basename(basename)
                 objects.append(
                     os.path.join(
                         root_dir,

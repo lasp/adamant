@@ -153,7 +153,7 @@ class build_bindings(build_rule_base):
             + os.sep
             + target.get_default_target()
             + os.sep
-            + base
+            + base.lower()
             + "_" + ext[1:]
             + ".ads",
         )
