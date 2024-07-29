@@ -100,5 +100,15 @@ private
    -- hardware registers, or performing other special functionality that only needs to be performed after parameters have
    -- been updated.
    overriding procedure Update_Parameters_Action (Self : in out Instance);
+   -- This function is called when the parameter operation type is "Validate". The default implementation of this
+   -- subprogram in the implementation package is a function that returns "Valid". However, this function can, and should be
+   -- overridden if something special needs to happen to further validate a parameter. Examples of this might be validation of
+   -- certain parameters beyond individual type ranges, or performing other special functionality that only needs to be
+   -- performed after parameters have been validated. Note that range checking is performed during staging, and does not need
+   -- to be implemented here.
+   overriding function Validate_Parameters (
+      Self : in out Instance;
+      Max_Sends_Per_Tick : in Packed_U16.U
+   ) return Parameter_Validation_Status.E is (Parameter_Validation_Status.Valid);
 
 end Component.Limiter.Implementation;
