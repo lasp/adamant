@@ -48,4 +48,7 @@ abstract project a_bareboard_base extends all "a_adamant.gpr" is
          ("-Wl,--defsym=__stack_size=5000");
    end Linker;
 
+   -- Source files declared empty for abstract project
+   for Source_Files use ();
+
 end a_bareboard_base;
