@@ -445,6 +445,14 @@ package body Component.Parameters.Implementation is
                -- The memory region needs to be filled by the current values of all our active parameters:
             when Get =>
                To_Return := Self.Copy_Parameter_Table_To_Region (Arg.Region);
+            when Validate =>
+               -- TODO Validate the parameter table:
+               -- TODO Check for length error, CRC, Validate_Parameters_Action:
+               -- TODO Send events/data product:
+               -- TODO Return status:
+               -- To_Return := (Region => Arg.Region, Status => Validation_Error);
+               To_Return := (Region => Arg.Region, Status => Success);
+
          end case;
       end if;
 
