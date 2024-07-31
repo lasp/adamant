@@ -40,6 +40,9 @@ enums:
       - name: Set
         value: 1
         description: Set the current values of the parameters.
+      - name: Validate
+        value: 2
+        description: Validate the current values of the parameters.
   - name: Parameter_Table_Update_Status
     description: This status enumeration provides information on the success/failure of a parameter table update.
     literals:
@@ -54,7 +57,7 @@ enums:
         description: The computed CRC of the table does not match the stored CRC.
       - name: Parameter_Error
         value: 3
-        description: Failed to fetch or update an individual parameter within a component.
+        description: An individual parameter was found invalid due to a constraint error within a component, or failing component-specific validation.
       - name: Dropped
         value: 4
         description: The operation could not be performed because it was dropped from a full queue.

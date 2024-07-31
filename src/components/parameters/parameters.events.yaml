@@ -12,6 +12,9 @@ events:
   - name: Parameter_Update_Failed
     description: A parameter value could not be updated.
     param_type: Parameter_Operation_Status.T
+  - name: Parameter_Validation_Failed
+    description: A parameter value could not be validated.
+    param_type: Parameter_Operation_Status.T
   - name: Parameter_Fetch_Failed
     description: A parameter value could not be updated.
     param_type: Parameter_Operation_Status.T

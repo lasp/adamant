@@ -41,6 +41,7 @@ package Component.Parameters.Implementation.Tester is
    package Parameter_Update_Id_Not_Recognized_History_Package is new Printable_History (Parameter_Id.T, Parameter_Id.Representation.Image);
    package Parameter_Stage_Failed_History_Package is new Printable_History (Parameter_Operation_Status.T, Parameter_Operation_Status.Representation.Image);
    package Parameter_Update_Failed_History_Package is new Printable_History (Parameter_Operation_Status.T, Parameter_Operation_Status.Representation.Image);
+   package Parameter_Validation_Failed_History_Package is new Printable_History (Parameter_Operation_Status.T, Parameter_Operation_Status.Representation.Image);
    package Parameter_Fetch_Failed_History_Package is new Printable_History (Parameter_Operation_Status.T, Parameter_Operation_Status.Representation.Image);
    package Parameter_Fetch_Length_Mismatch_History_Package is new Printable_History (Invalid_Parameter_Length.T, Invalid_Parameter_Length.Representation.Image);
    package Parameter_Update_Length_Mismatch_History_Package is new Printable_History (Invalid_Parameter_Length.T, Invalid_Parameter_Length.Representation.Image);
@@ -75,6 +76,7 @@ package Component.Parameters.Implementation.Tester is
       Parameter_Update_Id_Not_Recognized_History : Parameter_Update_Id_Not_Recognized_History_Package.Instance;
       Parameter_Stage_Failed_History : Parameter_Stage_Failed_History_Package.Instance;
       Parameter_Update_Failed_History : Parameter_Update_Failed_History_Package.Instance;
+      Parameter_Validation_Failed_History : Parameter_Validation_Failed_History_Package.Instance;
       Parameter_Fetch_Failed_History : Parameter_Fetch_Failed_History_Package.Instance;
       Parameter_Fetch_Length_Mismatch_History : Parameter_Fetch_Length_Mismatch_History_Package.Instance;
       Parameter_Update_Length_Mismatch_History : Parameter_Update_Length_Mismatch_History_Package.Instance;
@@ -155,6 +157,8 @@ package Component.Parameters.Implementation.Tester is
    overriding procedure Parameter_Stage_Failed (Self : in out Instance; Arg : in Parameter_Operation_Status.T);
    -- A parameter value could not be updated.
    overriding procedure Parameter_Update_Failed (Self : in out Instance; Arg : in Parameter_Operation_Status.T);
+   -- A parameter value could not be validated.
+   overriding procedure Parameter_Validation_Failed (Self : in out Instance; Arg : in Parameter_Operation_Status.T);
    -- A parameter value could not be updated.
    overriding procedure Parameter_Fetch_Failed (Self : in out Instance; Arg : in Parameter_Operation_Status.T);
    -- A parameter was fetched but contained an unexpected length.
