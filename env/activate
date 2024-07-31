@@ -141,8 +141,6 @@ for path in "${paths[@]}"; do
   # Also update PATH. Alire will include the current PATH set by the Adamant
   # environment plus some alire specific paths.
   #
-  echo "+++++++++++ ALR ENV"
-  alr -n printenv | grep PATH
   eval `alr -n printenv | grep PATH`
 
   # Set up the LD_LIBRARY_PATH so that it also includes the libraries that come
@@ -155,10 +153,11 @@ for path in "${paths[@]}"; do
       fi
   fi
 
+  # Add Adamant and project repository GPR files to the GPR_PROJECT_PATH
+  export GPR_PROJECT_PATH=$GPR_PROJECT_PATH:$path/redo/targets/gpr
+
   # Activate the local python configuration:
   . $ADAMANT_DIR/env/set_python_path.sh $path
-  echo "+++++++++++ ENV"
-  env
 
   cd - &> /dev/null
 done
