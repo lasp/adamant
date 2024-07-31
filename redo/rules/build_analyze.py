@@ -10,7 +10,6 @@ from util import redo_arg
 from util import filesystem
 from util import redo
 from util import shell
-from models import analyze
 import re
 
 
@@ -68,7 +67,7 @@ def _analyze_ada_sources(source_files, base_dir, build_target, binary_mode=False
     # Build dependencies:
     redo.redo_ifchange(deps)
 
-    # We cannot use "fast" compilation when canning CodePeer, since CodePeer wants to analyze both
+    # We cannot use "fast" compilation when running GNAT SAS, since GNAT SAS wants to analyze both
     # the .adb's and .ads's, which is not always true of pure compilation. This will make sure we build
     # and depend on all related source code, not just the minimum set required for compilation.
     environ["SAFE_COMPILE"] = "True"
@@ -112,23 +111,16 @@ def _analyze_ada_sources(source_files, base_dir, build_target, binary_mode=False
         and not type_ranges_reg.match(src)
     ]
 
-    # To support running CodePeer with "-j0" flag we cannot use the shared directory
-    # to store the CodePeer output directory (which contains the CodePeer database.
-    # So we make sure CodePeer always outputs to a native directory located in
-    # ~/.codepeer/absolute/path/to/redo/analysis/dir. This keeps things fast
-    # and allows us to use "-j0".
+    # So we make sure GNAT SAS always outputs to a native directory located in
+    # ~/.gnatsas/absolute/path/to/redo/analysis/dir. This keeps things fast.
     from pathlib import Path
 
     home = str(Path.home())
-    output_dir = home + os.sep + ".codepeer" + base_dir
+    output_dir = home + os.sep + ".gnatsas" + base_dir
     filesystem.safe_makedir(output_dir)
 
-    # Copy all source and dependencies to a single analysis location. This makes
-    # sure analysis is only performed on the desired files, for speed, and to not clutter the
-    # log with compilation errors. There is not an easy way to tell codepeer to
-    # only consider these X files for compilation. It tends to compile everything
-    # it finds in a directory even if it is not in the "-files-from" switch.
-    # So to better specify the exact files we want analyzed, we do this copy.
+    # Copy all source and dependencies to a single analysis location. This is a
+    # simple way to ensure analysis is only performed on the desired files.
     src_dir = output_dir + os.sep + "src"
     filesystem.safe_makedir(src_dir)
     import shutil
@@ -144,150 +136,127 @@ def _analyze_ada_sources(source_files, base_dir, build_target, binary_mode=False
     with open(relocated_sources_file, "w") as f:
         f.write("\n".join(relocated_sources_to_analyze))
 
-    # Get info for forming codepeer command:
+    # Get info for forming gnatsas command:
     gpr_project_file = build_target_instance.gpr_project_file().strip()
-    target_path_files = build_target_instance.path_files()
-    run_file = build_dir + os.sep + "run.log"
-    output_file = build_dir + os.sep + "analysis.txt"
-    direct = " >&2"
 
     # Info print:
     redo.info_print(
         "Analyzing " + analyzing_what + ":\n" + "\n".join(sources_to_analyze)
     )
 
-    # See if there is a CodePeer yaml configuration file that determines the messages
-    # and level we use for CodePeer.
-    level = 2
-    messages = "normal"  # max, min, normal
-    switches = ""
-    analyze_yaml = os.path.join(base_dir, "all.analyze.yaml")
-    if os.path.exists(analyze_yaml):
-        sys.stderr.write(
-            "Using CodePeer configuration found in " + analyze_yaml + ".\n"
-        )
-        analyze_model = analyze.analyze(analyze_yaml)
-        if analyze_model.messages is not None:
-            messages = analyze_model.messages
-        if analyze_model.level is not None:
-            level = analyze_model.level
-        if analyze_model.switches:
-            switches = " ".join(analyze_model.switches)
-    else:
-        sys.stderr.write(
-            "No CodePeer configuration was found at "
-            + analyze_yaml
-            + ". Using default configuration.\n"
-        )
-    sys.stderr.write(
-        "Running CodePeer with switches: -level="
-        + str(level)
-        + " -messages="
-        + messages
-        + " "
-        + switches
-        + "\n"
-    )
-    sys.stderr.write("CodePeer output directory: " + output_dir + "\n")
-    sys.stderr.write("Run log: " + run_file + "\n")
-    sys.stderr.write(
-        "^^ Tip: run 'tail -f "
-        + run_file
-        + "' to view the progress of a long running analysis.\n"
-    )
+    # Function to modify the contents of a gpr file for use with
+    # gnatsas
+    def modify_contents(gpr_contents, gpr_file_name):
+        # Split the contents into lines
+        lines = gpr_contents.split('\n')
 
-    # If this is a 32-bit target then make sure we run CodePeer with the
-    # -32bits switch enabled.
-    if "32bit" in target_path_files:
-        switches += " -32bits"
+        # Set flag to find if 'Source_Dirs' line was found
+        source_dirs_line_exists = False
+        source_dirs_line = '   for Source_Dirs use ("./**");'
 
-    # Handling for security report.
-    if level > 0:
-        security = " --security-report "
-    # Currently disabled...
-    security = ""
+        # Replace any Source_Dirs declaration with the one for gnatsas
+        for i, line in enumerate(lines):
+            # Replace "for Source_Dirs use" line with new line
+            if line.strip().startswith("for Source_Dirs use"):
+                lines[i] = source_dirs_line
+                source_dirs_line_exists = True
+                break
 
-    # Uncomment the line below to debug AdamantMessagePatterns.xml:
-    # switches += " -dbg-on patterns -show-info"
+        # If there is no 'Source_Dirs' line, add it after 'project' line
+        if not source_dirs_line_exists:
+            for i, line in enumerate(lines):
+                if line.strip().startswith("project "):
+                    lines.insert(i+1, source_dirs_line)
+                    break
 
-    # Form codepeer command:
-    gpr_search_path = (
-        "export GPR_PROJECT_PATH="
-        + os.environ["ADAMANT_DIR"]
-        + os.sep
-        + "redo"
-        + os.sep
-        + "targets"
-        + os.sep
-        + "gpr"
-        + ":$GPR_PROJECT_PATH;"
-    )
-    analyze_cmd = (
-        gpr_search_path
-        + " codepeer -j0 -level "
-        + str(level)
-        + " -messages "
-        + messages
-        + " "
-        + switches
-        + " -f -status-codes -show-header -output-dir "
-        + output_dir
-        + " -output-msg -show-removed -cwe -out "
-        + output_file
-        + security
-        + " -files-from "
-        + relocated_sources_file
-        + " -P "
-        + gpr_project_file
-        + " -XADAMANT_DIR="
-        + os.environ["ADAMANT_DIR"]
-        + " -XOBJECT_DIR="
-        + output_dir
-        + " -XSOURCE_DIRS="
-        + src_dir
-        + direct
-    )
+        # This is a bit hacky, but should work for current Adamant gpr files
+        # for native targets.
+        def contains_linux_or_native(input_string):
+            # Convert the input string to lower case
+            input_string_lower = input_string.lower()
+            return "linux" in input_string_lower or "native" in input_string_lower
 
-    # Run the compile command:
-    ret, stdout, stderr = shell.try_run_command_capture_output(analyze_cmd)
+        # Insert gnatsas target near the bottom
+        if contains_linux_or_native(lines[0]):
+            length = len(lines)
+            for i, line in enumerate(reversed(lines)):
+                # Insert target line before end line
+                if line.strip().startswith("end "):
+                    lines.insert(length-i-1, '   for Target use "codepeer";')
+                    break
 
-    # Create a convenient link the the build/analysis directory
-    # that points to the CodePeer database for this directory.
-    output_link = build_dir + os.sep + "output_dir"
+        # Join the modified lines back into a single string
+        return "\n".join(lines)
+
+    # Open the .gpr file for the current target and read its
+    # contents. We are going to use this as the base for the
+    # gnatsas .gpr file, but with some modifications.
+    gpr_contents = None
     try:
-        os.symlink(output_dir, output_link)
-    except FileExistsError:
-        os.unlink(output_link)
-        os.symlink(output_dir, output_link)
+        with open(gpr_project_file, 'r') as f:
+            gpr_contents = f.read()
+    except FileNotFoundError:
+        raise FileNotFoundError(f"The file '{gpr_project_file}' does not exist.")
 
-    # Write output to file:
-    with open(run_file, "w") as f:
-        f.write(stdout)
-        f.write(stderr)
+    # Make the appropriate modifications. This seems hacky, but
+    # should work for any of the gpr files provided with Adamant
+    # without issue.
+    new_gpr_contents = modify_contents(gpr_contents, gpr_project_file)
+
+    # Open the file in write mode
+    gnatsas_gpr_file = os.path.join(src_dir, os.path.basename(gpr_project_file))
+    with open(gnatsas_gpr_file, 'w') as f:
+        # Write the modified contents to the file
+        f.write(new_gpr_contents)
+
+    # Run GNAT SAS analysis
+    output_dir = os.path.join(src_dir, "reports")
+    filesystem.safe_makedir(output_dir)
+    analyze_out_file = os.path.join(output_dir, "analyze.txt")
+    suffix = " 2>&1 | tee " + analyze_out_file + " 1>&2"
+    analyze_cmd = "gnatsas analyze -j0 -P" + gnatsas_gpr_file + suffix
+    ret = shell.try_run_command(analyze_cmd)
+
+    # Make CSV report
+    csv_out_file = os.path.join(output_dir, "report.csv")
+    csv_cmd = "gnatsas report csv -P" + gnatsas_gpr_file + " --out " + csv_out_file + suffix
+    ret = shell.try_run_command(csv_cmd)
+
+    # Make html report
+    # html_out_file = os.path.join(src_dir, "gnathub" + os.sep + "html-report" + os.sep + "index.html")
+    # html_cmd = "gnatsas report html -P" + gnatsas_gpr_file + suffix
+    # ret = shell.try_run_command(html_cmd)
+
+    # Make security report
+    security_out_file = os.path.join(output_dir, "security.html")
+    security_cmd = "gnatsas report security -P" + gnatsas_gpr_file + " --out " + security_out_file + suffix
+    ret = shell.try_run_command(security_cmd)
+
+    # Make text report and print to screen
+    report_out_file = os.path.join(output_dir, "report.txt")
+    suffix = " 2>&1 | tee " + report_out_file + " 1>&2"
+    report_cmd = "gnatsas report -P" + gnatsas_gpr_file + suffix
 
     # Write output to terminal:
-    sys.stderr.write(stdout)
-    sys.stderr.write(stderr)
     sys.stderr.write("\n-----------------------------------------------------\n")
     sys.stderr.write("---------- Analysis Output --------------------------\n")
     sys.stderr.write("-----------------------------------------------------\n")
-    with open(output_file, "r") as f:
-        sys.stderr.write(f.read())
+    ret = shell.try_run_command(report_cmd)
     sys.stderr.write("-----------------------------------------------------\n")
     sys.stderr.write("-----------------------------------------------------\n\n")
-    sys.stderr.write("CodePeer run log saved in " + run_file + "\n")
-    sys.stderr.write("CodePeer analysis output saved in " + output_file + "\n")
-    sys.stderr.write("CodePeer output directory located at " + output_dir + "\n")
-    sys.stderr.write(
-        "^^ Tip: remove this directory to reset the historical CodePeer database.\n"
-    )
+    sys.stderr.write("GNAT SAS output directory located at " + output_dir + "\n")
+    sys.stderr.write("GNAT SAS run log saved in " + analyze_out_file + "\n")
+    sys.stderr.write("GNAT SAS analysis text output saved in " + report_out_file + "\n")
+    sys.stderr.write("GNAT SAS analysis CSV output saved in " + csv_out_file + "\n")
+    # sys.stderr.write("GNAT SAS analysis HTML output saved in " + html_out_file + "\n")
+    sys.stderr.write("GNAT SAS security report output saved in " + security_out_file + "\n")
 
     return ret
 
 
 class build_analyze(build_rule_base):
     """
-    This build rule uses codepeer to analyze any code
+    This build rule uses gnatsas to analyze any code
     found in the current directory.
     """
     def _build(self, redo_1, redo_2, redo_3):
@@ -324,7 +293,7 @@ class build_analyze(build_rule_base):
             ret = _analyze_ada_sources(
                 sources, directory, target, binary_mode=bool(binaries)
             )
-            # Exit with error code if codepeer failed:
+            # Exit with error code if gnatsas failed:
             if ret != 0:
                 sys.exit(ret)
         else:

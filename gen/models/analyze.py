@@ -3,7 +3,7 @@ import os
 
 
 class analyze(base):
-    """This model stores yaml information for configuring CodepEer for a directory."""
+    """This model stores yaml information for configuring GNAT SAS for a directory."""
     def __init__(self, filename, template=os.environ["SCHEMAPATH"] + "/analyze.yaml"):
         # Load the object from the file:
         super(analyze, self).__init__(filename, template)
