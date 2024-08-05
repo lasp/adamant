@@ -148,13 +148,11 @@ package body Component.Parameter_Store.Implementation is
                   -- Send info event:
                   Self.Event_T_Send_If_Connected (Self.Events.Parameter_Table_Fetched (Self.Sys_Time_T_Get, Arg.Region));
                when Validate =>
-                  -- TODO Validate the parameter table:
-                  -- TODO Check for length error, CRC, Validate_Parameters_Action:
-                  -- TODO Send events/data product:
-                  -- TODO Return status:
-                  -- To_Return := (Region => Arg.Region, Status => Validation_Error);
-                  To_Return := (Region => Arg.Region, Status => Success);
-
+                  -- This component does not perform component-specific validation, so table validation is unsupported:
+                  -- Throw event:
+                  Self.Event_T_Send_If_Connected (Self.Events.Table_Validation_Not_Supported (Self.Sys_Time_T_Get));
+                  -- Set the return status:
+                  To_Return := (Region => Arg.Region, Status => Parameter_Error);
             end case;
          end;
       end if;

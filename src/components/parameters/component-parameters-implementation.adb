@@ -446,13 +446,29 @@ package body Component.Parameters.Implementation is
             when Get =>
                To_Return := Self.Copy_Parameter_Table_To_Region (Arg.Region);
             when Validate =>
-               -- TODO Validate the parameter table:
-               -- TODO Check for length error, CRC, Validate_Parameters_Action:
-               -- TODO Send events/data product:
-               -- TODO Return status:
-               -- To_Return := (Region => Arg.Region, Status => Validation_Error);
-               To_Return := (Region => Arg.Region, Status => Success);
-
+               -- Validate the parameter table.
+               -- Length is checked at the beginning of this procedure.
+               -- Check the CRC:
+               declare
+                  use Byte_Array_Pointer;
+                  use Byte_Array_Pointer.Packed;
+                  use Basic_Types;
+                  -- Extract the parameter table header:
+                  Ptr : constant Byte_Array_Pointer.Instance := Unpack (Arg.Region);
+                  Ptr_Header : constant Byte_Array_Pointer.Instance := Slice (Ptr, Start_Index => 0, End_Index => Parameter_Table_Header.Size_In_Bytes - 1);
+                  Table_Header : constant Parameter_Table_Header.T := Parameter_Table_Header.Serialization.From_Byte_Array (To_Byte_Array (Ptr_Header));
+                  -- Compute the CRC over the incoming table:
+                  Computed_Crc : constant Crc_16.Crc_16_Type := Self.Crc_Parameter_Table (To_Byte_Array (Ptr));
+               begin
+                  -- If the CRCs do not match then throw an event
+                  if Table_Header.Crc_Table /= Computed_Crc then
+                     Self.Event_T_Send_If_Connected (Self.Events.Memory_Region_Crc_Invalid (Self.Sys_Time_T_Get, (Parameters_Region => Arg, Header => Table_Header, Computed_Crc => Computed_Crc)));
+                     To_Return := (Region => Arg.Region, Status => Crc_Error);
+                  else
+                     To_Return := (Region => Arg.Region, Status => Success);
+                  end if;
+               end;
+               -- TODO Check the individual component parameter validation status:
          end case;
       end if;
 
