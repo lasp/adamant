@@ -460,7 +460,7 @@ package body Component.Parameters.Implementation is
                   -- Compute the CRC over the incoming table:
                   Computed_Crc : constant Crc_16.Crc_16_Type := Self.Crc_Parameter_Table (To_Byte_Array (Ptr));
                begin
-                  -- If the CRCs do not match then throw an event
+                  -- If the CRCs do not match then throw an event and set return to CRC error:
                   if Table_Header.Crc_Table /= Computed_Crc then
                      Self.Event_T_Send_If_Connected (Self.Events.Memory_Region_Crc_Invalid (Self.Sys_Time_T_Get, (Parameters_Region => Arg, Header => Table_Header, Computed_Crc => Computed_Crc)));
                      To_Return := (Region => Arg.Region, Status => Crc_Error);
@@ -468,7 +468,43 @@ package body Component.Parameters.Implementation is
                      To_Return := (Region => Arg.Region, Status => Success);
                   end if;
                end;
-               -- TODO Check the individual component parameter validation status:
+               -- Check the individual component parameter validation status:
+               declare
+                  use Parameter_Enums.Parameter_Update_Status;
+                  use Parameter_Enums.Parameter_Operation_Type;
+               begin
+                  -- Go through all entries linearly to validate parameters.
+                  for Param_Entry of Self.Entries.all loop
+                     declare
+                        -- Calculate the parameters length:
+                        Param_Length : constant Parameter_Types.Parameter_Buffer_Length_Type := Param_Entry.End_Index - Param_Entry.Start_Index + 1;
+                        -- Create a parameter validate record:
+                        Param_Validate : Parameter_Update.T := (
+                           Operation => Validate,
+                           Status => Success,
+                           Param => (Header => (Id => Param_Entry.Id, Buffer_Length => Param_Length), Buffer => [others => 0]
+                        ));
+                        -- Create a temporary buffer to hold the parameter value:
+                        Value : constant Parameter_Types.Parameter_Buffer_Type := [others => 0];
+                        -- Component index:
+                        Idx : constant Parameter_Update_T_Provide_Index := Parameter_Update_T_Provide_Index (Param_Entry.Component_Id);
+                     begin
+                        -- Validate the parameter:
+                        -- Copy over value into record:
+                        Param_Validate.Param.Buffer (Param_Validate.Param.Buffer'First .. Param_Validate.Param.Buffer'First + Param_Length - 1)
+                           := Value (Param_Validate.Param.Buffer'First .. Param_Validate.Param.Buffer'First + Param_Length - 1);
+
+                        -- Send the parameter fetch request to the appropriate component:
+                        Self.Parameter_Update_T_Provide (Idx, Param_Validate);
+
+                        -- Make sure the status is successful. If it is not, then produce an event.
+                        if Param_Validate.Status /= Success then
+                           To_Return := (Region => Arg.Region, Status => Parameter_Error);
+                        end if;
+                     end;
+                  end loop;
+                  -- If this point was reached without changing To_Return, then it should still be Success
+               end;
          end case;
       end if;
 
