@@ -16,9 +16,9 @@ def optimize_path():
         env_paths = []
         other_paths = []
         for p in sys.path:
-            if not (p.startswith("/share") or p.startswith("/home")):
+            if not p.startswith("/home"):
                 system_paths.append(p)
-            elif "env/python" in p:
+            elif ".py_env" in p:
                 env_paths.append(p)
             else:
                 other_paths.append(p)
