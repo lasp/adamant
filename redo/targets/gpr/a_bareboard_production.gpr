@@ -18,6 +18,10 @@ abstract project a_bareboard_production extends all "a_bareboard_base.gpr" is
          -- optimization
          ("-O2");
 
+      for Switches ("C++") use a_bareboard_base.Compiler'Switches ("C++") &
+         -- optimization
+         ("-O2");
+
       for Switches ("Asm_Cpp") use a_bareboard_base.Compiler'Switches ("Asm_Cpp") &
          -- optimization
          ("-O2");
