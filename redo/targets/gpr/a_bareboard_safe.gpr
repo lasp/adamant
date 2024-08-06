@@ -1,0 +1,29 @@
+abstract project a_bareboard_safe extends all "a_bareboard_base.gpr" is
+
+   -- This is a "safe" target which has no optimization and no runtime checks enabled.
+   -- It is meant for "fallback" images, which need to have substantially different binaries
+   -- than production images to work around compiler bugs and boot loops caused from Ada
+   -- runtime checks. It is recommended to pair this with a runtime that also has optimizations
+   -- disabled.
+   package Compiler is
+      -- Add preprocessor definitions and configuration pragma switches:
+      for Switches ("Ada") use a_bareboard_base.Compiler'Switches ("Ada") &
+         -- No optimization
+         ("-O0") &
+         -- Suppress ALL runtime checking;
+         ("-gnatp");
+
+      for Switches ("C") use a_bareboard_base.Compiler'Switches ("C") &
+         -- No optimization
+         ("-O0");
+
+      for Switches ("C++") use a_bareboard_base.Compiler'Switches ("C++") &
+         -- No optimization
+         ("-O0");
+
+      for Switches ("Asm_Cpp") use a_bareboard_base.Compiler'Switches ("Asm_Cpp") &
+         -- No optimization
+         ("-O0");
+   end Compiler;
+
+end a_bareboard_safe;
