@@ -4,9 +4,8 @@ assembly_events_file=$1
 
 if test -z "$assembly_events_file"
 then
-  echo "usage: socket_event_decoder_to_bin.sh /share/path/to/assembly_events.py"
+  echo "usage: socket_event_decoder_to_bin.sh /path/to/assembly_events.py"
   echo "description: Convert a python script to a standalone executable with no dependencies that can run on any platform. You must provide the assembly events file that this program will be run with in production."
-  echo "NOTE: your path to assembly_events.py must start with /share, not /home. There is an issue when starting from /home."
   exit 1
 fi
 

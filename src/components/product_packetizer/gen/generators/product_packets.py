@@ -71,10 +71,11 @@ class product_packets_ads(product_packets_gen, generator_base):
 
 class product_packets_html(product_packets_gen, generator_base):
     def __init__(self):
+        from os import environ
         product_packets_gen.__init__(
             self,
             template_filename="name.html",
-            additional_template_dirs=["/share/adamant/gen/templates"],
+            additional_template_dirs=[environ["ADAMANT_DIR"] + os.sep + "gen" + os.sep + "templates"],
         )
 
     def generate(self, input_filename):
