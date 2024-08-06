@@ -13,6 +13,12 @@ abstract project a_bareboard_development extends all "a_bareboard_production.gpr
          -- This combined with Initialize_Scalars, below, greatly aids in discovering uninitializated
          -- variable bugs.
          ("-gnatVa");
+
+      for Switches ("C") use a_bareboard_base.Compiler'Switches ("C");
+
+      for Switches ("C++") use a_bareboard_base.Compiler'Switches ("C++");
+
+      for Switches ("Asm_Cpp") use a_bareboard_base.Compiler'Switches ("Asm_Cpp");
    end Compiler;
 
 end a_bareboard_development;
