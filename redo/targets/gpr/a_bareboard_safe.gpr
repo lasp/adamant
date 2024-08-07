@@ -26,4 +26,7 @@ abstract project a_bareboard_safe extends all "a_bareboard_base.gpr" is
          ("-O0");
    end Compiler;
 
+   -- Source files declared empty for abstract project
+   for Source_Files use ();
+
 end a_bareboard_safe;
