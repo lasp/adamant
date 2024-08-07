@@ -306,6 +306,15 @@ package body Component.Parameters.Implementation is
       -- Send the parameter fetch request to the appropriate component:
       Self.Parameter_Update_T_Provide (Idx, Param_Validate);
 
+      -- Make sure the status is successful. If it is not, then produce an event.
+      if Param_Validate.Status /= Success then
+         Self.Event_T_Send_If_Connected (Self.Events.Parameter_Validation_Failed (Self.Sys_Time_T_Get, (
+            Operation => Param_Validate.Operation,
+            Status => Param_Validate.Status,
+            Id => Param_Validate.Param.Header.Id)
+         ));
+      end if;
+
       return Param_Validate.Status;
    end Validate_Parameters;
 
@@ -345,16 +354,6 @@ package body Component.Parameters.Implementation is
       Memory_Region_Ptr : constant Byte_Array_Pointer.Instance := Byte_Array_Pointer.Packed.Unpack (Region);
       Parameter_Data_Ptr : constant Byte_Array_Pointer.Instance
          := Byte_Array_Pointer.Slice (Memory_Region_Ptr, Start_Index => Parameter_Table_Header.Size_In_Bytes);
-
-      -- If the status returned is not success then set our status to return to a parameter error.
-      procedure Set_Status (Stat : in Parameter_Enums.Parameter_Update_Status.E) is
-      begin
-         -- Check the return status. Even if it is bad, we still continue to try to stage
-         -- the rest of the parameters.
-         if Stat /= Success then
-            Status_To_Return := Parameter_Error;
-         end if;
-      end Set_Status;
    begin
       -- Go through all our entries linearly, extracting data from the incoming memory region, and
       -- using the values stored there as values to stage our parameters.
@@ -377,7 +376,9 @@ package body Component.Parameters.Implementation is
             Value (Value'First .. Value'First + Param_Length - 1) := To_Byte_Array (Ptr);
 
             -- Stage the parameter:
-            Set_Status (Self.Stage_Parameter (Param_Entry => Param_Entry, Value => Value));
+            if Self.Stage_Parameter (Param_Entry => Param_Entry, Value => Value) /= Success then
+               Status_To_Return := Parameter_Error;
+            end if;
          end;
       end loop;
       return Status_To_Return;
@@ -388,16 +389,6 @@ package body Component.Parameters.Implementation is
       use Parameter_Enums.Parameter_Update_Status;
       use Parameter_Enums.Parameter_Table_Update_Status;
       Status_To_Return : Parameter_Enums.Parameter_Table_Update_Status.E := Success;
-
-      -- If the status returned is not success then set our status to return to a parameter error.
-      procedure Set_Status (Stat : in Parameter_Enums.Parameter_Update_Status.E) is
-      begin
-         -- Check the return status. Even if it is bad, we still continue to try to stage
-         -- the rest of the parameters.
-         if Stat /= Success then
-            Status_To_Return := Parameter_Error;
-         end if;
-      end Set_Status;
    begin
       -- Stage all of the parameters:
       Status_To_Return := Self.Stage_Parameter_Table (Region);
@@ -405,15 +396,11 @@ package body Component.Parameters.Implementation is
       -- OK, now we need to validate all the parameters.
       for Idx in Self.Connector_Parameter_Update_T_Provide'Range loop
          if Self.Is_Parameter_Update_T_Provide_Connected (Idx) then
-            Set_Status (Self.Validate_Parameters (Component_Id => Idx));
+            if Self.Validate_Parameters (Component_Id => Idx) /= Success then
+               Status_To_Return := Parameter_Error;
+            end if;
          end if;
       end loop;
-
-      -- Send out a new parameter's packet if configured to do so:
-      if Self.Dump_Parameters_On_Change then
-         -- Send the packet:
-         Set_Status (Self.Send_Parameters_Packet);
-      end if;
 
       -- Return the memory pointer with the status for deallocation.
       return (Region => Region, Status => Status_To_Return);
