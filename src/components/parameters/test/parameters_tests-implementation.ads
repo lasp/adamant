@@ -19,6 +19,8 @@ private
    overriding procedure Test_Nominal_Update_Parameters (Self : in out Instance);
    -- This unit test tests the nominal updating of the parameter table by memory region upload.
    overriding procedure Test_Nominal_Table_Upload (Self : in out Instance);
+   -- This unit test tests the nominal validation of the parameter table by memory region upload.
+   overriding procedure Test_Nominal_Table_Validate (Self : in out Instance);
    -- This unit test tests the nominal fetching of the parameter table by into a provided memory region.
    overriding procedure Test_Nominal_Table_Fetch (Self : in out Instance);
    -- This unit test tests the behavior when dumping the parameter table fails.
@@ -27,6 +29,8 @@ private
    overriding procedure Test_Update_Parameters_Error (Self : in out Instance);
    -- This unit test tests the behavior when updating of the parameter table by memory region upload fails.
    overriding procedure Test_Table_Upload_Error (Self : in out Instance);
+   -- This unit test tests the behavior when validation of the parameter table by memory region upload fails.
+   overriding procedure Test_Table_Validate_Error (Self : in out Instance);
    -- This unit test tests the behavior when fetching of the parameter table into a memory region fails.
    overriding procedure Test_Table_Fetch_Error (Self : in out Instance);
    -- This unit test tests the no-dump-on-change configuration for the Init function and makes sure the component behaves as expected.
