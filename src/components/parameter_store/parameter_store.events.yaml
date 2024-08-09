@@ -26,3 +26,4 @@ events:
     param_type: Parameters_Memory_Region.T
   - name: Table_Validation_Not_Supported
     description: Produced a packet with the contents of the parameter store.
+    param_type: Memory_Region.T

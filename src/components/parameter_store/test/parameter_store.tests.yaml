@@ -11,6 +11,8 @@ tests:
     description: This unit test tests the behavior when updating the parameter table with a memory region of invalid length.
   - name: Test_Table_Upload_Crc_Error
     description: This unit test tests the behavior when updating the parameter table with a memory region that contains an invalid CRC.
+  - name: Test_Table_Validate_Unimplemented
+    description: This unit test tests the behavior when unimplemented validation of the parameter table by memory region upload is requested.
   - name: Test_Table_Fetch_Length_Error
     description: This unit test tests the behavior when fetching the parameter table with a memory region of invalid length.
   - name: Test_No_Dump_On_Change

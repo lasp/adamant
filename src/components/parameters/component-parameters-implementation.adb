@@ -390,6 +390,9 @@ package body Component.Parameters.Implementation is
       use Parameter_Enums.Parameter_Table_Update_Status;
       Status_To_Return : Parameter_Enums.Parameter_Table_Update_Status.E := Success;
    begin
+      -- Send info event:
+      Self.Event_T_Send_If_Connected (Self.Events.Starting_Parameter_Table_Validate (Self.Sys_Time_T_Get, Region));
+
       -- Stage all of the parameters:
       Status_To_Return := Self.Stage_Parameter_Table (Region);
 
@@ -401,6 +404,12 @@ package body Component.Parameters.Implementation is
             end if;
          end if;
       end loop;
+
+      -- Send info event:
+      Self.Event_T_Send_If_Connected (Self.Events.Finished_Parameter_Table_Validate (Self.Sys_Time_T_Get, (
+         Region => Region,
+         Status => Status_To_Return)
+      ));
 
       -- Return the memory pointer with the status for deallocation.
       return (Region => Region, Status => Status_To_Return);

@@ -298,6 +298,30 @@ package body Parameter_Store_Tests.Implementation is
 
    end Test_Table_Upload_Crc_Error;
 
+   -- This unit test tests the behavior when validation of the parameter table by
+   -- memory region upload fails.
+   overriding procedure Test_Table_Validate_Unimplemented (Self : in out Instance) is
+      use Parameter_Enums.Parameter_Table_Update_Status;
+      use Parameter_Enums.Parameter_Table_Operation_Type;
+      T : Component.Parameter_Store.Implementation.Tester.Instance_Access renames Self.Tester;
+      -- Create a memory region that holds the parameter table data.
+      Table : aliased Basic_Types.Byte_Array := [0 .. 99 => 17];
+      Region : constant Memory_Region.T := (Address => Table'Address, Length => Table'Length);
+   begin
+      -- Send the memory region to the component:
+      T.Parameters_Memory_Region_T_Send ((Region => Region, Operation => Validate));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      -- Check events:
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Table_Validation_Not_Supported_History.Get_Count, 1);
+      Memory_Region_Assert.Eq (T.Table_Validation_Not_Supported_History.Get (1), Region);
+
+      -- Make sure the memory location was released with the proper status:
+      Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 1);
+      Parameters_Memory_Region_Release_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get (1), (Region, Parameter_Error));
+   end Test_Table_Validate_Unimplemented;
+
    overriding procedure Test_Table_Fetch_Length_Error (Self : in out Instance) is
       use Parameter_Enums.Parameter_Table_Update_Status;
       use Parameter_Enums.Parameter_Table_Operation_Type;

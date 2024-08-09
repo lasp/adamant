@@ -211,8 +211,7 @@ package body Component.Parameter_Store.Implementation.Tester is
    end Memory_Region_Dropped;
 
    -- Produced a packet with the contents of the parameter store.
-   overriding procedure Table_Validation_Not_Supported (Self : in out Instance) is
-      Arg : constant Natural := 0;
+   overriding procedure Table_Validation_Not_Supported (Self : in out Instance; Arg : in Memory_Region.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Table_Validation_Not_Supported_History.Push (Arg);
