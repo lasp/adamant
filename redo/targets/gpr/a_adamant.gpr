@@ -122,6 +122,7 @@ abstract project a_adamant is
 
    -- GNATSAS Analyzer definition:
    package Analyzer is
+      for Switches ("analyze") use ("--no-unused-annotate-warning");
       for Additional_Patterns use ADAMANT_DIR & "/redo/targets/gnatsas/AdamantMessagePatterns.xml";
    end Analyzer;
 

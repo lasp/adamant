@@ -78,3 +78,21 @@ class Linux_Prove(Linux_Debug):
     """This is the target used with GNATprove to verify SPARK code."""
     def description(self):
         return "This target is used to generate the path for calls to GNATprove to analyze SPARK code."
+
+
+class Linux_Analyze(Linux_Base):
+    """Analyze target which runs GNAT SAS in deep mode."""
+    def description(self):
+        return ("Same as Linux_Debug except it adds deep mode switch for GNAT SAS.")
+
+    def gpr_project_file(self):
+        return os.path.join(
+            os.environ["ADAMANT_DIR"],
+            "redo"
+            + os.sep
+            + "targets"
+            + os.sep
+            + "gpr"
+            + os.sep
+            + "linux_analyze.gpr",
+        )
