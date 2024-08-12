@@ -82,8 +82,6 @@ if __name__ == "__main__":
         from rules.build_coverage_all import build_coverage_all as rule_cls
     elif base == "publish":
         from rules.build_publish import build_publish as rule_cls
-    elif base == "codepeer_server":
-        from rules.build_codepeer_server import build_codepeer_server as rule_cls
     elif base == "yaml_sloc":
         from rules.build_yaml_sloc import build_yaml_sloc as rule_cls
 
