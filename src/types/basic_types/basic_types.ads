@@ -11,28 +11,27 @@ package Basic_Types is
    -- Define a byte as an 8-bit mod type:
    subtype Byte is Interfaces.Unsigned_8
    with Object_Size => 8,
-          Value_Size => 8;
+        Value_Size => 8;
 
-         -- Define a collection of bytes indexed by a subtype of Natural.
-         --
-         -- We define the Byte_Array_Index type as the range of a Natural
-         -- minus one value on the upper end. The reason for this is so
-         -- That the 'Length attribute of a byte array will always return
-         -- a value in the range of a Natural. This prevents a constraint
-         -- error from being thrown when storing Length of a maximum
-         -- sized byte array. This subtle issue was caught by CodePeer
-         -- static analysis tool.
-         --
-   subtype Byte_Array_Index is Natural range Natural'First .. Natural'Last - 1;
+   -- Define a collection of bytes indexed by a subtype of Natural.
    --
+   -- We define the Byte_Array_Index type as the range of a Natural
+   -- minus one value on the upper end. The reason for this is so
+   -- That the 'Length attribute of a byte array will always return
+   -- a value in the range of a Natural. This prevents a constraint
+   -- error from being thrown when storing Length of a maximum
+   -- sized byte array. This subtle issue was caught by GNAT SAS
+   -- static analysis tool.
+   subtype Byte_Array_Index is Natural range Natural'First .. Natural'Last - 1;
+
    -- Define the unconstrained byte array type.
    type Byte_Array is array (Byte_Array_Index range <>) of Byte
       with Scalar_Storage_Order => System.High_Order_First,
-             Alignment => 1;
+           Alignment => 1;
 
-      -- "Thick pointer" access type will include an address
-      -- to the bytes array in memory and an address to the bounds
-      -- of the constrained byte array.
+   -- "Thick pointer" access type will include an address
+   -- to the bytes array in memory and an address to the bounds
+   -- of the constrained byte array.
    type Byte_Array_Access is access all Byte_Array;
 
    -- Creating a constrained Byte array, so that the access type of
@@ -88,14 +87,14 @@ package Basic_Types is
    -- Define a 64 bit polymorphic type that can hold most primitive
    -- ada types. This can be useful in making things more generic.
    subtype Poly_64_Type is Byte_Array (Natural'First .. Natural'First + 8 - 1) with
-         Object_Size => 64;
+      Object_Size => 64;
 
-         -- Define a 32 bit polymorphic type that can hold many primitive
-         -- ada types. This can be useful in making things more generic.
+   -- Define a 32 bit polymorphic type that can hold many primitive
+   -- ada types. This can be useful in making things more generic.
    subtype Poly_32_Type is Byte_Array (Natural'First .. Natural'First + 4 - 1) with
-         Object_Size => 32;
+      Object_Size => 32;
 
-         -- Generic poly type definition, set to 64-bit type.
+   -- Generic poly type definition, set to 64-bit type.
    subtype Poly_Type is Poly_64_Type;
 
 end Basic_Types;
