@@ -1,6 +1,7 @@
 with Smart_Assert;
 with Interfaces; use Interfaces;
 with Basic_Types.Representation; use Basic_Types;
+with System;
 
 package Basic_Assertions is
 
@@ -26,5 +27,6 @@ package Basic_Assertions is
    package Boolean_Assert is new Smart_Assert.Basic (Boolean, Boolean'Image);
    package Byte_Assert is new Smart_Assert.Discrete (Byte, Byte'Image);
    package Byte_Array_Assert is new Smart_Assert.Basic (Byte_Array, Basic_Types.Representation.Image);
+   package Address_Assert is new Smart_Assert.Basic (System.Address, System.Address'Image);
 
 end Basic_Assertions;
