@@ -487,7 +487,7 @@ package body Component.Parameters.Implementation is
          case Arg.Operation is
             -- The memory region contains a fresh parameter table. We need to use this parameter table to
             -- update all the active parameters.
-            when Set =>
+            when Set .. Validate =>
                -- First check the CRC:
                declare
                   use Byte_Array_Pointer;
@@ -500,47 +500,32 @@ package body Component.Parameters.Implementation is
                   -- Compute the CRC over the incoming table:
                   Computed_Crc : constant Crc_16.Crc_16_Type := Self.Crc_Parameter_Table (To_Byte_Array (Ptr));
                begin
-                  -- If the CRCs match, then update the downstream components' internal parameters:
+                  -- If the CRCs match, then continue updating or validating the downstream components'
+                  -- internal parameters:
                   if Table_Header.Crc_Table = Computed_Crc then
-                     -- Save off crc and version:
-                     Self.Table_Version := Table_Header.Version;
-                     Self.Stored_Crc := Table_Header.Crc_Table;
-                     -- Update the parameter table:
-                     To_Return := Self.Update_Parameter_Table (Arg.Region);
+                     case Arg.Operation is
+                        when Set =>
+                           -- Save off crc and version:
+                           Self.Table_Version := Table_Header.Version;
+                           Self.Stored_Crc := Table_Header.Crc_Table;
+                           -- Update the parameter table:
+                           To_Return := Self.Update_Parameter_Table (Arg.Region);
+                        when Validate =>
+                           -- Validate the parameter table:
+                           To_Return := Self.Validate_Parameter_Table (Arg.Region);
+                        when others =>
+                           -- There are no other cases in this range, this should be unreachable:
+                           pragma Assert (False);
+                     end case;
                   else
-                     -- If the CRCs do not match then throw an event and do NOT update the downstream components'
-                     -- internal parameters:
+                     -- If the CRCs do not match then throw an event and do NOT update or validate the
+                     -- downstream components' internal parameters:
                      Self.Event_T_Send_If_Connected (Self.Events.Memory_Region_Crc_Invalid (Self.Sys_Time_T_Get, (Parameters_Region => Arg, Header => Table_Header, Computed_Crc => Computed_Crc)));
                      To_Return := (Region => Arg.Region, Status => Crc_Error);
                   end if;
                end;
-               -- The memory region needs to be filled by the current values of all our active parameters:
             when Get =>
                To_Return := Self.Copy_Parameter_Table_To_Region (Arg.Region);
-            when Validate =>
-               -- Length is checked at the beginning of this procedure.
-               -- Check the CRC:
-               declare
-                  use Byte_Array_Pointer;
-                  use Byte_Array_Pointer.Packed;
-                  use Basic_Types;
-                  -- Extract the parameter table header:
-                  Ptr : constant Byte_Array_Pointer.Instance := Unpack (Arg.Region);
-                  Ptr_Header : constant Byte_Array_Pointer.Instance := Slice (Ptr, Start_Index => 0, End_Index => Parameter_Table_Header.Size_In_Bytes - 1);
-                  Table_Header : constant Parameter_Table_Header.T := Parameter_Table_Header.Serialization.From_Byte_Array (To_Byte_Array (Ptr_Header));
-                  -- Compute the CRC over the incoming table:
-                  Computed_Crc : constant Crc_16.Crc_16_Type := Self.Crc_Parameter_Table (To_Byte_Array (Ptr));
-               begin
-                  -- If the CRCs do not match then throw an event and set return to CRC error:
-                  if Table_Header.Crc_Table /= Computed_Crc then
-                     Self.Event_T_Send_If_Connected (Self.Events.Memory_Region_Crc_Invalid (Self.Sys_Time_T_Get, (Parameters_Region => Arg, Header => Table_Header, Computed_Crc => Computed_Crc)));
-                     -- Set status:
-                     To_Return := (Region => Arg.Region, Status => Crc_Error);
-                  else
-                     -- CRC is okay, continue with validating the parameter table:
-                     To_Return := Self.Validate_Parameter_Table (Arg.Region);
-                  end if;
-               end;
          end case;
       end if;
 
