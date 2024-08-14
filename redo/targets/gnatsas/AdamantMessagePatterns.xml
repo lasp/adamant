@@ -1,23 +1,19 @@
 <?xml version="1.0"?>
 
 <!-- This file provides additional message patterns for -->
-<!-- CodePeer, adapted for the Adamant architecture.    -->
-<!-- This is to be used in addition to the CodePeer     -->
+<!-- GNAT SAS, adapted for the Adamant architecture.    -->
+<!-- This is to be used in addition to the GNAT SAS -->
 <!-- provided MessagePatterns.xml, a copy of which is   -->
-<!-- also provided in this director                     -->
+<!-- also provided in this directory                    -->
 
 <!-- This file specifies pattern-matching rules for  -->
 <!-- determining the error probability level -->
-<!-- assigned to each CodePeer-identified problem. -->
-<!-- The rules may be overridden by a CodePeer option; -->
+<!-- assigned to each GNAT SAS-identified problem. -->
+<!-- The rules may be overridden by a GNAT SAS option; -->
 <!-- see the documentation for more information. -->
 <!-- Note: the order is not significant, so add new rules at the end, -->
 <!-- and update the number, which is printed out in the debug traces for -->
 <!-- pattern matching. -->
-
-<!-- Note: -levels 1/2 correspond  to the "Min_Messages" setting.  -->
-<!--       -level  3   corresponds to the default (aka "Normal_Messages").  -->
-<!--       -level  4   corresponds to "Max_Messages".  -->
 
 <!-- You can check this file against an XSD schema. On Linux, the command is
 

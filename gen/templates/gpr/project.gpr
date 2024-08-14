@@ -13,13 +13,5 @@ project {{ name }} is
    );
 
    for Main use ("{{ main }}");
-{% if config.codepeer_ide_server %}
-
-   -- Configure a remote CodePeer server to view static
-   -- analysis results:
-   package CodePeer is
-      for Server_URL use "{{ config.codepeer_ide_server }}";
-   end CodePeer;
-{% endif %}
 
 end {{ name }};
