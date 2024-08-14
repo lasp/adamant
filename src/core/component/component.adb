@@ -18,7 +18,7 @@ package body Component is
    end Active_Task;
 
    function Get_Queue_Current_Percent_Used (Self : in out Core_Instance) return Basic_Types.Byte is
-      pragma Annotate (Codepeer, Intentional, "subp always fails",
+      pragma Annotate (GNATSAS, Intentional, "subp always fails",
          "Intentional - this subp should never be called on a component without a queue.");
       Ignore : Core_Instance renames Self;
    begin
@@ -27,7 +27,7 @@ package body Component is
    end Get_Queue_Current_Percent_Used;
 
    function Get_Queue_Maximum_Percent_Used (Self : in out Core_Instance) return Basic_Types.Byte is
-      pragma Annotate (Codepeer, Intentional, "subp always fails",
+      pragma Annotate (GNATSAS, Intentional, "subp always fails",
          "Intentional - this subp should never be called on a component without a queue.");
       Ignore : Core_Instance renames Self;
    begin

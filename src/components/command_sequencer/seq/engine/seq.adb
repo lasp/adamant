@@ -6,7 +6,7 @@ package body Seq is
 
    procedure Initialize (Self : in out Engine; Stack_Depth : in Stack_Depth_Type; Engine_Id : in Sequence_Engine_Id) is
    begin
-      pragma Assert (Stack_Depth < 255, "Codepeer points out that 255 can break things.");
+      pragma Assert (Stack_Depth < 255, "GNAT SAS points out that 255 can break things.");
       Self.Stack := new Seq_Array (Max_Seq_Num'First .. Max_Seq_Num'First + Stack_Depth - 1);
       Self.Initialized := True;
       Self.Engine_Id := Engine_Id;

@@ -45,14 +45,14 @@ package body {{ name }}.Validation is
          for Jdx in R (Idx)'Range loop
             if not R (Idx)(Jdx)'Valid then
                Errant_Field := Count + 1;
-               pragma Annotate (CodePeer, Intentional, "dead code", "some array elements may not be bit-constrained and thus will always be valid");
+               pragma Annotate (GNATSAS, Intentional, "dead code", "some array elements may not be bit-constrained and thus will always be valid");
                return False;
             end if;
          end loop;
 {% else %}
          if not R (Idx)'Valid then
             Errant_Field := Count + 1;
-            pragma Annotate (CodePeer, Intentional, "dead code", "some array elements may not be bit-constrained and thus will always be valid");
+            pragma Annotate (GNATSAS, Intentional, "dead code", "some array elements may not be bit-constrained and thus will always be valid");
             return False;
          end if;
 {% endif %}
@@ -115,14 +115,14 @@ package body {{ name }}.Validation is
          for Jdx in R (Idx)'Range loop
             if not R (Idx)(Jdx)'Valid then
                Errant_Field := Count + 1;
-               pragma Annotate (CodePeer, Intentional, "dead code", "some array elements may not be bit-constrained and thus will always be valid");
+               pragma Annotate (GNATSAS, Intentional, "dead code", "some array elements may not be bit-constrained and thus will always be valid");
                return False;
             end if;
          end loop;
 {% else %}
          if not R (Idx)'Valid then
             Errant_Field := Count + 1;
-            pragma Annotate (CodePeer, Intentional, "dead code", "some array elements may not be bit-constrained and thus will always be valid");
+            pragma Annotate (GNATSAS, Intentional, "dead code", "some array elements may not be bit-constrained and thus will always be valid");
             return False;
          end if;
 {% endif %}
@@ -186,14 +186,14 @@ package body {{ name }}.Validation is
          for Jdx in R (Idx)'Range loop
             if not R (Idx)(Jdx)'Valid then
                Errant_Field := Count + 1;
-               pragma Annotate (CodePeer, Intentional, "dead code", "some array elements may not be bit-constrained and thus will always be valid");
+               pragma Annotate (GNATSAS, Intentional, "dead code", "some array elements may not be bit-constrained and thus will always be valid");
                return False;
             end if;
          end loop;
 {% else %}
          if not R (Idx)'Valid then
             Errant_Field := Count + 1;
-            pragma Annotate (CodePeer, Intentional, "dead code", "some array elements may not be bit-constrained and thus will always be valid");
+            pragma Annotate (GNATSAS, Intentional, "dead code", "some array elements may not be bit-constrained and thus will always be valid");
             return False;
          end if;
 {% endif %}

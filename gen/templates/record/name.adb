@@ -132,7 +132,7 @@ package body {{ name }} is
       -- as to be deemed invalid.
       if Num_Bytes_Serialized > Max_Serialized_Length then
          return Failure;
-         pragma Annotate (CodePeer, Intentional, "dead code",
+         pragma Annotate (GNATSAS, Intentional, "dead code",
             "Sometimes based on the length type of the variable length type it is impossible for Failure to " &
             "be returned here. That is OK. The compiler will optimize this out.");
       end if;
@@ -208,7 +208,7 @@ package body {{ name }} is
       -- as to be deemed invalid.
       if Num_Bytes_Serialized > Max_Serialized_Length then
          return Failure;
-         pragma Annotate (CodePeer, Intentional, "dead code",
+         pragma Annotate (GNATSAS, Intentional, "dead code",
             "Sometimes based on the length type of the variable length type it is impossible for Failure to " &
             "be returned here. That is OK. The compiler will optimize this out.");
       end if;

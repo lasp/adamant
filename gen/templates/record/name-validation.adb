@@ -51,7 +51,7 @@ package body {{ name }}.Validation is
       -- Make sure sizing field for the variable length field is valid for its type.
       if not R.{{ field.variable_length }}'Valid then
          Errant_Field := {{ field.variable_length_field.start_field_number }};
-         pragma Annotate (CodePeer, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
+         pragma Annotate (GNATSAS, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
          return False;
       end if;
 
@@ -60,7 +60,7 @@ package body {{ name }}.Validation is
       Variable_Length := Integer (R.{{ field.variable_length }}) + Integer ({{ field.variable_length_offset }});
       if Variable_Length > R.{{ field.name }}'Length then
          Errant_Field := {{ field.variable_length_field.start_field_number }};
-         pragma Annotate (CodePeer, Intentional, "dead code", "since this field is already 'Valid, it may be not too large by definition");
+         pragma Annotate (GNATSAS, Intentional, "dead code", "since this field is already 'Valid, it may be not too large by definition");
          return False;
       end if;
 
@@ -83,7 +83,7 @@ package body {{ name }}.Validation is
          for E of R.{{ field.name }} (R.{{ field.name }}'First .. R.{{ field.name }}'First + Variable_Length - 1) loop
             if not E'Valid then
                Errant_Field := {{ field.start_field_number }};
-               pragma Annotate (CodePeer, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
+               pragma Annotate (GNATSAS, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
                return False;
             end if;
          end loop;
@@ -92,7 +92,7 @@ package body {{ name }}.Validation is
       for E of R.{{ field.name }} loop
          if not E'Valid then
             Errant_Field := {{ field.start_field_number }};
-            pragma Annotate (CodePeer, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
+            pragma Annotate (GNATSAS, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
             return False;
          end if;
       end loop;
@@ -101,7 +101,7 @@ package body {{ name }}.Validation is
 {% if field.name not in variable_length_sizing_fields.keys() %}
       if not R.{{ field.name }}'Valid then
          Errant_Field := {{ field.start_field_number }};
-         pragma Annotate (CodePeer, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
+         pragma Annotate (GNATSAS, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
          return False;
       end if;
 {% else %}
@@ -185,7 +185,7 @@ package body {{ name }}.Validation is
       -- Make sure sizing field for the variable length field is valid for its type.
       if not R.{{ field.variable_length }}'Valid then
          Errant_Field := {{ field.variable_length_field.start_field_number }};
-         pragma Annotate (CodePeer, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
+         pragma Annotate (GNATSAS, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
          return False;
       end if;
 
@@ -194,7 +194,7 @@ package body {{ name }}.Validation is
       Variable_Length := Integer (R.{{ field.variable_length }}) + Integer ({{ field.variable_length_offset }});
       if Variable_Length > R.{{ field.name }}'Length then
          Errant_Field := {{ field.variable_length_field.start_field_number }};
-         pragma Annotate (CodePeer, Intentional, "dead code", "since this field is already 'Valid, it may be not too large by definition");
+         pragma Annotate (GNATSAS, Intentional, "dead code", "since this field is already 'Valid, it may be not too large by definition");
          return False;
       end if;
 
@@ -217,7 +217,7 @@ package body {{ name }}.Validation is
          for E of R.{{ field.name }} (R.{{ field.name }}'First .. R.{{ field.name }}'First + Variable_Length - 1) loop
             if not E'Valid then
                Errant_Field := {{ field.start_field_number }};
-               pragma Annotate (CodePeer, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
+               pragma Annotate (GNATSAS, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
                return False;
             end if;
          end loop;
@@ -226,7 +226,7 @@ package body {{ name }}.Validation is
       for E of R.{{ field.name }} loop
          if not E'Valid then
             Errant_Field := {{ field.start_field_number }};
-            pragma Annotate (CodePeer, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
+            pragma Annotate (GNATSAS, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
             return False;
          end if;
       end loop;
@@ -235,7 +235,7 @@ package body {{ name }}.Validation is
 {% if field.name not in variable_length_sizing_fields.keys() %}
       if not R.{{ field.name }}'Valid then
          Errant_Field := {{ field.start_field_number }};
-         pragma Annotate (CodePeer, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
+         pragma Annotate (GNATSAS, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
          return False;
       end if;
 {% else %}
@@ -318,7 +318,7 @@ package body {{ name }}.Validation is
       -- Make sure sizing field for the variable length field is valid for its type.
       if not R.{{ field.variable_length }}'Valid then
          Errant_Field := {{ field.variable_length_field.start_field_number }};
-         pragma Annotate (CodePeer, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
+         pragma Annotate (GNATSAS, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
          return False;
       end if;
 
@@ -327,7 +327,7 @@ package body {{ name }}.Validation is
       Variable_Length := Integer (R.{{ field.variable_length }}) + Integer ({{ field.variable_length_offset }});
       if Variable_Length > R.{{ field.name }}'Length then
          Errant_Field := {{ field.variable_length_field.start_field_number }};
-         pragma Annotate (CodePeer, Intentional, "dead code", "since this field is already 'Valid, it may be not too large by definition");
+         pragma Annotate (GNATSAS, Intentional, "dead code", "since this field is already 'Valid, it may be not too large by definition");
          return False;
       end if;
 
@@ -349,7 +349,7 @@ package body {{ name }}.Validation is
          for E of R.{{ field.name }} (R.{{ field.name }}'First .. R.{{ field.name }}'First + Variable_Length - 1) loop
             if not E'Valid then
                Errant_Field := {{ field.start_field_number }};
-               pragma Annotate (CodePeer, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
+               pragma Annotate (GNATSAS, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
                return False;
             end if;
          end loop;
@@ -358,7 +358,7 @@ package body {{ name }}.Validation is
       for E of R.{{ field.name }} loop
          if not E'Valid then
             Errant_Field := {{ field.start_field_number }};
-            pragma Annotate (CodePeer, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
+            pragma Annotate (GNATSAS, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
             return False;
          end if;
       end loop;
@@ -367,7 +367,7 @@ package body {{ name }}.Validation is
 {% if field.name not in variable_length_sizing_fields.keys() %}
       if not R.{{ field.name }}'Valid then
          Errant_Field := {{ field.start_field_number }};
-         pragma Annotate (CodePeer, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
+         pragma Annotate (GNATSAS, Intentional, "dead code", "some fields may not be bit-constrained and thus will always be valid");
          return False;
       end if;
 {% else %}
