@@ -398,10 +398,8 @@ package body Component.Parameters.Implementation is
 
       -- OK, now we need to validate all the parameters.
       for Idx in Self.Connector_Parameter_Update_T_Provide'Range loop
-         if Self.Is_Parameter_Update_T_Provide_Connected (Idx) then
-            if Self.Validate_Parameters (Component_Id => Idx) /= Success then
-               Status_To_Return := Parameter_Error;
-            end if;
+         if Self.Validate_Parameters (Component_Id => Idx) /= Success then
+            Status_To_Return := Parameter_Error;
          end if;
       end loop;
 
@@ -439,9 +437,7 @@ package body Component.Parameters.Implementation is
 
       -- OK, now we need to update all the parameters.
       for Idx in Self.Connector_Parameter_Update_T_Provide'Range loop
-         if Self.Is_Parameter_Update_T_Provide_Connected (Idx) then
-            Set_Status (Self.Update_Parameters (Component_Id => Idx));
-         end if;
+         Set_Status (Self.Update_Parameters (Component_Id => Idx));
       end loop;
 
       -- Send out a new parameter's packet if configured to do so:

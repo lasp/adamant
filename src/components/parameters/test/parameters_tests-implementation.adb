@@ -40,7 +40,7 @@ package body Parameters_Tests.Implementation is
    overriding procedure Set_Up_Test (Self : in out Instance) is
    begin
       -- Allocate heap memory to component:
-      Self.Tester.Init_Base (Queue_Size => Self.Tester.Component_Instance.Get_Max_Queue_Element_Size * 3, Parameter_Update_T_Provide_Count => 4);
+      Self.Tester.Init_Base (Queue_Size => Self.Tester.Component_Instance.Get_Max_Queue_Element_Size * 3, Parameter_Update_T_Provide_Count => 3);
 
       -- Make necessary connections between tester and component:
       Self.Tester.Connect;
@@ -112,6 +112,11 @@ package body Parameters_Tests.Implementation is
             [(Id => 2, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Component_Id => 1, Start_Index => 16, End_Index => 17),
              (Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Component_Id => 4, Start_Index => 20, End_Index => 23)];
       begin
+         Self.Tear_Down_Test;
+         Self.Tester.Init_Base (Queue_Size => Self.Tester.Component_Instance.Get_Max_Queue_Element_Size * 3, Parameter_Update_T_Provide_Count => 4);
+         Self.Tester.Connect;
+         -- Now run the test, which is to call component init with a custom parameter
+         -- table entry list that causes it to access index 4, which is unconnected.
          T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
          Assert (False, "Unconnected Component Id init failed!");
       exception
