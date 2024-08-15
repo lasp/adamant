@@ -24,3 +24,6 @@ events:
   - name: Memory_Region_Dropped
     description: A memory region was dropped due to a full queue.
     param_type: Parameters_Memory_Region.T
+  - name: Table_Validation_Not_Supported
+    description: Produced a packet with the contents of the parameter store.
+    param_type: Memory_Region.T

@@ -39,6 +39,7 @@ package Component.Parameter_Store.Implementation.Tester is
    package Invalid_Command_Received_History_Package is new Printable_History (Invalid_Command_Info.T, Invalid_Command_Info.Representation.Image);
    package Command_Dropped_History_Package is new Printable_History (Command_Header.T, Command_Header.Representation.Image);
    package Memory_Region_Dropped_History_Package is new Printable_History (Parameters_Memory_Region.T, Parameters_Memory_Region.Representation.Image);
+   package Table_Validation_Not_Supported_History_Package is new Printable_History (Memory_Region.T, Memory_Region.Representation.Image);
 
    -- Packet history packages:
    package Stored_Parameters_History_Package is new Printable_History (Packet.T, Packet.Representation.Image);
@@ -62,6 +63,7 @@ package Component.Parameter_Store.Implementation.Tester is
       Invalid_Command_Received_History : Invalid_Command_Received_History_Package.Instance;
       Command_Dropped_History : Command_Dropped_History_Package.Instance;
       Memory_Region_Dropped_History : Memory_Region_Dropped_History_Package.Instance;
+      Table_Validation_Not_Supported_History : Table_Validation_Not_Supported_History_Package.Instance;
       -- Packet histories:
       Stored_Parameters_History : Stored_Parameters_History_Package.Instance;
       -- Booleans to control assertion if message is dropped on async queue:
@@ -127,6 +129,8 @@ package Component.Parameter_Store.Implementation.Tester is
    overriding procedure Command_Dropped (Self : in out Instance; Arg : in Command_Header.T);
    -- A memory region was dropped due to a full queue.
    overriding procedure Memory_Region_Dropped (Self : in out Instance; Arg : in Parameters_Memory_Region.T);
+   -- Produced a packet with the contents of the parameter store.
+   overriding procedure Table_Validation_Not_Supported (Self : in out Instance; Arg : in Memory_Region.T);
 
    -----------------------------------------------
    -- Packet handler primitives:

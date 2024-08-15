@@ -40,7 +40,7 @@ package body Parameters_Tests.Implementation is
    overriding procedure Set_Up_Test (Self : in out Instance) is
    begin
       -- Allocate heap memory to component:
-      Self.Tester.Init_Base (Queue_Size => Self.Tester.Component_Instance.Get_Max_Queue_Element_Size * 3, Parameter_Update_T_Provide_Count => 4);
+      Self.Tester.Init_Base (Queue_Size => Self.Tester.Component_Instance.Get_Max_Queue_Element_Size * 3, Parameter_Update_T_Provide_Count => 3);
 
       -- Make necessary connections between tester and component:
       Self.Tester.Connect;
@@ -112,6 +112,11 @@ package body Parameters_Tests.Implementation is
             [(Id => 2, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Component_Id => 1, Start_Index => 16, End_Index => 17),
              (Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Component_Id => 4, Start_Index => 20, End_Index => 23)];
       begin
+         Self.Tear_Down_Test;
+         Self.Tester.Init_Base (Queue_Size => Self.Tester.Component_Instance.Get_Max_Queue_Element_Size * 3, Parameter_Update_T_Provide_Count => 4);
+         Self.Tester.Connect;
+         -- Now run the test, which is to call component init with a custom parameter
+         -- table entry list that causes it to access index 4, which is unconnected.
          T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
          Assert (False, "Unconnected Component Id init failed!");
       exception
@@ -351,6 +356,41 @@ package body Parameters_Tests.Implementation is
       Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 1);
       Parameters_Memory_Region_Release_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get (1), (Region, Success));
    end Test_Nominal_Table_Upload;
+
+   overriding procedure Test_Nominal_Table_Validate (Self : in out Instance) is
+      use Parameter_Enums.Parameter_Table_Update_Status;
+      use Parameter_Enums.Parameter_Table_Operation_Type;
+      T : Component.Parameters.Implementation.Tester.Instance_Access renames Self.Tester;
+      -- Create a memory region that holds the parameter table data.
+      Table : aliased Test_Parameter_Table_Record.Serialization.Byte_Array :=
+         Test_Parameter_Table_Record.Serialization.To_Byte_Array
+            ((Crc_Calculated => [0, 0], Header => (Crc_Table => [0, 0], Version => 1.0), Component_A_Parameter_I32 => (Value => 99), Component_C_The_Tick => ((3, 2), 8), Component_A_Parameter_U16 => (Value => 19), Component_B_Parameter_U16 => (Value => 12),
+               Component_B_Parameter_I32 => (Value => -22)));
+      Crc : constant Crc_16.Crc_16_Type := Crc_16.Compute_Crc_16 (Table (Table'First + Crc_16.Crc_16_Type'Length + Parameter_Table_Header.Crc_Section_Length .. Table'Last));
+      Region : constant Memory_Region.T := (Address => Table'Address + Crc_16.Crc_16_Type'Length, Length => Test_Parameter_Table_Record.Serialization.Serialized_Length - Crc_16.Crc_16_Type'Length);
+   begin
+      -- Set the CRC:
+      Table (Table'First + Crc_16.Crc_16_Type'Length .. Table'First + Crc_16.Crc_16_Type'Length + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => Crc, Version => 1.0));
+      Table (Table'First .. Table'First + Crc_16.Crc_16_Type'Length - 1) := Crc;
+
+      -- Send the memory region to the component:
+      T.Parameters_Memory_Region_T_Send ((Region => Region, Operation => Validate));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      -- Check events:
+      Natural_Assert.Eq (T.Starting_Parameter_Table_Validate_History.Get_Count, 1);
+      Memory_Region_Assert.Eq (T.Starting_Parameter_Table_Validate_History.Get (1), Region);
+      Natural_Assert.Eq (T.Parameter_Validation_Failed_History.Get_Count, 0);
+      Natural_Assert.Eq (T.Finished_Parameter_Table_Validate_History.Get_Count, 1);
+      Parameters_Memory_Region_Release_Assert.Eq (T.Finished_Parameter_Table_Validate_History.Get (1), (Region, Success));
+
+      -- A packet should not have been automatically dumped.
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
+
+      -- Make sure the memory location was released with the proper status:
+      Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 1);
+      Parameters_Memory_Region_Release_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get (1), (Region, Success));
+   end Test_Nominal_Table_Validate;
 
    overriding procedure Test_Nominal_Table_Fetch (Self : in out Instance) is
       use Parameter_Enums.Parameter_Table_Update_Status;
@@ -647,6 +687,72 @@ package body Parameters_Tests.Implementation is
       Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 2);
       Parameters_Memory_Region_Release_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get (2), ((Address => Table'Address, Length => Table'Length), Crc_Error));
    end Test_Table_Upload_Error;
+
+   overriding procedure Test_Table_Validate_Error (Self : in out Instance) is
+      use Parameter_Enums.Parameter_Update_Status;
+      use Parameter_Enums.Parameter_Table_Update_Status;
+      use Parameter_Enums.Parameter_Table_Operation_Type;
+      use Parameter_Enums.Parameter_Operation_Type;
+      T : Component.Parameters.Implementation.Tester.Instance_Access renames Self.Tester;
+      -- Create a memory region that holds the parameter table data.
+      Dump : constant Test_Parameter_Table_Record.Serialization.Byte_Array :=
+         Test_Parameter_Table_Record.Serialization.To_Byte_Array
+            ((Crc_Calculated => [0, 0], Header => (Crc_Table => [0, 0], Version => 1.0), Component_A_Parameter_I32 => (Value => 99), Component_C_The_Tick => ((3, 2), 8), Component_A_Parameter_U16 => (Value => 19), Component_B_Parameter_U16 => (Value => 12),
+               Component_B_Parameter_I32 => (Value => -22)));
+      Table : aliased Basic_Types.Byte_Array (0 .. Test_Parameter_Table_Record.Size_In_Bytes - Crc_16.Crc_16_Type'Length - 1) := Dump (Dump'First + Crc_16.Crc_16_Type'Length .. Dump'Last);
+      Crc : constant Crc_16.Crc_16_Type := Crc_16.Compute_Crc_16 (Table (Table'First + Parameter_Table_Header.Crc_Section_Length .. Table'Last));
+      Region : constant Memory_Region.T := (Address => Table'Address, Length => Table'Length);
+   begin
+      -- Set the CRC:
+      Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => Crc, Version => 1.0));
+
+      -- Set A to return a bad status:
+      T.Component_A.Override_Parameter_Return (Status => Validation_Error, Length => 0);
+
+      -- Send the memory region to the component:
+      T.Parameters_Memory_Region_T_Send ((Region => Region, Operation => Validate));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      -- Check events:
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 5);
+      Natural_Assert.Eq (T.Parameter_Stage_Failed_History.Get_Count, 2);
+      Parameter_Operation_Status_Assert.Eq (T.Parameter_Stage_Failed_History.Get (1), (Operation => Stage, Status => Validation_Error, Id => 2));
+      Parameter_Operation_Status_Assert.Eq (T.Parameter_Stage_Failed_History.Get (2), (Operation => Stage, Status => Validation_Error, Id => 1));
+      Natural_Assert.Eq (T.Parameter_Validation_Failed_History.Get_Count, 1);
+      Parameter_Operation_Status_Assert.Eq (T.Parameter_Validation_Failed_History.Get (1), (Operation => Validate, Status => Validation_Error, Id => 0));
+      Natural_Assert.Eq (T.Starting_Parameter_Table_Validate_History.Get_Count, 1);
+      Memory_Region_Assert.Eq (T.Starting_Parameter_Table_Validate_History.Get (1), Region);
+      Natural_Assert.Eq (T.Finished_Parameter_Table_Validate_History.Get_Count, 1);
+      Parameters_Memory_Region_Release_Assert.Eq (T.Finished_Parameter_Table_Validate_History.Get (1), (Region, Parameter_Error));
+
+      -- Make sure the memory location was released with the proper status:
+      Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 1);
+      Parameters_Memory_Region_Release_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get (1), (Region, Parameter_Error));
+
+      --
+      -- Send the memory region to the component with a get request, but with bad CRC:
+      --
+      Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => [6, 7], Version => 1.0));
+      T.Parameters_Memory_Region_T_Send ((Region => (Address => Table'Address, Length => Table'Length), Operation => Validate));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      -- Check events:
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 6);
+      Natural_Assert.Eq (T.Memory_Region_Crc_Invalid_History.Get_Count, 1);
+      Invalid_Parameters_Memory_Region_Crc_Assert.Eq
+         (T.Memory_Region_Crc_Invalid_History.Get (1), (Parameters_Region => (Region => (Address => Table'Address, Length => Table'Length), Operation => Validate), Header => (Crc_Table => [6, 7], Version => 1.0), Computed_Crc => Crc));
+      Natural_Assert.Eq (T.Starting_Parameter_Table_Validate_History.Get_Count, 1);
+      Memory_Region_Assert.Eq (T.Starting_Parameter_Table_Validate_History.Get (1), Region);
+      Natural_Assert.Eq (T.Finished_Parameter_Table_Validate_History.Get_Count, 1);
+      Parameters_Memory_Region_Release_Assert.Eq (T.Finished_Parameter_Table_Validate_History.Get (1), (Region, Parameter_Error));
+
+      -- A packet should not have been automatically dumped.
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
+
+      -- Make sure the memory location was released with the proper status:
+      Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 2);
+      Parameters_Memory_Region_Release_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get (2), ((Address => Table'Address, Length => Table'Length), Crc_Error));
+   end Test_Table_Validate_Error;
 
    overriding procedure Test_Table_Fetch_Error (Self : in out Instance) is
       use Parameter_Enums.Parameter_Update_Status;

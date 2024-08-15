@@ -12,6 +12,9 @@ events:
   - name: Parameter_Update_Failed
     description: A parameter value could not be updated.
     param_type: Parameter_Operation_Status.T
+  - name: Parameter_Validation_Failed
+    description: A parameter value could not be validated.
+    param_type: Parameter_Operation_Status.T
   - name: Parameter_Fetch_Failed
     description: A parameter value could not be updated.
     param_type: Parameter_Operation_Status.T
@@ -36,6 +39,12 @@ events:
     param_type: Memory_Region.T
   - name: Finished_Parameter_Table_Update
     description: Done updating the parameters from a received memory region with following status.
+    param_type: Parameters_Memory_Region_Release.T
+  - name: Starting_Parameter_Table_Validate
+    description: Starting validation of the parameters from a received memory region.
+    param_type: Memory_Region.T
+  - name: Finished_Parameter_Table_Validate
+    description: Done validating the parameters from a received memory region with following status.
     param_type: Parameters_Memory_Region_Release.T
   - name: Starting_Parameter_Table_Fetch
     description: Starting updating of the parameters from a received memory region.

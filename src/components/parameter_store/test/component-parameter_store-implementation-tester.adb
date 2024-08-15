@@ -32,6 +32,7 @@ package body Component.Parameter_Store.Implementation.Tester is
       Self.Memory_Region_Dropped_History.Init (Depth => 10);
       -- Packet histories:
       Self.Stored_Parameters_History.Init (Depth => 10);
+      Self.Table_Validation_Not_Supported_History.Init (Depth => 10);
    end Init_Base;
 
    procedure Final_Base (Self : in out Instance) is
@@ -52,6 +53,7 @@ package body Component.Parameter_Store.Implementation.Tester is
       Self.Invalid_Command_Received_History.Destroy;
       Self.Command_Dropped_History.Destroy;
       Self.Memory_Region_Dropped_History.Destroy;
+      Self.Table_Validation_Not_Supported_History.Destroy;
       -- Packet histories:
       Self.Stored_Parameters_History.Destroy;
 
@@ -207,6 +209,13 @@ package body Component.Parameter_Store.Implementation.Tester is
       -- Push the argument onto the test history for looking at later:
       Self.Memory_Region_Dropped_History.Push (Arg);
    end Memory_Region_Dropped;
+
+   -- Produced a packet with the contents of the parameter store.
+   overriding procedure Table_Validation_Not_Supported (Self : in out Instance; Arg : in Memory_Region.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Table_Validation_Not_Supported_History.Push (Arg);
+   end Table_Validation_Not_Supported;
 
    -----------------------------------------------
    -- Packet handler primitive:

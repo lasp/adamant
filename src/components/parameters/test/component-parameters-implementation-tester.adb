@@ -27,6 +27,7 @@ package body Component.Parameters.Implementation.Tester is
       Self.Parameter_Update_Id_Not_Recognized_History.Init (Depth => 20);
       Self.Parameter_Stage_Failed_History.Init (Depth => 20);
       Self.Parameter_Update_Failed_History.Init (Depth => 20);
+      Self.Parameter_Validation_Failed_History.Init (Depth => 20);
       Self.Parameter_Fetch_Failed_History.Init (Depth => 20);
       Self.Parameter_Fetch_Length_Mismatch_History.Init (Depth => 20);
       Self.Parameter_Update_Length_Mismatch_History.Init (Depth => 20);
@@ -36,6 +37,8 @@ package body Component.Parameters.Implementation.Tester is
       Self.Finished_Dumping_Parameters_History.Init (Depth => 20);
       Self.Starting_Parameter_Table_Update_History.Init (Depth => 20);
       Self.Finished_Parameter_Table_Update_History.Init (Depth => 20);
+      Self.Starting_Parameter_Table_Validate_History.Init (Depth => 20);
+      Self.Finished_Parameter_Table_Validate_History.Init (Depth => 20);
       Self.Starting_Parameter_Table_Fetch_History.Init (Depth => 20);
       Self.Finished_Parameter_Table_Fetch_History.Init (Depth => 20);
       Self.Invalid_Command_Received_History.Init (Depth => 20);
@@ -65,6 +68,7 @@ package body Component.Parameters.Implementation.Tester is
       Self.Parameter_Update_Id_Not_Recognized_History.Destroy;
       Self.Parameter_Stage_Failed_History.Destroy;
       Self.Parameter_Update_Failed_History.Destroy;
+      Self.Parameter_Validation_Failed_History.Destroy;
       Self.Parameter_Fetch_Failed_History.Destroy;
       Self.Parameter_Fetch_Length_Mismatch_History.Destroy;
       Self.Parameter_Update_Length_Mismatch_History.Destroy;
@@ -74,6 +78,8 @@ package body Component.Parameters.Implementation.Tester is
       Self.Finished_Dumping_Parameters_History.Destroy;
       Self.Starting_Parameter_Table_Update_History.Destroy;
       Self.Finished_Parameter_Table_Update_History.Destroy;
+      Self.Starting_Parameter_Table_Validate_History.Destroy;
+      Self.Finished_Parameter_Table_Validate_History.Destroy;
       Self.Starting_Parameter_Table_Fetch_History.Destroy;
       Self.Finished_Parameter_Table_Fetch_History.Destroy;
       Self.Invalid_Command_Received_History.Destroy;
@@ -218,6 +224,13 @@ package body Component.Parameters.Implementation.Tester is
       Self.Parameter_Update_Failed_History.Push (Arg);
    end Parameter_Update_Failed;
 
+   -- A parameter value could not be validated.
+   overriding procedure Parameter_Validation_Failed (Self : in out Instance; Arg : in Parameter_Operation_Status.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Parameter_Validation_Failed_History.Push (Arg);
+   end Parameter_Validation_Failed;
+
    -- A parameter value could not be updated.
    overriding procedure Parameter_Fetch_Failed (Self : in out Instance; Arg : in Parameter_Operation_Status.T) is
    begin
@@ -282,6 +295,21 @@ package body Component.Parameters.Implementation.Tester is
       -- Push the argument onto the test history for looking at later:
       Self.Finished_Parameter_Table_Update_History.Push (Arg);
    end Finished_Parameter_Table_Update;
+
+   -- Starting validation of the parameters from a received memory region.
+   overriding procedure Starting_Parameter_Table_Validate (Self : in out Instance; Arg : in Memory_Region.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Starting_Parameter_Table_Validate_History.Push (Arg);
+   end Starting_Parameter_Table_Validate;
+
+   -- Done validating the parameters from a received memory region with following
+   -- status.
+   overriding procedure Finished_Parameter_Table_Validate (Self : in out Instance; Arg : in Parameters_Memory_Region_Release.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Finished_Parameter_Table_Validate_History.Push (Arg);
+   end Finished_Parameter_Table_Validate;
 
    -- Starting updating of the parameters from a received memory region.
    overriding procedure Starting_Parameter_Table_Fetch (Self : in out Instance; Arg : in Memory_Region.T) is
