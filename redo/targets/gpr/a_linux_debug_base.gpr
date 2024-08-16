@@ -35,4 +35,7 @@ abstract project a_linux_debug_base extends all "a_adamant.gpr" is
          ("-g");
    end Compiler;
 
+   -- Source files declared empty for abstract project
+   for Source_Files use ();
+
 end a_linux_debug_base;

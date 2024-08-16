@@ -257,7 +257,7 @@ package body Component.{{ name }} is
                Dispatch_To : constant Dispatch_Procedure := Dispatch_Table (Id_Record.Id);
             begin
                Dispatch_To (Self{% if connectors.arrayed_invokee() %}, Id_Record.Index{% endif %}, Bytes (Bytes'First .. Bytes'First + Length - 1));
-               pragma Annotate (CodePeer, False_Positive, "range check", "We never put items on queue larger than Bytes'Length.");
+               pragma Annotate (GNASAS, False_Positive, "range check", "We never put items on queue larger than Bytes'Length.");
             end;
          -- Error was returned:
          when Error =>
@@ -305,7 +305,7 @@ package body Component.{{ name }} is
                Dispatch_To : constant Dispatch_Procedure := Dispatch_Table (Id_Record.Id);
             begin
                Dispatch_To (Self{% if connectors.arrayed_invokee() %}, Id_Record.Index{% endif %}, Bytes (Bytes'First .. Bytes'First + Length - 1));
-               pragma Annotate (CodePeer, False_Positive, "range check", "We never put items on queue larger than Bytes'Length.");
+               pragma Annotate (GNATSAS, False_Positive, "range check", "We never put items on queue larger than Bytes'Length.");
             end;
             -- The dispatch function MUST release the lock when finished.
             return True;
@@ -381,7 +381,7 @@ package body Component.{{ name }} is
                -- Push failed due to serialization problem, return to caller.
                when Serialization_Failure =>
                   return Message_Dropped;
-                  pragma Annotate (CodePeer, False_Positive, "dead code",
+                  pragma Annotate (GNATSAS, False_Positive, "dead code",
                      "Some types can never fail to serialize, thus this code will never be executed.");
 {% endif %}
 {% if connectors.requires_priority_queue() %}
@@ -497,7 +497,7 @@ package body Component.{{ name }} is
 {% endif %}
 {% else %}
    overriding procedure Cycle (Self : in out Base_Instance) is
-      pragma Annotate (CodePeer, Intentional, "subp always fails",
+      pragma Annotate (GNATSAS, Intentional, "subp always fails",
          "Intentional - this subp should never be called on a component without a task.");
       Ignore : Base_Instance renames Self;
    begin
@@ -658,7 +658,7 @@ package body Component.{{ name }} is
       begin
          -- This type we serialized successfully, it should always deserialize successfully.
          pragma Assert (Ser_Status = Success);
-         pragma Annotate (CodePeer, False_Positive, "assertion", "Assertion will only fail in case of data corruption of software bug.");
+         pragma Annotate (GNATSAS, False_Positive, "assertion", "Assertion will only fail in case of data corruption of software bug.");
          -- The calculated length of the type should always equal the number of bytes received in the function.
          pragma Assert (Bytes'Length = Num_Bytes_Deserialized);
       end;
@@ -799,7 +799,7 @@ package body Component.{{ name }} is
             -- hope user sees the event and corrects the problem.
             Full_Queue_Behavior => Connector_Types.Drop
          );
-         pragma Annotate (CodePeer, False_Positive, "range check",
+         pragma Annotate (GNATSAS, False_Positive, "range check",
             "The command ID cannot be out of range since range checking is done in Set_Id_Bases.");
          -- Sleep a bit, so as to not stress out the command router component's queue.
          Sleep.Sleep_Us (Configuration.Command_Registration_Delay);
@@ -833,7 +833,7 @@ package body Component.{{ name }} is
 {% endif %}
    begin
       pragma Assert (Cmd.Header.Id = Self.Command_Id_Base + {{ loop.index0 }});
-      pragma Annotate (CodePeer, False_Positive, "assertion", "Internal routing ensures this is true.");
+      pragma Annotate (GNATSAS, False_Positive, "assertion", "Internal routing ensures this is true.");
 
 {% if command.type %}
 {% if command.type_model and command.type_model.variable_length %}
@@ -843,7 +843,7 @@ package body Component.{{ name }} is
       -- actually deserialized. This "padding" is simply ignored.
       Stat := Arg_Deserializer.From_Byte_Array (Args, Cmd.Arg_Buffer (Cmd.Arg_Buffer'First .. Cmd.Arg_Buffer'First + Cmd.Header.Arg_Buffer_Length - 1), Num_Bytes_Deserialized);
       if Stat = Success and then Cmd.Header.Arg_Buffer_Length >= Num_Bytes_Deserialized then
-         pragma Annotate (CodePeer, Intentional, "condition predetermined", "Sometimes the length can never be too large based on its type, and that is just fine.");
+         pragma Annotate (GNATSAS, Intentional, "condition predetermined", "Sometimes the length can never be too large based on its type, and that is just fine.");
          declare
 {% else %}
       -- Check the command argument length and make sure it is valid.
@@ -854,7 +854,7 @@ package body Component.{{ name }} is
 {% endif %}
 {% if command.type_model %}
             Errant_Field : Unsigned_32 := 0;
-            pragma Annotate (CodePeer, Intentional, "unused assignment", "Sometimes the type can never be invalid, and in that case Errant_Field will never be needed.");
+            pragma Annotate (GNATSAS, Intentional, "unused assignment", "Sometimes the type can never be invalid, and in that case Errant_Field will never be needed.");
             Args_Valid : constant Boolean := {{ command.type_package }}.Validation.Valid (Args, Errant_Field);
 {% else %}
             Errant_Field : constant Unsigned_32 := 0;
@@ -1029,7 +1029,7 @@ package body Component.{{ name }} is
 {% endif %}
    begin
       pragma Assert (Par.Header.Id = Self.Parameter_Id_Base + {{ loop.index0 }});
-      pragma Annotate (CodePeer, False_Positive, "assertion", "Internal routing ensures this is true.");
+      pragma Annotate (GNATSAS, False_Positive, "assertion", "Internal routing ensures this is true.");
 
       -- Check the parameter buffer length and make sure it is valid.
       if Par.Header.Buffer_Length = Buffer_Deserializer.Serialized_Length then
@@ -1038,7 +1038,7 @@ package body Component.{{ name }} is
             Par_To_Stage : constant {{ par.type }} := Buffer_Deserializer.From_Byte_Array (Par.Buffer (Par.Buffer'First .. Par.Buffer'First + Buffer_Deserializer.Serialized_Length - 1));
 {% if par.type_model %}
             Errant_Field : Unsigned_32 := 0;
-            pragma Annotate (CodePeer, Intentional, "unused assignment", "Sometimes the type can never be invalid, and in that case Errant_Field will never be needed.");
+            pragma Annotate (GNATSAS, Intentional, "unused assignment", "Sometimes the type can never be invalid, and in that case Errant_Field will never be needed.");
             Args_Valid : constant Boolean := {{ par.type_package }}.Validation.Valid (Par_To_Stage, Errant_Field);
 {% else %}
             Errant_Field : constant Unsigned_32 := 0;
@@ -1114,7 +1114,7 @@ package body Component.{{ name }} is
       package Buffer_Deserializer is new Serializer ({{ par.type }});
       Value : constant {{ par.type }} := Self.Staged_Parameters.Get_{{ par.name }};
 {% endif %}
-      pragma Annotate (CodePeer, False_Positive, "validity check",
+      pragma Annotate (GNATSAS, False_Positive, "validity check",
          "Defaults for parameter values are always initialized within Staged_Parameters protected object definition.");
    begin
       pragma Assert (Par.Header.Id = Self.Parameter_Id_Base + {{ loop.index0 }});

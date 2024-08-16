@@ -43,15 +43,15 @@ package body Serializer is
    end From_Byte_Array;
 
    function From_Byte_Array (Src : in Byte_Array) return T is
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "to_Return is initialized via overlay copy");
       -- The annotation below is not enough to remove the false positive for some
       -- reason, so just turn of analysis of this function.
-      pragma Annotate (Codepeer, Skip_Analysis);
       To_Return : T;
       Overlay : Byte_Array with Import, Convention => Ada, Address => To_Return'Address;
    begin
       Overlay := Src;
-      pragma Annotate (Codepeer, False_Positive, "validity check", "to_Return is initialized via overlay copy");
       return To_Return;
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "to_Return is initialized via overlay copy");
    end From_Byte_Array;
 
    function From_Byte_Array_Unchecked (Dest : out T; Src : in Basic_Types.Byte_Array) return Natural is
@@ -68,15 +68,15 @@ package body Serializer is
    end From_Byte_Array_Unchecked;
 
    function From_Byte_Array_Unchecked (Src : in Basic_Types.Byte_Array) return T is
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "to_Return is initialized via overlay copy");
       -- The annotation below is not enough to remove the false positive for some
       -- reason, so just turn of analysis of this function.
-      pragma Annotate (Codepeer, Skip_Analysis);
       To_Return : T;
       Overlay : Byte_Array with Import, Convention => Ada, Address => To_Return'Address;
    begin
       Overlay := Src (Src'First .. Src'First + Byte_Array'Length - 1);
-      pragma Annotate (Codepeer, False_Positive, "validity check", "to_Return is initialized via overlay copy");
       return To_Return;
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "to_Return is initialized via overlay copy");
    end From_Byte_Array_Unchecked;
 
    pragma Warnings (On, "overlay changes scalar storage order");

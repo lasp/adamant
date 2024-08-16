@@ -31,6 +31,6 @@ class build_yaml_sloc(build_rule_base):
         sys.stderr.write("Auto-coded SLOC: " + str(autocoded_sloc) + "\n")
         sys.stderr.write("Total SLOC:      " + str(total_sloc) + "\n")
 
-    # No need to provide these for "redo codepeer_server"
+    # No need to provide these for "redo yaml_sloc"
     # def input_file_regex(self): pass
     # def output_filename(self, input_filename): pass

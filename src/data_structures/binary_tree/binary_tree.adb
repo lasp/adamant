@@ -81,7 +81,7 @@ package body Binary_Tree is
 
    -- Search for element in tree. This is done in O(log n) where n is the current size of the tree.
    function Search (Self : in Instance; Element : in Element_Type; Element_Found : out Element_Type; Element_Index : out Positive) return Boolean is
-      pragma Annotate (Codepeer, Intentional, "validity check", "Out parameters element_Found and element_Index will be uninitialized if no element is found, by design.");
+      pragma Annotate (GNATSAS, Intentional, "validity check", "Out parameters element_Found and element_Index will be uninitialized if no element is found, by design.");
       Low_Index : Natural := Self.Tree'First;
       High_Index : Natural := Self.Size;
    begin

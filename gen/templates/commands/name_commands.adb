@@ -70,11 +70,11 @@ package body {{ name }} is
 
       -- Set the command length and id and initialize buffer:
       if Len > Command_Types.Command_Arg_Buffer_Length_Type'Last then
-         pragma Annotate (CodePeer, False_Positive, "test always false",
-            "Some CodePeer can prove the Len can never be too large so this code does not execute. This is OK.");
+         pragma Annotate (GNATSAS, False_Positive, "test always false",
+            "GNAT SAS can prove the Len can never be too large so this code does not execute. This is OK.");
          return Failure;
-         pragma Annotate (CodePeer, False_Positive, "dead code",
-            "Some CodePeer can prove the Len can never be too large so this code does not execute. This is OK.");
+         pragma Annotate (GNATSAS, False_Positive, "dead code",
+            "GNAT SAS can prove the Len can never be too large so this code does not execute. This is OK.");
       end if;
       Cmd := (Header => (Source_Id => Self.Source_Id, Id => Self.Get_{{ command.name }}_Id, Arg_Buffer_Length => Len), Arg_Buffer => [others => 0]);
 

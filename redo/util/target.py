@@ -97,6 +97,12 @@ def set_target(target):
     os.environ["TARGET"] = target
 
 
+def set_target_if_not_set(target):
+    """Set the current target to a given string."""
+    if "TARGET" not in os.environ:
+        os.environ["TARGET"] = target
+
+
 def set_test_target(target):
     """Set the current test target to a given string."""
     if not target.endswith("_Test"):

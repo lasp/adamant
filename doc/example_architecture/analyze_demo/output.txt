@@ -1,0 +1,35 @@
+redo    analyze 
+redo  Analyzing Binary:
+/home/user/adamant/doc/example_architecture/analyze_demo/main.adb
+[gnatsas]: launching GNATcheck
+[gnatsas]: launching Infer
+[gnatsas]: launching Inspector
+Compile
+   [Ada]          main.adb
+no partitioning needed.
+starting the analysis of main.scil
+analyzed main.scil in 0.00 seconds
+starting the analysis of main__body.scil
+analyzed main__body.scil in 0.00 seconds
+re-starting the analysis of main.scil
+re-analyzed main.scil in 0.00 seconds
+analysis complete.
+2 .scil files processed; 4 subprograms analyzed.
+[gnatsas]: Analysis results stored in timeline "fast".
+[gnatsas]: Run `gnatsas report -P../.gnatsas/home/user/adamant/doc/example_architecture/analyze_demo/src/linux_debug.gpr` to display results.
+[sam-to-security]: Report generated at /home/user/adamant/../.gnatsas/home/user/adamant/doc/example_architecture/analyze_demo/src/reports/security.html
+
+-----------------------------------------------------
+---------- Analysis Output --------------------------
+-----------------------------------------------------
+main.adb:8:4: high: validity check [CWE 457] (Inspector): out parameter Old_Val might be uninitialized
+main.adb:17:16: high: validity check [CWE 457] (Inspector): main.set_global.Old_Val is uninitialized here
+main.adb:19:43: high: validity check [CWE 457] (Infer): `Old` is read without initialization
+-----------------------------------------------------
+-----------------------------------------------------
+
+GNAT SAS output directory located at /home/user/.gnatsas/home/user/adamant/doc/example_architecture/analyze_demo/src/reports
+GNAT SAS run log saved in /home/user/.gnatsas/home/user/adamant/doc/example_architecture/analyze_demo/src/reports/analyze.txt
+GNAT SAS analysis text output saved in /home/user/.gnatsas/home/user/adamant/doc/example_architecture/analyze_demo/src/reports/report.txt
+GNAT SAS analysis CSV output saved in /home/user/.gnatsas/home/user/adamant/doc/example_architecture/analyze_demo/src/reports/report.csv
+GNAT SAS security report output saved in /home/user/.gnatsas/home/user/adamant/doc/example_architecture/analyze_demo/src/reports/security.html

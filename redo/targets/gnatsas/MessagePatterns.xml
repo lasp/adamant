@@ -1,0 +1,2189 @@
+<?xml version="1.0"?>
+<!-- This file specifies pattern-matching rules for  -->
+<!-- determining the error probability level -->
+<!-- assigned to each GNAT SAS-identified problem. -->
+<!-- The rules may be overridden by a GNAT SAS option; -->
+<!-- see the documentation for more information. -->
+<!-- Note: the order is not significant, so add new rules at the end, -->
+<!-- and update the number, which is printed out in the debug traces for -->
+<!-- pattern matching. -->
+
+<!-- You can check this file against an XSD schema. On Linux, the command is
+
+       xmllint -noout -schema MessagePatterns.xsd MessagePatterns.xml
+
+     (replace the simple '-' by double '-') -->
+
+<Message_Probability_Rules>
+
+<!--0-->
+<!-- suppress messages about variables generated internally by GNAT SAS-->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*Obj_Id#*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--1-->
+<!-- When -messages min, "might fail" check messages are ranked "NOT_AN_ERROR"
+     (instead of low), unless overridden by another rule. -->
+<Message_Rule Matching_Probability="NOT_AN_ERROR">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_MIGHT_FAIL">
+    </String_Specifier>
+    <Computed_Specifier Name_Of_Computed_Attribute="Is_Check">
+    </Computed_Specifier>
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="INVALID_CHECK">
+    </String_Specifier>
+    <Computed_Specifier
+      Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--2-->
+<!-- suppress messages about variables generated internally by GNAT SAS -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*Obj_Id#*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--3-->
+<!-- Suppress warning if parameter is of an access type -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Bool_Specifier
+      Name_Of_Boolean_Attribute="Is_Pointer">
+    </Bool_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="UNASSIGNED_IN_OUT_PARAMETER_WARNING">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--4-->
+<!-- consider user check as 'suppressed' when -messages min -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="CONDITIONAL_RAISE_CHECK">
+    </String_Specifier>
+    <Computed_Specifier
+      Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--5-->
+<!-- suppress "soft" check messages in -messages min mode -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+    <Bool_Specifier
+      Name_Of_Boolean_Attribute="CHECK_IS_SOFT">
+    </Bool_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--6-->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="NEGATIVE_EXPONENT_CHECK">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--7-->
+<!-- notify the user with a 'medium' marker if a subprogram does not return,
+     except for task bodies -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="PROCEDURE_DOES_NOT_RETURN_ERROR">
+    </String_Specifier>
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*'Task_*Body">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--8-->
+<!-- mark 'high' a check that always fails -->
+<Message_Rule Matching_Probability="HIGH">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="CHECK_FAILS_ON_EVERY_CALL_ERROR">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--9-->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="UNLOCKED_REENTRANT_UPDATE_ERROR">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--10-->
+<!-- Set warning as medium by default -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="UNASSIGNED_IN_OUT_PARAMETER_WARNING">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--11-->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="MISMATCHED_LOCKED_UPDATE_ERROR">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--12-->
+<Message_Rule Matching_Probability="NOT_AN_ERROR">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_CANNOT_FAIL">
+    </String_Specifier>
+    <Computed_Specifier Name_Of_Computed_Attribute="Is_Check">
+    </Computed_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--13-->
+<!-- Set warning as medium by default -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="UNREAD_IN_OUT_PARAMETER_WARNING">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--14-->
+<Message_Rule Matching_Probability="HIGH">
+  <Message_Pattern>
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="CHECK_IS_SOFT">
+    </Bool_Specifier>
+
+    <String_Specifier
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_WILL_FAIL">
+    </String_Specifier>
+
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="RAISE_CHECK">
+    </String_Specifier>
+
+    <Computed_Specifier Name_Of_Computed_Attribute="Is_Check">
+    </Computed_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--15-->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <Bool_Specifier Name_Of_Boolean_Attribute="CHECK_IS_SOFT">
+    </Bool_Specifier>
+
+    <String_Specifier
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_WILL_FAIL">
+    </String_Specifier>
+
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="RAISE_CHECK">
+    </String_Specifier>
+
+    <Bool_Specifier
+     Complemented="YES"
+     Name_Of_Boolean_Attribute="Is_Pointer">
+    </Bool_Specifier>
+
+    <Computed_Specifier Name_Of_Computed_Attribute="Is_Check">
+    </Computed_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--16-->
+<!-- suppress soft precondition messages on GNAT internal functions (e.g.
+     xxx'Rep_To_Pos) -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <Bool_Specifier Name_Of_Boolean_Attribute="CHECK_IS_SOFT">
+    </Bool_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="PRECONDITION_CHECK">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="on *'[IDCRB]*:*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--17-->
+<!-- suppress unused assignments into "Ptr.all.xxx" -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="DEAD_STORE_WARNING">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*into *.all.*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--18-->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+  <String_Specifier
+    Name_Of_String_Attribute="Likelihood"
+    String_To_Match="CHECK_MIGHT_FAIL">
+  </String_Specifier>
+
+  <Bool_Specifier Name_Of_Boolean_Attribute="Is_Big_Int"></Bool_Specifier>
+  <Bool_Specifier
+    Name_Of_Boolean_Attribute="EXPECTED_SET_IS_SUBSET_PLUS_MINUS_1000">
+  </Bool_Specifier>
+
+  <Computed_Specifier Name_Of_Computed_Attribute="Is_Assign_Stm_Check">
+  </Computed_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--19-->
+<!-- complements rules 18 -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+  <String_Specifier
+    Name_Of_String_Attribute="Likelihood"
+    String_To_Match="CHECK_MIGHT_FAIL">
+  </String_Specifier>
+
+  <Bool_Specifier Name_Of_Boolean_Attribute="Is_Big_Int"></Bool_Specifier>
+  <Bool_Specifier
+    Name_Of_Boolean_Attribute="EXPECTED_SET_IS_SUBSET_PLUS_MINUS_1000">
+  </Bool_Specifier>
+
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="NUMERIC_OVERFLOW_CHECK">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--20-->
+<!-- Bad set is a singleton; looks like an off-by-one error (for range -->
+<!-- or array index check. Don't do this when -messages min (and keep the -->
+<!-- message low/not_an_error). -->
+<!-- NOTE: we used to require the Expected_Set to *not* be a -->
+<!--       singleton presuming that was a true/false test, -->
+<!--       but we were not completely consistent about it.  -->
+<!--       We now err on the side of making it "medium" rather than "low." -->
+<!--       Rule 21 still requires the Expected set to not be a singleton. -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_MIGHT_FAIL">
+    </String_Specifier>
+
+    <Bool_Specifier Name_Of_Boolean_Attribute="Is_Big_Int"></Bool_Specifier>
+
+    <Bool_Specifier Name_Of_Boolean_Attribute="VALID_BAD_SET_IS_SINGLETON_SET">
+    </Bool_Specifier>
+
+    <Computed_Specifier
+      Complemented="YES"
+      Name_Of_Computed_Attribute="Is_Assign_Stm_Or_Precond_Check">
+    </Computed_Specifier>
+
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="NUMERIC_OVERFLOW_CHECK">
+    </String_Specifier>
+
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="INVALID_OR_NULL_CHECK">
+    </String_Specifier>
+
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="ASSERTION_CHECK">
+    </String_Specifier>
+
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="CONDITIONAL_RAISE_CHECK">
+    </String_Specifier>
+
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="TYPE_VARIANT_CHECK">
+    </String_Specifier>
+
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="ALIASING_CHECK">
+    </String_Specifier>
+
+    <Computed_Specifier
+      Complemented="YES"
+      Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="Message_Involves_Loop_Imprecision">
+    </Bool_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--21-->
+<!-- Mark medium range checks which involve the +/-1000 range and are not -->
+<!-- a singleton (to exclude complex boolean expressions) -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_MIGHT_FAIL">
+    </String_Specifier>
+
+    <Bool_Specifier Name_Of_Boolean_Attribute="Is_Big_Int"></Bool_Specifier>
+    <Bool_Specifier
+      Name_Of_Boolean_Attribute="EXPECTED_SET_IS_SUBSET_PLUS_MINUS_1000">
+    </Bool_Specifier>
+
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="NUMERIC_RANGE_CHECK">
+    </String_Specifier>
+
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="EXPECTED_SET_IS_SINGLETON_SET">
+    </Bool_Specifier>
+
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="Message_Involves_Loop_Imprecision">
+    </Bool_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--22-->
+<!-- Mark medium array index checks which involve the +/-1000 range and are -->
+<!-- not a singleton (to exclude complex boolean expressions) -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_MIGHT_FAIL">
+    </String_Specifier>
+
+    <Bool_Specifier Name_Of_Boolean_Attribute="Is_Big_Int"></Bool_Specifier>
+    <Bool_Specifier
+      Name_Of_Boolean_Attribute="EXPECTED_SET_IS_SUBSET_PLUS_MINUS_1000">
+    </Bool_Specifier>
+
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="ARRAY_INDEXING_CHECK">
+    </String_Specifier>
+
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="EXPECTED_SET_IS_SINGLETON_SET">
+    </Bool_Specifier>
+
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="Message_Involves_Loop_Imprecision">
+    </Bool_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--23-->
+<!-- Bad set includes some relatively small values (within +/- 1000), -->
+<!-- and this is a range or array index check. -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_MIGHT_FAIL">
+    </String_Specifier>
+
+    <Bool_Specifier Name_Of_Boolean_Attribute="Is_Big_Int"></Bool_Specifier>
+
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="EXPECTED_SET_IS_SINGLETON_SET">
+    </Bool_Specifier>
+
+    <Bool_Specifier
+      Name_Of_Boolean_Attribute="VALID_BAD_SET_OVERLAPS_PLUS_MINUS_1000">
+    </Bool_Specifier>
+
+    <Computed_Specifier
+      Complemented="YES"
+      Name_Of_Computed_Attribute="Is_Assign_Stm_Or_Precond_Check">
+    </Computed_Specifier>
+
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="NUMERIC_OVERFLOW_CHECK">
+    </String_Specifier>
+
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="INVALID_OR_NULL_CHECK">
+    </String_Specifier>
+
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="ASSERTION_CHECK">
+    </String_Specifier>
+
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="CONDITIONAL_RAISE_CHECK">
+    </String_Specifier>
+
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="ALIASING_CHECK">
+    </String_Specifier>
+
+    <Computed_Specifier
+      Complemented="YES"
+      Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="Message_Involves_Loop_Imprecision">
+    </Bool_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--24-->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="NEW_OBJ_ANNOTATION">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--25-->
+<!-- A pointer can never be uninitialized in Ada -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="INVALID_CHECK">
+    </String_Specifier>
+    <Bool_Specifier Name_Of_Boolean_Attribute="Is_Pointer"></Bool_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--26-->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="PRECONDITION_CHECK">
+    </String_Specifier>
+
+    <Bool_Specifier Name_Of_Boolean_Attribute="Is_Pointer"></Bool_Specifier>
+    <Bool_Specifier Name_Of_Boolean_Attribute="BAD_SET_ONLY_INVALID">
+    </Bool_Specifier>
+
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_WILL_FAIL">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--27-->
+<!-- Mark unknown call messages as info when -messages max.
+     See also rule 108 -->
+<Message_Rule Matching_Probability="INFO">
+  <Message_Pattern>
+    <Computed_Specifier
+      Name_Of_Computed_Attribute="Max_Messages">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="UNKNOWN_CALL_WARNING">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--28-->
+<!-- 'predetermined condition' messages are potentially interesting, since they
+     are not usually associated with some 'dead code' message. -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="*_CONDITION_DEAD_EDGE_WARNING">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      Complemented="YES"
+      String_To_Match="*{[dD]ebug,[dD]bg}*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--29-->
+<!-- suppress internal GNAT subprograms transformed into pseudo attribute
+     functions (e.g. xxxRP -> xxx'Rep_To_Pos) unless "check-will-fail".
+     Note that we also suppress CHECK_FAILS_ON_EVERY_CALL_ERROR because
+     e.g. some composite_equal subprograms will always fail if
+     called, but that's mostly noise to the user.
+     See rule 30 and 45 for a special case on init procs.  -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+
+    <String_Specifier
+      Name_Of_String_Attribute="Subp"
+      String_To_Match="*'[DCRB]*">
+    </String_Specifier>
+
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_WILL_FAIL">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--30-->
+<!-- Complement rule 29 for init procs where we want to warn also in case
+     of CHECK_FAILS_ON_EVERY_CALL_ERROR.
+     Do not suppress messages if -messages max, since failures on init procs
+     need to be flagged in this mode.  -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier
+      Complemented="YES"
+      Name_Of_Computed_Attribute="Max_Messages">
+    </Computed_Specifier>
+
+    <String_Specifier
+      Name_Of_String_Attribute="Subp"
+      String_To_Match="*'Initialize">
+    </String_Specifier>
+
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_WILL_FAIL">
+    </String_Specifier>
+
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="CHECK_FAILS_ON_EVERY_CALL_ERROR">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--31-->
+<!-- suppress messages about system.soft_links -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*system.soft_links*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--32-->
+<!-- Mark all messages from GNATcheck as medium -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <Bool_Specifier Name_Of_Boolean_Attribute="Is_GNATcheck_Message"/>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--33-->
+<!-- suppress "uncertain" messages if not "max" -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier
+      Complemented="YES"
+      Name_Of_Computed_Attribute="Max_Messages">
+    </Computed_Specifier>
+    <Bool_Specifier Name_Of_Boolean_Attribute="Message_Is_Uncertain">
+    </Bool_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--34-->
+<!-- suppress most suspicious "soft" preconditions, almost always noise -->
+<!-- overwrite rule 4 -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="SUSPICIOUS_*_PRECONDITION_WARNING">
+    </String_Specifier>
+    <Bool_Specifier Name_Of_Boolean_Attribute="CHECK_IS_SOFT">
+    </Bool_Specifier>
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*lower bound of *">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--35-->
+<!-- suppress "soft&uncertain" precondition checks if not max messages -->
+<!-- overwrite rule 28 -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Bool_Specifier Name_Of_Boolean_Attribute="CHECK_IS_SOFT">
+    </Bool_Specifier>
+    <Computed_Specifier
+      Complemented="YES"
+      Name_Of_Computed_Attribute="Max_Messages">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="PRECONDITION_CHECK">
+    </String_Specifier>
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_WILL_FAIL">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--36-->
+<!-- suppress overflow outside +/- 1000 if not max messages -->
+<!-- complements rules 19-21 -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier
+      Complemented="YES"
+      Name_Of_Computed_Attribute="Max_Messages">
+    </Computed_Specifier>
+
+    <String_Specifier
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_MIGHT_FAIL">
+    </String_Specifier>
+
+    <Bool_Specifier Name_Of_Boolean_Attribute="Is_Big_Int"></Bool_Specifier>
+
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="EXPECTED_SET_IS_SINGLETON_SET">
+    </Bool_Specifier>
+
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="VALID_BAD_SET_IS_SINGLETON_SET">
+    </Bool_Specifier>
+
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="VALID_BAD_SET_OVERLAPS_PLUS_MINUS_1000">
+    </Bool_Specifier>
+
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="EXPECTED_SET_IS_SUBSET_PLUS_MINUS_1000">
+    </Bool_Specifier>
+
+    <Computed_Specifier
+      Name_Of_Computed_Attribute="Is_Assign_Stm_Or_Precond_Check">
+    </Computed_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--37-->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier
+      Complemented="YES"
+      Name_Of_Computed_Attribute="Max_Messages">
+    </Computed_Specifier>
+
+    <String_Specifier
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_MIGHT_FAIL">
+    </String_Specifier>
+
+    <Bool_Specifier Name_Of_Boolean_Attribute="Is_Big_Int"></Bool_Specifier>
+
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="EXPECTED_SET_IS_SINGLETON_SET">
+    </Bool_Specifier>
+
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="VALID_BAD_SET_IS_SINGLETON_SET">
+    </Bool_Specifier>
+
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="VALID_BAD_SET_OVERLAPS_PLUS_MINUS_1000">
+    </Bool_Specifier>
+
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="EXPECTED_SET_IS_SUBSET_PLUS_MINUS_1000">
+    </Bool_Specifier>
+
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="NUMERIC_OVERFLOW_CHECK">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--38-->
+<!-- suppress unused-assignment-related messages if "-messages min" -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="*DEAD*_STORE_WARNING">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--39-->
+<!-- suppress overflow checks on boolean values: generate false positives
+     and redundant with validity checks -->
+<!-- complements rules 68 -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_MIGHT_FAIL">
+    </String_Specifier>
+
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="NUMERIC_OVERFLOW_CHECK">
+    </String_Specifier>
+
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="* in false..true">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--40-->
+<!-- suppress unlocked shared daemon update messages if "-messages min" -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="UNLOCKED_SHARED_DAEMON_UPDATE_ERROR">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--41-->
+<!-- 'suspicious input' messages are potentially interesting -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="SUSPICIOUS_INPUT_WARNING">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--42-->
+<!-- 'suspicious constant operation' messages are potentially interesting -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="SUSPICIOUS_CONSTANT_OPERATION_WARNING">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--43-->
+<!-- suppress underflow messages unless -messages=max -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier
+      Complemented="YES"
+      Name_Of_Computed_Attribute="Max_Messages">
+    </Computed_Specifier>
+
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="FLOATING_POINT_UNDERFLOW_CHECK">
+    </String_Specifier>
+
+  </Message_Pattern>
+</Message_Rule>
+
+<!--44-->
+<!-- suppress messages generated inside init procs unless -messages max.
+     We still want precondition failures when calling init procs. -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier
+      Complemented="YES"
+      Name_Of_Computed_Attribute="Max_Messages">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Subp"
+      String_To_Match="*'Initialize">
+    </String_Specifier>
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="PRECONDITION_CHECK">
+    </String_Specifier>
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_WILL_FAIL">
+    </String_Specifier>
+
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="CHECK_FAILS_ON_EVERY_CALL_ERROR">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--45-->
+<!-- Disable aliasing checks messages when -messages min, the interesting
+     messages will be propagated as preconditions. -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="ALIASING_CHECK">
+    </String_Specifier>
+    <Computed_Specifier Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--46-->
+<!-- suppress postconditions about GNAT temps -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="POSTCONDITION_ANNOTATION">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*$[A-Z]*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--47-->
+<!-- suppress postconditions about string literals -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="POSTCONDITION_ANNOTATION">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match='"*'>
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--48-->
+<!-- suppress preconditions about GNAT temps -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="PRECONDITION_CHECK">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*$[A-Z]*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--49-->
+<!-- messages mentioning internally generated Unchecked_Conversion -->
+<!-- this rule is a no-op, as such messages are already informational -->
+<!-- and displayed in message max mode -->
+<Message_Rule Matching_Probability="INFO">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*Unchecked_Conversion_*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--50-->
+<!-- suppress messages mentioning temps related to Unchecked_Conversion -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*(unchecked_conversion)*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--51-->
+<!-- suppress messages mentioning result of Indirect_Call -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*_tmp_*(Indirect_Call'Result)*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--52-->
+<!-- suppress overflow check message on string concatenation -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_MIGHT_FAIL">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="USER_ASSIGN_STM_CHECK">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="$L[0-9]*b *in*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--53-->
+<!-- mark precondition check messages as medium by default -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="PRECONDITION_CHECK">
+    </String_Specifier>
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="CHECK_IS_SOFT">
+    </Bool_Specifier>
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="Message_Involves_Loop_Imprecision">
+    </Bool_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--54-->
+<!-- 'test always true' messages are more interesting than 'test always false',
+     since they may not have an associated 'dead code' message. -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="TRUE_DEAD_EDGE_WARNING">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      Complemented="YES"
+      String_To_Match="*{[dD]ebug,[dD]bg}*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--55-->
+<!-- suppress internal GNAT subprograms -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Subp"
+      String_To_Match="*.E[0-9]*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--56-->
+<!-- mark dead code as medium ranking. We might want to mark it high,
+     but there are too many false positives for now, and dead code is not
+     always considered interesting by users. -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="DEAD_BLOCK_WARNING">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      Complemented="YES"
+      String_To_Match="*{[dD]ebug,[dD]bg}*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--57-->
+<!-- mark unused assignment as medium ranking, since it's often not a bug. -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="DEAD_*STORE_WARNING">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--58-->
+<!-- suppress _clean procedure for protected operations -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Subp"
+      String_To_Match="*._clean">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--59-->
+<!-- suppress boolean-guard procedure for protected entry -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Subp"
+      String_To_Match="*_B[0-9]*s">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--60-->
+<!-- suppress wrapper for protected procedure ("*N" has all of the code) -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <Computed_Specifier
+      Complemented="YES"
+      Name_Of_Computed_Attribute="Max_Messages">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Subp"
+      String_To_Match="*P">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--61-->
+<!-- suppress elab routine for library subprogram -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Subp"
+      String_To_Match="*'Elab_Subp_*">
+    </String_Specifier>
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="*analyzed_module_warning">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--62-->
+<!-- suppress postconditions about GNAT aggregate temps -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="POSTCONDITION_ANNOTATION">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="((*,*)* = *">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--63-->
+<!-- suppress postconditions about string literal bounds -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="POSTCONDITION_ANNOTATION">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match='("*'>
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--64-->
+<!-- suppress messages on GNAT SAS internal inheritance table
+     generated to analyze dispatching calls -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*__Descendant_Table*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--65-->
+<!-- suppress messages on GNAT SAS internal dispatch table
+     generated to analyze dispatching calls -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*__Dispatch_Table*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--66-->
+<!-- suppress messages on suspicious precondition for internal dispatch
+     table -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="SUSPICIOUS_*_PRECONDITION_WARNING">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*'Tag: *">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--67-->
+<!-- suppress overflow checks on boolean values: generate false positives
+     and redundant with validity checks -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_MIGHT_FAIL">
+    </String_Specifier>
+
+    <Computed_Specifier Name_Of_Computed_Attribute="Is_Assign_Stm_Check">
+    </Computed_Specifier>
+
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="* in false..true">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--68-->
+<!-- override rule 56 for controlled object (s-finroo.ads) -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="*DEAD_EDGE_WARNING">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*Oeq (x._parent, y._parent)*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--69-->
+<!-- suppress "soft" precondition failure on potentially uninitialized
+     vars for now, generates too many false positives -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier
+      Complemented="YES"
+      Name_Of_Computed_Attribute="Max_Messages">
+    </Computed_Specifier>
+    <Bool_Specifier Name_Of_Boolean_Attribute="CHECK_IS_SOFT">
+    </Bool_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="PRECONDITION_CHECK">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*'Initialized">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--70-->
+<!-- suppress unused assignment to global on internal variables and
+     function results (never relevant). Note that this rule is currently
+     not used since this warning is only enabled for global variables -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="POTENTIALLY_DEAD_STORE_WARNING">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*{'Result,._}*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--71-->
+<!-- suppress unused assignments into "obvious names": (discard/dummy/...)* -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="DEAD_STORE_WARNING">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*into {[dD]iscard,[dD]ummy,[iI]gnore,[uU]nuse,[tT]mp,[tT]emp}*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--72-->
+<!-- Complete rule 72 for all upper case names -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="DEAD_STORE_WARNING">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*into {DISCARD,DUMMY,IGNORE,UNUSE,TMP,TEMP}*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--73-->
+<!-- suppress dead code about GNAT temps -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="DEAD_*">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*$[A-Z][0-9]*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--74-->
+<!-- suppress _finalizer procedure for protected operations -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Subp"
+      String_To_Match="*._finalizer">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--75-->
+<!-- suppress unused assignments into GNAT internal variables -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="DEAD_STORE_WARNING">
+    </String_Specifier>
+    <String_Specifier
+       Name_Of_String_Attribute="Text"
+      String_To_Match="*into $[RL][0-9]*b">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--76-->
+<!-- suppress overflow outside +/- 1000 if min messages -->
+<!-- complements rules 19, 21, 37 -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+
+    <String_Specifier
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_MIGHT_FAIL">
+    </String_Specifier>
+
+    <Bool_Specifier Name_Of_Boolean_Attribute="Is_Big_Int"></Bool_Specifier>
+
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="VALID_BAD_SET_OVERLAPS_PLUS_MINUS_1000">
+    </Bool_Specifier>
+
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="EXPECTED_SET_IS_SUBSET_PLUS_MINUS_1000">
+    </Bool_Specifier>
+
+    <Computed_Specifier
+      Name_Of_Computed_Attribute="Is_Assign_Stm_Or_Precond_Check">
+    </Computed_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--77-->
+<!-- bump to medium validity messages (unless certain or for internal
+     dispatch table or soft or possibly false positive) -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="INVALID_CHECK">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_MIGHT_FAIL">
+    </String_Specifier>
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*(*)*'Initialized">
+    </String_Specifier>
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*.all">
+    </String_Specifier>
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*'Tag.all*">
+    </String_Specifier>
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="CHECK_IS_SOFT">
+    </Bool_Specifier>
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="Message_Likely_False_Positive">
+    </Bool_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--78-->
+<!-- suppress validity check messages that are likely false positives in  -->
+<!-- -messages min mode -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier
+      Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_MIGHT_FAIL">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="INVALID_CHECK">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*{.all,(*),'Result,unsigned_32(}*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--79-->
+<!-- suppress messages that are likely false positives in -messages min mode -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Bool_Specifier Name_Of_Boolean_Attribute="Message_Likely_False_Positive">
+    </Bool_Specifier>
+    <Computed_Specifier
+      Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="INVALID_CHECK">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--80-->
+<!-- suppress uncertain validity messages on internal display tables
+     when -messages min -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="INVALID_CHECK">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_MIGHT_FAIL">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*'Tag.all*">
+    </String_Specifier>
+    <Computed_Specifier
+      Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--81-->
+<!-- 'suspicious input' on *_assign* generated subprograms should be
+     ignored, as they originate in wrong inputs generated by GNAT SAS -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="SUSPICIOUS_INPUT_WARNING">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Subp"
+      String_To_Match="*_assign*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--82-->
+<!-- 'suspicious input' on array range should be ignored, as they usually
+     originate in wrong inputs generated by GNAT SAS -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="SUSPICIOUS_INPUT_WARNING">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*..*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--83-->
+<!-- 'suspicious input' on array range should be ignored, as they usually
+     originate in wrong inputs generated by GNAT SAS -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="SUSPICIOUS_INPUT_WARNING">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*._data*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--84-->
+<!-- suppress "soft" precondition failure on potentially uninitialized
+     tags, generates too many false positives. See also rule 70. -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="PRECONDITION_CHECK">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*(soft)*'Tag'Initialized">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--85-->
+<!-- suppress message on task body never returning, since this is in most
+     cases expected. -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="PROCEDURE_DOES_NOT_RETURN_ERROR">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*'Task_*Body">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--86-->
+<!-- bump default ranking of divide by zero messages. -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="DIVIDE_BY_ZERO_CHECK">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--87-->
+<!-- suppress tag check messages when -messages min. -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="TAG_CHECK">
+    </String_Specifier>
+    <Computed_Specifier
+      Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--88-->
+<!-- mark self assignment as medium ranking since it's a logical error, and
+     potentially a false positive -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="SAME_VALUE_DEAD_STORE_WARNING">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--89-->
+<!-- same ranking as dead code warnings for infinite loop warnings -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="INFINITE_LOOP_WARNING">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--90-->
+<!-- suppress messages on GNAT run-time files unless -messages max -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Source_Is_Ada">
+    </Computed_Specifier>
+    <Computed_Specifier
+      Complemented="YES"
+      Name_Of_Computed_Attribute="Max_Messages">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="File"
+      String_To_Match="[agsi]-*.ad[sb]">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--91-->
+<!-- suppress overflow outside +/- 1000 if not max messages -->
+<!-- complements rules 37 -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier
+      Complemented="YES"
+      Name_Of_Computed_Attribute="Max_Messages">
+    </Computed_Specifier>
+
+    <String_Specifier
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_MIGHT_FAIL">
+    </String_Specifier>
+
+    <Bool_Specifier Name_Of_Boolean_Attribute="Is_Big_Int"></Bool_Specifier>
+
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="EXPECTED_SET_IS_SINGLETON_SET">
+    </Bool_Specifier>
+
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="VALID_BAD_SET_IS_SINGLETON_SET">
+    </Bool_Specifier>
+
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="VALID_BAD_SET_OVERLAPS_PLUS_MINUS_1000">
+    </Bool_Specifier>
+
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="EXPECTED_SET_IS_SUBSET_PLUS_MINUS_1000">
+    </Bool_Specifier>
+
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="NUMERIC_OVERFLOW_CHECK">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--92-->
+<!-- suppress uncertain precondition check messages if "-messages min" -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="PRECONDITION_CHECK">
+    </String_Specifier>
+  <String_Specifier
+    Name_Of_String_Attribute="Likelihood"
+    String_To_Match="CHECK_MIGHT_FAIL">
+  </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--93-->
+<!-- suppress uncertain access check messages if "-messages min" -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="INVALID_OR_NULL_CHECK">
+    </String_Specifier>
+  <String_Specifier
+    Name_Of_String_Attribute="Likelihood"
+    String_To_Match="CHECK_MIGHT_FAIL">
+  </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--94-->
+<!-- suppress tag check messages if "-messages min" -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="TAG_CHECK">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--95-->
+<!-- suppress uncertain discriminant check messages if "-messages min" -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="TYPE_VARIANT_CHECK">
+    </String_Specifier>
+  <String_Specifier
+    Name_Of_String_Attribute="Likelihood"
+    String_To_Match="CHECK_MIGHT_FAIL">
+  </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--96-->
+<!-- Suppress test always true/false and dead code on pointers if
+     -messages min, since not accurate -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="*DEAD*WARNING">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="= null">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--97-->
+<!-- Suppress user check in -messages min mode -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="CONDITIONAL_RAISE_CHECK">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--98-->
+<!-- mark suspicious preconditions as medium (unless -messages min/soft): they
+     are worth our attention, but often do not point to real bugs -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="SUSPICIOUS_*_PRECONDITION_WARNING">
+    </String_Specifier>
+    <Computed_Specifier
+      Complemented="YES"
+      Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+    <Bool_Specifier
+      Complemented="YES"
+      Name_Of_Boolean_Attribute="CHECK_IS_SOFT">
+    </Bool_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--99-->
+<!-- suppress suspicious preconditions when -messages min  -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="SUSPICIOUS_*_PRECONDITION_WARNING">
+    </String_Specifier>
+    <Computed_Specifier
+      Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--100-->
+<!-- suppress messages about X'Accessibility_Level if message is uncertain
+     and not from a precondition, unless -messages max is used -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_MIGHT_FAIL">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*'Accessibility_Level*">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="CONDITIONAL_RAISE_CHECK">
+    </String_Specifier>
+    <Computed_Specifier
+      Complemented="YES"
+      Name_Of_Computed_Attribute="Max_Messages">
+    </Computed_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--101-->
+<!-- Mark most interesting GNAT warnings medium -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <Bool_Specifier Name_Of_Boolean_Attribute="Is_GNAT_Warning"/>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="-gnatw[ncwbxvqr]">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--102-->
+<!-- Complement rule 101 for -gnatw.* switches -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <Bool_Specifier Name_Of_Boolean_Attribute="Is_GNAT_Warning"/>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="-gnatw.[abriqm]">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--103-->
+<!-- Mark all other GNAT warnings as low (default) or suppressed when
+     -messages min -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Bool_Specifier Name_Of_Boolean_Attribute="Is_GNAT_Warning"/>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="-gnatw*">
+    </String_Specifier>
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="-gnatw[ncwbxvqr]">
+    </String_Specifier>
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="-gnatw.[abriqm]">
+    </String_Specifier>
+    <Computed_Specifier
+      Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--104-->
+<!-- Mark all "xxx will be raised at runtime" GNAT warnings as high -->
+<Message_Rule Matching_Probability="HIGH">
+  <Message_Pattern>
+    <Bool_Specifier Name_Of_Boolean_Attribute="Is_GNAT_Warning"/>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="-gnatwn">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="* {will be raised at run time,raises Constraint_Error}">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--105-->
+<!-- Mark "out parameter uninitialized" messages as high unless uncertain -->
+<Message_Rule Matching_Probability="HIGH">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="INVALID_CHECK">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*: out *">
+    </String_Specifier>
+    <Bool_Specifier
+     Complemented="YES"
+     Name_Of_Boolean_Attribute="Message_Likely_False_Positive">
+    </Bool_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--106-->
+<!-- Mark "out parameter uninitialized" messages as medium if uncertain -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="INVALID_CHECK">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*: out *">
+    </String_Specifier>
+    <Bool_Specifier
+     Name_Of_Boolean_Attribute="Message_Likely_False_Positive">
+    </Bool_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--107-->
+<!-- Make lal-checkers messages Medium by default -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <Bool_Specifier Name_Of_Boolean_Attribute="Is_LAL_Checker_Message"/>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--108-->
+<!-- Do not emit info messages on unknown calls unless -messages max -->
+<!-- See also rule 27 -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier
+      Complemented="YES"
+      Name_Of_Computed_Attribute="Max_Messages">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="UNKNOWN_CALL_WARNING">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--109-->
+<!-- suppress messages about X'Valid always false / true if X can be
+     initialized unless -messages max. GNAT SAS assumes that X is in
+     the range of its subtype in most cases and we don't want to bother
+     users with these messages. -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Bool_Specifier Name_Of_Boolean_Attribute="Message_About_Validity_Test">
+    </Bool_Specifier>
+    <Computed_Specifier
+      Complemented="YES"
+      Name_Of_Computed_Attribute="Max_Messages">
+    </Computed_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--110-->
+<!-- suppress messages about X may be uninitialized if X is a prefix of
+     'Valid unless X is certainly uninitialized and -messages max is given.
+     One can call 'Valid on uninitialized variable, but doing so for a
+     variable that is always uninitialized is suspicious. -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Bool_Specifier Name_Of_Boolean_Attribute="Message_About_Validity_Test_Operand">
+    </Bool_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Likelihood"
+      String_To_Match="CHECK_MIGHT_FAIL">
+    </String_Specifier>
+    <Computed_Specifier
+      Complemented="YES"
+      Name_Of_Computed_Attribute="Max_Messages">
+    </Computed_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--111-->
+<!-- Make infer messages Medium by default -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <Bool_Specifier Name_Of_Boolean_Attribute="Is_Infer_Message"/>
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="test always*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--112-->
+<!-- Make infer bufferoverrun messages HIGH -->
+<Message_Rule Matching_Probability="HIGH">
+  <Message_Pattern>
+    <Bool_Specifier Name_Of_Boolean_Attribute="Is_Infer_Message"/>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="{range check,array index check,access check,discriminant check,length check,assertion,precondition*}">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--113-->
+<!-- Make Cppcheck messages Medium by default -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <Bool_Specifier Name_Of_Boolean_Attribute="Is_Cppcheck_Message"/>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--114-->
+<!-- Suppress condition predetermined / dead code messages from GNAT SAS 
+     about debug code when messages min is given. -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier
+      Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="*DEAD_{EDGE,BLOCK}_WARNING">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*{[dD]ebug,[dD]bg}*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--115-->
+<!-- Suppress condition predetermined / dead code messages from infer
+     about debug code when messages min is given. -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Computed_Specifier
+      Name_Of_Computed_Attribute="Min_Messages">
+    </Computed_Specifier>
+    <Bool_Specifier Name_Of_Boolean_Attribute="Is_Infer_Message"/>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="test always*">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*{[dD]ebug,[dD]bg}*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+<!--116-->
+<!-- Make infer condition predetermined messages Medium if they are not
+     about debug code. -->
+<Message_Rule Matching_Probability="MEDIUM">
+  <Message_Pattern>
+    <Bool_Specifier Name_Of_Boolean_Attribute="Is_Infer_Message"/>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="test always*">
+    </String_Specifier>
+    <String_Specifier
+      Complemented="YES"
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*{[dD]ebug,[dD]bg}*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+
+
+</Message_Probability_Rules>

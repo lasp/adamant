@@ -4,7 +4,7 @@ abstract project a_adamant is
    -- Adamant build system and GPRBuild.
    ADAMANT_DIR := external("ADAMANT_DIR", "");
    SOURCE_DIRS := external_as_list("SOURCE_DIRS", ",");
-   OBJECT_DIR := external("OBJECT_DIR");
+   OBJECT_DIR := external("OBJECT_DIR", "");
    EXEC_DIR := external("EXEC_DIR", "");
    CHECK_STYLE := external("CHECK_STYLE", "False");
 
@@ -120,10 +120,13 @@ abstract project a_adamant is
    package Linker is
    end Linker;
 
-   -- CodePeer definition:
-   package CodePeer is
-      for Additional_Patterns use ADAMANT_DIR & "/redo/targets/codepeer/AdamantMessagePatterns.xml";
-      for CWE use "true";
-   end CodePeer;
+   -- GNATSAS Analyzer definition:
+   package Analyzer is
+      for Switches ("analyze") use ("--no-unused-annotate-warning");
+      for Additional_Patterns use ADAMANT_DIR & "/redo/targets/gnatsas/AdamantMessagePatterns.xml";
+   end Analyzer;
+
+   -- Source files declared empty for abstract project
+   for Source_Files use ();
 
 end a_adamant;

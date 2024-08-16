@@ -1,1 +1,1 @@
-rm -rf output*.txt build
+rm -rf output2.txt build
