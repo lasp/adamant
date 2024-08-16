@@ -6271,9 +6271,7 @@ Using the \texttt{CHECK\_STYLE} variable will enforce style checks during every 
 
 \subsection{Static Analysis} \label{Static Analysis}
 
-Static analysis is the act of running code through a program to search for potential vulnerabilities or defects prior to compilation. Adamant provides support for static analysis through the \href{https://www.adacore.com/static-analysis-suite}{\textcolor{blue}{GNAT SAS}} tool developed by AdaCore. To make GNAT SAS easier to run on Adamant style code, it has been integrated into the build system and can be run via \texttt{redo} calls. The following sections outline how to run GNAT SAS.
-
-\subsubsection{Local Static Analysis}
+Static analysis is used to search for potential vulnerabilities or defects in the source code. Adamant provides support for static analysis through the \href{https://www.adacore.com/static-analysis-suite}{\textcolor{blue}{GNAT SAS}} tool developed by AdaCore. To make GNAT SAS easier to run on Adamant code, it has been integrated into the build system and can be run via \texttt{redo} calls. \\
 
 To invoke GNAT SAS on a set of code simply run:
 
@@ -6311,13 +6309,9 @@ In fact, when running the program, this bug is very evident:
 
 The old value of \texttt{Outer\_Var} is reported to be some random number that is not at all the value of 6 like we would expect. \\
 
-GNAT SAS can be run in different configurations that analyze code at a deeper level, thus finding more potential errors, and also more false positives. This configuration is controlled via the CodePeer \texttt{Level} and \texttt{Messages} settings. \texttt{Level} can be configured to be a value between 0 and 4, where 4 performs the most thorough analysis, but also takes the longest time to complete. Information on the difference between the individual levels can be found \href{https://docs.adacore.com/codepeer-docs/users_guide/_build/html/running.html#codepeer-levels}{\textcolor{blue}{here}}. \texttt{Messages} is used to filter out messages that are more likely to be false positives. It can be set to \texttt{min}, \texttt{normal}, or \texttt{max}. A setting of \texttt{max} will show the most messages produced by CodePeer and show the most false positives. A setting of \texttt{min} will show only those messages most likely to indicate real defects. By default, \texttt{redo analyze} runs CodePeer with a setting of \texttt{-level=2} and \texttt{-messages=normal}. \\
+By default, GNAT SAS is run with the currently set build target specified by the \texttt{TARGET} environment variable and runs in \texttt{fast} mode. This is the recommended mode for everyday running of GNAT SAS by developers. GNAT SAS can also be run in \texttt{deep} mode, ideal for overnight runs on a continuous integration server, by specifying \texttt{---mode=deep} in your build target's \textit{.gpr} file. A \texttt{deep} analysis target for Linux is provided in \textit{redo/targets/gpr/linux\_analyze.gpr} and can be used by running \texttt{export TARGET=Linux\_Analyze} prior to running \texttt{redo analyze}. \\
 
-These defaults can be changed by including a YAML file which alters the configuration for a particular directory. To do this we can add the file \textit{all.analyze.yaml}:
-
-\yamlcodef{../example_architecture/analyze_demo/all.analyze.yaml}
-
-In this case, running \texttt{redo analyze} in this directory will run CodePeer at \texttt{-level=1} and \texttt{-messages=min}.
+The \texttt{redo analyze} command copies all source files to \texttt{\$HOME/.codepeer}, analyzes it, and produces results in the same directory. It is recommended that you save the results stored in \texttt{\$HOME/.codepeer} in a version control system so you can compare results of different static analysis runs over time. For more information on GNAT SAS, how to view and compare results between runs, and produce different style reports, see AdaCore's \href{https://docs.adacore.com/live/wave/gnatsas/html/user_guide/getting_started.html}{\textcolor{blue}{documentation}}.
 
 \subsection{Code Metrics} \label{Code Metrics}
 
@@ -6973,12 +6967,6 @@ YAML schema for model files of the form \textit{all.prove.yaml}. \\
 
 \textit{gen/schemas/prove.yaml}:
 \yamlcodef{../../gen/schemas/prove.yaml}
-
-\subsection{GNAT SAS Analyze Model Schema}
-YAML schema for model files of the form \textit{all.analyze.yaml}. \\
-
-\textit{gen/schemas/analyze.yaml}:
-\yamlcodef{../../gen/schemas/analyze.yaml}
 
 \subsection{Memory Map Model Schema}
 YAML schema for model files of the form \textit{name.memory\_map.yaml}. \\
