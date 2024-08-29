@@ -190,8 +190,15 @@ class task_watchdog_list(assembly_submodel):
             )
         # Resolve all pet connector component ids:
         for pet_info in self.watchdog_list.values():
-            pet_info.connector_id = connected_components[pet_info.connector_name]
-            self.watchdog_list[pet_info.connector_name] = pet_info
+            try:
+                pet_info.connector_id = connected_components[pet_info.connector_name]
+                self.watchdog_list[pet_info.connector_name] = pet_info
+            except KeyError:
+                raise ModelException(
+                    "Task_Watchdog Lists specifies connector name: "
+                    + str(pet_info.connector_name)
+                    + " which does not exist in the assembly."
+                )
 
         # Sort the watchdog list by index:
         self.watchdog_list = OrderedDict(
