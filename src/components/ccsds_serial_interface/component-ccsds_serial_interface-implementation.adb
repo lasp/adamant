@@ -8,10 +8,26 @@ with Ccsds_Primary_Header;
 with Interfaces;
 with Ada.Execution_Time;
 with Ada.Real_Time;
+with Sleep;
 -- with Ada.Text_IO; use Ada.Text_IO;
 -- with Basic_Types.Representation;
 
 package body Component.Ccsds_Serial_Interface.Implementation is
+
+   --------------------------------------------------
+   -- Subprogram for implementation init method:
+   --------------------------------------------------
+   -- Init to provide gap between packets if necessary
+   --
+   -- Init Parameters:
+   -- Interpacket_Gap_Ms : Natural - Amount of time in milliseconds to wait in
+   -- between transmission of each CCSDS packet. Some UART protocols rely on a gap to
+   -- differentiate between packets, and this can be used to enforce that.
+   --
+   overriding procedure Init (Self : in out Instance; Interpacket_Gap_Ms : in Natural := 0) is
+   begin
+      Self.Interpacket_Gap_Ms := Interpacket_Gap_Ms;
+   end Init;
 
    ---------------------------------------
    -- Invokee connector primitives:
@@ -55,6 +71,9 @@ package body Component.Ccsds_Serial_Interface.Implementation is
          begin
             Diagnostic_Uart.Put (Sync_Pattern & Bytes (0 .. Num_Bytes_Serialized - 1));
             --Put_Line(Standard_Error, Basic_Types.Representation.Image(sync_Pattern & bytes(0 .. num_Bytes_Serialized - 1)));
+            if Self.Interpacket_Gap_Ms > 0 then
+               Sleep.Sleep_Ms (Self.Interpacket_Gap_Ms);
+            end if;
          end;
       end if;
    end Ccsds_Space_Packet_T_Recv_Async;

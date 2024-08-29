@@ -5,6 +5,13 @@ execution: active
 subtasks:
   - name: Listener
     description: This internal task is used to listen on the serial port for incoming packets.
+init:
+  description: Init to provide gap between packets if necessary
+  parameters:
+    - name: Interpacket_Gap_Ms
+      type: Natural
+      default: "0"
+      description: Amount of time in milliseconds to wait in between transmission of each CCSDS packet. Some UART protocols rely on a gap to differentiate between packets, and this can be used to enforce that.
 connectors:
   - description: On this connector the Socket Interface Component receives data and sends it out of the socket.
     type: Ccsds_Space_Packet.T
