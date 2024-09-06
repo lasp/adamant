@@ -328,7 +328,7 @@ package body Component.{{ name }} is
          if Base_Instance'Class (Self).Dispatch_Nonblock = False then
             return Elements_Dispatched;
          end if;
-         Elements_Dispatched := Elements_Dispatched + 1;
+         Elements_Dispatched := @ + 1;
       end loop;
       return Elements_Dispatched;
    end Dispatch_N;
@@ -419,7 +419,7 @@ package body Component.{{ name }} is
                   -- However, to be safe, let's just sleep for a short amount of time
                   -- to give up the processor so we don't end up hogging the CPU if this is a high priority
                   -- task.
-                  Count := Count + 1;
+                  Count := @ + 1;
                   if Count > 5 then
                      -- We are still in an error condition after trying many time, something is terribly
                      -- wrong, drop the message.

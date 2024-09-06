@@ -49,7 +49,7 @@ package body Fifo is
       Self.Items (Index) := Value;
 
       -- Increment the buffer count:
-      Self.Count := Self.Count + 1;
+      Self.Count := @ + 1;
 
       -- Update high water mark:
       if Self.Count > Self.Max_Count then
@@ -67,8 +67,8 @@ package body Fifo is
       end if;
 
       -- Increment the start index and count:
-      Self.Head := (Self.Head + 1) mod Self.Items'Length;
-      Self.Count := Self.Count - 1;
+      Self.Head := (@ + 1) mod Self.Items'Length;
+      Self.Count := @ - 1;
       return Success;
    end Pop;
 

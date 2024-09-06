@@ -72,11 +72,11 @@ package body Two_Counter_Entry is
                         -- Check if the event was at the max persistence and should be limited
                         if Event_Info.Top_Event_Count >= Self.Persistence then
                            -- Increment our number of limited event counter if the event is enabled here (so that its protected in the component)
-                           Self.Num_Events_Limited := Self.Num_Events_Limited + 1;
+                           Self.Num_Events_Limited := @ + 1;
                            Increment_Status := Event_Max_Limit;
                            -- Increment if we are less than the persistence
                         else
-                           Event_Info.Top_Event_Count := Event_Info.Top_Event_Count + 1;
+                           Event_Info.Top_Event_Count := @ + 1;
                         end if;
                         -- Nothing to do if disabled
                      when Event_State_Type.Disabled =>
@@ -95,11 +95,11 @@ package body Two_Counter_Entry is
                         -- Check if the event was at the max persistence and limited
                         if Event_Info.Bottom_Event_Count >= Self.Persistence then
                            -- Increment our number of limited event counter if the event is enabled here (so that its protected in the component)
-                           Self.Num_Events_Limited := Self.Num_Events_Limited + 1;
+                           Self.Num_Events_Limited := @ + 1;
                            Increment_Status := Event_Max_Limit;
                            -- Increment if we are less than the persistence
                         else
-                           Event_Info.Bottom_Event_Count := Event_Info.Bottom_Event_Count + 1;
+                           Event_Info.Bottom_Event_Count := @ + 1;
                         end if;
                         -- Nothing to do if disabled
                      when Event_State_Type.Disabled =>
@@ -143,7 +143,7 @@ package body Two_Counter_Entry is
                         end if;
                         -- Decrement the count if needed
                         if Event_Info.Top_Event_Count > 0 then
-                           Event_Info.Top_Event_Count := Event_Info.Top_Event_Count - 1;
+                           Event_Info.Top_Event_Count := @ - 1;
                         end if;
                         -- Nothing to do if disabled
                      when Disabled =>
@@ -164,7 +164,7 @@ package body Two_Counter_Entry is
                         end if;
                         -- Decrement count if needed
                         if Event_Info.Bottom_Event_Count > 0 then
-                           Event_Info.Bottom_Event_Count := Event_Info.Bottom_Event_Count - 1;
+                           Event_Info.Bottom_Event_Count := @ - 1;
                         end if;
                         -- Nothing to do if disabled
                      when Disabled =>

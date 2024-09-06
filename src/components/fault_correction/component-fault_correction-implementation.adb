@@ -69,7 +69,7 @@ package body Component.Fault_Correction.Implementation is
 
             -- OK, now add response entry to table:
             Self.Fault_Response_Table.all (Table_Index) := Response_Entry;
-            Table_Index := Table_Index + 1;
+            Table_Index := @ + 1;
          end;
       end loop;
    end Init;
@@ -163,7 +163,7 @@ package body Component.Fault_Correction.Implementation is
                      -- Note: We won't overflow this based on assertions in Init.
                      To_Send.Buffer (Product_Buffer_Index) := Status_Byte;
                      if Product_Buffer_Index < Data_Product_Types.Data_Product_Buffer_Length_Type'Last then
-                        Product_Buffer_Index := Product_Buffer_Index + 1;
+                        Product_Buffer_Index := @ + 1;
                      end if;
                      Status_Byte := 0;
                   end if;
@@ -264,7 +264,7 @@ package body Component.Fault_Correction.Implementation is
             end if;
 
             -- Send data products if necessary:
-            Self.Fault_Counter := Self.Fault_Counter + 1;
+            Self.Fault_Counter := @ + 1;
             Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Fault_Counter (The_Time, (Value => Self.Fault_Counter)));
             Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Last_Fault_Id_Received (The_Time, (Id => Arg.Header.Id)));
             Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Time_Of_Last_Fault_Received (The_Time, Arg.Header.Time));

@@ -17,7 +17,7 @@ package body Last_Chance_Handler is
       GNAT.IO.Put ("LCH called => ");
       while Peek (A) /= Ascii.Nul loop
          GNAT.IO.Put (Peek (A));
-         A := A + 1;
+         A := @ + 1;
       end loop;
       GNAT.IO.Put (": ");
       GNAT.IO.Put (Line); -- avoid the secondary stack for Line'Image

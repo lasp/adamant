@@ -27,7 +27,7 @@ package body Component.Event_Component.Implementation is
       Self.Event_T_Send (Self.Events.Tick_Received (Timestamp, Arg));
 
       -- Increment the count:
-      Self.Count := Self.Count + 1;
+      Self.Count := @ + 1;
    end Tick_T_Recv_Sync;
 
 end Component.Event_Component.Implementation;

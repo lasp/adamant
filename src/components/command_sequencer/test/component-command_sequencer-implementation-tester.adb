@@ -280,7 +280,7 @@ package body Component.Command_Sequencer.Implementation.Tester is
       if not Self.Expect_Tick_T_Send_Dropped then
          pragma Assert (False, "The component's queue filled up when Tick_T_Send was called!");
       else
-         Self.Tick_T_Send_Dropped_Count := Self.Tick_T_Send_Dropped_Count + 1;
+         Self.Tick_T_Send_Dropped_Count := @ + 1;
          Self.Expect_Tick_T_Send_Dropped := False;
       end if;
    end Tick_T_Send_Dropped;
@@ -292,7 +292,7 @@ package body Component.Command_Sequencer.Implementation.Tester is
       if not Self.Expect_Command_Response_T_Send_Dropped then
          pragma Assert (False, "The component's queue filled up when Command_Response_T_Send was called!");
       else
-         Self.Command_Response_T_Send_Dropped_Count := Self.Command_Response_T_Send_Dropped_Count + 1;
+         Self.Command_Response_T_Send_Dropped_Count := @ + 1;
          Self.Expect_Command_Response_T_Send_Dropped := False;
       end if;
    end Command_Response_T_Send_Dropped;
@@ -304,7 +304,7 @@ package body Component.Command_Sequencer.Implementation.Tester is
       if not Self.Expect_Command_T_Send_Dropped then
          pragma Assert (False, "The component's queue filled up when Command_T_Send was called!");
       else
-         Self.Command_T_Send_Dropped_Count := Self.Command_T_Send_Dropped_Count + 1;
+         Self.Command_T_Send_Dropped_Count := @ + 1;
          Self.Expect_Command_T_Send_Dropped := False;
       end if;
    end Command_T_Send_Dropped;
@@ -316,7 +316,7 @@ package body Component.Command_Sequencer.Implementation.Tester is
       if not Self.Expect_Sequence_Load_T_Send_Dropped then
          pragma Assert (False, "The component's queue filled up when Sequence_Load_T_Send was called!");
       else
-         Self.Sequence_Load_T_Send_Dropped_Count := Self.Sequence_Load_T_Send_Dropped_Count + 1;
+         Self.Sequence_Load_T_Send_Dropped_Count := @ + 1;
          Self.Expect_Sequence_Load_T_Send_Dropped := False;
       end if;
    end Sequence_Load_T_Send_Dropped;

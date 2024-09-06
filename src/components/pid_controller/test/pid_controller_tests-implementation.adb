@@ -100,7 +100,7 @@ package body Pid_Controller_Tests.Implementation is
 
       -- Induce the packet to send
       while Subpacket_Duration > Extra_Packets loop
-         Subpacket_Duration := Subpacket_Duration - 1;
+         Subpacket_Duration := @ - 1;
 
          T.Control_Input_U_Send (((0, 0), 1.0, 1.0, 1.0, False));
          Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);

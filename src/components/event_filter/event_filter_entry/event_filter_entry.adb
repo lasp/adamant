@@ -137,10 +137,10 @@ package body Event_Filter_Entry is
             end case;
 
             if Event_State = Event_Filter_State.Filtered then
-               Self.Num_Events_Filtered := Self.Num_Events_Filtered + 1;
+               Self.Num_Events_Filtered := @ + 1;
                return Filtered;
             else
-               Self.Num_Events_Unfiltered := Self.Num_Events_Unfiltered + 1;
+               Self.Num_Events_Unfiltered := @ + 1;
                return Unfiltered;
             end if;
          end;

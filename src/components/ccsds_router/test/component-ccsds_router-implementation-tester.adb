@@ -196,7 +196,7 @@ package body Component.Ccsds_Router.Implementation.Tester is
       if not Self.Expect_Ccsds_Space_Packet_T_Send_2_Dropped then
          pragma Assert (False, "The component's queue filled up when Ccsds_Space_Packet_T_Send_2 was called!");
       else
-         Self.Ccsds_Space_Packet_T_Send_2_Dropped_Count := Self.Ccsds_Space_Packet_T_Send_2_Dropped_Count + 1;
+         Self.Ccsds_Space_Packet_T_Send_2_Dropped_Count := @ + 1;
          Self.Expect_Ccsds_Space_Packet_T_Send_2_Dropped := False;
       end if;
    end Ccsds_Space_Packet_T_Send_2_Dropped;

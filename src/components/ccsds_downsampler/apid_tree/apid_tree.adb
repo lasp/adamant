@@ -43,7 +43,7 @@ package body Apid_Tree is
          -- If we couldn't find the packet, then increment the pass count and move on
          when False =>
             -- Update the counter and return the status
-            Self.Num_Passed_Packets := Self.Num_Passed_Packets + 1;
+            Self.Num_Passed_Packets := @ + 1;
             Count := Self.Num_Passed_Packets;
             Return_Status := Invalid_Id;
          when True =>
@@ -52,24 +52,24 @@ package body Apid_Tree is
                -- When the factor is set to 0, we dont pass anything along.
                when 0 =>
                   -- Update counter
-                  Self.Num_Filtered_Packets := Self.Num_Filtered_Packets + 1;
+                  Self.Num_Filtered_Packets := @ + 1;
                   Return_Status := Filter;
                   Count := Self.Num_Filtered_Packets;
                -- Use the filter factor value for all other values to determine if it needs to be filtered or not
                when others =>
                   if (Fetched_Entry.Filter_Count mod Fetched_Entry.Filter_Factor) = 0 then
-                     Self.Num_Passed_Packets := Self.Num_Passed_Packets + 1;
+                     Self.Num_Passed_Packets := @ + 1;
                      Return_Status := Pass;
                      Count := Self.Num_Passed_Packets;
                   else
                      -- Filtered here
-                     Self.Num_Filtered_Packets := Self.Num_Filtered_Packets + 1;
+                     Self.Num_Filtered_Packets := @ + 1;
                      Return_Status := Filter;
                      Count := Self.Num_Filtered_Packets;
                   end if;
             end case;
             -- If we found the entry in the tree, then make sure we update with the new count for that entry
-            Fetched_Entry.Filter_Count := Fetched_Entry.Filter_Count + 1;
+            Fetched_Entry.Filter_Count := @ + 1;
             Self.Downsample_Entry.Set (Tree_Index, Fetched_Entry);
       end case;
 

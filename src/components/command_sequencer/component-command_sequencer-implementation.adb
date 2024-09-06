@@ -322,7 +322,7 @@ package body Component.Command_Sequencer.Implementation is
       if Self.Timeout_Limit /= Natural'First then
          -- Increment up to maximum.
          if Timeout_Counter < Natural'Last then
-            Timeout_Counter := Timeout_Counter + 1;
+            Timeout_Counter := @ + 1;
          end if;
 
          -- Check against limit:
@@ -653,7 +653,7 @@ package body Component.Command_Sequencer.Implementation is
             ));
 
          -- Increment the index:
-         Idx := Idx + Engine_Summary_Type.Size_In_Bytes;
+         Idx := @ + Engine_Summary_Type.Size_In_Bytes;
       end loop;
 
       -- Fill in packet length:
@@ -688,7 +688,7 @@ package body Component.Command_Sequencer.Implementation is
          ));
 
       -- Increment the index:
-      Idx := Idx + Engine_Details_Type.Size_In_Bytes;
+      Idx := @ + Engine_Details_Type.Size_In_Bytes;
 
       for Stack_Index in Seq_Types.Max_Seq_Num'First .. Seq_Types.Max_Seq_Num'First + Stack_Depth - 1 loop
          Pkt.Buffer (Idx .. Idx + Sequence_Details_Type.Size_In_Bytes - 1) :=
@@ -702,7 +702,7 @@ package body Component.Command_Sequencer.Implementation is
             ));
 
          -- Increment the index:
-         Idx := Idx + Sequence_Details_Type.Size_In_Bytes;
+         Idx := @ + Sequence_Details_Type.Size_In_Bytes;
       end loop;
 
       -- Fill in packet length:
@@ -777,7 +777,7 @@ package body Component.Command_Sequencer.Implementation is
                            declare
                               Error_Counter : Interfaces.Unsigned_16 renames Self.Engine_Aux_Data.all (Engine.Get_Engine_Id).Command_Error_Counter;
                            begin
-                              Error_Counter := Error_Counter + 1;
+                              Error_Counter := @ + 1;
                            end;
 
                            -- If we were waiting on a command or this engine triggered a load into another engine, then we just execute the next command in our sequence
@@ -851,7 +851,7 @@ package body Component.Command_Sequencer.Implementation is
          end if;
 
          -- Increment the packet counter:
-         Self.Packet_Counter := Self.Packet_Counter + 1;
+         Self.Packet_Counter := @ + 1;
       end if;
    end Tick_T_Recv_Async;
 
@@ -900,7 +900,7 @@ package body Component.Command_Sequencer.Implementation is
                declare
                   Error_Counter : Interfaces.Unsigned_16 renames Self.Engine_Aux_Data.all (Engine_Id).Command_Error_Counter;
                begin
-                  Error_Counter := Error_Counter + 1;
+                  Error_Counter := @ + 1;
                end;
 
                -- If we are configured to continue on a command failure then keep going, otherwise

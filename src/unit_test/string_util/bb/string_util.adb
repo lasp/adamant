@@ -28,7 +28,7 @@ package body String_Util is
    begin
       for Indx in Bytes'Range loop
          Toreturn ((Cnt * 4 + 1) .. (Cnt * 4 + 4)) := " " & Get_Number (Indx);
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
       end loop;
       return Prefix & Trim_Both (Toreturn) & Postfix;
    end Bytes_To_String;
@@ -57,12 +57,12 @@ package body String_Util is
    begin
       -- Find the first non-space character
       while Start_Index <= End_Index and then Input (Start_Index) = ' ' loop
-         Start_Index := Start_Index + 1;
+         Start_Index := @ + 1;
       end loop;
 
       -- Find the last non-space character
       while End_Index >= Start_Index and then Input (End_Index) = ' ' loop
-         End_Index := End_Index - 1;
+         End_Index := @ - 1;
       end loop;
 
       -- Return the trimmed substring

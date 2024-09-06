@@ -29,7 +29,7 @@ package body Component.Tick_Divider.Implementation is
          -- is disabled, thus it should not be included in the calculation.
          Divider := Self.Dividers (Index);
          if Divider > 0 then
-            Self.Max_Count := Self.Max_Count * Divider;
+            Self.Max_Count := @ * Divider;
          end if;
       end loop;
 
@@ -62,7 +62,7 @@ package body Component.Tick_Divider.Implementation is
       -- never called. This behavior is by design.
       -- This increment will overflow because Self.Max_Count < Natural'Last
       -- according to check in the Init.
-      Self.Count := (Self.Count + 1) mod Self.Max_Count;
+      Self.Count := (@ + 1) mod Self.Max_Count;
    end Tick_T_Recv_Sync;
 
    overriding procedure Tick_T_Send_Dropped (Self : in out Instance; Index : in Tick_T_Send_Index; Arg : in Tick.T) is

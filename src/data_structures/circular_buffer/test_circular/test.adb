@@ -36,7 +36,7 @@ procedure Test is
             Natural_Assert.Eq (Num_Bytes, Expected_Cnt - Cnt, "num_Bytes_Returned wrong!", Filename, Line);
             -- Put_Line(Basic_Types.Representation.Image(bytes(0 .. num_Bytes - 1)));
             Byte_Array_Assert.Eq (Bytes (0 .. Num_Bytes - 1), Bytes_To_Compare (Bytes_To_Compare'First + Cnt .. Bytes_To_Compare'First + Cnt + Num_Bytes - 1), "byte compare failed at iteration: " & Natural'Image (Idx), Filename, Line);
-            Cnt := Cnt + 1;
+            Cnt := @ + 1;
          end loop;
          Pop_Assert.Eq (Buf.Peek (Bytes, Num_Bytes, Offset => Cnt), Empty);
          Pop_Assert.Eq (Buf.Peek (Bytes, Num_Bytes, Offset => 0), Success, "Pop not successful!", Filename, Line);
@@ -54,7 +54,7 @@ procedure Test is
                -- Copy pointers to bytes_To_Compare:
                if (not Is_Null (D)) and then Length (D) > 0 then
                   Bytes_To_Compare (Cnt .. Cnt + Length (D) - 1) := To_Byte_Array (D);
-                  Cnt := Cnt + Length (D);
+                  Cnt := @ + Length (D);
                end if;
             end loop;
             return Cnt;

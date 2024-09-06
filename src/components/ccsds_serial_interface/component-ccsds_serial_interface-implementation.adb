@@ -22,7 +22,7 @@ package body Component.Ccsds_Serial_Interface.Implementation is
       Num_Bytes_Serialized : Natural;
       Stat : Serialization_Status;
    begin
-      Self.Count := Self.Count + 1;
+      Self.Count := @ + 1;
 
       if Self.Count > 200 then
          -- Measure execution time of listener task. This is important because the execution percentage of this task,
@@ -81,7 +81,7 @@ package body Component.Ccsds_Serial_Interface.Implementation is
 
          -- Check against the sync pattern:
          if A_Byte = Sync_Pattern (Count) then
-            Count := Count + 1;
+            Count := @ + 1;
          elsif A_Byte = Sync_Pattern (Sync_Pattern'First) then
             Count := Sync_Pattern'First + 1;
          else
@@ -89,7 +89,7 @@ package body Component.Ccsds_Serial_Interface.Implementation is
          end if;
 
          -- Increment bytes without sync and send out an event with every 20 bytes:
-         Bytes_Without_Sync := Bytes_Without_Sync + 1;
+         Bytes_Without_Sync := @ + 1;
          if (Bytes_Without_Sync mod 20) = 0 then
             Self.Event_T_Send_If_Connected (Self.Events.Have_Not_Seen_Sync_Pattern (Self.Sys_Time_T_Get, (Value => Bytes_Without_Sync)));
          end if;

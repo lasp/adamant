@@ -180,7 +180,7 @@ package body Component.Pid_Controller.Implementation is
                Self.Packet_T_Send_If_Connected (Self.Diagnostic_Packet);
 
                -- Increment sequence count:
-               Self.Diagnostic_Packet.Header.Sequence_Count := Self.Diagnostic_Packet.Header.Sequence_Count + 1;
+               Self.Diagnostic_Packet.Header.Sequence_Count := @ + 1;
 
                -- Reset diagnostic subpacket counter:
                Self.Diagnostic_Subpacket_Count := 0;
@@ -206,7 +206,7 @@ package body Component.Pid_Controller.Implementation is
                   Pid_Diagnostic_Subpacket.Serialization.To_Byte_Array ((Measured_Angle => Arg.Measured_Value, Reference_Angle => Arg.Commanded_Value, Current_Out_Angle => Pid_Control_Output));
 
                -- Increment the diagnostic subpacket count:
-               Self.Diagnostic_Subpacket_Count := Self.Diagnostic_Subpacket_Count + 1;
+               Self.Diagnostic_Subpacket_Count := @ + 1;
 
                -- Decrement the count. If it is 0 here (is. was equal to 1) we will not return here so we need to send what we have of the packet.
                Self.Diagnostic_Counter.Decrement_Count (1);

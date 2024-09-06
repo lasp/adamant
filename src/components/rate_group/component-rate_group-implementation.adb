@@ -105,7 +105,7 @@ package body Component.Rate_Group.Implementation is
          -- data product periodically.
          if Self.Ticks_Per_Timing_Report > 0 then
             -- Increment the number of ticks.
-            Self.Num_Ticks := Self.Num_Ticks + 1;
+            Self.Num_Ticks := @ + 1;
 
             -- If we are at the period then send out the data product:
             if Self.Num_Ticks >= Self.Ticks_Per_Timing_Report then
@@ -131,7 +131,7 @@ package body Component.Rate_Group.Implementation is
             end if;
          end if;
       else
-         Self.Ticks_Since_Startup := Self.Ticks_Since_Startup + 1;
+         Self.Ticks_Since_Startup := @ + 1;
       end if;
 
       -- Check for cycle slip.
@@ -140,7 +140,7 @@ package body Component.Rate_Group.Implementation is
       -- been put on our queue before we have finished executing the last Tick then
       -- our rate group has slipped. Sad day :(
       if Self.Queue.Num_Elements > 0 then
-         Self.Num_Cycle_Slips := Self.Num_Cycle_Slips + 1;
+         Self.Num_Cycle_Slips := @ + 1;
          Self.Event_T_Send_If_Connected (Self.Events.Cycle_Slip (Stop_Wall_Time, (Slipped_Tick => Arg, Num_Slips => Self.Num_Cycle_Slips)));
       end if;
 

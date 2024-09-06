@@ -110,7 +110,7 @@ package body Sequence_Store_Tests.Implementation is
             Id => Slot_0_Header.Seq_Header.Id,
             Sequence_Length => Slot_0_Header.Seq_Header.Length
          ));
-      Idx := Idx + Packed_Slot_Summary.Size_In_Bytes;
+      Idx := @ + Packed_Slot_Summary.Size_In_Bytes;
 
       -- Serialize slot 2 data:
       Pkt.Buffer (Idx .. Idx + Packed_Slot_Summary.Size_In_Bytes - 1) :=
@@ -119,7 +119,7 @@ package body Sequence_Store_Tests.Implementation is
             Id => Slot_1_Header.Seq_Header.Id,
             Sequence_Length => Slot_1_Header.Seq_Header.Length
          ));
-      Idx := Idx + Packed_Slot_Summary.Size_In_Bytes;
+      Idx := @ + Packed_Slot_Summary.Size_In_Bytes;
 
       -- Serialize slot 3 data:
       Pkt.Buffer (Idx .. Idx + Packed_Slot_Summary.Size_In_Bytes - 1) :=
@@ -128,7 +128,7 @@ package body Sequence_Store_Tests.Implementation is
             Id => Slot_2_Header.Seq_Header.Id,
             Sequence_Length => Slot_2_Header.Seq_Header.Length
          ));
-      Idx := Idx + Packed_Slot_Summary.Size_In_Bytes;
+      Idx := @ + Packed_Slot_Summary.Size_In_Bytes;
 
       -- Serialize slot 4 data:
       Pkt.Buffer (Idx .. Idx + Packed_Slot_Summary.Size_In_Bytes - 1) :=
@@ -137,7 +137,7 @@ package body Sequence_Store_Tests.Implementation is
             Id => Slot_3_Header.Seq_Header.Id,
             Sequence_Length => Slot_3_Header.Seq_Header.Length
          ));
-      Idx := Idx + Packed_Slot_Summary.Size_In_Bytes;
+      Idx := @ + Packed_Slot_Summary.Size_In_Bytes;
 
       return Pkt;
    end Create_Summary_Packet;
@@ -1045,7 +1045,7 @@ package body Sequence_Store_Tests.Implementation is
                Validity => Undefined), Seq_Header => (Crc => [0, 0], Version => 0, Category => 0, Id => 54, Length => 12));
 
       -- Corrupt CRC
-      Seq_Header.Crc (1) := Seq_Header.Crc (1) + 1;
+      Seq_Header.Crc (1) := @ + 1;
 
       -- OK, first let's try to send a sequence:
       T.Sequence_Store_Memory_Region_Store_T_Send ((Slot => 1, Sequence_Region => Seq_Region));
@@ -1077,10 +1077,10 @@ package body Sequence_Store_Tests.Implementation is
 
       -- Again
       -- Fix CRC
-      Seq_Header.Crc (1) := Seq_Header.Crc (1) - 1;
+      Seq_Header.Crc (1) := @ - 1;
       -- Set length to bad, this will show up as a CRC error.
-      Seq_Header.Length := Seq_Header.Length + 1;
-      Seq_Region.Length := Seq_Region.Length + 1;
+      Seq_Header.Length := @ + 1;
+      Seq_Region.Length := @ + 1;
 
       -- OK, first let's try to send a sequence :
       T.Sequence_Store_Memory_Region_Store_T_Send ((Slot => 1, Sequence_Region => Seq_Region));
@@ -1115,13 +1115,13 @@ package body Sequence_Store_Tests.Implementation is
       --
 
       -- Reset lengths:
-      Seq_Header.Length := Seq_Header.Length - 1;
-      Seq_Region.Length := Seq_Region.Length - 1;
+      Seq_Header.Length := @ - 1;
+      Seq_Region.Length := @ - 1;
 
       -- OK, now if the region is too small to hold the entire sequence we
       -- should get an error thrown. So let's make the region too small
       -- by a single byte.
-      Seq_Region.Length := Seq_Region.Length - 1;
+      Seq_Region.Length := @ - 1;
 
       -- OK, first let's try to send a sequence:
       T.Sequence_Store_Memory_Region_Store_T_Send ((Slot => 1, Sequence_Region => Seq_Region));

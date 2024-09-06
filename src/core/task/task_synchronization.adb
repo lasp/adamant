@@ -94,7 +94,7 @@ package body Task_Synchronization is
                Timeout_Count := 0;
             else
                -- Increment the timeout counter.
-               Timeout_Count := Timeout_Count + 1;
+               Timeout_Count := @ + 1;
             end if;
          else
             -- If no task is waiting, then reset the

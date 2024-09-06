@@ -88,7 +88,7 @@ package body Component.Connector_Queuer.Implementation.Tester is
       if not Self.Expect_T_Send_Dropped then
          pragma Assert (False, "The component's queue filled up when T_Send was called!");
       else
-         Self.T_Send_Dropped_Count := Self.T_Send_Dropped_Count + 1;
+         Self.T_Send_Dropped_Count := @ + 1;
          Self.Expect_T_Send_Dropped := False;
       end if;
    end T_Send_Dropped;

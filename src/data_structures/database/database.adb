@@ -59,7 +59,7 @@ package body Database is
          Self.Index_Table (Id) := Db_Index;
 
          -- Increment the head:
-         Self.Head := Self.Head + 1;
+         Self.Head := @ + 1;
       end if;
 
       -- The index should ALWAYS be less than head.

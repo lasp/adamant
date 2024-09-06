@@ -131,7 +131,7 @@ package body Component.Command_Protector.Implementation is
 
                -- If this is a protected command, we need to increment a counter for telemetry.
                if Is_Protected_Command then
-                  Self.Protected_Command_Forward_Count := Self.Protected_Command_Forward_Count + 1;
+                  Self.Protected_Command_Forward_Count := @ + 1;
                   Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Protected_Command_Forward_Count (The_Time, (Value => Self.Protected_Command_Forward_Count)));
 
                   -- Send info event:
@@ -152,7 +152,7 @@ package body Component.Command_Protector.Implementation is
                   The_Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
                begin
                   -- Increment the reject counter:
-                  Self.Protected_Command_Reject_Count := Self.Protected_Command_Reject_Count + 1;
+                  Self.Protected_Command_Reject_Count := @ + 1;
                   Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Protected_Command_Reject_Count (The_Time, (Value => Self.Protected_Command_Reject_Count)));
 
                   -- Send info event:

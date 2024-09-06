@@ -67,7 +67,7 @@ package body Monitor is
             else
                -- Increment counter:
                if Self.Persistence_Count < Natural'Last then
-                  Self.Persistence_Count := Self.Persistence_Count + 1;
+                  Self.Persistence_Count := @ + 1;
                end if;
 
                -- Transition if counter is at the threshold:
@@ -85,7 +85,7 @@ package body Monitor is
             if Predicate then
                -- Increment counter:
                if Self.Persistence_Count < Natural'Last then
-                  Self.Persistence_Count := Self.Persistence_Count + 1;
+                  Self.Persistence_Count := @ + 1;
                end if;
 
                -- Transition if counter is at the threshold:

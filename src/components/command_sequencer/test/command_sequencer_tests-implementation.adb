@@ -166,7 +166,7 @@ package body Command_Sequencer_Tests.Implementation is
       while not End_Of_File (File) loop
          Read (File, Data);
          Buffer (Sequence_Size) := Data;
-         Sequence_Size := Sequence_Size + 1;
+         Sequence_Size := @ + 1;
       end loop;
       Put_Line ("Loaded " & Sequence_Size'Image & " bytes.");
       Close (File);
@@ -1936,7 +1936,7 @@ package body Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
 
       -- Modify the memory region size so it is one byte too small.
-      Sequence_Region.Length := Sequence_Region.Length - 1;
+      Sequence_Region.Length := @ - 1;
 
       -- Load a simple sequence:
       T.Sequence_Load_T_Send ((Engine_Request => Specific_Engine, Engine_Id => 0, Sequence_Region => Sequence_Region));

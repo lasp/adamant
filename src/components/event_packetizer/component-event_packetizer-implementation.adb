@@ -93,7 +93,7 @@ package body Component.Event_Packetizer.Implementation is
          -- Helper procedure to increment the dropped event counter:
          procedure Increment_Events_Dropped is
          begin
-            Events_Dropped := Events_Dropped + 1;
+            Events_Dropped := @ + 1;
             New_Packets_Dropped := True;
          end Increment_Events_Dropped;
 
@@ -101,11 +101,11 @@ package body Component.Event_Packetizer.Implementation is
          procedure Next_Packet is
          begin
             -- Increment full count:
-            Num_Packets_Full := Num_Packets_Full + 1;
+            Num_Packets_Full := @ + 1;
             pragma Assert (Num_Packets_Full <= Packets'Length);
             -- Increment index:
             if Index < Packet_Array_Index'Last then
-               Index := Index + 1;
+               Index := @ + 1;
             end if;
             -- Check for roll over:
             if Index > Packets'Last then
@@ -212,7 +212,7 @@ package body Component.Event_Packetizer.Implementation is
             when Full =>
                Do_Pop_Packet (Idx, The_Packet);
                -- Decrement the packet full count:
-               Num_Packets_Full := Num_Packets_Full - 1;
+               Num_Packets_Full := @ - 1;
                Status := Success;
             when Partial =>
                if Allow_Partial_Packet then
@@ -334,7 +334,7 @@ package body Component.Event_Packetizer.Implementation is
             -- is requested, but not available.
             when Packet_Partially_Full =>
                if Self.Partial_Packet_Count < Natural'Last then
-                  Self.Partial_Packet_Count := Self.Partial_Packet_Count + 1;
+                  Self.Partial_Packet_Count := @ + 1;
                end if;
             when Packet_Empty =>
                null;

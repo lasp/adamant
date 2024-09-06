@@ -76,13 +76,13 @@ package body Component.Ccsds_Subpacket_Extractor.Implementation is
                if Stat = Success then
                   -- Send out subpacket:
                   Self.Ccsds_Space_Packet_T_Send (Subpacket);
-                  Idx := Idx + Num_Bytes_Deserialized;
+                  Idx := @ + Num_Bytes_Deserialized;
 
                   -- If the maximum number of packets is set positive, then we want to limit the number of packets extracted.
                   -- If we have reached this limit, then stop extraction. If the max limit is negative, then we don't limit the
                   -- number of packets extracted at all.
                   if Self.Max_Subpackets_To_Extract > 0 then
-                     Num_Subpackets_Sent := Num_Subpackets_Sent + 1;
+                     Num_Subpackets_Sent := @ + 1;
                      if Num_Subpackets_Sent >= Self.Max_Subpackets_To_Extract then
                         exit;
                      end if;

@@ -31,7 +31,7 @@ package body Component.Parameter_Component.Implementation is
       end if;
 
       -- Increment the count:
-      Self.Count := Self.Count + 1;
+      Self.Count := @ + 1;
    end Tick_T_Recv_Sync;
 
    -- This procedure is called when the parameters of a component have been updated. The default implementation of this

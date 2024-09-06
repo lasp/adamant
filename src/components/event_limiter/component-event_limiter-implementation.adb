@@ -151,7 +151,7 @@ package body Component.Event_Limiter.Implementation is
                when Event_Max_Limit =>
                   if Num_Event_Limited_Event.Num_Event_Ids <= Num_Event_Limited_Event.Event_Id_Limited_Array'Length then
                      Num_Event_Limited_Event.Event_Id_Limited_Array (Integer (Num_Event_Limited_Event.Num_Event_Ids)) := Dec_Event_Id;
-                     Num_Event_Limited_Event.Num_Event_Ids := Num_Event_Limited_Event.Num_Event_Ids + 1;
+                     Num_Event_Limited_Event.Num_Event_Ids := @ + 1;
                   end if;
                   -- Assert on the status. We know the range so we shouldn't get an invalid_Id error
                when Invalid_Id =>
@@ -201,7 +201,7 @@ package body Component.Event_Limiter.Implementation is
                         when 7 =>
                            Event_Bitmap.State_7 := Event_State;
                            Event_State_Array (Byte_Num) := Event_Id_Limiter_State_Type.Serialization.To_Byte_Array (Event_Bitmap) (0);
-                           Byte_Num := Byte_Num + 1;
+                           Byte_Num := @ + 1;
                      end case;
                   when Invalid_Id =>
                      pragma Assert (False, "Invalid_Id found when decrementing all event limiter counters which should not be possible: " & Natural'Image (Natural (Id)));
@@ -231,7 +231,7 @@ package body Component.Event_Limiter.Implementation is
       end if;
       -- If the number of events limited is not 0, then update the total number of events limited for the component lifetime and reset the number since last tick count
       if Num_Events_Limited > 0 then
-         Self.Total_Event_Limited_Count := Self.Total_Event_Limited_Count + Unsigned_32 (Num_Events_Limited);
+         Self.Total_Event_Limited_Count := @ + Unsigned_32 (Num_Events_Limited);
          Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Total_Events_Limited (Timestamp, ((Value => Self.Total_Event_Limited_Count))));
 
          Self.Event_Array.Reset_Event_Limited_Count;

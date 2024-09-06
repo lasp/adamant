@@ -46,7 +46,7 @@ package body Component.Product_Packetizer.Implementation is
 
             -- If there is not a duplicate period, then multiply into our product:
             if not Duplicate_Period then
-               Common_Multiple := Common_Multiple * Current_Period;
+               Common_Multiple := @ * Current_Period;
             end if;
          end if;
       end loop;
@@ -159,7 +159,7 @@ package body Component.Product_Packetizer.Implementation is
                end if;
 
                -- Increment the current index:
-               Curr_Index := Curr_Index + Sys_Time.Serialization.Serialized_Length;
+               Curr_Index := @ + Sys_Time.Serialization.Serialized_Length;
             end if;
 
             -- If the status was such that we need to copy the data to the packet then
@@ -189,7 +189,7 @@ package body Component.Product_Packetizer.Implementation is
          end if;
 
          -- Increment the index by the size of the data product:
-         Curr_Index := Curr_Index + Item.Size;
+         Curr_Index := @ + Item.Size;
       end loop;
 
       -- If the packet time has not been set, then set it:
@@ -221,7 +221,7 @@ package body Component.Product_Packetizer.Implementation is
          -- Build and send packet:
          Self.Packet_T_Send_If_Connected (Self.Build_Packet (Arg.Time, Packet_Desc));
          -- Increment sequence count:
-         Packet_Desc.Count := Packet_Desc.Count + 1;
+         Packet_Desc.Count := @ + 1;
       end Send_Packet;
    begin
       -- Handle any commands in queue. Service up to N commands per tick:
@@ -244,7 +244,7 @@ package body Component.Product_Packetizer.Implementation is
       end loop;
 
       -- Increment internal counter:
-      Self.Count := Self.Count + 1;
+      Self.Count := @ + 1;
 
       -- Check roll over:
       if Self.Count > Self.Roll_Over_Value then

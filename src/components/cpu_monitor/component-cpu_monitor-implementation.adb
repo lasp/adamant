@@ -71,7 +71,7 @@ package body Component.Cpu_Monitor.Implementation is
          -- Ignore zero entries, since this special value means that the connector index
          -- is disabled, thus it should not be included in the calculation.
          Period := Self.Execution_Periods (Index);
-         Self.Max_Count := Self.Max_Count * Period;
+         Self.Max_Count := @ * Period;
       end loop;
    end Init;
 
@@ -165,7 +165,7 @@ package body Component.Cpu_Monitor.Implementation is
       if Self.Packet_Counter.Is_Count_At_Period then
          Self.Packet_To_Send.Header.Time := Self.Sys_Time_T_Get;
          Self.Packet_T_Send_If_Connected (Self.Packet_To_Send);
-         Self.Packet_To_Send.Header.Sequence_Count := Self.Packet_To_Send.Header.Sequence_Count + 1;
+         Self.Packet_To_Send.Header.Sequence_Count := @ + 1;
       end if;
 
       -- Increment the packet count:
@@ -175,7 +175,7 @@ package body Component.Cpu_Monitor.Implementation is
       -- product of the divisors.
       -- Note: this will fail with a divide by zero error if init is
       -- never called. This behavior is by design.
-      Self.Count := (Self.Count + 1) mod Self.Max_Count;
+      Self.Count := (@ + 1) mod Self.Max_Count;
    end Tick_T_Recv_Sync;
 
    -- This is the command receive connector.
