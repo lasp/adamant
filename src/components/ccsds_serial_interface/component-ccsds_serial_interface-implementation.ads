@@ -16,6 +16,18 @@ package Component.Ccsds_Serial_Interface.Implementation is
    -- The component class instance record:
    type Instance is new Ccsds_Serial_Interface.Base_Instance with private;
 
+   --------------------------------------------------
+   -- Subprogram for implementation init method:
+   --------------------------------------------------
+   -- Init to provide gap between packets if necessary
+   --
+   -- Init Parameters:
+   -- Interpacket_Gap_Ms : Natural - Amount of time in milliseconds to wait in
+   -- between transmission of each CCSDS packet. Some UART protocols rely on a gap to
+   -- differentiate between packets, and this can be used to enforce that.
+   --
+   overriding procedure Init (Self : in out Instance; Interpacket_Gap_Ms : in Natural := 0);
+
 private
 
    -- The component class instance record:
@@ -24,6 +36,7 @@ private
       Task_Id_Set : Boolean := False;
       Cpu_Usage : Float;
       Count : Natural := 0;
+      Interpacket_Gap_Ms : Natural := 0;
    end record;
 
    ---------------------------------------
