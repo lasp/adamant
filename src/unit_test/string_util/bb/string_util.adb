@@ -43,11 +43,18 @@ package body String_Util is
 
    -- Return the string representation of an array
    function To_Array_String (R : in A; Show_Index : in Boolean := True) return String is
-      pragma Unreferenced (Image);
-      Ignore_R : A renames R;
       Ignore : Boolean renames Show_Index;
    begin
-      return "Array string are not supported on this platform!";
+      -- Dummy usage of Image to avoid warnings.
+      -- It basically achieves this
+      --    pragma Unreferenced(Image);
+      -- for this .adb file only.
+      declare
+         Dummy_String : constant String := Image (R (R'First));
+      begin
+         null;
+      end;
+      return R'Image;
    end To_Array_String;
 
    function Trim_Both (Input : in String) return String is
