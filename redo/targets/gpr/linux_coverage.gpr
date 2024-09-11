@@ -23,6 +23,13 @@ project linux_coverage extends all "a_linux_debug_base.gpr" is
       for Switches ("Ada") use a_linux_debug_base.Compiler'Switches ("Ada") &
          -- gcov instrumentation flags
          ("-fprofile-arcs", "-ftest-coverage");
+      for Switches ("C++") use a_linux_debug_base.Compiler'Switches ("C++") &
+         -- gcov instrumentation flags
+         ("-fprofile-arcs", "-ftest-coverage");
+      for Switches ("C") use a_linux_debug_base.Compiler'Switches ("C") &
+         -- gcov instrumentation flags
+         ("-fprofile-arcs", "-ftest-coverage");
+      for Switches ("Asm_Cpp") use a_linux_debug_base.Compiler'Switches ("Asm_Cpp");
    end Compiler;
 
    package Linker is

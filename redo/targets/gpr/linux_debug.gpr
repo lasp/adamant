@@ -15,6 +15,9 @@ project linux_debug extends all "a_linux_debug_base.gpr" is
       for Switches ("Ada") use a_linux_debug_base.Compiler'Switches ("Ada") &
          -- add ravenscar restriction
          ("-gnatec=" & a_adamant.ADAMANT_DIR & "/redo/targets/configuration_pragmas/ravenscar.adc");
+      for Switches ("C++") use a_linux_debug_base.Compiler'Switches ("C++");
+      for Switches ("C") use a_linux_debug_base.Compiler'Switches ("C");
+      for Switches ("Asm_Cpp") use a_linux_debug_base.Compiler'Switches ("Asm_Cpp");
    end Compiler;
 
 end linux_debug;
