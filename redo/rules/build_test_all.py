@@ -71,7 +71,9 @@ class build_test_all(build_rule_base):
 
         # Make a build directory at the top level:
         failed_test_log_dir = os.path.join(directory, "build" + os.sep + "failed_test_logs")
+        log_dir = os.path.join(directory, "build" + os.sep + "log")
         filesystem.safe_makedir(failed_test_log_dir)
+        filesystem.safe_makedir(log_dir)
 
         # Run tests:
         exit_code = 0
@@ -86,7 +88,8 @@ class build_test_all(build_rule_base):
             sys.stderr.flush()
             database.setup.reset()
             try:
-                redo.redo([os.path.join(test, "test"), "1>&2", "2>/dev/null"])
+                test_log = os.path.join(log_dir, rel_test.replace(os.sep, "_") + ".log")
+                redo.redo([os.path.join(test, "test"), "1>&2", "2>" + test_log])
                 sys.stderr.write(" " + PASSED + "\n")
             except BaseException:
                 exit_code = 1
