@@ -86,8 +86,24 @@ else
   . $py_activate
   pip3 install --upgrade pip
   pip3 install wheel
-  pip3 install -r $ADAMANT_DIR/env/requirements1.txt
-  pip3 install -r $ADAMANT_DIR/env/requirements2.txt
+
+  # Install all packages in env/requirements*.txt files in adamant/
+  # and any project dirs in the paths
+  for path in "${paths[@]}"; do
+    # Install any python dependencies.
+    files=$(find "$path/env" -name 'requirements*.txt' 2>/dev/null)
+
+    # Check if find returned any files
+    if [ -n "$files" ]; then
+        for file in $files; do
+            echo "Installing python dependencies from $file"
+            pip3 install -r "$file"
+        done
+    else
+        echo "No python requirements files found in $path/env"
+    fi
+  done
+
   echo "Done."
 fi
 
