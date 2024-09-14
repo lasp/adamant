@@ -81,7 +81,9 @@ class build_style_all(build_rule_base):
 
         # Make a build directory at the top level:
         failed_style_log_dir = os.path.join(directory, "build" + os.sep + "failed_style_logs")
+        log_dir = os.path.join(directory, "build" + os.sep + "style_logs")
         filesystem.safe_makedir(failed_style_log_dir)
+        filesystem.safe_makedir(log_dir)
 
         # Run tests:
         exit_code = 0
@@ -96,7 +98,8 @@ class build_style_all(build_rule_base):
             sys.stderr.flush()
             database.setup.reset()
             try:
-                redo.redo([os.path.join(test, "style"), "2>/dev/null", "1>/dev/null"])
+                style_run_log = os.path.join(log_dir, rel_test.replace(os.sep, "_") + ".log")
+                redo.redo([os.path.join(test, "style"), "1>&2", "2>" + style_run_log])
 
                 # See if there is anything in the log file:
                 style_log = os.path.join(

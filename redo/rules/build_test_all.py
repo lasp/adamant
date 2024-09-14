@@ -71,7 +71,7 @@ class build_test_all(build_rule_base):
 
         # Make a build directory at the top level:
         failed_test_log_dir = os.path.join(directory, "build" + os.sep + "failed_test_logs")
-        log_dir = os.path.join(directory, "build" + os.sep + "log")
+        log_dir = os.path.join(directory, "build" + os.sep + "test_logs")
         filesystem.safe_makedir(failed_test_log_dir)
         filesystem.safe_makedir(log_dir)
 
