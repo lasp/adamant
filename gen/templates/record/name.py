@@ -39,48 +39,85 @@ class {{ name }}(PackedTypeBase):
 {% endif %}
         if {{ field.name }} is not None:
 {% if field.is_enum %}
-            assert isinstance({{ field.name }}, {{ field.type_model.name }}), \
-                ("Expected type for field '{{ field.name }}' to be '{{ field.type_model.name }}' "
+            assert isinstance(
+                {{ field.name }},
+                {{ field.type_model.name }}), \
+                ("Expected type for field "
+                 "'{{ field.name }}' "
+                 "to be "
+                 "'{{ field.type_model.name }}' "
                  "and instead found '" + str(type({{ field.name }})))
 {% elif field.is_packed_type %}
-            assert isinstance({{ field.name }}, {{ field.type_package }}), \
-                ("Expected type for field '{{ field.name }}' to be '{{ field.type_package }}' "
-                 "and instead found '" + str(type({{ field.name }})))
+            assert isinstance(
+                {{ field.name }},
+                {{ field.type_package }}), \
+                ("Expected type for field "
+                 "'{{ field.name }}' "
+                 "to be "
+                 "'{{ field.type_package }}' "
+                 "and instead found '"
+                 + str(type({{ field.name }})))
 {% if field.variable_length %}
             # Make sure variable length field value is not larger than the packed array length
             if self.{{ field.variable_length}} is not None:
                 assert self.{{ field.variable_length }} <= {{ field.type_package }}().length, \
-                    ("Length of '{{ field.name }}' is determined by '{{ field.variable_length }}' which is '"
-                     "" + str(self.{{ field.variable_length }}) + "' which exceeds maximum allowed length: " + str({{ field.type_package }}().length))
+                    ("Length of "
+                     "'{{ field.name }}' "
+                     "is determined by "
+                     "'{{ field.variable_length }}' "
+                     "which is '"
+                     + str(self.{{ field.variable_length }}) +
+                     "' which exceeds maximum allowed length: "
+                     + str({{ field.type_package }}().length))
 {% endif %}
 {% elif field.format %}
 {% if field.format.length %}
             assert isinstance({{ field.name }}, list), \
-                "Expected type for field '{{ field.name }}' to be 'list' and instead found '" + str(type({{ field.name }}))
+                ("Expected type for field "
+                 "'{{ field.name }}' "
+                 "to be 'list' and instead found '"
+                 + str(type({{ field.name }})))
 {% if field.variable_length %}
             assert len({{ field.name }}) <= {{ field.format.length }}, \
-                "Length of {{ field.name }} is '" + str(len({{ field.name }})) + "' which exceeds maximum allowed length: " + str({{ field.format.length }})
+                ("Length of "
+                 "{{ field.name }} "
+                 "is '" + str(len({{ field.name }})) +
+                 "' which exceeds maximum allowed length: "
+                 + str({{ field.format.length }}))
             # Make sure variable length field value and actual buffer length match.
             if self.{{ field.variable_length }} is not None:
                 assert (self.{{ field.variable_length }} + int({{ field.variable_length_offset }})) == len({{ field.name }}), \
-                    ("Expected length of variable length field '{{ field.name }}' to match value of "
-                     "'{{ field.variable_length }} + int({{ field.variable_length_offset }})' "
-                     "which is '" + str((self.{{ field.variable_length }} + int({{ field.variable_length_offset }}))) + ""
+                    ("Expected length of variable length field "
+                     "'{{ field.name }}' "
+                     "to match value of "
+                     "'{{ field.variable_length }} + "
+                     "int({{ field.variable_length_offset }})' "
+                     "which is '"
+                     + str((self.{{ field.variable_length }} + int({{ field.variable_length_offset }}))) +
                      "', but instead found length of '" + str(len({{ field.name }})) + "'.")
 {% else %}
             assert len({{ field.name }}) == {{ field.format.length }}, \
-                ("Expected length of list for field '{{ field.name }}' to be '{{ field.format.length }}' "
-                 "but instead found a list of length '" + str(len({{ field.name }})) + "'.")
+                ("Expected length of list for field "
+                 "'{{ field.name }}' "
+                 "to be "
+                 "'{{ field.format.length }}' "
+                 "but instead found a list of length '"
+                 + str(len({{ field.name }})) + "'.")
 {% endif %}
 {% else %}
             assert isinstance({{ field.name }}, {{ field.format.get_python_type_string() }}), \
-                ("Expected type for field '{{ field.name }}' to be "
+                ("Expected type for field "
+                 "'{{ field.name }}' "
+                 "to be "
                  "'{{ field.format.get_python_type_string() }}' "
-                 "and instead found '" + str(type({{ field.name }})))
+                 "and instead found '"
+                 + str(type({{ field.name }})))
 {% if field.format.type[0] == "U" %}
             assert {{ field.name }} >= 0, \
-                ("{{ field.name }} is unsigned and must be positive. "
-                 "Received value of '" + str({{ field.name }}) + "' "
+                ("{{ field.name }} "
+                 "is unsigned and must be positive. "
+                 "Received value of '"
+                 + str({{ field.name }}) + "' "
                  " is not allowed.")
 {% endif %}
 {% endif %}
@@ -142,13 +179,16 @@ class {{ name }}(PackedTypeBase):
         from bitstring import BitStream
         _{{ field.name }} = {{ field.type_package }}._create_from_stream(BitStream(bits))
         # Update the stream position:
-        stream.pos += (_{{ field.variable_length }} + int({{ field.variable_length_offset }})) * _{{ field.name }}.element_size
+        stream.pos += (_{{ field.variable_length }} + int({{ field.variable_length_offset }})) \
+            * _{{ field.name }}.element_size
 {% else %}
         _{{ field.name }} = {{ field.type_package }}._create_from_stream(stream)
 {% endif %}
 {% else %}
 {% if field.variable_length %}
-        _{{ field.name }} = stream.readlist(str(_{{ field.variable_length }} + int({{ field.variable_length_offset }})) + "*{{ field.format.get_element_bitarray_string() }}")
+        _{{ field.name }} = stream.readlist(str(
+                _{{ field.variable_length }} + int({{ field.variable_length_offset }})
+            ) + "*{{ field.format.get_element_bitarray_string() }}")
 {% elif field.is_enum %}
         _{{ field.name }} = {{ field.type_model.name }}(stream.read("{{ field.format.get_bitarray_string() }}"))
 {% else %}
@@ -175,7 +215,10 @@ class {{ name }}(PackedTypeBase):
         else:
             the_bits = BitArray("uint:{{ field.size }}=0")
         if self.{{ field.variable_length }} is not None:
-            bits += the_bits[:((self.{{ field.variable_length }} + int({{ field.variable_length_offset }})) * self.{{ field.name }}.element_size)]  # Only serialize valid data.
+            bits += the_bits[
+                :((self.{{ field.variable_length }} + int({{ field.variable_length_offset }}))
+                    * self.{{ field.name }}.element_size)
+            ]  # Only serialize valid data.
         else:
             bits += the_bits
 {% else %}
