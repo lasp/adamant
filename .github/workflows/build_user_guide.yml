@@ -25,7 +25,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: user_guide
-          path: doc/user_guide/build/pdf/user_guide.pdf
+          path: ${{ github.workspace }}/doc/user_guide/build/pdf/user_guide.pdf
           if-no-files-found: error
       - name: Build the architecture description document
         run: bash env/github_run.sh "redo doc/architecture_description_document/build/pdf/architecture_description_document.pdf"
@@ -33,6 +33,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: architecture_description_document 
-          path: doc/architecture_description_document/build/pdf/architecture_description_document.pdf
+          path: ${{ github.workspace }}/doc/architecture_description_document/build/pdf/architecture_description_document.pdf
           if-no-files-found: error
       - run: echo "Finished with status - ${{ job.status }}."

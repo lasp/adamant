@@ -25,8 +25,8 @@ jobs:
         if: always() # Make sure this runs even if `redo style_all` fails
         uses: actions/upload-artifact@v4
         with:
-          name: failed_style_logs
-          path: build/failed_style_logs
+          name: style_logs
+          path: ${{ github.workspace }}/build
           if-no-files-found: ignore
       - run: echo "Finished with status - ${{ job.status }}."
         if: always()
