@@ -260,9 +260,9 @@ class basic_generator(object):
 
         # Construct the filename:
         if specific_name:
-            output_filename = self._get_default_output_filename(specific_name)
+            output_filename = self._get_default_output_filename(specific_name.lower())
         else:
-            output_filename = self._get_default_output_filename(model_name)
+            output_filename = self._get_default_output_filename(model_name.lower())
 
         # Return the suggested output filename:
         return dirname + os.sep + build_dir + os.sep + output_filename
