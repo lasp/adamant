@@ -28,7 +28,7 @@ package body Seq_Simulator is
          -- Provide engine its stack size and engine identifier:
          Self.Seq_Engines (Id).Initialize (Stack_Depth => Stack_Size, Engine_Id => Id);
          Self.Seq_Engines (Id).Set_Source_Id (The_Source_Id);
-         The_Source_Id := The_Source_Id + 1;
+         The_Source_Id := @ + 1;
       end loop;
       return True;
    exception
@@ -47,7 +47,7 @@ package body Seq_Simulator is
       while not End_Of_File (File) loop
          Read (File, Data);
          Buffer (Sequence_Size) := Data;
-         Sequence_Size := Sequence_Size + 1;
+         Sequence_Size := @ + 1;
       end loop;
       Sequence := (Address => (Buffer (0)'Address), Length => Sequence_Size);
       Close (File);

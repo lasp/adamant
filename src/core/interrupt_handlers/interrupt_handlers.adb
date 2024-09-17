@@ -65,7 +65,7 @@ package body Interrupt_Handlers is
          Custom_Procedure.all (Internal_Data);
          -- Increment the count:
          if Count /= Natural'Last then
-            Count := Count + 1;
+            Count := @ + 1;
          end if;
       end Handler;
 

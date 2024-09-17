@@ -36,7 +36,7 @@ package body Component.Example_Component.Implementation is
       end loop;
 
       -- Increment counter:
-      Self.Counter := Self.Counter + 1;
+      Self.Counter := @ + 1;
    end Tick_T_Recv_Sync;
 
 end Component.Example_Component.Implementation;

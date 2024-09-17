@@ -25,7 +25,7 @@ package body String_Util is
    begin
       for Indx in Bytes'Range loop
          Toreturn ((Cnt * 3 + 1) .. (Cnt * 3 + 3)) := " " & String_Util.Natural_2_Hex_String (Natural (Bytes (Indx)), 2);
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
       end loop;
       return Prefix & Trim_Both (Toreturn) & Postfix;
    end Bytes_To_String;

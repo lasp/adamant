@@ -74,7 +74,7 @@ package body Component.Ccsds_Command_Depacketizer.Implementation is
          -- First check the checksum. If the checksum is not zero, then it is invalid, since the checksum within
          -- the packet itself should zero out the rest of the computed checksum.
          Checksum := Xor_8.Compute_Xor_8 (Ccsds_Primary_Header.Serialization.To_Byte_Array (Arg.Header)); -- checksum header
-         Checksum := Xor_8.Compute_Xor_8 (Arg.Data (Arg.Data'First .. Arg.Data'First + Data_Length - 1), Checksum); -- checksum data
+         Checksum := Xor_8.Compute_Xor_8 (Arg.Data (Arg.Data'First .. Arg.Data'First + Data_Length - 1), @); -- checksum data
          if Checksum /= 0 then
             Self.Drop_Packet (Arg, Self.Events.Invalid_Packet_Checksum (Self.Sys_Time_T_Get, (
                   Ccsds_Header => (
@@ -111,14 +111,14 @@ package body Component.Ccsds_Command_Depacketizer.Implementation is
                         else
                            -- We don't need anything else out of the secondary header, unless an error
                            -- occurs, so just skip right over it.
-                           Next_Index := Next_Index + Ccsds_Command_Secondary_Header_Length;
+                           Next_Index := @ + Ccsds_Command_Secondary_Header_Length;
 
                            -- Set the command header arg buffer length:
                            The_Command.Header.Arg_Buffer_Length := Argument_Data_Length;
 
                            -- Extract command id:
                            The_Command.Header.Id := Command_Id.Serialization.From_Byte_Array (Arg.Data (Next_Index .. Next_Index + Command_Id_Length - 1)).Id;
-                           Next_Index := Next_Index + Command_Id_Length;
+                           Next_Index := @ + Command_Id_Length;
 
                            -- Copy argument buffer:
                            The_Command.Arg_Buffer (The_Command.Arg_Buffer'First .. The_Command.Arg_Buffer'First + Argument_Data_Length - 1) := Arg.Data (Next_Index .. Next_Index + Argument_Data_Length - 1);

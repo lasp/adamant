@@ -19,7 +19,7 @@ package body Component.Data_Product_Component.Implementation is
       Self.Data_Product_T_Send (Self.Data_Products.Last_Tick_Received (Timestamp, Arg));
 
       -- Increment the count:
-      Self.Count := Self.Count + 1;
+      Self.Count := @ + 1;
    end Tick_T_Recv_Sync;
 
 end Component.Data_Product_Component.Implementation;

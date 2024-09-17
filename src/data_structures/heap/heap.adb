@@ -147,12 +147,12 @@ package body Heap is
             Largest := Index;
 
             -- Which is larger, the current node of the left node?:
-            Largest := Max (Left, Largest);
+            Largest := Max (Left, @);
 
             -- Make sure the right node exists before checking it:
             if Right < Self.Count then
                -- Which is larger, the current node of the left node?:
-               Largest := Max (Right, Largest);
+               Largest := Max (Right, @);
             end if;
 
             -- If the largest node is the current node then we are
@@ -217,7 +217,7 @@ package body Heap is
             end if;
          end;
          -- Increment our safety valve:
-         Iter := Iter + 1;
+         Iter := @ + 1;
       end loop;
 
       -- OK, index now contains the correct place to insert our new
@@ -230,8 +230,8 @@ package body Heap is
       Self.Tree (Index) := (Order => Self.Order, Element => Element);
 
       -- Increment the count and the order:
-      Self.Count := Self.Count + 1;
-      Self.Order := Self.Order + 1;
+      Self.Count := @ + 1;
+      Self.Order := @ + 1;
 
       -- Update the high water mark if necessary:
       if Self.Count > Self.Max_Count then
@@ -252,7 +252,7 @@ package body Heap is
       -- Place the last element on the heap in the root
       -- position and resize the heap. This will put the smallest
       -- value in the heap on the top, violating the heap property.
-      Self.Count := Self.Count - 1; -- This should never underflow
+      Self.Count := @ - 1; -- This should never underflow
       -- because of the check above.
       Self.Tree (Self.Tree.all'First) := Self.Tree (Self.Count);
 

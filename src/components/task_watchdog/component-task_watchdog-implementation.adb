@@ -147,7 +147,7 @@ package body Component.Task_Watchdog.Implementation is
                      -- Note: We won't overflow this based on assertions in Init.
                      To_Send.Buffer (Product_Buffer_Index) := State_Byte;
                      if Product_Buffer_Index < Data_Product_Types.Data_Product_Buffer_Length_Type'Last then
-                        Product_Buffer_Index := Product_Buffer_Index + 1;
+                        Product_Buffer_Index := @ + 1;
                      end if;
                      State_Byte := 0;
                   end if;

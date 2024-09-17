@@ -127,7 +127,7 @@ package body Seq_Runtime is
          -- Increment the instruction counter
          -- Then check if we have hit the instruction limit.
          -- If we have, return with a READY state so we can resume execution during the next cycle.
-         Instruction_Counter := Instruction_Counter + 1;
+         Instruction_Counter := @ + 1;
          if Instruction_Counter >= Instruction_Limit then
             declare
                Ignore : Seq_Position := Self.Process_Error (Limit);
@@ -228,14 +228,14 @@ package body Seq_Runtime is
    -- Sets the engines wake time. This is only called for relative waits to transform them into absolute waits.
    procedure Change_Relative_Wait_To_Absolute (Self : in out Instance; Current_Time : in Sys_Time.T) is
    begin
-      Self.Wake_Time.Seconds := Self.Wake_Time.Seconds + Current_Time.Seconds;
+      Self.Wake_Time.Seconds := @ + Current_Time.Seconds;
       Self.Set_State_Blocking (Wait_Absolute);
    end Change_Relative_Wait_To_Absolute;
 
    -- Telemetry timeouts come in as relative, so must change to absolute.
    procedure Change_Relative_Timeout_To_Absolute (Self : in out Instance; Current_Time : in Sys_Time.T) is
    begin
-      Self.Telemetry_Timeout.Seconds := Self.Telemetry_Timeout.Seconds + Current_Time.Seconds;
+      Self.Telemetry_Timeout.Seconds := @ + Current_Time.Seconds;
       Self.Set_State_Blocking (Wait_Telemetry_Value);
    end Change_Relative_Timeout_To_Absolute;
 
@@ -795,7 +795,7 @@ package body Seq_Runtime is
          return Self.Process_Error (Command_Parse);
       end if;
 
-      Self.Next_Position := Self.Next_Position + Seq_Position (Bytes_Serialized);
+      Self.Next_Position := @ + Seq_Position (Bytes_Serialized);
 
       -- Read off the end of the sequence
       if Self.Next_Position > Seq_Position (Self.Seq_Header.Length) then

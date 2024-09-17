@@ -103,31 +103,31 @@ package body Variable_Tests.Implementation is
       Put_Line (Basic_Types.Representation.Image (Log_Bytes));
       pragma Assert (Simple_Variable.Serialized_Length (Var, Len) = Success);
       pragma Assert (Simple_Variable.Serialization.To_Byte_Array (Bytes_To_Compare (Idx .. Idx + Len - 1), Var) = Success);
-      Idx := Idx + Len;
+      Idx := @ + Len;
       Var := (1, [0 => 1, others => 9]);
       T.T_Send (Var);
       Put_Line (Basic_Types.Representation.Image (Log_Bytes));
       pragma Assert (Simple_Variable.Serialized_Length (Var, Len) = Success);
       pragma Assert (Simple_Variable.Serialization.To_Byte_Array (Bytes_To_Compare (Idx .. Idx + Len - 1), Var) = Success);
-      Idx := Idx + Len;
+      Idx := @ + Len;
       Var := (2, [0 => 2, 1 => 3, others => 9]);
       T.T_Send (Var);
       Put_Line (Basic_Types.Representation.Image (Log_Bytes));
       pragma Assert (Simple_Variable.Serialized_Length (Var, Len) = Success);
       pragma Assert (Simple_Variable.Serialization.To_Byte_Array (Bytes_To_Compare (Idx .. Idx + Len - 1), Var) = Success);
-      Idx := Idx + Len;
+      Idx := @ + Len;
       Var := (3, [0 => 4, 1 => 5, 2 => 6, others => 9]);
       T.T_Send (Var);
       Put_Line (Basic_Types.Representation.Image (Log_Bytes));
       pragma Assert (Simple_Variable.Serialized_Length (Var, Len) = Success);
       pragma Assert (Simple_Variable.Serialization.To_Byte_Array (Bytes_To_Compare (Idx .. Idx + Len - 1), Var) = Success);
-      Idx := Idx + Len;
+      Idx := @ + Len;
       Var := (4, [0 => 7, 1 => 8, 2 => 9, 3 => 10, others => 9]);
       T.T_Send (Var);
       Put_Line (Basic_Types.Representation.Image (Log_Bytes));
       pragma Assert (Simple_Variable.Serialized_Length (Var, Len) = Success);
       pragma Assert (Simple_Variable.Serialization.To_Byte_Array (Bytes_To_Compare (Idx .. Idx + Len - 1), Var) = Success);
-      Idx := Idx + Len;
+      Idx := @ + Len;
 
       -- Make sure no events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);

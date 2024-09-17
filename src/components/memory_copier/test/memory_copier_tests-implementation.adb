@@ -83,7 +83,7 @@ package body Memory_Copier_Tests.Implementation is
       while not Task_Exit.all and then Cnt < 2_000 loop
 
          -- Increment variables:
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
 
          if Task_Send_Response then
             -- Send a valid response:
@@ -95,7 +95,7 @@ package body Memory_Copier_Tests.Implementation is
             -- Send a valid response:
             Sleep (4);
             Class_Self.all.Tester.Timeout_Tick_Send (((0, 0), 0));
-            Tick_Count := Tick_Count + 1;
+            Tick_Count := @ + 1;
             if Tick_Count > 4 then
                Tick_Count := 0;
                Task_Send_Timeout := False;

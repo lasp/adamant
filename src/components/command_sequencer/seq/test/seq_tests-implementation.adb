@@ -81,7 +81,7 @@ package body Seq_Tests.Implementation is
          Read (File, Data);
             -- Put_Line (sequence_size'Image&" "&data'Image);
          Buffer (Sequence_Size) := Data;
-         Sequence_Size := Sequence_Size + 1;
+         Sequence_Size := @ + 1;
       end loop;
       --Put_Line ("Size: "&sequence_size'Image&" bytes");
       Sequence := (Address => (Buffer (0)'Address), Length => Sequence_Size);

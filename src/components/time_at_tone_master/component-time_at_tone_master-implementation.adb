@@ -85,7 +85,7 @@ package body Component.Time_At_Tone_Master.Implementation is
             Self.Tone_Message_Send_If_Connected (Message);
 
             -- Increment the transaction count:
-            Self.Transaction_Count := Self.Transaction_Count + 1;
+            Self.Transaction_Count := @ + 1;
 
             -- Send out data products:
             Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Tone_Messages_Sent (Time_Message_Time, (Value => Self.Transaction_Count)));

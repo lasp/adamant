@@ -43,7 +43,7 @@ package body Component.Event_Text_Logger.Implementation.Tester is
       if not Self.Expect_Event_T_Send_Dropped then
          pragma Assert (False, "The component's queue filled up when Event_T_Send was called!");
       else
-         Self.Event_T_Send_Dropped_Count := Self.Event_T_Send_Dropped_Count + 1;
+         Self.Event_T_Send_Dropped_Count := @ + 1;
          Self.Expect_Event_T_Send_Dropped := False;
       end if;
    end Event_T_Send_Dropped;

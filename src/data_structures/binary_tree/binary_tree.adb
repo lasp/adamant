@@ -48,7 +48,7 @@ package body Binary_Tree is
          end loop;
 
          -- Increment size:
-         Self.Size := Self.Size + 1;
+         Self.Size := @ + 1;
 
          -- Move the last element into the new last slot.
          pragma Assert (Self.Size >= Self.Tree'First, "Size is greater than or equal to 1 at this point.");
@@ -74,7 +74,7 @@ package body Binary_Tree is
       end loop;
 
       -- Decrement size:
-      Self.Size := Self.Size - 1;
+      Self.Size := @ - 1;
 
       return True;
    end Remove;

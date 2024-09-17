@@ -18,7 +18,7 @@ package body Socket is
             if Last_Char = '.' then
                return False;
             end if;
-            Num_Periods := Num_Periods + 1;
+            Num_Periods := @ + 1;
          else
             return False;
          end if;

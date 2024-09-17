@@ -116,14 +116,14 @@ package body Byte_Array_Util is
             -- If we didn't just copy over the last destination byte then peek ahead...
             if Src_Idx > First_Src_Idx then
                -- Combine with relevant bits from the next byte to copy.
-               Value (Dest_Idx) := Value (Dest_Idx) or (Shift_Left (Src (Src_Idx - 1), Left_Shift) and Left_Mask);
+               Value (Dest_Idx) := @ or (Shift_Left (Src (Src_Idx - 1), Left_Shift) and Left_Mask);
                -- Decrement the source index:
-               Src_Idx := Src_Idx - 1;
+               Src_Idx := @ - 1;
             end if;
          end loop;
 
          -- Apply the appropriate mask to the last byte copied:
-         Value (First_Dest_Idx) := Value (First_Dest_Idx) and Last_Mask;
+         Value (First_Dest_Idx) := @ and Last_Mask;
       end;
 
       -- If the value we extracted is signed, then we need to handle the case where the value is
@@ -146,7 +146,7 @@ package body Byte_Array_Util is
                   Value (Idx) := Byte'Last;
                end loop;
                -- Set the lead of any partial byte to 1.
-               Value (Byte_Idx) := Value (Byte_Idx) or (Bit_Mask (Bit_Idx + 1) xor Byte'Last);
+               Value (Byte_Idx) := @ or (Bit_Mask (Bit_Idx + 1) xor Byte'Last);
             end if;
          end;
       end if;
@@ -238,7 +238,7 @@ package body Byte_Array_Util is
             if Dest_Idx > First_Dest_Idx then
                Dest (Dest_Idx - 1) := Shift_Right (Value_To_Set (Src_Idx), Right_Shift) and Right_Mask;
                -- Decrement the source index:
-               Dest_Idx := Dest_Idx - 1;
+               Dest_Idx := @ - 1;
             end if;
          end loop;
 

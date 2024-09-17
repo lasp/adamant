@@ -6,7 +6,7 @@ package body Tick_Interrupt_Handler is
       use Interfaces;
    begin
       -- Increment the count:
-      Data.Count := Data.Count + 1;
+      Data.Count := @ + 1;
    end Handler;
 
    procedure Set_Tick_Time (Data : in out Tick.T; Time : in Sys_Time.T) is

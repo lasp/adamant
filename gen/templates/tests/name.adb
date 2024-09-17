@@ -87,7 +87,7 @@ package body {{ name }} is
       Self.Log ("    Finishing Tear_Down for test " & Closing_Test);
       Self.End_Logging (Closing_Test);
       -- Increment counter for the next test name in the list and pass the log to close back up to the tear down (or component unit test)
-      Self.Test_Name_Index := Self.Test_Name_Index + 1;
+      Self.Test_Name_Index := @ + 1;
 {% if component and not component.generic %}
       -- Delete tester:
       Free_Tester (Self.Tester);

@@ -72,7 +72,7 @@ package body Component.Queued_Component.Implementation.Tester is
       if not Self.Expect_Packed_Byte_T_Send_Dropped then
          pragma Assert (False, "The component's queue filled up when Packed_Byte_T_Send was called!");
       else
-         Self.Packed_Byte_T_Send_Dropped_Count := Self.Packed_Byte_T_Send_Dropped_Count + 1;
+         Self.Packed_Byte_T_Send_Dropped_Count := @ + 1;
          Self.Expect_Packed_Byte_T_Send_Dropped := False;
       end if;
    end Packed_Byte_T_Send_Dropped;
@@ -84,7 +84,7 @@ package body Component.Queued_Component.Implementation.Tester is
       if not Self.Expect_Packed_U16_T_Send_Dropped then
          pragma Assert (False, "The component's queue filled up when Packed_U16_T_Send was called!");
       else
-         Self.Packed_U16_T_Send_Dropped_Count := Self.Packed_U16_T_Send_Dropped_Count + 1;
+         Self.Packed_U16_T_Send_Dropped_Count := @ + 1;
          Self.Expect_Packed_U16_T_Send_Dropped := False;
       end if;
    end Packed_U16_T_Send_Dropped;

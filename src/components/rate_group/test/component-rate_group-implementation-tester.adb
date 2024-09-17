@@ -76,7 +76,7 @@ package body Component.Rate_Group.Implementation.Tester is
    overriding procedure Tick_T_Recv_Sync (Self : in out Instance; Arg : in Tick.T) is
    begin
       -- Increment the system time to simulate an executing component:
-      Self.System_Time := (Self.System_Time.Seconds + Self.Seconds_Delta, Self.System_Time.Subseconds + Self.Subseconds_Delta);
+      Self.System_Time := (@.Seconds + Self.Seconds_Delta, @.Subseconds + Self.Subseconds_Delta);
       -- Push the argument onto the test history for looking at later:
       Self.Tick_T_Recv_Sync_History.Push (Arg);
    end Tick_T_Recv_Sync;
@@ -126,7 +126,7 @@ package body Component.Rate_Group.Implementation.Tester is
       if not Self.Expect_Tick_T_Send_Dropped then
          pragma Assert (False, "The component's queue filled up when Tick_T_Send was called!");
       else
-         Self.Tick_T_Send_Dropped_Count := Self.Tick_T_Send_Dropped_Count + 1;
+         Self.Tick_T_Send_Dropped_Count := @ + 1;
          Self.Expect_Tick_T_Send_Dropped := False;
       end if;
    end Tick_T_Send_Dropped;

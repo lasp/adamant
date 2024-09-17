@@ -24,7 +24,7 @@ package body Component.Packet_Component.Implementation is
       Self.Packet_T_Send (Self.Packets.Last_Tick_Received (Timestamp, Arg));
 
       -- Increment the count:
-      Self.Count := Self.Count + 1;
+      Self.Count := @ + 1;
    end Tick_T_Recv_Sync;
 
 end Component.Packet_Component.Implementation;

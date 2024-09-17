@@ -197,7 +197,7 @@ package body Seq_Runtime.Decoder is
       while not End_Of_File (File) loop
          Read (File, Data);
          Buffer (Sequence_Size) := Data;
-         Sequence_Size := Sequence_Size + 1;
+         Sequence_Size := @ + 1;
       end loop;
       Sequence := (Address => (Buffer (0)'Address), Length => Sequence_Size);
       Close (File);
@@ -265,7 +265,7 @@ package body Seq_Runtime.Decoder is
          raise Program_Error with "Command Serialization Failure.";
       end if;
 
-      Self.Next_Position := Self.Next_Position + Seq_Position (Bytes_Serialized);
+      Self.Next_Position := @ + Seq_Position (Bytes_Serialized);
 
       -- Read off the end of the sequence
       if Self.Next_Position > Seq_Position (Self.Seq_Header.Length) then

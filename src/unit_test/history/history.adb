@@ -25,7 +25,7 @@ package body History is
          Self.Buffer (Index) := Value;
 
          -- Increment the buffer count:
-         Self.Count := Self.Count + 1;
+         Self.Count := @ + 1;
       end if;
    end Push;
 

@@ -54,7 +54,7 @@ package body Variable_Database_Tests.Implementation is
       for Id in Start_Id .. Stop_Id loop
          Value.Length := Cnt;
          Value.Buffer := [others => Cnt + 7];
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
          Put_Line ("inserting " & Natural'Image (Natural (Id)) & " => " & Simple_Variable.Representation.To_Tuple_String (Value));
          U_Status := Self.Db.Update (Id, Value);
          Update_Status_Assert.Eq (U_Status, My_Database.Success);
@@ -68,7 +68,7 @@ package body Variable_Database_Tests.Implementation is
          Fetch_Status_Assert.Eq (F_Status, My_Database.Success);
          Simple_Variable_Assert.Eq (Value, (Cnt, [others => Cnt + 7]));
          Put_Line ("fetching " & Natural'Image (Natural (Id)) & " => " & Simple_Variable.Representation.To_Tuple_String (Value));
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
       end loop;
 
       -- Add items to database:
@@ -76,7 +76,7 @@ package body Variable_Database_Tests.Implementation is
       for Id in reverse Start_Id .. Stop_Id loop
          Value.Length := Cnt;
          Value.Buffer := [others => Cnt + 11];
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
          Put_Line ("inserting " & Natural'Image (Natural (Id)) & " => " & Simple_Variable.Representation.To_Tuple_String (Value));
          U_Status := Self.Db.Update (Id, Value);
          Update_Status_Assert.Eq (U_Status, My_Database.Success);
@@ -90,7 +90,7 @@ package body Variable_Database_Tests.Implementation is
          Fetch_Status_Assert.Eq (F_Status, My_Database.Success);
          Simple_Variable_Assert.Eq (Value, (Cnt, [others => Cnt + 11]));
          Put_Line ("fetching " & Natural'Image (Natural (Id)) & " => " & Simple_Variable.Representation.To_Tuple_String (Value));
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
       end loop;
    end Test_Nominal_Update_Fetch;
 
@@ -133,7 +133,7 @@ package body Variable_Database_Tests.Implementation is
       for Id in Start_Id .. Stop_Id - 1 loop
          Value.Length := Cnt;
          Value.Buffer := [others => Cnt + 12];
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
          U_Status := Self.Db.Update (Id, Value);
          Update_Status_Assert.Eq (U_Status, My_Database.Success);
       end loop;
@@ -145,7 +145,7 @@ package body Variable_Database_Tests.Implementation is
          F_Status := Self.Db.Fetch (Id, Value);
          Fetch_Status_Assert.Eq (F_Status, My_Database.Success);
          Simple_Variable_Assert.Eq (Value, (Cnt, [others => Cnt + 12]));
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
       end loop;
 
       -- Fetching the last item should still be unavailable:
@@ -165,7 +165,7 @@ package body Variable_Database_Tests.Implementation is
       for Id in Start_Id .. Stop_Id loop
          Value.Length := Cnt;
          Value.Buffer := [others => Cnt + 7];
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
          U_Status := Self.Db.Update (Id, Value);
          Update_Status_Assert.Eq (U_Status, My_Database.Success);
       end loop;
@@ -185,7 +185,7 @@ package body Variable_Database_Tests.Implementation is
          F_Status := Self.Db.Fetch (Id, Value);
          Fetch_Status_Assert.Eq (F_Status, My_Database.Success);
          Simple_Variable_Assert.Eq (Value, (Cnt, [others => Cnt + 7]));
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
       end loop;
    end Test_Serialization_Failure;
 
@@ -200,7 +200,7 @@ package body Variable_Database_Tests.Implementation is
       for Id in Start_Id .. Stop_Id loop
          Value.Length := Cnt;
          Value.Buffer := [others => Cnt + 7];
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
          Put_Line ("inserting " & Natural'Image (Natural (Id)) & " => " & Simple_Variable.Representation.To_Tuple_String (Value));
          U_Status := Self.Db.Update (Id, Value);
          Update_Status_Assert.Eq (U_Status, My_Database.Success);
@@ -214,7 +214,7 @@ package body Variable_Database_Tests.Implementation is
          Fetch_Status_Assert.Eq (F_Status, My_Database.Success);
          Simple_Variable_Assert.Eq (Value, (Cnt, [others => Cnt + 7]));
          Put_Line ("fetching " & Natural'Image (Natural (Id)) & " => " & Simple_Variable.Representation.To_Tuple_String (Value));
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
       end loop;
 
       -- Override items in database:
@@ -223,7 +223,7 @@ package body Variable_Database_Tests.Implementation is
       for Id in Start_Id .. Stop_Id loop
          Value.Length := Cnt;
          Value.Buffer := [others => Cnt];
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
          Put_Line ("overriding " & Natural'Image (Natural (Id)) & " => " & Simple_Variable.Representation.To_Tuple_String (Value));
          U_Status := Self.Db.Override (Id, Value);
          Update_Status_Assert.Eq (U_Status, My_Database.Success);
@@ -238,7 +238,7 @@ package body Variable_Database_Tests.Implementation is
          Fetch_Status_Assert.Eq (F_Status, My_Database.Success);
          Simple_Variable_Assert.Eq (Value, (Cnt, [others => Cnt]));
          Put_Line ("fetching " & Natural'Image (Natural (Id)) & " => " & Simple_Variable.Representation.To_Tuple_String (Value));
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
          pragma Assert (Self.Db.Any_Overridden = True);
       end loop;
 
@@ -247,7 +247,7 @@ package body Variable_Database_Tests.Implementation is
       for Id in Start_Id .. Stop_Id loop
          Value.Length := Cnt;
          Value.Buffer := [others => Cnt + 7];
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
          Put_Line ("inserting " & Natural'Image (Natural (Id)) & " => " & Simple_Variable.Representation.To_Tuple_String (Value));
          U_Status := Self.Db.Update (Id, Value);
          Update_Status_Assert.Eq (U_Status, My_Database.Success);
@@ -261,7 +261,7 @@ package body Variable_Database_Tests.Implementation is
          Fetch_Status_Assert.Eq (F_Status, My_Database.Success);
          Simple_Variable_Assert.Eq (Value, (Cnt, [others => Cnt]));
          Put_Line ("fetching " & Natural'Image (Natural (Id)) & " => " & Simple_Variable.Representation.To_Tuple_String (Value));
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
          pragma Assert (Self.Db.Any_Overridden = True);
       end loop;
 
@@ -279,7 +279,7 @@ package body Variable_Database_Tests.Implementation is
       for Id in Start_Id .. Stop_Id loop
          Value.Length := Cnt;
          Value.Buffer := [others => Cnt + 7];
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
          Put_Line ("inserting " & Natural'Image (Natural (Id)) & " => " & Simple_Variable.Representation.To_Tuple_String (Value));
          U_Status := Self.Db.Update (Id, Value);
          Update_Status_Assert.Eq (U_Status, My_Database.Success);
@@ -297,7 +297,7 @@ package body Variable_Database_Tests.Implementation is
             Simple_Variable_Assert.Eq (Value, (Cnt, [others => Cnt]));
          end if;
          Put_Line ("fetching " & Natural'Image (Natural (Id)) & " => " & Simple_Variable.Representation.To_Tuple_String (Value));
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
          pragma Assert (Self.Db.Any_Overridden = True);
       end loop;
 
@@ -310,7 +310,7 @@ package body Variable_Database_Tests.Implementation is
       for Id in Start_Id .. Stop_Id loop
          Value.Length := Cnt;
          Value.Buffer := [others => Cnt + 10];
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
          Put_Line ("inserting " & Natural'Image (Natural (Id)) & " => " & Simple_Variable.Representation.To_Tuple_String (Value));
          U_Status := Self.Db.Update (Id, Value);
          Update_Status_Assert.Eq (U_Status, My_Database.Success);
@@ -324,7 +324,7 @@ package body Variable_Database_Tests.Implementation is
          Fetch_Status_Assert.Eq (F_Status, My_Database.Success);
          Simple_Variable_Assert.Eq (Value, (Cnt, [others => Cnt + 10]));
          Put_Line ("fetching " & Natural'Image (Natural (Id)) & " => " & Simple_Variable.Representation.To_Tuple_String (Value));
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
          pragma Assert (Self.Db.Any_Overridden = False);
       end loop;
    end Test_Override;

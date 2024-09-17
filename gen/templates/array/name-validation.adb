@@ -57,7 +57,7 @@ package body {{ name }}.Validation is
          end if;
 {% endif %}
 {% endif %}
-         Count := Count + 1;
+         Count := @ + 1;
       end loop;
 {% endif %}
 
@@ -127,7 +127,7 @@ package body {{ name }}.Validation is
          end if;
 {% endif %}
 {% endif %}
-         Count := Count + 1;
+         Count := @ + 1;
       end loop;
 {% endif %}
 
@@ -198,7 +198,7 @@ package body {{ name }}.Validation is
          end if;
 {% endif %}
 {% endif %}
-         Count := Count + 1;
+         Count := @ + 1;
       end loop;
 {% endif %}
 
