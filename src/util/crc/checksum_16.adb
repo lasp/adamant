@@ -12,9 +12,9 @@ package body Checksum_16 is
       -- left shifted by 8-bits and each odd byte does not in the addition.
       for Idx in Bytes'Range loop
          if ((Idx - Bytes'First) mod 2) = 0 then
-            To_Return := To_Return + Unsigned_16 (Bytes (Idx)) * 16#100#;
+            To_Return := @ + Unsigned_16 (Bytes (Idx)) * 16#100#;
          else
-            To_Return := To_Return + Unsigned_16 (Bytes (Idx));
+            To_Return := @ + Unsigned_16 (Bytes (Idx));
          end if;
       end loop;
 

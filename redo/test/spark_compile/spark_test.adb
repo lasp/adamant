@@ -5,7 +5,7 @@ is
 
    procedure Increment (X : in out Integer) is
    begin
-      X := X + 1;
+      X := @ + 1;
    end Increment;
 
 end Spark_Test;

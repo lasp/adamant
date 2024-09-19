@@ -95,7 +95,7 @@ package body Component.Stack_Monitor.Implementation is
          -- to save execution time.
          while not Start_Found loop
             -- Move the stack index back 100 bytes.
-            Start_Index := Start_Index - 100;
+            Start_Index := @ - 100;
 
             -- If the start index went negative then reset it to zero and we we will start from there.
             if Start_Index <= 0 then
@@ -114,7 +114,7 @@ package body Component.Stack_Monitor.Implementation is
                   Start_Found := True;
                end if;
 
-               Start_Index := Start_Index + 1;
+               Start_Index := @ + 1;
             end loop;
          end loop;
 
@@ -128,7 +128,7 @@ package body Component.Stack_Monitor.Implementation is
                if Stack_Bytes (Index) /= 16#CC# then
                   exit;
                end if;
-               Index := Index + 1;
+               Index := @ + 1;
             end loop;
 
             -- Ok, we found the first bye not matching the pattern. Save the index we found to speed up this
@@ -167,9 +167,9 @@ package body Component.Stack_Monitor.Implementation is
          -- Calculate the task usage for each task in our list:
          for Task_Info_Idx in Self.Tasks'Range loop
             Self.Packet_To_Send.Buffer (Idx) := Calculate_Stack_Percent_Usage (Self.Tasks (Task_Info_Idx), Self.Stack_Indexes.all (Task_Info_Idx));
-            Idx := Idx + 1;
+            Idx := @ + 1;
             Self.Packet_To_Send.Buffer (Idx) := Calculate_Secondary_Stack_Percent_Usage (Self.Tasks (Task_Info_Idx));
-            Idx := Idx + 1;
+            Idx := @ + 1;
          end loop;
          -- Make sure the right number of bytes were filled in in the packet.
          pragma Assert (Idx - Self.Packet_To_Send.Buffer'First = Self.Packet_To_Send.Header.Buffer_Length);
@@ -177,7 +177,7 @@ package body Component.Stack_Monitor.Implementation is
          -- Timestamp and send the packet:
          Self.Packet_To_Send.Header.Time := Self.Sys_Time_T_Get;
          Self.Packet_T_Send_If_Connected (Self.Packet_To_Send);
-         Self.Packet_To_Send.Header.Sequence_Count := Self.Packet_To_Send.Header.Sequence_Count + 1;
+         Self.Packet_To_Send.Header.Sequence_Count := @ + 1;
       end if;
 
       -- Increment the count:

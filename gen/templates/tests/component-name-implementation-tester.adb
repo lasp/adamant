@@ -312,7 +312,7 @@ package body Component.{{ name }}.Implementation.Tester is
          pragma Assert (False, "The component's queue filled up when {{ connector.tester_name }} was called!");
 {% endif %}
       else
-         Self.{{ connector.tester_name }}_Dropped_Count := Self.{{ connector.tester_name }}_Dropped_Count + 1;
+         Self.{{ connector.tester_name }}_Dropped_Count := @ + 1;
          Self.Expect_{{ connector.tester_name }}_Dropped := False;
       end if;
    end {{ connector.tester_name }}_Dropped;

@@ -156,7 +156,7 @@ package body Priority_Queue is
 
       -- Increment the start index:
       if Self.Index_Pool_Start < Self.Index_Pool.all'Last then
-         Self.Index_Pool_Start := Self.Index_Pool_Start + 1;
+         Self.Index_Pool_Start := @ + 1;
       else
          Self.Index_Pool_Start := Self.Index_Pool.all'First;
       end if;
@@ -172,7 +172,7 @@ package body Priority_Queue is
       Self.Index_Pool.all (Self.Index_Pool_Stop) := Index;
       -- Increment the stop index:
       if Self.Index_Pool_Stop < Self.Index_Pool.all'Last then
-         Self.Index_Pool_Stop := Self.Index_Pool_Stop + 1;
+         Self.Index_Pool_Stop := @ + 1;
       else
          Self.Index_Pool_Stop := Self.Index_Pool.all'First;
       end if;

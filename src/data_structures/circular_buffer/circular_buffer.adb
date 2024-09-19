@@ -234,11 +234,11 @@ package body Circular_Buffer is
       end if;
 
       -- Set the and count:
-      Self.Count := Self.Count + Bytes_Length;
+      Self.Count := @ + Bytes_Length;
       if Overwrite and then Self.Count > Self.Bytes'Length then
          -- We need to move head if an overwrite actually occurs, since we are
          -- basically "popping" old data by doing the overwrite.
-         Self.Head := (Self.Head + (Self.Count - Self.Bytes'Length)) mod Self.Bytes'Length;
+         Self.Head := (@ + (Self.Count - Self.Bytes'Length)) mod Self.Bytes'Length;
          -- The count should never be greater than the length of the buffer.
          Self.Count := Self.Bytes'Length;
       end if;
@@ -326,8 +326,8 @@ package body Circular_Buffer is
 
       -- Set the new head and count if we removed any bytes.
       if Self.Bytes'Length > 0 and then Num_Bytes_Returned > 0 then
-         Self.Head := (Self.Head + Num_Bytes_Returned) mod Self.Bytes'Length;
-         Self.Count := Self.Count - Num_Bytes_Returned;
+         Self.Head := (@ + Num_Bytes_Returned) mod Self.Bytes'Length;
+         Self.Count := @ - Num_Bytes_Returned;
       end if;
 
       -- Optimization: set head to zero if count is zero, this
@@ -405,7 +405,7 @@ package body Circular_Buffer is
       pragma Assert (Num_Bytes_Popped = Bytes_To_Pop, "Popping bytes returned too few bytes. This can only be false if there is a software bug.");
 
       -- Decrement the counter:
-      Self.Item_Count := Self.Item_Count - 1;
+      Self.Item_Count := @ - 1;
    end Do_Pop;
 
    function Pop (Self : in out Queue_Base) return Pop_Status is
@@ -443,7 +443,7 @@ package body Circular_Buffer is
       end;
 
       -- Increment the counters:
-      Self.Item_Count := Self.Item_Count + 1;
+      Self.Item_Count := @ + 1;
       if Self.Item_Count > Self.Item_Max_Count then
          Self.Item_Max_Count := Self.Item_Count;
       end if;

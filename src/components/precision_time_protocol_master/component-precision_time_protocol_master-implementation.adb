@@ -52,7 +52,7 @@ package body Component.Precision_Time_Protocol_Master.Implementation is
          begin
             -- We increment the transaction count number prior to sending out the message.
             -- Transaction_Number data product is defined as the last sent sequence number.
-            Self.Transaction_Count := Self.Transaction_Count + 1;
+            Self.Transaction_Count := @ + 1;
 
             -- Send out sync message:
             Self.Ptp_Time_Message_T_Send ((Message_Type => Sync, Transaction_Count => Self.Transaction_Count, Time_Stamp => Time_Stamp));
@@ -66,7 +66,7 @@ package body Component.Precision_Time_Protocol_Master.Implementation is
       end if;
 
       -- Increment cycle count.
-      Self.Cycle_Count := (Self.Cycle_Count + 1) mod Self.Sync_Period;
+      Self.Cycle_Count := (@ + 1) mod Self.Sync_Period;
    end Tick_T_Recv_Async;
 
    -- The command receive connector.
@@ -106,14 +106,14 @@ package body Component.Precision_Time_Protocol_Master.Implementation is
                Self.Ptp_Time_Message_T_Send ((Message_Type => Delay_Response, Transaction_Count => Self.Transaction_Count, Time_Stamp => Receive_Time));
 
                -- Update data products:
-               Self.Delay_Request_Message_Count := Self.Delay_Request_Message_Count + 1;
+               Self.Delay_Request_Message_Count := @ + 1;
                Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Delay_Request_Messages_Received (Receive_Time, (Value => Self.Delay_Request_Message_Count)));
             else
                -- This is an old or out of order transaction. Report it and do not send a delay response.
                Self.Event_T_Send_If_Connected (Self.Events.Unexpected_Transaction_Count (Receive_Time, (Message => Message, Expected_Transaction_Count => Self.Transaction_Count)));
 
                -- Update data product:
-               Self.Unexpected_Message_Count := Self.Unexpected_Message_Count + 1;
+               Self.Unexpected_Message_Count := @ + 1;
                Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Unexpected_Messages_Received (Receive_Time, (Value => Self.Unexpected_Message_Count)));
             end if;
             -- These should only be sent by the master, thus we should not be getting any of these.
@@ -122,7 +122,7 @@ package body Component.Precision_Time_Protocol_Master.Implementation is
             Self.Event_T_Send_If_Connected (Self.Events.Unexpected_Message_Type (Receive_Time, Message));
 
             -- Update data product:
-            Self.Unexpected_Message_Count := Self.Unexpected_Message_Count + 1;
+            Self.Unexpected_Message_Count := @ + 1;
             Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Unexpected_Messages_Received (Receive_Time, (Value => Self.Unexpected_Message_Count)));
       end case;
    end Ptp_Time_Message_Receive_T_Recv_Async;
@@ -135,7 +135,7 @@ package body Component.Precision_Time_Protocol_Master.Implementation is
       Self.Ptp_Time_Message_T_Send ((Message_Type => Follow_Up, Transaction_Count => Self.Transaction_Count, Time_Stamp => Arg));
 
       -- Update data products:
-      Self.Follow_Up_Message_Count := Self.Follow_Up_Message_Count + 1;
+      Self.Follow_Up_Message_Count := @ + 1;
       Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Follow_Up_Messages_Sent (Arg, (Value => Self.Follow_Up_Message_Count)));
    end Follow_Up_Sys_Time_T_Recv_Async;
 

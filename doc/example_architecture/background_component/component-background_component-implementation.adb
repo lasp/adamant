@@ -62,7 +62,7 @@ package body Component.Background_Component.Implementation is
       end;
 
       -- Calculate the next wake up time as 500ms after this wake up time.
-      Self.Wake_Up_Time := Self.Wake_Up_Time + Ada.Real_Time.Microseconds (500_000);
+      Self.Wake_Up_Time := @ + Ada.Real_Time.Microseconds (500_000);
    end Cycle;
 
 end Component.Background_Component.Implementation;

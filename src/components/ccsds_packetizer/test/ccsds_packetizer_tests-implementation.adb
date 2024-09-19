@@ -88,26 +88,26 @@ package body Ccsds_Packetizer_Tests.Implementation is
       P : Packet.T := (Header => (Time => (10, 55), Id => 77, Sequence_Count => 99, Buffer_Length => 5), Buffer => [1, 2, 3, 4, 5, others => 0]);
    begin
       -- Send a few packets:
-      P.Header.Sequence_Count := P.Header.Sequence_Count + 1;
+      P.Header.Sequence_Count := @ + 1;
       T.Packet_T_Send (P);
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 1);
-      P.Header.Sequence_Count := P.Header.Sequence_Count + 1;
+      P.Header.Sequence_Count := @ + 1;
       T.Packet_T_Send (P);
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 2);
-      P.Header.Sequence_Count := P.Header.Sequence_Count + 1;
+      P.Header.Sequence_Count := @ + 1;
       T.Packet_T_Send (P);
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 3);
-      P.Header.Sequence_Count := P.Header.Sequence_Count + 1;
+      P.Header.Sequence_Count := @ + 1;
       T.Packet_T_Send (P);
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 4);
-      P.Header.Sequence_Count := P.Header.Sequence_Count + 1;
+      P.Header.Sequence_Count := @ + 1;
       T.Packet_T_Send (P);
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 5);
 
       -- Check packet contents:
       P.Header.Sequence_Count := 99;
       for Idx in 1 .. 5 loop
-         P.Header.Sequence_Count := P.Header.Sequence_Count + 1;
+         P.Header.Sequence_Count := @ + 1;
          Check_Packet (P, T.Ccsds_Space_Packet_T_Recv_Sync_History.Get (Idx));
       end loop;
    end Test_Nominal_Packetization;
@@ -120,26 +120,26 @@ package body Ccsds_Packetizer_Tests.Implementation is
           Buffer => [0 => 1, 1 => 2, 2 => 3, 3 => 4, 4 => 5, 5 .. Packet_Types.Packet_Buffer_Type'Last - 1 => 22, Packet_Types.Packet_Buffer_Type'Last => 9]);
    begin
       -- Send a few packets:
-      P.Header.Sequence_Count := P.Header.Sequence_Count + 1;
+      P.Header.Sequence_Count := @ + 1;
       T.Packet_T_Send (P);
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 1);
-      P.Header.Sequence_Count := P.Header.Sequence_Count + 1;
+      P.Header.Sequence_Count := @ + 1;
       T.Packet_T_Send (P);
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 2);
-      P.Header.Sequence_Count := P.Header.Sequence_Count + 1;
+      P.Header.Sequence_Count := @ + 1;
       T.Packet_T_Send (P);
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 3);
-      P.Header.Sequence_Count := P.Header.Sequence_Count + 1;
+      P.Header.Sequence_Count := @ + 1;
       T.Packet_T_Send (P);
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 4);
-      P.Header.Sequence_Count := P.Header.Sequence_Count + 1;
+      P.Header.Sequence_Count := @ + 1;
       T.Packet_T_Send (P);
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 5);
 
       -- Check packet contents:
       P.Header.Sequence_Count := 13;
       for Idx in 1 .. 5 loop
-         P.Header.Sequence_Count := P.Header.Sequence_Count + 1;
+         P.Header.Sequence_Count := @ + 1;
          Check_Packet (P, T.Ccsds_Space_Packet_T_Recv_Sync_History.Get (Idx));
       end loop;
    end Test_Max_Size_Packetization;
@@ -150,26 +150,26 @@ package body Ccsds_Packetizer_Tests.Implementation is
       P : Packet.T := (Header => (Time => (10, 55), Id => 13, Sequence_Count => 77, Buffer_Length => 0), Buffer => [0 => 1, 1 => 2, 2 => 3, 3 => 4, 4 => 5, 5 .. Packet_Types.Packet_Buffer_Type'Last - 1 => 22, Packet_Types.Packet_Buffer_Type'Last => 9]);
    begin
       -- Send a few packets:
-      P.Header.Sequence_Count := P.Header.Sequence_Count + 1;
+      P.Header.Sequence_Count := @ + 1;
       T.Packet_T_Send (P);
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 1);
-      P.Header.Sequence_Count := P.Header.Sequence_Count + 1;
+      P.Header.Sequence_Count := @ + 1;
       T.Packet_T_Send (P);
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 2);
-      P.Header.Sequence_Count := P.Header.Sequence_Count + 1;
+      P.Header.Sequence_Count := @ + 1;
       T.Packet_T_Send (P);
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 3);
-      P.Header.Sequence_Count := P.Header.Sequence_Count + 1;
+      P.Header.Sequence_Count := @ + 1;
       T.Packet_T_Send (P);
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 4);
-      P.Header.Sequence_Count := P.Header.Sequence_Count + 1;
+      P.Header.Sequence_Count := @ + 1;
       T.Packet_T_Send (P);
       Natural_Assert.Eq (T.Ccsds_Space_Packet_T_Recv_Sync_History.Get_Count, 5);
 
       -- Check packet contents:
       P.Header.Sequence_Count := 77;
       for Idx in 1 .. 5 loop
-         P.Header.Sequence_Count := P.Header.Sequence_Count + 1;
+         P.Header.Sequence_Count := @ + 1;
          Check_Packet (P, T.Ccsds_Space_Packet_T_Recv_Sync_History.Get (Idx));
       end loop;
    end Test_Min_Size_Packetization;

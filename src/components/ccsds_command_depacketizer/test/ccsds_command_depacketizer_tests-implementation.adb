@@ -67,7 +67,7 @@ package body Ccsds_Command_Depacketizer_Tests.Implementation is
       Packet : Ccsds_Space_Packet.T := Construct_Packet (Ccsds_Command_Secondary_Header.Serialization.To_Byte_Array (The_Secondary_Header) & Command_Id.Serialization.To_Byte_Array ((Id => Cmd_Id)) & Data & (1 .. Natural (Function_Code) => 0), Packet_Type, Secondary_Header, Apid, Sequence_Count);
    begin
       -- Adjust packet length if requested:
-      Packet.Header.Packet_Length := Unsigned_16 (Natural (Packet.Header.Packet_Length) + Packet_Length_Adjustment);
+      Packet.Header.Packet_Length := Unsigned_16 (Natural (@) + Packet_Length_Adjustment);
       declare
          -- Get packet header bytes:
          Header_Bytes : constant Byte_Array := Ccsds_Primary_Header.Serialization.To_Byte_Array (Packet.Header);

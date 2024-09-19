@@ -30,7 +30,7 @@ package body Component.Tick_Listener.Implementation is
       begin
          -- Increment the count:
          if Count /= Natural'Last then
-            Count := Count + 1;
+            Count := @ + 1;
          end if;
       end Increment_Count;
 

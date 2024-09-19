@@ -72,7 +72,7 @@ package body Watchdog_List is
 
       -- Increment the count if needed
       if Self.Task_Watchdog_Pet_Connections (Index).Missed_Pet_Count <= Self.Task_Watchdog_Pet_Connections (Index).Missed_Pet_Limit then
-         Self.Task_Watchdog_Pet_Connections (Index).Missed_Pet_Count := Self.Task_Watchdog_Pet_Connections (Index).Missed_Pet_Count + 1;
+         Self.Task_Watchdog_Pet_Connections (Index).Missed_Pet_Count := @ + 1;
       end if;
       return Return_Status;
    end Check_Watchdog_Pets;

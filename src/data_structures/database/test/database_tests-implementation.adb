@@ -59,7 +59,7 @@ package body Database_Tests.Implementation is
          U_Status := Self.Db.Update (Id, Natural (Id) + 60);
          Update_Status_Assert.Eq (U_Status, My_Database.Success);
          Natural_Assert.Eq (Self.Db.Get_Count, Cnt);
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
          Boolean_Assert.Eq (Self.Db.Is_Empty, False);
          if Id /= Id_Type ((Natural (Id_Range'First) + Database_Size - 1)) then
             Boolean_Assert.Eq (Self.Db.Is_Full, False);

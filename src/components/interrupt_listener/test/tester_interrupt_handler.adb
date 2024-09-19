@@ -7,7 +7,7 @@ package body Tester_Interrupt_Handler is
       use Interfaces;
    begin
       -- Increment the count:
-      Data.Count := Data.Count + 1;
+      Data.Count := @ + 1;
       -- Increment the time:
       Data.Time := (0, 0);
    end Handler;

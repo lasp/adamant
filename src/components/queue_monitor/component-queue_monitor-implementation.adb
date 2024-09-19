@@ -59,16 +59,16 @@ package body Component.Queue_Monitor.Implementation is
             -- Dispatching call to component's overridden method, because the type of
             -- comp is Component.Instance'Class:
             Self.Packet_To_Send.Buffer (Idx) := Comp.all.Get_Queue_Current_Percent_Used;
-            Idx := Idx + 1;
+            Idx := @ + 1;
             Self.Packet_To_Send.Buffer (Idx) := Comp.all.Get_Queue_Maximum_Percent_Used;
-            Idx := Idx + 1;
+            Idx := @ + 1;
          end loop;
          pragma Assert (Idx = Self.Packet_To_Send.Header.Buffer_Length, "Length calculation is wrong.");
 
          -- Send packet;
          Self.Packet_To_Send.Header.Time := Self.Sys_Time_T_Get;
          Self.Packet_T_Send (Self.Packet_To_Send);
-         Self.Packet_To_Send.Header.Sequence_Count := Self.Packet_To_Send.Header.Sequence_Count + 1;
+         Self.Packet_To_Send.Header.Sequence_Count := @ + 1;
       end if;
 
       -- Increment the packet count:

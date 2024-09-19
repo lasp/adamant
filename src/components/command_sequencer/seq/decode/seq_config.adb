@@ -15,7 +15,7 @@ package body Seq_Config is
    begin
       for Char of Str loop
          exit when Char = ASCII.NUL;
-         Idx := Idx + 1;
+         Idx := @ + 1;
       end loop;
       return Str (Str'First .. Idx - 1);
    end Strip_Nul;
@@ -37,7 +37,7 @@ package body Seq_Config is
             End_Idx := I - 1;
             exit;
          end if;
-         I := I + 1;
+         I := @ + 1;
       end loop;
 
       -- Iterate through all words:
@@ -62,7 +62,7 @@ package body Seq_Config is
 
          -- Store word in return array:
          To_Return (Words_Parsed) (1 .. L - F + 1) := S (F .. L);
-         Words_Parsed := Words_Parsed + 1;
+         Words_Parsed := @ + 1;
          I := L + 1;
       end loop;
 
@@ -132,8 +132,8 @@ package body Seq_Config is
                         -- Transform pattern string into an an array of bytes
                         while Pattern_Str (Pattern_Idx) /= ASCII.NUL loop
                            Command_Bytes (Command_Bytes_Idx) := Basic_Types.Byte'Value ("16#" & Pattern_Str (Pattern_Idx .. Pattern_Idx + 1) & "#");
-                           Command_Bytes_Idx := Command_Bytes_Idx + 1;
-                           Pattern_Idx := Pattern_Idx + 2;
+                           Command_Bytes_Idx := @ + 1;
+                           Pattern_Idx := @ + 2;
                         end loop;
 
                         -- Deserialize array of bytes into command record

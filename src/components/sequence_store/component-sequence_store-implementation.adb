@@ -239,7 +239,7 @@ package body Component.Sequence_Store.Implementation is
                      Sequence_Length => Slot_Header.Seq_Header.Length
                   ));
                   -- Increment the index:
-                  Idx := Idx + Packed_Slot_Summary.Size_In_Bytes;
+                  Idx := @ + Packed_Slot_Summary.Size_In_Bytes;
                end;
             end loop;
 

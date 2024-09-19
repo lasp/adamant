@@ -48,7 +48,7 @@ package body Arm_State is
                -- If timeout is positive, then decrement it.
                if Timeout > Arm_Timeout_Type'First then
                   -- Decrement:
-                  Timeout := Timeout - 1;
+                  Timeout := @ - 1;
 
                   -- If timeout is now equal to zero, then we have
                   -- timed out.

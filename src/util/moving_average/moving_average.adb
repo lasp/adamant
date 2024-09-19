@@ -34,9 +34,9 @@ package body Moving_Average is
    procedure Add_New_Sample (Self : in out Instance; New_Sample : in T) is
    begin
       -- Start by adding the sample since we have to do this regardless if we are wrapping yet or not
-      Self.Sum := Self.Sum + New_Sample;
+      Self.Sum := @ + New_Sample;
       if Self.Calculate_Variance then
-         Self.Sum_Squared := Self.Sum_Squared + (New_Sample * New_Sample);
+         Self.Sum_Squared := @ + (New_Sample * New_Sample);
       end if;
 
       -- Determine if we have a full buffer so that we know if we need to increment the count
@@ -44,13 +44,13 @@ package body Moving_Average is
          declare
             Prev_Sample : constant T := Self.Items (Self.Head);
          begin
-            Self.Sum := Self.Sum - Prev_Sample;
+            Self.Sum := @ - Prev_Sample;
             if Self.Calculate_Variance then
-               Self.Sum_Squared := Self.Sum_Squared - (Prev_Sample * Prev_Sample);
+               Self.Sum_Squared := @ - (Prev_Sample * Prev_Sample);
             end if;
          end;
       else
-         Self.Count := Self.Count + 1;
+         Self.Count := @ + 1;
       end if;
 
       -- Determine if we have a new max value to store
@@ -67,7 +67,7 @@ package body Moving_Average is
 
       -- Now update our structures and statistics
       Self.Items (Self.Head) := New_Sample;
-      Self.Head := (Self.Head + 1) mod (Self.Items_Length);
+      Self.Head := (@ + 1) mod (Self.Items_Length);
    end Add_New_Sample;
 
    procedure Calculate_Mean_Variance_Max (Self : in out Instance; Mean : out T; Variance : out T; Max : out T) is

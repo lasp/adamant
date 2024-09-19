@@ -24,7 +24,7 @@ package body Component.Memory_Manager.Implementation is
                Status := Success;
                -- Set the ID:
                Id := Current_Id;
-               Current_Id := Current_Id + 1;
+               Current_Id := @ + 1;
                -- Set the new state, the memory is now in use.
                Current_State := In_Use;
                -- Update the data product. This needs to be done inside the protected

@@ -46,6 +46,6 @@ begin
    loop
       -- Wait for time:
       delay until Next_Time;
-      Next_Time := Next_Time + Wait_Time;
+      Next_Time := @ + Wait_Time;
    end loop;
 end Main;

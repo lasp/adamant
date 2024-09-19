@@ -53,7 +53,7 @@ package body Component.Generic_Queued.Implementation.Tester is
       if not Self.Expect_Generic_Type_2_Send_Dropped then
          pragma Assert (False, "The component's queue filled up when Generic_Type_2_Send was called!");
       else
-         Self.Generic_Type_2_Send_Dropped_Count := Self.Generic_Type_2_Send_Dropped_Count + 1;
+         Self.Generic_Type_2_Send_Dropped_Count := @ + 1;
          Self.Expect_Generic_Type_2_Send_Dropped := False;
       end if;
    end Generic_Type_2_Send_Dropped;

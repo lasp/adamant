@@ -33,13 +33,13 @@ package body Protected_Variables is
 
          procedure Increment_Count (To_Add : in T := 1) is
          begin
-            Count := Count + To_Add;
+            Count := @ + To_Add;
          end Increment_Count;
 
          procedure Increment_Count_And_Return_Previous (Prev_Count : out T; To_Add : in T := 1) is
          begin
             Prev_Count := Count;
-            Count := Count + To_Add;
+            Count := @ + To_Add;
          end Increment_Count_And_Return_Previous;
       end Counter;
    end Generic_Protected_Counter;
@@ -63,13 +63,13 @@ package body Protected_Variables is
 
          procedure Decrement_Count (To_Subtract : in T := 1) is
          begin
-            Count := Count - To_Subtract;
+            Count := @ - To_Subtract;
          end Decrement_Count;
 
          procedure Decrement_Count_And_Return_Previous (Prev_Count : out T; To_Subtract : in T := 1) is
          begin
             Prev_Count := Count;
-            Count := Count - To_Subtract;
+            Count := @ - To_Subtract;
          end Decrement_Count_And_Return_Previous;
       end Counter;
    end Generic_Protected_Counter_Decrement;
@@ -100,7 +100,7 @@ package body Protected_Variables is
          procedure Increment_Count (To_Add : in T := 1) is
          begin
             if Period > 0 then
-               Count := (Count + To_Add) mod Period;
+               Count := (@ + To_Add) mod Period;
             end if;
          end Increment_Count;
 

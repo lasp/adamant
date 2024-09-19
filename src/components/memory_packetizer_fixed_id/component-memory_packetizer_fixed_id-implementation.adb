@@ -69,7 +69,7 @@ package body Component.Memory_Packetizer_Fixed_Id.Implementation is
             delay until Self.Next_Period_Start;
             -- Set the next period relative to the current one to avoid period drift
             -- during high packet load.
-            Self.Next_Period_Start := Self.Next_Period_Start + Self.Time_Period;
+            Self.Next_Period_Start := @ + Self.Time_Period;
             Self.Num_Packets_Sent := 0;
          end if;
 
@@ -107,11 +107,11 @@ package body Component.Memory_Packetizer_Fixed_Id.Implementation is
                -- Send the packet:
                Self.Packet_T_Send_If_Connected (Packet_To_Send);
                -- Increment the memory index:
-               Memory_Index := Memory_Index + Buffer_Length;
+               Memory_Index := @ + Buffer_Length;
             end;
 
             -- Increment the number of packets:
-            Self.Num_Packets_Sent := Self.Num_Packets_Sent + 1;
+            Self.Num_Packets_Sent := @ + 1;
          end;
       end loop;
    end Memory_Dump_Recv_Async;

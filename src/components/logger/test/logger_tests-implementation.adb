@@ -104,23 +104,23 @@ package body Logger_Tests.Implementation is
       The_Tick := ((1, 2), 3);
       T.T_Send (The_Tick);
       Bytes_To_Compare (Idx .. Idx + Tick.Serialization.Serialized_Length - 1) := Tick.Serialization.To_Byte_Array (The_Tick);
-      Idx := Idx + Tick.Serialization.Serialized_Length;
+      Idx := @ + Tick.Serialization.Serialized_Length;
       The_Tick := ((4, 5), 6);
       T.T_Send (The_Tick);
       Bytes_To_Compare (Idx .. Idx + Tick.Serialization.Serialized_Length - 1) := Tick.Serialization.To_Byte_Array (The_Tick);
-      Idx := Idx + Tick.Serialization.Serialized_Length;
+      Idx := @ + Tick.Serialization.Serialized_Length;
       The_Tick := ((7, 8), 9);
       T.T_Send (The_Tick);
       Bytes_To_Compare (Idx .. Idx + Tick.Serialization.Serialized_Length - 1) := Tick.Serialization.To_Byte_Array (The_Tick);
-      Idx := Idx + Tick.Serialization.Serialized_Length;
+      Idx := @ + Tick.Serialization.Serialized_Length;
       The_Tick := ((10, 11), 12);
       T.T_Send (The_Tick);
       Bytes_To_Compare (Idx .. Idx + Tick.Serialization.Serialized_Length - 1) := Tick.Serialization.To_Byte_Array (The_Tick);
-      Idx := Idx + Tick.Serialization.Serialized_Length;
+      Idx := @ + Tick.Serialization.Serialized_Length;
       The_Tick := ((13, 14), 15);
       T.T_Send (The_Tick);
       Bytes_To_Compare (Idx .. Idx + Tick.Serialization.Serialized_Length - 1) := Tick.Serialization.To_Byte_Array (The_Tick);
-      Idx := Idx + Tick.Serialization.Serialized_Length;
+      Idx := @ + Tick.Serialization.Serialized_Length;
 
       -- Make sure no events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
@@ -350,23 +350,23 @@ package body Logger_Tests.Implementation is
       The_Tick := ((1, 2), 3);
       T.T_Send (The_Tick);
       Bytes_To_Compare (Idx .. Idx + Tick.Serialization.Serialized_Length - 1) := Tick.Serialization.To_Byte_Array (The_Tick);
-      Idx := Idx + Tick.Serialization.Serialized_Length;
+      Idx := @ + Tick.Serialization.Serialized_Length;
       The_Tick := ((4, 5), 6);
       T.T_Send (The_Tick);
       Bytes_To_Compare (Idx .. Idx + Tick.Serialization.Serialized_Length - 1) := Tick.Serialization.To_Byte_Array (The_Tick);
-      Idx := Idx + Tick.Serialization.Serialized_Length;
+      Idx := @ + Tick.Serialization.Serialized_Length;
       The_Tick := ((7, 8), 9);
       T.T_Send (The_Tick);
       Bytes_To_Compare (Idx .. Idx + Tick.Serialization.Serialized_Length - 1) := Tick.Serialization.To_Byte_Array (The_Tick);
-      Idx := Idx + Tick.Serialization.Serialized_Length;
+      Idx := @ + Tick.Serialization.Serialized_Length;
       The_Tick := ((10, 11), 12);
       T.T_Send (The_Tick);
       Bytes_To_Compare (Idx .. Idx + Tick.Serialization.Serialized_Length - 1) := Tick.Serialization.To_Byte_Array (The_Tick);
-      Idx := Idx + Tick.Serialization.Serialized_Length;
+      Idx := @ + Tick.Serialization.Serialized_Length;
       The_Tick := ((13, 14), 15);
       T.T_Send (The_Tick);
       Bytes_To_Compare (Idx .. Idx + Tick.Serialization.Serialized_Length - 1) := Tick.Serialization.To_Byte_Array (The_Tick);
-      Idx := Idx + Tick.Serialization.Serialized_Length;
+      Idx := @ + Tick.Serialization.Serialized_Length;
 
       -- Make sure no events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);

@@ -398,7 +398,7 @@ package body Tests.Implementation is
          Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, Cnt);
          Natural_Assert.Eq (T.Dump_Packet_History.Get_Count, Cnt);
          Data_Product_Assert.Eq (T.Dump_Packet_History.Get (Cnt), D_Prod);
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
       end loop;
    end Test_Nominal_Dump;
 
@@ -438,7 +438,7 @@ package body Tests.Implementation is
          Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, Cnt);
          Natural_Assert.Eq (T.Data_Product_Poly_Type_Dump_History.Get_Count, Cnt);
          Data_Product_Poly_Type_Assert.Eq (T.Data_Product_Poly_Type_Dump_History.Get (Cnt), (Time => D_Prod.Header.Time, Id => Id, Data => [0, 0, 0, Basic_Types.Byte (Id)]));
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
       end loop;
 
       -- Induce an extraction failure.
@@ -475,7 +475,7 @@ package body Tests.Implementation is
          Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, Cnt);
          Natural_Assert.Eq (T.Data_Product_Fetch_Id_Not_Available_History.Get_Count, Cnt);
          Data_Product_Id_Assert.Eq (T.Data_Product_Fetch_Id_Not_Available_History.Get (Cnt), (Id => Id));
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
       end loop;
 
       -- Make sure events were thrown:
@@ -492,7 +492,7 @@ package body Tests.Implementation is
          Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, Cnt + 10);
          Natural_Assert.Eq (T.Data_Product_Dump_Id_Not_Available_History.Get_Count, Cnt);
          Data_Product_Id_Assert.Eq (T.Data_Product_Dump_Id_Not_Available_History.Get (Cnt), (Id => Id));
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
       end loop;
 
       -- Try to dump some data products poly types that are not available:
@@ -507,7 +507,7 @@ package body Tests.Implementation is
          -- Poly info event ignored here, checked in nominal test.
          Natural_Assert.Eq (T.Data_Product_Dump_Poly_Id_Not_Available_History.Get_Count, Cnt);
          Data_Product_Id_Assert.Eq (T.Data_Product_Dump_Poly_Id_Not_Available_History.Get (Cnt), (Id => Id));
-         Cnt := Cnt + 1;
+         Cnt := @ + 1;
       end loop;
 
       -- Store some data:

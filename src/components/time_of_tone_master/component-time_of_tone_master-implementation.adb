@@ -56,7 +56,7 @@ package body Component.Time_Of_Tone_Master.Implementation is
       if Self.Send_Counter.Is_Count_At_Period or else Do_Once then
 
          -- Increment the transaction count:
-         Self.Tone_Message_Count := Self.Tone_Message_Count + 1;
+         Self.Tone_Message_Count := @ + 1;
 
          declare
             -- Grab the current time:
@@ -85,7 +85,7 @@ package body Component.Time_Of_Tone_Master.Implementation is
    overriding procedure Tone_Message_Sys_Time_T_Recv_Sync (Self : in out Instance; Arg : in Sys_Time.T) is
    begin
       -- Increment the transaction count:
-      Self.Time_Message_Count := Self.Time_Message_Count + 1;
+      Self.Time_Message_Count := @ + 1;
 
       declare
          -- Grab the current time:

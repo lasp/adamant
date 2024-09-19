@@ -113,7 +113,7 @@ package body {{ name }} is
       -- Size of variable sized field "{{ field.name }}":
       Length := (Integer (Src.{{ field.variable_length }}) + Integer ({{ field.variable_length_offset }})) * {{ field.name }}_Unit_Length;
       if Length > 0 then
-         Size_In_Bytes_To_Return := Size_In_Bytes_To_Return + Length;
+         Size_In_Bytes_To_Return := @ + Length;
       end if;
 {% else %}
       -- Add size of packed type for field "{{ field.name }}":
@@ -121,7 +121,7 @@ package body {{ name }} is
          Num_Bytes_Serialized := Size_In_Bytes_To_Return;
          return Failure;
       end if;
-      Size_In_Bytes_To_Return := Size_In_Bytes_To_Return + Length;
+      Size_In_Bytes_To_Return := @ + Length;
 {% endif %}
 
 {% endfor %}
@@ -189,7 +189,7 @@ package body {{ name }} is
       -- Size of variable sized field "{{ field.name }}":
       Length := (Integer (Src.{{ field.variable_length }}) + Integer ({{ field.variable_length_offset }})) * {{ field.name }}_Unit_Length;
       if Length > 0 then
-         Size_In_Bytes_To_Return := Size_In_Bytes_To_Return + Length;
+         Size_In_Bytes_To_Return := @ + Length;
       end if;
 {% else %}
       -- Add size of packed type for field "{{ field.name }}":
@@ -197,7 +197,7 @@ package body {{ name }} is
          Num_Bytes_Serialized := Size_In_Bytes_To_Return;
          return Failure;
       end if;
-      Size_In_Bytes_To_Return := Size_In_Bytes_To_Return + Length;
+      Size_In_Bytes_To_Return := @ + Length;
 {% endif %}
 
 {% endfor %}

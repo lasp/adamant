@@ -145,7 +145,7 @@ package body Component.Memory_Manager.Implementation.Tester is
       if not Self.Expect_Command_T_Send_Dropped then
          pragma Assert (False, "The component's queue filled up when Command_T_Send was called!");
       else
-         Self.Command_T_Send_Dropped_Count := Self.Command_T_Send_Dropped_Count + 1;
+         Self.Command_T_Send_Dropped_Count := @ + 1;
          Self.Expect_Command_T_Send_Dropped := False;
       end if;
    end Command_T_Send_Dropped;

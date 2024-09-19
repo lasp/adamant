@@ -145,7 +145,7 @@ package body Component.Sequence_Store.Implementation.Tester is
       if not Self.Expect_Command_T_Send_Dropped then
          pragma Assert (False, "The component's queue filled up when Command_T_Send was called!");
       else
-         Self.Command_T_Send_Dropped_Count := Self.Command_T_Send_Dropped_Count + 1;
+         Self.Command_T_Send_Dropped_Count := @ + 1;
          Self.Expect_Command_T_Send_Dropped := False;
       end if;
    end Command_T_Send_Dropped;
@@ -157,7 +157,7 @@ package body Component.Sequence_Store.Implementation.Tester is
       if not Self.Expect_Sequence_Store_Memory_Region_Store_T_Send_Dropped then
          pragma Assert (False, "The component's queue filled up when Sequence_Store_Memory_Region_Store_T_Send was called!");
       else
-         Self.Sequence_Store_Memory_Region_Store_T_Send_Dropped_Count := Self.Sequence_Store_Memory_Region_Store_T_Send_Dropped_Count + 1;
+         Self.Sequence_Store_Memory_Region_Store_T_Send_Dropped_Count := @ + 1;
          Self.Expect_Sequence_Store_Memory_Region_Store_T_Send_Dropped := False;
       end if;
    end Sequence_Store_Memory_Region_Store_T_Send_Dropped;

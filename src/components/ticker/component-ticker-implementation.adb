@@ -20,10 +20,10 @@ package body Component.Ticker.Implementation is
 
       -- Send the tick and update the count:
       Self.Tick_T_Send ((Time => Self.Sys_Time_T_Get, Count => Self.Count));
-      Self.Count := Self.Count + 1;
+      Self.Count := @ + 1;
 
       -- Calculate the next wake-up time:
-      Self.Next_Period := Self.Next_Period + Self.Period;
+      Self.Next_Period := @ + Self.Period;
    end Cycle;
 
 end Component.Ticker.Implementation;

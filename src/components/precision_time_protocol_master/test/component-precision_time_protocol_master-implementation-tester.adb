@@ -137,7 +137,7 @@ package body Component.Precision_Time_Protocol_Master.Implementation.Tester is
       if not Self.Expect_Tick_T_Send_Dropped then
          pragma Assert (False, "The component's queue filled up when Tick_T_Send was called!");
       else
-         Self.Tick_T_Send_Dropped_Count := Self.Tick_T_Send_Dropped_Count + 1;
+         Self.Tick_T_Send_Dropped_Count := @ + 1;
          Self.Expect_Tick_T_Send_Dropped := False;
       end if;
    end Tick_T_Send_Dropped;
@@ -149,7 +149,7 @@ package body Component.Precision_Time_Protocol_Master.Implementation.Tester is
       if not Self.Expect_Command_T_Send_Dropped then
          pragma Assert (False, "The component's queue filled up when Command_T_Send was called!");
       else
-         Self.Command_T_Send_Dropped_Count := Self.Command_T_Send_Dropped_Count + 1;
+         Self.Command_T_Send_Dropped_Count := @ + 1;
          Self.Expect_Command_T_Send_Dropped := False;
       end if;
    end Command_T_Send_Dropped;
@@ -161,7 +161,7 @@ package body Component.Precision_Time_Protocol_Master.Implementation.Tester is
       if not Self.Expect_Ptp_Time_Message_Receive_T_Send_Dropped then
          pragma Assert (False, "The component's queue filled up when Ptp_Time_Message_Receive_T_Send was called!");
       else
-         Self.Ptp_Time_Message_Receive_T_Send_Dropped_Count := Self.Ptp_Time_Message_Receive_T_Send_Dropped_Count + 1;
+         Self.Ptp_Time_Message_Receive_T_Send_Dropped_Count := @ + 1;
          Self.Expect_Ptp_Time_Message_Receive_T_Send_Dropped := False;
       end if;
    end Ptp_Time_Message_Receive_T_Send_Dropped;
@@ -173,7 +173,7 @@ package body Component.Precision_Time_Protocol_Master.Implementation.Tester is
       if not Self.Expect_Follow_Up_Sys_Time_T_Send_Dropped then
          pragma Assert (False, "The component's queue filled up when Follow_Up_Sys_Time_T_Send was called!");
       else
-         Self.Follow_Up_Sys_Time_T_Send_Dropped_Count := Self.Follow_Up_Sys_Time_T_Send_Dropped_Count + 1;
+         Self.Follow_Up_Sys_Time_T_Send_Dropped_Count := @ + 1;
          Self.Expect_Follow_Up_Sys_Time_T_Send_Dropped := False;
       end if;
    end Follow_Up_Sys_Time_T_Send_Dropped;

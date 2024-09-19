@@ -21,7 +21,7 @@ package body Component.Event_Producer.Implementation is
          when others =>
             pragma Assert (False);
       end case;
-      Self.Count := Self.Count + 1;
+      Self.Count := @ + 1;
    end Tick_T_Recv_Sync;
 
 end Component.Event_Producer.Implementation;

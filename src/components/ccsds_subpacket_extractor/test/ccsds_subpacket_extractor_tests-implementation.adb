@@ -50,7 +50,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       for Packet of Packet_Array loop
          Stat := Ccsds_Space_Packet.Serialization.To_Byte_Array (To_Return.Data (Idx .. Last_Index), Packet, Num_Bytes_Serialized);
          pragma Assert (Stat = Success, "Failed to serialize CCSDS inside of another CCSDS");
-         Idx := Idx + Num_Bytes_Serialized;
+         Idx := @ + Num_Bytes_Serialized;
       end loop;
       To_Return.Header.Packet_Length := Unsigned_16 (Idx) + Unsigned_16 (Stop_Offset) - 1;
       return To_Return;
@@ -284,7 +284,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       -- Send over the sync connector first:
       Packet := Create_Packet ([0 => Packet_1, 1 => Packet_3]);
       -- Override packet header to make it too small:
-      Packet.Header.Packet_Length := Packet.Header.Packet_Length - 1;
+      Packet.Header.Packet_Length := @ - 1;
       T.Ccsds_Space_Packet_T_Send (Packet);
 
       -- Expect event to be thrown and the last packet not extracted.
@@ -307,7 +307,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       -- Send over the sync connector first:
       Packet := Create_Packet ([0 => Packet_2]);
       -- Override packet header to make it way too small:
-      Packet.Header.Packet_Length := Packet.Header.Packet_Length - Unsigned_16 (Ccsds_Primary_Header.Size_In_Bytes);
+      Packet.Header.Packet_Length := @ - Unsigned_16 (Ccsds_Primary_Header.Size_In_Bytes);
       T.Ccsds_Space_Packet_T_Send_2 (Packet);
       Natural_Assert.Eq (Self.Tester.Dispatch_All, 1);
 
@@ -335,7 +335,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       -- Send over the sync connector first:
       Packet := Create_Packet ([0 => Packet_1, 1 => Packet_3]);
       -- Override packet header to make it too large by a little:
-      Packet.Header.Packet_Length := Packet.Header.Packet_Length + 1;
+      Packet.Header.Packet_Length := @ + 1;
       T.Ccsds_Space_Packet_T_Send (Packet);
 
       -- Expect 2 packets to be extracted correctly:
@@ -355,7 +355,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       Packet := Create_Packet ([0 => Packet_3]);
       -- Override packet header to make it too large by a lot:
       Packet.Data (Natural (Packet.Header.Packet_Length) + 1 .. Packet.Data'Last) := [others => 99];
-      Packet.Header.Packet_Length := Packet.Header.Packet_Length + Unsigned_16 (Ccsds_Primary_Header.Size_In_Bytes);
+      Packet.Header.Packet_Length := @ + Unsigned_16 (Ccsds_Primary_Header.Size_In_Bytes);
       T.Ccsds_Space_Packet_T_Send_2 (Packet);
       Natural_Assert.Eq (Self.Tester.Dispatch_All, 1);
 
@@ -445,7 +445,7 @@ package body Ccsds_Subpacket_Extractor_Tests.Implementation is
       -- Send over the sync connector first:
       Packet := Create_Packet ([0 => Packet_1, 1 => Packet_3], Start_Offset => 4, Stop_Offset => 6);
       -- Override packet header to make it too large by a little:
-      Packet.Header.Packet_Length := Packet.Header.Packet_Length + 1;
+      Packet.Header.Packet_Length := @ + 1;
       T.Ccsds_Space_Packet_T_Send (Packet);
 
       -- Expect 2 packets to be extracted correctly:

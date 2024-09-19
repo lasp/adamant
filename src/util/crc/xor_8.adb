@@ -6,7 +6,7 @@ package body Xor_8 is
       To_Return : Xor_8_Type := Seed;
    begin
       for B of Bytes loop
-         To_Return := To_Return xor B;
+         To_Return := @ xor B;
       end loop;
       return To_Return;
    end Compute_Xor_8;

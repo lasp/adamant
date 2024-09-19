@@ -208,7 +208,7 @@ package body Seq is
             Self.Set_Engine_Error (Load);
             return Failure;
          else
-            Self.Current := Self.Current + 1;
+            Self.Current := @ + 1;
          end if;
       end if;
 
@@ -260,7 +260,7 @@ package body Seq is
                -- Unload the current runtime stack entry
                Self.Stack.all (Self.Current).Unload;
                -- Pop the finished sequence off the stack
-               Self.Current := Self.Current - 1;
+               Self.Current := @ - 1;
                -- Continue executing the caller sequence.
                return Self.Execute (Instruction_Limit, Timestamp);
             else
@@ -297,7 +297,7 @@ package body Seq is
             return Self.Last_Execute_State;
          when Seq_Runtime_State.Wait_Command =>
             Self.Last_Command_Id := Self.Stack.all (Self.Current).Get_Command_Id;
-            Self.Commands_Sent := Self.Commands_Sent + 1;
+            Self.Commands_Sent := @ + 1;
             Self.Last_Execute_State := Seq_Execute_State.Wait_Command;
             return Self.Last_Execute_State;
          when Seq_Runtime_State.Wait_Telemetry_Set =>
