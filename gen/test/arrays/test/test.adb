@@ -1,4 +1,3 @@
-pragma Ada_2022;
 with Ada.Text_IO; use Ada.Text_IO;
 with Simple_Array.Representation;
 with Complex_Array.Representation;
