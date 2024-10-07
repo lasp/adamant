@@ -118,10 +118,14 @@ def _build_all_ada_dependencies(ada_source_files, source_db):
         for source in new_ads_sources:
             if source.endswith("_h.ads"):
                 with c_source_database() as db:
-                    c_sources.extend(db.get_sources([os.path.basename(source[:-6])]))
+                    binded_sources = db.try_get_sources([os.path.basename(source[:-6])])
+                    if binded_sources:
+                        c_sources.extend(binded_sources)
             if source.endswith("_hpp.ads"):
                 with c_source_database() as db:
-                    c_sources.extend(db.get_sources([os.path.basename(source[:-8])]))
+                    binded_sources = db.try_get_sources([os.path.basename(source[:-8])])
+                    if binded_sources:
+                        c_sources.extend(binded_sources)
         if c_sources:
             redo.redo_ifchange(c_sources)
             deps.extend(c_sources)
