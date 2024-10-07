@@ -3,9 +3,6 @@
 --
 -- Generated from {{ filename }} on {{ time }}.
 --------------------------------------------------------------------------------
-
--- Standard Includes:
-with Ada.Unchecked_Conversion;
 {% if type_includes %}
 
 -- Record Component Includes:
@@ -37,12 +34,17 @@ package {{ name }}.C is
    -- Access type for U_C.
    type U_C_Access is access all U_C;
 
-   -- Functions for converting between the Ada and C version of the packed type:
-   function To_Ada is new Ada.Unchecked_Conversion (Source => U_C, Target => U);
-   function To_C is new Ada.Unchecked_Conversion (Source => U, Target => U_C);
-
-   -- The .C package is not supported for all Adamant packed records. We do not allow compilation in
-   -- these cases.
-   pragma Compile_Time_Error ({{ name }}.U'Size /= U_C'Size, "C type size not compatible with Ada type size.");
+   -- Functions for converting between the Ada and C version of the
+   -- unpacked and packed types:
+   function To_Ada (Src : in U_C) return U;
+   function To_C (Src : in U) return U_C;
+{% if endianness in ["either", "big"] %}
+   function Pack (Src : in U_C) return T;
+   function Unpack (Src : in T) return U_C;
+{% endif %}
+{% if endianness in ["either", "little"] %}
+   function Pack (Src : in U_C) return T_Le;
+   function Unpack (Src : in T_Le) return U_C;
+{% endif %}
 
 end {{ name }}.C;

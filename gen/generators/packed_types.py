@@ -14,6 +14,7 @@ record_templates = [
     "record/name-assertion.ads",
     "record/name-assertion.adb",
     "record/name-c.ads",
+    "record/name-c.adb",
     "record/name.py",
     "record/name_type_ranges.adb",
 ]
