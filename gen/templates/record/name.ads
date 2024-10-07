@@ -3,7 +3,6 @@
 --
 -- Generated from {{ filename }} on {{ time }}.
 --------------------------------------------------------------------------------
-pragma Ada_2022;
 
 -- Standard Includes:
 with Basic_Types;
