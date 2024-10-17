@@ -207,13 +207,33 @@ class build_executable(build_rule_base):
         source_dir = os.path.dirname(source_to_compile)
 
         # Find any C objects that need to be linked against so that we can
-        # tell GPRbuild to link with them.
+        # tell gprbuild to link with them.
         with c_source_database() as db:
             c_objects = db.get_all_objects(build_target)
         existing_c_objects = [ofile for ofile in c_objects if os.path.isfile(ofile)]
         c_source_path = list(
             set([redo_arg.get_src_dir(obj) for obj in existing_c_objects])
         )
+
+        # Gprbuild will try to link to all C/C++ objects that it finds source
+        # files for in directories in c_source_path. However, we often only want to link
+        # with some of these files, not all. In order to tell gprbuild to not
+        # link with everything we need to create a list of files for it to
+        # exclude.
+        existing_c_basenames = [os.path.basename(os.path.splitext(ofile)[0]) for ofile in existing_c_objects]
+        source_extensions = ['.h', '.c', '.cpp', '.hpp', '.s', '.S']
+        c_source_exclude = []
+
+        # Iterate over each directory in the C source path list
+        for directory in c_source_path:
+            # Walk the directory and find all files
+            for root, _, files in os.walk(directory):
+                for file in files:
+                    # Check if the file has one of the supported extensions
+                    basename, fext = os.path.splitext(file)
+                    if fext in source_extensions and \
+                       basename not in existing_c_basenames:
+                        c_source_exclude.append(os.path.basename(file))
 
         # Sym link any c objects into the executable object directory, since
         # these would not have gotten symlinked like all the ada objects
@@ -261,6 +281,8 @@ class build_executable(build_rule_base):
             + " -XSOURCE_DIRS="
             + source_dir
             + (("," + ",".join(c_source_path)) if c_source_path else "")
+            + " -XEXCLUDED_SOURCE_FILES="
+            + ",".join(c_source_exclude)
             + ((" " + gprbuild_flags.strip()) if gprbuild_flags else "")
             + direct
         )

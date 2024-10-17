@@ -10,6 +10,7 @@ project linux_test extends all "a_linux_debug_base.gpr" is
    -- to GPRBuild.
    -----------------------------------------------
    for Source_Dirs use a_adamant.SOURCE_DIRS;
+   for Excluded_Source_Files use a_adamant.EXCLUDED_SOURCE_FILES;
    for Object_Dir use a_adamant.OBJECT_DIR;
    for Exec_Dir use a_adamant.EXEC_DIR;
 

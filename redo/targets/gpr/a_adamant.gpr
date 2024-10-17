@@ -4,6 +4,7 @@ abstract project a_adamant is
    -- Adamant build system and GPRBuild.
    ADAMANT_DIR := external("ADAMANT_DIR", "");
    SOURCE_DIRS := external_as_list("SOURCE_DIRS", ",");
+   EXCLUDED_SOURCE_FILES := external_as_list("EXCLUDED_SOURCE_FILES", ",");
    OBJECT_DIR := external("OBJECT_DIR", "");
    EXEC_DIR := external("EXEC_DIR", "");
    CHECK_STYLE := external("CHECK_STYLE", "False");
