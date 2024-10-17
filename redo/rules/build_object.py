@@ -671,7 +671,7 @@ class build_object(build_rule_base):
 
         # If we still have not found source files to build this
         # object, then we are out of luck. Alert the user.
-        error.error_abort("No Ada or C/C++source files were found to build '" + redo_1 + "'.")
+        error.error_abort("No Ada or C/C++ source files were found to build '" + redo_1 + "'.")
 
     def input_file_regex(self):
         """
@@ -679,7 +679,7 @@ class build_object(build_rule_base):
         an object. In C/C++ only the .c or .cpp files produce object
         code, so ignore header files.
         """
-        return [r"^((?!template/).)*\.ad[sb]$", r"^((?!template/).)*\.(h|hpp|c|cpp|s)$"]
+        return [r"^((?!template/).)*\.ad[sb]$", r"^((?!template/).)*\.(c|cpp|s)$"]
 
     def output_filename(self, input_filename):
         """
