@@ -227,7 +227,7 @@ class build_executable(build_rule_base):
         # Iterate over each directory in the C source path list
         for directory in c_source_path:
             # Walk the directory and find all files
-            for root, _, files in os.walk(directory):
+            for files in os.listdir(directory):
                 for file in files:
                     # Check if the file has one of the supported extensions
                     basename, fext = os.path.splitext(file)
