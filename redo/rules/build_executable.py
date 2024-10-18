@@ -225,15 +225,17 @@ class build_executable(build_rule_base):
         c_source_exclude = []
 
         # Iterate over each directory in the C source path list
+        # to find C source files that may need to be excluded
         for directory in c_source_path:
-            # Walk the directory and find all files
-            for files in os.listdir(directory):
-                for file in files:
-                    # Check if the file has one of the supported extensions
-                    basename, fext = os.path.splitext(file)
+            for fname in os.listdir(directory):
+                full_path = os.path.join(directory, fname)
+                if os.path.isfile(full_path):
+                    # If the file is a source file, but doesn't have
+                    # an object built for it, then we need to exclude it
+                    basename, fext = os.path.splitext(fname)
                     if fext in source_extensions and \
                        basename not in existing_c_basenames:
-                        c_source_exclude.append(os.path.basename(file))
+                        c_source_exclude.append(os.path.basename(fname))
 
         # Sym link any c objects into the executable object directory, since
         # these would not have gotten symlinked like all the ada objects
