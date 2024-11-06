@@ -1,6 +1,6 @@
 ---
 description: This is a generic component that can be used to queue (as in recv_async) the call to an input connector. The component allows a queue to be added in front of a synchronous connector in any component. Adding a queue to a component not designed with thread-safety in mind can serve as a multi-tasking safe synchronization point for multiple callers. When the T_Recv_Async connector is called, the data is queued. Based on the priority of this component, the data will be safely dequeued in the future and the T_Send connector will be called. The queue is implemented using the standard Adamant queue, and thus calls are serviced in FIFO order. The queue protection mechanism effectively makes all downstream connector calls of this component thread-safe. The advantage of this component is that deploying it appropriately in an assembly can provide thread-safety and priority-tuned FIFO execution to components which are not designed to be thread-safe in and of themselves.
-execution: passive
+execution: active
 with:
   - Serializer_Types
 generic:
