@@ -66,10 +66,15 @@ class formal_parameter(object):
                 + "'."
             )
 
-        self.type = ada.formatType(type)
-        # Calculate type package, if one:
-        if not ada.isTypePrimitive(self.type):
-            self.type_package = ada.getPackage(self.type)
+        try:
+            # Handle integer formal parameters
+            self.type = str(int(type))
+        except ValueError:
+            # Handle normal formal parameters
+            self.type = ada.formatType(type)
+            # Calculate type package, if one:
+            if not ada.isTypePrimitive(self.type):
+                self.type_package = ada.getPackage(self.type)
 
 
 class generic_unit(object):
