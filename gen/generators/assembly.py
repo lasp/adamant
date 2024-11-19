@@ -15,6 +15,7 @@ assembly_templates = [
     "assembly/name.ads",
     "assembly/name.adb",
     "assembly/name.dot",
+    "assembly/name_components.ads",
     "assembly/name_commands.ads",
     "assembly/name_data_products.ads",
     "assembly/name_data_dependencies.ads",

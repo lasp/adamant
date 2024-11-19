@@ -607,6 +607,7 @@ class assembly(subassembly):
         self.interrupt_list = None  # list of interrupts in assembly
         self.ads_includes = []
         self.adb_includes = []
+        self.components_ads_includes = []
         self.task_dict = {}  # Tasks indexed by priority
         self.task_list = []  # Tasks in order of task number (and priority rank)
         self.entity_dict = (
@@ -908,7 +909,18 @@ class assembly(subassembly):
             self.interrupt_list = sorted_interrupts
 
             # Store all includes for the assembly:
-            self.ads_includes.extend(
+            self.adb_includes.extend(
+                list(
+                    OrderedDict.fromkeys(
+                        [self.name + "_Components"]
+                        + (["Ada.Synchronous_Task_Control"]
+                           if self.task_list
+                           else [])
+                    )
+                )
+            )
+            self.adb_includes = list(OrderedDict.fromkeys(self.adb_includes))
+            self.components_ads_includes.extend(
                 list(
                     OrderedDict.fromkeys(
                         ["Task_Types", "Interrupt_Types"]
@@ -929,17 +941,11 @@ class assembly(subassembly):
                             ]
                         )
                         + (self.generic_type_includes)
-                        + (self.includes)
                     )
                 )
             )
-            self.ads_includes = list(OrderedDict.fromkeys(self.ads_includes))
-
-            # Store all includes for the assembly:
-            self.adb_includes.extend(
-                [inc for inc in self.adb_includes if inc not in self.ads_includes]
-            )
-            self.adb_includes = list(OrderedDict.fromkeys(self.adb_includes))
+            self.components_ads_includes = list(OrderedDict.fromkeys(self.components_ads_includes))
+            self.includes = list(OrderedDict.fromkeys(self.includes))
 
             # Now generate all entity ids each component:
             if not self.shallow_load:
