@@ -9,9 +9,18 @@
 {% for include in adb_includes %}
 with {{ include }};
 {% endfor %}
+{% for include in includes %}
+{% if include not in adb_includes %}
+pragma Warnings (Off, "unit ""{{ include }}"" is not referenced");
+with {{ include }};
+pragma Warnings (On, "unit ""{{ include }}"" is not referenced");
+{% endif %}
+{% endfor %}
 
 {% endif %}
 package body {{ name }} is
+
+   use {{ name }}_Components;
 
 {% if component_kind_dict["init_base"] %}
    procedure Init_Base is
