@@ -13,6 +13,11 @@ mapping:
     seq:
       - type: str
     required: False
+  # Manual "with" statements that should only appear in the .adb generation
+  with_adb:
+    seq:
+      - type: str
+    required: False
   # Any useful handcode to include in the .ads file can be included here.
   # You can think of this as inline Ada, which might be useful for declaring
   # custom enum types and the like. The code here is copied immediately

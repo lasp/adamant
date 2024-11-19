@@ -388,6 +388,8 @@ class subassembly(base):
         # file:
         if "with" in self.data and self.data["with"]:
             self.includes = list(self.data["with"])
+        if "with_adb" in self.data and self.data["with_adb"]:
+            self.adb_includes = list(self.data["with_adb"])
         for include in self.includes:
             include = ada.formatType(include)
         if "preamble" in self.data:
