@@ -153,7 +153,7 @@ def build_py_deps(source_file=None, update_path=True):
         redo_3=source_file + ".out",
     )
 
-    # Reset the database, so that this function can be run again, if warrented.
+    # Reset the database, so that this function can be run again, if warranted.
     import database.setup
 
     database.setup.reset()
@@ -169,7 +169,7 @@ def run_py(source_file):
         redo_3=source_file + ".out",
     )
 
-    # Reset the database, so that this function can be run again, if warrented.
+    # Reset the database, so that this function can be run again, if warranted.
     import database.setup
 
     database.setup.reset()
@@ -177,21 +177,22 @@ def run_py(source_file):
 
 # This can also be run from the command line:
 if __name__ == "__main__":
-    args = sys.argv[-2:]
-    if len(args) != 2 or args[-1].endswith("pydep.py"):
-        print("usage:\n  pydep.py /path/to/python_file.py")
-    source_file = args[-1]
+    args = sys.argv[1:]
+    if not args:
+        print("usage:\n  pydep.py /path/to/python_file1.py /path/to/python_file2.py ...")
+        sys.exit(1)
 
-    existing_deps, nonexistant_deps = pydep(source_file)
-    print("Finding dependencies for: " + source_file)
-    print("")
-    print("Existing dependencies: ")
-    for dep in existing_deps:
-        print(dep)
-    print("")
-    print("Nonexistent dependencies: ")
-    for dep in nonexistant_deps:
-        print(dep)
-    print("")
-    print("Building nonexistent dependencies: ")
-    build_py_deps(source_file)
+    for source_file in args:
+        print(f"\nFinding dependencies for: {source_file}")
+        existing_deps, nonexistant_deps = pydep(source_file)
+
+        print("\nExisting dependencies:")
+        for dep in existing_deps:
+            print(dep)
+
+        print("\nNonexistent dependencies:")
+        for dep in nonexistant_deps:
+            print(dep)
+
+        print("\nBuilding nonexistent dependencies:")
+        build_py_deps(source_file)
