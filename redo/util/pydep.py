@@ -35,7 +35,7 @@ def pydep(source_file, path=[]):
                 spec = importlib.util.find_spec(name)
                 # if module (and its origin file) exists, append to the existing_deps
                 if spec is not None:
-                    if spec.origin is None or spec.origin == "built-in":
+                    if spec.origin is None or "built-in" in spec.origin or "site-packages" in spec.origin:
                         existing_deps.append(f"built-in:{name}")
                     else:
                         existing_deps.append(spec.origin)
@@ -47,7 +47,7 @@ def pydep(source_file, path=[]):
             if name:  # if name is not None
                 spec = importlib.util.find_spec(name)
                 if spec is not None:
-                    if spec.origin is None or spec.origin == "built-in":
+                    if spec.origin is None or "built-in" in spec.origin or "site-packages" in spec.origin:
                         existing_deps.append(f"built-in:{name}")
                     else:
                         existing_deps.append(spec.origin)
