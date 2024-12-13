@@ -178,21 +178,31 @@ def run_py(source_file):
 # This can also be run from the command line:
 if __name__ == "__main__":
     args = sys.argv[1:]
+    verbose = "--verbose" in args or "-v" in args
+    if "--verbose" in args:
+        args.remove("--verbose")
+    if "-v" in args:
+        args.remove("-v")
+
     if not args:
-        print("usage:\n  pydep.py /path/to/python_file1.py /path/to/python_file2.py ...")
+        print("usage:\n  pydep.py [--verbose or -v] /path/to/python_file1.py /path/to/python_file2.py ...")
         sys.exit(1)
 
     for source_file in args:
-        print(f"\nFinding dependencies for: {source_file}")
         existing_deps, nonexistant_deps = pydep(source_file)
 
-        print("\nExisting dependencies:")
-        for dep in existing_deps:
-            print(dep)
+        if verbose:
+            print(f"\nFinding dependencies for: {source_file}")
+            print("\nExisting dependencies:")
+            for dep in existing_deps:
+                print(dep)
 
-        print("\nNonexistent dependencies:")
-        for dep in nonexistant_deps:
-            print(dep)
+            print("\nNonexistent dependencies:")
+            for dep in nonexistant_deps:
+                print(dep)
 
-        print("\nBuilding nonexistent dependencies:")
+            print("\nBuilding nonexistent dependencies:")
+
         build_py_deps(source_file)
+
+        print("\n".join(existing_deps))
