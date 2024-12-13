@@ -35,7 +35,10 @@ def pydep(source_file, path=[]):
                 spec = importlib.util.find_spec(name)
                 # if module (and its origin file) exists, append to the existing_deps
                 if spec is not None:
-                    existing_deps.append(name)
+                    if spec.origin is None or spec.origin == "built-in":
+                        existing_deps.append(f"built-in:{name}")
+                    else:
+                        existing_deps.append(spec.origin)
                 else:
                     nonexistent_deps.append(name)
 
@@ -44,11 +47,14 @@ def pydep(source_file, path=[]):
             if name:  # if name is not None
                 spec = importlib.util.find_spec(name)
                 if spec is not None:
-                    existing_deps.append(name)
+                    if spec.origin is None or spec.origin == "built-in":
+                        existing_deps.append(f"built-in:{name}")
+                    else:
+                        existing_deps.append(spec.origin)
                 else:
                     nonexistent_deps.append(name)
 
-    return existing_deps, nonexistent_deps
+    return list(set(existing_deps)), nonexistent_deps
 
 
 def _build_pydeps(source_file, path=[]):
@@ -188,8 +194,11 @@ if __name__ == "__main__":
         print("usage:\n  pydep.py [--verbose or -v] /path/to/python_file1.py /path/to/python_file2.py ...")
         sys.exit(1)
 
+    all_existing_deps = set()
+
     for source_file in args:
         existing_deps, nonexistant_deps = pydep(source_file)
+        all_existing_deps.update(existing_deps)
 
         if verbose:
             print(f"\nFinding dependencies for: {source_file}")
@@ -205,4 +214,4 @@ if __name__ == "__main__":
 
         build_py_deps(source_file)
 
-        print("\n".join(existing_deps))
+    print("\n".join(sorted(all_existing_deps)))
