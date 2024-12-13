@@ -32,6 +32,8 @@ def pydep(source_file, path=[]):
         if isinstance(node, ast.Import):
             for alias in node.names:
                 name = alias.name  # name of the module
+                if name == "openc3.script":
+                    continue
                 spec = importlib.util.find_spec(name)
                 # if module (and its origin file) exists, append to the existing_deps
                 if spec is not None:
@@ -44,6 +46,8 @@ def pydep(source_file, path=[]):
 
         if isinstance(node, ast.ImportFrom):
             name = node.module  # name of the module
+            if name == "openc3.script":
+                continue
             if name:  # if name is not None
                 spec = importlib.util.find_spec(name)
                 if spec is not None:
