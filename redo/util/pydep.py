@@ -32,13 +32,13 @@ def pydep(source_file, path=[]):
         if isinstance(node, ast.Import):
             for alias in node.names:
                 name = alias.name  # name of the module
-                if name == "openc3.script":
+                if any(ignored in name for ignored in ignore_list):
                     continue
                 spec = importlib.util.find_spec(name)
                 # if module (and its origin file) exists, append to the existing_deps
                 if spec is not None:
                     if spec.origin is None or "built-in" in spec.origin or "site-packages" in spec.origin:
-                        existing_deps.append(f"built-in:{name}")
+                        nonexistent_deps.append(name)
                     else:
                         existing_deps.append(spec.origin)
                 else:
@@ -46,13 +46,13 @@ def pydep(source_file, path=[]):
 
         if isinstance(node, ast.ImportFrom):
             name = node.module  # name of the module
-            if name == "openc3.script":
-                continue
-            if name:  # if name is not None
+            if name:
+                if any(ignored in name for ignored in ignore_list):
+                    continue
                 spec = importlib.util.find_spec(name)
                 if spec is not None:
                     if spec.origin is None or "built-in" in spec.origin or "site-packages" in spec.origin:
-                        existing_deps.append(f"built-in:{name}")
+                        nonexistent_deps.append(name)
                     else:
                         existing_deps.append(spec.origin)
                 else:
@@ -194,13 +194,30 @@ if __name__ == "__main__":
     if "-v" in args:
         args.remove("-v")
 
+    global ignore_list
+    ignore_list = set()
+    if "--ignore" in args:
+        ignore_index = args.index("--ignore")
+        ignore_list = args[ignore_index + 1:]
+        file_args = args[:ignore_index]
+    elif "-i" in args:
+        ignore_index = args.index("-i")
+        ignore_list = args[ignore_index + 1:]
+        file_args = args[:ignore_index]
+    else:
+        file_args = args
+
     if not args:
-        print("usage:\n  pydep.py [--verbose or -v] /path/to/python_file1.py /path/to/python_file2.py ...")
+        print(
+            "usage:\n  pydep.py [--verbose or -v] "
+            "[/path/to/python_file1.py /path/to/python_file2.py ...] "
+            "[--ignore or -i string1 string2 ...]"
+        )
         sys.exit(1)
 
     all_existing_deps = set()
 
-    for source_file in args:
+    for source_file in file_args:
         existing_deps, nonexistant_deps = pydep(source_file)
         all_existing_deps.update(existing_deps)
 
