@@ -8,7 +8,7 @@ from base_classes.build_rule_base import build_rule_base
 from util import shell
 
 
-def pydep(source_file, path=[]):
+def pydep(source_file, path=[], ignore_list=[]):
     """
     Return dependencies for a given python source file.
     Two lists are returned to the user. The first list is
@@ -34,7 +34,11 @@ def pydep(source_file, path=[]):
                 name = alias.name  # name of the module
                 if any(ignored in name for ignored in ignore_list):
                     continue
-                spec = importlib.util.find_spec(name)
+                try:
+                    spec = importlib.util.find_spec(name)
+                except ModuleNotFoundError:
+                    nonexistant_deps.append(name)
+                    continue
                 # if module (and its origin file) exists, append to the existing_deps
                 if spec is not None:
                     if spec.origin is None or "built-in" in spec.origin or "site-packages" in spec.origin:
@@ -49,7 +53,11 @@ def pydep(source_file, path=[]):
             if name:
                 if any(ignored in name for ignored in ignore_list):
                     continue
-                spec = importlib.util.find_spec(name)
+                try:
+                    spec = importlib.util.find_spec(name)
+                except ModuleNotFoundError:
+                    nonexistant_deps.append(name)
+                    continue
                 if spec is not None:
                     if spec.origin is None or "built-in" in spec.origin or "site-packages" in spec.origin:
                         nonexistent_deps.append(name)
@@ -194,7 +202,6 @@ if __name__ == "__main__":
     if "-v" in args:
         args.remove("-v")
 
-    global ignore_list
     ignore_list = set()
     if "--ignore" in args:
         ignore_index = args.index("--ignore")
@@ -218,7 +225,7 @@ if __name__ == "__main__":
     all_existing_deps = set()
 
     for source_file in file_args:
-        existing_deps, nonexistant_deps = pydep(source_file)
+        existing_deps, nonexistant_deps = pydep(source_file, ignore_list=ignore_list)
         all_existing_deps.update(existing_deps)
 
         if verbose:
