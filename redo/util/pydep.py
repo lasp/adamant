@@ -8,7 +8,7 @@ from base_classes.build_rule_base import build_rule_base
 from util import shell
 
 
-def pydep(source_file, path=[]):
+def pydep(source_file, path=[], ignore_list=[]):
     """
     Return dependencies for a given python source file.
     Two lists are returned to the user. The first list is
@@ -32,23 +32,41 @@ def pydep(source_file, path=[]):
         if isinstance(node, ast.Import):
             for alias in node.names:
                 name = alias.name  # name of the module
-                spec = importlib.util.find_spec(name)
+                if any(ignored in name for ignored in ignore_list):
+                    continue
+                try:
+                    spec = importlib.util.find_spec(name)
+                except ModuleNotFoundError:
+                    nonexistant_deps.append(name)
+                    continue
                 # if module (and its origin file) exists, append to the existing_deps
                 if spec is not None:
-                    existing_deps.append(name)
+                    if spec.origin is None or "built-in" in spec.origin or "site-packages" in spec.origin:
+                        nonexistent_deps.append(name)
+                    else:
+                        existing_deps.append(spec.origin)
                 else:
                     nonexistent_deps.append(name)
 
         if isinstance(node, ast.ImportFrom):
             name = node.module  # name of the module
-            if name:  # if name is not None
-                spec = importlib.util.find_spec(name)
+            if name:
+                if any(ignored in name for ignored in ignore_list):
+                    continue
+                try:
+                    spec = importlib.util.find_spec(name)
+                except ModuleNotFoundError:
+                    nonexistant_deps.append(name)
+                    continue
                 if spec is not None:
-                    existing_deps.append(name)
+                    if spec.origin is None or "built-in" in spec.origin or "site-packages" in spec.origin:
+                        nonexistent_deps.append(name)
+                    else:
+                        existing_deps.append(spec.origin)
                 else:
                     nonexistent_deps.append(name)
 
-    return existing_deps, nonexistent_deps
+    return list(set(existing_deps)), nonexistent_deps
 
 
 def _build_pydeps(source_file, path=[]):
@@ -153,7 +171,7 @@ def build_py_deps(source_file=None, update_path=True):
         redo_3=source_file + ".out",
     )
 
-    # Reset the database, so that this function can be run again, if warrented.
+    # Reset the database, so that this function can be run again, if warranted.
     import database.setup
 
     database.setup.reset()
@@ -169,7 +187,7 @@ def run_py(source_file):
         redo_3=source_file + ".out",
     )
 
-    # Reset the database, so that this function can be run again, if warrented.
+    # Reset the database, so that this function can be run again, if warranted.
     import database.setup
 
     database.setup.reset()
@@ -177,21 +195,51 @@ def run_py(source_file):
 
 # This can also be run from the command line:
 if __name__ == "__main__":
-    args = sys.argv[-2:]
-    if len(args) != 2 or args[-1].endswith("pydep.py"):
-        print("usage:\n  pydep.py /path/to/python_file.py")
-    source_file = args[-1]
+    args = sys.argv[1:]
+    verbose = "--verbose" in args or "-v" in args
+    if "--verbose" in args:
+        args.remove("--verbose")
+    if "-v" in args:
+        args.remove("-v")
 
-    existing_deps, nonexistant_deps = pydep(source_file)
-    print("Finding dependencies for: " + source_file)
-    print("")
-    print("Existing dependencies: ")
-    for dep in existing_deps:
-        print(dep)
-    print("")
-    print("Nonexistent dependencies: ")
-    for dep in nonexistant_deps:
-        print(dep)
-    print("")
-    print("Building nonexistent dependencies: ")
-    build_py_deps(source_file)
+    ignore_list = set()
+    if "--ignore" in args:
+        ignore_index = args.index("--ignore")
+        ignore_list = args[ignore_index + 1:]
+        file_args = args[:ignore_index]
+    elif "-i" in args:
+        ignore_index = args.index("-i")
+        ignore_list = args[ignore_index + 1:]
+        file_args = args[:ignore_index]
+    else:
+        file_args = args
+
+    if not args:
+        print(
+            "usage:\n  pydep.py [--verbose or -v] "
+            "[/path/to/python_file1.py /path/to/python_file2.py ...] "
+            "[--ignore or -i string1 string2 ...]"
+        )
+        sys.exit(1)
+
+    all_existing_deps = set()
+
+    for source_file in file_args:
+        existing_deps, nonexistant_deps = pydep(source_file, ignore_list=ignore_list)
+        all_existing_deps.update(existing_deps)
+
+        if verbose:
+            print(f"\nFinding dependencies for: {source_file}")
+            print("\nExisting dependencies:")
+            for dep in existing_deps:
+                print(dep)
+
+            print("\nNonexistent dependencies:")
+            for dep in nonexistant_deps:
+                print(dep)
+
+            print("\nBuilding nonexistent dependencies:")
+
+        build_py_deps(source_file)
+
+    print("\n".join(sorted(all_existing_deps)))
