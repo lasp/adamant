@@ -537,6 +537,7 @@ class record(packed_type):
             if (
                 not f.type_ranges_loaded
                 and not f.is_packed_type
+                and not f.is_modeled_enum
                 and not f.format.length
                 and not f.skip_validation
             ):
@@ -548,6 +549,7 @@ class record(packed_type):
                 # OK this must be an enumeration instead:
                 except AttributeError:
                     f.literals = type_range.literals
+                    f.is_enum = True
                 f.type_ranges_loaded = True
 
     def is_always_valid(self):
