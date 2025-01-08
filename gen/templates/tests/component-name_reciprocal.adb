@@ -303,7 +303,7 @@ package body Component.{{ name }}_Reciprocal is
             Self.Log ("{{ dir }} {{ connector.name }} {{ finished }}: " & {{ type_package }}.Representation.To_Tuple_String ({{ to_print }}));
          else
             -- Use the header representation to log the message.
-            Self.Log ("{{ dir }} {{ connector.name }} {{ finished }}: " & {{ type_package }}_Header.Representation.To_Tuple_String ({{ to_print }}));
+            Self.Log ("{{ dir }} {{ connector.name }} {{ finished }}: " & {{ type_package }}_Header.Representation.To_Tuple_String ({{ to_print }}.Header));
          end if;
 {% elif type_package in ["Ccsds_Space_Packet"] %}
          if Self.Log_Verbose then
@@ -311,7 +311,7 @@ package body Component.{{ name }}_Reciprocal is
             Self.Log ("{{ dir }} {{ connector.name }} {{ finished }}: " & Ccsds_Space_Packet.Representation.To_Tuple_String ({{ to_print }}));
          else
             -- Use the header representation to log the message.
-            Self.Log ("{{ dir }} {{ connector.name }} {{ finished }}: " & Ccsds_Primary_Header.Representation.To_Tuple_String ({{ to_print }}));
+            Self.Log ("{{ dir }} {{ connector.name }} {{ finished }}: " & Ccsds_Primary_Header.Representation.To_Tuple_String ({{ to_print }}.Header));
          end if;
 {% else %}
 {% if type_package in ["Parameter_Update"] and parameters and parameters.parameters %}
