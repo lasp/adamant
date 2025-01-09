@@ -33,6 +33,7 @@ class ccsds_packets_xml(assembly_hydra_generator, generator_base):
                 "Ccsds_Space_Packet"
             )
 
+        a.load_packet_type_ranges()
         a.type_format_dictionary = genassem.type_format_dictionary
         genassem.create_type_print_strings(a)
         genassem.create_type_field_strings(a)
@@ -51,5 +52,6 @@ class assembly_cosmos_telemetry_txt(assembly_cosmos_plugin_generator_base, gener
         a = self.model_cls(input_filename)
         a.ccsds_primary_header_model = model_loader.try_load_model_by_name("Ccsds_Primary_Header")
         a.sys_time_record_model = model_loader.try_load_model_by_name("sys_time")
+        a.load_packet_type_ranges()
         genassem.create_type_field_strings(a)
         print(a.render(self.template, template_path=self.template_dir))
