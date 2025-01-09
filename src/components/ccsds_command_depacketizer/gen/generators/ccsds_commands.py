@@ -21,6 +21,7 @@ class assembly_ccsds_commands_xml(assembly_hydra_generator, generator_base):
         a = self.model_cls(input_filename)
         if "Ccsds_Command_Depacketizer" in a.component_types_dict:
             a.additional_types.append("Ccsds_Command_Secondary_Header.T")
+        a.load_command_type_ranges()
         assembly_gen.create_type_field_strings(a)
         print(a.render(self.template, template_path=self.template_dir))
 
@@ -37,5 +38,6 @@ class assembly_cosmos_commands_txt(assembly_cosmos_plugin_generator_base, genera
         a = self.model_cls(input_filename)
         a.ccsds_primary_header_model = model_loader.try_load_model_by_name("Ccsds_Primary_Header")
         a.ccsds_command_secondary_header = model_loader.try_load_model_by_name("Ccsds_Command_Secondary_Header")
+        a.load_command_type_ranges()
         assembly_gen.create_type_field_strings(a)
         print(a.render(self.template, template_path=self.template_dir))

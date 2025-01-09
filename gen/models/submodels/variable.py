@@ -15,6 +15,7 @@ class datatype(object):
         self.is_atomic_type = False
         self.is_register_type = False
         self.is_enum = False
+        self.is_modeled_enum = False
         # set to true when range_min/range_max or literals is set.
         # we don't do this preemptively since it takes a lot of time
         # to set these, and they are rarely needed.
@@ -41,7 +42,14 @@ class datatype(object):
                 if self.model:
                     self.package = sp[0]
                     self.model = self.model.get_enum_by_name(sp[1])
+                    self.is_modeled_enum = True
                     self.is_enum = True
+                    # Save literals at this level so it mirrors how we save off
+                    # literals for type ranges of bare Ada enum types. In this case
+                    # we have a "modeled" enum, but we still want to reflect the
+                    # literals at the datatype level so modeled enums and bare
+                    # Ada enums can be treated uniformly by users of the datatype.
+                    self.literals = self.model.literals
             elif self.name.endswith(".Volatile_T") or self.name.endswith(
                 ".Volatile_T_Le"
             ):
@@ -119,8 +127,16 @@ class variable(object):
         return self.datatype.is_atomic_type
 
     @property
+    def is_modeled_enum(self):
+        return self.datatype.is_modeled_enum
+
+    @property
     def is_enum(self):
         return self.datatype.is_enum
+
+    @is_enum.setter
+    def is_enum(self, value):
+        self.datatype.is_enum = value
 
     @property
     def range_min(self):
