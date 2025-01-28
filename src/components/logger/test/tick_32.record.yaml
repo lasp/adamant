@@ -1,0 +1,11 @@
+---
+description: The tick datatype used for periodic scheduling. Included in this type is the Time associated with a tick and a count.
+fields:
+  - name: Time
+    description: The timestamp associated with the tick.
+    type: Sys_Time_32.T
+  - name: Count
+    description: The cycle number of the tick.
+    type: Interfaces.Unsigned_32
+    format: U32
+    default: '0'
