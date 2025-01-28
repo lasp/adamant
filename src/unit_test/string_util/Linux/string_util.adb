@@ -23,8 +23,8 @@ package body String_Util is
       Toreturn : String (1 .. Bytes'Length * 3);
       Cnt : Natural := 0;
    begin
-      for Indx in Bytes'Range loop
-         Toreturn ((Cnt * 3 + 1) .. (Cnt * 3 + 3)) := " " & String_Util.Natural_2_Hex_String (Natural (Bytes (Indx)), 2);
+      for Idx in Bytes'Range loop
+         Toreturn ((Cnt * 3 + 1) .. (Cnt * 3 + 3)) := " " & String_Util.Natural_2_Hex_String (Natural (Bytes (Idx)), 2);
          Cnt := @ + 1;
       end loop;
       return Prefix & Trim_Both (Toreturn) & Postfix;
