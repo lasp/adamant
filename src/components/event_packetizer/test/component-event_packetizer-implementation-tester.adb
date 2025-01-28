@@ -11,15 +11,15 @@ package body Component.Event_Packetizer.Implementation.Tester is
    begin
       -- Initialize tester heap:
       -- Connector histories:
-      Self.Packet_T_Recv_Sync_History.Init (Depth => 10);
-      Self.Sys_Time_T_Return_History.Init (Depth => 300);
-      Self.Data_Product_T_Recv_Sync_History.Init (Depth => 300);
-      Self.Command_Response_T_Recv_Sync_History.Init (Depth => 10);
+      Self.Packet_T_Recv_Sync_History.Init (Depth => 20);
+      Self.Sys_Time_T_Return_History.Init (Depth => 400);
+      Self.Data_Product_T_Recv_Sync_History.Init (Depth => 400);
+      Self.Command_Response_T_Recv_Sync_History.Init (Depth => 20);
       -- Data product histories:
-      Self.Events_Dropped_Count_History.Init (Depth => 10);
-      Self.Bytes_Available_History.Init (Depth => 300);
+      Self.Events_Dropped_Count_History.Init (Depth => 20);
+      Self.Bytes_Available_History.Init (Depth => 400);
       -- Packet histories:
-      Self.Events_Packet_History.Init (Depth => 10);
+      Self.Events_Packet_History.Init (Depth => 20);
    end Init_Base;
 
    procedure Final_Base (Self : in out Instance) is

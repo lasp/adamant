@@ -205,8 +205,7 @@ package body Ccsds_Product_Extractor_Tests.Implementation is
 
       -- Check that we can set the time in the packet and receive it through the correct product
       Incoming_Packet_Apid_100.Header.Packet_Length := 16;
-      Incoming_Packet_Apid_100.Data (3) := 50; -- 50 sec
-      Incoming_Packet_Apid_100.Data (7) := 100; -- 100 subsec
+      Incoming_Packet_Apid_100.Data (0 .. Sys_Time.Size_In_Bytes - 1) := Sys_Time.Serialization.To_Byte_Array ((50, 100));
       Incoming_Packet_Apid_100.Data (11) := 30;
       Incoming_Packet_Apid_100.Data (16) := 40;
       T.Ccsds_Space_Packet_T_Send (Incoming_Packet_Apid_100);
@@ -217,8 +216,7 @@ package body Ccsds_Product_Extractor_Tests.Implementation is
 
       -- Lastly, check the very end of a packet offset
       Incoming_Packet_Apid_100.Header.Packet_Length := 15;
-      Incoming_Packet_Apid_100.Data (3) := 50; -- 50 sec
-      Incoming_Packet_Apid_100.Data (7) := 100; -- 100 subsec
+      Incoming_Packet_Apid_100.Data (0 .. Sys_Time.Size_In_Bytes - 1) := Sys_Time.Serialization.To_Byte_Array ((50, 100));
       Incoming_Packet_Apid_100.Data (11) := 25;
       Incoming_Packet_Apid_100.Data (15) := 10;
       T.Ccsds_Space_Packet_T_Send (Incoming_Packet_Apid_100);

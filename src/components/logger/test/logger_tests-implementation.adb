@@ -83,7 +83,7 @@ package body Logger_Tests.Implementation is
       use Byte_Array_Pointer;
       use Byte_Array_Pointer.Packed;
       T : Component_Tester_Package.Instance_Access renames Self.Tester;
-      The_Tick : Tick.T;
+      The_Tick : Tick_32.T;
       Bytes : Basic_Types.Byte_Array := [0 .. 99 => 0];
       Bytes_To_Compare : Basic_Types.Byte_Array := [0 .. 99 => 0];
       Ptr : Byte_Array_Pointer.Instance;
@@ -103,24 +103,24 @@ package body Logger_Tests.Implementation is
       -- Send some data to the logger while it is disabled:
       The_Tick := ((1, 2), 3);
       T.T_Send (The_Tick);
-      Bytes_To_Compare (Idx .. Idx + Tick.Serialization.Serialized_Length - 1) := Tick.Serialization.To_Byte_Array (The_Tick);
-      Idx := @ + Tick.Serialization.Serialized_Length;
+      Bytes_To_Compare (Idx .. Idx + Tick_32.Serialization.Serialized_Length - 1) := Tick_32.Serialization.To_Byte_Array (The_Tick);
+      Idx := @ + Tick_32.Serialization.Serialized_Length;
       The_Tick := ((4, 5), 6);
       T.T_Send (The_Tick);
-      Bytes_To_Compare (Idx .. Idx + Tick.Serialization.Serialized_Length - 1) := Tick.Serialization.To_Byte_Array (The_Tick);
-      Idx := @ + Tick.Serialization.Serialized_Length;
+      Bytes_To_Compare (Idx .. Idx + Tick_32.Serialization.Serialized_Length - 1) := Tick_32.Serialization.To_Byte_Array (The_Tick);
+      Idx := @ + Tick_32.Serialization.Serialized_Length;
       The_Tick := ((7, 8), 9);
       T.T_Send (The_Tick);
-      Bytes_To_Compare (Idx .. Idx + Tick.Serialization.Serialized_Length - 1) := Tick.Serialization.To_Byte_Array (The_Tick);
-      Idx := @ + Tick.Serialization.Serialized_Length;
+      Bytes_To_Compare (Idx .. Idx + Tick_32.Serialization.Serialized_Length - 1) := Tick_32.Serialization.To_Byte_Array (The_Tick);
+      Idx := @ + Tick_32.Serialization.Serialized_Length;
       The_Tick := ((10, 11), 12);
       T.T_Send (The_Tick);
-      Bytes_To_Compare (Idx .. Idx + Tick.Serialization.Serialized_Length - 1) := Tick.Serialization.To_Byte_Array (The_Tick);
-      Idx := @ + Tick.Serialization.Serialized_Length;
+      Bytes_To_Compare (Idx .. Idx + Tick_32.Serialization.Serialized_Length - 1) := Tick_32.Serialization.To_Byte_Array (The_Tick);
+      Idx := @ + Tick_32.Serialization.Serialized_Length;
       The_Tick := ((13, 14), 15);
       T.T_Send (The_Tick);
-      Bytes_To_Compare (Idx .. Idx + Tick.Serialization.Serialized_Length - 1) := Tick.Serialization.To_Byte_Array (The_Tick);
-      Idx := @ + Tick.Serialization.Serialized_Length;
+      Bytes_To_Compare (Idx .. Idx + Tick_32.Serialization.Serialized_Length - 1) := Tick_32.Serialization.To_Byte_Array (The_Tick);
+      Idx := @ + Tick_32.Serialization.Serialized_Length;
 
       -- Make sure no events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
@@ -131,7 +131,7 @@ package body Logger_Tests.Implementation is
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Send_Meta_Data_Event_Id, Status => Success));
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Log_Info_Update_History.Get_Count, 1);
-      Logger_Info_Assert.Eq (T.Log_Info_Update_History.Get (1), ((Head => 0, Count => Unsigned_32 (Tick.Serialization.Serialized_Length) * 5, Size => 100), Current_Mode => Logger_Mode.Enabled));
+      Logger_Info_Assert.Eq (T.Log_Info_Update_History.Get (1), ((Head => 0, Count => Unsigned_32 (Tick_32.Serialization.Serialized_Length) * 5, Size => 100), Current_Mode => Logger_Mode.Enabled));
 
       -- Dump the log and make sure the meta data and data was sent:
       T.Command_T_Send (T.Commands.Dump_Log);
@@ -142,12 +142,12 @@ package body Logger_Tests.Implementation is
 
       -- Check the dumped memory meta data:
       Natural_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get_Count, 2);
-      Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (1), (Head => 0, Count => Unsigned_32 (Tick.Serialization.Serialized_Length) * 5, Size => 100));
+      Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (1), (Head => 0, Count => Unsigned_32 (Tick_32.Serialization.Serialized_Length) * 5, Size => 100));
       -- Make sure pointer sent in event matches the pointer send via the dump:
       Memory_Region_Assert.Eq (T.Dumping_Log_Memory_History.Get (1), Pack (T.Memory_Dump_Recv_Sync_History.Get (1).Memory_Pointer));
 
       -- Check the dumped memory data:
-      Check_Dump (T.Memory_Dump_Recv_Sync_History.Get (2), 0, Tick.Serialization.Serialized_Length * 5);
+      Check_Dump (T.Memory_Dump_Recv_Sync_History.Get (2), 0, Tick_32.Serialization.Serialized_Length * 5);
       -- Make sure pointer sent in event matches the pointer send via the dump:
       Memory_Region_Assert.Eq (T.Dumping_Log_Memory_History.Get (2), Pack (T.Memory_Dump_Recv_Sync_History.Get (2).Memory_Pointer));
       Ptr := T.Memory_Dump_Recv_Sync_History.Get (2).Memory_Pointer;
@@ -164,7 +164,7 @@ package body Logger_Tests.Implementation is
 
       -- Check the dumped memory meta data:
       Natural_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get_Count, 4);
-      Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (3), (Head => 0, Count => Unsigned_32 (Tick.Serialization.Serialized_Length) * 5, Size => 100));
+      Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (3), (Head => 0, Count => Unsigned_32 (Tick_32.Serialization.Serialized_Length) * 5, Size => 100));
       -- Make sure pointer sent in event matches the pointer send via the dump:
       Memory_Region_Assert.Eq (T.Dumping_Log_Memory_History.Get (3), Pack (T.Memory_Dump_Recv_Sync_History.Get (3).Memory_Pointer));
 
@@ -186,7 +186,7 @@ package body Logger_Tests.Implementation is
 
       -- Check the dumped memory meta data:
       Natural_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get_Count, 6);
-      Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (5), (Head => 0, Count => Unsigned_32 (Tick.Serialization.Serialized_Length) * 5, Size => 100));
+      Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (5), (Head => 0, Count => Unsigned_32 (Tick_32.Serialization.Serialized_Length) * 5, Size => 100));
       -- Make sure pointer sent in event matches the pointer send via the dump:
       Memory_Region_Assert.Eq (T.Dumping_Log_Memory_History.Get (5), Pack (T.Memory_Dump_Recv_Sync_History.Get (5).Memory_Pointer));
 
@@ -208,7 +208,7 @@ package body Logger_Tests.Implementation is
 
       -- Check the dumped memory meta data:
       Natural_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get_Count, 8);
-      Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (7), (Head => 0, Count => Unsigned_32 (Tick.Serialization.Serialized_Length) * 5, Size => 100));
+      Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (7), (Head => 0, Count => Unsigned_32 (Tick_32.Serialization.Serialized_Length) * 5, Size => 100));
       -- Make sure pointer sent in event matches the pointer send via the dump:
       Memory_Region_Assert.Eq (T.Dumping_Log_Memory_History.Get (7), Pack (T.Memory_Dump_Recv_Sync_History.Get (7).Memory_Pointer));
 
@@ -229,7 +229,7 @@ package body Logger_Tests.Implementation is
       use Byte_Array_Pointer;
       use Byte_Array_Pointer.Packed;
       T : Component_Tester_Package.Instance_Access renames Self.Tester;
-      The_Tick : Tick.T;
+      The_Tick : Tick_32.T;
    begin
       -- Initialize the component:
       T.Component_Instance.Init (Size => 50);
@@ -328,7 +328,7 @@ package body Logger_Tests.Implementation is
       use Byte_Array_Pointer;
       use Byte_Array_Pointer.Packed;
       T : Component_Tester_Package.Instance_Access renames Self.Tester;
-      The_Tick : Tick.T;
+      The_Tick : Tick_32.T;
       Bytes : Basic_Types.Byte_Array := [0 .. 99 => 0];
       Bytes_To_Compare : Basic_Types.Byte_Array := [0 .. 99 => 0];
       Ptr : Byte_Array_Pointer.Instance;
@@ -349,24 +349,24 @@ package body Logger_Tests.Implementation is
       -- Send some data to the logger while it is disabled:
       The_Tick := ((1, 2), 3);
       T.T_Send (The_Tick);
-      Bytes_To_Compare (Idx .. Idx + Tick.Serialization.Serialized_Length - 1) := Tick.Serialization.To_Byte_Array (The_Tick);
-      Idx := @ + Tick.Serialization.Serialized_Length;
+      Bytes_To_Compare (Idx .. Idx + Tick_32.Serialization.Serialized_Length - 1) := Tick_32.Serialization.To_Byte_Array (The_Tick);
+      Idx := @ + Tick_32.Serialization.Serialized_Length;
       The_Tick := ((4, 5), 6);
       T.T_Send (The_Tick);
-      Bytes_To_Compare (Idx .. Idx + Tick.Serialization.Serialized_Length - 1) := Tick.Serialization.To_Byte_Array (The_Tick);
-      Idx := @ + Tick.Serialization.Serialized_Length;
+      Bytes_To_Compare (Idx .. Idx + Tick_32.Serialization.Serialized_Length - 1) := Tick_32.Serialization.To_Byte_Array (The_Tick);
+      Idx := @ + Tick_32.Serialization.Serialized_Length;
       The_Tick := ((7, 8), 9);
       T.T_Send (The_Tick);
-      Bytes_To_Compare (Idx .. Idx + Tick.Serialization.Serialized_Length - 1) := Tick.Serialization.To_Byte_Array (The_Tick);
-      Idx := @ + Tick.Serialization.Serialized_Length;
+      Bytes_To_Compare (Idx .. Idx + Tick_32.Serialization.Serialized_Length - 1) := Tick_32.Serialization.To_Byte_Array (The_Tick);
+      Idx := @ + Tick_32.Serialization.Serialized_Length;
       The_Tick := ((10, 11), 12);
       T.T_Send (The_Tick);
-      Bytes_To_Compare (Idx .. Idx + Tick.Serialization.Serialized_Length - 1) := Tick.Serialization.To_Byte_Array (The_Tick);
-      Idx := @ + Tick.Serialization.Serialized_Length;
+      Bytes_To_Compare (Idx .. Idx + Tick_32.Serialization.Serialized_Length - 1) := Tick_32.Serialization.To_Byte_Array (The_Tick);
+      Idx := @ + Tick_32.Serialization.Serialized_Length;
       The_Tick := ((13, 14), 15);
       T.T_Send (The_Tick);
-      Bytes_To_Compare (Idx .. Idx + Tick.Serialization.Serialized_Length - 1) := Tick.Serialization.To_Byte_Array (The_Tick);
-      Idx := @ + Tick.Serialization.Serialized_Length;
+      Bytes_To_Compare (Idx .. Idx + Tick_32.Serialization.Serialized_Length - 1) := Tick_32.Serialization.To_Byte_Array (The_Tick);
+      Idx := @ + Tick_32.Serialization.Serialized_Length;
 
       -- Make sure no events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
@@ -377,7 +377,7 @@ package body Logger_Tests.Implementation is
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Send_Meta_Data_Event_Id, Status => Success));
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Log_Info_Update_History.Get_Count, 1);
-      Logger_Info_Assert.Eq (T.Log_Info_Update_History.Get (1), ((Head => (Unsigned_32 (Tick.Serialization.Serialized_Length) * 5) mod 50, Count => 50, Size => 50), Current_Mode => Logger_Mode.Enabled));
+      Logger_Info_Assert.Eq (T.Log_Info_Update_History.Get (1), ((Head => (Unsigned_32 (Tick_32.Serialization.Serialized_Length) * 5) mod 50, Count => 50, Size => 50), Current_Mode => Logger_Mode.Enabled));
 
       -- Dump the log and make sure the meta data and data was sent:
       T.Command_T_Send (T.Commands.Dump_Log);
@@ -388,7 +388,7 @@ package body Logger_Tests.Implementation is
 
       -- Check the dumped memory meta data:
       Natural_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get_Count, 3);
-      Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (1), (Head => Unsigned_32 (Tick.Serialization.Serialized_Length * 5) mod 50, Count => 50, Size => 50));
+      Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (1), (Head => Unsigned_32 (Tick_32.Serialization.Serialized_Length * 5) mod 50, Count => 50, Size => 50));
       -- Make sure pointer sent in event matches the pointer send via the dump:
       Memory_Region_Assert.Eq (T.Dumping_Log_Memory_History.Get (1), Pack (T.Memory_Dump_Recv_Sync_History.Get (1).Memory_Pointer));
 
@@ -418,7 +418,7 @@ package body Logger_Tests.Implementation is
 
       -- Check the dumped memory meta data:
       Natural_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get_Count, 5);
-      Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (4), (Head => Unsigned_32 (Tick.Serialization.Serialized_Length * 5) mod 50, Count => 50, Size => 50));
+      Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (4), (Head => Unsigned_32 (Tick_32.Serialization.Serialized_Length * 5) mod 50, Count => 50, Size => 50));
       -- Make sure pointer sent in event matches the pointer send via the dump:
       Memory_Region_Assert.Eq (T.Dumping_Log_Memory_History.Get (4), Pack (T.Memory_Dump_Recv_Sync_History.Get (4).Memory_Pointer));
 
@@ -441,7 +441,7 @@ package body Logger_Tests.Implementation is
 
       -- Check the dumped memory meta data:
       Natural_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get_Count, 8);
-      Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (6), (Head => Unsigned_32 (Tick.Serialization.Serialized_Length * 5) mod 50, Count => 50, Size => 50));
+      Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (6), (Head => Unsigned_32 (Tick_32.Serialization.Serialized_Length * 5) mod 50, Count => 50, Size => 50));
       -- Make sure pointer sent in event matches the pointer send via the dump:
       Memory_Region_Assert.Eq (T.Dumping_Log_Memory_History.Get (6), Pack (T.Memory_Dump_Recv_Sync_History.Get (6).Memory_Pointer));
 
@@ -471,7 +471,7 @@ package body Logger_Tests.Implementation is
 
       -- Check the dumped memory meta data:
       Natural_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get_Count, 10);
-      Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (9), (Head => Unsigned_32 (Tick.Serialization.Serialized_Length * 5) mod 50, Count => 50, Size => 50));
+      Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (9), (Head => Unsigned_32 (Tick_32.Serialization.Serialized_Length * 5) mod 50, Count => 50, Size => 50));
       -- Make sure pointer sent in event matches the pointer send via the dump:
       Memory_Region_Assert.Eq (T.Dumping_Log_Memory_History.Get (9), Pack (T.Memory_Dump_Recv_Sync_History.Get (9).Memory_Pointer));
 
@@ -493,7 +493,7 @@ package body Logger_Tests.Implementation is
 
       -- Check the dumped memory meta data:
       Natural_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get_Count, 13);
-      Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (11), (Head => Unsigned_32 (Tick.Serialization.Serialized_Length * 5) mod 50, Count => 50, Size => 50));
+      Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (11), (Head => Unsigned_32 (Tick_32.Serialization.Serialized_Length * 5) mod 50, Count => 50, Size => 50));
       -- Make sure pointer sent in event matches the pointer send via the dump:
       Memory_Region_Assert.Eq (T.Dumping_Log_Memory_History.Get (11), Pack (T.Memory_Dump_Recv_Sync_History.Get (11).Memory_Pointer));
 
@@ -523,7 +523,7 @@ package body Logger_Tests.Implementation is
 
       -- Check the dumped memory meta data:
       Natural_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get_Count, 15);
-      Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (14), (Head => Unsigned_32 (Tick.Serialization.Serialized_Length * 5) mod 50, Count => 50, Size => 50));
+      Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (14), (Head => Unsigned_32 (Tick_32.Serialization.Serialized_Length * 5) mod 50, Count => 50, Size => 50));
       -- Make sure pointer sent in event matches the pointer send via the dump:
       Memory_Region_Assert.Eq (T.Dumping_Log_Memory_History.Get (14), Pack (T.Memory_Dump_Recv_Sync_History.Get (14).Memory_Pointer));
 
@@ -535,12 +535,11 @@ package body Logger_Tests.Implementation is
       Bytes (0 .. Length (Ptr) - 1) := To_Byte_Array (Ptr);
       Put_Line (Basic_Types.Representation.Image (Bytes (0 .. Len + Length (Ptr) - 1)));
       Byte_Array_Assert.Eq (Bytes (0 .. Length (Ptr) - 1), Bytes_To_Compare (Idx - 9 .. Idx - 1));
-
    end Test_Log_Overwrite_And_Dump;
 
    overriding procedure Test_Enable_Disable (Self : in out Instance) is
       T : Component_Tester_Package.Instance_Access renames Self.Tester;
-      The_Tick : Tick.T;
+      The_Tick : Tick_32.T;
    begin
       -- Initialize the component:
       T.Component_Instance.Init (Size => 100);
@@ -607,7 +606,7 @@ package body Logger_Tests.Implementation is
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (3), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Send_Meta_Data_Event_Id, Status => Success));
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 3);
       Natural_Assert.Eq (T.Log_Info_Update_History.Get_Count, 2);
-      Logger_Info_Assert.Eq (T.Log_Info_Update_History.Get (2), ((Head => 0, Count => 60, Size => 100), Current_Mode => Logger_Mode.Enabled));
+      Logger_Info_Assert.Eq (T.Log_Info_Update_History.Get (2), ((Head => 0, Count => Interfaces.Unsigned_32 (Tick_32.Size_In_Bytes * 5), Size => 100), Current_Mode => Logger_Mode.Enabled));
 
       -- Send disable command:
       T.Command_T_Send (T.Commands.Disable);
@@ -641,7 +640,7 @@ package body Logger_Tests.Implementation is
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (5), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Send_Meta_Data_Event_Id, Status => Success));
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 5);
       Natural_Assert.Eq (T.Log_Info_Update_History.Get_Count, 3);
-      Logger_Info_Assert.Eq (T.Log_Info_Update_History.Get (3), ((Head => 0, Count => 60, Size => 100), Current_Mode => Logger_Mode.Disabled));
+      Logger_Info_Assert.Eq (T.Log_Info_Update_History.Get (3), ((Head => 0, Count => Interfaces.Unsigned_32 (Tick_32.Size_In_Bytes * 5), Size => 100), Current_Mode => Logger_Mode.Disabled));
 
       -- Send enabled command:
       T.Command_T_Send (T.Commands.Enable);
@@ -653,7 +652,7 @@ package body Logger_Tests.Implementation is
       Natural_Assert.Eq (T.Mode_History.Get_Count, 4);
       Logger_Mode_Assert.Eq (T.Mode_History.Get (4).Current_Mode, Logger_Mode.Enabled);
 
-      -- Send some data to the logger while it is disabled:
+      -- Send some data to the logger while it is enabled:
       The_Tick := ((1, 2), 3);
       T.T_Send (The_Tick);
       The_Tick := ((4, 5), 6);
@@ -674,7 +673,7 @@ package body Logger_Tests.Implementation is
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (7), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Send_Meta_Data_Event_Id, Status => Success));
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 7);
       Natural_Assert.Eq (T.Log_Info_Update_History.Get_Count, 4);
-      Logger_Info_Assert.Eq (T.Log_Info_Update_History.Get (4), ((Head => 20, Count => 100, Size => 100), Current_Mode => Logger_Mode.Enabled));
+      Logger_Info_Assert.Eq (T.Log_Info_Update_History.Get (4), ((Head => Interfaces.Unsigned_32 ((Tick_32.Size_In_Bytes * 10) mod 100), Count => 100, Size => 100), Current_Mode => Logger_Mode.Enabled));
    end Test_Enable_Disable;
 
    overriding procedure Test_Init (Self : in out Instance) is
