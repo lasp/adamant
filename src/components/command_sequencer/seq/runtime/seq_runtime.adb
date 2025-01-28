@@ -310,7 +310,7 @@ package body Seq_Runtime is
 
    function Get_Telemetry_Wait_Start_Time (Self : in Instance) return Sys_Time.T is
    begin
-      return Self.Most_Recent_Execution_Time;
+      return Self.Telemetry_Wait_Start_Time;
    end Get_Telemetry_Wait_Start_Time;
 
    function Get_Error_Code (Self : in Instance) return Seq_Error.E is
