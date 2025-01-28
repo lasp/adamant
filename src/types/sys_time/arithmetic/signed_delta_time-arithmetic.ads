@@ -1,14 +1,13 @@
 with Ada.Real_Time; use Ada.Real_Time;
 with Sys_Time.Arithmetic;
-with Interfaces; use Interfaces;
 
 -- Arithmetic package for Delta_Time
 package Signed_Delta_Time.Arithmetic is
 
    -- Smallest and largest possible Delta_Times
-   Max_Delta_Time : constant Signed_Delta_Time.T := (Seconds => Unsigned_32'Last, Subseconds => Unsigned_32'Last, Sign => Positive_Delta);
-   Zero_Delta_Time : constant Signed_Delta_Time.T := (Seconds => Unsigned_32'First, Subseconds => Unsigned_32'First, Sign => Positive_Delta);
-   Min_Delta_Time : constant Signed_Delta_Time.T := (Seconds => Unsigned_32'Last, Subseconds => Unsigned_32'Last, Sign => Negative_Delta);
+   Max_Delta_Time : constant Signed_Delta_Time.T := (Seconds => Seconds_Type'Last, Subseconds => Subseconds_Type'Last, Sign => Positive_Delta);
+   Zero_Delta_Time : constant Signed_Delta_Time.T := (Seconds => Seconds_Type'First, Subseconds => Subseconds_Type'First, Sign => Positive_Delta);
+   Min_Delta_Time : constant Signed_Delta_Time.T := (Seconds => Seconds_Type'Last, Subseconds => Subseconds_Type'Last, Sign => Negative_Delta);
 
    -- Convert an Ada.Real_Time.Time_Span to a Delta_Time
    function To_Signed_Delta_Time (Arg_In : in Time_Span; Arg_Out : out Signed_Delta_Time.T) return Sys_Time.Arithmetic.Sys_Time_Status;
