@@ -539,4 +539,22 @@ package {{ name }} is
 {% endfor %}
 {% endif %}
 
+   -------------------------------------------------
+   -- Named subtypes for each field for convenience:
+   -------------------------------------------------
+
+{% for field in fields.values() %}
+{% if field.is_packed_type %}
+   subtype {{ field.name }}_Type is {{ field.type_package }}.U;
+{% if endianness in ["either", "big"] %}
+   subtype {{ field.name }}_Type_T is {{ field.type_package }}.T;
+{% endif %}
+{% if endianness in ["either", "little"] %}
+   subtype {{ field.name }}_Type_T_Le is {{ field.type_package }}.T_Le;
+{% endif %}
+{% else %}
+   {% if (field.name + "_Type") == field.type %}-- {% endif %}subtype {{ field.name }}_Type is {{ field.type }};
+{% endif %}
+{% endfor %}
+
 end {{ name }};
