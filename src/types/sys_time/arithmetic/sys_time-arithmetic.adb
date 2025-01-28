@@ -5,8 +5,14 @@
 --   nanoseconds. For example, 1 second and 1 nanosecond is represented
 --   as the stored integer 1_000_000_001. This is for the 64-bit Duration
 --   case, not clear if this also is used for 32-bit Duration values.
+with Interfaces; use Interfaces;
 
 package body Sys_Time.Arithmetic is
+
+   -- Define the number of subseconds ticks that exist in a second.
+   Subseconds_In_Second : constant Unsigned_64 := Unsigned_64 (Subseconds_Type'Last) + Unsigned_64 (1);
+   -- Define the number of nanoseconds that exist in a second.
+   Nanoseconds_In_Second : constant Unsigned_64 := 1_000_000_000;
 
    -- Convert an Ada.Real_Time.Time to a Sys_Time
    -- This can result in an under_flow if the Time sent is negative. In that case an under_flow status will be sent and with a time of zero which is the earliest time available
@@ -15,12 +21,13 @@ package body Sys_Time.Arithmetic is
       Sub_Second_Time_Span : Time_Span;
 
       -- largest seconds value a Sys_Time can hold
-      Max_Seconds : constant Seconds_Count := Seconds_Count (Unsigned_32'Last);
+      Max_Seconds : constant Seconds_Count := Seconds_Count (Seconds_Type'Last);
       Time_Zero : constant Time := Time_Of (Seconds_Count (0), Nanoseconds (0));
 
-      -- 2^32 / one_second (in nanoseconds as represented in a time_span) / Duration'Small
-      -- or 2^32
-      Conversion_Factor : constant Duration := 10#4.2949_6729_6#E+9;
+      -- 2^32 or one_second (in nanoseconds as represented in a time_span) / Duration'Small
+      -- Conversion_Factor : constant Duration := 10#4.2949_6729_6#E+9;
+      -- ^ for 32-bit subseconds
+      Conversion_Factor : constant Duration := Duration (Subseconds_In_Second);
    begin
       -- Split the time into seconds and sub seconds:
       Split (Arg_In, Seconds_Since_Epoch, Sub_Second_Time_Span);
@@ -34,16 +41,16 @@ package body Sys_Time.Arithmetic is
       elsif Seconds_Since_Epoch > Max_Seconds then
          -- Set arg_out to largest Sys_Time possible
          Arg_Out := Sys_Time_Max;
-         -- We can not handle this time, it is larger than Unsigned_32'Last
+         -- We can not handle this time, it is larger than Seconds_Type'Last
          return Overflow;
       end if;
 
       -- Complete the conversion
       -- Set the seconds for the system time, this assumes that the Ada real time has the same Epoch:
-      Arg_Out.Seconds := Unsigned_32 (Seconds_Since_Epoch);
+      Arg_Out.Seconds := Seconds_Type (Seconds_Since_Epoch);
 
       -- Convert from a subsecond Time_Span to Sys_Time subseconds
-      Arg_Out.Subseconds := Unsigned_32 (To_Duration (Sub_Second_Time_Span) * Conversion_Factor);
+      Arg_Out.Subseconds := Subseconds_Type (To_Duration (Sub_Second_Time_Span) * Conversion_Factor);
 
       return Success;
    exception
@@ -56,12 +63,16 @@ package body Sys_Time.Arithmetic is
       Seconds_Since_Epoch : Seconds_Count;
       Sub_Second_Time_Span : Time_Span;
 
-      -- This is the conversion factor between sub-seconds and nanoseconds * 10E9, it is converted to a Unsigned_64 so that
-      -- It is possible to do integer math
-      Subsec_To_Nsec : constant Unsigned_64 := 2_328_306_436;
+      -- This is the conversion factor between sub-seconds and nanoseconds * 10E9. it is scaled up and
+      -- converted to a Unsigned_64 to provide the most precision and allow us to do integer instead of
+      -- floating point math in the calculation.
+      -- Subsec_To_Nsec : constant Unsigned_64 := 2_328_306_436;
+      -- ^ for 32-bit subseconds
+      Scale_64 : constant Unsigned_64 := 10_000_000_000;
+      Subsec_To_Nsec : constant Unsigned_64 := (Scale_64 * Nanoseconds_In_Second) / Subseconds_In_Second;
 
       -- Check for Unsigned_64 overflow
-      pragma Compile_Time_Error (Subsec_To_Nsec * 2**32 > Unsigned_64'Last, "This defines the conversion factor between sub-seconds and nanoseconds, times 10E10, if this is not less than Long_Integer, then need to switch to Long_Long_Integer");
+      pragma Compile_Time_Error (Subsec_To_Nsec * Subseconds_In_Second > Unsigned_64'Last, "This defines the conversion factor between sub-seconds and nanoseconds, times 10E10, if this is not less than Long_Integer, then need to switch to Long_Long_Integer");
    begin
       -- Used to check the precision of Real_Time.Time
       -- Put_Line("Duration'Size = " & Integer'Image(Duration'Size));
@@ -82,7 +93,7 @@ package body Sys_Time.Arithmetic is
 
       -- Convert system time sub-seconds to a Time_Span by:
       -- Converting the sub-seconds to nanoseconds by multiplying by the conversion factor and then dividing by 10^9
-      Sub_Second_Time_Span := Nanoseconds (Integer ((Unsigned_64 (Arg.Subseconds) * Subsec_To_Nsec) / 10#10#E9));
+      Sub_Second_Time_Span := Nanoseconds (Integer ((Unsigned_64 (Arg.Subseconds) * Subsec_To_Nsec) / Scale_64));
 
       -- Convert to a time using Ada Time_Of function
       To_Return := Time_Of (Seconds_Since_Epoch, Sub_Second_Time_Span);

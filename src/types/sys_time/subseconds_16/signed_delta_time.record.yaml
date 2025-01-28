@@ -1,0 +1,21 @@
+---
+description: A record which holds a time difference using EMA VTC format including seconds and subseconds with a sign to determine direction.
+preamble: |
+  type Delta_Time_Sign_Type is (Positive_Delta, Negative_Delta);
+  for Delta_Time_Sign_Type use (Positive_Delta => 0, Negative_Delta => 1);
+fields:
+  - name: Seconds
+    description: The number of seconds elapsed since epoch.
+    type: Interfaces.Unsigned_32
+    format: U32
+    default: '0'
+  - name: Subseconds
+    description: The number of 1/(2^16) sub-seconds.
+    type: Interfaces.Unsigned_16
+    format: U16
+    default: '0'
+  - name: Sign
+    description: The sign of the time delta.
+    type: Delta_Time_Sign_Type
+    format: E8
+    default: "Positive_Delta"

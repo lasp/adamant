@@ -1,0 +1,13 @@
+---
+description: A record which holds a time stamp using EMA VTC format including seconds and subseconds since epoch (1-5-1980 to 1-6-1980 midnight).
+fields:
+  - name: Seconds
+    description: The number of seconds elapsed since epoch.
+    type: Interfaces.Unsigned_32
+    format: U32
+    default: '0'
+  - name: Subseconds
+    description: The number of 1/(2^16) sub-seconds.
+    type: Interfaces.Unsigned_16
+    format: U16
+    default: '0'
