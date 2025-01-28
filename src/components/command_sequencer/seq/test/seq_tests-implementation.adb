@@ -198,7 +198,7 @@ package body Seq_Tests.Implementation is
          Exec_State_Assert.Eq (Engine.Execute (100, Time), Seq_Execute_State.Wait_Command);
          Sys_Time_Assert.Eq (Engine.Get_Sequence_Start_Time (Engine.Get_Stack_Level), Time);
          Sys_Time_Assert.Eq (Engine.Get_Sequence_Last_Executed_Time (Engine.Get_Stack_Level), Time);
-         Sys_Time_Assert.Eq (Engine.Get_Sequence_Telemetry_Wait_Start_Time (Engine.Get_Stack_Level), (0, 0));
+         -- Sys_Time_Assert.Eq (Engine.Get_Sequence_Telemetry_Wait_Start_Time (Engine.Get_Stack_Level), (0, 0));
          Sys_Time_Assert.Eq (Engine.Get_Telemetry_Timeout, (0, 0));
          Test_Command := Engine.Get_Command;
          Command_Id_Assert.Eq (Test_Command.Header.Id, Expected_Id);

@@ -535,7 +535,6 @@ package body Logger_Tests.Implementation is
       Bytes (0 .. Length (Ptr) - 1) := To_Byte_Array (Ptr);
       Put_Line (Basic_Types.Representation.Image (Bytes (0 .. Len + Length (Ptr) - 1)));
       Byte_Array_Assert.Eq (Bytes (0 .. Length (Ptr) - 1), Bytes_To_Compare (Idx - 9 .. Idx - 1));
-
    end Test_Log_Overwrite_And_Dump;
 
    overriding procedure Test_Enable_Disable (Self : in out Instance) is
@@ -607,7 +606,7 @@ package body Logger_Tests.Implementation is
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (3), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Send_Meta_Data_Event_Id, Status => Success));
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 3);
       Natural_Assert.Eq (T.Log_Info_Update_History.Get_Count, 2);
-      Logger_Info_Assert.Eq (T.Log_Info_Update_History.Get (2), ((Head => 0, Count => 60, Size => 100), Current_Mode => Logger_Mode.Enabled));
+      Logger_Info_Assert.Eq (T.Log_Info_Update_History.Get (2), ((Head => 0, Count => Interfaces.Unsigned_32 (Tick.Size_In_Bytes * 5), Size => 100), Current_Mode => Logger_Mode.Enabled));
 
       -- Send disable command:
       T.Command_T_Send (T.Commands.Disable);
@@ -641,7 +640,7 @@ package body Logger_Tests.Implementation is
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (5), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Send_Meta_Data_Event_Id, Status => Success));
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 5);
       Natural_Assert.Eq (T.Log_Info_Update_History.Get_Count, 3);
-      Logger_Info_Assert.Eq (T.Log_Info_Update_History.Get (3), ((Head => 0, Count => 60, Size => 100), Current_Mode => Logger_Mode.Disabled));
+      Logger_Info_Assert.Eq (T.Log_Info_Update_History.Get (3), ((Head => 0, Count => Interfaces.Unsigned_32 (Tick.Size_In_Bytes * 5), Size => 100), Current_Mode => Logger_Mode.Disabled));
 
       -- Send enabled command:
       T.Command_T_Send (T.Commands.Enable);
@@ -653,7 +652,7 @@ package body Logger_Tests.Implementation is
       Natural_Assert.Eq (T.Mode_History.Get_Count, 4);
       Logger_Mode_Assert.Eq (T.Mode_History.Get (4).Current_Mode, Logger_Mode.Enabled);
 
-      -- Send some data to the logger while it is disabled:
+      -- Send some data to the logger while it is enabled:
       The_Tick := ((1, 2), 3);
       T.T_Send (The_Tick);
       The_Tick := ((4, 5), 6);
@@ -674,7 +673,7 @@ package body Logger_Tests.Implementation is
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (7), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Send_Meta_Data_Event_Id, Status => Success));
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 7);
       Natural_Assert.Eq (T.Log_Info_Update_History.Get_Count, 4);
-      Logger_Info_Assert.Eq (T.Log_Info_Update_History.Get (4), ((Head => 20, Count => 100, Size => 100), Current_Mode => Logger_Mode.Enabled));
+      Logger_Info_Assert.Eq (T.Log_Info_Update_History.Get (4), ((Head => Interfaces.Unsigned_32 ((Tick.Size_In_Bytes * 10) mod 100), Count => 100, Size => 100), Current_Mode => Logger_Mode.Enabled));
    end Test_Enable_Disable;
 
    overriding procedure Test_Init (Self : in out Instance) is

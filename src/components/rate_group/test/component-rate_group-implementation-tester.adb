@@ -76,7 +76,7 @@ package body Component.Rate_Group.Implementation.Tester is
    overriding procedure Tick_T_Recv_Sync (Self : in out Instance; Arg : in Tick.T) is
    begin
       -- Increment the system time to simulate an executing component:
-      Self.System_Time := (@.Seconds + Self.Seconds_Delta, @.Subseconds + Self.Subseconds_Delta);
+      Self.System_Time := (@.Seconds + Self.Seconds_Delta, @.Subseconds + Sys_Time.Subseconds_Type (Self.Subseconds_Delta));
       -- Push the argument onto the test history for looking at later:
       Self.Tick_T_Recv_Sync_History.Push (Arg);
    end Tick_T_Recv_Sync;
