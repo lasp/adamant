@@ -8,6 +8,7 @@ with Signed_Delta_Time.Arithmetic;
 with Signed_Delta_Time.Representation;
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Numerics.Float_Random; use Ada.Numerics.Float_Random;
+with Interfaces; use Interfaces;
 
 package body Sys_Time_Tests.Implementation is
    --
@@ -100,7 +101,7 @@ package body Sys_Time_Tests.Implementation is
       Diff_Ave : Float;
 
       -- Need a different eps for this because of the floating point conversions
-      Eps : constant Time_Span := Nanoseconds (500);
+      Eps : constant Time_Span := Microseconds (32);
 
       -- return status of Sys_Time arithmetic
       Status : Sys_Time_Status;
@@ -188,7 +189,7 @@ package body Sys_Time_Tests.Implementation is
       Diff_Ave : Float;
 
       -- Need a different eps for this because the floating point conversions decrease the precision of the conversions
-      Eps : constant Time_Span := Nanoseconds (500);
+      Eps : constant Time_Span := Microseconds (32);
 
       -- return status of Sys_Time arithmetic
       Ignore : Sys_Time_Status;
@@ -280,7 +281,7 @@ package body Sys_Time_Tests.Implementation is
       Diff_Ave : Float;
 
       -- Need a different eps for this because the floating point conversions decrease the precision of the conversions
-      Eps : constant Time_Span := Nanoseconds (500);
+      Eps : constant Time_Span := Microseconds (32);
 
       -- return status of Sys_Time arithmetic
       Status : Sys_Time_Status;
@@ -371,7 +372,7 @@ package body Sys_Time_Tests.Implementation is
       Real_To_Sys1 : Sys_Time.T;
       Back_Sys1 : Sys_Time.T;
 
-      Time1_6 : constant Sys_Time.T := (Seconds => 1, Subseconds => 3_000_000_000);
+      Time1_6 : constant Sys_Time.T := (Seconds => 1, Subseconds => Subseconds_Type (Unsigned_64 (3_000_000_000) / (Unsigned_64 (Unsigned_32'Last) + 1)));
 
       Sys_To_Real1_6 : Ada.Real_Time.Time;
 
@@ -574,8 +575,8 @@ package body Sys_Time_Tests.Implementation is
    -- This unit test adds some additional testing.
    overriding procedure Additional_Tests (Self : in out Instance) is
       Ignore_Self : Instance renames Self;
-      Time_1 : Sys_Time.T := (1167846707, 1484907633); -- Broadcast time
-      Time_2 : Sys_Time.T := (1167846707, 1485043675); -- Broadcast recv time
+      Time_1 : Sys_Time.T := (1167846707, Subseconds_Type (Unsigned_64 (1484907633) / (Unsigned_64 (Unsigned_32'Last) + 1))); -- Broadcast time
+      Time_2 : Sys_Time.T := (1167846707, Subseconds_Type (Unsigned_64 (1485043675) / (Unsigned_64 (Unsigned_32'Last) + 1))); -- Broadcast recv time
       Time_Delta : Time_Span;
       Status : Sys_Time.Arithmetic.Sys_Time_Status;
       Time_Correction : Signed_Delta_Time.T;
@@ -594,8 +595,8 @@ package body Sys_Time_Tests.Implementation is
       Put_Line (Sys_Time.Arithmetic.Sys_Time_Status'Image (Status));
       Put_Line (Signed_Delta_Time.Representation.Image (Time_Correction));
 
-      Time_1 := (1167846708, 1484877568); -- Broadcast time
-      Time_2 := (1167846709, 1484600950); -- Broadcast recv time
+      Time_1 := (1167846708, Subseconds_Type (Unsigned_64 (1484877568) / (Unsigned_64 (Unsigned_32'Last) + 1))); -- Broadcast time
+      Time_2 := (1167846709, Subseconds_Type (Unsigned_64 (1484600950) / (Unsigned_64 (Unsigned_32'Last) + 1))); -- Broadcast recv time
 
       -- Get our final time delta
       Time_Delta := Time_1 - Time_2;
@@ -611,8 +612,8 @@ package body Sys_Time_Tests.Implementation is
       Put_Line (Sys_Time.Arithmetic.Sys_Time_Status'Image (Status));
       Put_Line (Signed_Delta_Time.Representation.Image (Time_Correction));
 
-      Time_1 := (1167846706, 1484941993); -- Broadcast time
-      Time_2 := (1167846706, 1484980626); -- Broadcast recv time
+      Time_1 := (1167846706, Subseconds_Type (Unsigned_64 (1484941993) / (Unsigned_64 (Unsigned_32'Last) + 1))); -- Broadcast time
+      Time_2 := (1167846706, Subseconds_Type (Unsigned_64 (1484980626) / (Unsigned_64 (Unsigned_32'Last) + 1))); -- Broadcast recv time
 
       -- Get our final time delta
       Time_Delta := Time_1 - Time_2;
