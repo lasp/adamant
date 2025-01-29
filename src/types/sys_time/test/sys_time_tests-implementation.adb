@@ -40,9 +40,7 @@ package body Sys_Time_Tests.Implementation is
       To_Return : Sys_Time.T;
 
    begin
-
       Status := To_Sys_Time (Time_Of (Seconds_Count (0), To_Time_Span (Duration (abs (Arg_In)))), To_Return);
-
       if Status = Overflow and then Print_Flag1 then
          Put_Line ("Long_Float_to_Sys_Time returned an Overflow status, input Long_Float was outside valid range:" & Long_Float'Image (Arg_In));
          Put_Line ("This is the expected for some conversions and is part of the test");
@@ -117,30 +115,31 @@ package body Sys_Time_Tests.Implementation is
 
          Status := Add (Rand_Time, Rand_Span, Time_Sum);
 
-         if Status /= Success and then Print_Flag2 then
-            Put_Line ("random add span returned " & Sys_Time_Status'Image (Status));
-            Put_Line ("This is the expected for some additions and is part of the test");
-            New_Line;
+         if Status /= Success then
+            if Print_Flag2  then
+               Put_Line ("random add span returned " & Sys_Time_Status'Image (Status));
+               Put_Line ("This is the expected for some additions and is part of the test");
+               New_Line;
+            end if;
             Print_Flag2 := False;
+         else
+            Difference := Float_Sum_Time - Time_Sum;
+
+            -- Update sum
+            Diff_Sum := Diff_Sum + abs (Difference);
+
+            -- Keep track of max difference
+            if abs (Difference) > Diff_Max then
+               Diff_Max := Difference;
+            end if;
+
+            -- Put_Line ("Difference (nsec): " & Integer'Image( difference/Nanoseconds(1) ) & ",");
+
+            -- diff_sum_float := Float(To_Duration(diff_sum));
+            -- Put_Line (ASCII.LF & "Difference Sum(nsec): " & Float'Image( diff_sum_float ));
+
+            Sys_Time_Assert.Eq (Float_Sum_Time, Time_Sum, Eps);
          end if;
-
-         Difference := Float_Sum_Time - Time_Sum;
-
-         -- Update sum
-         Diff_Sum := Diff_Sum + abs (Difference);
-
-         -- Keep track of max difference
-         if abs (Difference) > Diff_Max then
-            Diff_Max := Difference;
-         end if;
-
-         -- Put_Line ("Difference (nsec): " & Integer'Image( difference/Nanoseconds(1) ) & ",");
-
-         -- diff_sum_float := Float(To_Duration(diff_sum));
-         -- Put_Line (ASCII.LF & "Difference Sum(nsec): " & Float'Image( diff_sum_float ));
-
-         Sys_Time_Assert.Eq (Float_Sum_Time, Time_Sum, Eps);
-
       end loop;
 
       --Put_Line("tests: " & Integer'Image(tests));
@@ -304,7 +303,6 @@ package body Sys_Time_Tests.Implementation is
                Seen_Underflow := True;
             end if;
          else
-
             -- Calculate the difference between the floating point math and the time math
             Difference := Float_Sum_Sys_Time - Time_Diff;
 
@@ -316,16 +314,15 @@ package body Sys_Time_Tests.Implementation is
                Diff_Max := Difference;
             end if;
 
-            -- Used to output the differences between the float math and the time math
+            -- -- Used to output the differences between the float math and the time math
             -- Put_Line ("Difference (nsec): " & Integer'Image( difference/Nanoseconds(1) ) & ",");
 
-            -- Used to monitor the sum of the differences as it grows
+            -- -- Used to monitor the sum of the differences as it grows
             -- diff_sum_float := Float(To_Duration(diff_sum));
             -- Put_Line (ASCII.LF & "Difference Sum(nsec): " & Float'Image( diff_sum_float ));
 
             -- check equality
             Sys_Time_Assert.Eq (Float_Sum_Sys_Time, Time_Diff, Eps);
-
          end if; -- END IF negative result check
       end loop;
 
@@ -580,6 +577,35 @@ package body Sys_Time_Tests.Implementation is
       Time_Delta : Time_Span;
       Status : Sys_Time.Arithmetic.Sys_Time_Status;
       Time_Correction : Signed_Delta_Time.T;
+
+      -- This test below reveals and issue if we do not handle the case where
+      -- fixed point duration is rounded UP while converting to an unsigned
+      -- integer, causing the subseconds to overflow.
+      procedure Test_Subtract_Problematic is
+         -- Error output.
+         --
+         --  Difference (nsec):  1000000000,
+         --  Difference Sum(nsec):  9.99649E-01
+         --
+         --  Float
+         --   4.29496268900000E+09
+         --  Time:
+         --  (SECONDS =>  4294962688,
+         --   SUBSECONDS =>  0)
+         --  ^ These are off by a whole second!
+         --
+         Float1 : constant Long_Float := 4.294962688999999E+09;
+         Rand_Time : Sys_Time.T;
+      begin
+         Put_Line ("");
+         Put_Line ("Begin Test_Subtract_Problematic");
+         Rand_Time := Long_Float_To_Sys_Time (Float1);
+         Put_Line ("input float:  4.294962688999999E+09;");
+         Put_Line ("float image: " & Float1'Image);
+         Put_Line ("Rand_Time: " & Rand_Time'Image);
+         Put_Line ("End Test_Subtract_Problematic");
+         Sys_Time_Assert.Eq (Rand_Time, (4294962689, 0), Eps => Microseconds (32));
+      end Test_Subtract_Problematic;
    begin
       -- Get our final time delta
       Time_Delta := Time_1 - Time_2;
@@ -628,6 +654,9 @@ package body Sys_Time_Tests.Implementation is
       Status := Signed_Delta_Time.Arithmetic.To_Signed_Delta_Time (Time_Delta, Time_Correction);
       Put_Line (Sys_Time.Arithmetic.Sys_Time_Status'Image (Status));
       Put_Line (Signed_Delta_Time.Representation.Image (Time_Correction));
+
+      -- Run additional test:
+      Test_Subtract_Problematic;
    end Additional_Tests;
 
 end Sys_Time_Tests.Implementation;
