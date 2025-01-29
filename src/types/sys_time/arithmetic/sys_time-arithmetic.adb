@@ -23,11 +23,6 @@ package body Sys_Time.Arithmetic is
       -- largest seconds value a Sys_Time can hold
       Max_Seconds : constant Seconds_Count := Seconds_Count (Seconds_Type'Last);
       Time_Zero : constant Time := Time_Of (Seconds_Count (0), Nanoseconds (0));
-
-      -- 2^32 or one_second (in nanoseconds as represented in a time_span) / Duration'Small
-      -- Conversion_Factor : constant Duration := 10#4.2949_6729_6#E+9;
-      -- ^ for 32-bit subseconds
-      Conversion_Factor : constant Duration := Duration (Subseconds_In_Second);
    begin
       -- Split the time into seconds and sub seconds:
       Split (Arg_In, Seconds_Since_Epoch, Sub_Second_Time_Span);
@@ -50,7 +45,40 @@ package body Sys_Time.Arithmetic is
       Arg_Out.Seconds := Seconds_Type (Seconds_Since_Epoch);
 
       -- Convert from a subsecond Time_Span to Sys_Time subseconds
-      Arg_Out.Subseconds := Subseconds_Type (To_Duration (Sub_Second_Time_Span) * Conversion_Factor);
+      declare
+         -- 2^32 or one_second (in nanoseconds as represented in a time_span) / Duration'Small
+         -- Conversion_Factor : constant Duration := 10#4.2949_6729_6#E+9;
+         -- ^ for 32-bit subseconds
+         Conversion_Factor : constant Duration := Duration (Subseconds_In_Second);
+
+         -- Use the conversion factor to scale the duration subseconds into the full bit width
+         -- of our subseconds type.
+         Subseconds_Duration : constant Duration := To_Duration (Sub_Second_Time_Span) * Conversion_Factor;
+
+         -- We need to floor the fixed type duration in order to safely convert to an integer type.
+         -- This avoids constraint errors on the case where Subseconds_Duration is greater than
+         -- Subseconds_Type'Last but still less than Subseconds_Type'Last + 1. We attempt to achieve
+         -- this by simply converting to an Unsigned_64, however, according to Ada RM 4.6:
+         --
+         -- https://www.adaic.org/resources/add_content/standards/05rm/html/RM-4-6.html
+         --
+         -- "If the target type is an integer type and the operand type is real, the result is rounded
+         -- to the nearest integer (away from zero if exactly halfway between two integers)."
+         --
+         -- This means the operation below can round up to Subseconds_Type'Last + 1 and we can get
+         -- a Constraint_Error. We must handle this case, and increment second if this happens.
+         --
+         Subseconds_Duration_Rounded : constant Unsigned_64 := Unsigned_64 (Subseconds_Duration);
+      begin
+         if Subseconds_Duration_Rounded > Unsigned_64 (Subseconds_Type'Last) then
+            -- We overflowed subseconds, so round to the next second.
+            Arg_Out.Subseconds := 0;
+            Arg_Out.Seconds := @ + 1;
+         else
+            -- We round to the nearest subsecond representation.
+            Arg_Out.Subseconds := Subseconds_Type (Subseconds_Duration_Rounded);
+         end if;
+      end;
 
       return Success;
    exception
@@ -59,10 +87,6 @@ package body Sys_Time.Arithmetic is
 
    -- Convert a Sys_Time to an Ada.Real_Time.Time
    function To_Time (Arg : in Sys_Time.T) return Time is
-      To_Return : Time;
-      Seconds_Since_Epoch : Seconds_Count;
-      Sub_Second_Time_Span : Time_Span;
-
       -- This is the conversion factor between sub-seconds and nanoseconds * 10E9. it is scaled up and
       -- converted to a Unsigned_64 to provide the most precision and allow us to do integer instead of
       -- floating point math in the calculation.
@@ -73,6 +97,17 @@ package body Sys_Time.Arithmetic is
 
       -- Check for Unsigned_64 overflow
       pragma Compile_Time_Error (Subsec_To_Nsec * Subseconds_In_Second > Unsigned_64'Last, "This defines the conversion factor between sub-seconds and nanoseconds, times 10E10, if this is not less than Long_Integer, then need to switch to Long_Long_Integer");
+
+      -- Convert seconds to seconds_count. Seconds count is implemented as a 64-bit number
+      -- and so this should always be a safe conversion.
+      Seconds_Since_Epoch : constant Seconds_Count := Seconds_Count (Arg.Seconds);
+
+      -- Convert system time sub-seconds to a Time_Span by:
+      -- Converting the sub-seconds to nanoseconds by multiplying by the conversion factor and then dividing by 10^9
+      Sub_Second_Time_Span : constant Time_Span := Nanoseconds (Integer ((Unsigned_64 (Arg.Subseconds) * Subsec_To_Nsec) / Scale_64));
+
+      -- Convert to a time using Ada Time_Of function
+      To_Return : constant Time := Time_Of (Seconds_Since_Epoch, Sub_Second_Time_Span);
    begin
       -- Used to check the precision of Real_Time.Time
       -- Put_Line("Duration'Size = " & Integer'Image(Duration'Size));
@@ -87,16 +122,6 @@ package body Sys_Time.Arithmetic is
       -- Put_Line("Duration, one second: " & Duration'Image(To_Duration(Seconds(1))) );
       -- New_Line;
 
-      -- Convert seconds to seconds_count. Seconds count is implemented as a 64-bit number
-      -- and so this should always be a safe conversion.
-      Seconds_Since_Epoch := Seconds_Count (Arg.Seconds);
-
-      -- Convert system time sub-seconds to a Time_Span by:
-      -- Converting the sub-seconds to nanoseconds by multiplying by the conversion factor and then dividing by 10^9
-      Sub_Second_Time_Span := Nanoseconds (Integer ((Unsigned_64 (Arg.Subseconds) * Subsec_To_Nsec) / Scale_64));
-
-      -- Convert to a time using Ada Time_Of function
-      To_Return := Time_Of (Seconds_Since_Epoch, Sub_Second_Time_Span);
       return To_Return;
    end To_Time;
 
