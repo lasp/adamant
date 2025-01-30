@@ -6,4 +6,6 @@ this_dir = os.path.dirname(os.path.realpath(__file__))
 # this directory as the build path. This prevents any
 # name conflicts we might get from using the regular
 # ".all_path".
-modify_build_path.set_build_path(this_dir + os.pathsep + os.path.join(this_dir, ".." + os.sep + "c_src"))
+modify_build_path.set_build_path(
+    this_dir + os.pathsep + os.path.join(this_dir, ".." + os.sep + "c_src")
+)
