@@ -441,4 +441,20 @@ package {{ name }} is
    package Element_Serialization is new Serializer (Element_Packed);
 {% endif %}
 
+   ----------------------------------------------------
+   -- Named subtypes for array element for convenience:
+   ----------------------------------------------------
+
+{% if element.is_packed_type %}
+   subtype Element_Type_U is {{ element.type_package }}.U;
+{% if endianness in ["either", "big"] %}
+   subtype Element_Type_T is {{ element.type_package }}.T;
+{% endif %}
+{% if endianness in ["either", "little"] %}
+   subtype Element_Type_T_Le is {{ element.type_package }}.T_Le;
+{% endif %}
+{% else %}
+   {% if ("Element_Type") == element.type %}-- {% endif %}subtype Element_Type is {{ element.type }};
+{% endif %}
+
 end {{ name }};
