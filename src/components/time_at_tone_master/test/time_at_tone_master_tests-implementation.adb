@@ -4,16 +4,24 @@
 
 with Basic_Assertions; use Basic_Assertions;
 with Packed_U32.Assertion; use Packed_U32.Assertion;
-with Tick.Assertion; use Tick.Assertion;
 with Interfaces; use Interfaces;
 with Invalid_Command_Info.Assertion; use Invalid_Command_Info.Assertion;
 with Command_Response.Assertion; use Command_Response.Assertion;
 with Command_Enums; use Command_Enums.Command_Response_Status;
+with Sys_Time;
 with Command;
 with Tat_State.Assertion; use Tat_State.Assertion;
+with Ada.Real_Time; use Ada.Real_Time;
+with Sys_Time.Assertion; use Sys_Time.Assertion;
 use Tat_State;
 
 package body Time_At_Tone_Master_Tests.Implementation is
+
+   -------------------------------------------------------------------------
+   -- Globals:
+   -------------------------------------------------------------------------
+
+   Eps : constant Time_Span := Microseconds (48);
 
    -------------------------------------------------------------------------
    -- Fixtures:
@@ -61,8 +69,11 @@ package body Time_At_Tone_Master_Tests.Implementation is
       T.Tick_T_Send (((0, 0), 0));
       Natural_Assert.Eq (T.Time_Message_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get_Count, 1);
-      Tick_Assert.Eq (T.Time_Message_Recv_Sync_History.Get (1), ((17, 23 + (5 * (16#FFFF_FFFF# / 1_000))), 0));
-      Tick_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get (1), ((17, 23 + (5 * (16#FFFF_FFFF# / 1_000))), 0));
+      Sys_Time_Assert.Eq (T.Time_Message_Recv_Sync_History.Get (1).Time, (17, 23 + (5 * (Sys_Time.Subseconds_Type'Last / 1_000))), Eps);
+      Unsigned_32_Assert.Eq (T.Time_Message_Recv_Sync_History.Get (1).Count, 0);
+
+      Sys_Time_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get (1).Time, (17, 23 + (5 * (Sys_Time.Subseconds_Type'Last / 1_000))), Eps);
+      Unsigned_32_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get (1).Count, 0);
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 3);
       Natural_Assert.Eq (T.Tone_Messages_Sent_History.Get_Count, 2);
       Packed_U32_Assert.Eq (T.Tone_Messages_Sent_History.Get (2), (Value => 1));
@@ -76,8 +87,10 @@ package body Time_At_Tone_Master_Tests.Implementation is
       T.Tick_T_Send (((0, 0), 0));
       Natural_Assert.Eq (T.Time_Message_Recv_Sync_History.Get_Count, 2);
       Natural_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get_Count, 2);
-      Tick_Assert.Eq (T.Time_Message_Recv_Sync_History.Get (2), ((17, 23 + (5 * (16#FFFF_FFFF# / 1_000))), 1));
-      Tick_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get (2), ((17, 23 + (5 * (16#FFFF_FFFF# / 1_000))), 1));
+      Sys_Time_Assert.Eq (T.Time_Message_Recv_Sync_History.Get (2).Time, (17, 23 + (5 * (Sys_Time.Subseconds_Type'Last / 1_000))), Eps);
+      Unsigned_32_Assert.Eq (T.Time_Message_Recv_Sync_History.Get (2).Count, 1);
+      Sys_Time_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get (2).Time, (17, 23 + (5 * (Sys_Time.Subseconds_Type'Last / 1_000))), Eps);
+      Unsigned_32_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get (2).Count, 1);
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 4);
       Natural_Assert.Eq (T.Tone_Messages_Sent_History.Get_Count, 3);
       Packed_U32_Assert.Eq (T.Tone_Messages_Sent_History.Get (3), (Value => 2));
@@ -91,8 +104,10 @@ package body Time_At_Tone_Master_Tests.Implementation is
       T.Tick_T_Send (((0, 0), 0));
       Natural_Assert.Eq (T.Time_Message_Recv_Sync_History.Get_Count, 3);
       Natural_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get_Count, 3);
-      Tick_Assert.Eq (T.Time_Message_Recv_Sync_History.Get (3), ((17, 23 + (5 * (16#FFFF_FFFF# / 1_000))), 2));
-      Tick_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get (3), ((17, 23 + (5 * (16#FFFF_FFFF# / 1_000))), 2));
+      Sys_Time_Assert.Eq (T.Time_Message_Recv_Sync_History.Get (3).Time, (17, 23 + (5 * (Sys_Time.Subseconds_Type'Last / 1_000))), Eps);
+      Unsigned_32_Assert.Eq (T.Time_Message_Recv_Sync_History.Get (3).Count, 2);
+      Sys_Time_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get (3).Time, (17, 23 + (5 * (Sys_Time.Subseconds_Type'Last / 1_000))), Eps);
+      Unsigned_32_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get (3).Count, 2);
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 5);
       Natural_Assert.Eq (T.Tone_Messages_Sent_History.Get_Count, 4);
       Packed_U32_Assert.Eq (T.Tone_Messages_Sent_History.Get (4), (Value => 3));
@@ -161,8 +176,10 @@ package body Time_At_Tone_Master_Tests.Implementation is
          T.Tick_T_Send (((0, 0), 0));
          Natural_Assert.Eq (T.Time_Message_Recv_Sync_History.Get_Count, Idx);
          Natural_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get_Count, Idx);
-         Tick_Assert.Eq (T.Time_Message_Recv_Sync_History.Get (Idx), ((17, 23 + (5 * (16#FFFF_FFFF# / 1_000))), Unsigned_32 (Idx - 1)));
-         Tick_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get (Idx), ((17, 23 + (5 * (16#FFFF_FFFF# / 1_000))), Unsigned_32 (Idx - 1)));
+         Sys_Time_Assert.Eq (T.Time_Message_Recv_Sync_History.Get (Idx).Time, (17, 23 + (5 * (Sys_Time.Subseconds_Type'Last / 1_000))), Eps);
+         Unsigned_32_Assert.Eq (T.Time_Message_Recv_Sync_History.Get (Idx).Count, Unsigned_32 (Idx - 1));
+         Sys_Time_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get (Idx).Time, (17, 23 + (5 * (Sys_Time.Subseconds_Type'Last / 1_000))), Eps);
+         Unsigned_32_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get (Idx).Count, Unsigned_32 (Idx - 1));
          Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, Idx + 4);
          Natural_Assert.Eq (T.Tone_Messages_Sent_History.Get_Count, Idx + 1);
          Packed_U32_Assert.Eq (T.Tone_Messages_Sent_History.Get (Idx + 1), (Value => Unsigned_32 (Idx)));
@@ -199,8 +216,10 @@ package body Time_At_Tone_Master_Tests.Implementation is
       T.Tick_T_Send (((0, 0), 0));
       Natural_Assert.Eq (T.Time_Message_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get_Count, 1);
-      Tick_Assert.Eq (T.Time_Message_Recv_Sync_History.Get (1), ((17, 23 + (5 * (16#FFFF_FFFF# / 1_000))), 0));
-      Tick_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get (1), ((17, 23 + (5 * (16#FFFF_FFFF# / 1_000))), 0));
+      Sys_Time_Assert.Eq (T.Time_Message_Recv_Sync_History.Get (1).Time, (17, 23 + (5 * (Sys_Time.Subseconds_Type'Last / 1_000))), Eps);
+      Unsigned_32_Assert.Eq (T.Time_Message_Recv_Sync_History.Get (1).Count, 0);
+      Sys_Time_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get (1).Time, (17, 23 + (5 * (Sys_Time.Subseconds_Type'Last / 1_000))), Eps);
+      Unsigned_32_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get (1).Count, 0);
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Tone_Messages_Sent_History.Get_Count, 1);
       Packed_U32_Assert.Eq (T.Tone_Messages_Sent_History.Get (1), (Value => 1));
@@ -225,8 +244,10 @@ package body Time_At_Tone_Master_Tests.Implementation is
       T.Tick_T_Send (((0, 0), 0));
       Natural_Assert.Eq (T.Time_Message_Recv_Sync_History.Get_Count, 2);
       Natural_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get_Count, 2);
-      Tick_Assert.Eq (T.Time_Message_Recv_Sync_History.Get (2), ((17, 23 + (5 * (16#FFFF_FFFF# / 1_000))), 1));
-      Tick_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get (2), ((17, 23 + (5 * (16#FFFF_FFFF# / 1_000))), 1));
+      Sys_Time_Assert.Eq (T.Time_Message_Recv_Sync_History.Get (2).Time, (17, 23 + (5 * (Sys_Time.Subseconds_Type'Last / 1_000))), Eps);
+      Unsigned_32_Assert.Eq (T.Time_Message_Recv_Sync_History.Get (2).Count, 1);
+      Sys_Time_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get (2).Time, (17, 23 + (5 * (Sys_Time.Subseconds_Type'Last / 1_000))), Eps);
+      Unsigned_32_Assert.Eq (T.Tone_Message_Recv_Sync_History.Get (2).Count, 1);
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 2);
       Natural_Assert.Eq (T.Tone_Messages_Sent_History.Get_Count, 2);
       Packed_U32_Assert.Eq (T.Tone_Messages_Sent_History.Get (2), (Value => 2));

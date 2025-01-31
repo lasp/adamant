@@ -4,7 +4,7 @@
 
 -- Component Tester Include:
 with Component.Logger.Implementation.Tester;
-with Tick;
+with Tick_32;
 
 -- This is a unit test suite for the Logger component
 package Logger_Tests.Implementation is
@@ -29,7 +29,7 @@ private
    overriding procedure Test_Invalid_Command (Self : in out Instance);
 
    -- Instantiate generic component:
-   package Component_Package is new Component.Logger (T => Tick.T, Serialized_Length => Tick.Serialized_Length);
+   package Component_Package is new Component.Logger (T => Tick_32.T, Serialized_Length => Tick_32.Serialized_Length);
    package Component_Implementation_Package is new Component_Package.Implementation;
    package Component_Tester_Package is new Component_Implementation_Package.Tester;
 

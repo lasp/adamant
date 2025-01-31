@@ -689,8 +689,8 @@ package body Tests.Implementation is
       -- Check event:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
       Natural_Assert.Eq (T.Data_Product_Length_Mismatch_History.Get_Count, 2);
-      Invalid_Data_Product_Length_Assert.Eq (T.Data_Product_Length_Mismatch_History.Get (1), ((Time => (0, 0), Id => 0, Buffer_Length => 17), Expected_Length => 4));
-      Invalid_Data_Product_Length_Assert.Eq (T.Data_Product_Length_Mismatch_History.Get (2), ((Time => (0, 0), Id => 2, Buffer_Length => 17), Expected_Length => 12));
+      Invalid_Data_Product_Length_Assert.Eq (T.Data_Product_Length_Mismatch_History.Get (1), ((Time => (0, 0), Id => 0, Buffer_Length => 17), Expected_Length => Packed_U32.Size_In_Bytes));
+      Invalid_Data_Product_Length_Assert.Eq (T.Data_Product_Length_Mismatch_History.Get (2), ((Time => (0, 0), Id => 2, Buffer_Length => 17), Expected_Length => Tick.Size_In_Bytes));
 
       -- Send tick, expect no packets received:
       T.Tick_T_Send (The_Tick);
@@ -715,8 +715,8 @@ package body Tests.Implementation is
       -- Check event:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 4);
       Natural_Assert.Eq (T.Data_Product_Length_Mismatch_History.Get_Count, 4);
-      Invalid_Data_Product_Length_Assert.Eq (T.Data_Product_Length_Mismatch_History.Get (3), ((Time => (0, 0), Id => 0, Buffer_Length => 17), Expected_Length => 4));
-      Invalid_Data_Product_Length_Assert.Eq (T.Data_Product_Length_Mismatch_History.Get (4), ((Time => (0, 0), Id => 2, Buffer_Length => 17), Expected_Length => 12));
+      Invalid_Data_Product_Length_Assert.Eq (T.Data_Product_Length_Mismatch_History.Get (3), ((Time => (0, 0), Id => 0, Buffer_Length => 17), Expected_Length => Packed_U32.Size_In_Bytes));
+      Invalid_Data_Product_Length_Assert.Eq (T.Data_Product_Length_Mismatch_History.Get (4), ((Time => (0, 0), Id => 2, Buffer_Length => 17), Expected_Length => Tick.Size_In_Bytes));
 
       -- Stop overriding length:
       T.Data_Product_Length_Override := 0;

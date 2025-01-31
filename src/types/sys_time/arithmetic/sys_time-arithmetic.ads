@@ -1,13 +1,12 @@
 with Ada.Real_Time; use Ada.Real_Time;
-with Interfaces; use Interfaces;
 
 -- Arithmetic package for Sys_Time
 package Sys_Time.Arithmetic is
 
    -- Smallest and largest possible Sys_Times
-   Sys_Time_Max : constant Sys_Time.T := (Seconds => Unsigned_32'Last, Subseconds => Unsigned_32'Last);
-   Sys_Time_Zero : constant Sys_Time.T := (Seconds => Unsigned_32'First, Subseconds => Unsigned_32'First);
-   Sys_Time_One : constant Sys_Time.T := (Seconds => 1, Subseconds => Unsigned_32'First);
+   Sys_Time_Max : constant Sys_Time.T := (Seconds => Seconds_Type'Last, Subseconds => Subseconds_Type'Last);
+   Sys_Time_Zero : constant Sys_Time.T := (Seconds => Seconds_Type'First, Subseconds => Subseconds_Type'First);
+   Sys_Time_One : constant Sys_Time.T := (Seconds => 1, Subseconds => Subseconds_Type'First);
 
    -- Return status types:
    type Sys_Time_Status is (Success, Underflow, Overflow);

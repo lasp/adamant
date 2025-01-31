@@ -10,6 +10,7 @@ with Invalid_Command_Info.Assertion; use Invalid_Command_Info.Assertion;
 with Command_Response.Assertion; use Command_Response.Assertion;
 with Command_Enums; use Command_Enums.Command_Response_Status;
 with Command;
+with Sys_Time;
 with Tat_State.Assertion; use Tat_State.Assertion;
 use Tat_State;
 
@@ -119,9 +120,9 @@ package body Time_Of_Tone_Master_Tests.Implementation is
       Packed_U32_Assert.Eq (T.Time_Messages_Sent_History.Get (3), (Value => 2));
 
       -- Send the component tone times, and make sure time messages sent at appropriate time:
-      T.Tone_Message_Sys_Time_T_Send ((Unsigned_32'Last, Unsigned_32'Last - 53));
+      T.Tone_Message_Sys_Time_T_Send ((Sys_Time.Seconds_Type'Last, Sys_Time.Subseconds_Type'Last - 53));
       Natural_Assert.Eq (T.Time_Message_Recv_Sync_History.Get_Count, 3);
-      Tick_Assert.Eq (T.Time_Message_Recv_Sync_History.Get (3), ((Unsigned_32'Last, Unsigned_32'Last - 53), 3));
+      Tick_Assert.Eq (T.Time_Message_Recv_Sync_History.Get (3), ((Sys_Time.Seconds_Type'Last, Sys_Time.Subseconds_Type'Last - 53), 3));
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 6);
       Natural_Assert.Eq (T.Time_Messages_Sent_History.Get_Count, 4);
       Packed_U32_Assert.Eq (T.Time_Messages_Sent_History.Get (4), (Value => 3));

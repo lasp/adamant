@@ -193,7 +193,7 @@ package body Component.Command_Sequencer.Implementation.Tester is
             To_Return.The_Data_Product.Header.Buffer_Length := 4;
             To_Return.The_Data_Product.Buffer (0 .. To_Return.The_Data_Product.Header.Buffer_Length - 1) := Packed_F32.Serialization.To_Byte_Array (Self.Component_A_Data_Product_2);
          when 3 =>
-            To_Return.The_Data_Product.Header.Buffer_Length := 8;
+            To_Return.The_Data_Product.Header.Buffer_Length := Sys_Time.Size_In_Bytes;
             To_Return.The_Data_Product.Buffer (0 .. To_Return.The_Data_Product.Header.Buffer_Length - 1) := Sys_Time.Serialization.To_Byte_Array (Self.Component_A_Data_Product_3);
          when 4 =>
             To_Return.The_Data_Product.Header.Buffer_Length := 2;
@@ -205,7 +205,7 @@ package body Component.Command_Sequencer.Implementation.Tester is
             To_Return.The_Data_Product.Header.Buffer_Length := 4;
             To_Return.The_Data_Product.Buffer (0 .. To_Return.The_Data_Product.Header.Buffer_Length - 1) := Packed_F32.Serialization.To_Byte_Array (Self.Component_B_Data_Product_2);
          when 7 =>
-            To_Return.The_Data_Product.Header.Buffer_Length := 8;
+            To_Return.The_Data_Product.Header.Buffer_Length := Sys_Time.Size_In_Bytes;
             To_Return.The_Data_Product.Buffer (0 .. To_Return.The_Data_Product.Header.Buffer_Length - 1) := Sys_Time.Serialization.To_Byte_Array (Self.Component_B_Data_Product_3);
          when 8 =>
             To_Return.The_Data_Product.Header.Buffer_Length := 2;
