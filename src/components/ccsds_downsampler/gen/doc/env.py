@@ -1,3 +1,4 @@
+from environments import modify_build_path
 import runpy
 import os
 
@@ -17,4 +18,4 @@ runpy.run_path(
         + "env.py",
     )
 )
-os.environ["EXTRA_BUILD_PATH"] = this_dir + os.pathsep + os.environ["EXTRA_BUILD_PATH"]
+modify_build_path.add_to_build_path(this_dir)

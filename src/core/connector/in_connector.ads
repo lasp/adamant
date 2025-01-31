@@ -12,7 +12,7 @@ package In_Connector is
    type Ptr is access all Instance;
 
    -- This is the subprogram definition for the invokee side of this connector.
-   type Invokee_Hook is access function (A_Component : in out Component.Core_Instance'Class; Input : in T; Index : in Connector_Index_Type; fFull_Queue_Behavior : in Full_Queue_Action) return Connector_Status;
+   type Invokee_Hook is access function (A_Component : in out Component.Core_Instance'Class; Input : in T; Index : in Connector_Index_Type; Full_Queue_Behavior : in Full_Queue_Action) return Connector_Status;
 
    -- Public function to register the component attached
    -- to the receiving end of the connector:

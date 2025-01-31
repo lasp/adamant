@@ -1,4 +1,4 @@
-from environments import test  # noqa: F401
+from environments import test, modify_build_path  # noqa: F401
 import os
 
 this_dir = os.path.dirname(os.path.realpath(__file__))
@@ -6,4 +6,4 @@ this_dir = os.path.dirname(os.path.realpath(__file__))
 # this directory as the build path. This prevents any
 # name conflicts we might get from using the regular
 # ".all_path".
-os.environ["EXTRA_BUILD_PATH"] = this_dir + os.pathsep + this_dir + os.sep + ".."
+modify_build_path.add_to_build_path([this_dir, this_dir + os.sep + ".."])
