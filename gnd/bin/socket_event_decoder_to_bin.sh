@@ -1,5 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 
+this_dir=`readlink -f "${BASH_SOURCE[0]}" | xargs dirname`
 assembly_events_file=$1
 
 if test -z "$assembly_events_file"
@@ -13,7 +14,7 @@ fi
 py_path=`which python`
 echo $py_path
 hidden_import=""
-for dir in `python socket_event_decoder.py --python-path 0.0.0.0 3001 108 $assembly_events_file output.log`
+for dir in `python $this_dir/socket_event_decoder.py --python-path 0.0.0.0 3001 108 $assembly_events_file output.log`
 do 
   py_path=$py_path:$dir
 done
@@ -21,7 +22,7 @@ echo "PYTHONPATH: $py_path"
 echo ""
 
 # Get all modules that the program depends on:
-for module in `python socket_event_decoder.py --module-dependencies 0.0.0.0 3001 108 $assembly_events_file output.log`
+for module in `python $this_dir/socket_event_decoder.py --module-dependencies 0.0.0.0 3001 108 $assembly_events_file output.log`
 do 
   hidden_import=$hidden_import" --hidden-import $module"
 done
@@ -29,7 +30,7 @@ echo "hidden imports: $hidden_import"
 echo ""
  
 # Run py installer.
-exe="pyinstaller --onefile -y socket_event_decoder.py -p $py_path -F --distpath build/bin --specpath build/bin $hidden_import"
+exe="pyinstaller --onefile -y $this_dir/socket_event_decoder.py -p $py_path -F --distpath $this_dir/build/bin --specpath $this_dir/build/bin $hidden_import"
 echo $exe
 $exe
 status=$?
@@ -37,8 +38,8 @@ status=$?
 if [ $status -eq 0 ]
 then
   # Copy assembly events file for production use.
-  cp $assembly_events_file build/bin/assembly_events.py
-  echo "\n -------- \n The build was successful. \n The socket_event_decoder executable is located at build/bin/socket_event_decoder. \n For more help you can run 'build/bin/socket_event_decoder -h' \n --------"
+  cp $assembly_events_file $this_dir/build/bin/assembly_events.py
+  echo "\n -------- \n The build was successful. \n The socket_event_decoder executable is located at $this_dir/build/bin/socket_event_decoder. \n For more help you can run '$this_dir/build/bin/socket_event_decoder -h' \n --------"
   exit 0
 else
   echo "\n -------- \n The build was unsuccessful, oh no! \n --------"
