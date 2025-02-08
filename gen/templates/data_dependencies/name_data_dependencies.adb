@@ -25,6 +25,7 @@ package body {{ name }} is
       -- Copy over IDs into the object:
 {% for dd in data_dependencies %}
       Self.{{ dd.name }}_Id := {{ dd.name }}_Id;
+      Self.{{ dd.name }}_Stale_Limit := {{ dd.name }}_Stale_Limit;
 {% endfor %}
    end Set_Ids_And_Limits;
 
