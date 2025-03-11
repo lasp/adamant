@@ -73,19 +73,19 @@ def _build_all_ada_object_dependencies(
         # Read the dependency files for each object we just built and construct
         # a list of dependencies:
         dep_files = list(set([of + ".deps" for of in object_files]))
-        deps = []
+        obj_deps = []
         for dep_file in dep_files:
             with open(dep_file, "r") as f:
-                deps.extend(f.read().split("\n"))
+                obj_deps.extend(f.read().split("\n"))
 
         # Filter out files that are not Ada/C/C++ source files:
-        deps = [d for d in deps if d.endswith('.ads') or d.endswith('.adb') or
-                d.endswith('.c') or d.endswith('.h') or d.endswith('.hpp') or d.endswith('.cpp')]
-        deps = list(set(deps))
+        obj_deps = [d for d in obj_deps if d.endswith('.ads') or d.endswith('.adb') or
+                    d.endswith('.c') or d.endswith('.h') or d.endswith('.hpp') or d.endswith('.cpp')]
+        obj_deps = list(set(obj_deps))
 
         # Only include dependencies that exist in the database:
         dep_objects = []
-        dep_packages = list(set([ada.file_name_to_package_name(dep) for dep in deps]))
+        dep_packages = list(set([ada.file_name_to_package_name(dep) for dep in obj_deps]))
         for package in dep_packages:
             objects_in_db = source_db.get_objects([package], the_target=build_target)
             if not objects_in_db:

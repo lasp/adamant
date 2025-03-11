@@ -34,7 +34,7 @@ def _get_build_target_instance(target_name):
         return instance, filename
 
 
-def _build_all_ada_dependencies(ada_source_files, source_db):
+def _build_all_ada_dependencies(ada_source_files, source_db, dry_run=False):
     """
     Given a list of source files, redo-ifchange on all dependency
     source files. This function is recursive, and will redo-ifchange
@@ -96,10 +96,13 @@ def _build_all_ada_dependencies(ada_source_files, source_db):
         return ads_sources, adb_sources
 
     def _get_all_dependencies(source_files):
-        sources = _get_immediate_dependencies(source_files)
+        ads_sources, adb_sources = _get_immediate_dependencies(source_files)
         # Filter out sources that are already in the deps:
-        new_ads_sources, new_adb_sources = [
-            source for source in sources if source not in deps
+        new_ads_sources = [
+            source for source in ads_sources if source not in deps
+        ]
+        new_adb_sources = [
+            source for source in adb_sources if source not in deps
         ]
 
         # Special handling to make sure we build C-objects for which we have
@@ -127,13 +130,15 @@ def _build_all_ada_dependencies(ada_source_files, source_db):
                     if binded_sources:
                         c_sources.extend(binded_sources)
         if c_sources:
-            redo.redo_ifchange(c_sources)
+            if not dry_run:
+                redo.redo_ifchange(c_sources)
             deps.extend(c_sources)
 
         if new_ads_sources:
             if fast_compile:
                 # Depend on new sources:
-                redo.redo_ifchange(new_ads_sources)
+                if not dry_run:
+                    redo.redo_ifchange(new_ads_sources)
 
                 # Add them to the overall dependency list:
                 deps.extend(new_ads_sources)
@@ -158,7 +163,8 @@ def _build_all_ada_dependencies(ada_source_files, source_db):
                                 required_adb_sources.append(adb_source)
 
                 # Depend on adb sources:
-                redo.redo_ifchange(required_adb_sources)
+                if not dry_run:
+                    redo.redo_ifchange(required_adb_sources)
 
                 # Add them to the overall dependency list:
                 deps.extend(required_adb_sources)
@@ -172,7 +178,8 @@ def _build_all_ada_dependencies(ada_source_files, source_db):
                 new_sources = new_ads_sources + new_adb_sources
 
                 # Depend on new sources:
-                redo.redo_ifchange(new_sources)
+                if not dry_run:
+                    redo.redo_ifchange(new_sources)
 
                 # Add them to the overall dependency list:
                 deps.extend(new_sources)
@@ -235,7 +242,7 @@ def get_c_source_dependencies(source_file, build_target_instance, c_source_db=No
 
 
 def _build_all_c_dependencies(
-    c_source_files, c_source_db, build_target_instance
+    c_source_files, c_source_db, build_target_instance, dry_run=False
 ):
     deps = []
 
@@ -255,7 +262,8 @@ def _build_all_c_dependencies(
         # and see if those sources have any dependencies:
         if new_sources:
             # Depend on new sources:
-            redo.redo_ifchange(new_sources)
+            if not dry_run:
+                redo.redo_ifchange(new_sources)
             # Add them to the overall dependency list:
             deps.extend(new_sources)
             # Get the dependencies of the new sources:
@@ -372,71 +380,63 @@ def _get_object_sources(object_file):
     return source_to_compile, source_files
 
 
-def _precompile_objects(object_files):
-    # Form temporary files paths:
-    temp_object_dir = os.environ["OBJECT_PRE_BUILD_DIR"]
-
-    # Make sure that the build target is the same for all object files. This should be enforced by the
-    # build system itself.
+def _build_all_ada_and_c_dependencies_for_object(object_files, dry_run=False):
+    # Make sure all objects have the same target
     build_target = redo_arg.get_target(object_files[0])
     for obj_file in object_files:
         assert build_target == redo_arg.get_target(
             obj_file
         ), "All build object file must have same build target!"
 
-    # Get the build target instance:
+    # Get build target info for this object
     build_target_instance, build_target_file = _get_build_target_instance(build_target)
 
-    # Depend on this file and the target file:
-    redo.redo_ifchange([build_target_file, __file__])
-
-    # Create the source files we need to compile to build these objects:
-    # source_files = []
+    # Given the object files to build dependencies for, get all of the sources
+    # use to compile these objects.
     sources_to_compile = []
-    all_deps = []
+    sources_to_depend = []
     for object_file in object_files:
         # Get immediate sources for object:
-        source_to_compile, sources_to_depend = _get_object_sources(object_file)
+        source_to_compile, obj_srcs_to_depend = _get_object_sources(object_file)
+        sources_to_compile.append(source_to_compile)
+        sources_to_depend.extend(obj_srcs_to_depend)
 
-        # Depend on immediate source files:
+    # Depend on and build immediate source files dependencies:
+    if not dry_run:
         redo.redo_ifchange(sources_to_depend)
 
-        # Sort sources by Ada and C/C++
-        ada_sources_to_depend = [dep for dep in sources_to_depend if dep.endswith('.ads') or dep.endswith('.adb')]
-        c_sources_to_depend = [dep for dep in sources_to_depend if dep.endswith('.h') or dep.endswith('.c') or
-                               dep.endswith('.hpp') or dep.endswith('.cpp')]
+    # Sort sources by Ada and C/C++
+    ada_sources_to_depend = [dep for dep in sources_to_depend if dep.endswith('.ads') or dep.endswith('.adb')]
+    c_sources_to_depend = [dep for dep in sources_to_depend if dep.endswith('.h') or dep.endswith('.c') or
+                           dep.endswith('.hpp') or dep.endswith('.cpp')]
 
-        # Build all Ada dependencies for this object recursively:
-        deps = sources_to_depend
-        if ada_sources_to_depend:
-            with source_database() as db:
-                deps.extend(
-                    _build_all_ada_dependencies(
-                        ada_sources_to_depend, db
-                    )
+    # Discover and build all Ada dependencies for this object recursively.
+    if ada_sources_to_depend:
+        with source_database() as db:
+            sources_to_depend.extend(
+                _build_all_ada_dependencies(
+                    ada_sources_to_depend, db, dry_run=dry_run
                 )
+            )
 
-        # Build all C/C++ dependencies for this object recursively:
-        if c_sources_to_depend:
-            from database.c_source_database import c_source_database
-            with c_source_database() as db:
-                deps.extend(
-                    _build_all_c_dependencies(
-                        c_sources_to_depend, db, build_target_instance
-                    )
+    # Discover and build all C/C++ dependencies for this object recursively.
+    if c_sources_to_depend:
+        from database.c_source_database import c_source_database
+        with c_source_database() as db:
+            sources_to_depend.extend(
+                _build_all_c_dependencies(
+                    c_sources_to_depend, db, build_target_instance, dry_run=dry_run
                 )
+            )
 
-        # Write deps to file so we can use it for dependency tracking later:
-        deps = list(set(deps))
-        with open(
-            temp_object_dir + os.sep + os.path.basename(object_file) + ".deps", "w"
-        ) as f:
-            f.write("\n".join([build_target_file, __file__] + deps))
+    # Uniquify the dependency list for this object and return them.
+    sources_to_depend = list(set(sources_to_depend))
+    return sources_to_compile, [build_target_file, __file__] + sources_to_depend, build_target_instance
 
-        # Append sources to global lists for bulk compilation:
-        # source_files.extend(sources_to_depend)
-        sources_to_compile.append(source_to_compile)
-        all_deps.extend(deps)
+
+def _precompile_objects(object_files):
+    # Get and build all source files dependencies for these object files
+    sources_to_compile, sources_to_depend, build_target_instance = _build_all_ada_and_c_dependencies_for_object(object_files)
 
     # Info print if we are compiling a lot of objects, so the user is informed what is going on.
     num_objects = len(object_files)
@@ -449,7 +449,8 @@ def _precompile_objects(object_files):
         )
 
     # Run gprbuild to compile the sources:
-    _run_gprbuild_command(build_target_instance, sources_to_compile, source_dependencies=all_deps, object_dir=temp_object_dir)
+    temp_object_dir = os.environ["OBJECT_PRE_BUILD_DIR"]
+    _run_gprbuild_command(build_target_instance, sources_to_compile, source_dependencies=sources_to_depend, object_dir=temp_object_dir)
 
     if num_objects >= 10:
         redo.info_print(
@@ -486,12 +487,21 @@ def _handle_prebuilt_object(redo_1, redo_2, redo_3):
             if f != temp_object_file:
                 move(f, os.path.join(build_dir, os.path.basename(f)))
 
-        # After the move there should be a dependencies file created from
-        # the precompile that we can use to track dependencies. Lets open
-        # it and use it:
-        with open(build_dir + os.sep + os.path.basename(redo_1) + ".deps", "r") as f:
-            deps = f.read().split("\n")
-            redo.redo_ifchange(deps)
+        # Discover all Ada and C dependencies for this object recursively. We already built
+        # these dependencies in the precompile, so they should all exist already,
+        # thus we can optimize by setting dry_run=True, which will ensure that no
+        # calls to redo are made.
+        _, sources_to_depend, _ = _build_all_ada_and_c_dependencies_for_object([redo_1], dry_run=True)
+
+        # Write deps file out to save computed object dependencies
+        with open(
+            build_dir + os.sep + os.path.basename(redo_1) + ".deps", "w"
+        ) as f:
+            f.write("\n".join(sources_to_depend))
+
+        # Finally, tell redo to depend on these dependencies. Again
+        # all of these should be built already, so this should be fast.
+        redo.redo_ifchange(sources_to_depend)
 
         # Exit early, we are done, no need to compile...
         return True
