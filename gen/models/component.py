@@ -12,6 +12,7 @@ import models.submodels.ided_suite as ided_suite_module
 from util import ada
 from util import model_loader
 from util import redo_arg
+from util import filesystem
 import os
 from collections import OrderedDict
 
@@ -639,21 +640,23 @@ class component(base):
 
         ut_model_files = []
         self.full_file_dir = os.path.dirname(self.full_filename)
-        for root, dirs, files in os.walk(self.full_file_dir):
+        for root, dirs, files in filesystem.recurse_through_repo(
+            self.full_file_dir,
+            ignore=["build", "ignore", "doc"]
+        ):
             for dirname in dirs:
-                if dirname not in ["build", "doc"]:
-                    for unit_test_model in glob.iglob(
-                        os.path.join(
-                            os.path.join(root, dirname),
-                            "*" + self.name.lower() + ".tests.yaml",
-                        )
-                    ):
-                        # Unit test found, load it:
-                        # sys.stderr.write(unit_test_model + "\n")
-                        t = tests(unit_test_model)
-                        t.set_component(self)
-                        self.unit_tests.append(t)
-                        ut_model_files.append(t.full_filename)
+                for unit_test_model in glob.iglob(
+                    os.path.join(
+                        os.path.join(root, dirname),
+                        "*" + self.name.lower() + ".tests.yaml",
+                    )
+                ):
+                    # Unit test found, load it:
+                    # sys.stderr.write(unit_test_model + "\n")
+                    t = tests(unit_test_model)
+                    t.set_component(self)
+                    self.unit_tests.append(t)
+                    ut_model_files.append(t.full_filename)
         return ut_model_files
 
     def set_component_instance_data(

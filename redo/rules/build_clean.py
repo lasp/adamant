@@ -1,8 +1,9 @@
 import os.path
 from util import redo
 from util import debug
-from shutil import rmtree
 from base_classes.build_rule_base import build_rule_base
+import subprocess
+import concurrent.futures
 
 
 class build_clean(build_rule_base):
@@ -24,23 +25,30 @@ class build_clean(build_rule_base):
         # Find all build directories below this directory:
         dirs_to_clean = []
         do_files_to_do = []
-        alire_dir = os.path.join(os.environ["ADAMANT_DIR"], "alire")
+        skip_dirs = {"alire"}
         for root, dirnames, files in os.walk(directory):
-            if root.startswith(alire_dir):
-                continue
-            dirnames[:] = [d for d in dirnames if not d[0] == "." and not d[0] == "_"]
+            dirnames[:] = [d for d in dirnames if not d[0] == "." and not d[0] == "_" and d not in skip_dirs]
             if "build" in dirnames:
                 dirs_to_clean.append(os.path.join(root, "build"))
+                # We don't want to recurse into build directories
+                # so remove them from the list.
+                dirnames.remove("build")
             if "clean.do" in files and root != directory:
                 do_files_to_do.append(os.path.join(root, "clean"))
 
-        # Remove build directories:
-        for dir_to_clean in dirs_to_clean:
-            try:
-                debug.debug_print("removing " + dir_to_clean)
-                rmtree(dir_to_clean)
-            except BaseException:
-                pass
+        # Concurrently remove build directories using system calls. This
+        # executes much faster that python's rmtree.
+        def remove_directory(dir_to_clean):
+            debug.debug_print("removing " + dir_to_clean)
+            subprocess.run(["rm", "-rf", dir_to_clean], check=True)
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = [executor.submit(remove_directory, d) for d in dirs_to_clean]
+            for future in concurrent.futures.as_completed(futures):
+                try:
+                    future.result()
+                except subprocess.CalledProcessError as e:
+                    debug.debug_print("Error removing directory: " + str(e))
 
         # Clean any subdirectories:
         if do_files_to_do:
