@@ -1,0 +1,5 @@
+---
+type: Short_Float
+format: F32
+description: An simple array of Short_Floats
+length: 12

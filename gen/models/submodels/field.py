@@ -423,3 +423,11 @@ class field(variable):
                 return True
             else:
                 return False
+
+    @property
+    def has_float(self):
+        if self.is_packed_type:
+            assert self.type_model.has_float is not None
+            return self.type_model.has_float
+        else:
+            return self.format.type.startswith("F")

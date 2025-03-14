@@ -23,6 +23,7 @@ class type(packed_type):
         """Load record specific data structures with information from YAML file."""
         # Initialize object members:
         self.element = None
+        self.has_float = False
 
         # Populate the object with the contents of the
         # file data:
@@ -37,6 +38,10 @@ class type(packed_type):
                 "Error encountered loading data for element: " + str(e)
             )
         self.num_fields = 1
+
+        # If this element has a float, then this type has a float:
+        if self.element.has_float:
+            self.has_float = True
 
         # Calculate total size:
         self.size = self.element.size

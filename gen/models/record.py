@@ -28,6 +28,7 @@ class record(packed_type):
         self.dynamically_sized_fields = OrderedDict()
         self.statically_sized_fields = OrderedDict()
         self.variable_length_sizing_fields = OrderedDict()
+        self.has_float = False
 
         #
         # Define the endiannesses available for this packed record. Depending
@@ -62,6 +63,10 @@ class record(packed_type):
             self.fields[the_field.name] = the_field
             start_bit = the_field.end_bit + 1
             self.num_fields = the_field.end_field_number
+
+            # If this field has a float, then this record has a float:
+            if the_field.has_float:
+                self.has_float = True
 
             # If field is arrayed then the array components must be <= 8 bits otherwise
             # endianness cannot be guaranteed. In this case, the user should be using a
@@ -395,13 +400,14 @@ class record(packed_type):
         # Create type uses list for assertion package. This is complicated, but needed.
         type_includes_no_var = []
         for f in self.fields.values():
-            if f.type_model and f.is_packed_type:
-                if not f.type_model.variable_length:
+            if f.variable_length:
+                if f.type_model and f.is_packed_type:
+                    if not f.type_model.variable_length:
+                        type_includes_no_var.append(f.type_package)
+                elif f.type_model and not f.is_packed_type:
+                    type_includes_no_var.append(f.type_package + "." + f.type_model.name)
+                elif f.type_package:
                     type_includes_no_var.append(f.type_package)
-            elif f.type_model and not f.is_packed_type:
-                type_includes_no_var.append(f.type_package + "." + f.type_model.name)
-            elif f.type_package:
-                type_includes_no_var.append(f.type_package)
         self.type_uses = list(OrderedDict.fromkeys(type_includes_no_var))
 
         # Store the includes for any complex types (those that have models).

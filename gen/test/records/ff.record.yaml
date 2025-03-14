@@ -1,0 +1,15 @@
+---
+description: This is a packed record named F that has floats
+fields:
+  - name: One
+    description: Element 1
+    type: Interfaces.Unsigned_8
+    format: U8
+  - name: Two
+    description: Element 2
+    type: Short_Float
+    format: F32
+  - name: Three
+    description: Element 3
+    type: Long_Float
+    format: F64
