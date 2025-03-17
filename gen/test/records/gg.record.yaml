@@ -1,0 +1,8 @@
+---
+description: This is a packed record includes a field F that has floats
+fields:
+  - name: Yo
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: F
+    type: FF.T

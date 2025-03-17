@@ -43,13 +43,13 @@ package body Smart_Assert is
    -- Low level assertion function, used for implementing comparisons of complex types
    -- Assert function for code savings:
    procedure Call_Assert (Condition : in Boolean; T1 : in T; T2 : in T; Comparison : in String := "compared to"; Message : in String := ""; Filename : in String := Sinfo.File; Line : in Natural := Sinfo.Line) is
-      Assertmessage : constant String := "Assertion: " & ASCII.LF & Image (T1) & ASCII.LF & Comparison & ASCII.LF & Image (T2) & ASCII.LF & "failed.";
+      Assert_Message : constant String := "Assertion: " & ASCII.LF & Image (T1) & ASCII.LF & Comparison & ASCII.LF & Image (T2) & ASCII.LF & "failed.";
    begin
       -- Call AUnit assert:
       if Message = "" then
-         Assert (Condition, Assertmessage, Filename, Line);
+         Assert (Condition, Assert_Message, Filename, Line);
       else
-         Assert (Condition, Assertmessage & ASCII.LF & "Message: " & Message, Filename, Line);
+         Assert (Condition, Assert_Message & ASCII.LF & "Message: " & Message, Filename, Line);
       end if;
 
       -- If the type is out of range, it will fail to print by the assertion
@@ -58,12 +58,12 @@ package body Smart_Assert is
    exception
       when Constraint_Error =>
          declare
-            Safeassertmessage : constant String := "Assertion: " & ASCII.LF & "Item 1" & ASCII.LF & Comparison & ASCII.LF & "Item 2" & ASCII.LF & "failed due to either Item 1 or Item 2 issuing a Constraint_Error.";
+            Safe_Assert_Message : constant String := "Assertion: " & ASCII.LF & "Item 1" & ASCII.LF & Comparison & ASCII.LF & "Item 2" & ASCII.LF & "failed due to either Item 1 or Item 2 issuing a Constraint_Error.";
          begin
             if Message = "" then
-               Assert (False, Safeassertmessage, Filename, Line);
+               Assert (False, Safe_Assert_Message, Filename, Line);
             else
-               Assert (False, Safeassertmessage & ASCII.LF & "Message: " & Message, Filename, Line);
+               Assert (False, Safe_Assert_Message & ASCII.LF & "Message: " & Message, Filename, Line);
             end if;
          end;
          -- Make sure constraint error gets thrown if assertions are disabled and the program
@@ -132,17 +132,17 @@ package body Smart_Assert is
       procedure Float_Assert is new Call_Assert (T, Image_Float);
 
       procedure Eq (T1 : in T; T2 : in T; Epsilon : in T := T'Small; Message : in String := ""; Filename : in String := Sinfo.File; Line : in Natural := Sinfo.Line) is
-         Condition : constant Boolean := ((T1 + Epsilon) > T2) and then ((T1 - Epsilon) < T2);
+         Condition : constant Boolean := ((T1 + Epsilon) >= T2) and then ((T1 - Epsilon) <= T2);
       begin
          -- Need to check both sides of floating point value against an epsilon.
-         Float_Assert (Condition, T1, T2, "= (epsilon => " & Image_Float (Epsilon) & ")", Message, Filename, Line);
+         Float_Assert (Condition, T1, T2, "= (with Epsilon => " & Image_Float (Epsilon) & ")", Message, Filename, Line);
       end Eq;
 
       procedure Neq (T1 : in T; T2 : in T; Epsilon : in T := T'Small; Message : in String := ""; Filename : in String := Sinfo.File; Line : in Natural := Sinfo.Line) is
          Condition : constant Boolean := ((T1 + Epsilon) < T2) or else ((T1 - Epsilon) > T2);
       begin
          -- Need to check both sides of floating point value against an epsilon.
-         Float_Assert (Condition, T1, T2, "/= (epsilon => " & Image_Float (Epsilon) & ")", Message, Filename, Line);
+         Float_Assert (Condition, T1, T2, "/= (with Epsilon => " & Image_Float (Epsilon) & ")", Message, Filename, Line);
       end Neq;
 
       procedure Gt (T1 : in T; T2 : in T; Message : in String := ""; Filename : in String := Sinfo.File; Line : in Natural := Sinfo.Line) is

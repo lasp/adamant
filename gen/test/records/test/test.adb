@@ -12,6 +12,8 @@ with Cc.Assertion; use Cc.Assertion;
 with Cc.C; use Cc.C;
 with Ee.Representation;
 with Ee.Assertion; use Ee.Assertion;
+with Ff.Assertion; use Ff.Assertion;
+with Gg.Assertion; use Gg.Assertion;
 with Simple_Variable.Representation;
 with Simple_Variable.Validation;
 with Simple_Variable.Assertion; use Simple_Variable.Assertion;
@@ -79,6 +81,11 @@ procedure Test is
    A2 : Aa.T;
    B2 : Bb.T;
    C2 : Cc.T;
+   F_U : constant Ff.U := (One => 5, Two => 21.5, Three => 50.2345);
+   F : constant Ff.T := (One => 5, Two => 21.5, Three => 50.2345);
+   F_Le : constant Ff.T_Le := (One => 5, Two => 21.5, Three => 50.2345);
+   G_U : constant Gg.U := (Yo => 17, F => (One => 5, Two => 21.5, Three => 50.2345));
+   G : constant Gg.T := (Yo => 17, F => (One => 5, Two => 21.5, Three => 50.2345));
 
    -- Record array definitions:
    A_Bytes : Aa.Serialization.Byte_Array := [0 => 255, others => 0];
@@ -641,4 +648,17 @@ begin
    Put_Line ("passed.");
    Put_Line ("");
 
+   Put_Line ("Floating point assertion test: ");
+   Ff_U_Assert.Eq (F_U, (5, 15.2, 45.3), Epsilon => 50.0);
+   Ff_Assert.Eq (F, (5, 15.2, 45.3), Epsilon => 50.0);
+   Ff_Le_Assert.Eq (F_Le, (5, 15.2, 45.3), Epsilon => 50.0);
+   Ff_U_Assert.Eq (F_U, (5, 21.5, 50.2), Epsilon => 0.1);
+   Ff_Assert.Eq (F, (5, 21.5, 50.2), Epsilon => 0.1);
+   Ff_Le_Assert.Eq (F_Le, (5, 21.5, 50.2), Epsilon => 0.1);
+   Gg_U_Assert.Eq (G_U, (17, (5, 15.2, 45.3)), Epsilon => 50.0);
+   Gg_Assert.Eq (G, (17, (5, 15.2, 45.3)), Epsilon => 50.0);
+   Gg_U_Assert.Eq (G_U, (17, (5, 21.5, 50.2)), Epsilon => 0.1);
+   Gg_Assert.Eq (G, (17, (5, 21.5, 50.2)), Epsilon => 0.1);
+   Put_Line ("passed.");
+   Put_Line ("");
 end Test;

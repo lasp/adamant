@@ -12,7 +12,9 @@ with Eight_Bit_Type_Array.Validation;
 with Unaligned_Array.Validation;
 with Enum_Array.Validation;
 with Simple_Array.Assertion; use Simple_Array.Assertion;
+with Float_Array.Assertion; use Float_Array.Assertion;
 with Complex_Array.Assertion; use Complex_Array.Assertion;
+with Complex_Float_Array.Assertion; use Complex_Float_Array.Assertion;
 with Eight_Bit_Type_Array.Assertion; use Eight_Bit_Type_Array.Assertion;
 with Unaligned_Array.Assertion; use Unaligned_Array.Assertion;
 with Enum_Array.Assertion; use Enum_Array.Assertion;
@@ -55,6 +57,11 @@ procedure Test is
    Eight2 : Eight_Bit_Type_Array.T := [others => [others => 2]];
    Unaligned2 : Unaligned_Array.T := [others => 0];
    Enum2 : Enum_Array.T := [others => First_Enum.Blue];
+   Flt : constant Float_Array.T := [others => 1.1];
+   Complex_Flt : constant Complex_Float_Array.T := [others => (Yo => 17, F => (One => 5, Two => 21.5, Three => 50.2345))];
+   Flt_U : constant Float_Array.U := [others => 1.1];
+   Flt_Le : constant Float_Array.T_Le := [others => 1.1];
+   Complex_Flt_U : constant Complex_Float_Array.U := [others => (Yo => 17, F => (One => 5, Two => 21.5, Three => 50.2345))];
 
    -- Other local vars:
    Ignore : Unsigned_32;
@@ -253,4 +260,13 @@ begin
    Put_Line ("passed.");
    Put_Line ("");
 
+   Put_Line ("Floating point assertion test: ");
+   Float_Array_Assert.Eq (Flt, [others => 5.0], Epsilon => 50.0);
+   Float_Array_U_Assert.Eq (Flt_U, [others => 4.0], Epsilon => 50.0);
+   Float_Array_Le_Assert.Eq (Flt_Le, [others => 3.0], Epsilon => 50.0);
+   Float_Array_Le_Assert.Eq (Flt_Le, [0 => 1.1, 1 => 1.1, 2 => 5.1, 3 => 0.4, others => 3.0], Epsilon => 50.0);
+   Complex_Float_Array_Assert.Eq (Complex_Flt, [others => (Yo => 17, F => (One => 5, Two => 21.5, Three => 50.23458))], Epsilon => 0.1);
+   Complex_Float_Array_U_Assert.Eq (Complex_Flt_U, [others => (Yo => 17, F => (One => 5, Two => 21.5, Three => 50.23459))], Epsilon => 0.2);
+   Put_Line ("passed.");
+   Put_Line ("");
 end Test;
