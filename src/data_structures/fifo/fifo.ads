@@ -17,6 +17,7 @@ package Fifo is
    -- Initialization/destruction functions:
    --
    procedure Init (Self : in out Instance; Depth : in Positive);
+   procedure Clear (Self : in out Instance);
    procedure Destroy (Self : in out Instance);
 
    --

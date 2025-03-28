@@ -13,6 +13,12 @@ package body Fifo is
       Free_If_Testing (Self.Items);
    end Destroy;
 
+   procedure Clear (Self : in out Instance) is
+   begin
+      Self.Head := Natural'First;
+      Self.Count := Natural'First;
+   end Clear;
+
    function Is_Full (Self : in Instance) return Boolean is
    begin
       return Self.Count = Self.Items'Length;
