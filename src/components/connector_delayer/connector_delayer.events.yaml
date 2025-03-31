@@ -1,0 +1,4 @@
+---
+events:
+  - name: Dropped_Message
+    description: The queue overflowed and the incoming data was dropped.
