@@ -1,0 +1,35 @@
+---
+description: |
+  This component is similar to the Connector Queuer component except that it delays (via sleep) the transmission of the sent data for a configurable (at initialization) amount of time prior. When configured to sleep for zero microseconds, this component behaves identically to the Connector Queuer. This component can be used for a variety of purposes, such as 1) serving as an alarm, transmitting data N us after receipt or 2) spacing out the transmission of data, sending out new data every N us.
+
+  Like the Connector Queuer, this component serves as a multi-tasking safe synchronization point for multiple callers. When the T_Recv_Async connector is called, the data is queued. Based on the priority of this component, the data will be safely dequeued in the future, the component will then sleep for the configurable amount of microseconds, and then, finally, the T_Send connector will be called. The queue is implemented using the standard Adamant queue, and thus calls are serviced in FIFO order. The queue protection mechanism effectively makes all downstream connector calls of this component thread-safe.
+execution: active
+with:
+  - Serializer_Types
+generic:
+  description: The is generic component in that it can be instantiated to protect a connector of any type at compile time.
+  parameters:
+    - name: T
+      description: The generic type of data passed in and out of the component.
+    - name: Serialized_Length
+      description: A method that returns the serialized length of an item of type T. This is useful for serializing variable length packed types onto the queue.
+      formal_type: "with function Serialized_Length (Src : in T; Num_Bytes_Serialized : out Natural) return Serializer_Types.Serialization_Status;"
+init:
+  description: Configure how long the component will delay prior to sending out any queued data.
+  parameters:
+    - name: Delay_Us
+      description: The amount of time to delay prior to transmission in microseconds. The delay time begins right after the element is dequeued from the Adamant queue.
+      type: Natural
+connectors:
+  - description: The generic invokee connector.
+    type: T
+    kind: recv_async
+  - description: The generic invoker connector. Calls originating from this connector are serviced from the component's queue and thus will be executed in FIFO order in a thread-safe, atomic manner.
+    type: T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send
