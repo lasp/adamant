@@ -1,1 +1,2 @@
-unqlite
+# 0.9.8 is broken against python 3.12
+unqlite==0.9.7
