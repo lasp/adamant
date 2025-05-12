@@ -13,3 +13,6 @@ data_products:
   - name: Armed_State_Timeout
     description: The time remaining (in ticks) until the armed state expires.
     type: Packed_Arm_Timeout.T
+  - name: Last_Dumped_Register_Set
+    description: The address and length of the last register dump.
+    type: N_Registers.T

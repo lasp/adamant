@@ -4,9 +4,13 @@
 
 with Packed_U32;
 with Ada.Unchecked_Conversion;
+with Register_Stuffer_Packet;
 with System;
 with Sys_Time;
 with Command_Protector_Enums;
+with System.Storage_Elements; use System.Storage_Elements;
+with Register_Stuffer_Packet_Array;
+with Register_Stuffer_Packet_Header;
 
 package body Component.Register_Stuffer.Implementation is
 
@@ -224,6 +228,56 @@ package body Component.Register_Stuffer.Implementation is
 
       return Success;
    end Arm_Protected_Write;
+
+   -- Read the value of multiple registers and dump them into a packet.
+   overriding function Dump_Registers (Self : in out Instance; Arg : in N_Registers.T) return Command_Execution_Status.E is
+      use Command_Execution_Status;
+      -- Get the time:
+      The_Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
+   begin
+      -- Unarm if armed:
+      if Self.Protect_Registers then
+         Do_Unarm (Self);
+      end if;
+
+      declare
+         Arr : Register_Stuffer_Packet_Array.T := [others => Packed_U32.Pack(Packed_U32.U'(Value => 0))];
+      begin
+         -- Loop on Number of Registers:
+         -- Somehow get the underlying integer from num_registers
+         for Register in 0 .. Arg.Value-1 loop
+            if not Self.Is_Address_Valid(Arg.Address + Storage_Offset(Register*4)) then
+               return Failure;
+            end if;
+            declare
+               -- Define the register at the appropriate address:
+               Reg : Packed_U32.Register_T_Le with Import, Convention => Ada, Address => Arg.Address + Storage_Offset(Register*4);
+               -- Read the register value:
+               Reg_Copy : constant Packed_U32.T := Packed_U32.Swap_Endianness (Packed_U32.T_Le (Reg));
+            begin
+               -- Load the register value, in Reg_Copy to the Packet type.
+               Arr(Register) := Reg_Copy;
+            end;
+         end loop;
+         -- Construct and Send the packet based upon the returned array of register values
+         Self.Packet_T_Send_If_Connected (Self.Packets.Register_Packet_Truncate (The_Time, 
+            Register_Stuffer_Packet.Pack (Register_Stuffer_Packet.U'(
+               Header => Register_Stuffer_Packet_Header.U'(
+                  Start_Address => Arg.Address,
+                  Num_Registers => Arg.Value
+               ),
+               Buffer => Register_Stuffer_Packet_Array.Unpack(Arr)
+            ))
+         ));
+      end;
+
+      -- Update data product:
+      Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Last_Dumped_Register_Set (The_Time, Arg));
+
+      -- Throw info event:
+      Self.Event_T_Send_If_Connected (Self.Events.Registers_Dumped (The_Time, Arg));
+      return Success;
+   end Dump_Registers;
 
    -- Invalid command handler. This procedure is called when a command's arguments are found to be invalid:
    overriding procedure Invalid_Command (Self : in out Instance; Cmd : in Command.T; Errant_Field_Number : in Unsigned_32; Errant_Field : in Basic_Types.Poly_Type) is
