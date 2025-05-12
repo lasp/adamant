@@ -3,7 +3,7 @@ ruamel.yaml
 pykwalify[ruamel]
 Jinja2
 latex
-cython
+cython==3.0.12
 gitpython
 yamllint
 filelock
