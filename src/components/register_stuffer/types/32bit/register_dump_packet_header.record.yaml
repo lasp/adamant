@@ -1,0 +1,15 @@
+---
+description: Packet Header for Register Stuffer Packets
+preamble: |
+  subtype N_Registers is Integer range 1 .. {{ ((packet_buffer_size - 6) / 4) | int }};
+fields:
+  - name: Start_Address
+    description: Starting address of the N register dump
+    type: System.Address
+    format: U32
+    skip_validation: True
+    byte_image: True
+  - name: Num_Registers
+    description: Number of Registers to Dump
+    type: N_Registers
+    format: U16

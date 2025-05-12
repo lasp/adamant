@@ -1,0 +1,6 @@
+---
+description: Packets for the register stuffer.
+packets:
+  - name: Register_Packet
+    description: This packet contains dumped register values.
+    type: Register_Dump_Packet.T

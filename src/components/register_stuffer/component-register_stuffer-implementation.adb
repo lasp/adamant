@@ -3,11 +3,14 @@
 --------------------------------------------------------------------------------
 
 with Packed_U32;
-with Ada.Unchecked_Conversion;
 with System;
 with Sys_Time;
 with Command_Protector_Enums;
-
+with System.Storage_Elements; use System.Storage_Elements;
+with Register_Dump_Packet_Array;
+with Register_Value; use Register_Value;
+with Serializer_Types; use Serializer_Types;
+with Ada.Unchecked_Conversion;
 package body Component.Register_Stuffer.Implementation is
 
    --------------------------------------------------
@@ -78,15 +81,10 @@ package body Component.Register_Stuffer.Implementation is
 
    -- Helper function to check the validity of an address:
    function Is_Address_Valid (Self : in out Instance; Address : in System.Address) return Boolean is
-      -- Convert address to unsigned integer so we can use the "mod" operation on it.
-      -- This component is for 32-bit register addresses only. However, on Linux dev environment
-      -- we have 64-bit addresses, so the following warning is produced. We ignore this warning
-      -- on Linux. The warning does not appear when compiling for a 32-bit system.
-      pragma Warnings (Off, "types for unchecked conversion have different sizes");
-      function Convert_To_U32 is new Ada.Unchecked_Conversion (System.Address, Interfaces.Unsigned_32);
-      pragma Warnings (On, "types for unchecked conversion have different sizes");
+      -- This conversion is okay as Address_Mod_Type will always be the correct size and alignment for System.Address
+      function Address_To_Mod_Type is new Ada.Unchecked_Conversion (System.Address, Address_Mod_Type);
       -- Make sure the register address is on a 32-bit boundary:
-      Is_Valid : constant Boolean := (Convert_To_U32 (Address) mod 4) = 0;
+      Is_Valid : constant Boolean := (Address_To_Mod_Type (Address) mod Address_Mod_Type (Packed_U32.Size_In_Bytes)) = 0;
    begin
       -- Throw event if necessary:
       if not Is_Valid then
@@ -94,6 +92,25 @@ package body Component.Register_Stuffer.Implementation is
       end if;
       return Is_Valid;
    end Is_Address_Valid;
+
+   function Is_End_Address_Valid (Self : in out Instance; Arg : in Register_Dump_Packet_Header.T) return Boolean is
+      -- This conversion is okay as Address_Mod_Type will always be the correct size and alignment for System.Address
+      function Address_To_Mod_Type is new Ada.Unchecked_Conversion (System.Address, Address_Mod_Type);
+      -- Convert the address to an unsigned 64-bit integer for arithmetic operations
+      Start_Address : constant Address_Mod_Type := Address_To_Mod_Type (Arg.Start_Address);
+      -- Calculate the bytes to add (4 bytes per element)
+      Bytes_To_Add : constant Address_Mod_Type := Address_Mod_Type (Arg.Num_Registers * Packed_U32.Size_In_Bytes);
+
+      Max_Address : constant Address_Mod_Type := Address_Mod_Type'Last;
+
+      -- Check if the end address would overflow
+      Overflow : constant Boolean := Start_Address > (Max_Address - Bytes_To_Add);
+   begin
+      if Overflow then
+         Self.Event_T_Send_If_Connected (Self.Events.Address_Range_Overflow (Self.Sys_Time_T_Get, Arg));
+      end if;
+      return not Overflow;
+   end Is_End_Address_Valid;
 
    -- Helper subprogram which unarms the component for register write and sends out the appropriate events and data products.
    procedure Do_Unarm (Self : in out Instance) is
@@ -224,6 +241,66 @@ package body Component.Register_Stuffer.Implementation is
 
       return Success;
    end Arm_Protected_Write;
+
+   -- Read the value of multiple registers and dump them into a packet.
+   overriding function Dump_Registers (Self : in out Instance; Arg : in Register_Dump_Packet_Header.T) return Command_Execution_Status.E is
+      use Command_Execution_Status;
+      -- Get the time:
+      The_Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
+   begin
+      -- Unarm if armed:
+      if Self.Protect_Registers then
+         Do_Unarm (Self);
+      end if;
+
+      declare
+         Arr : Register_Dump_Packet_Array.T := [others => (Value => 0)];
+         Last_Addr : constant System.Address := Arg.Start_Address + Storage_Offset ((Arg.Num_Registers - 1) * Packed_U32.Size_In_Bytes);
+      begin
+         if not Self.Is_Address_Valid (Arg.Start_Address) or else
+            not Self.Is_End_Address_Valid (Arg)
+         then
+            return Failure;
+         end if;
+
+         for Register in 0 .. Arg.Num_Registers - 1 loop
+            declare
+               -- Define the register at the appropriate address:
+               Reg : Packed_U32.Register_T_Le with Import, Convention => Ada, Address => Arg.Start_Address + Storage_Offset (Register * Packed_U32.Size_In_Bytes);
+            begin
+               -- Load the register value, in Reg_Copy to the Packet type.
+               Arr (Register) := Packed_U32.Swap_Endianness (Packed_U32.T_Le (Reg));
+            end;
+         end loop;
+         -- Construct and Send the packet based upon the returned array of register values
+         declare
+            Packet_To_Send : Packet.T;
+            Serial_Status : constant Serialization_Status := Self.Packets.Register_Packet (The_Time,
+               (
+                  Header => Arg,
+                  Buffer => Arr
+               ),
+               Packet_To_Send
+            );
+         begin
+            -- This assertion should never fail, since the type is restricted to never being larger than a packet
+            pragma Assert (Serial_Status = Success);
+            Self.Packet_T_Send_If_Connected (Packet_To_Send);
+         end;
+         -- Update data product: (produce Last_register_read on last value)
+         Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Last_Register_Read (The_Time,
+            (
+               Address => Last_Addr,
+               -- Arg.Num_Registers must be strictly >= 1, so we will not have constraint error with this array access
+               Value => Arr (Arr'First + Arg.Num_Registers - 1).Value
+            )
+         ));
+      end;
+
+      -- Throw info event:
+      Self.Event_T_Send_If_Connected (Self.Events.Registers_Dumped (The_Time, Arg));
+      return Success;
+   end Dump_Registers;
 
    -- Invalid command handler. This procedure is called when a command's arguments are found to be invalid:
    overriding procedure Invalid_Command (Self : in out Instance; Cmd : in Command.T; Errant_Field_Number : in Unsigned_32; Errant_Field : in Basic_Types.Poly_Type) is

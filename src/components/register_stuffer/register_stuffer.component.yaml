@@ -26,3 +26,6 @@ connectors:
   - description: The system time is retrieved via this connector.
     return_type: Sys_Time.T
     kind: get
+  - description: Packets are sent out of this connector
+    type: Packet.T
+    kind: send

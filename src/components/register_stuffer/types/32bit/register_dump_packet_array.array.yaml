@@ -1,0 +1,4 @@
+---
+type: Packed_U32.T
+description: An array of Packed U32 Register Values.
+length: {{ ((packet_buffer_size - 6) / 4) | int }}

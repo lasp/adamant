@@ -60,6 +60,8 @@ private
    overriding procedure Data_Product_T_Send_Dropped (Self : in out Instance; Arg : in Data_Product.T) is null;
    -- This procedure is called when a Event_T_Send message is dropped due to a full queue.
    overriding procedure Event_T_Send_Dropped (Self : in out Instance; Arg : in Event.T) is null;
+   -- This procedure is called when a Packet_T_Send message is dropped due to a full queue.
+   overriding procedure Packet_T_Send_Dropped (Self : in out Instance; Arg : in Packet.T) is null;
 
    -----------------------------------------------
    -- Command handler primitives:
@@ -72,6 +74,8 @@ private
    overriding function Read_Register (Self : in out Instance; Arg : in Packed_Address.T) return Command_Execution_Status.E;
    -- An arm command which enables the next write command to a register to be accepted. The armed state of the component will expire on the next command to this component no matter what it is or after the configurable timeout.
    overriding function Arm_Protected_Write (Self : in out Instance; Arg : in Packed_Arm_Timeout.T) return Command_Execution_Status.E;
+   -- Read the value of multiple registers and dump them into a packet.
+   overriding function Dump_Registers (Self : in out Instance; Arg : in Register_Dump_Packet_Header.T) return Command_Execution_Status.E;
 
    -- Invalid command handler. This procedure is called when a command's arguments are found to be invalid:
    overriding procedure Invalid_Command (Self : in out Instance; Cmd : in Command.T; Errant_Field_Number : in Unsigned_32; Errant_Field : in Basic_Types.Poly_Type);
