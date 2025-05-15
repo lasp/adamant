@@ -435,19 +435,19 @@ package body Register_Stuffer_Tests.Implementation is
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
 
       -- Check packet length:
-      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (1).Header.Buffer_Length, Packet_Header_Length + 4*1);
-      
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (1).Header.Buffer_Length, Packet_Header_Length + 4 * 1);
+
       declare
          Packed_Register_Array : Register_Stuffer_Packet_Array.U;
       begin
          -- Packed Array is 0-indexed vs Normal is 1-indexed
          for I in Register_Array'Range loop
-            Packed_Register_Array (I - 1) := Packed_U32.U'( Value => Register_Array (I));
+            Packed_Register_Array (I - 1) := Packed_U32.U'(Value => Register_Array (I));
          end loop;
 
          -- Check packet contents:
          Register_Stuffer_Packet_Assert.Eq (
-            T.Register_Packet_History.Get (1), 
+            T.Register_Packet_History.Get (1),
             Register_Stuffer_Packet.Pack (Register_Stuffer_Packet.U'(
                Header => Register_Stuffer_Packet_Header.U'(
                   Start_Address => Register_Array'Address,
@@ -464,20 +464,20 @@ package body Register_Stuffer_Tests.Implementation is
    -- registers by command.
    overriding procedure Test_Nominal_Dump_Max_Registers (Self : in out Instance) is
       T : Component.Register_Stuffer.Implementation.Tester.Instance_Access renames Self.Tester;
-      function Generate_Index_Value(I : Interfaces.Unsigned_32) return Interfaces.Unsigned_32 is
+      function Generate_Index_Value (I : Interfaces.Unsigned_32) return Interfaces.Unsigned_32 is
       begin
          return I;  -- Simply return the index
       end Generate_Index_Value;
-      
+
       -- Create array using a loop and expression function ((packet_buffer_size - 20) / 8)
       Packet_Header_Length : constant Natural := Register_Stuffer_Packet_Header.Serialization.Serialized_Length;
-      Packet_Max_Registers : constant Natural := (Configuration.Packet_Buffer_Size - Packet_Header_Length)/(Packet_Header_Length-4);
+      Packet_Max_Registers : constant Natural := (Configuration.Packet_Buffer_Size - Packet_Header_Length) / (Packet_Header_Length - 4);
 
-      Large_Index_Array : array (1 .. Packet_Max_Registers) of Interfaces.Unsigned_32 := 
-         [for I in 1 .. Packet_Max_Registers => Generate_Index_Value(Interfaces.Unsigned_32(I))];
+      Large_Index_Array : array (1 .. Packet_Max_Registers) of Interfaces.Unsigned_32 :=
+         [for I in 1 .. Packet_Max_Registers => Generate_Index_Value (Interfaces.Unsigned_32 (I))];
    begin
       -- The Internal is 0-indexed, so we sub 1 to convert from 1->0
-      T.Command_T_Send (T.Commands.Dump_Registers ((Address => Large_Index_Array'Address, Value => Packet_Max_Registers - 1 )));
+      T.Command_T_Send (T.Commands.Dump_Registers ((Address => Large_Index_Array'Address, Value => Packet_Max_Registers - 1)));
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Dump_Registers_Id, Status => Success));
 
@@ -495,20 +495,20 @@ package body Register_Stuffer_Tests.Implementation is
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
 
       -- Check packet length:
-      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (1).Header.Buffer_Length, Packet_Header_Length + 4*(Packet_Max_Registers - 1));
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (1).Header.Buffer_Length, Packet_Header_Length + 4 * (Packet_Max_Registers - 1));
 
-      -- Check the packet 
+      -- Check the packet
       declare
          Packed_Register_Array : Register_Stuffer_Packet_Array.U;
       begin
          -- Packed Array is 0-indexed vs Normal is 1-indexed
          for I in Large_Index_Array'Range loop
-            Packed_Register_Array (I - 1) := Packed_U32.U'( Value => Large_Index_Array (I));
+            Packed_Register_Array (I - 1) := Packed_U32.U'(Value => Large_Index_Array (I));
          end loop;
 
          -- Check packet contents:
          Register_Stuffer_Packet_Assert.Eq (
-            T.Register_Packet_History.Get (1), 
+            T.Register_Packet_History.Get (1),
             Register_Stuffer_Packet.Pack (Register_Stuffer_Packet.U'(
                Header => Register_Stuffer_Packet_Header.U'(
                   Start_Address => Large_Index_Array'Address,
@@ -545,14 +545,14 @@ package body Register_Stuffer_Tests.Implementation is
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
 
       -- Check packet length:
-      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (1).Header.Buffer_Length, Packet_Header_Length + 4*0);
-      
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (1).Header.Buffer_Length, Packet_Header_Length + 4 * 0);
+
       declare
          Packed_Register_Array : constant Register_Stuffer_Packet_Array.U := [others => Packed_U32.U'(Value => 0)];
       begin
          -- Check packet contents:
          Register_Stuffer_Packet_Assert.Eq (
-            T.Register_Packet_History.Get (1), 
+            T.Register_Packet_History.Get (1),
             Register_Stuffer_Packet.Pack (Register_Stuffer_Packet.U'(
                Header => Register_Stuffer_Packet_Header.U'(
                   Start_Address => Register_Array'Address,

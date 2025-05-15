@@ -241,32 +241,32 @@ package body Component.Register_Stuffer.Implementation is
       end if;
 
       declare
-         Arr : Register_Stuffer_Packet_Array.T := [others => Packed_U32.Pack(Packed_U32.U'(Value => 0))];
+         Arr : Register_Stuffer_Packet_Array.T := [others => Packed_U32.Pack (Packed_U32.U'(Value => 0))];
       begin
          -- Loop on Number of Registers:
          -- Somehow get the underlying integer from num_registers
-         for Register in 0 .. Arg.Value-1 loop
-            if not Self.Is_Address_Valid(Arg.Address + Storage_Offset(Register*4)) then
+         for Register in 0 .. Arg.Value - 1 loop
+            if not Self.Is_Address_Valid (Arg.Address + Storage_Offset (Register * 4)) then
                return Failure;
             end if;
             declare
                -- Define the register at the appropriate address:
-               Reg : Packed_U32.Register_T_Le with Import, Convention => Ada, Address => Arg.Address + Storage_Offset(Register*4);
+               Reg : Packed_U32.Register_T_Le with Import, Convention => Ada, Address => Arg.Address + Storage_Offset (Register * 4);
                -- Read the register value:
                Reg_Copy : constant Packed_U32.T := Packed_U32.Swap_Endianness (Packed_U32.T_Le (Reg));
             begin
                -- Load the register value, in Reg_Copy to the Packet type.
-               Arr(Register) := Reg_Copy;
+               Arr (Register) := Reg_Copy;
             end;
          end loop;
          -- Construct and Send the packet based upon the returned array of register values
-         Self.Packet_T_Send_If_Connected (Self.Packets.Register_Packet_Truncate (The_Time, 
+         Self.Packet_T_Send_If_Connected (Self.Packets.Register_Packet_Truncate (The_Time,
             Register_Stuffer_Packet.Pack (Register_Stuffer_Packet.U'(
                Header => Register_Stuffer_Packet_Header.U'(
                   Start_Address => Arg.Address,
                   Num_Registers => Arg.Value
                ),
-               Buffer => Register_Stuffer_Packet_Array.Unpack(Arr)
+               Buffer => Register_Stuffer_Packet_Array.Unpack (Arr)
             ))
          ));
       end;
