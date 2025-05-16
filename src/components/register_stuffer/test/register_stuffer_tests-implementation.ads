@@ -31,9 +31,8 @@ private
    -- This unit test makes sure the component can dump the maximum number of
    -- registers by command.
    overriding procedure Test_Nominal_Dump_Max_Registers (Self : in out Instance);
-   -- This unit test makes sure the component returns a packet containing only the
-   -- headers.
-   overriding procedure Test_Dump_Zero_Registers (Self : in out Instance);
+   -- This unit test makes sure the component can dump four registers by command.
+   overriding procedure Test_Dump_Four_Registers (Self : in out Instance);
    -- Test data and state:
    type Instance is new Register_Stuffer_Tests.Base_Instance with record
       null;

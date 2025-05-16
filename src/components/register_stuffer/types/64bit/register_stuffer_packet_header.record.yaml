@@ -1,7 +1,7 @@
 ---
 description: Packet Header for Register Stuffer Packets
-preamble: | # Set the range to be (packetsize - header_size) / 4
-  subtype N_Registers is Integer range 0 .. {{ ((packet_buffer_size - 12) / 8) | int }}; 
+preamble: |
+  subtype N_Registers is Integer range 1 .. {{ ((packet_buffer_size - 12) / 8) | int }};
 fields:
   - name: Start_Address
     description: Starting address of the N register dump

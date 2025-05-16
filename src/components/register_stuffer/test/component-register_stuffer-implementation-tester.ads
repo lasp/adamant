@@ -10,15 +10,15 @@ with Data_Product.Representation;
 with Event.Representation;
 with Sys_Time.Representation;
 with Packet.Representation;
-with Event;
-with Packed_Address.Representation;
+with Data_Product;
 with Register_Value.Representation;
-with Invalid_Command_Info.Representation;
+with Packed_Arm_State.Representation;
 with Packed_Arm_Timeout.Representation;
 with N_Registers.Representation;
+with Event;
+with Packed_Address.Representation;
+with Invalid_Command_Info.Representation;
 with Register_Stuffer_Packet.Representation;
-with Data_Product;
-with Packed_Arm_State.Representation;
 
 -- This component services a commands to stuff and dump registers. This component
 -- is different than the memory stuffer/dumper in that it atomically sets 32-bit
@@ -47,6 +47,7 @@ package Component.Register_Stuffer.Implementation.Tester is
    package Unarmed_History_Package is new Printable_History (Natural, Natural'Image);
    package Unarmed_Timeout_History_Package is new Printable_History (Natural, Natural'Image);
    package Registers_Dumped_History_Package is new Printable_History (N_Registers.T, N_Registers.Representation.Image);
+   package Address_Range_Overflow_History_Package is new Printable_History (N_Registers.T, N_Registers.Representation.Image);
 
    -- Data product history packages:
    package Last_Register_Written_History_Package is new Printable_History (Register_Value.T, Register_Value.Representation.Image);
@@ -78,6 +79,7 @@ package Component.Register_Stuffer.Implementation.Tester is
       Unarmed_History : Unarmed_History_Package.Instance;
       Unarmed_Timeout_History : Unarmed_Timeout_History_Package.Instance;
       Registers_Dumped_History : Registers_Dumped_History_Package.Instance;
+      Address_Range_Overflow_History : Address_Range_Overflow_History_Package.Instance;
       -- Data product histories:
       Last_Register_Written_History : Last_Register_Written_History_Package.Instance;
       Last_Register_Read_History : Last_Register_Read_History_Package.Instance;
@@ -138,6 +140,8 @@ package Component.Register_Stuffer.Implementation.Tester is
    overriding procedure Unarmed_Timeout (Self : in out Instance);
    -- The specified registers were dumped.
    overriding procedure Registers_Dumped (Self : in out Instance; Arg : in N_Registers.T);
+   -- The specified registers were dumped.
+   overriding procedure Address_Range_Overflow (Self : in out Instance; Arg : in N_Registers.T);
 
    -----------------------------------------------
    -- Data product handler primitives:

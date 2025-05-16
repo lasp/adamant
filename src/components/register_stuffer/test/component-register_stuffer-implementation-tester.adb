@@ -26,6 +26,7 @@ package body Component.Register_Stuffer.Implementation.Tester is
       Self.Unarmed_History.Init (Depth => 100);
       Self.Unarmed_Timeout_History.Init (Depth => 100);
       Self.Registers_Dumped_History.Init (Depth => 100);
+      Self.Address_Range_Overflow_History.Init (Depth => 100);
       -- Data product histories:
       Self.Last_Register_Written_History.Init (Depth => 100);
       Self.Last_Register_Read_History.Init (Depth => 100);
@@ -55,6 +56,7 @@ package body Component.Register_Stuffer.Implementation.Tester is
       Self.Unarmed_History.Destroy;
       Self.Unarmed_Timeout_History.Destroy;
       Self.Registers_Dumped_History.Destroy;
+      Self.Address_Range_Overflow_History.Destroy;
       -- Data product histories:
       Self.Last_Register_Written_History.Destroy;
       Self.Last_Register_Read_History.Destroy;
@@ -196,6 +198,13 @@ package body Component.Register_Stuffer.Implementation.Tester is
       -- Push the argument onto the test history for looking at later:
       Self.Registers_Dumped_History.Push (Arg);
    end Registers_Dumped;
+
+   -- The specified registers were dumped.
+   overriding procedure Address_Range_Overflow (Self : in out Instance; Arg : in N_Registers.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Address_Range_Overflow_History.Push (Arg);
+   end Address_Range_Overflow;
 
    -----------------------------------------------
    -- Data product handler primitive:

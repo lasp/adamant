@@ -523,44 +523,49 @@ package body Register_Stuffer_Tests.Implementation is
 
       -- This unit test makes sure the component returns a packet containing only the
    -- headers.
-   overriding procedure Test_Dump_Zero_Registers (Self : in out Instance) is
+   overriding procedure Test_Dump_Four_Registers (Self : in out Instance) is
       T : Component.Register_Stuffer.Implementation.Tester.Instance_Access renames Self.Tester;
       Packet_Header_Length : constant Natural := Register_Stuffer_Packet_Header.Serialization.Serialized_Length;
    begin
-      T.Command_T_Send (T.Commands.Dump_Registers ((Address => Register_Array'Address, Value => 0)));
+      T.Command_T_Send (T.Commands.Dump_Registers ((Address => Register_Array'Address, Value => 4)));
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Dump_Registers_Id, Status => Success));
 
       -- Check data products:
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Last_Dumped_Register_Set_History.Get_Count, 1);
-      N_Registers_Assert.Eq (T.Last_Dumped_Register_Set_History.Get (1), (Address => Register_Array'Address, Value => 0));
+      N_Registers_Assert.Eq (T.Last_Dumped_Register_Set_History.Get (1), (Address => Register_Array'Address, Value => 4));
 
       -- Check events:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Registers_Dumped_History.Get_Count, 1);
-      N_Registers_Assert.Eq (T.Registers_Dumped_History.Get (1), (Address => Register_Array'Address, Value => 0));
+      N_Registers_Assert.Eq (T.Registers_Dumped_History.Get (1), (Address => Register_Array'Address, Value => 4));
 
       -- Check packet:
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
 
       -- Check packet length:
-      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (1).Header.Buffer_Length, Packet_Header_Length + 4 * 0);
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (1).Header.Buffer_Length, Packet_Header_Length + 4 * 4);
 
       declare
-         Packed_Register_Array : constant Register_Stuffer_Packet_Array.U := [others => Packed_U32.U'(Value => 0)];
+         Packed_Register_Array : Register_Stuffer_Packet_Array.U;
       begin
+         -- Packed Array is 0-indexed vs Normal is 1-indexed
+         for I in Register_Array'Range loop
+            Packed_Register_Array (I - 1) := Packed_U32.U'(Value => Register_Array (I));
+         end loop;
+
          -- Check packet contents:
          Register_Stuffer_Packet_Assert.Eq (
             T.Register_Packet_History.Get (1),
             Register_Stuffer_Packet.Pack (Register_Stuffer_Packet.U'(
                Header => Register_Stuffer_Packet_Header.U'(
                   Start_Address => Register_Array'Address,
-                  Num_Registers => 0
+                  Num_Registers => 4
                ),
                Buffer => Packed_Register_Array
             ))
          );
       end;
-   end Test_Dump_Zero_Registers;
+   end Test_Dump_Four_Registers;
 end Register_Stuffer_Tests.Implementation;

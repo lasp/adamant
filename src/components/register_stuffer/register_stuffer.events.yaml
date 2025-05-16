@@ -26,3 +26,6 @@ events:
   - name: Registers_Dumped
     description: The specified registers were dumped.
     param_type: N_Registers.T
+  - name: Address_Range_Overflow
+    description: The specified registers were dumped.
+    param_type: N_Registers.T

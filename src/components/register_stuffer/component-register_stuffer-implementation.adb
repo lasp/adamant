@@ -99,6 +99,45 @@ package body Component.Register_Stuffer.Implementation is
       return Is_Valid;
    end Is_Address_Valid;
 
+   function Is_End_Address_Valid (Self : in out Instance; Address : in System.Address; Length : in Interfaces.Unsigned_32) return Boolean is
+      -- Convert address to unsigned integer so we can use the "mod" operation on it.
+      -- This component is for 32-bit register addresses only. However, on Linux dev environment
+      -- we have 64-bit addresses, so the following warning is produced. We ignore this warning
+      -- on Linux. The warning does not appear when compiling for a 32-bit system.
+      pragma Warnings (Off, "types for unchecked conversion have different sizes");
+      function Convert_To_U32 is new Ada.Unchecked_Conversion (System.Address, Interfaces.Unsigned_32);
+      function Convert_U32_To_Integer is new Ada.Unchecked_Conversion
+         (Source => Interfaces.Unsigned_32, Target => Standard.Integer);
+      pragma Warnings (On, "types for unchecked conversion have different sizes");
+      -- Convert the address to an unsigned 32-bit integer for arithmetic operations
+      Start_Address : constant Interfaces.Unsigned_32 := Convert_To_U32 (Address);
+      -- Check if the address is on a 32-bit boundary
+      Is_Aligned : constant Boolean := (Start_Address mod 4) = 0;
+      -- Calculate the bytes to add (4 bytes per element)
+      Bytes_To_Add : Interfaces.Unsigned_32;
+      -- Check if the end address would overflow
+      No_Overflow : Boolean;
+   begin
+      -- Check for potential overflow when calculating Bytes_To_Add (4*Length)
+      if Length > Interfaces.Unsigned_32'Last / 4 then
+         -- Multiplication would overflow
+         No_Overflow := False;
+      else
+         Bytes_To_Add := 4 * Length;
+         -- Check if adding Bytes_To_Add to Start_Address would overflow
+         No_Overflow := Start_Address <= Interfaces.Unsigned_32'Last - Bytes_To_Add;
+      end if;
+      -- Combined validity check
+      if not Is_Aligned then
+         Self.Event_T_Send_If_Connected (Self.Events.Invalid_Register_Address (Self.Sys_Time_T_Get, (Address => Address)));
+         return False;
+      elsif not No_Overflow then
+         Self.Event_T_Send_If_Connected (Self.Events.Address_Range_Overflow (Self.Sys_Time_T_Get, (Address => Address, Value => Convert_U32_To_Integer (Length))));
+         return False;
+      end if;
+      return True;
+   end Is_End_Address_Valid;
+
    -- Helper subprogram which unarms the component for register write and sends out the appropriate events and data products.
    procedure Do_Unarm (Self : in out Instance) is
       The_Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
@@ -245,6 +284,10 @@ package body Component.Register_Stuffer.Implementation is
       begin
          -- Loop on Number of Registers:
          -- Somehow get the underlying integer from num_registers
+         if not Self.Is_End_Address_Valid (Arg.Address, Interfaces.Unsigned_32 (Arg.Value)) then
+            return Failure;
+         end if;
+
          for Register in 0 .. Arg.Value - 1 loop
             if not Self.Is_Address_Valid (Arg.Address + Storage_Offset (Register * 4)) then
                return Failure;
