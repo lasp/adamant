@@ -11,3 +11,9 @@ tests:
     description: This unit test makes sure an malformed command is rejected.
   - name: Test_Protected_Register_Write
     description: This unit test makes sure the protected register write feature works as intended.
+  - name: Test_Nominal_Dump_One_Registers
+    description: This unit test makes sure the component can dump one register by command.
+  - name: Test_Nominal_Dump_Max_Registers
+    description: This unit test makes sure the component can dump the maximum number of registers by command.
+  - name: Test_Dump_Four_Registers
+    description: This unit test makes sure the component can dump four registers by command.
