@@ -15,6 +15,7 @@ package body Component.Register_Stuffer.Implementation.Tester is
       Self.Data_Product_T_Recv_Sync_History.Init (Depth => 100);
       Self.Event_T_Recv_Sync_History.Init (Depth => 100);
       Self.Sys_Time_T_Return_History.Init (Depth => 100);
+      Self.Packet_T_Recv_Sync_History.Init (Depth => 100);
       -- Event histories:
       Self.Invalid_Register_Address_History.Init (Depth => 100);
       Self.Register_Written_History.Init (Depth => 100);
@@ -24,11 +25,15 @@ package body Component.Register_Stuffer.Implementation.Tester is
       Self.Armed_History.Init (Depth => 100);
       Self.Unarmed_History.Init (Depth => 100);
       Self.Unarmed_Timeout_History.Init (Depth => 100);
+      Self.Registers_Dumped_History.Init (Depth => 100);
+      Self.Address_Range_Overflow_History.Init (Depth => 100);
       -- Data product histories:
       Self.Last_Register_Written_History.Init (Depth => 100);
       Self.Last_Register_Read_History.Init (Depth => 100);
       Self.Armed_State_History.Init (Depth => 100);
       Self.Armed_State_Timeout_History.Init (Depth => 100);
+      -- Packet histories:
+      Self.Register_Packet_History.Init (Depth => 100);
    end Init_Base;
 
    procedure Final_Base (Self : in out Instance) is
@@ -39,6 +44,7 @@ package body Component.Register_Stuffer.Implementation.Tester is
       Self.Data_Product_T_Recv_Sync_History.Destroy;
       Self.Event_T_Recv_Sync_History.Destroy;
       Self.Sys_Time_T_Return_History.Destroy;
+      Self.Packet_T_Recv_Sync_History.Destroy;
       -- Event histories:
       Self.Invalid_Register_Address_History.Destroy;
       Self.Register_Written_History.Destroy;
@@ -48,11 +54,15 @@ package body Component.Register_Stuffer.Implementation.Tester is
       Self.Armed_History.Destroy;
       Self.Unarmed_History.Destroy;
       Self.Unarmed_Timeout_History.Destroy;
+      Self.Registers_Dumped_History.Destroy;
+      Self.Address_Range_Overflow_History.Destroy;
       -- Data product histories:
       Self.Last_Register_Written_History.Destroy;
       Self.Last_Register_Read_History.Destroy;
       Self.Armed_State_History.Destroy;
       Self.Armed_State_Timeout_History.Destroy;
+      -- Packet histories:
+      Self.Register_Packet_History.Destroy;
    end Final_Base;
 
    ---------------------------------------
@@ -64,6 +74,7 @@ package body Component.Register_Stuffer.Implementation.Tester is
       Self.Component_Instance.Attach_Data_Product_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Data_Product_T_Recv_Sync_Access);
       Self.Component_Instance.Attach_Event_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Event_T_Recv_Sync_Access);
       Self.Component_Instance.Attach_Sys_Time_T_Get (To_Component => Self'Unchecked_Access, Hook => Self.Sys_Time_T_Return_Access);
+      Self.Component_Instance.Attach_Packet_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Packet_T_Recv_Sync_Access);
       Self.Attach_Tick_T_Send (To_Component => Self.Component_Instance'Unchecked_Access, Hook => Self.Component_Instance.Tick_T_Recv_Sync_Access);
       Self.Attach_Command_T_Send (To_Component => Self.Component_Instance'Unchecked_Access, Hook => Self.Component_Instance.Command_T_Recv_Sync_Access);
    end Connect;
@@ -106,6 +117,15 @@ package body Component.Register_Stuffer.Implementation.Tester is
       return To_Return;
    end Sys_Time_T_Return;
 
+   -- Packets are sent out of this connector
+   overriding procedure Packet_T_Recv_Sync (Self : in out Instance; Arg : in Packet.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Packet_T_Recv_Sync_History.Push (Arg);
+      -- Dispatch the packet to the correct handler:
+      Self.Dispatch_Packet (Arg);
+   end Packet_T_Recv_Sync;
+
    -----------------------------------------------
    -- Event handler primitive:
    -----------------------------------------------
@@ -139,7 +159,8 @@ package body Component.Register_Stuffer.Implementation.Tester is
       Self.Invalid_Command_Received_History.Push (Arg);
    end Invalid_Command_Received;
 
-   -- The specified register could not be written because the component was not armed first.
+   -- The specified register could not be written because the component was not armed
+   -- first.
    overriding procedure Rejected_Protected_Register_Write (Self : in out Instance; Arg : in Register_Value.T) is
    begin
       -- Push the argument onto the test history for looking at later:
@@ -168,6 +189,20 @@ package body Component.Register_Stuffer.Implementation.Tester is
       -- Push the argument onto the test history for looking at later:
       Self.Unarmed_Timeout_History.Push (Arg);
    end Unarmed_Timeout;
+
+   -- The specified registers were dumped.
+   overriding procedure Registers_Dumped (Self : in out Instance; Arg : in Register_Dump_Packet_Header.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Registers_Dumped_History.Push (Arg);
+   end Registers_Dumped;
+
+   -- The specified registers were dumped.
+   overriding procedure Address_Range_Overflow (Self : in out Instance; Arg : in Register_Dump_Packet_Header.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Address_Range_Overflow_History.Push (Arg);
+   end Address_Range_Overflow;
 
    -----------------------------------------------
    -- Data product handler primitive:
@@ -201,5 +236,17 @@ package body Component.Register_Stuffer.Implementation.Tester is
       -- Push the argument onto the test history for looking at later:
       Self.Armed_State_Timeout_History.Push (Arg);
    end Armed_State_Timeout;
+
+   -----------------------------------------------
+   -- Packet handler primitive:
+   -----------------------------------------------
+   -- Description:
+   --    Packets for the register stuffer.
+   -- This packet contains dumped register values.
+   overriding procedure Register_Packet (Self : in out Instance; Arg : in Register_Dump_Packet.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Register_Packet_History.Push (Arg);
+   end Register_Packet;
 
 end Component.Register_Stuffer.Implementation.Tester;

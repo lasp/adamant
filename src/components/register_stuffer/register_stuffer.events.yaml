@@ -23,3 +23,9 @@ events:
     description: The component received a command and is now unarmed.
   - name: Unarmed_Timeout
     description: The component armed state timed out and is now unarmed.
+  - name: Registers_Dumped
+    description: The specified registers were dumped.
+    param_type: Register_Dump_Packet_Header.T
+  - name: Address_Range_Overflow
+    description: The specified registers were dumped.
+    param_type: Register_Dump_Packet_Header.T

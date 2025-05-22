@@ -1,0 +1,8 @@
+---
+description: Packed Record for N Dumped Registers
+fields:
+  - name: Header
+    type: Register_Dump_Packet_Header.T
+  - name: Buffer
+    type: Register_Dump_Packet_Array.T
+    variable_length: Header.Num_Registers

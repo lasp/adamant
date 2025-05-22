@@ -1,5 +1,8 @@
 ---
 description: A register value packed record.
+preamble: |
+  -- Add subtype for conversion of System.Address type so we can check alignment and prevent overflow.
+  subtype Address_Mod_Type is Interfaces.Unsigned_64;
 fields:
   - name: Address
     description: The address of the register.
