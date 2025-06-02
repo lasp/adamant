@@ -136,6 +136,20 @@ digraph {{ name }} {
 
 {% endfor %}
 {% endif %}
+{% if show_switches["show_data_dependencies"] %}
+{% for id, dd in data_dependencies.items() %}
+  {{ dd.data_product.suite.component.instance_name }} -> {{ dd.suite.component.instance_name }} [
+    arrowsize=.6
+{% if show_switches["show_connector_type"] %}
+    label=<
+      <FONT FACE="courier" POINT-SIZE="8"><I>{{ dd.type }}</I></FONT>
+    >
+{% endif %}
+    , style=dotted, dir=both, arrowhead=curve, arrowtail=none
+  ];
+
+{% endfor %}
+{% endif %}
 {% if postamble %}
 
 {{ printMultiLine(postamble, '  ') }}

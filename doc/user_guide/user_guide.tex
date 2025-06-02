@@ -5656,6 +5656,7 @@ Following is a set of \texttt{show\_*} switches. By default, if left unspecified
   \item \textbf{\texttt{show\_component\_name}} - Shows the component instance name inside each component box.
   \item \textbf{\texttt{show\_connector\_type}} - Shows the connector type next to each connection.
   \item \textbf{\texttt{hide\_group\_outline}} - If set to \texttt{False}, it shows a dotted line around any ``groups" defined in the view
+  \item \textbf{\texttt{show\_data\_dependencies}} - This flag is an exception, it is default set to \texttt{False}. If set to \texttt{True}, any data dependencies defined in the assembly are displayed.
 \end{spaceditemize}
 \vspace{5mm} %5mm vertical space
 
@@ -5665,7 +5666,7 @@ Below the \texttt{rule} definition is the \texttt{filters}. Any number of filter
 
 In this case we define a single \texttt{filter}. A \texttt{name} must be provided for the filter, and it must be unique within the view. A filter \texttt{type} must also be provided. Along with the filter type is one of two lists (but never both): an \texttt{include} list or an \texttt{exclude} list. If an \texttt{include} list is provided, then the assembly graph is filtered to \textit{include} any components or connections that meet the filter criteria to create the subgraph. If an \texttt{exclude} list is provided, then the assembly graph is filtered to include any components or connections that not NOT meet the filter criteria to create the subgraph. \\
 
-There are two different types of view filters: 1) those that filter components, and 2) those that filter connectors. A component filter will remove any components that do not meet the filter criteria. Any connections that are shared between the components are left, and any connections that connect to removed components are pruned from the subgraph. The component filters are shown below:
+There are three different types of view filters: 1) those that filter components, 2) those that filter connectors, and 3) those that filter data dependencies. A component filter will remove any components that do not meet the filter criteria. Any connections that are shared between the components are left, and any connections that connect to removed components are pruned from the subgraph. The component filters are shown below:
 
 \vspace{5mm} %5mm vertical space
 \begin{spaceditemize}
@@ -5688,6 +5689,15 @@ A connector filter will remove any connectors that do not meet the filter criter
 \vspace{5mm} %5mm vertical space
 
 In this case we use the \texttt{connector\_type} filter type with an \texttt{include} list. In this way we are trying to include any connectors that are of type \texttt{Command.T}. Any components that do not have a \texttt{Command.T} connector will be removed. \\
+
+Data dependency filters should always be used in conjunction with \textbf{\texttt{show\_data\_dependencies}} flag set to \texttt{True}. These filters operate independently of connector filters, so data dependency filters will leave all connectors unfilterd, and vice versa.
+
+\vspace{5mm} %5mm vertical space
+\begin{spaceditemize}
+  \item \textbf{\texttt{data\_dependency\_name}} - Filter by data dependency or data product names, ie. \texttt{Register\_Stuffer\_Consumer\_Instance.Last\_Register\_Written} or \texttt{Register\_Stuffer\_Instance.Last\_Register\_Written}.
+  \item \textbf{\texttt{data\_dependency\_type}} - Filter by type passed along a data dependency, ie \texttt{Register\_Value.T}.
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
 
 The presence of the view model allows Adamant to provide new build rules:
 
@@ -5742,6 +5752,19 @@ The above YAML produces the following view, which shows how the \texttt{paramete
 \begin{figure}[H]
   \includegraphics[width=1.0\textwidth,center]{../example_architecture/build/eps/science_assembly_parameters_context_view.eps}
 \end{figure}
+
+This is an example of building a view using data dependency filters with the proper flag.\\
+
+\textit{data\_collector\_view.science\_assembly.view.yaml:}
+\yamlcodef{../example_architecture/data_collector_view.science_assembly.view.yaml}
+
+In the below diagram the dependencies are represented by the thin dotted lines. The necessity of excluding extraneous components/connectors in the view is as a result of the exclusivity of connector and data dependency filters.
+
+\begin{figure}[H]
+  \includegraphics[width=1.0\textwidth,center]{../example_architecture/build/eps/science_assembly_data_collector_view.eps}
+\end{figure}
+
+Data dependency "connectors" are different than traditional Adamant connectors. They are not direct connections between two components, they only indirectly depict data product flow which is actually routed through the database. Even though these are not direct models of how data is passed in Adamant, the data dependency "connectors" still provide useful information for understanding data flow. Depicted in the view above is both the true path the data product takes, through the database, and the data dependency "connections". Visually it is much easier to tell that the \texttt{Science\_Instance} consumes the data from the \texttt{Data\_Collector\_Instance} with the data dependency "connectors" as opposed to the actual connections routed through the database.
 
 \subsubsection{Using View Rules} \label{Using View Rules}
 

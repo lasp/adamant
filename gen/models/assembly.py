@@ -630,7 +630,11 @@ class assembly(subassembly):
 
             def default_show_switches(keys):
                 for k in keys:
-                    self.show_switches[k] = True
+                    if k == "show_data_dependencies":
+                        # show_data_dependencies defaults to false
+                        self.show_switches[k] = False
+                    else:
+                        self.show_switches[k] = True
 
             default_show_switches(
                 [
@@ -640,6 +644,7 @@ class assembly(subassembly):
                     "show_component_name",
                     "show_connector_type",
                     "hide_group_outline",
+                    "show_data_dependencies",
                 ]
             )
 

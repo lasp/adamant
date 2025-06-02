@@ -1,0 +1,16 @@
+---
+description: This is view showing data dependencies.
+show_component_priority: False
+show_data_dependencies: True
+filters:
+  - name: include_data_dependencies
+    type: data_dependency_name
+    include:
+      - Data_Collector_Instance.Sensor_1_Data
+      - Science_Instance.Sensor_2_Reading
+  - name: include_specific_components
+    type: component_name
+    include:
+      - Data_Collector_Instance
+      - Science_Instance
+      - Database_Instance
