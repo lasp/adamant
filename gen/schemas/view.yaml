@@ -38,6 +38,9 @@ mapping:
   hide_group_outline:
     type: bool
     required: False
+  show_data_dependencies:
+    type: bool
+    required: False
   # A rule which determines how the filters are applied to the assembly.
   # If not provided, the assumed rule is to "and" all the filters together
   # in order.
@@ -63,9 +66,11 @@ mapping:
           #   connector_name - filter by connector_names
           #   connecter_type - filter by connector type
           #   connecter_kind - filter by connector kinds (recv_async, recv_sync, send, request, service, get, return, provide, modify)
+          #   data_dependency_name - filter by data_dependency or data_product pseudo-connector names
+          #   data_dependency_type - filter by data_dependency pseudo-connector types
           type:
             type: str
-            enum: ['component_name', 'component_name_context', 'component_type', 'component_type_context', 'component_execution', 'connector_name', 'connector_type', 'connector_kind']
+            enum: ['component_name', 'component_name_context', 'component_type', 'component_type_context', 'component_execution', 'connector_name', 'connector_type', 'connector_kind', 'data_dependency_name', 'data_dependency_type']
             required: True
           # Items to include in the view, ie. they are filtered in (white list).
           include:
