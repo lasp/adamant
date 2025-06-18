@@ -259,7 +259,7 @@ private
       Internals : Internal_Array := [others => (Value => [0, 0, 0, 0])];
       Local_Variable_Array : Variable_Array := [others => (Value => [0, 0, 0, 0])];
       -- We are not supporting strings yet...
-      -- Local_String_Pool : String_Pool := [others => (others => Character'Val (0])); -- This is a null initialization
+      -- Local_String_Pool : String_Pool := [others => [others => Character'Val (0)]]; -- This is a null initialization
       Out_Arguments : Variable_Array := [others => (Value => [0, 0, 0, 0])];
       Telemetry_Request : Telemetry_Record.T := (Id => 0, Offset => 0, Size => 1, Tlm_Type => Seq_Data_Format.Unsigned_Byte, New_Value_Required => False);
       Telemetry_Destination : Seq_Internal.E := Seq_Internal.Timeout;

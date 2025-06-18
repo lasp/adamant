@@ -16,7 +16,7 @@ fields:
     # Define the proper array format, 20 unsigned bytes
     format: U8x20
     # Define the default value as all zeros.
-    default: (others => 0)
+    default: "[others => 0]"
     # Define the length field that controls the "used" length of this field
     variable_length: Length
     # Optional - provide a signed integer that will be added to the length
