@@ -473,7 +473,7 @@ package body Component.{{ name }}.Implementation.Tester is
       Param_Update : Parameter_Update.T := (
          Operation => Fetch,
          Status => Success,
-         Param => (Header => (Id => Id, Buffer_Length => 0), Buffer => (others => 0))
+         Param => (Header => (Id => Id, Buffer_Length => 0), Buffer => [others => 0])
       );
    begin
       -- Set the ID to fetch:
@@ -489,7 +489,7 @@ package body Component.{{ name }}.Implementation.Tester is
       Param_Update : Parameter_Update.T := (
          Operation => Update,
          Status => Success,
-         Param => ((0, 0), (others => 0))
+         Param => ((0, 0), [others => 0])
       );
    begin
       Self.Parameter_Update_T_Provide (Param_Update);
