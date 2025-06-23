@@ -37,7 +37,7 @@ def pydep(source_file, path=[], ignore_list=[]):
                 try:
                     spec = importlib.util.find_spec(name)
                 except ModuleNotFoundError:
-                    nonexistant_deps.append(name)
+                    nonexistent_deps.append(name)
                     continue
                 # if module (and its origin file) exists, append to the existing_deps
                 if spec is not None:
@@ -56,7 +56,7 @@ def pydep(source_file, path=[], ignore_list=[]):
                 try:
                     spec = importlib.util.find_spec(name)
                 except ModuleNotFoundError:
-                    nonexistant_deps.append(name)
+                    nonexistent_deps.append(name)
                     continue
                 if spec is not None:
                     if spec.origin is None or "built-in" in spec.origin or "site-packages" in spec.origin:
@@ -79,14 +79,14 @@ def _build_pydeps(source_file, path=[]):
 
     def _inner_build_pydeps(source_file):
         # Find the python dependencies:
-        existing_deps, nonexistant_deps = pydep(source_file, path)
+        existing_deps, nonexistent_deps = pydep(source_file, path)
 
         # For the nonexistent dependencies, see if we have a rule
         # to build those:
-        if nonexistant_deps:
+        if nonexistent_deps:
             deps_to_build = []
             with py_source_database() as db:
-                deps_to_build = db.try_get_sources(nonexistant_deps)
+                deps_to_build = db.try_get_sources(nonexistent_deps)
 
             deps_not_in_path.extend(deps_to_build)
 
@@ -103,7 +103,7 @@ def _build_pydeps(source_file, path=[]):
                     _inner_build_pydeps(dep)
 
     _inner_build_pydeps(source_file)
-    return list(set(deps_not_in_path))
+    return list(set(deps_not_in_path)) # may want to return more than one list
 
 
 class _build_python_no_update(build_rule_base):
@@ -225,7 +225,7 @@ if __name__ == "__main__":
     all_existing_deps = set()
 
     for source_file in file_args:
-        existing_deps, nonexistant_deps = pydep(source_file, ignore_list=ignore_list)
+        existing_deps, nonexistent_deps = pydep(source_file, ignore_list=ignore_list)
         all_existing_deps.update(existing_deps)
 
         if verbose:
@@ -235,7 +235,7 @@ if __name__ == "__main__":
                 print(dep)
 
             print("\nNonexistent dependencies:")
-            for dep in nonexistant_deps:
+            for dep in nonexistent_deps:
                 print(dep)
 
             print("\nBuilding nonexistent dependencies:")
