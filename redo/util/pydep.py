@@ -7,6 +7,8 @@ from database.py_source_database import py_source_database
 from base_classes.build_rule_base import build_rule_base
 from util import shell
 
+all_existing_deps = set()
+
 
 def pydep(source_file, path=[], ignore_list=[]):
     """
@@ -80,6 +82,7 @@ def _build_pydeps(source_file, path=[]):
     def _inner_build_pydeps(source_file):
         # Find the python dependencies:
         existing_deps, nonexistent_deps = pydep(source_file, path)
+        all_existing_deps.update(existing_deps)
 
         # For the nonexistent dependencies, see if we have a rule
         # to build those:
@@ -103,7 +106,7 @@ def _build_pydeps(source_file, path=[]):
                     _inner_build_pydeps(dep)
 
     _inner_build_pydeps(source_file)
-    return list(set(deps_not_in_path)) # may want to return more than one list
+    return list(set(deps_not_in_path))
 
 
 class _build_python_no_update(build_rule_base):
@@ -202,6 +205,12 @@ if __name__ == "__main__":
     if "-v" in args:
         args.remove("-v")
 
+    print_paths = "--paths" in args or "-p" in args
+    if "--paths" in args:
+        args.remove("--paths")
+    elif "-p" in args:
+        args.remove("-p")
+
     ignore_list = set()
     if "--ignore" in args:
         ignore_index = args.index("--ignore")
@@ -216,13 +225,13 @@ if __name__ == "__main__":
 
     if not args:
         print(
-            "usage:\n  pydep.py [--verbose or -v] "
+            "usage:\n  pydep.py [--verbose or -v] [--paths or -p] "
             "[/path/to/python_file1.py /path/to/python_file2.py ...] "
             "[--ignore or -i string1 string2 ...]"
         )
         sys.exit(1)
 
-    all_existing_deps = set()
+    all_built_deps = set()
 
     for source_file in file_args:
         existing_deps, nonexistent_deps = pydep(source_file, ignore_list=ignore_list)
@@ -240,6 +249,12 @@ if __name__ == "__main__":
 
             print("\nBuilding nonexistent dependencies:")
 
-        build_py_deps(source_file)
+        built_deps = build_py_deps(source_file)
+        all_built_deps.update(built_deps)
 
     print("\n".join(sorted(all_existing_deps)))
+    # print full paths on mode flag
+    if print_paths:
+        all_paths = all_existing_deps.union(all_built_deps)
+        print("\nAll dependency paths:")
+        print("\n".join(sorted(all_paths)))
