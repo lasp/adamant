@@ -2,6 +2,7 @@ import os
 import sys
 import ast
 import importlib.util
+import argparse
 from util import redo
 from database.py_source_database import py_source_database
 from base_classes.build_rule_base import build_rule_base
@@ -198,46 +199,50 @@ def run_py(source_file):
 
 # This can also be run from the command line:
 if __name__ == "__main__":
-    args = sys.argv[1:]
-    verbose = "--verbose" in args or "-v" in args
-    if "--verbose" in args:
-        args.remove("--verbose")
-    if "-v" in args:
-        args.remove("-v")
+    parser = argparse.ArgumentParser(
+        usage="pydep.py [--verbose or -v] [--paths or -p] "
+              "[/path/to/python_file1.py /path/to/python_file2.py ...] "
+              "[--ignore or -i string1 string2 ...]"
+    )
 
-    print_paths = "--paths" in args or "-p" in args
-    if "--paths" in args:
-        args.remove("--paths")
-    elif "-p" in args:
-        args.remove("-p")
+    parser.add_argument(
+        "-v", "--verbose",
+        action="store_true",
+        help="Enable verbose output"
+    )
 
-    ignore_list = set()
-    if "--ignore" in args:
-        ignore_index = args.index("--ignore")
-        ignore_list = args[ignore_index + 1:]
-        file_args = args[:ignore_index]
-    elif "-i" in args:
-        ignore_index = args.index("-i")
-        ignore_list = args[ignore_index + 1:]
-        file_args = args[:ignore_index]
-    else:
-        file_args = args
+    parser.add_argument(
+        "-p", "--paths",
+        action="store_true",
+        help="Print resolved dependency paths"
+    )
 
-    if not args:
-        print(
-            "usage:\n  pydep.py [--verbose or -v] [--paths or -p] "
-            "[/path/to/python_file1.py /path/to/python_file2.py ...] "
-            "[--ignore or -i string1 string2 ...]"
-        )
+    parser.add_argument(
+        "-i", "--ignore",
+        nargs="+",
+        default=[],
+        help="Strings to ignore in dependency names"
+    )
+
+    parser.add_argument(
+        "file_args",
+        nargs="*",
+        help="Paths to Python files"
+    )
+
+    args = parser.parse_args()
+
+    if not args.file_args:
+        parser.print_usage()
         sys.exit(1)
 
     all_built_deps = set()
 
-    for source_file in file_args:
-        existing_deps, nonexistent_deps = pydep(source_file, ignore_list=ignore_list)
+    for source_file in args.file_args:
+        existing_deps, nonexistent_deps = pydep(source_file, ignore_list=set(args.ignore))
         all_existing_deps.update(existing_deps)
 
-        if verbose:
+        if args.verbose:
             print(f"\nFinding dependencies for: {source_file}")
             print("\nExisting dependencies:")
             for dep in existing_deps:
@@ -254,7 +259,9 @@ if __name__ == "__main__":
 
     print("\n".join(sorted(all_existing_deps)))
     # print full paths on mode flag
-    if print_paths:
+    if args.paths:
+        if args.verbose:
+            print("\nAll dependency paths:")
+
         all_paths = all_existing_deps.union(all_built_deps)
-        print("\nAll dependency paths:")
         print("\n".join(sorted(all_paths)))
