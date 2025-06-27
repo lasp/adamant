@@ -199,11 +199,7 @@ def run_py(source_file):
 
 # This can also be run from the command line:
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        usage="pydep.py [--verbose or -v] [--paths or -p] "
-              "[/path/to/python_file1.py /path/to/python_file2.py ...] "
-              "[--ignore or -i string1 string2 ...]"
-    )
+    parser = argparse.ArgumentParser()
 
     parser.add_argument(
         "-v", "--verbose",
@@ -214,6 +210,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-p", "--paths",
         action="store_true",
+        required=True,
         help="Print resolved dependency paths"
     )
 
@@ -231,10 +228,6 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-
-    if not args.file_args:
-        parser.print_usage()
-        sys.exit(1)
 
     all_static_deps = set()
 
@@ -254,8 +247,8 @@ if __name__ == "__main__":
             print("\nBuilding nonexistent dependencies:")
 
         built_deps, static_existing_deps = build_py_deps(source_file)
-        print("\n".join(sorted(built_deps)))
-        # Collect static existing dependencies:
+        # Collect all existing dependencies:
+        all_static_deps.update(built_deps)
         all_static_deps.update(static_existing_deps)
 
     # print full paths on mode flag
