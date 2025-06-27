@@ -8,8 +8,6 @@ from database.py_source_database import py_source_database
 from base_classes.build_rule_base import build_rule_base
 from util import shell
 
-all_existing_deps = set()
-
 
 def pydep(source_file, path=[], ignore_list=[]):
     """
@@ -76,14 +74,16 @@ def _build_pydeps(source_file, path=[]):
     """
     Recursively build any missing python module dependencies for
     a given source file.
+    Collect any static existing dependencies.
     """
     built_deps = []
+    all_existing_deps = []
     deps_not_in_path = []
 
     def _inner_build_pydeps(source_file):
         # Find the python dependencies:
         existing_deps, nonexistent_deps = pydep(source_file, path)
-        all_existing_deps.update(existing_deps)
+        all_existing_deps.extend(existing_deps)
 
         # For the nonexistent dependencies, see if we have a rule
         # to build those:
@@ -107,7 +107,7 @@ def _build_pydeps(source_file, path=[]):
                     _inner_build_pydeps(dep)
 
     _inner_build_pydeps(source_file)
-    return list(set(deps_not_in_path))
+    return list(set(deps_not_in_path)), list(set(all_existing_deps))
 
 
 class _build_python_no_update(build_rule_base):
@@ -127,7 +127,7 @@ class _build_python(build_rule_base):
     """
     def _build(self, redo_1, redo_2, redo_3):
         # Build any dependencies:
-        deps_not_in_path = _build_pydeps(redo_1)
+        deps_not_in_path, existing_deps = _build_pydeps(redo_1)
 
         # Figure out what we need to add to the path:
         paths_to_add = list(set([os.path.dirname(d) for d in deps_not_in_path]))
@@ -135,7 +135,7 @@ class _build_python(build_rule_base):
         # Add the paths to the path:
         sys.path.extend(paths_to_add)
 
-        return deps_not_in_path
+        return deps_not_in_path, existing_deps
 
 
 class _run_python(build_rule_base):
@@ -169,7 +169,7 @@ def build_py_deps(source_file=None, update_path=True):
         rule = _build_python()
     else:
         rule = _build_python_no_update()
-    deps = rule.build(
+    built_deps, existing_deps = rule.build(
         redo_1=source_file,
         redo_2=os.path.splitext(source_file)[0],
         redo_3=source_file + ".out",
@@ -180,7 +180,7 @@ def build_py_deps(source_file=None, update_path=True):
 
     database.setup.reset()
 
-    return deps
+    return built_deps, existing_deps
 
 
 def run_py(source_file):
@@ -236,11 +236,10 @@ if __name__ == "__main__":
         parser.print_usage()
         sys.exit(1)
 
-    all_built_deps = set()
+    all_static_deps = set()
 
     for source_file in args.file_args:
         existing_deps, nonexistent_deps = pydep(source_file, ignore_list=set(args.ignore))
-        all_existing_deps.update(existing_deps)
 
         if args.verbose:
             print(f"\nFinding dependencies for: {source_file}")
@@ -254,14 +253,14 @@ if __name__ == "__main__":
 
             print("\nBuilding nonexistent dependencies:")
 
-        built_deps = build_py_deps(source_file)
-        all_built_deps.update(built_deps)
+        built_deps, static_existing_deps = build_py_deps(source_file)
+        print("\n".join(sorted(built_deps)))
+        # Collect static existing dependencies:
+        all_static_deps.update(static_existing_deps)
 
-    print("\n".join(sorted(all_existing_deps)))
     # print full paths on mode flag
     if args.paths:
         if args.verbose:
-            print("\nAll dependency paths:")
+            print("\nAll static dependency paths:")
 
-        all_paths = all_existing_deps.union(all_built_deps)
-        print("\n".join(sorted(all_paths)))
+        print("\n".join(sorted(all_static_deps)))
