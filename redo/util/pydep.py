@@ -2,6 +2,7 @@ import os
 import sys
 import ast
 import importlib.util
+import argparse
 from util import redo
 from database.py_source_database import py_source_database
 from base_classes.build_rule_base import build_rule_base
@@ -37,7 +38,7 @@ def pydep(source_file, path=[], ignore_list=[]):
                 try:
                     spec = importlib.util.find_spec(name)
                 except ModuleNotFoundError:
-                    nonexistant_deps.append(name)
+                    nonexistent_deps.append(name)
                     continue
                 # if module (and its origin file) exists, append to the existing_deps
                 if spec is not None:
@@ -56,7 +57,7 @@ def pydep(source_file, path=[], ignore_list=[]):
                 try:
                     spec = importlib.util.find_spec(name)
                 except ModuleNotFoundError:
-                    nonexistant_deps.append(name)
+                    nonexistent_deps.append(name)
                     continue
                 if spec is not None:
                     if spec.origin is None or "built-in" in spec.origin or "site-packages" in spec.origin:
@@ -73,20 +74,23 @@ def _build_pydeps(source_file, path=[]):
     """
     Recursively build any missing python module dependencies for
     a given source file.
+    Collect any static existing dependencies.
     """
     built_deps = []
+    all_existing_deps = []
     deps_not_in_path = []
 
     def _inner_build_pydeps(source_file):
         # Find the python dependencies:
-        existing_deps, nonexistant_deps = pydep(source_file, path)
+        existing_deps, nonexistent_deps = pydep(source_file, path)
+        all_existing_deps.extend(existing_deps)
 
         # For the nonexistent dependencies, see if we have a rule
         # to build those:
-        if nonexistant_deps:
+        if nonexistent_deps:
             deps_to_build = []
             with py_source_database() as db:
-                deps_to_build = db.try_get_sources(nonexistant_deps)
+                deps_to_build = db.try_get_sources(nonexistent_deps)
 
             deps_not_in_path.extend(deps_to_build)
 
@@ -103,7 +107,7 @@ def _build_pydeps(source_file, path=[]):
                     _inner_build_pydeps(dep)
 
     _inner_build_pydeps(source_file)
-    return list(set(deps_not_in_path))
+    return list(set(deps_not_in_path)), list(set(all_existing_deps))
 
 
 class _build_python_no_update(build_rule_base):
@@ -123,7 +127,7 @@ class _build_python(build_rule_base):
     """
     def _build(self, redo_1, redo_2, redo_3):
         # Build any dependencies:
-        deps_not_in_path = _build_pydeps(redo_1)
+        deps_not_in_path, existing_deps = _build_pydeps(redo_1)
 
         # Figure out what we need to add to the path:
         paths_to_add = list(set([os.path.dirname(d) for d in deps_not_in_path]))
@@ -131,7 +135,7 @@ class _build_python(build_rule_base):
         # Add the paths to the path:
         sys.path.extend(paths_to_add)
 
-        return deps_not_in_path
+        return deps_not_in_path, existing_deps
 
 
 class _run_python(build_rule_base):
@@ -165,7 +169,7 @@ def build_py_deps(source_file=None, update_path=True):
         rule = _build_python()
     else:
         rule = _build_python_no_update()
-    deps = rule.build(
+    built_deps, existing_deps = rule.build(
         redo_1=source_file,
         redo_2=os.path.splitext(source_file)[0],
         redo_3=source_file + ".out",
@@ -176,7 +180,7 @@ def build_py_deps(source_file=None, update_path=True):
 
     database.setup.reset()
 
-    return deps
+    return built_deps, existing_deps
 
 
 def run_py(source_file):
@@ -195,51 +199,61 @@ def run_py(source_file):
 
 # This can also be run from the command line:
 if __name__ == "__main__":
-    args = sys.argv[1:]
-    verbose = "--verbose" in args or "-v" in args
-    if "--verbose" in args:
-        args.remove("--verbose")
-    if "-v" in args:
-        args.remove("-v")
+    parser = argparse.ArgumentParser()
 
-    ignore_list = set()
-    if "--ignore" in args:
-        ignore_index = args.index("--ignore")
-        ignore_list = args[ignore_index + 1:]
-        file_args = args[:ignore_index]
-    elif "-i" in args:
-        ignore_index = args.index("-i")
-        ignore_list = args[ignore_index + 1:]
-        file_args = args[:ignore_index]
-    else:
-        file_args = args
+    parser.add_argument(
+        "-v", "--verbose",
+        action="store_true",
+        help="Enable verbose output"
+    )
 
-    if not args:
-        print(
-            "usage:\n  pydep.py [--verbose or -v] "
-            "[/path/to/python_file1.py /path/to/python_file2.py ...] "
-            "[--ignore or -i string1 string2 ...]"
-        )
-        sys.exit(1)
+    parser.add_argument(
+        "-p", "--paths",
+        action="store_true",
+        required=True,
+        help="Print resolved dependency paths"
+    )
 
-    all_existing_deps = set()
+    parser.add_argument(
+        "-i", "--ignore",
+        nargs="+",
+        default=[],
+        help="Strings to ignore in dependency names"
+    )
 
-    for source_file in file_args:
-        existing_deps, nonexistant_deps = pydep(source_file, ignore_list=ignore_list)
-        all_existing_deps.update(existing_deps)
+    parser.add_argument(
+        "file_args",
+        nargs="*",
+        help="Paths to Python files"
+    )
 
-        if verbose:
+    args = parser.parse_args()
+
+    all_static_deps = set()
+
+    for source_file in args.file_args:
+        existing_deps, nonexistent_deps = pydep(source_file, ignore_list=set(args.ignore))
+
+        if args.verbose:
             print(f"\nFinding dependencies for: {source_file}")
             print("\nExisting dependencies:")
             for dep in existing_deps:
                 print(dep)
 
             print("\nNonexistent dependencies:")
-            for dep in nonexistant_deps:
+            for dep in nonexistent_deps:
                 print(dep)
 
             print("\nBuilding nonexistent dependencies:")
 
-        build_py_deps(source_file)
+        built_deps, static_existing_deps = build_py_deps(source_file)
+        # Collect all existing dependencies:
+        all_static_deps.update(built_deps)
+        all_static_deps.update(static_existing_deps)
 
-    print("\n".join(sorted(all_existing_deps)))
+    # print full paths on mode flag
+    if args.paths:
+        if args.verbose:
+            print("\nAll static dependency paths:")
+
+        print("\n".join(sorted(all_static_deps)))
