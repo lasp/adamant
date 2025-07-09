@@ -121,9 +121,10 @@ def _analyze_ada_sources(source_files, base_dir, build_target, binary_mode=False
 
     # Copy all source and dependencies to a single analysis location. This is a
     # simple way to ensure analysis is only performed on the desired files.
-    src_dir = output_dir + os.sep + "src"
-    filesystem.safe_makedir(src_dir)
     import shutil
+    src_dir = output_dir + os.sep + "src"
+    shutil.rmtree(src_dir, ignore_errors=True)
+    filesystem.safe_makedir(src_dir)
 
     for dep in deps:
         shutil.copyfile(dep, src_dir + os.sep + os.path.basename(dep))
@@ -242,14 +243,20 @@ def _analyze_ada_sources(source_files, base_dir, build_target, binary_mode=False
     sys.stderr.write("---------- Analysis Output --------------------------\n")
     sys.stderr.write("-----------------------------------------------------\n")
     ret = shell.try_run_command(report_cmd)
+    # Copy all reports to local build directory
+    shutil.copytree(
+        src=output_dir,
+        dst=build_dir,
+        dirs_exist_ok=True  # allow overwriting into an existing build_dir
+    )
     sys.stderr.write("-----------------------------------------------------\n")
     sys.stderr.write("-----------------------------------------------------\n\n")
-    sys.stderr.write("GNAT SAS output directory located at " + output_dir + "\n")
-    sys.stderr.write("GNAT SAS run log saved in " + analyze_out_file + "\n")
-    sys.stderr.write("GNAT SAS analysis text output saved in " + report_out_file + "\n")
-    sys.stderr.write("GNAT SAS analysis CSV output saved in " + csv_out_file + "\n")
+    sys.stderr.write("GNAT SAS analysis text output saved in " + build_dir + os.sep + "report.txt" + "\n")
+    sys.stderr.write("GNAT SAS analysis CSV output saved in " + build_dir + os.sep + "report.csv" + "\n")
+    sys.stderr.write("GNAT SAS run log saved in " + build_dir + os.sep + "analyze.txt" + "\n")
     # sys.stderr.write("GNAT SAS analysis HTML output saved in " + html_out_file + "\n")
-    sys.stderr.write("GNAT SAS security report output saved in " + security_out_file + "\n")
+    sys.stderr.write("GNAT SAS security report output saved in " + build_dir + os.sep + "security.html" + "\n")
+    sys.stderr.write("GNAT SAS output directory located at " + output_dir + "\n")
 
     return ret
 
