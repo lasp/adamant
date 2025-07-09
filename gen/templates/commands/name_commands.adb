@@ -62,13 +62,16 @@ package body {{ name }} is
       Len : Natural;
       Ignore : Natural;
    begin
+      -- Initialize out command:
+      Cmd := (Header => (Source_Id => Self.Source_Id, Id => Self.Get_{{ command.name }}_Id, Arg_Buffer_Length => 0), Arg_Buffer => [others => 0]);
+
       -- Calculate the serialized length of the argument:
       Stat := {{ command.type_package }}.Serialized_Length (Arg, Len);
       if Stat /= Success then
          return Stat;
       end if;
 
-      -- Set the command length and id and initialize buffer:
+      -- Set the command length:
       if Len > Command_Types.Command_Arg_Buffer_Length_Type'Last then
          pragma Annotate (GNATSAS, False_Positive, "test always false",
             "GNAT SAS can prove the Len can never be too large so this code does not execute. This is OK.");
@@ -76,7 +79,7 @@ package body {{ name }} is
          pragma Annotate (GNATSAS, False_Positive, "dead code",
             "GNAT SAS can prove the Len can never be too large so this code does not execute. This is OK.");
       end if;
-      Cmd := (Header => (Source_Id => Self.Source_Id, Id => Self.Get_{{ command.name }}_Id, Arg_Buffer_Length => Len), Arg_Buffer => [others => 0]);
+      Cmd.Header.Arg_Buffer_Length := Len;
 
       -- Serialize the argument onto the buffer:
       Stat := {{ command.type_package }}.Serialization.To_Byte_Array (Cmd.Arg_Buffer, Arg, Ignore);
