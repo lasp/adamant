@@ -44,6 +44,81 @@ def _get_source_files(object_files):
     return to_return, build_target
 
 
+def _filter_report_for_flight_code(build_dir):
+    """
+    Filter the report.txt file to exclude test code warnings.
+    Backup the original report to unfiltered_report.txt and create a new
+    filtered report.txt containing only flight code warnings.
+    """
+    report_file = os.path.join(build_dir, "report.txt")
+    unfiltered_report_file = os.path.join(build_dir, "unfiltered_report.txt")
+
+    # Check if report.txt exists
+    if not os.path.exists(report_file):
+        return
+
+    # Read the original report
+    with open(report_file, 'r') as f:
+        lines = f.readlines()
+
+    # Backup original report
+    with open(unfiltered_report_file, 'w') as f:
+        f.writelines(lines)
+
+    # Filter out test code warnings
+    filtered_lines = []
+    for line in lines:
+        # Check if line contains a file path with test directory patterns
+        if _is_test_code_warning(line):
+            continue  # Skip test code warnings
+        filtered_lines.append(line)
+
+    # Write filtered report back to report.txt
+    with open(report_file, 'w') as f:
+        f.writelines(filtered_lines)
+
+
+def _is_test_code_warning(line):
+    """
+    Check if a warning line is from test code or non-flight code.
+    GNAT SAS only shows file names, not full paths, so we filter based on file naming patterns.
+    """
+    # GNAT SAS warnings start with a file name (format: filename:line:column:)
+    if ':' in line:
+        # Extract file name (everything before the first colon that might be a line number)
+        file_name = line.split(':')[0]
+
+        if file_name:
+            # Define file name patterns for non-flight code
+            test_file_patterns = [
+                # Test tester files
+                re.compile(r'.*-implementation-tester\.ad[sb]$', re.IGNORECASE),
+                # Test reciprocal files
+                re.compile(r'.*_reciprocal\.ad[sb]$', re.IGNORECASE),
+                # Test suite files
+                re.compile(r'.*-implementation-suite\.ad[sb]$', re.IGNORECASE),
+                # Test files
+                re.compile(r'.*_tests\.ad[sb]$', re.IGNORECASE),
+                re.compile(r'^tests\.ad[sb]$', re.IGNORECASE),
+                re.compile(r'.*tests-implementation\.ad[sb]$', re.IGNORECASE),
+                # Assertion files
+                re.compile(r'.*-assertion\.ad[sb]$', re.IGNORECASE),
+                # Representation files
+                re.compile(r'.*-representation\.ad[sb]$', re.IGNORECASE),
+                # Type ranges files
+                re.compile(r'.*_type_ranges\.ad[sb]$', re.IGNORECASE),
+                # Type main files
+                re.compile(r'.*test.adb$', re.IGNORECASE)
+            ]
+
+            # Check against all patterns
+            for pattern in test_file_patterns:
+                if pattern.match(file_name):
+                    return True
+
+    return False
+
+
 def _analyze_ada_sources(source_files, base_dir, build_target, binary_mode=False):
     # Extract useful path info:
     build_dir = base_dir + os.sep + "build" + os.sep + "analyze"
@@ -233,25 +308,40 @@ def _analyze_ada_sources(source_files, base_dir, build_target, binary_mode=False
     security_cmd = "gnatsas report security -P" + gnatsas_gpr_file + " --out " + security_out_file + suffix
     ret = shell.try_run_command(security_cmd)
 
-    # Make text report and print to screen
+    # Make text report (don't print to screen yet, we'll filter it first)
     report_out_file = os.path.join(output_dir, "report.txt")
-    suffix = " 2>&1 | tee " + report_out_file + " 1>&2"
-    report_cmd = "gnatsas report -P" + gnatsas_gpr_file + suffix
+    report_cmd = "gnatsas report -P" + gnatsas_gpr_file + " --out " + report_out_file
 
-    # Write output to terminal:
-    sys.stderr.write("\n-----------------------------------------------------\n")
-    sys.stderr.write("---------- Analysis Output --------------------------\n")
-    sys.stderr.write("-----------------------------------------------------\n")
+    # Generate report file
     ret = shell.try_run_command(report_cmd)
+
     # Copy all reports to local build directory
     shutil.copytree(
         src=output_dir,
         dst=build_dir,
         dirs_exist_ok=True  # allow overwriting into an existing build_dir
     )
+
+    # Filter the report.txt to exclude test code warnings
+    _filter_report_for_flight_code(build_dir)
+
+    # Now print the filtered report to terminal
+    sys.stderr.write("\n-----------------------------------------------------\n")
+    sys.stderr.write("----------------- Analysis Output -------------------\n")
+    sys.stderr.write("-----------------------------------------------------\n")
+
+    # Read and display the filtered report
+    filtered_report_file = os.path.join(build_dir, "report.txt")
+    if os.path.exists(filtered_report_file):
+        with open(filtered_report_file, 'r') as f:
+            sys.stderr.write(f.read())
+    else:
+        sys.stderr.write("No filtered report found.\n")
+
     sys.stderr.write("-----------------------------------------------------\n")
     sys.stderr.write("-----------------------------------------------------\n\n")
     sys.stderr.write("GNAT SAS analysis text output saved in " + build_dir + os.sep + "report.txt" + "\n")
+    sys.stderr.write("GNAT SAS unfiltered analysis output saved in " + build_dir + os.sep + "unfiltered_report.txt" + "\n")
     sys.stderr.write("GNAT SAS analysis CSV output saved in " + build_dir + os.sep + "report.csv" + "\n")
     sys.stderr.write("GNAT SAS run log saved in " + build_dir + os.sep + "analyze.txt" + "\n")
     # sys.stderr.write("GNAT SAS analysis HTML output saved in " + html_out_file + "\n")
