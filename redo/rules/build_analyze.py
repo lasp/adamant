@@ -296,10 +296,23 @@ class build_analyze(build_rule_base):
             and not target.endswith("type_ranges.elf")
         ]
         if objects:
-            sources, target = _get_source_files(objects)
+            sources, build_target = _get_source_files(objects)
+
+            # Force the analyze target
+            if build_target.endswith("_Test"):
+                build_target = build_target.replace("_Test", "_Analyze")
+            elif build_target.endswith("_Coverage"):
+                build_target = build_target.replace("_Coverage", "_Analyze")
+            elif build_target.endswith("_Analyze"):
+                pass
+            else:
+                build_target += "_Analyze"
+
+            # Run the analysis
             ret = _analyze_ada_sources(
-                sources, directory, target, binary_mode=bool(binaries)
+                sources, directory, build_target, binary_mode=bool(binaries)
             )
+
             # Exit with error code if gnatsas failed:
             if ret != 0:
                 sys.exit(ret)
