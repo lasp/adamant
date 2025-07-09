@@ -50,6 +50,8 @@ if __name__ == "__main__":
         from rules.build_prove import build_prove as rule_cls
     elif base == "analyze":
         from rules.build_analyze import build_analyze as rule_cls
+    elif base == "analyze_all":
+        from rules.build_analyze_all import build_analyze_all as rule_cls
     elif base == "style":
         from rules.build_style import build_style as rule_cls
     elif base == "style_all":

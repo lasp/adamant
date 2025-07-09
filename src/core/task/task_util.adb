@@ -20,6 +20,7 @@ package body Task_Util is
       end loop;
       -- Return the lowest address on the stack:
       return The_Stack'Address;
+      pragma Annotate (GNATSAS, Intentional, "stack variable address escape", "Intentionally returning the address of a stack variable for info purposes.");
    end Set_Stack_Pattern;
 
    procedure Initialize_Task (Task_Data : in Task_Types.Task_Info_Access; Pri : in System.Priority; Stack_Size : in Natural; Secondary_Stack_Size : in Natural) is

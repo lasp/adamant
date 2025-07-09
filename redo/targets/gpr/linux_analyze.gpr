@@ -1,3 +1,6 @@
+-- Include aunit in compilation:
+with "aunit.gpr";
+
 project linux_analyze extends all "a_linux_debug_base.gpr" is
 
    -----------------------------------------------
@@ -13,9 +16,7 @@ project linux_analyze extends all "a_linux_debug_base.gpr" is
 
    package Compiler is
       -- Add preprocessor definitions and configuration pragma switches:
-      for Switches ("Ada") use a_linux_debug_base.Compiler'Switches ("Ada") &
-         -- add ravenscar restriction
-         ("-gnatec=" & a_adamant.ADAMANT_DIR & "/redo/targets/configuration_pragmas/ravenscar.adc");
+      for Switches ("Ada") use a_linux_debug_base.Compiler'Switches ("Ada");
       for Switches ("C++") use a_linux_debug_base.Compiler'Switches ("C++");
       for Switches ("C") use a_linux_debug_base.Compiler'Switches ("C");
       for Switches ("Asm_Cpp") use a_linux_debug_base.Compiler'Switches ("Asm_Cpp");
@@ -23,7 +24,9 @@ project linux_analyze extends all "a_linux_debug_base.gpr" is
 
    -- Force analysis into "deep" mode
    package Analyzer is
-      for Switches ("analyze") use ("--no-unused-annotate-warning", "--mode=deep");
+      for Switches ("analyze") use ("--no-unused-annotate-warning");
+      -- Uncomment for deep analysis mode
+      -- for Switches ("analyze") use ("--no-unused-annotate-warning", "--mode=deep");
       for Additional_Patterns use a_adamant.ADAMANT_DIR &
          "/redo/targets/gnatsas/AdamantMessagePatterns.xml";
    end Analyzer;
