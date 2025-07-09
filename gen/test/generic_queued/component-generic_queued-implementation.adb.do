@@ -12,6 +12,7 @@ BEGIN {
 /TODO declarations/ {
   if (count == 0) {
     print "      A_Out : Generic_Type_1;"
+    print "      pragma Annotate (GNATSAS, Intentional, \"unassigned variable\", \"Ignore, this is OK for this test\");"
   }
 }
 /TODO statements/ {

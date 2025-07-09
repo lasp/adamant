@@ -72,10 +72,12 @@ package body Database is
    end Update;
 
    function Fetch (Self : in Instance; Id : in Id_Type; Value : out Value_Type) return Fetch_Status is
+      pragma Annotate (GNATSAS, Intentional, "validity check", "out parameter Value not set on failed look up for performance");
       Db_Index : Natural;
    begin
       if Id < Self.Index_Table'First or else Id > Self.Index_Table'Last then
          return Id_Out_Of_Range;
+         pragma Annotate (GNATSAS, Intentional, "validity check", "out parameter Value not set on failed look up for performance");
       end if;
 
       -- Look up the database index:
@@ -85,6 +87,7 @@ package body Database is
       -- then return error.
       if Db_Index = 0 then
          return Data_Not_Available;
+         pragma Annotate (GNATSAS, Intentional, "validity check", "out parameter Value not set on failed look up for performance");
       end if;
 
       -- The index should ALWAYS be less than head.

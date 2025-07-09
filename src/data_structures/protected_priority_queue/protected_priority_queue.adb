@@ -84,6 +84,7 @@ package body Protected_Priority_Queue is
       end Push;
 
       procedure Pop (Priority : out Priority_Type; Bytes : out Basic_Types.Byte_Array; Not_Full : in out Ada.Synchronous_Task_Control.Suspension_Object; Length : out Natural; Status : out Pop_Status) is
+         pragma Annotate (GNATSAS, False_Positive, "validity check", "Priority out parameter initialized by Queue.Pop on success");
          use Priority_Queue_Package;
       begin
          case Queue.Pop (Priority => Priority, Num_Bytes_Returned => Length, Bytes => Bytes) is
@@ -130,6 +131,7 @@ package body Protected_Priority_Queue is
    end Push;
 
    function Pop (Self : in out Instance; Priority : out Priority_Type; Bytes : out Basic_Types.Byte_Array; Length : out Natural) return Pop_Status is
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "Priority out parameter initialized by Queue.Pop on success");
       Status : Pop_Status;
    begin
       Self.Queue.Pop (Priority, Bytes, Self.Not_Full, Length, Status);
@@ -302,6 +304,7 @@ package body Protected_Priority_Queue is
    end Push_Variable_Length_Type_Block;
 
    function Pop_Type (Self : in out Instance; Priority : out Priority_Type; Dest : out T) return Pop_Type_Status is
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "Priority out parameter initialized by Queue.Pop on success");
       -- The length in bytes of the serialized type.
       Serialized_Length : constant Natural := T'Object_Size / Basic_Types.Byte'Object_Size; -- in bytes
       -- Byte_Array type for storing the type:
@@ -332,6 +335,7 @@ package body Protected_Priority_Queue is
    end Pop_Type;
 
    function Pop_Type_Block (Self : in out Instance; Priority : out Priority_Type; Dest : out T) return Pop_Type_Block_Status is
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "Priority out parameter initialized by Queue.Pop_Block on success");
       -- The length in bytes of the serialized type.
       Serialized_Length : constant Natural := T'Object_Size / Basic_Types.Byte'Object_Size; -- in bytes
       -- Byte_Array type for storing the type:
@@ -362,6 +366,7 @@ package body Protected_Priority_Queue is
    end Pop_Type_Block;
 
    function Pop_Variable_Length_Type (Self : in out Instance; Priority : out Priority_Type; Dest : out T) return Pop_Type_Status is
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "Priority out parameter initialized by Queue.Pop on success");
       -- The length in bytes of the serialized type.
       Max_Serialized_Length : constant Natural := T'Object_Size / Basic_Types.Byte'Object_Size; -- in bytes
       -- Byte_Array type for storing the type:
@@ -400,6 +405,7 @@ package body Protected_Priority_Queue is
    end Pop_Variable_Length_Type;
 
    function Pop_Variable_Length_Type_Block (Self : in out Instance; Priority : out Priority_Type; Dest : out T) return Pop_Type_Block_Status is
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "Priority out parameter initialized by Queue.Pop_Block on success");
       -- The length in bytes of the serialized type.
       Max_Serialized_Length : constant Natural := T'Object_Size / Basic_Types.Byte'Object_Size; -- in bytes
       -- Byte_Array type for storing the type:

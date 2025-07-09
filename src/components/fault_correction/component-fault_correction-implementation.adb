@@ -162,6 +162,7 @@ package body Component.Fault_Correction.Implementation is
                   if Record_Slot = 3 or else Index = Self.Fault_Response_Table.all'Last then
                      -- Note: We won't overflow this based on assertions in Init.
                      To_Send.Buffer (Product_Buffer_Index) := Status_Byte;
+                     pragma Annotate (GNATSAS, False_Positive, "array index check", "Product_Buffer_Index bounds guaranteed by assertions in the Init");
                      if Product_Buffer_Index < Data_Product_Types.Data_Product_Buffer_Length_Type'Last then
                         Product_Buffer_Index := @ + 1;
                      end if;

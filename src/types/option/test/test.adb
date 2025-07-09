@@ -27,6 +27,9 @@ procedure Test is
    -- Example which shows usual pattern:
    function Return_Status (Valid : in Boolean; Value : out Integer) return Boolean is
    begin
+      -- Initialize out parameter
+      Value := 0;
+
       if Valid then
          Value := 12;
       end if;

@@ -6,6 +6,7 @@ with Memory_Manager_Enums;
 with Byte_Array_Pointer.Packed;
 with Virtual_Memory_Region;
 with Memory_Enums;
+with System;
 
 package body Component.Memory_Copier.Implementation is
 
@@ -88,6 +89,9 @@ package body Component.Memory_Copier.Implementation is
       -- the virtual memoy region to be valid.
       Min_Length : constant Natural := Virtual_Region.Address + Virtual_Region.Length;
    begin
+      -- Initialize out parameter to null in case we fail to find memory region
+      Returned_Physical_Region := (Id => 0, Region => (Address => System.Null_Address, Length => 0));
+
       -- Check the request memory status:
       case Request.Status is
          when Failure =>

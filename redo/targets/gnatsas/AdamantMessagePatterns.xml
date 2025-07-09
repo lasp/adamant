@@ -576,4 +576,98 @@
     </String_Specifier>
   </Message_Pattern>
 </Message_Rule>
+<!--147-->
+<!-- Suppress predetermined condition warnings in generated component parameter validation -->
+<!-- These occur when enum ranges are checked but static analysis determines they're always valid -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="TRUE_CONDITION_DEAD_EDGE_WARNING">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="File"
+      String_To_Match="component-*.adb">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*Integer_Param_Id*Local_Parameter_Id_Type'Enum_Rep*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+<!--148-->
+<!-- Suppress test always true warnings in generated component parameter validation -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <Bool_Specifier Name_Of_Boolean_Attribute="Is_Infer_Message"/>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="TRUE_DEAD_EDGE_WARNING">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="File"
+      String_To_Match="component-*.adb">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*Integer_Param_Id*Local_Parameter_Id_Type'Enum_Rep*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+<!--149-->
+<!-- Suppress dead code warnings in generated component parameter validation -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="DEAD_BLOCK_WARNING">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="File"
+      String_To_Match="component-*.adb">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*Id_Error*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+<!--150-->
+<!-- Suppress Inspector test always true warnings in generated component parameter validation -->
+<!-- These occur when parameter ID range validation is always true due to enum constraints -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="TRUE_DEAD_EDGE_WARNING">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="File"
+      String_To_Match="component-*.adb">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*Integer_Param_Id*Local_Parameter_Id_Type'Enum_Rep*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
+<!--151-->
+<!-- Suppress Inspector dead code warnings in generated component parameter validation -->
+<!-- These occur when error handling becomes unreachable due to always-true conditions -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="DEAD_BLOCK_WARNING">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="File"
+      String_To_Match="component-*.adb">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*Integer_Param_Id*Local_Parameter_Id_Type'Enum_Rep*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
 </Message_Probability_Rules>

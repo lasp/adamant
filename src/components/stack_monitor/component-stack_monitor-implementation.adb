@@ -19,7 +19,6 @@ package body Component.Stack_Monitor.Implementation is
    -- packet_Period : Interfaces.Unsigned_16 - The period (in ticks) of how often to calculate value for and send out the packet. A period of zero disables sending of the packet.
    --
    overriding procedure Init (Self : in out Instance; Task_List : in not null Task_Types.Task_Info_List_Access; Packet_Period : in Interfaces.Unsigned_16 := 1) is
-      use Task_Types;
    begin
       -- Set the type variables.
       Self.Counter.Set_Period_And_Reset_Count (Packet_Period);

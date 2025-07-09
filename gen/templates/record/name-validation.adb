@@ -24,6 +24,7 @@ package body {{ name }}.Validation is
 {% for include in variable_length_type_includes %}
 {% if include not in ["Interfaces"] %}
       use {{ include }};
+      pragma Annotate (GNATSAS, Intentional, "unused entity", "It is OK if this is unused, including it makes the generator simpler");
 {% endif %}
 {% endfor %}
 {% if packed_type_includes %}
@@ -158,6 +159,7 @@ package body {{ name }}.Validation is
 {% for include in variable_length_type_includes %}
 {% if include not in ["Interfaces"] %}
       use {{ include }};
+      pragma Annotate (GNATSAS, Intentional, "unused entity", "It is OK if this is unused, including it makes the generator simpler");
 {% endif %}
 {% endfor %}
 {% if packed_type_includes %}
@@ -291,6 +293,7 @@ package body {{ name }}.Validation is
 {% for include in variable_length_type_includes %}
 {% if include not in ["Interfaces"] %}
       use {{ include }};
+      pragma Annotate (GNATSAS, Intentional, "unused entity", "It is OK if this is unused, including it makes the generator simpler");
 {% endif %}
 {% endfor %}
 {% if packed_type_includes %}

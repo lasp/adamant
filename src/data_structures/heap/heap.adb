@@ -120,7 +120,7 @@ package body Heap is
       -- Current index we are checking:
       Index : Natural := Self.Tree.all'First;
       -- Keep track of iterations to ensure that we always exit the while loop.
-      Iter : constant Natural := 0;
+      Iter : Natural := 0;
       Max_Iter : constant Natural := Self.Count + 1;
    begin
       -- Start at top of the tree. Look at the children of every node,
@@ -138,7 +138,7 @@ package body Heap is
             pragma Assert (Right > Left, "Right child invalid.");
 
             -- If the left child is larger than or equal to the heap
-            -- size then   we have reached the end of the heap, so we can stop.
+            -- size then we have reached the end of the heap, so we can stop.
             if Left >= Self.Count then
                exit;
             end if;
@@ -168,6 +168,9 @@ package body Heap is
                Index := Largest;
             end if;
          end;
+
+         -- Increment iteration counter to prevent infinite loops
+         Iter := Iter + 1;
       end loop;
 
       -- Make sure nothing went awry:

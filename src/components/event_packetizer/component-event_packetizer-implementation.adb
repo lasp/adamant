@@ -116,6 +116,9 @@ package body Component.Event_Packetizer.Implementation is
          Try_Status : Try_Insert_Status;
          Next_Try_Status : Try_Insert_Status;
       begin
+         -- Initialize out parameter.
+         Status := Uninitialized;
+
          if Initialized then
             -- If all the packets are full, alert the user and increment the dropped count:
             if Num_Packets_Full = Packets'Length then
@@ -157,7 +160,6 @@ package body Component.Event_Packetizer.Implementation is
             end if;
          else
             Increment_Events_Dropped;
-            Status := Uninitialized;
          end if;
       end Insert_Event;
 

@@ -5,6 +5,7 @@
 -- Standard Includes:
 -- Invokee Connector Includes:
 with Socket;
+with Socket_Address;
 
 -- The Socket Component is an interface component which connects the rest of the assembly to an outside entity (usually the ground system) via a TCP/IP socket. It spawns an internal task to listen to the socket for incoming data. It also provides an asynchronous receive connector which it services on it's task, sending any data it receives out of the socket. The data send and receive connectors are of a generic buffer type, Com_Packet, so that data of an arbitrary format can be sent via this component.
 --
@@ -43,6 +44,12 @@ private
    overriding procedure Ccsds_Space_Packet_T_Send_Dropped (Self : in out Instance; Arg : in Ccsds_Space_Packet.T) is null;
    -- This procedure is called when a Event_T_Send message is dropped due to a full queue.
    overriding procedure Event_T_Send_Dropped (Self : in out Instance; Arg : in Event.T) is null;
+
+   ---------------------------------------
+   -- Private helper functions:
+   ---------------------------------------
+   -- Helper function to convert GNAT socket address to Adamant Socket_Address
+   function Convert_Socket_Address (Self : in Instance) return Socket_Address.T;
 
    -------------------------------------------------------
    -- Definition of subtasks functions for task execution:

@@ -26,8 +26,6 @@ package body Component.Cpu_Monitor.Implementation is
    overriding procedure Init
       (Self : in out Instance; Task_List : in not null Task_Types.Task_Info_List_Access; Interrupt_List : in not null Interrupt_Types.Interrupt_Id_List_Access; Execution_Periods : in Execution_Periods_Type := [1, 6, 30]; Packet_Period : in Interfaces.Unsigned_16 := 1)
    is
-      use Task_Types;
-      use Interrupt_Types;
       Period : Natural;
       Current_Up_Time : constant Time := Ada.Real_Time.Clock;
    begin
