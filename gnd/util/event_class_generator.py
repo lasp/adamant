@@ -16,9 +16,7 @@ def create_event_cls(component_instance_name, event_name, param_type_cls):
             # Store the event name:
             self.component_instance_name = component_instance_name
             self.event_name = event_name
-            self.has_param = False
-
-            # Make sure param is of the appropriate class:
+            self.has_param = False  # Make sure param is of the appropriate class:
             param_buffer = None
             if Param is not None:
                 self.has_param = True
@@ -66,14 +64,24 @@ def create_event_cls(component_instance_name, event_name, param_type_cls):
             if self.Param:
                 param = ": " + self.Param.to_tuple_string()
 
-            return "%010d.%09d - %s.%s (0x%04X) %s" % (
-                seconds,
-                int((subseconds / (2**32)) * 1000000000),
-                self.component_instance_name,
-                self.event_name,
-                id,
-                param,
-            )
+            if self.Header.Time._size_in_bytes == 6:
+                return "%010d.%06d - %s.%s (0x%04X) %s" % (
+                    seconds,
+                    int((subseconds / (2**16)) * 1000000),
+                    self.component_instance_name,
+                    self.event_name,
+                    id,
+                    param,
+                )
+            else:
+                return "%010d.%09d - %s.%s (0x%04X) %s" % (
+                    seconds,
+                    int((subseconds / (2**32)) * 1000000000),
+                    self.component_instance_name,
+                    self.event_name,
+                    id,
+                    param,
+                )
 
     return SpecificEvent
 
