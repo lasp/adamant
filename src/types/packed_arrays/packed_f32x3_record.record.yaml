@@ -1,0 +1,6 @@
+---
+description: Single component record for holding a packed F32x3 array. This can be useful when interfacing with C to hide a float array pointer.
+fields:
+  - name: Value
+    description: Packed F32x3 array.
+    type: Packed_F32x3.T 
