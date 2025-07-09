@@ -13,11 +13,13 @@ package body Smart_Assert is
       use AUnit.Assertions;
       -- Function which prints a good assertion failure message. We will use this if AUnit is not currently being used.
       procedure Raise_Assertion_Failure is
+         pragma Annotate (GNATSAS, Intentional, "subp always fails", "intentional assertion failure in test framework");
       begin
          if Message'Length > 0 then
             Ada.Text_IO.Put_Line (Ada.Text_IO.Standard_Error, Message);
          end if;
          raise Ada.Assertions.Assertion_Error with " at " & Filename & ":" & String_Util.Trim_Both (Natural'Image (Line));
+         pragma Annotate (GNATSAS, Intentional, "raise exception", "intentional assertion failure in test framework");
       end Raise_Assertion_Failure;
    begin
       -- If we are in an active AUnit session then use the AUnit assertions, otherwise just

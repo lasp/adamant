@@ -343,6 +343,7 @@ package body Component.{{ name }}_Reciprocal is
    -- Tester components NEVER have threads.
    -- This method is implemented, but if called will throw an assertion.
    overriding procedure Cycle (Self : in out Base_Instance) is
+      pragma Annotate (GNATSAS, Intentional, "subp always fails", "passive test component should never be tasked");
       Ignore : Base_Instance renames Self;
    begin
       -- This is a passive component, meaning it CANNOT be tasked. If the component
