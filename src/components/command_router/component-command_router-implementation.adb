@@ -37,6 +37,9 @@ package body Component.Command_Router.Implementation is
       Reg_Cmd_Instance : Registration_Commands.Instance;
       Reg_Cmd : Command.T;
    begin
+      -- Initialize the ID Base of our command package with the base package ID to be consistent
+      Self.Commands.Set_Id_Base (Self.Command_Id_Base);
+
       -- Manually set the ID to zero, of the register command. ID 0 is reserved
       -- especially for this internal command:
       Reg_Cmd_Instance.Set_Id_Base (0);
