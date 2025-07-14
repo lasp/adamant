@@ -454,6 +454,7 @@ redo analyze
 redo style
 redo pretty
 redo test_all
+redo analyze_all
 redo coverage_all
 redo build/metric/Linux/component.adb.txt
 redo build/metric/Linux/component.ads.txt
@@ -498,6 +499,7 @@ In addition to specific commands, Adamant also provides a set of build commands 
   \item \textbf{\texttt{redo style}} - compiles all objects found in this directory with coding style checks enabled
   \item \textbf{\texttt{redo pretty}} - ``pretty" formats all hand-written code found in this directory and saves them in \textit{build/template/}
   \item \textbf{\texttt{redo analyze}} - runs a static analyzer on all code found in this directory
+  \item \textbf{\texttt{redo analyze\_all}} - finds and runs static analysis on all unit tests from this directory and all below it. Note: Add a \textit{.skip\_test} file to a directory to exclude it from being run by \texttt{redo analyze\_all}.
 \end{spaceditemize}
 \vspace{5mm} %5mm vertical space
 
@@ -742,6 +744,7 @@ redo analyze
 redo style
 redo pretty
 redo test_all
+redo analyze_all
 redo coverage_all
 redo build/bin/Linux/main.elf
 redo build/gpr/main.gpr
@@ -933,6 +936,7 @@ redo analyze
 redo style
 redo pretty
 redo test_all
+redo analyze_all
 redo coverage_all
 redo build/bin/Linux_Test/test.elf
 redo build/gpr/test.gpr
@@ -2412,6 +2416,7 @@ redo analyze
 redo style
 redo pretty
 redo test_all
+redo analyze_all
 redo coverage_all
 redo build/bin/Linux_Test/test.elf
 redo build/html/example_component_tests.html
@@ -4803,6 +4808,7 @@ redo analyze
 redo style
 redo pretty
 redo test_all
+redo analyze_all
 redo coverage_all
 redo build/pdf/example_component_commands.pdf
 redo build/pdf/example_component_connectors.pdf
@@ -5283,6 +5289,7 @@ redo analyze
 redo style
 redo pretty
 redo test_all
+redo analyze_all
 redo coverage_all
 redo build/dot/science_assembly.dot
 redo build/eps/science_assembly.eps
@@ -5430,6 +5437,7 @@ redo analyze
 redo style
 redo pretty
 redo test_all
+redo analyze_all
 redo coverage_all
 redo build/bin/Linux/main.elf
 redo build/obj/Linux/main.o
@@ -5716,6 +5724,7 @@ redo analyze
 redo style
 redo pretty
 redo test_all
+redo analyze_all
 redo coverage_all
 redo build/dot/science_assembly_command_view.dot
 redo build/eps/science_assembly_command_view.eps
@@ -5961,6 +5970,7 @@ redo analyze
 redo style
 redo pretty
 redo test_all
+redo analyze_all
 redo coverage_all
 redo build/pdf/science_assembly_commands.pdf
 redo build/pdf/science_assembly_components.pdf
@@ -6065,6 +6075,7 @@ redo analyze
 redo style
 redo pretty
 redo test_all
+redo analyze_all
 redo coverage_all
 redo build/cosmos/plugin/science_assembly_ccsds_commands.txt
 redo build/cosmos/plugin/science_assembly_ccsds_telemetry.txt
@@ -6100,6 +6111,7 @@ redo analyze
 redo style
 redo pretty
 redo test_all
+redo analyze_all
 redo coverage_all
 redo build/hydra/Config/science_assembly.xml
 redo build/hydra/Config/science_assembly_ccsds_commands.xml
@@ -6334,7 +6346,38 @@ The old value of \texttt{Outer\_Var} is reported to be some random number that i
 
 By default, GNAT SAS is run with the currently set build target specified by the \texttt{TARGET} environment variable and runs in \texttt{fast} mode. This is the recommended mode for everyday running of GNAT SAS by developers. GNAT SAS can also be run in \texttt{deep} mode, ideal for overnight runs on a continuous integration server, by specifying \texttt{---mode=deep} in your build target's \textit{.gpr} file. A \texttt{deep} analysis target for Linux is provided in \textit{redo/targets/gpr/linux\_analyze.gpr} and can be used by running \texttt{export TARGET=Linux\_Analyze} prior to running \texttt{redo analyze}. \\
 
-The \texttt{redo analyze} command copies all source files to \texttt{\$HOME/.codepeer}, analyzes it, and produces results in the same directory. It is recommended that you save the results stored in \texttt{\$HOME/.codepeer} in a version control system so you can compare results of different static analysis runs over time. For more information on GNAT SAS, how to view and compare results between runs, and produce different style reports, see AdaCore's \href{https://docs.adacore.com/live/wave/gnatsas/html/user_guide/getting_started.html}{\textcolor{blue}{documentation}}.
+Alternatively, the analysis mode can be controlled using the \texttt{REDO\_ANALYZE\_MODE} environment variable. If set, this variable will pass the \texttt{---mode=<VALUE>} parameter to the \texttt{gnatsas analyze} command. For example:
+
+\vspace{5mm} %5mm vertical space
+\begin{minted}{text}
+> export REDO_ANALYZE_MODE=deep
+> redo analyze
+\end{minted}
+\vspace{5mm} %5mm vertical space
+
+This approach allows users to easily switch analysis modes without changing build targets. If \texttt{REDO\_ANALYZE\_MODE} is not set, no mode parameter is passed and GNAT SAS runs in its default \texttt{fast} mode. \\
+
+For automated testing and continuous integration, the \texttt{redo analyze\_all} command provides additional control over exit behavior through the \texttt{REDO\_ANALYZE\_ALL\_FAIL\_LEVEL} environment variable. This variable determines the analysis warning level that causes the command to exit with a non-zero code:
+
+\vspace{5mm} %5mm vertical space
+\begin{spaceditemize}
+  \item \textbf{\texttt{HIGH}} - Exit with failure only on high-severity warnings or errors (default)
+  \item \textbf{\texttt{MEDIUM}} - Exit with failure on medium, high-severity warnings, or errors  
+  \item \textbf{\texttt{LOW}} - Exit with failure on low, medium, high-severity warnings, or errors
+  \item \textbf{\texttt{ERROR}} - Exit with failure only on analysis errors (not warnings)
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+
+Example usage:
+
+\vspace{5mm} %5mm vertical space
+\begin{minted}{text}
+> export REDO_ANALYZE_ALL_FAIL_LEVEL=MEDIUM
+> redo analyze_all  # Will exit non-zero if any medium or high warnings found
+\end{minted}
+\vspace{5mm} %5mm vertical space
+
+The \texttt{redo analyze} command copies all source files to \texttt{\$HOME/.gnatsas}, analyzes it, and produces results in the same directory. It is recommended that you save the results stored in \texttt{\$HOME/.gnatsas} in a version control system so you can compare results of different static analysis runs over time. For more information on GNAT SAS, how to view and compare results between runs, and produce different style reports, see AdaCore's \href{https://docs.adacore.com/live/wave/gnatsas/html/user_guide/getting_started.html}{\textcolor{blue}{documentation}}.
 
 \subsection{Code Metrics} \label{Code Metrics}
 
@@ -6360,6 +6403,7 @@ redo analyze
 redo style
 redo pretty
 redo test_all
+redo analyze_all
 redo coverage_all
 redo build/metric/Linux_Test/simple_package_tests-implementation-suite.adb.txt
 redo build/metric/Linux_Test/simple_package_tests-implementation-suite.ads.txt
@@ -6554,6 +6598,7 @@ redo analyze
 redo style
 redo pretty
 redo test_all
+redo analyze_all
 redo coverage_all
 redo build/html/system_registers.html
 redo build/metric/Linux/system_registers.ads.txt
@@ -6623,6 +6668,7 @@ redo analyze
 redo style
 redo pretty
 redo test_all
+redo analyze_all
 redo coverage_all
 redo build/html/nonvolatile_store.html
 redo build/metric/Linux/nonvolatile_store.ads.txt
