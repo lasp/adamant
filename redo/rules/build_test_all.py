@@ -27,6 +27,13 @@ class build_test_all(build_rule_base):
     as the tests are run. Tests are matched by finding either a
     "test.adb" file or a "test.do" file a directory.
     """
+
+    def _write_to_both(self, message):
+        """Write message to both stderr and summary file."""
+        sys.stderr.write(message)
+        self.summary_file.write(message)
+        self.summary_file.flush()
+
     def _build(self, redo_1, redo_2, redo_3):
         pass  # We are overriding build instead since
         # we don't need to usual build boilerplate
@@ -53,12 +60,18 @@ class build_test_all(build_rule_base):
             sys.stderr.write("No tests found in or below '" + directory + "'.\n")
             error.abort(0)
 
+        # Create summary report file
+        build_dir = os.path.join(directory, "build")
+        filesystem.safe_makedir(build_dir)
+        summary_report_path = os.path.join(build_dir, "test_all_summary.txt")
+        self.summary_file = open(summary_report_path, "w")
+
         # Print the test plan:
         num_tests = "%02d" % len(tests)
-        sys.stderr.write("Will be running a total of " + num_tests + " tests:\n")
+        self._write_to_both("Will be running a total of " + num_tests + " tests:\n")
         for number, test in enumerate(tests):
             rel_test = os.path.relpath(test, directory)
-            sys.stderr.write(
+            self._write_to_both(
                 ("%02d" % (number + 1)) + "/" + num_tests + " " + rel_test + "\n"
             )
 
@@ -77,23 +90,22 @@ class build_test_all(build_rule_base):
 
         # Run tests:
         exit_code = 0
-        sys.stderr.write("\nTesting...\n")
+        self._write_to_both("\nTesting...\n")
         for number, test in enumerate(tests):
             rel_test = os.path.relpath(test, directory)
-            sys.stderr.write(
+            self._write_to_both(
                 "{0:80}   ".format(
                     (("%02d" % (number + 1)) + "/" + num_tests + " " + rel_test)[:80]
                 )
             )
-            sys.stderr.flush()
             database.setup.reset()
             try:
                 test_log = os.path.join(log_dir, rel_test.replace(os.sep, "_") + ".log")
                 redo.redo([os.path.join(test, "test"), "1>&2", "2>" + test_log])
-                sys.stderr.write(" " + PASSED + "\n")
+                self._write_to_both(" " + PASSED + "\n")
             except BaseException:
                 exit_code = 1
-                sys.stderr.write(" " + FAILED + "\n")
+                self._write_to_both(" " + FAILED + "\n")
 
                 # On a failed test, save off the test logs for inspection. This is
                 # especially useful on a remote CI server.
@@ -105,6 +117,7 @@ class build_test_all(build_rule_base):
                 except BaseException:
                     pass
 
+        self.summary_file.close()
         error.abort(exit_code)
 
     # No need to provide these for "redo test_all"

@@ -37,6 +37,13 @@ class build_analyze_all(build_rule_base):
     is run. Tests are matched by finding either a "test.adb"
     file or a "test.do" file in a directory.
     """
+
+    def _write_to_both(self, message):
+        """Write message to both stderr and summary file."""
+        sys.stderr.write(message)
+        self.summary_file.write(message)
+        self.summary_file.flush()
+
     def _build(self, redo_1, redo_2, redo_3):
         pass  # We are overriding build instead since
         # we don't need to usual build boilerplate
@@ -65,12 +72,18 @@ class build_analyze_all(build_rule_base):
             sys.stderr.write("No tests found in or below '" + directory + "'.\n")
             error.abort(0)
 
+        # Create summary report file
+        build_dir = os.path.join(directory, "build")
+        filesystem.safe_makedir(build_dir)
+        summary_report_path = os.path.join(build_dir, "analyze_all_summary.txt")
+        self.summary_file = open(summary_report_path, "w")
+
         # Print the analysis plan:
         num_tests = "%02d" % len(tests)
-        sys.stderr.write("Will be running static analysis on a total of " + num_tests + " tests:\n")
+        self._write_to_both("Will be running static analysis on a total of " + num_tests + " tests:\n")
         for number, test in enumerate(tests):
             rel_test = os.path.relpath(test, directory)
-            sys.stderr.write(
+            self._write_to_both(
                 ("%02d" % (number + 1)) + "/" + num_tests + " " + rel_test + "\n"
             )
 
@@ -95,15 +108,14 @@ class build_analyze_all(build_rule_base):
 
         # Run static analysis:
         exit_code = 0
-        sys.stderr.write("\nAnalyzing...\n")
+        self._write_to_both("\nAnalyzing...\n")
         for number, test in enumerate(tests):
             rel_test = os.path.relpath(test, directory)
-            sys.stderr.write(
+            self._write_to_both(
                 "{0:80}   ".format(
                     (("%02d" % (number + 1)) + "/" + num_tests + " " + rel_test)[:80]
                 )
             )
-            sys.stderr.flush()
             database.setup.reset()
             try:
                 analysis_log = os.path.join(log_dir, rel_test.replace(os.sep, "_") + ".log")
@@ -115,19 +127,19 @@ class build_analyze_all(build_rule_base):
                 results.append(severity)
 
                 if severity == "HIGH":
-                    sys.stderr.write(" " + HIGH + "\n")
+                    self._write_to_both(" " + HIGH + "\n")
                 elif severity == "MEDIUM":
-                    sys.stderr.write(" " + MEDIUM + "\n")
+                    self._write_to_both(" " + MEDIUM + "\n")
                 elif severity == "LOW":
-                    sys.stderr.write(" " + LOW + "\n")
+                    self._write_to_both(" " + LOW + "\n")
                 elif severity == "NONE":
-                    sys.stderr.write(" " + NONE + "\n")
+                    self._write_to_both(" " + NONE + "\n")
                 else:
-                    sys.stderr.write(" " + ERROR + "\n")
+                    self._write_to_both(" " + ERROR + "\n")
 
             except BaseException:
                 results.append("ERROR")
-                sys.stderr.write(" " + ERROR + "\n")
+                self._write_to_both(" " + ERROR + "\n")
 
             # After analysis, save off the analysis logs for inspection. This is
             # especially useful on a remote CI server.
@@ -141,6 +153,7 @@ class build_analyze_all(build_rule_base):
 
         # Determine exit code based on results and fail level
         exit_code = self._determine_exit_code(results, fail_level)
+        self.summary_file.close()
         error.abort(exit_code)
 
     def _parse_analysis_report(self, report_path):
