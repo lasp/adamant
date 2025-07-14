@@ -290,7 +290,7 @@ def _analyze_ada_sources(source_files, base_dir, build_target, binary_mode=False
     filesystem.safe_makedir(output_dir)
     analyze_out_file = os.path.join(output_dir, "analyze.txt")
     suffix = " 2>&1 | tee " + analyze_out_file + " 1>&2"
-    analyze_cmd = "gnatsas analyze -j0 -P" + gnatsas_gpr_file + suffix
+    analyze_cmd = "gnatsas analyze -j0 --keep-going -P" + gnatsas_gpr_file + suffix
     ret = shell.try_run_command(analyze_cmd)
 
     # Make CSV report
