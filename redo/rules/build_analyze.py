@@ -290,7 +290,13 @@ def _analyze_ada_sources(source_files, base_dir, build_target, binary_mode=False
     filesystem.safe_makedir(output_dir)
     analyze_out_file = os.path.join(output_dir, "analyze.txt")
     suffix = " 2>&1 | tee " + analyze_out_file + " 1>&2"
-    analyze_cmd = "gnatsas analyze -j0 --keep-going -P" + gnatsas_gpr_file + suffix
+
+    # Check if REDO_ANALYZE_MODE environment variable is set to control analysis mode
+    # If set, will pass --mode=<VALUE> to gnatsas commands (e.g., REDO_ANALYZE_MODE=deep)
+    analyze_mode = environ.get("REDO_ANALYZE_MODE")
+    mode_param = f" --mode={analyze_mode}" if analyze_mode else ""
+
+    analyze_cmd = "gnatsas analyze -j0 --keep-going" + mode_param + " -P" + gnatsas_gpr_file + suffix
     ret = shell.try_run_command(analyze_cmd)
 
     # Make CSV report
@@ -355,6 +361,10 @@ class build_analyze(build_rule_base):
     """
     This build rule uses gnatsas to analyze any code
     found in the current directory.
+
+    Environment Variables:
+        REDO_ANALYZE_MODE: If set, passes --mode=<VALUE> to gnatsas commands.
+                          Example: REDO_ANALYZE_MODE=deep will run gnatsas in deep mode.
     """
     def _build(self, redo_1, redo_2, redo_3):
         # Define the special targets that exist everywhere...

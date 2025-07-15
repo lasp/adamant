@@ -36,6 +36,12 @@ class build_analyze_all(build_rule_base):
     prints an analysis report to the terminal as the analysis
     is run. Tests are matched by finding either a "test.adb"
     file or a "test.do" file in a directory.
+
+    Environment Variables:
+        REDO_ANALYZE_MODE: If set, passes --mode=<VALUE> to gnatsas commands.
+                          Example: REDO_ANALYZE_MODE=deep will run gnatsas in deep mode.
+        REDO_ANALYZE_ALL_FAIL_LEVEL: Controls exit code behavior (HIGH, MEDIUM, LOW, ERROR).
+        REDO_ANALYZE_ALL_NO_COLOR: If set, disables colored output.
     """
 
     def _write_to_both(self, message):

@@ -22,11 +22,8 @@ project linux_analyze extends all "a_linux_debug_base.gpr" is
       for Switches ("Asm_Cpp") use a_linux_debug_base.Compiler'Switches ("Asm_Cpp");
    end Compiler;
 
-   -- Force analysis into "deep" mode
    package Analyzer is
       for Switches ("analyze") use ("--no-unused-annotate-warning");
-      -- Uncomment for deep analysis mode
-      -- for Switches ("analyze") use ("--no-unused-annotate-warning", "--mode=deep");
       for Additional_Patterns use a_adamant.ADAMANT_DIR &
          "/redo/targets/gnatsas/AdamantMessagePatterns.xml";
    end Analyzer;
