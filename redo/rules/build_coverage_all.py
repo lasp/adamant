@@ -5,14 +5,19 @@ from util import error
 from util import filesystem
 from util import shell
 from base_classes.build_rule_base import build_rule_base
+from shutil import copytree
 
 # Definitions for producing colored text on the terminal
 NO_COLOR = "\033[0m"
 BOLD = "\033[1m"
 RED = "\033[31m"
 GREEN = "\033[32m"
-PASSED = BOLD + GREEN + "PASSED" + NO_COLOR
-FAILED = BOLD + RED + "FAILED" + NO_COLOR
+if "REDO_COVERAGE_ALL_NO_COLOR" in os.environ and os.environ["REDO_COVERAGE_ALL_NO_COLOR"]:
+    PASSED = "PASSED"
+    FAILED = "FAILED"
+else:
+    PASSED = BOLD + GREEN + "PASSED" + NO_COLOR
+    FAILED = BOLD + RED + "FAILED" + NO_COLOR
 
 
 class build_coverage_all(build_rule_base):
@@ -80,6 +85,12 @@ class build_coverage_all(build_rule_base):
         except BaseException:
             pass
 
+        # Make a build directory at the top level:
+        failed_test_log_dir = os.path.join(directory, "build" + os.sep + "failed_coverage_logs")
+        log_dir = os.path.join(directory, "build" + os.sep + "coverage_logs")
+        filesystem.safe_makedir(failed_test_log_dir)
+        filesystem.safe_makedir(log_dir)
+
         # Run tests:
         exit_code = 0
         self._write_to_both("\nTesting...\n")
@@ -92,11 +103,22 @@ class build_coverage_all(build_rule_base):
             )
             database.setup.reset()
             try:
-                redo.redo([os.path.join(test, "coverage"), "1>&2", "2>/dev/null"])
+                coverage_log = os.path.join(log_dir, rel_test.replace(os.sep, "_") + ".log")
+                redo.redo([os.path.join(test, "coverage"), "1>&2", "2>" + coverage_log])
                 self._write_to_both(" " + PASSED + "\n")
-            except Exception:
+            except BaseException:
                 exit_code = 1
                 self._write_to_both(" " + FAILED + "\n")
+
+                # On a failed test, save off the test logs for inspection. This is
+                # especially useful on a remote CI server.
+                try:
+                    copytree(
+                        os.path.join(test, "build" + os.sep + "log"),
+                        os.path.join(failed_test_log_dir, test.replace(os.sep, "_"))
+                    )
+                except BaseException:
+                    pass
 
         if exit_code != 0:
             self.summary_file.close()
