@@ -11,7 +11,7 @@ NO_COLOR = "\033[0m"
 BOLD = "\033[1m"
 RED = "\033[31m"
 GREEN = "\033[32m"
-if "REDO_UT_NO_COLOR" in os.environ and os.environ["REDO_UT_NO_COLOR"]:
+if "REDO_STYLE_ALL_NO_COLOR" in os.environ and os.environ["REDO_STYLE_ALL_NO_COLOR"]:
     PASSED = "PASSED"
     FAILED = "FAILED"
 else:
