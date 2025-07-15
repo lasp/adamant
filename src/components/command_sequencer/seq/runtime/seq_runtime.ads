@@ -1,5 +1,5 @@
 with Interfaces; use Interfaces;
-with Sys_Time; use Sys_Time;
+with Sys_Time;
 with Command;
 with Command_Types; use Command_Types;
 with Basic_Types; use Basic_Types;

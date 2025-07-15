@@ -23,7 +23,6 @@ package body Component.Parameters.Implementation is
    --
    overriding procedure Init (Self : in out Instance; Parameter_Table_Entries : in not null Parameters_Component_Types.Parameter_Table_Entry_List_Access; Dump_Parameters_On_Change : in Boolean := False) is
       use Parameter_Types;
-      use Parameters_Component_Types;
       Current_Byte : Natural := 0;
    begin
       -- Initialize internal variables:
@@ -41,6 +40,7 @@ package body Component.Parameters.Implementation is
             -- Make sure all the IDs are unique.
             for Next_Entry_Idx in Natural range Idx + 1 .. Self.Entries.all'Last loop
                pragma Assert (Param_Entry.Id /= Self.Entries.all (Next_Entry_Idx).Id, "All parameter IDs must be unique. Duplicate ID '" & Parameter_Id'Image (Param_Entry.Id) & "' found.");
+               pragma Annotate (GNATSAS, Intentional, "conditional raise", "This assertion is intentionally designed to raise an exception if duplicate parameter IDs are found during initialization validation.");
             end loop;
 
             -- Make sure all component IDs are within the index range of our arrayed parameter connector.

@@ -11,7 +11,7 @@ BEGIN {
   statement_count=0;
 }
 
-/TODO\ declarations/ {
+/TODO declarations/ {
   if( declaration_count == 0 ) {
     print "      A_Out : constant Aa.T := (One => Arg.Element, Two => Arg.Element2, Three => Arg.Element2);"
     declaration_count++;
@@ -22,7 +22,13 @@ BEGIN {
   next
 }
 
-/TODO\ statements/ {
+/Ignore.*:.*Instance.*renames.*Self;/ {
+  print "      pragma Annotate (GNATSAS, Intentional, \"subp always fails\", \"This is template code intentionally designed to fail to remind developer to implement it.\");"
+  print $0
+  next
+}
+
+/TODO statements/ {
   if( statement_count == 0 ) {
     print "      Put_Line (\"Component receiving something on B In\");"
     print "      Put_Line (\"Element: \" & Integer@Image (Arg.Element));"

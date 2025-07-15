@@ -142,6 +142,7 @@ package body Component.Logger.Implementation is
       if Size > 0 and then (Bytes /= null or else Meta_Data /= null) then
          pragma Assert (False, "Logger Init Error: Either size > 0 or bytes /= null should be provided to size the logger's internal buffer, not both!");
       end if;
+      pragma Annotate (GNATSAS, Intentional, "condition predetermined", "Defensive check - and also good documentation event if redundant with previous assertions");
 
       -- Initialize the internal byte buffer:
       if Bytes /= null then

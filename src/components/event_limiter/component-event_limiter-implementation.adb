@@ -164,7 +164,6 @@ package body Component.Event_Limiter.Implementation is
       if Send_Packet then
          declare
             use Serializer_Types;
-            use Packet;
             -- Byte array for the packet
             Event_State_Array : Basic_Types.Byte_Array (0 .. Self.State_Packet_Size - 1) := [others => 16#FF#];
             State_Packet : Packet.T;

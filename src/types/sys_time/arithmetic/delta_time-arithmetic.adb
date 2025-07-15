@@ -26,6 +26,7 @@ package body Delta_Time.Arithmetic is
          -- Convert from time span to an absolute time, time spans can be negative, sys_time and Delta_Time cannot
          The_Time := Time_Of (Seconds_Count (0), abs (Arg_In));
       end if;
+      pragma Annotate (GNATSAS, Intentional, "dead code", "Defensive handling for Time_Span_First edge case - prevents abs() overflow");
 
       -- Convert from time to Sys_Time
       Status := To_Sys_Time (The_Time, Out_Time);

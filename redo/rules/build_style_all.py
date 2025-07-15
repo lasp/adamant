@@ -25,6 +25,13 @@ class build_style_all(build_rule_base):
     it is passed and recursively below. It then runs redo style
     prints a report to the terminal as the style checks are run.
     """
+
+    def _write_to_both(self, message):
+        """Write message to both stderr and summary file."""
+        sys.stderr.write(message)
+        self.summary_file.write(message)
+        self.summary_file.flush()
+
     def _build(self, redo_1, redo_2, redo_3):
         pass  # We are overriding build instead since
         # we don't need to usual build boilerplate
@@ -63,12 +70,18 @@ class build_style_all(build_rule_base):
             sys.stderr.write("No source code found in or below '" + directory + "'.\n")
             error.abort(0)
 
+        # Create summary report file
+        build_dir = os.path.join(directory, "build")
+        filesystem.safe_makedir(build_dir)
+        summary_report_path = os.path.join(build_dir, "style_all_summary.txt")
+        self.summary_file = open(summary_report_path, "w")
+
         # Print the test plan:
         num_tests = "%02d" % len(tests)
-        sys.stderr.write("Will be checking a total of " + num_tests + " directories:\n")
+        self._write_to_both("Will be checking a total of " + num_tests + " directories:\n")
         for number, test in enumerate(tests):
             rel_test = os.path.relpath(test, directory)
-            sys.stderr.write(
+            self._write_to_both(
                 ("%02d" % (number + 1)) + "/" + num_tests + " " + rel_test + "\n"
             )
 
@@ -87,15 +100,14 @@ class build_style_all(build_rule_base):
 
         # Run tests:
         exit_code = 0
-        sys.stderr.write("\nChecking style...\n")
+        self._write_to_both("\nChecking style...\n")
         for number, test in enumerate(tests):
             rel_test = os.path.relpath(test, directory)
-            sys.stderr.write(
+            self._write_to_both(
                 "{0:80}   ".format(
                     (("%02d" % (number + 1)) + "/" + num_tests + " " + rel_test)[:80]
                 )
             )
-            sys.stderr.flush()
             database.setup.reset()
             try:
                 style_run_log = os.path.join(log_dir, rel_test.replace(os.sep, "_") + ".log")
@@ -106,7 +118,7 @@ class build_style_all(build_rule_base):
                     os.path.join(os.path.join(test, "build"), "style"), "style.log"
                 )
                 if os.path.isfile(style_log) and os.path.getsize(style_log) > 0:
-                    sys.stderr.write(" " + FAILED + "\n")
+                    self._write_to_both(" " + FAILED + "\n")
                     exit_code = 1
 
                     # On a failed style, save off the logs for inspection. This is
@@ -119,9 +131,9 @@ class build_style_all(build_rule_base):
                     except BaseException:
                         pass
                 else:
-                    sys.stderr.write(" " + PASSED + "\n")
+                    self._write_to_both(" " + PASSED + "\n")
             except Exception:
-                sys.stderr.write(" " + FAILED + "\n")
+                self._write_to_both(" " + FAILED + "\n")
                 exit_code = 1
 
                 # On a failed style, save off the logs for inspection. This is
@@ -134,6 +146,7 @@ class build_style_all(build_rule_base):
                 except BaseException:
                     pass
 
+        self.summary_file.close()
         error.abort(exit_code)
 
     # No need to provide these for "redo style_all"

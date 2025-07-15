@@ -38,6 +38,7 @@ package body Component.Product_Copier.Implementation is
             pragma Assert (
                Products_To_Copy (I).Destination_Id /= Products_To_Copy (J).Destination_Id
             );
+            pragma Annotate (GNATSAS, Intentional, "assertion", "This assertion is intentionally designed to raise an exception if duplicate destination IDs are found during initialization validation.");
          end loop;
       end loop;
 

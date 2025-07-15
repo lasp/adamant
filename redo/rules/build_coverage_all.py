@@ -23,6 +23,13 @@ class build_coverage_all(build_rule_base):
     as the tests are run. Tests are matched by finding either a
     "test.adb" file or a "test.do" file a directory.
     """
+
+    def _write_to_both(self, message):
+        """Write message to both stderr and summary file."""
+        sys.stderr.write(message)
+        self.summary_file.write(message)
+        self.summary_file.flush()
+
     def _build(self, redo_1, redo_2, redo_3):
         pass  # We are overriding build instead since
         # we don't need to usual build boilerplate
@@ -47,16 +54,22 @@ class build_coverage_all(build_rule_base):
             sys.stderr.write("No tests found in or below '" + directory + "'.\n")
             error.abort(0)
 
+        # Create summary report file
+        build_dir = os.path.join(directory, "build")
+        filesystem.safe_makedir(build_dir)
+        summary_report_path = os.path.join(build_dir, "coverage_all_summary.txt")
+        self.summary_file = open(summary_report_path, "w")
+
         # Print the test plan:
         num_tests = "%02d" % len(tests)
-        sys.stderr.write(
+        self._write_to_both(
             "Will be running and gathering coverage information on a total of "
             + num_tests
             + " tests:\n"
         )
         for number, test in enumerate(tests):
             rel_test = os.path.relpath(test, directory)
-            sys.stderr.write(
+            self._write_to_both(
                 ("%02d" % (number + 1)) + "/" + num_tests + " " + rel_test + "\n"
             )
 
@@ -69,24 +82,24 @@ class build_coverage_all(build_rule_base):
 
         # Run tests:
         exit_code = 0
-        sys.stderr.write("\nTesting...\n")
+        self._write_to_both("\nTesting...\n")
         for number, test in enumerate(tests):
             rel_test = os.path.relpath(test, directory)
-            sys.stderr.write(
+            self._write_to_both(
                 "{0:60}   ".format(
                     (("%02d" % (number + 1)) + "/" + num_tests + " " + rel_test)[:60]
                 )
             )
-            sys.stderr.flush()
             database.setup.reset()
             try:
                 redo.redo([os.path.join(test, "coverage"), "1>&2", "2>/dev/null"])
-                sys.stderr.write(" " + PASSED + "\n")
+                self._write_to_both(" " + PASSED + "\n")
             except Exception:
                 exit_code = 1
-                sys.stderr.write(" " + FAILED + "\n")
+                self._write_to_both(" " + FAILED + "\n")
 
         if exit_code != 0:
+            self.summary_file.close()
             error.abort(exit_code)
 
         # Run gcovr at this directory.
@@ -116,9 +129,11 @@ class build_coverage_all(build_rule_base):
         sys.stderr.write(str(stderr))
 
         # Print some info on commandline for user.
-        sys.stderr.write("\n")
-        sys.stderr.write("Output text file can be found here: " + coverage_file + "\n")
-        sys.stderr.write("Output html files can be found in: " + output_html + "\n")
+        self._write_to_both("\n")
+        self._write_to_both("Output text file can be found here: " + coverage_file + "\n")
+        self._write_to_both("Output html files can be found in: " + output_html + "\n")
+
+        self.summary_file.close()
 
     # No need to provide these for "redo coverage_all"
     # def input_file_regex(self): pass

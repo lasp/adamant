@@ -52,7 +52,7 @@ package body Tests.Implementation is
       use Ccsds_Primary_Header;
       use Interfaces;
       T : Component.Ccsds_Socket_Interface.Implementation.Tester.Instance_Access renames Self.Tester;
-      Address : constant Socket_Address.T := (Ip_Address => [127, 0, 0, 1], Port => Self.Port);
+      Address : constant Socket_Address.T := (Ip_Address => [127, 0, 0, 1], Port => Interfaces.Unsigned_32 (Self.Port));
       -- Start the socket internal listener thread:
       Socket_Listener_Task_Signal : aliased Ada.Synchronous_Task_Control.Suspension_Object;
       Socket_Listener_Task_Info : aliased Task_Types.Task_Info;

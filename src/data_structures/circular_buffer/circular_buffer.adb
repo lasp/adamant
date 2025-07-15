@@ -371,10 +371,11 @@ package body Circular_Buffer is
 
    function Peek_Length (Self : in Queue_Base; Length : out Natural) return Pop_Status is
    begin
+      -- Initialize length to zero:
+      Length := 0;
+
       -- Make sure there is data on the queue:
       if Self.Item_Count = 0 then
-         -- Initialize length to zero:
-         Length := 0;
          return Empty;
       end if;
 

@@ -37,14 +37,13 @@ package {{ name }} is
             Id => {{ response.command_id }},
             Arg_Buffer_Length => {{ response.command_arg_length }}
          ),
-         Arg_Buffer => (
+         Arg_Buffer =>
 {% if response.command.type_model %}
             {{ response.command_arg_type_model.name }}.Serialization.To_Byte_Array ({{ response.command_arg }}) &
             [0 .. Command_Types.Command_Arg_Buffer_Type'Length - {{ response.command_arg_type_model.name }}.Size_In_Bytes - 1 => 0]
 {% else %}
-            others => 0
+            [others => 0]
 {% endif %}
-         )
       )
    );
 

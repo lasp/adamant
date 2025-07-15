@@ -51,7 +51,7 @@ package body Binary_Tree is
          Self.Size := @ + 1;
 
          -- Move the last element into the new last slot.
-         pragma Assert (Self.Size >= Self.Tree'First, "Size is greater than or equal to 1 at this point.");
+         pragma Assert (Self.Size >= Self.Tree'First);
          Self.Tree (Self.Size) := This_Element;
       end;
 
@@ -81,11 +81,12 @@ package body Binary_Tree is
 
    -- Search for element in tree. This is done in O(log n) where n is the current size of the tree.
    function Search (Self : in Instance; Element : in Element_Type; Element_Found : out Element_Type; Element_Index : out Positive) return Boolean is
-      pragma Annotate (GNATSAS, Intentional, "validity check", "Out parameters element_Found and element_Index will be uninitialized if no element is found, by design.");
       Low_Index : Natural := Self.Tree'First;
       High_Index : Natural := Self.Size;
    begin
+      -- Ensure size is as expected
       pragma Assert (Self.Size <= Self.Tree'Last - Self.Tree'First + 1);
+
       -- Perform binary search on sorted list:
       while Low_Index <= High_Index loop
          declare
@@ -103,6 +104,10 @@ package body Binary_Tree is
             end if;
          end;
       end loop;
+
+      -- Initialize out parameters to sane values on failure to find match
+      Element_Index := Self.Tree'First;
+      Element_Found := Element;
 
       return False;
    end Search;

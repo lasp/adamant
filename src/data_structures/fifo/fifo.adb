@@ -79,6 +79,7 @@ package body Fifo is
    end Pop;
 
    function Peek (Self : in Instance; Value : out T) return Pop_Status is
+      pragma Annotate (GNATSAS, Intentional, "validity check", "out parameter Value not set Empty for performance");
    begin
       if Self.Is_Empty then
          return Empty;

@@ -7,6 +7,7 @@ with Ada.Text_IO; use Ada.Text_IO;
 cat build/template/$name | awk '
 /TODO declarations/ {
   print "      A_out : Generic_Type_1;"
+  print "      pragma Annotate (GNATSAS, Intentional, \"unassigned variable\", \"Ignore, this is OK for this test\");"
 }
 /TODO statements/ {
   print "      Put_Line (\"Component: Received generic type on Generic_Type_2_Sync_In\");"

@@ -4,7 +4,7 @@ from util import target
 # unless the target is already set to a coverage target.
 build_target = target.try_get_target()
 if build_target:
-    if not build_target.endswith("Coverage"):
+    if not build_target.endswith("Coverage") and not build_target.endswith("Analyze"):
         target.set_test_target(build_target)
 else:
     target.set_default_test_target()

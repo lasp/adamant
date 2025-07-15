@@ -460,7 +460,7 @@ package body Seq_Runtime is
       pragma Warnings (Off, "overlay changes scalar storage order");
       This_Internal : T with Import, Convention => Ada, Address => Inst.Internals (Seq_Internal.E'Pos (Src))'Address;
       pragma Warnings (On, "overlay changes scalar storage order");
-      Errant : Interfaces.Unsigned_32;
+      Errant : Interfaces.Unsigned_32 := 0;
    begin
       -- Make sure that the object can fit into a sequence runtime variable and that it is valid.
       -- This is invalid if we need to read into a packed record with a constrained field (i.e. enum)
@@ -674,6 +674,7 @@ package body Seq_Runtime is
          Self.Timeout_Set := False;
          return Self.Next_Position;
       end if;
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "Packed type .Value fields initialized by Get_Internal_* functions, verified by assertions");
 
       -- If we have not setup a timeout
       if Self.Timeout_Set = False then
@@ -958,6 +959,8 @@ package body Seq_Runtime is
          when Greater_Than_Equal =>
             Result.Value := (if Left.Value >= Right.Value then 1 else 0);
       end case;
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "Packed type .Value fields initialized by Get_Internal_* functions, verified by assertions");
+      pragma Annotate (GNATSAS, False_Positive, "divide by zero", "Division operations protected by sequencer runtime exception logic");
 
       -- Update Internal Value
       Set_Status := Set_Internal_Natural_32 (Self, Seq_Internal.A, Result);
@@ -1101,6 +1104,7 @@ package body Seq_Runtime is
       else
          return Self.Next_Position;
       end if;
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "Packed type .Value fields initialized by Get_Internal_* functions, verified by assertions");
    end Cmd_Jump_If_Zero;
 
    -- opcode 17 | Jump Not Zero | U8 - U8 - U16 | Opcode - Pad - Position
@@ -1125,6 +1129,7 @@ package body Seq_Runtime is
       else
          return Self.Next_Position;
       end if;
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "Packed type .Value fields initialized by Get_Internal_* functions, verified by assertions");
    end Cmd_Jump_Not_Zero;
 
    -- opcode 18 | Jump If Equal | U8 - U8 - U16 - U32 | Opcode - Pad - Position - Value
@@ -1148,6 +1153,7 @@ package body Seq_Runtime is
       else
          return Self.Next_Position;
       end if;
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "Packed type .Value fields initialized by Get_Internal_* functions, verified by assertions");
    end Cmd_Jump_If_Equal;
 
    -- opcode 19 | Jump Not Equal | U8 - U8 - U16 - U32 | Opcode - Pad - Position - Value
@@ -1171,6 +1177,7 @@ package body Seq_Runtime is
       else
          return Self.Next_Position;
       end if;
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "Packed type .Value fields initialized by Get_Internal_* functions, verified by assertions");
    end Cmd_Jump_Not_Equal;
 
    -- opcode 20 | Return | U8 - U8 - U8 - U8 | Opcode - Pad - Pad - Pad
@@ -1255,6 +1262,8 @@ package body Seq_Runtime is
          when Modulus | Bitwise_And | Bitwise_Xor | Bitwise_Or | Logical_Or | Logical_And =>
             return Self.Process_Error (Invalid_Op);
       end case;
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "Packed type .Value fields initialized by Get_Internal_* functions, verified by conditional checks");
+      pragma Annotate (GNATSAS, False_Positive, "divide by zero", "Division operations protected by sequencer runtime exception logic");
 
       -- Update Internal Value
       Set_Status := Set_Internal_F32 (Self, Seq_Internal.A, Result);
@@ -1286,6 +1295,8 @@ package body Seq_Runtime is
 
       -- Perform the cast (this can fail)
       Dst.Value := Interfaces.Unsigned_32 (Src.Value);
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "Packed type .Value fields initialized by Get_Internal_* functions, invalid handled by exception");
+      pragma Annotate (GNATSAS, False_Positive, "overflow check", "overflow purposefully handled by exception");
 
       -- Write Internal
       Status := Set_Internal_U32 (Self, Instruction.Id, Dst);
@@ -1316,6 +1327,7 @@ package body Seq_Runtime is
 
       -- Perform the cast (this cannot fail)
       Dst.Value := Short_Float (Src.Value);
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "Packed type .Value fields initialized by Get_Internal_* functions, checked by assertion");
 
       -- Write Internal
       Status := Set_Internal_F32 (Self, Instruction.Id, Dst);
@@ -1374,6 +1386,8 @@ package body Seq_Runtime is
          when Greater_Than_Equal =>
             Result.Value := (if Left.Value >= Right.Value then 1 else 0);
       end case;
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "Packed type .Value fields initialized by Get_Internal_* functions, verified by assertions");
+      pragma Annotate (GNATSAS, False_Positive, "divide by zero", "Division operations protected by sequencer runtime exception logic");
 
       -- Update Internal Value
       Set_Status := Set_Internal_I32 (Self, Seq_Internal.A, Result);
@@ -1404,6 +1418,7 @@ package body Seq_Runtime is
 
       -- Perform the cast (this can fail)
       Dst.Value := Interfaces.Unsigned_32 (Src.Value);
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "Packed type .Value fields initialized by Get_Internal_* functions, checked by assertion");
 
       -- Write Internal
       Status := Set_Internal_U32 (Self, Instruction.Id, Dst);
@@ -1434,6 +1449,7 @@ package body Seq_Runtime is
 
       -- Perform the cast (this can fail)
       Dst.Value := Interfaces.Integer_32 (Src.Value);
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "Packed type .Value fields initialized by Get_Internal_* functions, checked by assertion");
 
       -- Write Internal
       Status := Set_Internal_I32 (Self, Instruction.Id, Dst);
@@ -1465,6 +1481,8 @@ package body Seq_Runtime is
 
       -- Perform the cast (this can fail)
       Dst.Value := Interfaces.Integer_32 (Src.Value);
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "Packed type .Value fields initialized by Get_Internal_* functions, invalid handled by exception");
+      pragma Annotate (GNATSAS, False_Positive, "overflow check", "overflow purposefully handled by exception");
 
       -- Write Internal
       Status := Set_Internal_I32 (Self, Instruction.Id, Dst);
@@ -1495,6 +1513,7 @@ package body Seq_Runtime is
 
       -- Perform the cast (this cannot fail)
       Dst.Value := Short_Float (Src.Value);
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "Packed type .Value fields initialized by Get_Internal_* functions, checked by assertion");
 
       -- Write Internal
       Status := Set_Internal_F32 (Self, Instruction.Id, Dst);
@@ -1518,6 +1537,7 @@ package body Seq_Runtime is
       end if;
 
       return Self.Wait_Helper (Instruction.Wait_Type, Wait_Time.Value);
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "Packed type .Value fields initialized by Get_Internal_* functions, checked by assertion");
    end Cmd_Wait_On_B;
 
    -- opcode 36 | Wait If Zero On B | U8 - E8 - U16 | Opcode - Wait Type - Position
@@ -1535,6 +1555,7 @@ package body Seq_Runtime is
       end if;
 
       return Self.Wait_On_Helper (Instruction.Wait_Type, Timeout_Seconds.Value, Instruction.Position);
+      pragma Annotate (GNATSAS, False_Positive, "validity check", "Packed type .Value fields initialized by Get_Internal_* functions, checked by assertion");
    end Cmd_Wait_If_Zero_On_B;
 
    -- opcode 37 | Str_Alloc | U8 - U8 - U8 - U8 | Opcode - Id - Pad - Pad

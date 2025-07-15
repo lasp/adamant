@@ -23,6 +23,7 @@ package body Stream_Serializer is
    begin
       Ada.Streams.Read (Stream.all, Bytes (Constrained_Stream_Array'First .. Constrained_Stream_Array'First + Stream_Element_Offset (Num_Bytes_To_Deserialize - 1)), Ignore);
    end Deserialize;
+   pragma Annotate (GNATSAS, False_Positive, "validity check", "Output initialized by Ada.Streams.Read via address overlay");
 
    pragma Warnings (On, "overlay changes scalar storage order");
 

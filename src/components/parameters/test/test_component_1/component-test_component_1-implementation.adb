@@ -34,10 +34,12 @@ package body Component.Test_Component_1.Implementation is
       then
          Arg.Status := Self.Override_Parameter_Update_Status;
          Arg.Param.Header.Buffer_Length := Self.Override_Parameter_Length;
+         pragma Annotate (GNATSAS, False_Positive, "range check", "Override_Parameter_Length set by test configuration, within expected range");
       else
          -- Process the parameter update, staging or fetching parameters as requested.
          Self.Process_Parameter_Update (Arg);
       end if;
+      pragma Annotate (GNATSAS, Intentional, "condition predetermined", "Test component flags may be set to constant values for specific test scenarios");
    end Parameter_Update_T_Modify;
 
    -----------------------------------------------

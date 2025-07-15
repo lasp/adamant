@@ -8,19 +8,36 @@ with String_Util;
 with Serializer_Types;
 with Interfaces;
 with GNAT.Sockets; use GNAT.Sockets;
+with Ip_V4_Address;
+with Basic_Types;
 
 package body Component.Ccsds_Socket_Interface.Implementation is
 
    ---------------------------------------
    -- Private functions:
    ---------------------------------------
+   -- Helper function to convert GNAT socket address to Adamant Socket_Address
+   function Convert_Socket_Address (Self : in Instance) return Socket_Address.T is
+      Gnat_Ip : constant GNAT.Sockets.Inet_Addr_V4_Type := Self.Sock.Get_Ip_Address;
+      Gnat_Port : constant GNAT.Sockets.Port_Type := Self.Sock.Get_Port;
+      Adamant_Ip : Ip_V4_Address.T;
+      Adamant_Port : constant Interfaces.Unsigned_32 := Interfaces.Unsigned_32 (Gnat_Port);
+   begin
+      -- Convert IPv4 address from GNAT format to Adamant format
+      -- GNAT Inet_Addr_V4_Type is a 4-byte array, convert with proper indexing
+      for I in Gnat_Ip'Range loop
+         Adamant_Ip (Adamant_Ip'First + (I - Gnat_Ip'First)) := Basic_Types.Byte (Gnat_Ip (I));
+      end loop;
+      return (Ip_Address => Adamant_Ip, Port => Adamant_Port);
+   end Convert_Socket_Address;
+
    -- Function to connect to socket:
    procedure Connect (Self : in out Instance) is
    begin
       -- Try to connect to socket:
       Self.Sock.Connect (String_Util.Trim_Both (Self.Addr), Self.Port);
       if Self.Sock.Is_Connected then
-         Self.Event_T_Send_If_Connected (Self.Events.Socket_Connected (Self.Sys_Time_T_Get, (Self.Sock.Get_Ip_Address, Self.Sock.Get_Port)));
+         Self.Event_T_Send_If_Connected (Self.Events.Socket_Connected (Self.Sys_Time_T_Get, Self.Convert_Socket_Address));
       end if;
    end Connect;
 
@@ -28,8 +45,13 @@ package body Component.Ccsds_Socket_Interface.Implementation is
    procedure Disconnect (Self : in out Instance) is
    begin
       if Self.Sock.Is_Connected then
-         Self.Sock.Disconnect;
-         Self.Event_T_Send_If_Connected (Self.Events.Socket_Not_Connected (Self.Sys_Time_T_Get, (Self.Sock.Get_Ip_Address, Self.Sock.Get_Port)));
+         -- Get the socket address before disconnecting
+         declare
+            Socket_Addr : constant Socket_Address.T := Self.Convert_Socket_Address;
+         begin
+            Self.Sock.Disconnect;
+            Self.Event_T_Send_If_Connected (Self.Events.Socket_Not_Connected (Self.Sys_Time_T_Get, Socket_Addr));
+         end;
       end if;
    end Disconnect;
 
@@ -47,7 +69,7 @@ package body Component.Ccsds_Socket_Interface.Implementation is
       -- Try to connect to socket:
       Self.Connect;
       if not Self.Sock.Is_Connected then
-         Self.Event_T_Send_If_Connected (Self.Events.Socket_Not_Connected (Self.Sys_Time_T_Get, (Self.Sock.Get_Ip_Address, Self.Sock.Get_Port)));
+         Self.Event_T_Send_If_Connected (Self.Events.Socket_Not_Connected (Self.Sys_Time_T_Get, Self.Convert_Socket_Address));
       end if;
    end Init;
 

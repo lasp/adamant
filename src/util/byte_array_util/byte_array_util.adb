@@ -164,6 +164,7 @@ package body Byte_Array_Util is
       then
          return Error;
       end if;
+      pragma Annotate (GNATSAS, Intentional, "condition predetermined", "Defensive check - no current callers use Size > 32, but kept for safety");
 
       -- Check the polytype value to see if it can be stored without truncation:
       declare

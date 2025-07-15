@@ -130,6 +130,7 @@ package body Component.Ccsds_Serial_Interface.Implementation is
          else
             -- Now read the data:
             Diagnostic_Uart.Get (Packet.Data (0 .. Natural (Packet.Header.Packet_Length)));
+            pragma Annotate (GNATSAS, False_Positive, "validity check", "Packet.Header.Packet_Length initialized by Diagnostic_Uart.Get call above");
 
             -- OK awesome, we got a packet, send it out of the connector:
             Self.Ccsds_Space_Packet_T_Send_If_Connected (Packet);

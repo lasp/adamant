@@ -27,7 +27,7 @@ package body Global is
       Static_Var : Static.T := (others => 0);
       Variable_Var : Simple_Variable.T := (Length => 0, Buffer => [others => 0]);
       Bytes : Basic_Types.Byte_Array (0 .. 100);
-      Pri_Data : Data;
+      Pri_Data : Data := (Pri => 0, Data_Type => Bytes_Type);
       use Ada.Real_Time;
       use Simple_Variable;
       use Static.Assertion;

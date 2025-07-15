@@ -1,0 +1,5 @@
+---
+type: Basic_Types.Byte
+format: U8
+description: IPv4 address represented as 4 bytes
+length: 4
