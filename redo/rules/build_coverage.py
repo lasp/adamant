@@ -48,9 +48,14 @@ class build_coverage(build_rule_base):
 
         # Build files:
         binary_src_dir = redo_arg.get_src_dir(binary)
-        # Pipe through true, so we can get a coverage report even for a failing test
         redo.redo_ifchange(binary)
-        redo.redo(binary_src_dir + os.sep + "test | true")
+
+        # Try/catch test command so we can get a coverage report even for a failing test.
+        exit_code = 0
+        try:
+            redo.redo(binary_src_dir + os.sep + "test")
+        except BaseException:
+            exit_code = 1
 
         # Running the binary will create a bunch of .gcda files which are the files that
         # gcov needs to do analysis. Unfortunately, because of the way redo works, writing
@@ -103,6 +108,9 @@ class build_coverage(build_rule_base):
         sys.stderr.write("\n")
         sys.stderr.write("Output text file can be found here: " + coverage_file + "\n")
         sys.stderr.write("Output html files can be found in: " + output_html + "\n")
+
+        if exit_code != 0:
+            error.abort(exit_code)
 
     def input_file_regex(self):
         """Match any binary file called "test.elf"."""
