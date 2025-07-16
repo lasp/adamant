@@ -137,23 +137,80 @@ class build_coverage_all(build_rule_base):
         with open(coverage_file, "w") as f:
             f.write(stdout)
 
-        # Generate html report:
-        output_html = coverage_dir + os.sep + "coverage.html"
-        command = (
+        # Generate multiple filtered HTML reports
+        self._write_to_both("\nGenerating filtered coverage reports...\n")
+
+        # 1. Flight code only (exclude test and generated code)
+        flight_html = coverage_dir + os.sep + "flight_coverage.html"
+        flight_txt = coverage_dir + os.sep + "flight_coverage.txt"
+        flight_command = (
+            "gcovr -r " + directory +
+            " --exclude '.*/test/.*' --exclude '.*/build/.*'" +
+            " --html --html-details -o " + flight_html
+        )
+        rc, stderr, stdout = shell.try_run_command_capture_output(flight_command)
+        if rc == 0:
+            self._write_to_both("Flight code coverage report generated successfully.\n")
+            # Also generate flight code text report
+            flight_txt_command = (
+                "gcovr -r " + directory +
+                " --exclude '.*/test/.*' --exclude '.*/build/.*'"
+            )
+            rc_txt, stderr_txt, stdout_txt = shell.try_run_command_capture_output(flight_txt_command)
+            if rc_txt == 0:
+                with open(flight_txt, "w") as f:
+                    f.write(stdout_txt)
+        else:
+            self._write_to_both("Warning: Flight code coverage report generation failed.\n")
+
+        # 2. Test code coverage (test directories only)
+        test_html = coverage_dir + os.sep + "test_coverage.html"
+        test_command = (
+            "gcovr -r " + directory +
+            " --filter '.*/test/.*'" +
+            " --html --html-details -o " + test_html
+        )
+        rc, stderr, stdout = shell.try_run_command_capture_output(test_command)
+        if rc == 0:
+            self._write_to_both("Test code coverage report generated successfully.\n")
+        else:
+            self._write_to_both("Warning: Test code coverage report generation failed.\n")
+
+        # 3. Generated code coverage (build/src directories)
+        generated_html = coverage_dir + os.sep + "generated_coverage.html"
+        generated_command = (
+            "gcovr -r " + directory +
+            " --filter '.*/build/.*'" +
+            " --html --html-details -o " + generated_html
+        )
+        rc, stderr, stdout = shell.try_run_command_capture_output(generated_command)
+        if rc == 0:
+            self._write_to_both("Generated code coverage report generated successfully.\n")
+        else:
+            self._write_to_both("Warning: Generated code coverage report generation failed.\n")
+
+        # 4. Complete report - everything above combined
+        complete_html = coverage_dir + os.sep + "complete_coverage.html"
+        complete_command = (
             "gcovr -r "
             + directory
             + " --html --html-details -o "
-            + output_html
+            + complete_html
             + " >&2"
         )
-        rc, stderr, stdout = shell.try_run_command_capture_output(command)
+        rc, stderr, stdout = shell.try_run_command_capture_output(complete_command)
         sys.stderr.write(str(stdout))
         sys.stderr.write(str(stderr))
 
         # Print some info on commandline for user.
         self._write_to_both("\n")
-        self._write_to_both("Output text file can be found here: " + coverage_file + "\n")
-        self._write_to_both("Output html files can be found in: " + output_html + "\n")
+        self._write_to_both("Coverage reports generated:\n")
+        self._write_to_both("  Flight code only (recommended): " + flight_html + "\n")
+        self._write_to_both("  Flight code text summary: " + flight_txt + "\n")
+        self._write_to_both("  Test code only: " + test_html + "\n")
+        self._write_to_both("  Generated code only: " + generated_html + "\n")
+        self._write_to_both("  Complete coverage (all files): " + complete_html + "\n")
+        self._write_to_both("  Text summary (all files): " + coverage_file + "\n")
 
         self.summary_file.close()
 
