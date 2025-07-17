@@ -1,4 +1,4 @@
-name: Run All Unit Tests
+name: Run All Unit Tests with Coverage
 on:
   push:
     branches:
@@ -19,10 +19,10 @@ jobs:
       - run: echo "Checking out ${{ github.repository }} on branch ${{ github.ref }}."
       - name: Check out repository code
         uses: actions/checkout@v4
-      - name: Run all unit tests
-        run: bash env/github_run.sh "redo test_all"
+      - name: Run all unit tests and coverage
+        run: bash env/github_run.sh "redo coverage_all"
       - name: Archive logs for failed unit tests
-        if: always() # Make sure this runs even if `redo test_all` fails
+        if: always() # Make sure this runs even if `redo coverage_all` fails
         uses: actions/upload-artifact@v4
         with:
           name: test_logs
