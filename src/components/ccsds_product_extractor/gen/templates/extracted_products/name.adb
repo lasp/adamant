@@ -5,7 +5,9 @@ with Ccsds_Primary_Header; use Ccsds_Primary_Header;
 with Interfaces; use Interfaces;
 with Extract_Data_Product; use Extract_Data_Product;
 {% for item in includes %}
+{% if item not in ["Sys_Time", "Ccsds_Space_Packet"] %}
 with {{ item }};
+{% endif %}
 with {{ item }}.Validation;
 {% endfor %}
 
