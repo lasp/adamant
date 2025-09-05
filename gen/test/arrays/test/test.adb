@@ -1,6 +1,7 @@
 with Ada.Text_IO; use Ada.Text_IO;
 with Simple_Array.Representation;
 with Complex_Array.Representation;
+with Complex_Array_Le.Representation;
 with Eight_Bit_Type_Array.Representation;
 with Unaligned_Array.Representation;
 with Enum_Array.Representation;
@@ -8,12 +9,14 @@ with Simple_Array.Validation;
 with Simple_Array.C; use Simple_Array.C;
 with Complex_Array.Validation;
 with Complex_Array.C; use Complex_Array.C;
+with Complex_Array_Le.C; use Complex_Array_Le.C;
 with Eight_Bit_Type_Array.Validation;
 with Unaligned_Array.Validation;
 with Enum_Array.Validation;
 with Simple_Array.Assertion; use Simple_Array.Assertion;
 with Float_Array.Assertion; use Float_Array.Assertion;
 with Complex_Array.Assertion; use Complex_Array.Assertion;
+with Complex_Array_Le.Assertion; use Complex_Array_Le.Assertion;
 with Complex_Float_Array.Assertion; use Complex_Float_Array.Assertion;
 with Eight_Bit_Type_Array.Assertion; use Eight_Bit_Type_Array.Assertion;
 with Unaligned_Array.Assertion; use Unaligned_Array.Assertion;
@@ -31,6 +34,7 @@ procedure Test is
    -- Array definitions:
    S_Bytes : Simple_Array.Serialization.Byte_Array := [0 => 0, 1 => 1, 2 => 0, 3 => 1, 4 => 255, others => 0];
    C_Bytes : Complex_Array.Serialization.Byte_Array := [0 => 0, 1 => 19, 2 => 0, 3 => 6, 4 => 5, 5 => 9, others => 0];
+   C_Le_Bytes : Complex_Array_Le.Serialization_Le.Byte_Array := [0 => 0, 1 => 19, 2 => 5, 3 => 0, 4 => 6, 5 => 0, others => 0];
    E_Bytes : Eight_Bit_Type_Array.Serialization.Byte_Array := [0 .. 10 => 1, 11 => 0, others => 1];
    U_Bytes : Unaligned_Array.Serialization.Byte_Array := [0 .. 2 => 255, others => 0];
    En_Bytes : Enum_Array.Serialization.Byte_Array := [0, 1, 3, 4, 233];
@@ -39,6 +43,7 @@ procedure Test is
    Simple : constant Simple_Array.T := [others => 1];
    Reg_Array : constant Register_Array.Atomic_T := [others => 1];
    Complex : constant Complex_Array.T := [others => (One => 0, Two => 19, Three => 5)];
+   Complex_Le : constant Complex_Array_Le.T_Le := [others => (One => 0, Two => 19, Three => 5)];
    Eight : constant Eight_Bit_Type_Array.T := [others => [others => 1]];
    Unaligned : constant Unaligned_Array.T := [1 .. 4 => 1, others => 98];
    Enum : constant Enum_Array.T := [others => First_Enum.Black];
@@ -49,11 +54,15 @@ procedure Test is
    Complex_Mut : Complex_Array.T := Complex;
    Complex_U : Complex_Array.U := [others => (One => 0, Two => 19, Three => 6)];
    Complex_C : Complex_Array.C.U_C := [others => (One => 0, Two => 20, Three => 7)];
+   Complex_Le_Mut : Complex_Array_Le.T_Le := Complex_Le;
+   Complex_Le_U : Complex_Array_Le.U := [others => (One => 0, Two => 19, Three => 6)];
+   Complex_Le_C : Complex_Array_Le.C.U_C := [others => (One => 0, Two => 20, Three => 7)];
    Eight_Mut : Eight_Bit_Type_Array.T := Eight;
    Unaligned_Mut : Unaligned_Array.T := Unaligned;
    Enum_Mut : Enum_Array.T := Enum;
    Simple2 : Simple_Array.T := [others => 2];
    Complex2 : Complex_Array.T := [others => (One => 0, Two => 21, Three => 6)];
+   Complex2_Le : Complex_Array_Le.T_Le := [others => (One => 0, Two => 21, Three => 6)];
    Eight2 : Eight_Bit_Type_Array.T := [others => [others => 2]];
    Unaligned2 : Unaligned_Array.T := [others => 0];
    Enum2 : Enum_Array.T := [others => First_Enum.Blue];
@@ -78,6 +87,10 @@ begin
    Put_Line (Complex_Array.Representation.Image (Complex));
    Put_Line ("Complex Tuple: ");
    Put_Line (Complex_Array.Representation.To_Tuple_String (Complex));
+   Put_Line ("Complex_Le: ");
+   Put_Line (Complex_Array_Le.Representation.Image (Complex_Le));
+   Put_Line ("Complex_Le Tuple: ");
+   Put_Line (Complex_Array_Le.Representation.To_Tuple_String (Complex_Le));
    Put_Line ("Eight: ");
    Put_Line (Eight_Bit_Type_Array.Representation.Image (Eight));
    Put_Line ("Eight Tuple: ");
@@ -102,6 +115,12 @@ begin
    Complex_Mut (5) := (One => 1, Two => 20, Three => 6);
    Complex_Mut (6) := (One => 2, Two => 21, Three => 7);
    Put_Line (Complex_Array.Representation.Image (Complex_Mut));
+   Put_Line ("passed.");
+
+   Put ("Testing complex array LE... ");
+   Complex_Le_Mut (5) := (One => 1, Two => 20, Three => 6);
+   Complex_Le_Mut (6) := (One => 2, Two => 21, Three => 7);
+   Put_Line (Complex_Array_Le.Representation.Image (Complex_Le_Mut));
    Put_Line ("passed.");
 
    Put ("Testing unaligned array... ");
@@ -169,6 +188,9 @@ begin
    C_Bytes := Complex_Array.Serialization.To_Byte_Array (Complex);
    Complex2 := Complex_Array.Serialization.From_Byte_Array (C_Bytes);
    Complex_Array_Assert.Eq (Complex, Complex2);
+   C_Le_Bytes := Complex_Array_Le.Serialization_Le.To_Byte_Array (Complex_Le);
+   Complex2_Le := Complex_Array_Le.Serialization_Le.From_Byte_Array (C_Le_Bytes);
+   Complex_Array_Le_Le_Assert.Eq (Complex_Le, Complex2_Le);
    E_Bytes := Eight_Bit_Type_Array.Serialization.To_Byte_Array (Eight);
    Eight2 := Eight_Bit_Type_Array.Serialization.From_Byte_Array (E_Bytes);
    Eight_Bit_Type_Array_Assert.Eq (Eight, Eight2);
@@ -226,6 +248,21 @@ begin
    Put_Line ("passed.");
    Put_Line ("");
 
+   Put_Line ("Pack/unpack test (nested LE): ");
+   Complex_Le_Mut := [others => (One => 0, Two => 19, Three => 5)];
+   Complex_Le_U := Complex_Array_Le.Unpack (Complex_Le_Mut);
+   Put_Line ("Complex_Le:");
+   Put_Line (Complex_Array_Le.Representation.Image (Complex_Le_Mut));
+   Put_Line ("Complex_Le_U:");
+   Put_Line (Complex_Array_Le.Representation.Image (Complex_Le_U));
+   Complex_Array_Le_U_Assert.Eq (Complex_Le_U, [others => (One => 0, Two => 19, Three => 5)]);
+   Complex_Le_Mut := Complex_Array_Le.Pack (Complex_Le_U);
+   Put_Line ("Complex_Le:");
+   Put_Line (Complex_Array_Le.Representation.Image (Complex_Le_Mut));
+   Complex_Array_Le_Le_Assert.Eq (Complex_Le_Mut, [others => (One => 0, Two => 19, Three => 5)]);
+   Put_Line ("passed.");
+   Put_Line ("");
+
    Put_Line ("C conversion test: ");
    Simple_U := [others => 1];
    Simple_C := To_C (Simple_U);
@@ -257,6 +294,23 @@ begin
    Put_Line ("Complex_C:");
    Put_Line (Complex_C'Image);
    Complex_Array_U_Assert.Eq (Complex_U, [others => (One => 0, Two => 20, Three => 7)]);
+   Put_Line ("passed.");
+   Put_Line ("");
+
+   Put_Line ("C conversion test LE: ");
+   Complex_Le_U := [others => (One => 0, Two => 19, Three => 6)];
+   Complex_Le_C := To_C (Complex_Le_U);
+   Put_Line ("Complex_Le_U:");
+   Put_Line (Complex_Array_Le.Representation.Image (Complex_Le_U));
+   Put_Line ("Complex_Le_C:");
+   Put_Line (Complex_Le_C'Image);
+   Complex_Le_C := [others => (One => 0, Two => 20, Three => 7)];
+   Complex_Le_U := To_Ada (Complex_Le_C);
+   Put_Line ("Complex_Le_U:");
+   Put_Line (Complex_Array_Le.Representation.Image (Complex_Le_U));
+   Put_Line ("Complex_Le_C:");
+   Put_Line (Complex_Le_C'Image);
+   Complex_Array_Le_U_Assert.Eq (Complex_Le_U, [others => (One => 0, Two => 20, Three => 7)]);
    Put_Line ("passed.");
    Put_Line ("");
 

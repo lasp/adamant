@@ -1,0 +1,9 @@
+---
+description: A variable sized record.
+fields:
+  - name: Length
+    type: Interfaces.Unsigned_8
+    format: U8
+  - name: Buffer
+    type: Complex_Array_Le.T_Le
+    variable_length: Length
