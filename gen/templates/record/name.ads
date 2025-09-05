@@ -423,7 +423,11 @@ package {{ name }} is
    Min_Serialized_Length : constant Natural := ({{ min_size }} - 1) / Basic_Types.Byte'Object_Size + 1; -- in bytes
 
    -- The maximum length in bytes of the serialized type.
+{% if endianness in ["either", "big"] %}
    Max_Serialized_Length : constant Natural := T'Object_Size / Basic_Types.Byte'Object_Size; -- in bytes
+{% elif endianness in ["little"] %}
+   Max_Serialized_Length : constant Natural := T_Le'Object_Size / Basic_Types.Byte'Object_Size; -- in bytes
+{% endif %}
 
    -- Get the length of the record when serialized:
    -- These functions may produce an error if the length of a variable field

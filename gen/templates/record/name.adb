@@ -192,7 +192,7 @@ package body {{ name }} is
       end if;
 {% else %}
       -- Add size of packed type for field "{{ field.name }}":
-      if {{ field.type_package }}.Serialized_Length (Src.{{ field.name }}, Length) = Failure then
+      if {{ field.type_package }}.Serialized_Length_Le (Src.{{ field.name }}, Length) = Failure then
          Num_Bytes_Serialized := Size_In_Bytes_To_Return;
          return Failure;
       end if;

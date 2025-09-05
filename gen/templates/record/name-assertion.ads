@@ -83,7 +83,11 @@ package {{ name }}.Assertion is
 {% for field in fields.values() %}
 {% if field.is_packed_type %}
    package {{ field.name }}_Assertion renames {{ field.type_package }}.Assertion;
+{% if endianness in ["either", "big"] %}
    package {{ field.name }}_Assert renames {{ field.name }}_Assertion.{{ field.type_package }}_Assert;
+{% else %}
+   package {{ field.name }}_Assert renames {{ field.name }}_Assertion.{{ field.type_package }}_Le_Assert;
+{% endif %}
 {% elif field.is_enum %}
    package {{ field.name }}_Assertion renames {{ field.type_package }}.Assertion;
    package {{ field.name }}_Assert renames {{ field.name }}_Assertion.{{ field.type_model.name }}_Assert;
