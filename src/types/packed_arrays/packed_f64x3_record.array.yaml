@@ -1,0 +1,6 @@
+---
+description: Single component record for holding a packed F64x3 array. This can be useful when interfacing with C to hide a double array pointer.
+fields:
+  - name: Value
+    description: Packed F64x3 array.
+    type: Packed_F64x3.T
