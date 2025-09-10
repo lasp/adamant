@@ -88,7 +88,7 @@ package body Component.Tick_Divider.Implementation.Tester is
       Self.Component_Has_Full_Queue_History.Push (Arg);
    end Component_Has_Full_Queue;
 
-   not overriding function Check_Counts (Self : in Instance; Count : Natural; Max_Count : Natural) return Boolean is
+   not overriding function Check_Counts (Self : in Instance; Count : Interfaces.Unsigned_32; Max_Count : Interfaces.Unsigned_32) return Boolean is
    begin
       return Count = Self.Component_Instance.Count and then Max_Count = Self.Component_Instance.Max_Count;
    end Check_Counts;

@@ -68,6 +68,6 @@ package Component.Tick_Divider.Implementation.Tester is
    ---------------------------------------
    -- Custom functions for whitebox testing:
    ---------------------------------------
-   not overriding function Check_Counts (Self : in Instance; Count : Natural; Max_Count : Natural) return Boolean;
+   not overriding function Check_Counts (Self : in Instance; Count : Interfaces.Unsigned_32; Max_Count : Interfaces.Unsigned_32) return Boolean;
 
 end Component.Tick_Divider.Implementation.Tester;
