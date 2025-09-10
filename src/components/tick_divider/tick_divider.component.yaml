@@ -1,20 +1,28 @@
 ---
 description: |
   The Tick Divider has an invokee connector meant to be called at a periodic rate. This invokee connector will usually be connected to a component which services a periodic hardware tick, or the Ticker component, which simulates a hardware tick. The Tick Divider takes this periodic rate and divides it into subrates which are divisions of the original rate. These divisors are provided via an init routine. Ticks are forwarded out the Tick_T_Send arrayed output connector according to the provided divisors. The priority of the output ticks is determined by the order of the connections in the connector array. The first connector in the array has the highest priority, and should be connected to the output that needs to run first.
+
+  The component supports two tick counting modes: Internal mode (default) uses an internal counter that increments with each received tick and rolls over at a calculated maximum to ensure proper divisor alignment. Tick_Counter mode uses the Count field from incoming ticks directly for division calculations, allowing external control of the counting sequence.
 execution: passive
 with:
   - Connector_Types
+  - Interfaces
 preamble: |
-  type Divider_Array_Type is array (Connector_Types.Connector_Index_Type range <>) of Natural;
+  type Divider_Array_Type is array (Connector_Types.Connector_Index_Type range <>) of Interfaces.Unsigned_32;
   type Divider_Array_Type_Access is access all Divider_Array_Type;
+  type Tick_Source_Type is (Internal, Tick_Counter);
 init:
   description: |
     This initialization function is used to set the divider values for the component. An entry of 0 disables that connector from ever being invoked.
   parameters:
-    - name: dividers
+    - name: Dividers
       type: Divider_Array_Type_Access
       not_null: true
       description: An access to an array of dividers used to determine the tick rate of each Tick_T_Send connector.
+    - name: Tick_Source
+      type: Tick_Source_Type
+      default: Internal
+      description: Configures whether to use internal counter or incoming tick's Count field for division.
 connectors:
   - description: This connector receives a periodic Tick from an external component.
     type: Tick.T

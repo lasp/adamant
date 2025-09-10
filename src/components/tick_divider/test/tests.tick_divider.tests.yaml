@@ -7,3 +7,11 @@ tests:
     description: This unit test configures the component with a variety of bad input parameters and checks to make sure exceptions are thrown as expected.
   - name: Full_Queue
     description: This unit test makes sure that when a component has a full queue during scheduling the correct event is thrown.
+  - name: Tick_Counter_Mode
+    description: This unit test exercises the new Tick_Counter mode where the component uses the incoming tick's Count field instead of an internal counter for division logic.
+  - name: Boundary_Tick_Counts
+    description: This unit test exercises edge cases with Unsigned_32 boundary values including wraparound from max value to zero to ensure proper handling of tick count overflow scenarios.
+  - name: Edge_Case_Dividers
+    description: This unit test validates edge cases with special divider configurations including all-disabled connectors, single divisor of 1, and large divisors with small tick counts.
+  - name: Mode_Comparison
+    description: This unit test compares Internal vs Tick_Counter modes with identical tick sequences to verify consistent behavior and validate that the modes produce expected differences in output patterns.
