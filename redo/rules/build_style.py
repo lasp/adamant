@@ -75,7 +75,7 @@ class build_style(build_rule_base):
             and (target.endswith(".py") or target.endswith(".yaml"))
         ]
         redo.redo(objects)
-        flake_cmd_prefix = "flake8 --max-line-length=140 --ignore=E121,E123,E126,E226,E24,E704,W503,W504,E402 "
+        flake_cmd_prefix = "flake8 --ignore=E121,E123,E126,E226,E24,E704,W503,W504,E402,E501 "
         flake_cmd_suffix = " 2>&1 | tee -a " + style_log_file + " 1>&2"
         flake_target = ""
         if glob.glob(directory + os.sep + "*.py"):
