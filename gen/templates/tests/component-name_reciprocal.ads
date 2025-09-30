@@ -10,9 +10,11 @@ with File_Logger;
 {% for include in tester_base_ads_includes %}
 {% if include in includes %}
 pragma Warnings (Off, "unit ""{{ include }}"" is not referenced");
+pragma Warnings (Off, "no entities of ""{{ include }}"" are referenced in spec");
 {% endif %}
 with {{ include }};
 {% if include in includes %}
+pragma Warnings (On, "no entities of ""{{ include }}"" are referenced in spec");
 pragma Warnings (On, "unit ""{{ include }}"" is not referenced");
 {% endif %}
 {% if include in ["Connector_Types"] %}
