@@ -12,7 +12,7 @@ jobs:
     name: build_user_guide
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/lasp/adamant:latest
+      image: ghcr.io/lasp/adamant:0.1
       options: --user root
     steps:
       - run: echo "Starting job triggered by a ${{ github.event_name }} event on a ${{ runner.os }} server hosted by GitHub."
