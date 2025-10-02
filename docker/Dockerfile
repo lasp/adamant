@@ -42,7 +42,7 @@ RUN rm /etc/apt/apt.conf.d/docker-clean
 # Adamant add-on portion:
 #
 # Install some base Adamant dependencies:
-FROM base as adamant_base
+FROM base AS adamant_base
 USER root
 RUN cat /dev/zero | ssh-keygen -q -N "" \
     && echo "vm.swappiness = 0" > /etc/sysctl.conf \
@@ -63,7 +63,7 @@ RUN cat /dev/zero | ssh-keygen -q -N "" \
 
 # Install Alire:
 FROM base AS install_alire
-ENV ALIRE_VERSION="2.0.1"
+ENV ALIRE_VERSION="2.1.0"
 ENV ALIRE_FILE=alr-$ALIRE_VERSION-bin-x86_64-linux.zip
 ENV ALIRE_URL=https://github.com/alire-project/alire/releases/download/v$ALIRE_VERSION/$ALIRE_FILE
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq wget unzip \
@@ -81,10 +81,10 @@ RUN cd /root \
     && unzip adamant_seq.zip
 
 # Install redo
-FROM ghcr.io/dinkelk/redo:latest as install_redo
+FROM ghcr.io/dinkelk/redo:0.0 AS install_redo
 
 # Install libadalang-tools like gnatmetric and gnatpp
-FROM ghcr.io/dinkelk/libadalang_tool_builder:latest as install_libadalang
+FROM ghcr.io/dinkelk/libadalang_tool_builder:0.1 AS install_libadalang
 
 # Construct the final image from the multi-step build images above:
 FROM adamant_base AS final
