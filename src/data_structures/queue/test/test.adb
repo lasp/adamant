@@ -23,7 +23,7 @@ begin
 
    for I in 0 .. 1 loop
       Put_Line ("Filling queue test... ");
-      for Index in Natural'First .. (Queue_Length - 1) loop
+      for Index in Natural'First .. Queue_Length - 1 loop
          pragma Assert (My_Queue.Push (Index) = Success);
       end loop;
       pragma Assert (My_Queue.Is_Full);
@@ -49,7 +49,7 @@ begin
       Put_Line ("passed.");
 
       Put_Line ("Emptying queue test... ");
-      for Index in Natural'First .. (Queue_Length - 1) loop
+      for Index in Natural'First .. Queue_Length - 1 loop
          pragma Assert (My_Queue.Peek (Value) = Success);
          pragma Assert (Value = Index + 1, Integer'Image (Value) & " = " & Integer'Image (Index));
          pragma Assert (My_Queue.Pop (Value) = Success);
