@@ -81,7 +81,7 @@ RUN cd /root \
     && unzip adamant_seq.zip
 
 # Install redo
-FROM ghcr.io/dinkelk/redo:0.1 AS install_redo
+FROM ghcr.io/dinkelk/redo:0.0 AS install_redo
 
 # Install libadalang-tools like gnatmetric and gnatpp
 FROM ghcr.io/dinkelk/libadalang_tool_builder:0.1 AS install_libadalang
