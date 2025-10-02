@@ -6,6 +6,7 @@
 # Only set the environment once:
 if test -n "$ADAMANT_ENVIRONMENT_SET"
 then
+  echo "Adamant environment already activated. Run 'unset ADAMANT_ENVIRONMENT_SET' to reset."
   return
 fi
 
@@ -120,18 +121,6 @@ ADAMANT_TMP_DIR=`mktemp -d`
 ADAMANT_TMP_DIR=$ADAMANT_TMP_DIR".adamant"
 export ADAMANT_TMP_DIR
 mkdir -p $ADAMANT_TMP_DIR
-
-# Set up Alire toolchain if it is not set up.
-if ! test -d "$ADAMANT_DIR/alire" || ! test -d "$HOME/.config/alire"
-then
-  echo "Setting up alire toolchain..."
-  cd $ADAMANT_DIR
-  alr -n toolchain --select gnat_native
-  alr -n toolchain --select gprbuild
-  alr -n build --release
-  cd - > /dev/null
-  echo "Done."
-fi
 
 # Iterate through each path and print them out
 echo ""
