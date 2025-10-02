@@ -5,7 +5,6 @@
 with Memory_Packetizer_Types;
 with Byte_Array_Pointer;
 with Basic_Types;
-with Packet;
 with Basic_Assertions; use Basic_Assertions;
 with Smart_Assert;
 with Packet_Types;
@@ -58,9 +57,8 @@ package body Memory_Packetizer_Tests.Implementation is
       use Byte_Array_Pointer;
       use Packet_Types;
       T : Component.Memory_Packetizer.Implementation.Tester.Instance_Access renames Self.Tester;
-      A_Packet : Packet.T;
       Mem_Region_Length : constant Natural := Memory_Region.Serialization.Serialized_Length;
-      Packet_Data_Length : constant Natural := A_Packet.Buffer'Length - Mem_Region_Length;
+      Packet_Data_Length : constant Natural := Packet_Buffer_Type'Length - Mem_Region_Length;
       Bytes : aliased Basic_Types.Byte_Array := [0 .. 4 * Packet_Data_Length - Packet_Data_Length / 2 - 1 => 0];
       Dump_1 : constant Memory_Packetizer_Types.Memory_Dump := (Id => 7, Memory_Pointer => From_Address (Bytes'Address, Bytes'Length));
       Dump_2 : constant Memory_Packetizer_Types.Memory_Dump := (Id => 28, Memory_Pointer => From_Address (Bytes'Address, Bytes'Length));
@@ -102,22 +100,22 @@ package body Memory_Packetizer_Tests.Implementation is
 
       -- Check packet lengths:
       for Idx in 1 .. 3 loop
-         Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (Idx).Header.Buffer_Length, A_Packet.Buffer'Length);
+         Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (Idx).Header.Buffer_Length, Packet_Buffer_Type'Length);
       end loop;
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (4).Header.Buffer_Length, Packet_Data_Length / 2 + Memory_Region.Serialization.Serialized_Length);
       for Idx in 5 .. 7 loop
-         Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (Idx).Header.Buffer_Length, A_Packet.Buffer'Length);
+         Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (Idx).Header.Buffer_Length, Packet_Buffer_Type'Length);
       end loop;
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (8).Header.Buffer_Length, Packet_Data_Length / 2 + Memory_Region.Serialization.Serialized_Length);
 
       -- Check packet contents:
-      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (1).Buffer (Mem_Region_Length .. A_Packet.Buffer'Last), [0 .. Packet_Data_Length - 1 => 9]);
-      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (2).Buffer (Mem_Region_Length .. A_Packet.Buffer'Last), [0 .. Packet_Data_Length - 1 => 10]);
-      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (3).Buffer (Mem_Region_Length .. A_Packet.Buffer'Last), [0 .. Packet_Data_Length - 1 => 11]);
+      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (1).Buffer (Mem_Region_Length .. Packet_Buffer_Type'Last), [0 .. Packet_Data_Length - 1 => 9]);
+      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (2).Buffer (Mem_Region_Length .. Packet_Buffer_Type'Last), [0 .. Packet_Data_Length - 1 => 10]);
+      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (3).Buffer (Mem_Region_Length .. Packet_Buffer_Type'Last), [0 .. Packet_Data_Length - 1 => 11]);
       Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (4).Buffer (Mem_Region_Length .. T.Packet_T_Recv_Sync_History.Get (4).Header.Buffer_Length - 1), [0 .. Packet_Data_Length / 2 - 1 => 12]);
-      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (5).Buffer (Mem_Region_Length .. A_Packet.Buffer'Last), [0 .. Packet_Data_Length - 1 => 9]);
-      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (6).Buffer (Mem_Region_Length .. A_Packet.Buffer'Last), [0 .. Packet_Data_Length - 1 => 10]);
-      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (7).Buffer (Mem_Region_Length .. A_Packet.Buffer'Last), [0 .. Packet_Data_Length - 1 => 11]);
+      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (5).Buffer (Mem_Region_Length .. Packet_Buffer_Type'Last), [0 .. Packet_Data_Length - 1 => 9]);
+      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (6).Buffer (Mem_Region_Length .. Packet_Buffer_Type'Last), [0 .. Packet_Data_Length - 1 => 10]);
+      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (7).Buffer (Mem_Region_Length .. Packet_Buffer_Type'Last), [0 .. Packet_Data_Length - 1 => 11]);
       Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (8).Buffer (Mem_Region_Length .. T.Packet_T_Recv_Sync_History.Get (8).Header.Buffer_Length - 1), [0 .. Packet_Data_Length / 2 - 1 => 12]);
 
       -- Check packet address and length headers:
@@ -215,22 +213,22 @@ package body Memory_Packetizer_Tests.Implementation is
 
       -- Check packet lengths:
       for Idx in 9 .. 11 loop
-         Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (Idx).Header.Buffer_Length, A_Packet.Buffer'Length);
+         Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (Idx).Header.Buffer_Length, Packet_Buffer_Type'Length);
       end loop;
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (12).Header.Buffer_Length, Packet_Data_Length / 2 + Memory_Region.Serialization.Serialized_Length);
       for Idx in 13 .. 15 loop
-         Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (Idx).Header.Buffer_Length, A_Packet.Buffer'Length);
+         Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (Idx).Header.Buffer_Length, Packet_Buffer_Type'Length);
       end loop;
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (16).Header.Buffer_Length, Packet_Data_Length / 2 + Memory_Region.Serialization.Serialized_Length);
 
       -- Check packet contents:
-      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (9).Buffer (Mem_Region_Length .. A_Packet.Buffer'Last), [0 .. Packet_Data_Length - 1 => 7]);
-      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (10).Buffer (Mem_Region_Length .. A_Packet.Buffer'Last), [0 .. Packet_Data_Length - 1 => 6]);
-      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (11).Buffer (Mem_Region_Length .. A_Packet.Buffer'Last), [0 .. Packet_Data_Length - 1 => 5]);
+      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (9).Buffer (Mem_Region_Length .. Packet_Buffer_Type'Last), [0 .. Packet_Data_Length - 1 => 7]);
+      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (10).Buffer (Mem_Region_Length .. Packet_Buffer_Type'Last), [0 .. Packet_Data_Length - 1 => 6]);
+      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (11).Buffer (Mem_Region_Length .. Packet_Buffer_Type'Last), [0 .. Packet_Data_Length - 1 => 5]);
       Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (12).Buffer (Mem_Region_Length .. T.Packet_T_Recv_Sync_History.Get (4).Header.Buffer_Length - 1), [0 .. Packet_Data_Length / 2 - 1 => 4]);
-      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (13).Buffer (Mem_Region_Length .. A_Packet.Buffer'Last), [0 .. Packet_Data_Length - 1 => 7]);
-      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (14).Buffer (Mem_Region_Length .. A_Packet.Buffer'Last), [0 .. Packet_Data_Length - 1 => 6]);
-      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (15).Buffer (Mem_Region_Length .. A_Packet.Buffer'Last), [0 .. Packet_Data_Length - 1 => 5]);
+      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (13).Buffer (Mem_Region_Length .. Packet_Buffer_Type'Last), [0 .. Packet_Data_Length - 1 => 7]);
+      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (14).Buffer (Mem_Region_Length .. Packet_Buffer_Type'Last), [0 .. Packet_Data_Length - 1 => 6]);
+      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (15).Buffer (Mem_Region_Length .. Packet_Buffer_Type'Last), [0 .. Packet_Data_Length - 1 => 5]);
       Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (16).Buffer (Mem_Region_Length .. T.Packet_T_Recv_Sync_History.Get (8).Header.Buffer_Length - 1), [0 .. Packet_Data_Length / 2 - 1 => 4]);
 
       -- Check packet address and length headers:
@@ -289,9 +287,8 @@ package body Memory_Packetizer_Tests.Implementation is
       use Byte_Array_Pointer;
       use Packet_Types;
       T : Component.Memory_Packetizer.Implementation.Tester.Instance_Access renames Self.Tester;
-      A_Packet : Packet.T;
       Mem_Region_Length : constant Natural := Memory_Region.Serialization.Serialized_Length;
-      Packet_Data_Length : constant Natural := A_Packet.Buffer'Length - Mem_Region_Length;
+      Packet_Data_Length : constant Natural := Packet_Buffer_Type'Length - Mem_Region_Length;
       Bytes : aliased Basic_Types.Byte_Array := [0 .. 4 * Packet_Data_Length - Packet_Data_Length / 2 - 1 => 0];
       Dump_1 : constant Memory_Packetizer_Types.Memory_Dump := (Id => 4, Memory_Pointer => From_Address (Bytes'Address, Bytes'Length));
    begin
@@ -362,14 +359,14 @@ package body Memory_Packetizer_Tests.Implementation is
 
       -- Check packet lengths:
       for Idx in 1 .. 3 loop
-         Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (Idx).Header.Buffer_Length, A_Packet.Buffer'Length);
+         Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (Idx).Header.Buffer_Length, Packet_Buffer_Type'Length);
       end loop;
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (4).Header.Buffer_Length, Packet_Data_Length / 2 + Memory_Region.Serialization.Serialized_Length);
 
       -- Check packet contents:
-      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (1).Buffer (Mem_Region_Length .. A_Packet.Buffer'Last), [0 .. Packet_Data_Length - 1 => 9]);
-      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (2).Buffer (Mem_Region_Length .. A_Packet.Buffer'Last), [0 .. Packet_Data_Length - 1 => 10]);
-      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (3).Buffer (Mem_Region_Length .. A_Packet.Buffer'Last), [0 .. Packet_Data_Length - 1 => 11]);
+      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (1).Buffer (Mem_Region_Length .. Packet_Buffer_Type'Last), [0 .. Packet_Data_Length - 1 => 9]);
+      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (2).Buffer (Mem_Region_Length .. Packet_Buffer_Type'Last), [0 .. Packet_Data_Length - 1 => 10]);
+      Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (3).Buffer (Mem_Region_Length .. Packet_Buffer_Type'Last), [0 .. Packet_Data_Length - 1 => 11]);
       Byte_Array_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (4).Buffer (Mem_Region_Length .. T.Packet_T_Recv_Sync_History.Get (4).Header.Buffer_Length - 1), [0 .. Packet_Data_Length / 2 - 1 => 12]);
 
       -- Check packet timing:
@@ -442,9 +439,10 @@ package body Memory_Packetizer_Tests.Implementation is
 
    overriding procedure Test_Memory_Dump_Dropped (Self : in out Instance) is
       use Byte_Array_Pointer;
+      use Packet_Types;
       T : Component.Memory_Packetizer.Implementation.Tester.Instance_Access renames Self.Tester;
-      A_Packet : Packet.T;
-      Bytes : aliased Basic_Types.Byte_Array := [0 .. 4 * A_Packet.Buffer'Length - A_Packet.Buffer'Length / 2 - 1 => 0];
+      Packet_Buffer_Length : constant Natural := Packet_Buffer_Type'Length;
+      Bytes : aliased Basic_Types.Byte_Array := [0 .. 4 * Packet_Buffer_Length - Packet_Buffer_Length / 2 - 1 => 0];
       Dump_1 : constant Memory_Packetizer_Types.Memory_Dump := (Id => 1, Memory_Pointer => From_Address (Bytes'Address, Bytes'Length));
       Dump_2 : constant Memory_Packetizer_Types.Memory_Dump := (Id => 2, Memory_Pointer => From_Address (Bytes'Address, Bytes'Length));
       Dump_3 : constant Memory_Packetizer_Types.Memory_Dump := (Id => 3, Memory_Pointer => From_Address (Bytes'Address, Bytes'Length));
@@ -488,9 +486,8 @@ package body Memory_Packetizer_Tests.Implementation is
       use Byte_Array_Pointer;
       use Packet_Types;
       T : Component.Memory_Packetizer.Implementation.Tester.Instance_Access renames Self.Tester;
-      A_Packet : Packet.T;
       Mem_Region_Length : constant Natural := Memory_Region.Serialization.Serialized_Length;
-      Packet_Data_Length : constant Natural := A_Packet.Buffer'Length - Mem_Region_Length;
+      Packet_Data_Length : constant Natural := Packet_Buffer_Type'Length - Mem_Region_Length;
       Bytes : aliased Basic_Types.Byte_Array := [0 .. 15 => 9];
       Dump_1 : constant Memory_Packetizer_Types.Memory_Dump := (Id => 1, Memory_Pointer => From_Address (Bytes'Address, Bytes'Length));
       Dump_2 : constant Memory_Packetizer_Types.Memory_Dump := (Id => 2, Memory_Pointer => From_Address (Bytes'Address, Bytes'Length));
@@ -587,7 +584,7 @@ package body Memory_Packetizer_Tests.Implementation is
 
       -- Check packet lengths, all should be max:
       for Idx in 5 .. 12 loop
-         Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (Idx).Header.Buffer_Length, A_Packet.Buffer'Length);
+         Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (Idx).Header.Buffer_Length, Packet_Buffer_Type'Length);
       end loop;
 
       -- Check packet contents:
