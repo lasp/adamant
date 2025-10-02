@@ -6,7 +6,9 @@ with Ada.Text_IO; use Ada.Text_IO;
 '
 cat build/template/$name | awk '
 /TODO declarations/ {
+  print "      pragma Warnings (Off, \"variable * is read but never assigned\");"
   print "      A_out : Generic_Type_1;"
+  print "      pragma Warnings (On, \"variable * is read but never assigned\");"
   print "      pragma Annotate (GNATSAS, Intentional, \"unassigned variable\", \"Ignore, this is OK for this test\");"
 }
 /TODO statements/ {

@@ -17,7 +17,7 @@ with Parameter_Enums.Assertion;
 use Parameter_Enums.Parameter_Update_Status;
 use Parameter_Enums.Assertion;
 with Pid_Diagnostic_Subpacket;
-with Packet;
+with Packet_Types;
 
 package body Pid_Controller_Tests.Implementation is
 
@@ -51,10 +51,11 @@ package body Pid_Controller_Tests.Implementation is
    -------------------------------------------------------------------------
 
    overriding procedure Test_Diagnostic_Packet (Self : in out Instance) is
+      use Packet_Types;
       T : Component.Pid_Controller.Implementation.Tester.Instance_Access renames Self.Tester;
       Subpacket_Duration : Natural;
       Extra_Packets : constant Natural := 2;
-      Packet_Length : Packet.T;
+      Packet_Buffer_Length : constant Natural := Packet_Buffer_Type'Length;
    begin
       Put_Line ("");
       Put_Line ("----------------------------------");
@@ -91,7 +92,7 @@ package body Pid_Controller_Tests.Implementation is
 
       -- Start a new packet and this time lets make sure we fill the packet and send.
       -- Need to find out how many subpackets we should issue to get at least one full packet sent plus a couple more
-      Subpacket_Duration := Natural (Packet_Length.Buffer'Length / Pid_Diagnostic_Subpacket.Max_Serialized_Length) + Extra_Packets;
+      Subpacket_Duration := Natural (Packet_Buffer_Length / Pid_Diagnostic_Subpacket.Max_Serialized_Length) + Extra_Packets;
 
       T.Command_T_Send (T.Commands.Start_Diagnostics ((Duration => Subpacket_Duration)));
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 2);

@@ -11,7 +11,9 @@ BEGIN {
 
 /TODO declarations/ {
   if (count == 0) {
+    print "      pragma Warnings (Off, \"variable * is read but never assigned\");"
     print "      A_Out : Generic_Type_1;"
+    print "      pragma Warnings (On, \"variable * is read but never assigned\");"
     print "      pragma Annotate (GNATSAS, Intentional, \"unassigned variable\", \"Ignore, this is OK for this test\");"
   }
 }
