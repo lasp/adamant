@@ -93,8 +93,16 @@ class register_map(base):
             item.prev_item = prev_item
             prev_item = item
 
-        # Ok check for overlap:
+        # Check for 4-byte alignment and overlap:
         for item in self.items.values():
+            # Check that all register addresses are 4-byte aligned
+            if item.address % 4 != 0:
+                raise ModelException(
+                    'Register "' + str(item.name) + '" at address 0x'
+                    + str("%08X" % item.address)
+                    + " is not 4-byte aligned. Register addresses must be aligned to 4-byte boundaries (address must be divisible by 4)."
+                )
+
             if item.prev_item:
                 assert (
                     item.address >= item.prev_item.address
