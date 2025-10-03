@@ -89,6 +89,7 @@ is
    {{ item.name }}_End : constant Unsigned_32 := {{ item.name }}_Offset + {{ item.name }}_Size - 1; -- 0x{{ '%08X' % (item.address + item.size - 1) }}
    {{ item.name }}_Address : constant System.Address := To_Address (Integer_Address ({{ item.name }}_Offset));
 
+   pragma Warnings (GNATProve, Off, "[imprecise-address-specification]", Reason => "Intentional MMIO mapping for Time");
    pragma Warnings (Off, "indirect writes to ""{{ item.name }}"" through a potential alias are ignored");
    pragma Warnings (Off, "writing to ""{{ item.name }}"" is assumed to have no effects on other non-volatile objects");
    pragma Warnings (Off, "assuming no concurrent accesses to non-atomic object ""{{ item.name }}""");
@@ -97,6 +98,7 @@ is
    pragma Warnings (On, "assuming no concurrent accesses to non-atomic object ""{{ item.name }}""");
    pragma Warnings (On, "writing to ""{{ item.name }}"" is assumed to have no effects on other non-volatile objects");
    pragma Warnings (On, "indirect writes to ""{{ item.name }}"" through a potential alias are ignored");
+   pragma Warnings (GNATProve, On, "[imprecise-address-specification]", Reason => "Intentional MMIO mapping for Time");
 
 {% endfor %}
    --
