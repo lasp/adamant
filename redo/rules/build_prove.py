@@ -101,7 +101,7 @@ def _prove_ada_sources(source_files, base_dir):
     )
 
     prove_cmd = (
-        "gnatprove -j0 --checks-as-errors --level="
+        "gnatprove -j0 --checks-as-errors=on --level="
         + str(level)
         + " --mode="
         + mode

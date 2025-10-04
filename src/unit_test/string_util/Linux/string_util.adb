@@ -42,7 +42,7 @@ package body String_Util is
    function To_Array_String (R : in A; Show_Index : in Boolean := True) return String is
       Str : Unbounded_String; -- Empty unbounded string
    begin
-      for Idx in R'First .. (R'Last - 1) loop
+      for Idx in R'First .. R'Last - 1 loop
          if Show_Index then
             Append (Str, ASCII.LF & Trim_Both (I'Image (Idx)) & " => " & Trim_Both (Image (R (Idx))) & ", ");
          else

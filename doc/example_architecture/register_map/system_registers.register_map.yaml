@@ -5,7 +5,7 @@ items:
     name: First_Register
     description: An important register.
     type: Packed_U32.Register_T
-  - address: 0x4000_0016
+  - address: 0x4000_0010
     name: Second_Register
     description: An equally important register.
     type: Packed_Poly_32_Type.Register_T

@@ -38,13 +38,15 @@ execute () {
 }
 
 usage() {
-  echo "Usage: $1 [start, stop, login, push, build, remove]" >&2
+  echo "Usage: $1 [start, stop, login, pull, push, build, buildx, pushx, remove]" >&2
   echo "*  start: create and start the ${PROJECT_NAME} container" >&2
   echo "*  stop: stop the running ${PROJECT_NAME} container" >&2
   echo "*  login: login to the ${PROJECT_NAME} container" >&2
   echo "*  pull: pull the latest image from the Docker registry" >&2
   echo "*  push: push the image to the Docker registry" >&2
-  echo "*  build: build the image from the Dockerfile" >&2
+  echo "*  build: build the image from the Dockerfile (single platform)" >&2
+  echo "*  buildx: build multi-platform images and cache locally" >&2
+  echo "*  pushx: push cached multi-platform images to registry" >&2
   echo "*  remove: remove network and volumes for ${PROJECT_NAME}" >&2
   exit 1
 }
@@ -73,6 +75,20 @@ case $1 in
     ;;
   build )
     execute "${DOCKER_COMPOSE_COMMAND} -f ${DOCKER_COMPOSE_CONFIG} build"
+    ;;
+  buildx )
+    # Multi-platform build and cache locally (no push)
+    # Requires: docker buildx create --use (run once to set up buildx)
+    # Uses docker-compose.yml configuration for platforms and image names
+    echo "Building multi-platform images (platforms and names from docker-compose.yml)"
+    echo "Images will be cached locally. Use 'pushx' to push to registry."
+    execute "cd ${this_dir} && docker buildx bake -f ${DOCKER_COMPOSE_CONFIG}"
+    ;;
+  pushx )
+    # Push cached multi-platform images to registry
+    # Uses docker-compose.yml configuration for platforms and image names
+    echo "Pushing multi-platform images to registry (platforms and names from docker-compose.yml)"
+    execute "cd ${this_dir} && docker buildx bake -f ${DOCKER_COMPOSE_CONFIG} --push"
     ;;
   remove )
     if [ "$2" == "force" ]

@@ -38,7 +38,7 @@ package body Component.Product_Packetizer.Implementation is
             -- in the list. We only want to multiply the last value found of each
             -- unique period.
             Duplicate_Period := False;
-            for Jdx in (Idx + 1) .. Self.Packet_List.all'Last loop
+            for Jdx in Idx + 1 .. Self.Packet_List.all'Last loop
                if Self.Packet_List.all (Jdx).Period = Current_Period then
                   Duplicate_Period := True;
                end if;

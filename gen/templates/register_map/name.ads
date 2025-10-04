@@ -71,12 +71,14 @@ is
    {{ item.name }}_Size : constant Unsigned_32 := Unsigned_32 ({{ item.type_package }}.Size_In_Bytes); -- {{ item.size }} bytes
    {{ item.name }}_End : constant Unsigned_32 := {{ item.name }}_Offset + {{ item.name }}_Size - 1; -- 0x{{ '%08X' % (item.address + item.size - 1) }}
    {{ item.name }}_Address : constant System.Address := To_Address (Integer_Address ({{ item.name }}_Offset));
+   pragma Warnings (GNATProve, Off, "[imprecise-address-specification]", Reason => "Intentional MMIO mapping for Time");
    pragma Warnings (Off, "writing to ""{{ item.name }}"" is assumed to have no effects on other non-volatile objects");
    pragma Warnings (Off, "assuming no concurrent accesses to non-atomic object ""{{ item.name }}""");
    {{ item.name }} : aliased {{ item.type }}
       with {% if item.volatile_aspect %}{{ item.volatile_aspect }} => True, {% endif %}Import, Convention => Ada, Address => {{ item.name }}_Address;
    pragma Warnings (On, "assuming no concurrent accesses to non-atomic object ""{{ item.name }}""");
    pragma Warnings (On, "writing to ""{{ item.name }}"" is assumed to have no effects on other non-volatile objects");
+   pragma Warnings (GNATProve, On, "[imprecise-address-specification]", Reason => "Intentional MMIO mapping for Time");
 
 {% endfor %}
    --
@@ -99,6 +101,7 @@ is
 {% for item_name, item in items.items() %}
    -- 0x{{'%08X' % item.address}} - {{'%08X' % (item.address + item.size - 1)}}: {{ item.name }} Checks
    pragma Compile_Time_Error ({{ item.name }}_Offset /= 16#{{ '%08X' % item.address }}#, "Unexpected autocoder error. Item start address not as expected.");
+   pragma Compile_Time_Error (({{ item.name }}_Offset mod 4) /= 0, "Unexpected autocoder error. Item start address not 4-byte aligned.");
    pragma Compile_Time_Error ({{ item.name }}_Size /= {{ item.size }}, "Unexpected autocoder error. Item size not as expected.");
    pragma Compile_Time_Error ({{ item.name }}_End /= 16#{{ '%08X' % (item.address + item.size - 1) }}#, "Unexpected autocoder error. Item end address not as expected.");
    pragma Compile_Time_Error ({{ item.name }}_Offset >= {{ item.name }}_End, "Unexpected autocoder error. Item end address less than start address.");
