@@ -82,13 +82,13 @@ case $1 in
     # Uses docker-compose.yml configuration for platforms and image names
     echo "Building multi-platform images (platforms and names from docker-compose.yml)"
     echo "Images will be cached locally. Use 'pushx' to push to registry."
-    execute "BUILDX_BAKE_ENTITLEMENTS_FS=0 docker buildx bake -f ${DOCKER_COMPOSE_CONFIG}"
+    execute "cd ${this_dir} && docker buildx bake -f ${DOCKER_COMPOSE_CONFIG}"
     ;;
   pushx )
     # Push cached multi-platform images to registry
     # Uses docker-compose.yml configuration for platforms and image names
     echo "Pushing multi-platform images to registry (platforms and names from docker-compose.yml)"
-    execute "BUILDX_BAKE_ENTITLEMENTS_FS=0 docker buildx bake -f ${DOCKER_COMPOSE_CONFIG} --push"
+    execute "cd ${this_dir} && docker buildx bake -f ${DOCKER_COMPOSE_CONFIG} --push"
     ;;
   remove )
     if [ "$2" == "force" ]

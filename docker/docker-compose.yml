@@ -4,6 +4,7 @@ services:
         image: ghcr.io/lasp/adamant:multi
         build:
             context: .
+            dockerfile: Dockerfile
             x-bake:
                 platforms:
                     - linux/amd64
