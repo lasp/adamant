@@ -9,11 +9,20 @@ on:
   workflow_dispatch:
 jobs:
   compile_job:
-    name: build_user_guide
-    runs-on: ubuntu-latest
+    name: build_user_guide (${{ matrix.arch }})
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            platform: linux/amd64
+            arch: amd64
+          - runner: ubuntu-24.04-arm64
+            platform: linux/arm64
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
     container:
-      image: ghcr.io/lasp/adamant:0.1
-      options: --user root
+      image: ghcr.io/lasp/adamant:multi
+      options: --user root --platform ${{ matrix.platform }}
     steps:
       - run: echo "Starting job triggered by a ${{ github.event_name }} event on a ${{ runner.os }} server hosted by GitHub."
       - run: echo "Checking out ${{ github.repository }} on branch ${{ github.ref }}."
@@ -24,15 +33,15 @@ jobs:
       - name: Archive user guide PDF
         uses: actions/upload-artifact@v4
         with:
-          name: user_guide
+          name: user_guide_${{ matrix.arch }}
           path: ${{ github.workspace }}/doc/user_guide/build/pdf/user_guide.pdf
           if-no-files-found: error
       - name: Build the architecture description document
         run: bash env/github_run.sh "redo doc/architecture_description_document/build/pdf/architecture_description_document.pdf"
-      - name: Archive user guide PDF
+      - name: Archive architecture description document PDF
         uses: actions/upload-artifact@v4
         with:
-          name: architecture_description_document 
+          name: architecture_description_document_${{ matrix.arch }}
           path: ${{ github.workspace }}/doc/architecture_description_document/build/pdf/architecture_description_document.pdf
           if-no-files-found: error
       - run: echo "Finished with status - ${{ job.status }}."

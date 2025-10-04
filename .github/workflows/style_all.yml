@@ -9,11 +9,20 @@ on:
   workflow_dispatch:
 jobs:
   compile_job:
-    name: style_all
-    runs-on: ubuntu-latest
+    name: style_all (${{ matrix.arch }})
+    strategy:
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            platform: linux/amd64
+            arch: amd64
+          - runner: ubuntu-24.04-arm64
+            platform: linux/arm64
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
     container:
-      image: ghcr.io/lasp/adamant:0.1
-      options: --user root
+      image: ghcr.io/lasp/adamant:multi
+      options: --user root --platform ${{ matrix.platform }}
     steps:
       - run: echo "Starting job triggered by a ${{ github.event_name }} event on a ${{ runner.os }} server hosted by GitHub."
       - run: echo "Checking out ${{ github.repository }} on branch ${{ github.ref }}."
@@ -25,7 +34,7 @@ jobs:
         if: always() # Make sure this runs even if `redo style_all` fails
         uses: actions/upload-artifact@v4
         with:
-          name: style_logs
+          name: style_logs_${{ matrix.arch }}
           path: ${{ github.workspace }}/build
           if-no-files-found: ignore
       - run: echo "Finished with status - ${{ job.status }}."
