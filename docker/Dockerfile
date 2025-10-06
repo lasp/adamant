@@ -124,7 +124,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq wget \
 # Construct the final image from the multi-step build images above:
 FROM adamant_base AS final
 LABEL org.opencontainers.image.source=https://github.com/lasp/adamant
-LABEL org.opencontainers.image.description="Development environment for the Adamant framework"
+LABEL org.opencontainers.image.description="Complete development environment for Adamant - a component-based, model-driven framework for building reliable and reusable real-time embedded software. Includes GNAT compiler, SPARK tools, Alire package manager, redo build system, libadalang tools, and LaTeX document building tools. Supports both amd64 and arm64 architectures."
 LABEL org.opencontainers.image.licenses=Apache-2.0
 USER root
 ENV BIN_DIR=/usr/local/bin
