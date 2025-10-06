@@ -1,0 +1,37 @@
+name: Check Style (ARM64)
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+jobs:
+  compile_job:
+    name: style_all (arm64)
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Starting job triggered by a ${{ github.event_name }} event on a ${{ runner.os }} server hosted by GitHub."
+      - run: echo "Checking out ${{ github.repository }} on branch ${{ github.ref }}."
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Check out repository code
+        uses: actions/checkout@v4
+
+      - name: Check all style
+        run: |
+          docker run --rm --platform linux/arm64 \
+            -v ${{ github.workspace }}:/workspace \
+            -w /workspace \
+            ghcr.io/lasp/adamant:0.1 \
+            bash env/github_run.sh "redo src/components/command_router/style_all"
+
+      - name: Archive logs for failed style checks
+        if: always() # Make sure this runs even if `redo style_all` fails
+        uses: actions/upload-artifact@v4
+        with:
+          name: style_logs_arm64
+          path: ${{ github.workspace }}/build
+          if-no-files-found: ignore
+
+      - run: echo "Finished with status - ${{ job.status }}."
+        if: always()
