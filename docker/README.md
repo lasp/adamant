@@ -77,4 +77,37 @@ Next, you can create the Docker image by running:
    $ ./adamant_env.sh build
    ```
 
-This may take several minutes complete. By default, the image created is named `ghcr.io/lasp/adamant:latest`. To change this, modify `docker-compose.yml` before running `./adamant_env.sh build`.
+This may take several minutes complete. By default, the image created is named `ghcr.io/lasp/adamant:<version>`. To change this, modify `docker-compose.yml` before running `./adamant_env.sh build`.
+
+## Multi-Platform Image Building
+
+For creating Docker images that support multiple architectures (e.g., AMD64 and ARM64), Adamant provides additional commands using Docker Buildx:
+
+### Building Multi-Platform Images
+
+To build multi-platform images and cache them locally:
+
+   ```
+   $ ./adamant_env.sh buildx
+   ```
+
+This command:
+- Builds images for multiple platforms as specified in `docker-compose.yml`
+- Caches the built images locally
+- Does not push images to any registry
+- Requires Docker Buildx to be set up (run `docker buildx create --use` once to initialize)
+
+### Pushing Multi-Platform Images
+
+To push the cached multi-platform images to a Docker registry:
+
+   ```
+   $ ./adamant_env.sh pushx
+   ```
+
+This command:
+- Pushes the previously built multi-platform images to the registry
+- Uses the platforms and image names configured in `docker-compose.yml`
+- Requires that `buildx` has been run first to cache the images locally
+
+**Note:** These commands are typically used for maintainers who need to publish official multi-platform images. Regular users should use the standard `build` command for local single-platform builds.
