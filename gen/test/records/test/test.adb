@@ -749,6 +749,7 @@ begin
    pragma Assert (Stat = Failure, "deserialization succeeded but was expected to fail.");
    Put_Line ("failed at byte: " & Natural'Image (The_Size));
    Stat := Simple_Variable_Array_Le.Serialization_Le.From_Byte_Array (Av_Le2, Av_Le_Bytes (0 .. V_Size - 2), The_Size);
+   pragma Unreferenced (Av_Le2);
    pragma Assert (Stat = Failure, "deserialization succeeded but was expected to fail.");
    Put_Line ("failed at byte: " & Natural'Image (The_Size));
    Put_Line ("passed.");
@@ -833,6 +834,7 @@ begin
    pragma Assert (Stat = Failure, "deserialization succeeded but was expected to fail.");
    Put_Line ("failed at byte: " & Natural'Image (The_Size));
    Stat := Simple_Variable_Holder_Le.Serialization_Le.From_Byte_Array (Sv_Le2, Sv_Le_Bytes (0 .. V_Size - 2), The_Size);
+   pragma Unreferenced (Sv_Le2);
    pragma Assert (Stat = Failure, "deserialization succeeded but was expected to fail.");
    Put_Line ("failed at byte: " & Natural'Image (The_Size));
    Put_Line ("passed.");

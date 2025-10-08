@@ -42,11 +42,16 @@ RUN rm /etc/apt/apt.conf.d/docker-clean
 # Adamant add-on portion:
 #
 # Install some base Adamant dependencies:
-FROM base as adamant_base
+FROM base AS adamant_base
+ARG TARGETARCH
 USER root
 RUN cat /dev/zero | ssh-keygen -q -N "" \
     && echo "vm.swappiness = 0" > /etc/sysctl.conf \
-    && sudo ln -sf /usr/lib/x86_64-linux-gnu/libreadline.so.8 /usr/lib/x86_64-linux-gnu/libreadline.so.7 \
+    && if [ "$TARGETARCH" = "amd64" ]; then \
+         sudo ln -sf /usr/lib/x86_64-linux-gnu/libreadline.so.8 /usr/lib/x86_64-linux-gnu/libreadline.so.7; \
+       elif [ "$TARGETARCH" = "arm64" ]; then \
+         sudo ln -sf /usr/lib/aarch64-linux-gnu/libreadline.so.8 /usr/lib/aarch64-linux-gnu/libreadline.so.7; \
+       fi \
     && apt install --reinstall -y software-properties-common \
     && DEBIAN_FRONTEND=noninteractive apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -yq socat graphviz libpng-dev gawk xxd time psmisc python3-venv python3-dev \
@@ -63,12 +68,18 @@ RUN cat /dev/zero | ssh-keygen -q -N "" \
 
 # Install Alire:
 FROM base AS install_alire
-ENV ALIRE_VERSION="2.0.1"
-ENV ALIRE_FILE=alr-$ALIRE_VERSION-bin-x86_64-linux.zip
-ENV ALIRE_URL=https://github.com/alire-project/alire/releases/download/v$ALIRE_VERSION/$ALIRE_FILE
+ARG TARGETARCH
+ENV ALIRE_VERSION="2.1.0"
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq wget unzip \
     && mkdir -p /root/alire \
     && cd /root/alire \
+    && if [ "$TARGETARCH" = "amd64" ]; then \
+         ALIRE_ARCH="x86_64"; \
+       elif [ "$TARGETARCH" = "arm64" ]; then \
+         ALIRE_ARCH="aarch64"; \
+       fi \
+    && ALIRE_FILE=alr-$ALIRE_VERSION-bin-$ALIRE_ARCH-linux.zip \
+    && ALIRE_URL=https://github.com/alire-project/alire/releases/download/v$ALIRE_VERSION/$ALIRE_FILE \
     && wget $ALIRE_URL \
     && rm -rf bin \
     && unzip $ALIRE_FILE
@@ -81,20 +92,44 @@ RUN cd /root \
     && unzip adamant_seq.zip
 
 # Install redo
-FROM ghcr.io/dinkelk/redo:latest as install_redo
+FROM base AS install_redo
+ARG TARGETARCH
+ENV REDO_VERSION="v0.1"
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq wget \
+    && mkdir -p /root/redo \
+    && cd /root/redo \
+    && REDO_FILE=redo-linux-$TARGETARCH.tar.gz \
+    && REDO_URL=https://github.com/dinkelk/redo/releases/download/$REDO_VERSION/$REDO_FILE \
+    && wget $REDO_URL \
+    && wget $REDO_URL.sha256 \
+    && sha256sum -c $REDO_FILE.sha256 \
+    && tar -xzf $REDO_FILE \
+    && rm $REDO_FILE $REDO_FILE.sha256
 
 # Install libadalang-tools like gnatmetric and gnatpp
-FROM ghcr.io/dinkelk/libadalang_tool_builder:latest as install_libadalang
+FROM base AS install_libadalang
+ARG TARGETARCH
+ENV LIBADALANG_VERSION="v0.1"
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq wget \
+    && mkdir -p /root/libadalang \
+    && cd /root/libadalang \
+    && LIBADALANG_FILE=libadalang-tools-linux-$TARGETARCH.tar.gz \
+    && LIBADALANG_URL=https://github.com/dinkelk/libadalang_tool_builder/releases/download/$LIBADALANG_VERSION/$LIBADALANG_FILE \
+    && wget $LIBADALANG_URL \
+    && wget $LIBADALANG_URL.sha256 \
+    && sha256sum -c $LIBADALANG_FILE.sha256 \
+    && tar -xzf $LIBADALANG_FILE \
+    && rm $LIBADALANG_FILE $LIBADALANG_FILE.sha256
 
 # Construct the final image from the multi-step build images above:
 FROM adamant_base AS final
 LABEL org.opencontainers.image.source=https://github.com/lasp/adamant
-LABEL org.opencontainers.image.description="Development environment for the Adamant framework"
+LABEL org.opencontainers.image.description="Complete development environment for Adamant - a component-based, model-driven framework for building reliable and reusable real-time embedded software. Includes GNAT compiler, SPARK tools, Alire package manager, redo build system, libadalang tools, and LaTeX document building tools. Supports both amd64 and arm64 architectures."
 LABEL org.opencontainers.image.licenses=Apache-2.0
 USER root
 ENV BIN_DIR=/usr/local/bin
-COPY --from=install_redo /root/redo/bin/* $BIN_DIR
-COPY --from=install_libadalang /root/libadalang/libadalang_tool_builder/tools/* $BIN_DIR
+COPY --from=install_redo /root/redo/* $BIN_DIR
+COPY --from=install_libadalang /root/libadalang/* $BIN_DIR
 COPY --from=install_alire /root/alire/bin/alr $BIN_DIR
 COPY --from=install_sequence_builder /root/adamant_seq/bin/* $BIN_DIR
 

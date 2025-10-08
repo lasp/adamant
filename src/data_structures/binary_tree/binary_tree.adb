@@ -69,7 +69,7 @@ package body Binary_Tree is
       -- every element past this one a single entry to the left
       -- in the array. This will keep the list sorted and
       -- compact.
-      for Index in Element_Index .. (Self.Size - 1) loop
+      for Index in Element_Index .. Self.Size - 1 loop
          Self.Tree (Index) := Self.Tree (Index + 1);
       end loop;
 

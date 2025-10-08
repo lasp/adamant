@@ -1,38 +1,50 @@
-name: Build the User Guide
+name: Build the User Guide (ARM64)
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  release:
+    types: [published]
   workflow_dispatch:
 jobs:
   compile_job:
-    name: build_user_guide
+    name: build_user_guide (arm64)
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/lasp/adamant:0.1
-      options: --user root
     steps:
       - run: echo "Starting job triggered by a ${{ github.event_name }} event on a ${{ runner.os }} server hosted by GitHub."
       - run: echo "Checking out ${{ github.repository }} on branch ${{ github.ref }}."
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Check out repository code
         uses: actions/checkout@v4
+
       - name: Build the user guide
-        run: bash env/github_run.sh "redo doc/user_guide/build_user_guide"
+        run: |
+          docker run --rm --platform linux/arm64 \
+            -v ${{ github.workspace }}:/workspace \
+            -w /workspace \
+            ghcr.io/lasp/adamant:0.1 \
+            bash env/github_run.sh "redo doc/user_guide/build_user_guide"
+
       - name: Archive user guide PDF
         uses: actions/upload-artifact@v4
         with:
-          name: user_guide
+          name: user_guide_arm64
           path: ${{ github.workspace }}/doc/user_guide/build/pdf/user_guide.pdf
           if-no-files-found: error
+
       - name: Build the architecture description document
-        run: bash env/github_run.sh "redo doc/architecture_description_document/build/pdf/architecture_description_document.pdf"
+        run: |
+          docker run --rm --platform linux/arm64 \
+            -v ${{ github.workspace }}:/workspace \
+            -w /workspace \
+            ghcr.io/lasp/adamant:0.1 \
+            bash env/github_run.sh "redo doc/architecture_description_document/build/pdf/architecture_description_document.pdf"
+
       - name: Archive architecture description document PDF
         uses: actions/upload-artifact@v4
         with:
-          name: architecture_description_document
+          name: architecture_description_document_arm64
           path: ${{ github.workspace }}/doc/architecture_description_document/build/pdf/architecture_description_document.pdf
           if-no-files-found: error
+
       - run: echo "Finished with status - ${{ job.status }}."
