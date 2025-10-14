@@ -483,6 +483,19 @@ package body Component.{{ name }}.Implementation.Tester is
       return Param_Update.Status;
    end Fetch_Parameter;
 
+   not overriding function Validate_Parameters (Self : in out Instance) return Parameter_Update_Status.E is
+      use Parameter_Enums.Parameter_Update_Status;
+      use Parameter_Enums.Parameter_Operation_Type;
+      Param_Update : Parameter_Update.T := (
+         Operation => Validate,
+         Status => Success,
+         Param => ((0, 0), [others => 0])
+      );
+   begin
+      Self.Parameter_Update_T_Provide (Param_Update);
+      return Param_Update.Status;
+   end Validate_Parameters;
+
    not overriding function Update_Parameters (Self : in out Instance) return Parameter_Update_Status.E is
       use Parameter_Enums.Parameter_Update_Status;
       use Parameter_Enums.Parameter_Operation_Type;

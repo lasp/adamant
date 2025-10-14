@@ -285,6 +285,10 @@ package Component.{{ name }}.Implementation.Tester is
    not overriding function Stage_Parameter (Self : in out Instance; Par : in Parameter.T) return Parameter_Update_Status.E;
    -- Fetch the value of a parameter with the component
    not overriding function Fetch_Parameter (Self : in out Instance; Id : in Parameter_Types.Parameter_Id; Par : out Parameter.T) return Parameter_Update_Status.E;
+   -- Ask the component to validate all parameters. This will call the
+   -- Validate_Parameters subprogram within the component implementation,
+   -- which allows custom checking of the parameter set prior to updating.
+   not overriding function Validate_Parameters (Self : in out Instance) return Parameter_Update_Status.E;
    -- Tell the component it is OK to atomically update all of its
    -- working parameter values with the staged values.
    not overriding function Update_Parameters (Self : in out Instance) return Parameter_Update_Status.E;
