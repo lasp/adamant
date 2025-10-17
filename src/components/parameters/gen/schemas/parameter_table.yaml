@@ -16,10 +16,14 @@ mapping:
   # List of parameters to include in the suite.
   parameters:
     seq:
-      # Each parameter name must be in the format "Component_Instance_Name"."Parameter_Name" or
-      # simply "Component_Instance_Name" to use all of the component's parameters.
-      - type: str
-        required: False
+      # Each parameter entry can be either:
+      # 1. A single parameter string in the format "Component_Instance_Name"."Parameter_Name" or
+      #    simply "Component_Instance_Name" to use all of the component's parameters.
+      # 2. A list of parameter strings (grouped parameters) where all parameters in the list
+      #    share the same entry in the parameter table. All parameters in a group must be the
+      #    same type.
+      # Note: Type validation is handled in the Python model since pykwalify doesn't support union types well.
+      - type: any
     # A parameter table must have at least one parameter.
     range:
       min: 1

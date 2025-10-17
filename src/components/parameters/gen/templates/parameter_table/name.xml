@@ -16,14 +16,16 @@
           <label name="Value"/>
         </tableHeading>
 {% for table_entry in parameters.values() %}
+{% for param in table_entry.parameters %}
         <tableRow>
-          <label name="{{ table_entry.parameter.id }}    {{ table_entry.name }}"/>
+          <label name="{{ param.parameter.id }}    {{ param.name }}"/>
         </tableRow>
-{% for field_name in table_entry.parameter.type_model.flattened_names(separator="-") %}
+{% for field_name in param.parameter.type_model.flattened_names(separator="-") %}
         <tableRow>
           <label name="                   {{ field_name }}"/>
-          <item name="Ccsds-{{ parameters_instance_name }}-Active_Parameters-{{ table_entry.component_name[0]|upper }}{{ table_entry.component_name[1:] }}_{{ table_entry.parameter.name }}-{{ field_name }}"/>
+          <item name="Ccsds-{{ parameters_instance_name }}-Active_Parameters-{{ param.component_name[0]|upper }}{{ param.component_name[1:] }}_{{ param.parameter.name }}-{{ field_name }}"/>
         </tableRow>
+{% endfor %}
 {% endfor %}
 {% endfor %}
       </table>
