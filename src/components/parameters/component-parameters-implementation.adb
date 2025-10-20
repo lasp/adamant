@@ -31,7 +31,16 @@ package body Component.Parameters.Implementation is
 
       --
       -- Let's do a few checks. This should be done by the autocoder, but there is no harm doing it
-      -- at runtime as well.
+      -- at runtime as well. The following checks are performed:
+      --
+      --   1. All parameter IDs are unique across the entire parameter table.
+      --   2. Entry_IDs are properly ordered, zero-indexed, and sequential (can stay the same for grouped parameters or increment by 1).
+      --   3. All component IDs are within the valid range of the arrayed parameter connector.
+      --   4. All component IDs referenced are actually connected to downstream components.
+      --   5. Parameter entries are laid out in memory with no gaps, no partial overlaps, and proper sizing.
+      --      - Grouped parameters (same Entry_ID) must have identical Start_Index and End_Index (exact overlap allowed).
+      --      - Non-grouped parameters must be sequential with no deadspace between entries.
+      --   6. The total parameter table size (including header and CRC) fits within a single Packet.T buffer.
       --
       for Idx in Self.Entries.all'Range loop
          declare
@@ -42,6 +51,24 @@ package body Component.Parameters.Implementation is
                pragma Assert (Param_Entry.Id /= Self.Entries.all (Next_Entry_Idx).Id, "All parameter IDs must be unique. Duplicate ID '" & Parameter_Id'Image (Param_Entry.Id) & "' found.");
                pragma Annotate (GNATSAS, Intentional, "conditional raise", "This assertion is intentionally designed to raise an exception if duplicate parameter IDs are found during initialization validation.");
             end loop;
+
+            -- Make sure Entry_IDs are properly ordered and zero-indexed.
+            if Idx = Self.Entries.all'First then
+               -- First entry must have Entry_Id = 0
+               pragma Assert (Param_Entry.Entry_Id = 0, "First parameter entry must have Entry_Id = 0, but found Entry_Id = " & Parameter_Types.Parameter_Table_Entry_Id'Image (Param_Entry.Entry_Id) & ".");
+            else
+               declare
+                  Prev_Entry : Parameters_Component_Types.Parameter_Table_Entry renames Self.Entries.all (Idx - 1);
+               begin
+                  -- Each Entry_Id must be either the same as the previous (for grouped parameters) or exactly one more
+                  pragma Assert (
+                     Param_Entry.Entry_Id = Prev_Entry.Entry_Id or else Param_Entry.Entry_Id = Prev_Entry.Entry_Id + 1,
+                     "Entry_IDs must be in order and always increasing or staying the same. Parameter at index " & Natural'Image (Idx) &
+                     " has Entry_Id = " & Parameter_Types.Parameter_Table_Entry_Id'Image (Param_Entry.Entry_Id) &
+                     ", but previous entry has Entry_Id = " & Parameter_Types.Parameter_Table_Entry_Id'Image (Prev_Entry.Entry_Id) & "."
+                  );
+               end;
+            end if;
 
             -- Make sure all component IDs are within the index range of our arrayed parameter connector.
             pragma Assert (
@@ -55,11 +82,37 @@ package body Component.Parameters.Implementation is
                "Connector '" & Connector_Index_Type'Image (Param_Entry.Component_Id) & "' is unconnected, but has parameters that need to be serviced.");
 
             -- Make sure the parameter entries are layout in byte order, with no deadspace and no overlap, and are not too large.
-            pragma Assert (Param_Entry.Start_Index = Current_Byte, "Unexpected byte layout in parameter table at ID '" & Parameter_Id'Image (Param_Entry.Id) & "'.");
-            pragma Assert (Param_Entry.End_Index >= Param_Entry.Start_Index, "end_Index must be greater than start_Index at ID '" & Parameter_Id'Image (Param_Entry.Id) & "'.");
-            pragma Assert (Param_Entry.End_Index - Param_Entry.Start_Index + 1 <= Parameter_Types.Parameter_Buffer_Length_Type'Last,
-               "Parameter ID '" & Parameter_Id'Image (Param_Entry.Id) & "' is too large to fit in the parameter record.");
-            Current_Byte := Param_Entry.End_Index + 1;
+            -- Allow exact overlap (grouped parameters) where Start_Index and End_Index match the previous entry exactly.
+            declare
+               -- Helper procedure to validate parameter size and layout, avoiding code duplication
+               procedure Validate_Parameter_Layout is
+               begin
+                  pragma Assert (Param_Entry.Start_Index = Current_Byte, "Unexpected byte layout in parameter table at ID '" & Parameter_Id'Image (Param_Entry.Id) & "'.");
+                  pragma Assert (Param_Entry.End_Index >= Param_Entry.Start_Index, "end_Index must be greater than start_Index at ID '" & Parameter_Id'Image (Param_Entry.Id) & "'.");
+                  pragma Assert (Param_Entry.End_Index - Param_Entry.Start_Index + 1 <= Parameter_Types.Parameter_Buffer_Length_Type'Last,
+                     "Parameter ID '" & Parameter_Id'Image (Param_Entry.Id) & "' is too large to fit in the parameter record.");
+                  Current_Byte := Param_Entry.End_Index + 1;
+               end Validate_Parameter_Layout;
+            begin
+               if Idx > Self.Entries.all'First then
+                  declare
+                     Prev_Entry : Parameters_Component_Types.Parameter_Table_Entry renames Self.Entries.all (Idx - 1);
+                  begin
+                     -- Check if this is a grouped parameter (exact overlap with previous entry)
+                     if Param_Entry.Start_Index = Prev_Entry.Start_Index and then Param_Entry.End_Index = Prev_Entry.End_Index then
+                        -- This is a grouped parameter sharing the same memory location as the previous entry.
+                        -- No need to advance Current_Byte since we're reusing the same space.
+                        null;
+                     else
+                        -- Not a grouped parameter, so ensure no deadspace, no partial overlap, and proper ordering.
+                        Validate_Parameter_Layout;
+                     end if;
+                  end;
+               else
+                  -- First entry, perform standard checks
+                  Validate_Parameter_Layout;
+               end if;
+            end;
          end;
       end loop;
 
@@ -83,17 +136,23 @@ package body Component.Parameters.Implementation is
    -- to hold the entire parameter table.
    function Fetch_Parameters (Self : in out Instance; Buffer : in out Basic_Types.Byte_Array) return Parameter_Enums.Parameter_Update_Status.E is
       use Parameter_Enums.Parameter_Update_Status;
+      use Parameter_Types;
+      use Basic_Types;
       To_Return : Parameter_Enums.Parameter_Update_Status.E := Success;
+      Last_Entry_Id : Parameter_Types.Parameter_Table_Entry_Id := Parameter_Types.Parameter_Table_Entry_Id'Last;
+      First_Param_Id_In_Group : Parameter_Types.Parameter_Id := Parameter_Types.Parameter_Id'First;
    begin
       -- The caller of this function should ensure that the buffer type is large enough to hold an
       -- entire parameter table:
       pragma Assert (Buffer'Length >= Self.Parameter_Table_Data_Length, "Buffer not large enough to hold parameter table data!");
 
       -- Go through all of our parameter table entries and fetch them one at a time from the connected
-      -- components.
-      for Param_Entry of Self.Entries.all loop
+      -- components. For grouped parameters (multiple parameters sharing the same Entry_ID), we only
+      -- use the first fetched value and compare subsequent fetches to ensure they match.
+      for Idx in Self.Entries.all'Range loop
          declare
             use Parameter_Enums.Parameter_Operation_Type;
+            Param_Entry : Parameters_Component_Types.Parameter_Table_Entry renames Self.Entries.all (Idx);
             Param_Update : Parameter_Update.T := (
                Operation => Fetch,
                Status => Success,
@@ -102,10 +161,12 @@ package body Component.Parameters.Implementation is
             -- Calculate expected parameter length:
             Param_Length : constant Parameter_Types.Parameter_Buffer_Length_Type := Param_Entry.End_Index - Param_Entry.Start_Index + 1;
             -- Component index:
-            Idx : constant Parameter_Update_T_Provide_Index := Parameter_Update_T_Provide_Index (Param_Entry.Component_Id);
+            Comp_Idx : constant Parameter_Update_T_Provide_Index := Parameter_Update_T_Provide_Index (Param_Entry.Component_Id);
+            -- Check if this is the first parameter in a new entry group:
+            Is_First_In_Group : constant Boolean := (Param_Entry.Entry_Id /= Last_Entry_Id);
          begin
             -- Send the parameter fetch request to the appropriate component:
-            Self.Parameter_Update_T_Provide (Idx, Param_Update);
+            Self.Parameter_Update_T_Provide (Comp_Idx, Param_Update);
 
             -- Make sure the status is successful. If it is not, then produce an event, but still continue
             -- on to produce the packet:
@@ -113,9 +174,32 @@ package body Component.Parameters.Implementation is
                -- Copy the data returned into the packet, unless there is a length mismatch. A length mismatch
                -- should never happen if the autocoded parameter entry table is error free.
                if Param_Length = Param_Update.Param.Header.Buffer_Length then
-                  -- Copy parameter data into packet:
-                  Buffer (Buffer'First + Param_Entry.Start_Index .. Buffer'First + Param_Entry.End_Index)
-                     := Param_Update.Param.Buffer (Param_Update.Param.Buffer'First .. Param_Update.Param.Buffer'First + Param_Length - 1);
+                  -- Declare renames for buffer slices that can be used for both first and subsequent parameters
+                  declare
+                     Buffer_Slice : Basic_Types.Byte_Array renames Buffer (Buffer'First + Param_Entry.Start_Index .. Buffer'First + Param_Entry.End_Index);
+                     Fetched_Slice : Basic_Types.Byte_Array renames Param_Update.Param.Buffer (Param_Update.Param.Buffer'First .. Param_Update.Param.Buffer'First + Param_Length - 1);
+                  begin
+                     -- Check if this is the first parameter in the group or a subsequent one:
+                     if Is_First_In_Group then
+                        -- This is the first parameter for this Entry_ID, so use its value:
+                        Buffer_Slice := Fetched_Slice;
+                        -- Remember this Entry_ID and Parameter_ID for comparison with subsequent fetches:
+                        Last_Entry_Id := Param_Entry.Entry_Id;
+                        First_Param_Id_In_Group := Param_Entry.Id;
+                     else
+                        -- This is a subsequent parameter in the same entry group. Compare the fetched value
+                        -- with what's already in the buffer. If they don't match, throw an info event.
+                        if Buffer_Slice /= Fetched_Slice then
+                           -- Values don't match! Throw an info event to alert the user.
+                           Self.Event_T_Send_If_Connected (Self.Events.Parameter_Fetch_Value_Mismatch (Self.Sys_Time_T_Get, (
+                              Entry_Id => Param_Entry.Entry_Id,
+                              First_Id => First_Param_Id_In_Group,
+                              Second_Id => Param_Entry.Id)
+                           ));
+                        end if;
+                        -- Don't overwrite the buffer - we always use the first fetched value.
+                     end if;
+                  end;
                else
                   Self.Event_T_Send_If_Connected (Self.Events.Parameter_Fetch_Length_Mismatch (Self.Sys_Time_T_Get, (
                      Header => Param_Update.Param.Header,
@@ -552,19 +636,24 @@ package body Component.Parameters.Implementation is
    -----------------------------------------------
    -- Description:
    --    These are the commands for the Parameters component.
-   -- Update the active parameter value in a component for a parameter with the given ID, Length, and Value.
-   overriding function Update_Parameter (Self : in out Instance; Arg : in Parameter.T) return Command_Execution_Status.E is
+   -- Update the active parameter value in a component for a parameter table entry with the given ID, Length, and Value. If multiple parameters share the same entry ID (grouped parameters), all will be updated.
+   overriding function Update_Parameter (Self : in out Instance; Arg : in Parameter_Table_Entry.T) return Command_Execution_Status.E is
       use Parameter_Enums.Parameter_Update_Status;
       use Command_Execution_Status;
       use Parameter_Types;
+      Entry_Found : Boolean := False;
+      -- Track which components we need to update (to avoid duplicate updates)
+      Components_To_Update : array (Self.Connector_Parameter_Update_T_Provide'Range) of Boolean := [others => False];
    begin
-      -- Search through our entries linearly to see if a parameter with the id is found:
+      -- Search through our entries linearly to find all parameters with matching Entry_ID.
+      -- For grouped parameters, multiple parameters may share the same Entry_ID.
       for Idx in Self.Entries.all'Range loop
          declare
             Param_Entry : Parameters_Component_Types.Parameter_Table_Entry renames Self.Entries.all (Idx);
          begin
-            -- See if this entry contains the ID we are looking for.
-            if Arg.Header.Id = Param_Entry.Id then
+            -- See if this entry has the Entry_ID we are looking for.
+            if Arg.Header.Id = Param_Entry.Entry_Id then
+               Entry_Found := True;
                declare
                   -- Calculate expected parameter length:
                   Param_Length : constant Parameter_Types.Parameter_Buffer_Length_Type := Param_Entry.End_Index - Param_Entry.Start_Index + 1;
@@ -584,37 +673,46 @@ package body Component.Parameters.Implementation is
                         return Failure;
                      end if;
 
-                     -- Now let's update the parameter.
-                     if Self.Update_Parameters (Component_Id => Param_Entry.Component_Id) /= Success then
-                        -- No need to throw an event, because an event is thrown in the function above
-                        -- if something doesn't go well.
-                        return Failure;
-                     end if;
-
-                     -- Send out a new parameter's packet if configured to do so:
-                     if Self.Dump_Parameters_On_Change then
-                        declare
-                           -- Just call the dump parameter's command handler.
-                           Stat : constant Command_Execution_Status.E := Self.Dump_Parameters;
-                        begin
-                           if Stat /= Success then
-                              return Stat;
-                           end if;
-                        end;
-                     end if;
-
-                     -- If we got here than everything worked as expected:
-                     Self.Event_T_Send_If_Connected (Self.Events.Parameter_Update_Success (Self.Sys_Time_T_Get, (Id => Arg.Header.Id)));
-                     return Success;
+                     -- Mark this component as needing an update.
+                     Components_To_Update (Param_Entry.Component_Id) := True;
                   end if;
                end;
             end if;
          end;
       end loop;
 
-      -- If we get here than we did not find an ID that matches the parameter we are asked to update.
-      Self.Event_T_Send_If_Connected (Self.Events.Parameter_Update_Id_Not_Recognized (Self.Sys_Time_T_Get, (Id => Arg.Header.Id)));
-      return Failure;
+      -- If we didn't find any entries with matching Entry_ID, report error.
+      if not Entry_Found then
+         Self.Event_T_Send_If_Connected (Self.Events.Parameter_Update_Id_Not_Recognized (Self.Sys_Time_T_Get, (Id => Arg.Header.Id)));
+         return Failure;
+      end if;
+
+      -- Now update all components that had parameters staged.
+      for Component_Id in Components_To_Update'Range loop
+         if Components_To_Update (Component_Id) then
+            if Self.Update_Parameters (Component_Id => Component_Id) /= Success then
+               -- No need to throw an event, because an event is thrown in the function above
+               -- if something doesn't go well.
+               return Failure;
+            end if;
+         end if;
+      end loop;
+
+      -- Send out a new parameter's packet if configured to do so:
+      if Self.Dump_Parameters_On_Change then
+         declare
+            -- Just call the dump parameter's command handler.
+            Stat : constant Command_Execution_Status.E := Self.Dump_Parameters;
+         begin
+            if Stat /= Success then
+               return Stat;
+            end if;
+         end;
+      end if;
+
+      -- If we got here than everything worked as expected:
+      Self.Event_T_Send_If_Connected (Self.Events.Parameter_Update_Success (Self.Sys_Time_T_Get, (Id => Arg.Header.Id)));
+      return Success;
    end Update_Parameter;
 
    -- Produce a packet with the currently staged parameter values contained within connected components.
