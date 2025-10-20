@@ -153,6 +153,51 @@ package body Parameters_Tests.Implementation is
          when others =>
             null;
       end Init_Bad_Layout_2;
+
+      procedure Init_Bad_Entry_Id_Order is
+         -- A list of the parameter table entries for use by the component.
+         -- Entry_IDs skip from 0 to 2 (missing 1), which should fail the assertion on line 65.
+         Parameter_Table_Entries : aliased Parameters_Component_Types.Parameter_Table_Entry_List :=
+            [(Id => 2, Entry_Id => 0, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Entry_Id => 2, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Entry_Id => 3, Component_Id => 1, Start_Index => 16, End_Index => 17),
+             (Id => 3, Entry_Id => 4, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Entry_Id => 5, Component_Id => 2, Start_Index => 20, End_Index => 23)];
+      begin
+         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
+         Assert (False, "Bad Entry_ID order init failed!");
+      exception
+         -- Expecting exception to be thrown:
+         when others =>
+            null;
+      end Init_Bad_Entry_Id_Order;
+
+      procedure Init_Component_Id_Out_Of_Range is
+         -- A list of the parameter table entries for use by the component.
+         -- Last entry has Component_Id => 10, which is above the valid range (1..3), should fail assertion on line 75.
+         Parameter_Table_Entries : aliased Parameters_Component_Types.Parameter_Table_Entry_List :=
+            [(Id => 2, Entry_Id => 0, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Entry_Id => 1, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Entry_Id => 2, Component_Id => 1, Start_Index => 16, End_Index => 17),
+             (Id => 3, Entry_Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Entry_Id => 4, Component_Id => 10, Start_Index => 20, End_Index => 23)];
+      begin
+         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
+         Assert (False, "Component_ID out of range init failed!");
+      exception
+         -- Expecting exception to be thrown:
+         when others =>
+            null;
+      end Init_Component_Id_Out_Of_Range;
+
+      procedure Init_Parameter_Too_Large is
+         -- A list of the parameter table entries for use by the component.
+         -- Last entry has End_Index much larger than Start_Index, exceeding Parameter_Buffer_Length_Type'Last, should fail assertion on line 92.
+         Parameter_Table_Entries : aliased Parameters_Component_Types.Parameter_Table_Entry_List :=
+            [(Id => 2, Entry_Id => 0, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Entry_Id => 1, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Entry_Id => 2, Component_Id => 1, Start_Index => 16, End_Index => 17),
+             (Id => 3, Entry_Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Entry_Id => 4, Component_Id => 2, Start_Index => 20, End_Index => 300)];
+      begin
+         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
+         Assert (False, "Parameter too large init failed!");
+      exception
+         -- Expecting exception to be thrown:
+         when others =>
+            null;
+      end Init_Parameter_Too_Large;
    begin
       -- Test different start-up scenarios:
       Init_Nominal;
@@ -161,6 +206,9 @@ package body Parameters_Tests.Implementation is
       Init_Unconnected_Component_Id;
       Init_Bad_Layout_1;
       Init_Bad_Layout_2;
+      Init_Bad_Entry_Id_Order;
+      Init_Component_Id_Out_Of_Range;
+      Init_Parameter_Too_Large;
    end Test_Init;
 
    overriding procedure Test_Nominal_Dump_Parameters (Self : in out Instance) is
