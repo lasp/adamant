@@ -13,9 +13,11 @@ with Packet.Representation;
 with Event.Representation;
 with Sys_Time.Representation;
 with Event;
-with Parameter_Id.Representation;
+with Parameter_Table_Entry_Id.Representation;
 with Parameter_Operation_Status.Representation;
 with Invalid_Parameter_Length.Representation;
+with Parameter_Entry_Comparison.Representation;
+with Invalid_Parameter_Table_Entry_Length.Representation;
 with Invalid_Parameters_Memory_Region_Length.Representation;
 with Invalid_Parameters_Memory_Region_Crc.Representation;
 with Memory_Region.Representation;
@@ -25,9 +27,19 @@ with Parameters_Memory_Region.Representation;
 with Component.Test_Component_1.Implementation;
 with Component.Test_Component_2.Implementation;
 
--- The Parameters Component is responsible for staging, updating, and reporting the values of the ``active" parameters being used in the system. The component does not contain a parameter table itself. Instead it acts as an interface for the rest of the system to component's internal staged parameters. The component allows the staging and updating of parameters through a table upload (via Memory_Region_T_Recv_Async) or updating of individual parameter values by command. The component also provides a command to fetch all of the parameters held within components and produce a packet with the fetched values. The component can be configured to produce this packet automatically any time a parameter change is requested.
+-- The Parameters Component is responsible for staging, updating, and reporting
+-- the values of the ``active" parameters being used in the system. The component
+-- does not contain a parameter table itself. Instead it acts as an interface for
+-- the rest of the system to component's internal staged parameters. The component
+-- allows the staging and updating of parameters through a table upload (via
+-- Memory_Region_T_Recv_Async) or updating of individual parameter values by
+-- command. The component also provides a command to fetch all of the parameters
+-- held within components and produce a packet with the fetched values. The
+-- component can be configured to produce this packet automatically any time a
+-- parameter change is requested.
 package Component.Parameters.Implementation.Tester is
 
+   use Component.Parameters_Reciprocal;
    -- Invoker connector history packages:
    package Parameter_Update_T_Modify_History_Package is new Printable_History (Parameter_Update.T, Parameter_Update.Representation.Image);
    package Command_Response_T_Recv_Sync_History_Package is new Printable_History (Command_Response.T, Command_Response.Representation.Image);
@@ -37,14 +49,15 @@ package Component.Parameters.Implementation.Tester is
    package Sys_Time_T_Return_History_Package is new Printable_History (Sys_Time.T, Sys_Time.Representation.Image);
 
    -- Event history packages:
-   package Parameter_Update_Success_History_Package is new Printable_History (Parameter_Id.T, Parameter_Id.Representation.Image);
-   package Parameter_Update_Id_Not_Recognized_History_Package is new Printable_History (Parameter_Id.T, Parameter_Id.Representation.Image);
+   package Parameter_Update_Success_History_Package is new Printable_History (Parameter_Table_Entry_Id.T, Parameter_Table_Entry_Id.Representation.Image);
+   package Parameter_Update_Id_Not_Recognized_History_Package is new Printable_History (Parameter_Table_Entry_Id.T, Parameter_Table_Entry_Id.Representation.Image);
    package Parameter_Stage_Failed_History_Package is new Printable_History (Parameter_Operation_Status.T, Parameter_Operation_Status.Representation.Image);
    package Parameter_Update_Failed_History_Package is new Printable_History (Parameter_Operation_Status.T, Parameter_Operation_Status.Representation.Image);
    package Parameter_Validation_Failed_History_Package is new Printable_History (Parameter_Operation_Status.T, Parameter_Operation_Status.Representation.Image);
    package Parameter_Fetch_Failed_History_Package is new Printable_History (Parameter_Operation_Status.T, Parameter_Operation_Status.Representation.Image);
    package Parameter_Fetch_Length_Mismatch_History_Package is new Printable_History (Invalid_Parameter_Length.T, Invalid_Parameter_Length.Representation.Image);
-   package Parameter_Update_Length_Mismatch_History_Package is new Printable_History (Invalid_Parameter_Length.T, Invalid_Parameter_Length.Representation.Image);
+   package Parameter_Fetch_Value_Mismatch_History_Package is new Printable_History (Parameter_Entry_Comparison.T, Parameter_Entry_Comparison.Representation.Image);
+   package Parameter_Update_Length_Mismatch_History_Package is new Printable_History (Invalid_Parameter_Table_Entry_Length.T, Invalid_Parameter_Table_Entry_Length.Representation.Image);
    package Memory_Region_Length_Mismatch_History_Package is new Printable_History (Invalid_Parameters_Memory_Region_Length.T, Invalid_Parameters_Memory_Region_Length.Representation.Image);
    package Memory_Region_Crc_Invalid_History_Package is new Printable_History (Invalid_Parameters_Memory_Region_Crc.T, Invalid_Parameters_Memory_Region_Crc.Representation.Image);
    package Dumping_Parameters_History_Package is new Printable_History (Natural, Natural'Image);
@@ -81,6 +94,7 @@ package Component.Parameters.Implementation.Tester is
       Parameter_Validation_Failed_History : Parameter_Validation_Failed_History_Package.Instance;
       Parameter_Fetch_Failed_History : Parameter_Fetch_Failed_History_Package.Instance;
       Parameter_Fetch_Length_Mismatch_History : Parameter_Fetch_Length_Mismatch_History_Package.Instance;
+      Parameter_Fetch_Value_Mismatch_History : Parameter_Fetch_Value_Mismatch_History_Package.Instance;
       Parameter_Update_Length_Mismatch_History : Parameter_Update_Length_Mismatch_History_Package.Instance;
       Memory_Region_Length_Mismatch_History : Memory_Region_Length_Mismatch_History_Package.Instance;
       Memory_Region_Crc_Invalid_History : Memory_Region_Crc_Invalid_History_Package.Instance;
@@ -128,13 +142,18 @@ package Component.Parameters.Implementation.Tester is
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- The arrayed parameter request connector. Parameters stages, updates, and fetches are sent out this connector and a status is returned.
+   -- The arrayed parameter request connector. Parameters stages, updates, and
+   -- fetches are sent out this connector and a status is returned.
    overriding procedure Parameter_Update_T_Modify (Self : in out Instance; Arg : in out Parameter_Update.T);
    -- This connector is used to send command responses.
    overriding procedure Command_Response_T_Recv_Sync (Self : in out Instance; Arg : in Command_Response.T);
-   -- After a memory region is received on the Memory_Region_T_Recv_Async connector and then processed, it is released via a call to this connector. A status is also returned, so the downstream component can determine if the parameter update was successful or not.
+   -- After a memory region is received on the Memory_Region_T_Recv_Async connector
+   -- and then processed, it is released via a call to this connector. A status is
+   -- also returned, so the downstream component can determine if the parameter
+   -- update was successful or not.
    overriding procedure Parameters_Memory_Region_Release_T_Recv_Sync (Self : in out Instance; Arg : in Parameters_Memory_Region_Release.T);
-   -- The parameter packet connector. A copy of the active parameters is dumped via this connector.
+   -- The parameter packet connector. A copy of the active parameters is dumped via
+   -- this connector.
    overriding procedure Packet_T_Recv_Sync (Self : in out Instance; Arg : in Packet.T);
    -- Events are sent out of this connector.
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T);
@@ -153,10 +172,11 @@ package Component.Parameters.Implementation.Tester is
    -----------------------------------------------
    -- Event handler primitive:
    -----------------------------------------------
-   -- A parameter value was updated.
-   overriding procedure Parameter_Update_Success (Self : in out Instance; Arg : in Parameter_Id.T);
-   -- A parameter value could not be updated because the ID is not recognized.
-   overriding procedure Parameter_Update_Id_Not_Recognized (Self : in out Instance; Arg : in Parameter_Id.T);
+   -- A parameter table entry was updated.
+   overriding procedure Parameter_Update_Success (Self : in out Instance; Arg : in Parameter_Table_Entry_Id.T);
+   -- A parameter table entry could not be updated because the Entry ID is not
+   -- recognized.
+   overriding procedure Parameter_Update_Id_Not_Recognized (Self : in out Instance; Arg : in Parameter_Table_Entry_Id.T);
    -- A parameter value could not be updated.
    overriding procedure Parameter_Stage_Failed (Self : in out Instance; Arg : in Parameter_Operation_Status.T);
    -- A parameter value could not be updated.
@@ -167,27 +187,37 @@ package Component.Parameters.Implementation.Tester is
    overriding procedure Parameter_Fetch_Failed (Self : in out Instance; Arg : in Parameter_Operation_Status.T);
    -- A parameter was fetched but contained an unexpected length.
    overriding procedure Parameter_Fetch_Length_Mismatch (Self : in out Instance; Arg : in Invalid_Parameter_Length.T);
-   -- A parameter command was received to update a parameter but it contained an unexpected length.
-   overriding procedure Parameter_Update_Length_Mismatch (Self : in out Instance; Arg : in Invalid_Parameter_Length.T);
-   -- A memory region was received with an invalid length. The length of the region must be the same size as the parameter table.
+   -- Multiple parameters in a grouped entry were fetched and contained different
+   -- values. Using the first fetched value.
+   overriding procedure Parameter_Fetch_Value_Mismatch (Self : in out Instance; Arg : in Parameter_Entry_Comparison.T);
+   -- A parameter table entry command was received to update a parameter but it
+   -- contained an unexpected length.
+   overriding procedure Parameter_Update_Length_Mismatch (Self : in out Instance; Arg : in Invalid_Parameter_Table_Entry_Length.T);
+   -- A memory region was received with an invalid length. The length of the region
+   -- must be the same size as the parameter table.
    overriding procedure Memory_Region_Length_Mismatch (Self : in out Instance; Arg : in Invalid_Parameters_Memory_Region_Length.T);
-   -- A memory region parameter table was received with an invalid CRC. The computed CRC does not match the CRC found in the header.
+   -- A memory region parameter table was received with an invalid CRC. The computed
+   -- CRC does not match the CRC found in the header.
    overriding procedure Memory_Region_Crc_Invalid (Self : in out Instance; Arg : in Invalid_Parameters_Memory_Region_Crc.T);
-   -- Producing a packet with the currently staged parameter values contained within connected components.
+   -- Producing a packet with the currently staged parameter values contained within
+   -- connected components.
    overriding procedure Dumping_Parameters (Self : in out Instance);
    -- Done dumping the parameters.
    overriding procedure Finished_Dumping_Parameters (Self : in out Instance);
    -- Starting updating of the parameters from a received memory region.
    overriding procedure Starting_Parameter_Table_Update (Self : in out Instance; Arg : in Memory_Region.T);
-   -- Done updating the parameters from a received memory region with following status.
+   -- Done updating the parameters from a received memory region with following
+   -- status.
    overriding procedure Finished_Parameter_Table_Update (Self : in out Instance; Arg : in Parameters_Memory_Region_Release.T);
    -- Starting validation of the parameters from a received memory region.
    overriding procedure Starting_Parameter_Table_Validate (Self : in out Instance; Arg : in Memory_Region.T);
-   -- Done validating the parameters from a received memory region with following status.
+   -- Done validating the parameters from a received memory region with following
+   -- status.
    overriding procedure Finished_Parameter_Table_Validate (Self : in out Instance; Arg : in Parameters_Memory_Region_Release.T);
    -- Starting updating of the parameters from a received memory region.
    overriding procedure Starting_Parameter_Table_Fetch (Self : in out Instance; Arg : in Memory_Region.T);
-   -- Done updating the parameters from a received memory region with following status.
+   -- Done updating the parameters from a received memory region with following
+   -- status.
    overriding procedure Finished_Parameter_Table_Fetch (Self : in out Instance; Arg : in Parameters_Memory_Region_Release.T);
    -- A command was received with invalid parameters.
    overriding procedure Invalid_Command_Received (Self : in out Instance; Arg : in Invalid_Command_Info.T);
@@ -201,7 +231,8 @@ package Component.Parameters.Implementation.Tester is
    -----------------------------------------------
    -- Description:
    --    Packets for the Parameters Component.
-   -- This packet contains a copy of all the active parameters managed by this component.
+   -- This packet contains a copy of all the active parameters managed by this
+   -- component.
    overriding procedure Active_Parameters (Self : in out Instance; Arg : in Packet.T);
 
    -----------------------------------------------

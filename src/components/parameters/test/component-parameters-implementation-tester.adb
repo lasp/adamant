@@ -2,6 +2,7 @@
 -- Parameters Component Tester Body
 --------------------------------------------------------------------------------
 
+-- Includes:
 with String_Util;
 
 package body Component.Parameters.Implementation.Tester is
@@ -30,6 +31,7 @@ package body Component.Parameters.Implementation.Tester is
       Self.Parameter_Validation_Failed_History.Init (Depth => 20);
       Self.Parameter_Fetch_Failed_History.Init (Depth => 20);
       Self.Parameter_Fetch_Length_Mismatch_History.Init (Depth => 20);
+      Self.Parameter_Fetch_Value_Mismatch_History.Init (Depth => 20);
       Self.Parameter_Update_Length_Mismatch_History.Init (Depth => 20);
       Self.Memory_Region_Length_Mismatch_History.Init (Depth => 20);
       Self.Memory_Region_Crc_Invalid_History.Init (Depth => 20);
@@ -47,7 +49,7 @@ package body Component.Parameters.Implementation.Tester is
       -- Packet histories:
       Self.Active_Parameters_History.Init (Depth => 20);
 
-      -- Set base ids for attached components:
+      -- Initialize test components, setting their IDs
       Self.Component_A.Set_Id_Bases (Parameter_Id_Base => 1);
       Self.Component_B.Set_Id_Bases (Parameter_Id_Base => 3);
       Self.Component_C.Set_Id_Bases (Parameter_Id_Base => 5);
@@ -71,6 +73,7 @@ package body Component.Parameters.Implementation.Tester is
       Self.Parameter_Validation_Failed_History.Destroy;
       Self.Parameter_Fetch_Failed_History.Destroy;
       Self.Parameter_Fetch_Length_Mismatch_History.Destroy;
+      Self.Parameter_Fetch_Value_Mismatch_History.Destroy;
       Self.Parameter_Update_Length_Mismatch_History.Destroy;
       Self.Memory_Region_Length_Mismatch_History.Destroy;
       Self.Memory_Region_Crc_Invalid_History.Destroy;
@@ -97,26 +100,27 @@ package body Component.Parameters.Implementation.Tester is
    ---------------------------------------
    procedure Connect (Self : in out Instance) is
    begin
-      -- self.component_Instance.attach_Parameter_Update_T_Provide(1, self'Unchecked_Access, self.Parameter_Update_T_Modify_Access);
-      -- self.component_Instance.attach_Parameter_Update_T_Provide(2, self'Unchecked_Access, self.Parameter_Update_T_Modify_Access);
-      -- self.component_Instance.attach_Parameter_Update_T_Provide(3, self'Unchecked_Access, self.Parameter_Update_T_Modify_Access);
+      -- Self.Component_Instance.Attach_Parameter_Update_T_Provide (From_Index => 1, To_Component => Self'Unchecked_Access, Hook => Self.Parameter_Update_T_Modify_Access);
+      -- Self.Component_Instance.Attach_Parameter_Update_T_Provide (From_Index => 2, To_Component => Self'Unchecked_Access, Hook => Self.Parameter_Update_T_Modify_Access);
+      -- Self.Component_Instance.Attach_Parameter_Update_T_Provide (From_Index => 3, To_Component => Self'Unchecked_Access, Hook => Self.Parameter_Update_T_Modify_Access);
       -- ^^ Instead of connecting to the tester, lets connect the parameter component to actual component destinations
-      Self.Component_Instance.Attach_Parameter_Update_T_Provide (1, Self.Component_A'Unchecked_Access, Self.Component_A.Parameter_Update_T_Modify_Access);
-      Self.Component_Instance.Attach_Parameter_Update_T_Provide (2, Self.Component_B'Unchecked_Access, Self.Component_B.Parameter_Update_T_Modify_Access);
-      Self.Component_Instance.Attach_Parameter_Update_T_Provide (3, Self.Component_C'Unchecked_Access, Self.Component_C.Parameter_Update_T_Modify_Access);
-      Self.Component_Instance.Attach_Command_Response_T_Send (Self'Unchecked_Access, Self.Command_Response_T_Recv_Sync_Access);
-      Self.Component_Instance.Attach_Parameters_Memory_Region_Release_T_Send (Self'Unchecked_Access, Self.Parameters_Memory_Region_Release_T_Recv_Sync_Access);
-      Self.Component_Instance.Attach_Packet_T_Send (Self'Unchecked_Access, Self.Packet_T_Recv_Sync_Access);
-      Self.Component_Instance.Attach_Event_T_Send (Self'Unchecked_Access, Self.Event_T_Recv_Sync_Access);
-      Self.Component_Instance.Attach_Sys_Time_T_Get (Self'Unchecked_Access, Self.Sys_Time_T_Return_Access);
-      Self.Attach_Command_T_Send (Self.Component_Instance'Unchecked_Access, Self.Component_Instance.Command_T_Recv_Async_Access);
-      Self.Attach_Parameters_Memory_Region_T_Send (Self.Component_Instance'Unchecked_Access, Self.Component_Instance.Parameters_Memory_Region_T_Recv_Async_Access);
+      Self.Component_Instance.Attach_Parameter_Update_T_Provide (From_Index => 1, To_Component => Self.Component_A'Unchecked_Access, Hook => Self.Component_A.Parameter_Update_T_Modify_Access);
+      Self.Component_Instance.Attach_Parameter_Update_T_Provide (From_Index => 2, To_Component => Self.Component_B'Unchecked_Access, Hook => Self.Component_B.Parameter_Update_T_Modify_Access);
+      Self.Component_Instance.Attach_Parameter_Update_T_Provide (From_Index => 3, To_Component => Self.Component_C'Unchecked_Access, Hook => Self.Component_C.Parameter_Update_T_Modify_Access);
+      Self.Component_Instance.Attach_Command_Response_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Command_Response_T_Recv_Sync_Access);
+      Self.Component_Instance.Attach_Parameters_Memory_Region_Release_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Parameters_Memory_Region_Release_T_Recv_Sync_Access);
+      Self.Component_Instance.Attach_Packet_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Packet_T_Recv_Sync_Access);
+      Self.Component_Instance.Attach_Event_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Event_T_Recv_Sync_Access);
+      Self.Component_Instance.Attach_Sys_Time_T_Get (To_Component => Self'Unchecked_Access, Hook => Self.Sys_Time_T_Return_Access);
+      Self.Attach_Command_T_Send (To_Component => Self.Component_Instance'Unchecked_Access, Hook => Self.Component_Instance.Command_T_Recv_Async_Access);
+      Self.Attach_Parameters_Memory_Region_T_Send (To_Component => Self.Component_Instance'Unchecked_Access, Hook => Self.Component_Instance.Parameters_Memory_Region_T_Recv_Async_Access);
    end Connect;
 
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- The arrayed parameter request connector. Parameters stages, updates, and fetches are sent out this connector and a status is returned.
+   -- The arrayed parameter request connector. Parameters stages, updates, and
+   -- fetches are sent out this connector and a status is returned.
    overriding procedure Parameter_Update_T_Modify (Self : in out Instance; Arg : in out Parameter_Update.T) is
    begin
       -- Push the argument onto the test history for looking at later:
@@ -130,14 +134,18 @@ package body Component.Parameters.Implementation.Tester is
       Self.Command_Response_T_Recv_Sync_History.Push (Arg);
    end Command_Response_T_Recv_Sync;
 
-   -- After a memory region is received on the Memory_Region_T_Recv_Async connector and then processed, it is released via a call to this connector. A status is also returned, so the downstream component can determine if the parameter update was successful or not.
+   -- After a memory region is received on the Memory_Region_T_Recv_Async connector
+   -- and then processed, it is released via a call to this connector. A status is
+   -- also returned, so the downstream component can determine if the parameter
+   -- update was successful or not.
    overriding procedure Parameters_Memory_Region_Release_T_Recv_Sync (Self : in out Instance; Arg : in Parameters_Memory_Region_Release.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Parameters_Memory_Region_Release_T_Recv_Sync_History.Push (Arg);
    end Parameters_Memory_Region_Release_T_Recv_Sync;
 
-   -- The parameter packet connector. A copy of the active parameters is dumped via this connector.
+   -- The parameter packet connector. A copy of the active parameters is dumped via
+   -- this connector.
    overriding procedure Packet_T_Recv_Sync (Self : in out Instance; Arg : in Packet.T) is
    begin
       -- Push the argument onto the test history for looking at later:
@@ -157,10 +165,9 @@ package body Component.Parameters.Implementation.Tester is
 
    -- The system time is retrieved via this connector.
    overriding function Sys_Time_T_Return (Self : in out Instance) return Sys_Time.T is
-      To_Return : Sys_Time.T;
-   begin
       -- Return the system time:
-      To_Return := Self.System_Time;
+      To_Return : constant Sys_Time.T := Self.System_Time;
+   begin
       -- Push the argument onto the test history for looking at later:
       Self.Sys_Time_T_Return_History.Push (To_Return);
       return To_Return;
@@ -196,15 +203,16 @@ package body Component.Parameters.Implementation.Tester is
    -----------------------------------------------
    -- Event handler primitive:
    -----------------------------------------------
-   -- A parameter value was updated.
-   overriding procedure Parameter_Update_Success (Self : in out Instance; Arg : in Parameter_Id.T) is
+   -- A parameter table entry was updated.
+   overriding procedure Parameter_Update_Success (Self : in out Instance; Arg : in Parameter_Table_Entry_Id.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Parameter_Update_Success_History.Push (Arg);
    end Parameter_Update_Success;
 
-   -- A parameter value could not be updated because the ID is not recognized.
-   overriding procedure Parameter_Update_Id_Not_Recognized (Self : in out Instance; Arg : in Parameter_Id.T) is
+   -- A parameter table entry could not be updated because the Entry ID is not
+   -- recognized.
+   overriding procedure Parameter_Update_Id_Not_Recognized (Self : in out Instance; Arg : in Parameter_Table_Entry_Id.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Parameter_Update_Id_Not_Recognized_History.Push (Arg);
@@ -245,28 +253,40 @@ package body Component.Parameters.Implementation.Tester is
       Self.Parameter_Fetch_Length_Mismatch_History.Push (Arg);
    end Parameter_Fetch_Length_Mismatch;
 
-   -- A parameter command was received to update a parameter but it contained an unexpected length.
-   overriding procedure Parameter_Update_Length_Mismatch (Self : in out Instance; Arg : in Invalid_Parameter_Length.T) is
+   -- Multiple parameters in a grouped entry were fetched and contained different
+   -- values. Using the first fetched value.
+   overriding procedure Parameter_Fetch_Value_Mismatch (Self : in out Instance; Arg : in Parameter_Entry_Comparison.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Parameter_Fetch_Value_Mismatch_History.Push (Arg);
+   end Parameter_Fetch_Value_Mismatch;
+
+   -- A parameter table entry command was received to update a parameter but it
+   -- contained an unexpected length.
+   overriding procedure Parameter_Update_Length_Mismatch (Self : in out Instance; Arg : in Invalid_Parameter_Table_Entry_Length.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Parameter_Update_Length_Mismatch_History.Push (Arg);
    end Parameter_Update_Length_Mismatch;
 
-   -- A memory region was received with an invalid length. The length of the region must be the same size as the parameter table.
+   -- A memory region was received with an invalid length. The length of the region
+   -- must be the same size as the parameter table.
    overriding procedure Memory_Region_Length_Mismatch (Self : in out Instance; Arg : in Invalid_Parameters_Memory_Region_Length.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Memory_Region_Length_Mismatch_History.Push (Arg);
    end Memory_Region_Length_Mismatch;
 
-   -- A memory region parameter table was received with an invalid CRC. The computed CRC does not match the CRC found in the header.
+   -- A memory region parameter table was received with an invalid CRC. The computed
+   -- CRC does not match the CRC found in the header.
    overriding procedure Memory_Region_Crc_Invalid (Self : in out Instance; Arg : in Invalid_Parameters_Memory_Region_Crc.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Memory_Region_Crc_Invalid_History.Push (Arg);
    end Memory_Region_Crc_Invalid;
 
-   -- Producing a packet with the currently staged parameter values contained within connected components.
+   -- Producing a packet with the currently staged parameter values contained within
+   -- connected components.
    overriding procedure Dumping_Parameters (Self : in out Instance) is
       Arg : constant Natural := 0;
    begin
@@ -289,7 +309,8 @@ package body Component.Parameters.Implementation.Tester is
       Self.Starting_Parameter_Table_Update_History.Push (Arg);
    end Starting_Parameter_Table_Update;
 
-   -- Done updating the parameters from a received memory region with following status.
+   -- Done updating the parameters from a received memory region with following
+   -- status.
    overriding procedure Finished_Parameter_Table_Update (Self : in out Instance; Arg : in Parameters_Memory_Region_Release.T) is
    begin
       -- Push the argument onto the test history for looking at later:
@@ -318,7 +339,8 @@ package body Component.Parameters.Implementation.Tester is
       Self.Starting_Parameter_Table_Fetch_History.Push (Arg);
    end Starting_Parameter_Table_Fetch;
 
-   -- Done updating the parameters from a received memory region with following status.
+   -- Done updating the parameters from a received memory region with following
+   -- status.
    overriding procedure Finished_Parameter_Table_Fetch (Self : in out Instance; Arg : in Parameters_Memory_Region_Release.T) is
    begin
       -- Push the argument onto the test history for looking at later:
@@ -351,7 +373,8 @@ package body Component.Parameters.Implementation.Tester is
    -----------------------------------------------
    -- Description:
    --    Packets for the Parameters Component.
-   -- This packet contains a copy of all the active parameters managed by this component.
+   -- This packet contains a copy of all the active parameters managed by this
+   -- component.
    overriding procedure Active_Parameters (Self : in out Instance; Arg : in Packet.T) is
    begin
       -- Push the argument onto the test history for looking at later:
