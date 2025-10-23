@@ -1,0 +1,21 @@
+---
+description: This is a unit test suite for the Parameters component specifically testing grouped parameters functionality.
+tests:
+  - name: Test_Grouped_Dump_Parameters
+    description: This unit test tests the nominal dumping of grouped parameters by command.
+  - name: Test_Grouped_Update_Parameters
+    description: This unit test tests the nominal updating of a grouped parameter by command.
+  - name: Test_Grouped_Table_Upload
+    description: This unit test tests the nominal updating of grouped parameters by memory region upload.
+  - name: Test_Grouped_Table_Validate
+    description: This unit test tests the nominal validation of grouped parameters by memory region upload.
+  - name: Test_Grouped_Table_Fetch
+    description: This unit test tests the nominal fetching of grouped parameters into a provided memory region.
+  - name: Test_Grouped_Dump_Parameters_Error
+    description: This unit test tests error handling when dumping grouped parameters fails.
+  - name: Test_Grouped_Update_Parameters_Error
+    description: This unit test tests error handling when updating grouped parameters by command fails.
+  - name: Test_Grouped_Table_Upload_Error
+    description: This unit test tests error handling when updating grouped parameters by memory region upload fails.
+  - name: Test_Grouped_Fetch_Value_Mismatch
+    description: This unit test tests that the Parameter_Fetch_Value_Mismatch event is produced when grouped parameters have diverged values during a fetch operation.

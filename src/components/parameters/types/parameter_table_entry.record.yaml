@@ -1,0 +1,11 @@
+---
+description: Generic parameter table entry packet for holding a generic parameter table entry
+fields:
+  - name: Header
+    description: The parameter table entry header
+    type: Parameter_Table_Entry_Header.T
+  - name: Buffer
+    description: A buffer to that contains the parameter type
+    type: Parameter_Types.Parameter_Buffer_Type
+    format: U8x{{ parameter_buffer_size }}
+    variable_length: Header.Buffer_Length

@@ -2,7 +2,7 @@
 description: These are the commands for the Parameters component.
 commands:
   - name: Update_Parameter
-    description: Update the active parameter value in a component for a parameter with the given ID, Length, and Value.
-    arg_type: Parameter.T
+    description: Update the active parameter value in a component for a parameter table entry with the given ID, Length, and Value. If multiple parameters share the same entry ID (grouped parameters), all will be updated.
+    arg_type: Parameter_Table_Entry.T
   - name: Dump_Parameters
     description: Produce a packet with the currently staged parameter values contained within connected components.

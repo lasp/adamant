@@ -619,11 +619,11 @@ private
    -- The design of this protected object is to optimize the speed at which the copying of parameters
    -- from the staged to the working variables is as fast as possible.
    protected type Protected_Staged_Parameters is
-      -- Sets the parameters staged flag to True
-      procedure Set_Parameters_Staged;
+      -- Set the ready to update flag to True:
+      procedure Set_Ready_To_Update;
 
-      -- Returns true if the parameters have been staged:
-      function Have_Parameters_Been_Staged return Boolean;
+      -- Returns true if the parameters are ready to update:
+      function Is_Ready_To_Update return Boolean;
 
       -- Staging functions for each parameter:
 {% for par in parameters %}
@@ -640,14 +640,14 @@ private
       -- also resets the parameters_Updated boolean to False.
       procedure Copy_From_Staged (
 {% for par in parameters %}
-         {{ par.name }} : out {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %}{{ ";" if not loop.last }}
+         {{ par.name }} : in out {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %}{{ ";" if not loop.last }}
 {% endfor %}
       );
    private
-      -- Have the parameters been staged?
-      Parameters_Staged : Boolean := False;
       -- Staged parameter store:
+      Ready_To_Update : Boolean := False;
 {% for par in parameters %}
+      Is_{{ par.name }}_Staged : Boolean := False;
       {{ par.name }}_Staged : {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %}{% if par.default_value %} := {{ par.default_value }}{% endif %};
 {% endfor %}
    end Protected_Staged_Parameters;

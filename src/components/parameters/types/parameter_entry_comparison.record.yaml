@@ -1,0 +1,15 @@
+---
+description: A packed record which holds data related to comparing parameter values from a grouped entry.
+fields:
+  - name: Entry_Id
+    description: The parameter table entry identifier
+    type: Parameter_Types.Parameter_Table_Entry_Id
+    format: U16
+  - name: First_Id
+    description: The parameter ID of the first fetched parameter
+    type: Parameter_Types.Parameter_Id
+    format: U16
+  - name: Second_Id
+    description: The parameter ID of the mismatched parameter
+    type: Parameter_Types.Parameter_Id
+    format: U16

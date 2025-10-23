@@ -1,0 +1,10 @@
+---
+description: A packed record which holds data related to an invalid parameter table entry length.
+fields:
+  - name: Header
+    description: The parameter table entry identifier
+    type: Parameter_Table_Entry_Header.T
+  - name: Expected_Length
+    description: The parameter length bound that the length failed to meet.
+    type: Natural
+    format: U32

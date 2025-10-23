@@ -13,4 +13,6 @@ package Parameter_Types is
    subtype Parameter_Buffer_Index_Type is Parameter_Buffer_Length_Type range 0 .. Parameter_Buffer_Length_Type'Last - 1;
    -- Buffer type:
    subtype Parameter_Buffer_Type is Basic_Types.Byte_Array (Parameter_Buffer_Index_Type);
+   -- Parameter table entry ID:
+   type Parameter_Table_Entry_Id is new Natural range 0 .. 65_535;
 end Parameter_Types;

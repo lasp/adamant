@@ -1,0 +1,6 @@
+---
+description: Parameters for the test component.
+parameters:
+  - name: The_Tick
+    type: Tick.T
+    default: "((1, 2), 3)"

@@ -1,0 +1,39 @@
+---
+description: This is an assembly for testing the Parameters component with grouped parameters.
+with:
+  - Test_Grouped_Params
+########################################
+components:
+########################################
+  - type: Test_Component_1
+    name: Component_A
+  - type: Test_Component_1
+    name: Component_B
+  - type: Test_Component_2
+    name: Component_C
+  - type: Parameters
+    init_base:
+      - "queue_Size => 512"
+      - "Parameter_Update_T_Provide_Count => 4"
+    init:
+      - "parameter_Table_Entries => Test_Grouped_Params.Parameter_Table_Entries'Access"
+    priority: 1
+    stack_size: 5000
+    secondary_stack_size: 5000
+connections:
+  - from_component: Parameters_Instance
+    from_connector: Parameter_Update_T_Provide
+    from_index: 1
+    to_component: Component_A
+    to_connector: Parameter_Update_T_Modify
+  - from_component: Parameters_Instance
+    from_connector: Parameter_Update_T_Provide
+    from_index: 2
+    to_component: Component_B
+    to_connector: Parameter_Update_T_Modify
+  - from_component: Parameters_Instance
+    from_connector: Parameter_Update_T_Provide
+    from_index: 3
+    to_component: Component_C
+    to_connector: Parameter_Update_T_Modify
+    # Leave connector 4 unconnected to test unconnected connectors.

@@ -1,11 +1,11 @@
 ---
 events:
   - name: Parameter_Update_Success
-    description: A parameter value was updated.
-    param_type: Parameter_Id.T
+    description: A parameter table entry was updated.
+    param_type: Parameter_Table_Entry_Id.T
   - name: Parameter_Update_Id_Not_Recognized
-    description: A parameter value could not be updated because the ID is not recognized.
-    param_type: Parameter_Id.T
+    description: A parameter table entry could not be updated because the Entry ID is not recognized.
+    param_type: Parameter_Table_Entry_Id.T
   - name: Parameter_Stage_Failed
     description: A parameter value could not be updated.
     param_type: Parameter_Operation_Status.T
@@ -21,9 +21,12 @@ events:
   - name: Parameter_Fetch_Length_Mismatch
     description: A parameter was fetched but contained an unexpected length.
     param_type: Invalid_Parameter_Length.T
+  - name: Parameter_Fetch_Value_Mismatch
+    description: Multiple parameters in a grouped entry were fetched and contained different values. Using the first fetched value.
+    param_type: Parameter_Entry_Comparison.T
   - name: Parameter_Update_Length_Mismatch
-    description: A parameter command was received to update a parameter but it contained an unexpected length.
-    param_type: Invalid_Parameter_Length.T
+    description: A parameter table entry command was received to update a parameter but it contained an unexpected length.
+    param_type: Invalid_Parameter_Table_Entry_Length.T
   - name: Memory_Region_Length_Mismatch
     description: A memory region was received with an invalid length. The length of the region must be the same size as the parameter table.
     param_type: Invalid_Parameters_Memory_Region_Length.T

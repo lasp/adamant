@@ -21,23 +21,24 @@ package body Component.{{ name }} is
    -- The design of this protected object is to optimize the speed at which the copying of parameters
    -- from the staged to the working variables is as fast as possible.
    protected body Protected_Staged_Parameters is
-      -- Sets the parameters staged flag to True
-      procedure Set_Parameters_Staged is
+      -- Set the ready to update flag to True:
+      procedure Set_Ready_To_Update is
       begin
-         Parameters_Staged := True;
-      end Set_Parameters_Staged;
+         Ready_To_Update := True;
+      end Set_Ready_To_Update;
 
-      -- Returns true if the parameters have been staged:
-      function Have_Parameters_Been_Staged return Boolean is
+      -- Returns true if the parameters are ready to update:
+      function Is_Ready_To_Update return Boolean is
       begin
-         return Parameters_Staged;
-      end Have_Parameters_Been_Staged;
+         return Ready_To_Update;
+      end Is_Ready_To_Update;
 
       -- Staging functions for each parameter:
 {% for par in parameters %}
       procedure Stage_{{ par.name }} (Par : in {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %}) is
       begin
          {{ par.name }}_Staged := Par;
+         Is_{{ par.name }}_Staged := True;
       end Stage_{{ par.name }};
 
 {% endfor %}
@@ -53,17 +54,20 @@ package body Component.{{ name }} is
       -- also resets the parameters_Updated boolean to False.
       procedure Copy_From_Staged (
 {% for par in parameters %}
-         {{ par.name }} : out {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %}{{ ";" if not loop.last }}
+         {{ par.name }} : in out {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %}{{ ";" if not loop.last }}
 {% endfor %}
       ) is
       begin
-         if Parameters_Staged then
+         if Ready_To_Update then
             -- Copy over all the parameters from the staged to the passed in values:
 {% for par in parameters %}
-            {{ par.name }} := {{ par.name }}_Staged;
+            if Is_{{ par.name }}_Staged then
+               {{ par.name }} := {{ par.name }}_Staged;
+               Is_{{ par.name }}_Staged := False;
+            end if;
 {% endfor %}
             -- We have now updated all the parameters, so reset the staged flag:
-            Parameters_Staged := False;
+            Ready_To_Update := False;
          end if;
       end Copy_From_Staged;
    end Protected_Staged_Parameters;
@@ -928,7 +932,7 @@ package body Component.{{ name }} is
    begin
       -- If parameters have finished being staged, then we need to update
       -- our local working copy from the staged parameter store.
-      if Self.Staged_Parameters.Have_Parameters_Been_Staged then
+      if Self.Staged_Parameters.Is_Ready_To_Update then
          -- Copy over staged parameters to working parameters:
          Self.Staged_Parameters.Copy_From_Staged (
 {% for par in parameters %}
@@ -970,7 +974,7 @@ package body Component.{{ name }} is
             end case;
          when Update =>
             -- All parameters have been staged, we can now update our local parameters:
-            Self.Staged_Parameters.Set_Parameters_Staged;
+            Self.Staged_Parameters.Set_Ready_To_Update;
          when Fetch =>
             Status := Self.Fetch_Parameter (Par_Update.Param);
       end case;

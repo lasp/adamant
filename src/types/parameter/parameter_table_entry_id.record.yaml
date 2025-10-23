@@ -1,0 +1,7 @@
+---
+description: Packed record used for holding a parameter table entry Id.
+fields:
+  - name: Id
+    description: The parameter table entry identifier
+    type: Parameter_Types.Parameter_Table_Entry_Id
+    format: U16

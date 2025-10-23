@@ -29,6 +29,13 @@ def pydep(source_file, path=[], ignore_list=[]):
     existing_deps = []
     nonexistent_deps = []
 
+    def is_system_spec(spec):
+        # Must be string, must be a file path, and must not be a system package
+        return spec.origin is None or \
+               os.sep not in spec.origin or \
+               "/usr/lib/python" in spec.origin or \
+               "site-packages/" in spec.origin
+
     for node in ast.walk(root):
         if isinstance(node, ast.Import):
             for alias in node.names:
@@ -42,7 +49,7 @@ def pydep(source_file, path=[], ignore_list=[]):
                     continue
                 # if module (and its origin file) exists, append to the existing_deps
                 if spec is not None:
-                    if spec.origin is None or "built-in" in spec.origin or "site-packages" in spec.origin:
+                    if is_system_spec(spec):
                         nonexistent_deps.append(name)
                     else:
                         existing_deps.append(spec.origin)
@@ -60,7 +67,7 @@ def pydep(source_file, path=[], ignore_list=[]):
                     nonexistent_deps.append(name)
                     continue
                 if spec is not None:
-                    if spec.origin is None or "built-in" in spec.origin or "site-packages" in spec.origin:
+                    if is_system_spec(spec):
                         nonexistent_deps.append(name)
                     else:
                         existing_deps.append(spec.origin)

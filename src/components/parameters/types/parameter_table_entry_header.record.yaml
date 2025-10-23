@@ -1,0 +1,13 @@
+---
+description: Generic parameter table entry header for holding arbitrary parameter table entries
+fields:
+  - name: Id
+    description: The parameter table entry identifier
+    type: Parameter_Types.Parameter_Table_Entry_Id
+    format: U16
+    default: "Parameter_Types.Parameter_Table_Entry_Id'First"
+  - name: Buffer_Length
+    description: The number of bytes used in the parameter type buffer
+    type: Parameter_Types.Parameter_Buffer_Length_Type
+    format: U8
+    default: "Parameter_Types.Parameter_Buffer_Length_Type'First"

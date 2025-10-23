@@ -11,7 +11,7 @@
 
 The purpose of this generator is to provide a user friendly way of defining the layout of a parameter table that will be used within the Parameters component. The generator takes a YAML model file as input which specifies the component instance parameters to include in the table, in the order specified. From this information, the generator autocodes an Ada specification file which contains a data structure that should be passed to the Parameters component upon initialization. This data structure provides the necessary information to the Parameters component to properly decode a parameter table upload and push new parameter values to the correct downstream component where those parameters will be used.
 
-Note the example shown in this documentation is used in the unit test of this component so that the reader of this document can see it being used in context. Please refer to the unit test code for more details on how this generator can be used.
+Note the examples shown in this documentation are used in the unit test suites of this component so that the reader of this document can see it being used in context. Please refer to the unit test code for more details on how this generator can be used.
 
 \section{Schema}
 
@@ -34,5 +34,44 @@ The example input shown in the previous section produces the following Ada outpu
 The main job of the generator in this case was to verify the input YAML for validity and then to translate the data to an Ada data structure for use by the component.
 
 \adacodef{../../test/test_assembly/build/src/test_parameter_table.ads}
+
+\section{Grouped Parameters}
+
+The parameter table generator supports supports a feature called \textit{grouped parameters}, which allows multiple parameters from different component instances to share the same memory location (entry) in the parameter table. This is useful when you want multiple components to use the exact same parameter value, essentially creating a union of parameters that must be kept synchronized. Of course, all parameters in a group must have the same type (and size), as they will be sharing the same memory.
+
+When parameters are grouped together, they share the same \texttt{Entry\_Id} in the parameter table, but retain unique \texttt{Parameter\_Id} values. The key behaviors are:
+
+\begin{itemize}
+\item \textbf{Update Operations:} When a grouped entry is updated (via command or memory region upload), the new value is staged and updated to \textit{all} parameters in the group simultaneously.
+\item \textbf{Fetch Operations:} When fetching parameters to create a dump, the Parameters component fetches from all parameters in the group. The \textit{first} fetched value is used in the output. If subsequent fetches return different values, a \texttt{Parameter\_Fetch\_Value\_Mismatch} info event is emitted to alert the user, but the first value is always used. This condition should never occur in a properly designed system.
+\end{itemize}
+
+\subsection{Example Input}
+
+To specify grouped parameters in the YAML model, simply provide a list (array) of parameters instead of a single parameter name. The following example groups parameters from different component instances:
+
+\yamlcodef{../../test_grouped/test_grouped_assembly/test_grouped_params.test_grouped_assembly.parameter_table.yaml}
+
+In this example:
+\begin{itemize}
+\item \texttt{component\_A.Parameter\_I32} and \texttt{component\_B.Parameter\_I32} are grouped together (they share Entry\_ID 0)
+\item \texttt{component\_A.Parameter\_U16} and \texttt{component\_B.Parameter\_U16} are grouped together (they share Entry\_ID 1)
+\item \texttt{component\_C.The\_Tick} is a standalone parameter (Entry\_ID 2)
+\end{itemize}
+
+\subsection{Example Output}
+
+The grouped parameter example shown above produces the following Ada output. Notice how multiple parameters share the same \texttt{Entry\_Id} and the same \texttt{Start\_Index} and \texttt{End\_Index} values, indicating they occupy the same memory location:
+
+\adacodef{../../test_grouped/test_grouped_assembly/build/src/test_grouped_params.ads}
+
+Important notes about the generated output:
+
+\begin{itemize}
+\item Parameters with \texttt{Id => 2} (Component\_A.Parameter\_I32) and \texttt{Id => 4} (Component\_B.Parameter\_I32) both have \texttt{Entry\_Id => 0} and occupy bytes 0-3
+\item Parameters with \texttt{Id => 1} (Component\_A.Parameter\_U16) and \texttt{Id => 3} (Component\_B.Parameter\_U16) both have \texttt{Entry\_Id => 1} and occupy bytes 4-5
+\item The parameter table contains 5 entries total, even though only 3 distinct memory locations (Entry\_IDs 0, 1, and 2) are used
+\item The total parameter table size is only 18 bytes of data (plus header), despite managing 5 parameters, because grouped parameters share memory
+\end{itemize}
 
 \end{document}

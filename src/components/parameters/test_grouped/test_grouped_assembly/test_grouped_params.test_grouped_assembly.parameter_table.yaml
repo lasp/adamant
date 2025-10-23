@@ -1,0 +1,8 @@
+---
+description: Test parameter table with grouped parameters.
+parameters_instance_name: Parameters_Instance
+parameters:
+  # Grouped parameters - same entry in table for both Component_A and Component_B
+  - [component_A.Parameter_I32, component_B.Parameter_I32]
+  - [component_A.Parameter_U16, component_B.Parameter_U16]
+  - component_C.The_Tick

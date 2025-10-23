@@ -12,14 +12,19 @@ package {{ name[0]|upper }}{{ name[1:] }} is
 
    -- A list of the parameter table entries for use by the {{ parameters_instance_name }} component.
    Parameter_Table_Entries : aliased Parameter_Table_Entry_List := [
+{% set param_index = namespace(value=0) %}
 {% for table_entry in parameters.values() %}
-      -- Parameter {{ table_entry.name }}, size of {{ (table_entry.size/8)|int }} byte(s).
-      {{ loop.index0 }} => (
-         Id => {{ table_entry.parameter.id }},
-         Component_Id => {{ table_entry.component_id }},
+{% for param in table_entry.parameters %}
+      -- Parameter {{ param.name }}, size of {{ (table_entry.size/8)|int }} byte(s), Entry_ID {{ table_entry.entry_id }}.
+      {{ param_index.value }} => (
+         Id => {{ param.parameter.id }},
+         Entry_Id => {{ table_entry.entry_id }},
+         Component_Id => {{ param.component_id }},
          Start_Index => {{ table_entry.start_index}},
          End_Index => {{ table_entry.end_index}}
-      ){{ "," if not loop.last }}
+      ){{ "," if param_index.value < total_component_parameters - 1 }}
+{% set param_index.value = param_index.value + 1 %}
+{% endfor %}
 {% endfor %}
    ];
 

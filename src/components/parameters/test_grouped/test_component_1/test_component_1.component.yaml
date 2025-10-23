@@ -1,0 +1,7 @@
+---
+description: A simple component which has a parameter receive connector.
+execution: passive
+connectors:
+  - description: Parameter updates are received on this connector.
+    type: Parameter_Update.T
+    kind: modify

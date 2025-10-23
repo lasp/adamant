@@ -77,8 +77,8 @@ private
    -----------------------------------------------
    -- Description:
    --    These are the commands for the Parameters component.
-   -- Update the active parameter value in a component for a parameter with the given ID, Length, and Value.
-   overriding function Update_Parameter (Self : in out Instance; Arg : in Parameter.T) return Command_Execution_Status.E;
+   -- Update the active parameter value in a component for a parameter table entry with the given ID, Length, and Value. If multiple parameters share the same entry ID (grouped parameters), all will be updated.
+   overriding function Update_Parameter (Self : in out Instance; Arg : in Parameter_Table_Entry.T) return Command_Execution_Status.E;
    -- Produce a packet with the currently staged parameter values contained within connected components.
    overriding function Dump_Parameters (Self : in out Instance) return Command_Execution_Status.E;
 

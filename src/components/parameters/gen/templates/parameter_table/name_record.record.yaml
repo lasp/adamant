@@ -11,7 +11,7 @@ fields:
     description: The parameter table header.
     type: Parameter_Table_Header.T
 {% for table_entry in parameters.values() %}
-  - name: {{ table_entry.component_name }}_{{ table_entry.parameter_name }}
-    description: "(ID: {{ table_entry.parameter.id}}) {% if table_entry.parameter.description %}{{ table_entry.parameter.description }}{% endif %}"
-    type: {{ table_entry.parameter.type }}
+  - name: {{ table_entry.parameters[0].component_name }}_{{ table_entry.parameters[0].parameter_name }}
+    description: "Entry ID: {{ table_entry.entry_id }}{% if table_entry.parameters|length > 1 %} (Grouped: {% for param in table_entry.parameters %}{{ param.name }}{{ ", " if not loop.last }}{% endfor %}){% endif %}{% if table_entry.parameters[0].parameter.description %} - {{ table_entry.parameters[0].parameter.description }}{% endif %}"
+    type: {{ table_entry.parameters[0].parameter.type }}
 {% endfor %}
