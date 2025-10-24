@@ -122,54 +122,83 @@ ADAMANT_TMP_DIR=$ADAMANT_TMP_DIR".adamant"
 export ADAMANT_TMP_DIR
 mkdir -p $ADAMANT_TMP_DIR
 
+# Only initialize BUILD_ROOTS if it was previously unset
+if [ -z "${BUILD_ROOTS+x}" ]; then
+  BUILD_ROOTS=""
+  build_roots_enabled=true
+else
+  build_roots_enabled=false
+fi
+
 # Iterate through each path and print them out
 echo ""
 echo "Configuring build roots: ${paths[@]}"
 for path in "${paths[@]}"; do
-  echo "Setting up $path...  "
-  cd $path
+    echo "Setting up $path...  "
+    cd $path
 
-  # Mark path as safe git directory if it is not already marked.
-  if ! git config --global --get-regexp '^safe\.directory' | grep -q "^safe\.directory $path$"; then
-    git config --global --add safe.directory "$path"
-  fi
+    # Add path to the build root paths, if it was not previously
+    # set by the user. If that is the case, we respect what was
+    # previously set.
+    if [ "$build_roots_enabled" = true ]; then
+        if [ -n "$BUILD_ROOTS" ]; then
+            BUILD_ROOTS="$BUILD_ROOTS:$path"
+        else
+            BUILD_ROOTS="$path"
+        fi
+    fi
 
-  # Set up alire configuration if it is not yet set up.
-  echo "Building alire dependencies..."
-  if [ -f "alire.toml" ] && [ ! -f "${HOME}/.initialized" ]; then
-    # Force recheck of alire dependencies on first login
-    touch alire.toml
-  fi
-  alr -n build --release
+    # Mark path as safe git directory if it is not already marked.
+    if ! git config --global --get-regexp '^safe\.directory' | grep -q "^safe\.directory $path$"; then
+        git config --global --add safe.directory "$path"
+    fi
 
-  # This runs "export GPR_PROJECT_PATH=etc" which sets the GPR_PROJECT_PATH
-  # to whatever alr thinks it should be for the Adamant project crate.
-  # This allows the Adamant build system to then use gprbuild in the same way
-  # that alr would.
-  #
-  # Also update PATH. Alire will include the current PATH set by the Adamant
-  # environment plus some alire specific paths.
-  #
-  eval `alr -n printenv | grep PATH`
-
-  # Set up the LD_LIBRARY_PATH so that it also includes the libraries that come
-  # with the alr native compiler.
-  eval `alr -n printenv | grep GNAT_NATIVE_ALIRE_PREFIX`
-  if [ -n "$GNAT_NATIVE_ALIRE_PREFIX" ]; then
-      # Check if $GNAT_NATIVE_ALIRE_PREFIX/lib64 is already in LD_LIBRARY_PATH
-      if [[ ":$LD_LIBRARY_PATH:" != *":$GNAT_NATIVE_ALIRE_PREFIX/lib64:"* ]]; then
-          export LD_LIBRARY_PATH="$GNAT_NATIVE_ALIRE_PREFIX/lib64:$LD_LIBRARY_PATH"
+    if [ -f "$path/alire.toml" ]; then
+      # Set up alire configuration if it is not yet set up.
+      echo "Building alire dependencies..."
+      if [ -f "alire.toml" ] && [ ! -f "${HOME}/.initialized" ]; then
+          # Force recheck of alire dependencies on first login
+          touch alire.toml
       fi
-  fi
+      alr -n build --release
 
-  # Add Adamant and project repository GPR files to the GPR_PROJECT_PATH
-  export GPR_PROJECT_PATH=$GPR_PROJECT_PATH:$path/redo/targets/gpr
+      # This runs "export GPR_PROJECT_PATH=etc" which sets the GPR_PROJECT_PATH
+      # to whatever alr thinks it should be for the Adamant project crate.
+      # This allows the Adamant build system to then use gprbuild in the same way
+      # that alr would.
+      #
+      # Also update PATH. Alire will include the current PATH set by the Adamant
+      # environment plus some alire specific paths.
+      #
+      eval `alr -n printenv | grep PATH`
 
-  # Activate the local python configuration:
-  . $ADAMANT_DIR/env/set_python_path.sh $path
+      # Set up the LD_LIBRARY_PATH so that it also includes the libraries that come
+      # with the alr native compiler.
+      eval `alr -n printenv | grep GNAT_NATIVE_ALIRE_PREFIX`
+      if [ -n "$GNAT_NATIVE_ALIRE_PREFIX" ]; then
+          # Check if $GNAT_NATIVE_ALIRE_PREFIX/lib64 is already in LD_LIBRARY_PATH
+          if [[ ":$LD_LIBRARY_PATH:" != *":$GNAT_NATIVE_ALIRE_PREFIX/lib64:"* ]]; then
+              export LD_LIBRARY_PATH="$GNAT_NATIVE_ALIRE_PREFIX/lib64:$LD_LIBRARY_PATH"
+          fi
+      fi
 
-  cd - &> /dev/null
+      # Add Adamant and project repository GPR files to the GPR_PROJECT_PATH
+      if [ -d "$path/redo/targets/gpr" ]; then
+          export GPR_PROJECT_PATH="$GPR_PROJECT_PATH:$path/redo/targets/gpr"
+      fi
+    fi
+
+    # Activate the local python configuration:
+    . $ADAMANT_DIR/env/set_python_path.sh $path
+
+    cd - &> /dev/null
 done
+
+# Export $BUILD_ROOTS if it was computed above and not
+# previously set by the user.
+if [ "$build_roots_enabled" = true ]; then
+    export BUILD_ROOTS
+fi
 
 echo "Done."
 echo ""
