@@ -6,15 +6,15 @@
 # Only set the environment once:
 if test -n "$ADAMANT_ENVIRONMENT_SET"
 then
-  echo "Adamant environment already activated. Run 'unset ADAMANT_ENVIRONMENT_SET' to reset."
-  exit
+    echo "Adamant environment already activated. Run 'unset ADAMANT_ENVIRONMENT_SET' to reset."
+    exit
 fi
 
 # If the ADAMANT_DIR is not specified, then set it
 if test -z "$ADAMANT_DIR" # ie. /home/user/adamant
 then
-  # Set the adamant directory based on the location of this file.
-  export ADAMANT_DIR=`readlink -f "${BASH_SOURCE[0]}" | xargs dirname | xargs dirname`
+    # Set the adamant directory based on the location of this file.
+    export ADAMANT_DIR=`readlink -f "${BASH_SOURCE[0]}" | xargs dirname | xargs dirname`
 fi
 
 echo "------------------------------------------------------------------"
@@ -31,15 +31,15 @@ IFS=':' read -ra paths <<< "$1"
 # Check if $ADAMANT_DIR is present in the paths
 found_adamant_dir=false
 for path in "${paths[@]}"; do
-  if [ "$path" = "$ADAMANT_DIR" ]; then
-    found_adamant_dir=true
-    break
-  fi
+    if [ "$path" = "$ADAMANT_DIR" ]; then
+        found_adamant_dir=true
+        break
+    fi
 done
 
 # If $ADAMANT_DIR is not found, insert it at the beginning of the paths
 if [ "$found_adamant_dir" = false ]; then
-  paths=("$ADAMANT_DIR" "${paths[@]}")
+    paths=("$ADAMANT_DIR" "${paths[@]}")
 fi
 
 # Make sure the permissions of everything in the paths is correct
@@ -59,20 +59,20 @@ done
 # If the ADAMANT_CONFIGURATION_YAML is not specified then set it
 if test -z "$ADAMANT_CONFIGURATION_YAML" # ie. /home/user/adamant
 then
-  config_file=$ADAMANT_DIR/config/adamant.configuration.yaml
-  # Copy if from .original if needed
-  if ! test -f "$config_file"
-  then
-    cp -f $config_file.original $config_file
-  fi
-  export ADAMANT_CONFIGURATION_YAML=$config_file
+    config_file=$ADAMANT_DIR/config/adamant.configuration.yaml
+    # Copy if from .original if needed
+    if ! test -f "$config_file"
+    then
+        cp -f $config_file.original $config_file
+    fi
+    export ADAMANT_CONFIGURATION_YAML=$config_file
 fi
 
 # Set up python. If the ADAMANT_PYTHON_ENV is not specified
 # then we set it to a default
 if test -z "$ADAMANT_PYTHON_ENV" # ie. ~/.py_env
 then
-  export ADAMANT_PYTHON_ENV=$HOME/.py_env
+    export ADAMANT_PYTHON_ENV=$HOME/.py_env
 fi
 
 # See if the python environment already exists, if it does
@@ -80,32 +80,32 @@ fi
 py_activate=$ADAMANT_PYTHON_ENV/bin/activate
 if test -f "$py_activate"
 then
-  . $py_activate
+    . $py_activate
 else
-  echo "Setting up python environment in $ADAMANT_PYTHON_ENV..."
-  python3 -m venv $ADAMANT_PYTHON_ENV
-  . $py_activate
-  pip3 install --upgrade pip
-  pip3 install wheel
+    echo "Setting up python environment in $ADAMANT_PYTHON_ENV..."
+    python3 -m venv $ADAMANT_PYTHON_ENV
+    . $py_activate
+    pip3 install --upgrade pip
+    pip3 install wheel
 
-  # Install all packages in env/requirements*.txt files in adamant/
-  # and any project dirs in the paths
-  for path in "${paths[@]}"; do
-    # Install any python dependencies.
-    files=$(find "$path/env" -name 'requirements*.txt' 2>/dev/null)
+    # Install all packages in env/requirements*.txt files in adamant/
+    # and any project dirs in the paths
+    for path in "${paths[@]}"; do
+        # Install any python dependencies.
+        files=$(find "$path/env" -name 'requirements*.txt' 2>/dev/null)
 
-    # Check if find returned any files
-    if [ -n "$files" ]; then
-        for file in $files; do
-            echo "Installing python dependencies from $file"
-            pip3 install -r "$file"
-        done
-    else
-        echo "No python requirements files found in $path/env"
-    fi
-  done
+        # Check if find returned any files
+        if [ -n "$files" ]; then
+            for file in $files; do
+                echo "Installing python dependencies from $file"
+                pip3 install -r "$file"
+            done
+        else
+            echo "No python requirements files found in $path/env"
+        fi
+    done
 
-  echo "Done."
+    echo "Done."
 fi
 
 # Set up path:
@@ -124,10 +124,10 @@ mkdir -p $ADAMANT_TMP_DIR
 
 # Only initialize BUILD_ROOTS if it was previously unset
 if [ -z "${BUILD_ROOTS+x}" ]; then
-  BUILD_ROOTS=""
-  build_roots_enabled=true
+    BUILD_ROOTS=""
+    build_roots_enabled=true
 else
-  build_roots_enabled=false
+    build_roots_enabled=false
 fi
 
 # Iterate through each path and print them out
