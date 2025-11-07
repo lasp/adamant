@@ -16,4 +16,6 @@ create_python_path()
     done | tr '\n' ':'
 }
 
+# Prepend the path here. This script should be called with most
+# preferential python paths last.
 export PYTHONPATH=`create_python_path`:$PYTHONPATH
