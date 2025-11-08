@@ -1,0 +1,10 @@
+---
+description: A simple component which produces data products for testing the data product packetizer component.
+execution: passive
+connectors:
+  - description: Tick to regulate the execution of the component.
+    type: Tick.T
+    kind: recv_sync
+  - description: Data products are sent out on every tick.
+    type: Data_Product.T
+    kind: send

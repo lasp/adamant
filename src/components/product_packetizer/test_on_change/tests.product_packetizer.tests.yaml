@@ -1,0 +1,13 @@
+---
+description: This is the on-change unit test suite for the Product Packetizer. This test suite specifically tests the emit packet on-change feature of the component.
+tests:
+  - name: Test_On_Change_Nominal
+    description: This unit test tests the basic on-change functionality where packets are only sent when data products have changed since the last emission.
+  - name: Test_On_Change_Used_For_On_Change_False
+    description: This unit test tests that data products with used_for_on_change set to False do not trigger packet emission in on-change mode.
+  - name: Test_Enable_Packet_On_Change_Command
+    description: This unit test tests the Enable_Packet_On_Change command to dynamically switch a packet to on-change mode and verifies the correct event is emitted.
+  - name: Test_On_Change_Multiple_Changes
+    description: This unit test tests multiple data product changes over time to verify emission time tracking works correctly.
+  - name: Test_On_Change_With_Period
+    description: This unit test tests that on-change packets respect their evaluation period and only check for changes on period boundaries.
