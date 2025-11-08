@@ -28,6 +28,7 @@ package body Component.Product_Packetizer.Implementation.Tester is
       Self.Invalid_Packet_Id_Commanded_History.Init (Depth => 100);
       Self.Packet_Enabled_History.Init (Depth => 100);
       Self.Packet_Disabled_History.Init (Depth => 100);
+      Self.Packet_Enabled_On_Change_History.Init (Depth => 100);
       Self.Packet_Period_Set_History.Init (Depth => 100);
       Self.Data_Product_Missing_On_Fetch_History.Init (Depth => 100);
       Self.Packet_Period_Item_Bad_Id_History.Init (Depth => 100);
@@ -51,6 +52,7 @@ package body Component.Product_Packetizer.Implementation.Tester is
       Self.Invalid_Packet_Id_Commanded_History.Destroy;
       Self.Packet_Enabled_History.Destroy;
       Self.Packet_Disabled_History.Destroy;
+      Self.Packet_Enabled_On_Change_History.Destroy;
       Self.Packet_Period_Set_History.Destroy;
       Self.Data_Product_Missing_On_Fetch_History.Destroy;
       Self.Packet_Period_Item_Bad_Id_History.Destroy;
@@ -197,6 +199,13 @@ package body Component.Product_Packetizer.Implementation.Tester is
       -- Push the argument onto the test history for looking at later:
       Self.Packet_Disabled_History.Push (Arg);
    end Packet_Disabled;
+
+   -- An packet was enabled in on-change mode.
+   overriding procedure Packet_Enabled_On_Change (Self : in out Instance; Arg : in Packet_Period.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Packet_Enabled_On_Change_History.Push (Arg);
+   end Packet_Enabled_On_Change;
 
    -- An packet period was set.
    overriding procedure Packet_Period_Set (Self : in out Instance; Arg : Packet_Period.T) is

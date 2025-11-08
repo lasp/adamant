@@ -38,6 +38,7 @@ package Component.Product_Packetizer.Implementation.Tester is
    package Invalid_Packet_Id_Commanded_History_Package is new Printable_History (Invalid_Packet_Id.T, Invalid_Packet_Id.Representation.Image);
    package Packet_Enabled_History_Package is new Printable_History (Packet_Period.T, Packet_Period.Representation.Image);
    package Packet_Disabled_History_Package is new Printable_History (Packet_Period.T, Packet_Period.Representation.Image);
+   package Packet_Enabled_On_Change_History_Package is new Printable_History (Packet_Period.T, Packet_Period.Representation.Image);
    package Packet_Period_Set_History_Package is new Printable_History (Packet_Period.T, Packet_Period.Representation.Image);
    package Data_Product_Missing_On_Fetch_History_Package is new Printable_History (Packet_Data_Product_Ids.T, Packet_Data_Product_Ids.Representation.Image);
    package Packet_Period_Item_Bad_Id_History_Package is new Printable_History (Packet_Data_Product_Ids.T, Packet_Data_Product_Ids.Representation.Image);
@@ -62,6 +63,7 @@ package Component.Product_Packetizer.Implementation.Tester is
       Invalid_Packet_Id_Commanded_History : Invalid_Packet_Id_Commanded_History_Package.Instance;
       Packet_Enabled_History : Packet_Enabled_History_Package.Instance;
       Packet_Disabled_History : Packet_Disabled_History_Package.Instance;
+      Packet_Enabled_On_Change_History : Packet_Enabled_On_Change_History_Package.Instance;
       Packet_Period_Set_History : Packet_Period_Set_History_Package.Instance;
       Data_Product_Missing_On_Fetch_History : Data_Product_Missing_On_Fetch_History_Package.Instance;
       Packet_Period_Item_Bad_Id_History : Packet_Period_Item_Bad_Id_History_Package.Instance;
@@ -124,6 +126,8 @@ package Component.Product_Packetizer.Implementation.Tester is
    overriding procedure Packet_Enabled (Self : in out Instance; Arg : Packet_Period.T);
    -- An packet was disabled.
    overriding procedure Packet_Disabled (Self : in out Instance; Arg : Packet_Period.T);
+   -- An packet was enabled in on-change mode.
+   overriding procedure Packet_Enabled_On_Change (Self : in out Instance; Arg : in Packet_Period.T);
    -- An packet period was set.
    overriding procedure Packet_Period_Set (Self : in out Instance; Arg : Packet_Period.T);
    -- A data product was missing when fetched for packet insertion.
