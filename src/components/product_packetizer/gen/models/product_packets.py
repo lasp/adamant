@@ -58,14 +58,19 @@ class data_product_entry(object):
         event_on_missing=False,
         use_timestamp=False,
         include_timestamp=False,
+        used_for_on_change=True,
         pad_bytes=None,
     ):
         if pad_bytes and (
-            name or event_on_missing or use_timestamp or include_timestamp
+            name
+            or event_on_missing
+            or use_timestamp
+            or include_timestamp
+            or used_for_on_change is not True
         ):
             raise ModelException(
                 ('Packet data product list specifies "pad_bytes". If "pad_bytes" is specified'
-                 'then [name, event_on_missing, use_timestamp, include_timestamp] may not be specified.')
+                 'then [name, event_on_missing, use_timestamp, include_timestamp, used_for_on_change] may not be specified.')
             )
 
         if not name and not pad_bytes:
@@ -94,6 +99,7 @@ class data_product_entry(object):
         self.event_on_missing = event_on_missing
         self.use_timestamp = use_timestamp
         self.include_timestamp = include_timestamp
+        self.used_for_on_change = used_for_on_change
         self.packet_period_item = False
 
         # Variables to be set during resolving of ids.
@@ -124,7 +130,12 @@ class data_product_entry(object):
         if "include_timestamp" in product_data and product_data["include_timestamp"]:
             include_timestamp = True
 
-        # Set include_timestamp, default False:
+        # Set used_for_on_change, default True:
+        used_for_on_change = True
+        if "used_for_on_change" in product_data:
+            used_for_on_change = product_data["used_for_on_change"]
+
+        # Set pad_bytes, default None:
         pad_bytes = None
         if "pad_bytes" in product_data and product_data["pad_bytes"]:
             pad_bytes = product_data["pad_bytes"]
@@ -134,6 +145,7 @@ class data_product_entry(object):
             event_on_missing=event_on_missing,
             use_timestamp=use_timestamp,
             include_timestamp=include_timestamp,
+            used_for_on_change=used_for_on_change,
             pad_bytes=pad_bytes,
         )
 
@@ -285,9 +297,33 @@ class product_packet(packet):
         if "description" in packet_data:
             description = packet_data["description"]
 
+        # Set enabled, default True. Can be True, False, or "On_Change"
         enabled = True
-        if "enabled" in packet_data and not packet_data["enabled"]:
-            enabled = False
+        if "enabled" in packet_data:
+            enabled_val = packet_data["enabled"]
+            # Handle boolean values
+            if isinstance(enabled_val, bool):
+                enabled = enabled_val
+            # Handle string value "On_Change" (case-insensitive)
+            elif isinstance(enabled_val, str):
+                normalized = enabled_val.strip().lower()
+                if normalized == "on_change":
+                    enabled = "On_Change"
+                elif normalized == "true":
+                    enabled = True
+                elif normalized == "false":
+                    enabled = False
+                else:
+                    raise ModelException(
+                        f'Invalid enabled value "{enabled_val}" for packet "{name}". '
+                        'Use True, False, or "On_Change".'
+                    )
+            # Handle other cases
+            else:
+                raise ModelException(
+                    f'Invalid enabled value "{enabled_val}" for packet "{name}". '
+                    'Use True, False, or "On_Change".'
+                )
 
         offset = "0"
         if "offset" in packet_data:
