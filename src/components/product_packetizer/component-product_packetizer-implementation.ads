@@ -76,6 +76,8 @@ private
    overriding function Disable_Packet (Self : in out Instance; Arg : in Packet_Id.T) return Command_Execution_Status.E;
    -- Command to build specific packet and send it out on the next available tick. The packet is built and sent regardless of the packet being enabled or disabled.
    overriding function Send_Packet (Self : in out Instance; Arg : in Packet_Id.T) return Command_Execution_Status.E;
+   -- Command to enable the emission of a packet from the packetizer only when data products have changed since the last emission.
+   overriding function Enable_Packet_On_Change (Self : in out Instance; Arg : in Packet_Id.T) return Command_Execution_Status.E;
 
    -- Invalid command handler. This procedure is called when a command's arguments are found to be invalid:
    overriding procedure Invalid_Command (Self : in out Instance; Cmd : in Command.T; Errant_Field_Number : in Unsigned_32; Errant_Field : in Basic_Types.Poly_Type);

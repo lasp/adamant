@@ -7,6 +7,7 @@ with Packet_Types;
 with Data_Product_Enums;
 with Data_Product_Types;
 with Packed_Natural;
+with Sys_Time.Arithmetic;
 
 package body Component.Product_Packetizer.Implementation is
 
@@ -63,6 +64,8 @@ package body Component.Product_Packetizer.Implementation is
       -- Make sure the packet count for each is set to 0:
       for Idx in Self.Packet_List.all'Range loop
          Self.Packet_List.all (Idx).Count := Packet_Types.Sequence_Count_Mod_Type'First;
+         -- Initialize packet emission times to zero:
+         Self.Packet_List.all (Idx).Last_Emission_Time := Sys_Time.Arithmetic.Sys_Time_Zero;
       end loop;
    end Init;
 
@@ -70,9 +73,16 @@ package body Component.Product_Packetizer.Implementation is
    -- Private helper functions:
    ---------------------------------------
 
-   function Build_Packet (Self : in out Instance; Tick_Time : in Sys_Time.T; Packet_Desc : in Product_Packet_Types.Packet_Description_Type) return Packet.T is
+   function Build_Packet (
+      Self : in out Instance;
+      Tick_Time : in Sys_Time.T;
+      Packet_Desc : in Product_Packet_Types.Packet_Description_Type;
+      Check_On_Change : in Boolean;
+      Changed : out Boolean
+   ) return Packet.T is
       use Data_Product_Types;
       use Data_Product_Enums.Fetch_Status;
+      use Sys_Time.Arithmetic;
 
       -- Initialize the packet with the correct ID and sequence count.
       The_Packet : Packet.T := ((Time => Tick_Time, Id => Packet_Desc.Id, Sequence_Count => Packet_Desc.Count, Buffer_Length => 0), Buffer => [others => 0]);
@@ -83,9 +93,11 @@ package body Component.Product_Packetizer.Implementation is
       Time_Set : Boolean := False;
       Do_Copy : Boolean;
    begin
+      -- Initialize out parameter:
+      Changed := False;
+
       -- Fill packet:
       for Item of Packet_Desc.Items.all loop
-
          -- If this item does not have an ID then it is simply padding.
          -- Otherwise request a dataproduct from the database:
          Do_Copy := True;
@@ -171,6 +183,15 @@ package body Component.Product_Packetizer.Implementation is
                   Time_Set := True;
                end if;
 
+               -- If this in an on-change packet, then see if this data product
+               -- changed (only if we haven't already detected a change).
+               if Check_On_Change and then not Changed and then
+                  Item.Used_For_On_Change and then
+                  D_Prod_Ret.The_Data_Product.Header.Time > Packet_Desc.Last_Emission_Time
+               then
+                  Changed := True;
+               end if;
+
                -- Check the length of the data product to make sure it what we expect:
                if D_Prod_Ret.The_Data_Product.Header.Buffer_Length /= Item.Size then
                   -- Throw event:
@@ -188,7 +209,7 @@ package body Component.Product_Packetizer.Implementation is
             end if;
          end if;
 
-         -- Increment the index by the size of the data product:
+         -- Increment the index by the size of the data product or padding:
          Curr_Index := @ + Item.Size;
       end loop;
 
@@ -212,17 +233,32 @@ package body Component.Product_Packetizer.Implementation is
    -- This is the base tick for the component. It should be received at least as fast as the maximum desired product creation frequency.
    overriding procedure Tick_T_Recv_Sync (Self : in out Instance; Arg : in Tick.T) is
       use Packet_Types;
+      use Product_Packet_Types;
       Ignore : Tick.T renames Arg;
       Messages_Dispatched : Natural;
 
-      -- Helper procedure to build and send a packet:
-      procedure Send_Packet (Packet_Desc : in out Product_Packet_Types.Packet_Description_Type) is
+      -- Helper to build a packet (without on-change evaluation) and immediately dispatch it.
+      procedure Build_And_Send (
+         Packet_Desc : in out Product_Packet_Types.Packet_Description_Type;
+         Send_Only_On_Change : Boolean := False
+      ) is
+         Changed : Boolean;
+         Built_Packet : constant Packet.T := Self.Build_Packet (
+            Tick_Time => Arg.Time,
+            Packet_Desc => Packet_Desc,
+            Check_On_Change => Send_Only_On_Change,
+            Changed => Changed
+         );
       begin
-         -- Build and send packet:
-         Self.Packet_T_Send_If_Connected (Self.Build_Packet (Arg.Time, Packet_Desc));
-         -- Increment sequence count:
-         Packet_Desc.Count := @ + 1;
-      end Send_Packet;
+         -- Send packet if we are not configured for Send_Only_On_Change or,
+         -- if we are configured for Send_Only_On_Change, only if the packet
+         -- actually changed.
+         if not Send_Only_On_Change or else Changed then
+            Self.Packet_T_Send_If_Connected (Built_Packet);
+            Packet_Desc.Last_Emission_Time := Arg.Time;
+            Packet_Desc.Count := @ + 1;
+         end if;
+      end Build_And_Send;
    begin
       -- Handle any commands in queue. Service up to N commands per tick:
       Messages_Dispatched := Self.Dispatch_N (Self.Commands_Dispatched_Per_Tick);
@@ -232,13 +268,16 @@ package body Component.Product_Packetizer.Implementation is
       for Packet_Desc of Self.Packet_List.all loop
          -- See if send command was sent:
          if Packet_Desc.Send_Now then
-            Send_Packet (Packet_Desc);
+            Build_And_Send (Packet_Desc);
             Packet_Desc.Send_Now := False;
-            -- Make sure packet is enabled:
-         elsif Packet_Desc.Enabled and then Packet_Desc.Period > 0 then
+         -- Check if packet is enabled or on change:
+         elsif (Packet_Desc.Enabled = Product_Packet_Types.Enabled or else
+               Packet_Desc.Enabled = Product_Packet_Types.On_Change) and then
+               Packet_Desc.Period > 0
+         then
             -- Is it time to send packet based on its period?
             if (Self.Count mod Packet_Desc.Period) = (Packet_Desc.Offset mod Packet_Desc.Period) then
-               Send_Packet (Packet_Desc);
+               Build_And_Send (Packet_Desc, Send_Only_On_Change => (Packet_Desc.Enabled = Product_Packet_Types.On_Change));
             end if;
          end if;
       end loop;
@@ -300,13 +339,14 @@ package body Component.Product_Packetizer.Implementation is
    overriding function Enable_Packet (Self : in out Instance; Arg : in Packet_Id.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
       use Packet_Types;
+      use Product_Packet_Types;
       Id_Found : Boolean := False;
       Commands : Product_Packetizer_Commands.Instance;
       The_Period : Natural := 1;
    begin
       for Packet_Desc of Self.Packet_List.all loop
          if Packet_Desc.Id = Arg.Id then
-            Packet_Desc.Enabled := True;
+            Packet_Desc.Enabled := Product_Packet_Types.Enabled;
             The_Period := Packet_Desc.Period;
             Id_Found := True;
             exit;
@@ -328,13 +368,14 @@ package body Component.Product_Packetizer.Implementation is
    overriding function Disable_Packet (Self : in out Instance; Arg : in Packet_Id.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
       use Packet_Types;
+      use Product_Packet_Types;
       Id_Found : Boolean := False;
       Commands : Product_Packetizer_Commands.Instance;
       The_Period : Natural := 1;
    begin
       for Packet_Desc of Self.Packet_List.all loop
          if Packet_Desc.Id = Arg.Id then
-            Packet_Desc.Enabled := False;
+            Packet_Desc.Enabled := Product_Packet_Types.Disabled;
             The_Period := Packet_Desc.Period;
             Id_Found := True;
             exit;
@@ -375,6 +416,35 @@ package body Component.Product_Packetizer.Implementation is
       end if;
       return Success;
    end Send_Packet;
+
+   -- Command to enable the emission of a packet from the packetizer only when data products have changed since the last emission.
+   overriding function Enable_Packet_On_Change (Self : in out Instance; Arg : in Packet_Id.T) return Command_Execution_Status.E is
+      use Command_Execution_Status;
+      use Packet_Types;
+      use Product_Packet_Types;
+      Id_Found : Boolean := False;
+      Commands : Product_Packetizer_Commands.Instance;
+      The_Period : Natural := 1;
+   begin
+      for Packet_Desc of Self.Packet_List.all loop
+         if Packet_Desc.Id = Arg.Id then
+            Packet_Desc.Enabled := Product_Packet_Types.On_Change;
+            The_Period := Packet_Desc.Period;
+            Id_Found := True;
+            exit;
+         end if;
+      end loop;
+
+      -- Send event:
+      if Id_Found then
+         Self.Event_T_Send_If_Connected (Self.Events.Packet_Enabled_On_Change (Self.Sys_Time_T_Get, (Id => Arg.Id, Period => The_Period)));
+         return Success;
+      else
+         Commands.Set_Id_Base (Self.Command_Id_Base);
+         Self.Event_T_Send_If_Connected (Self.Events.Invalid_Packet_Id_Commanded (Self.Sys_Time_T_Get, (Packet_Id => Arg.Id, Command_Id => Commands.Get_Enable_Packet_On_Change_Id)));
+         return Failure;
+      end if;
+   end Enable_Packet_On_Change;
 
    -- Invalid command handler. This procedure is called when a command's arguments are found to be invalid:
    overriding procedure Invalid_Command (Self : in out Instance; Cmd : in Command.T; Errant_Field_Number : in Unsigned_32; Errant_Field : in Basic_Types.Poly_Type) is

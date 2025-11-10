@@ -9,6 +9,9 @@ events:
   - name: Packet_Disabled
     description: An packet was disabled.
     param_type: Packet_Period.T
+  - name: Packet_Enabled_On_Change
+    description: An packet was enabled in on-change mode.
+    param_type: Packet_Period.T
   - name: Packet_Period_Set
     description: An packet period was set.
     param_type: Packet_Period.T
