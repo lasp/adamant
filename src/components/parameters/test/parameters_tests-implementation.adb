@@ -47,7 +47,7 @@ package body Parameters_Tests.Implementation is
       Self.Tester.Connect;
 
       -- Call component init here.
-      Self.Tester.Component_Instance.Init (Parameter_Table_Entries => Test_Parameter_Table.Parameter_Table_Entries'Access, Dump_Parameters_On_Change => True);
+      Self.Tester.Component_Instance.Init (Parameter_Table_Entries => Test_Parameter_Table.Parameter_Table_Entries'Access, Table_Id => Test_Parameter_Table.Parameter_Table_Id, Dump_Parameters_On_Change => True);
 
       -- Call the component set up method that the assembly would normally call.
       Self.Tester.Component_Instance.Set_Up;
@@ -72,7 +72,7 @@ package body Parameters_Tests.Implementation is
             [(Id => 2, Entry_Id => 0, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Entry_Id => 1, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Entry_Id => 2, Component_Id => 1, Start_Index => 16, End_Index => 17),
              (Id => 3, Entry_Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Entry_Id => 4, Component_Id => 2, Start_Index => 20, End_Index => 23)];
       begin
-         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
+         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, 1, False);
       exception
          -- Not expecting exception to be thrown:
          when others =>
@@ -85,7 +85,7 @@ package body Parameters_Tests.Implementation is
             [(Id => 2, Entry_Id => 0, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Entry_Id => 1, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Entry_Id => 2, Component_Id => 1, Start_Index => 16, End_Index => 17),
              (Id => 3, Entry_Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 2, Entry_Id => 4, Component_Id => 2, Start_Index => 20, End_Index => 23)];
       begin
-         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
+         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, 1, False);
          Assert (False, "Unique Id init failed!");
       exception
          -- Expecting exception to be thrown:
@@ -99,7 +99,7 @@ package body Parameters_Tests.Implementation is
             [(Id => 2, Entry_Id => 0, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Entry_Id => 1, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Entry_Id => 2, Component_Id => 1, Start_Index => 16, End_Index => 17),
              (Id => 3, Entry_Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Entry_Id => 4, Component_Id => 5, Start_Index => 20, End_Index => 23)];
       begin
-         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
+         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, 1, False);
          Assert (False, "Component Id init failed!");
       exception
          -- Expecting exception to be thrown:
@@ -118,7 +118,7 @@ package body Parameters_Tests.Implementation is
          Self.Tester.Connect;
          -- Now run the test, which is to call component init with a custom parameter
          -- table entry list that causes it to access index 4, which is unconnected.
-         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
+         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, 1, False);
          Assert (False, "Unconnected Component Id init failed!");
       exception
          -- Expecting exception to be thrown:
@@ -132,7 +132,7 @@ package body Parameters_Tests.Implementation is
             [(Id => 2, Entry_Id => 0, Component_Id => 1, Start_Index => 2, End_Index => 0), (Id => 5, Entry_Id => 1, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Entry_Id => 2, Component_Id => 1, Start_Index => 16, End_Index => 17),
              (Id => 3, Entry_Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Entry_Id => 4, Component_Id => 2, Start_Index => 20, End_Index => 23)];
       begin
-         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
+         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, 1, False);
          Assert (False, "Bad Layout 2 init failed!");
       exception
          -- Expecting exception to be thrown:
@@ -146,7 +146,7 @@ package body Parameters_Tests.Implementation is
             [(Id => 2, Entry_Id => 0, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Entry_Id => 1, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Entry_Id => 2, Component_Id => 1, Start_Index => 16, End_Index => 17),
              (Id => 3, Entry_Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Entry_Id => 4, Component_Id => 2, Start_Index => 21, End_Index => 23)];
       begin
-         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
+         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, 1, False);
          Assert (False, "Bad Layout 2 init failed!");
       exception
          -- Expecting exception to be thrown:
@@ -161,7 +161,7 @@ package body Parameters_Tests.Implementation is
             [(Id => 2, Entry_Id => 0, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Entry_Id => 2, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Entry_Id => 3, Component_Id => 1, Start_Index => 16, End_Index => 17),
              (Id => 3, Entry_Id => 4, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Entry_Id => 5, Component_Id => 2, Start_Index => 20, End_Index => 23)];
       begin
-         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
+         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, 1, False);
          Assert (False, "Bad Entry_ID order init failed!");
       exception
          -- Expecting exception to be thrown:
@@ -176,7 +176,7 @@ package body Parameters_Tests.Implementation is
             [(Id => 2, Entry_Id => 0, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Entry_Id => 1, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Entry_Id => 2, Component_Id => 1, Start_Index => 16, End_Index => 17),
              (Id => 3, Entry_Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Entry_Id => 4, Component_Id => 10, Start_Index => 20, End_Index => 23)];
       begin
-         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
+         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, 1, False);
          Assert (False, "Component_ID out of range init failed!");
       exception
          -- Expecting exception to be thrown:
@@ -191,7 +191,7 @@ package body Parameters_Tests.Implementation is
             [(Id => 2, Entry_Id => 0, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Entry_Id => 1, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Entry_Id => 2, Component_Id => 1, Start_Index => 16, End_Index => 17),
              (Id => 3, Entry_Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Entry_Id => 4, Component_Id => 2, Start_Index => 20, End_Index => 300)];
       begin
-         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
+         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, 1, False);
          Assert (False, "Parameter too large init failed!");
       exception
          -- Expecting exception to be thrown:
@@ -923,7 +923,7 @@ package body Parameters_Tests.Implementation is
       Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => Crc, Version => 0.0));
 
       -- Call component with dump_Parameters_On_Change => False
-      T.Component_Instance.Init (Parameter_Table_Entries => Test_Parameter_Table.Parameter_Table_Entries'Access, Dump_Parameters_On_Change => False);
+      T.Component_Instance.Init (Parameter_Table_Entries => Test_Parameter_Table.Parameter_Table_Entries'Access, Table_Id => Test_Parameter_Table.Parameter_Table_Id, Dump_Parameters_On_Change => False);
 
       -- Send a command to update a parameter value:
       pragma Assert (T.Commands.Update_Parameter (Param_Entry, Cmd) = Success);

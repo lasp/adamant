@@ -39,7 +39,7 @@ package body Parameters_Grouped_Tests.Implementation is
       Self.Tester.Connect;
 
       -- Call component init here.
-      Self.Tester.Component_Instance.Init (Parameter_Table_Entries => Test_Grouped_Params.Parameter_Table_Entries'Access, Dump_Parameters_On_Change => True);
+      Self.Tester.Component_Instance.Init (Parameter_Table_Entries => Test_Grouped_Params.Parameter_Table_Entries'Access, Table_Id => Test_Grouped_Params.Parameter_Table_Id, Dump_Parameters_On_Change => True);
 
       -- Call the component set up method that the assembly would normally call.
       Self.Tester.Component_Instance.Set_Up;
