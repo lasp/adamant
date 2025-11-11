@@ -15,7 +15,7 @@ enums:
         description: Fetch the parameter.
       - name: Validate
         value: 3
-        description: Validate the parameter.
+        description: Validate all the parameters.
   - name: Parameter_Update_Status
     description: This status enumeration provides information on the success/failure of a parameter operation.
     literals:

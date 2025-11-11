@@ -15,6 +15,8 @@ with {{ include }};
 package body Component.{{ name }} is
 
 {% if parameters %}
+   use Parameter_Types;
+
    -- A protected object is used to store the component's staged parameters. This is because
    -- the staged parameters are accessed by both the execution thread of the component and the
    -- execution thread of the parameter component responsible for updating the parameters.
@@ -22,31 +24,70 @@ package body Component.{{ name }} is
    -- from the staged to the working variables is as fast as possible.
    protected body Protected_Staged_Parameters is
       -- Set the ready to update flag to True:
-      procedure Set_Ready_To_Update is
+      procedure Set_Ready_To_Update (Table_Id : in Parameter_Types.Parameter_Table_Id) is
+         Staged_By_This_Table : constant Parameter_Status := (State => Staged, Staged_By => Table_Id);
+         Ready_To_Update_Status : constant Parameter_Status := (State => Ready_To_Update, Staged_By => 0);
       begin
-         Ready_To_Update := True;
+{% for par in parameters %}
+         if {{ par.name }}_Status = Staged_By_This_Table then
+            {{ par.name }}_Status := Ready_To_Update_Status;
+         end if;
+
+{% endfor %}
+         -- Set the global Ready_To_Update variable:
+         Params_Ready_To_Update := True;
       end Set_Ready_To_Update;
 
       -- Returns true if the parameters are ready to update:
       function Is_Ready_To_Update return Boolean is
       begin
-         return Ready_To_Update;
+         return Params_Ready_To_Update;
       end Is_Ready_To_Update;
 
       -- Staging functions for each parameter:
 {% for par in parameters %}
-      procedure Stage_{{ par.name }} (Par : in {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %}) is
+      procedure Stage_{{ par.name }} (
+         Table_Id : in Parameter_Types.Parameter_Table_Id;
+         Par : in {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %}) is
       begin
          {{ par.name }}_Staged := Par;
-         Is_{{ par.name }}_Staged := True;
+         {{ par.name }}_Status := (State => Staged, Staged_By => Table_Id);
       end Stage_{{ par.name }};
 
 {% endfor %}
+      -- Grab the correct parameter for fetch purposes. We almost always just want to return the currently
+      -- used active parameter within the component when a fetch is requested. The exception is when a parameter
+      -- is getting ready to be updated (Ready_To_Update). In that case, the active parameter will be set
+      -- imminently using the staged parameter. In that case, we return the staged parameter.
 {% for par in parameters %}
-      function Get_{{ par.name }} return {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %} is
+      function Get_{{ par.name }}_For_Fetch (Active_Value : in {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %}) return {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %} is
       begin
-         return {{ par.name }}_Staged;
-      end Get_{{ par.name }};
+         case {{ par.name }}_Status.State is
+            when Ready_To_Update => return {{ par.name }}_Staged;
+            when Staged | Updated => return Active_Value;
+         end case;
+      end Get_{{ par.name }}_For_Fetch;
+
+{% endfor %}
+      -- Grab the correct parameter (staged or active) for validation purposes. This logic prevents
+      -- a stale, and potentially bad, staged parameter from being passed to the validation subprogram.
+      -- If the parameter has been staged by the Table ID requesting validation, then we return the
+      -- staged parameter. If the parameter is Ready_To_Update, then the staged parameter will be copied
+      -- to the component's active parameter imminently, so we return the staged parameter. If none of these
+      -- cases are true, then we should assume the value in the staged parameter is stale and we return
+      -- the active parameter value for validation.
+{% for par in parameters %}
+      function Get_{{ par.name }}_For_Validate (Table_Id : in Parameter_Types.Parameter_Table_Id; Active_Value : in {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %}) return {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %} is
+         Staged_By_This_Table : constant Parameter_Status := (State => Staged, Staged_By => Table_Id);
+      begin
+         if {{ par.name }}_Status = Staged_By_This_Table or else
+            {{ par.name }}_Status.State = Ready_To_Update
+         then
+            return {{ par.name }}_Staged;
+         else
+            return Active_Value;
+         end if;
+      end Get_{{ par.name }}_For_Validate;
 
 {% endfor %}
       -- Single update function to copy all the parameters from the
@@ -58,16 +99,17 @@ package body Component.{{ name }} is
 {% endfor %}
       ) is
       begin
-         if Ready_To_Update then
+         if Params_Ready_To_Update then
             -- Copy over all the parameters from the staged to the passed in values:
 {% for par in parameters %}
-            if Is_{{ par.name }}_Staged then
+            if {{ par.name }}_Status.State = Ready_To_Update then
                {{ par.name }} := {{ par.name }}_Staged;
-               Is_{{ par.name }}_Staged := False;
+               {{ par.name }}_Status.State := Updated;
             end if;
+
 {% endfor %}
             -- We have now updated all the parameters, so reset the staged flag:
-            Ready_To_Update := False;
+            Params_Ready_To_Update := False;
          end if;
       end Copy_From_Staged;
    end Protected_Staged_Parameters;
@@ -954,7 +996,7 @@ package body Component.{{ name }} is
       case Par_Update.Operation is
          when Stage =>
             -- Stage this parameter.
-            Status := Self.Stage_Parameter (Par_Update.Param);
+            Status := Self.Stage_Parameter (Par_Update.Table_Id, Par_Update.Param);
          when Validate =>
             -- Pass the staged parameters to the user defined validation function.
             -- Note that type ranges have already been validated as part of staging
@@ -962,7 +1004,7 @@ package body Component.{{ name }} is
             -- user-implemented validation.
             case Base_Instance'Class (Self).Validate_Parameters (
 {% for par in parameters %}
-               {{ par.name }} => Self.Staged_Parameters.Get_{{ par.name }}{{ "," if not loop.last }}
+               {{ par.name }} => Self.Staged_Parameters.Get_{{ par.name }}_For_Validate (Par_Update.Table_Id, Self.{{ par.name }}){{ "," if not loop.last }}
 {% endfor %}
             ) is
                when Valid =>
@@ -974,8 +1016,9 @@ package body Component.{{ name }} is
             end case;
          when Update =>
             -- All parameters have been staged, we can now update our local parameters:
-            Self.Staged_Parameters.Set_Ready_To_Update;
+            Self.Staged_Parameters.Set_Ready_To_Update (Par_Update.Table_Id);
          when Fetch =>
+            -- Fetch the value of the requested parameter:
             Status := Self.Fetch_Parameter (Par_Update.Param);
       end case;
 
@@ -983,8 +1026,11 @@ package body Component.{{ name }} is
       Par_Update.Status := Status;
    end Process_Parameter_Update;
 
-   not overriding function Stage_Parameter (Self : in out Base_Instance; Par : in Parameter.T) return Parameter_Update_Status.E is
-      use Parameter_Types;
+   not overriding function Stage_Parameter (
+      Self : in out Base_Instance;
+      Table_Id : in Parameter_Types.Parameter_Table_Id;
+      Par : in Parameter.T
+   ) return Parameter_Update_Status.E is
       use Parameter_Update_Status;
    begin
       -- If ID is within the valid range then stage the parameter, otherwise do error routine:
@@ -998,7 +1044,7 @@ package body Component.{{ name }} is
                Local_Id : constant {{ parameters.name }}.Local_Parameter_Id_Type := {{ parameters.name }}.Local_Parameter_Id_Type'Val (Par.Header.Id - Self.Parameter_Id_Base);
                Stage_To : constant Stage_Function := Parameter_Id_Table (Local_Id);
             begin
-               return Stage_To (Self, Par);
+               return Stage_To (Self, Table_Id, Par);
             end;
          else
             -- Id is not valid for component, so call the invalid parameter handler and return the the error status:
@@ -1024,8 +1070,11 @@ package body Component.{{ name }} is
    end Handle_Parameter_Length_Error;
 
 {% for par in parameters %}
-   not overriding function Stage_{{ par.name }} (Self : in out Base_Instance; Par : in Parameter.T) return Parameter_Update_Status.E is
-      use Parameter_Types;
+   not overriding function Stage_{{ par.name }} (
+      Self : in out Base_Instance;
+      Table_Id : in Parameter_Types.Parameter_Table_Id;
+      Par : in Parameter.T
+   ) return Parameter_Update_Status.E is
 {% if par.type_model %}
       package Buffer_Deserializer renames {{ par.type_package }}.Serialization;
 {% else %}
@@ -1053,9 +1102,9 @@ package body Component.{{ name }} is
             if Args_Valid then
                -- Stage the parameter:
 {% if par.type_package %}
-               Self.Staged_Parameters.Stage_{{ par.name }} ({{ par.type_package }}.Unpack (Par_To_Stage));
+               Self.Staged_Parameters.Stage_{{ par.name }} (Table_Id, {{ par.type_package }}.Unpack (Par_To_Stage));
 {% else %}
-               Self.Staged_Parameters.Stage_{{ par.name }} (Par_To_Stage);
+               Self.Staged_Parameters.Stage_{{ par.name }} (Table_Id, Par_To_Stage);
 {% endif %}
                return Parameter_Update_Status.Success;
             else
@@ -1085,7 +1134,6 @@ package body Component.{{ name }} is
 
 {% endfor %}
    not overriding function Fetch_Parameter (Self : in out Base_Instance; Par : in out Parameter.T) return Parameter_Update_Status.E is
-      use Parameter_Types;
       use Parameter_Update_Status;
    begin
       -- If ID is within the valid range then stage the parameter, otherwise do error routine:
@@ -1110,13 +1158,12 @@ package body Component.{{ name }} is
 
 {% for par in parameters %}
    not overriding function Fetch_{{ par.name }} (Self : in out Base_Instance; Par : in out Parameter.T) return Parameter_Update_Status.E is
-      use Parameter_Types;
 {% if par.type_model %}
       package Buffer_Deserializer renames {{ par.type_package }}.Serialization;
-      Value : constant {{ par.type }} := {{ par.type_package }}.Pack (Self.Staged_Parameters.Get_{{ par.name }});
+      Value : constant {{ par.type }} := {{ par.type_package }}.Pack (Self.Staged_Parameters.Get_{{ par.name }}_For_Fetch (Self.{{ par.name }}));
 {% else %}
       package Buffer_Deserializer is new Serializer ({{ par.type }});
-      Value : constant {{ par.type }} := Self.Staged_Parameters.Get_{{ par.name }};
+      Value : constant {{ par.type }} := Self.Staged_Parameters.Get_{{ par.name }}_For_Fetch (Self.{{ par.name }});
 {% endif %}
       pragma Annotate (GNATSAS, False_Positive, "validity check",
          "Defaults for parameter values are always initialized within Staged_Parameters protected object definition.");

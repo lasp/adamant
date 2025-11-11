@@ -368,10 +368,10 @@ private
       Id : Connector_Identifier_Enum;
    end record
       with Size => 8,
-             Object_Size => 8,
-             Value_Size => 8,
-             Alignment => 1,
-             Volatile => False;
+           Object_Size => 8,
+           Value_Size => 8,
+           Alignment => 1,
+           Volatile => False;
 
    -- Define the size of the record to be compact to save space on
    -- the queue (24 bits).
@@ -581,7 +581,11 @@ private
    not overriding procedure Process_Parameter_Update (Self : in out Base_Instance; Par_Update : in out Parameter_Update.T);
 
    -- Dispatch parameter to correct staging procedure:
-   not overriding function Stage_Parameter (Self : in out Base_Instance; Par : in Parameter.T) return Parameter_Update_Status.E;
+   not overriding function Stage_Parameter (
+      Self : in out Base_Instance;
+      Table_Id : in Parameter_Types.Parameter_Table_Id;
+      Par : in Parameter.T
+   ) return Parameter_Update_Status.E;
 
    -- Fetch a requested parameter value:
    not overriding function Fetch_Parameter (Self : in out Base_Instance; Par : in out Parameter.T) return Parameter_Update_Status.E;
@@ -591,12 +595,20 @@ private
 
    -- Private parameter staging procedures:
 {% for par in parameters %}
-   not overriding function Stage_{{ par.name }} (Self : in out Base_Instance; Par : in Parameter.T) return Parameter_Update_Status.E;
+   not overriding function Stage_{{ par.name }} (
+      Self : in out Base_Instance;
+      Table_Id : in Parameter_Types.Parameter_Table_Id;
+      Par : in Parameter.T
+   ) return Parameter_Update_Status.E;
    not overriding function Fetch_{{ par.name }} (Self : in out Base_Instance; Par : in out Parameter.T) return Parameter_Update_Status.E;
 {% endfor %}
 
    -- Procedure lookup table for dispatching to parameter stage handler:
-   type Stage_Function is not null access function (Self : in out Base_Instance; Par : in Parameter.T) return Parameter_Update_Status.E;
+   type Stage_Function is not null access function (
+      Self : in out Base_Instance;
+      Table_Id : in Parameter_Types.Parameter_Table_Id;
+      Par : in Parameter.T
+   ) return Parameter_Update_Status.E;
    type Parameter_Table_T is array ({{ parameters.name }}.Local_Parameter_Id_Type) of Stage_Function;
    Parameter_Id_Table : constant Parameter_Table_T := [
 {% for par in parameters %}
@@ -619,35 +631,41 @@ private
    -- The design of this protected object is to optimize the speed at which the copying of parameters
    -- from the staged to the working variables is as fast as possible.
    protected type Protected_Staged_Parameters is
-      -- Set the ready to update flag to True:
-      procedure Set_Ready_To_Update;
+      -- Set all parameters staged by Table_Id as ready to be updated by the component:
+      procedure Set_Ready_To_Update (Table_Id : in Parameter_Types.Parameter_Table_Id);
 
-      -- Returns true if the parameters are ready to update:
+      -- Returns True if the parameters are ready to update:
       function Is_Ready_To_Update return Boolean;
 
       -- Staging functions for each parameter:
 {% for par in parameters %}
-      procedure Stage_{{ par.name }} (Par : in {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %});
+      procedure Stage_{{ par.name }} (
+         Table_Id : in Parameter_Types.Parameter_Table_Id;
+         Par : in {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %});
 {% endfor %}
 
       -- Fetching functions for each parameter:
 {% for par in parameters %}
-      function Get_{{ par.name }} return {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %};
+      function Get_{{ par.name }}_For_Fetch (Active_Value : in {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %}) return {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %};
+      function Get_{{ par.name }}_For_Validate (Table_Id : in Parameter_Types.Parameter_Table_Id; Active_Value : in {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %}) return {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %};
 {% endfor %}
 
       -- Single update function to copy all the parameters from the
-      -- staged versions to the working copy passed in. This function
-      -- also resets the parameters_Updated boolean to False.
+      -- staged versions to the working copy passed in if the parameters
+      -- are in the Ready_To_Update state. This function also resets
+      -- the global Params_Ready_To_Update boolean to False.
       procedure Copy_From_Staged (
 {% for par in parameters %}
          {{ par.name }} : in out {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %}{{ ";" if not loop.last }}
 {% endfor %}
       );
    private
+      -- Global boolean to signify one or more parameters is ready for
+      -- update by the component.
+      Params_Ready_To_Update : Boolean := False;
       -- Staged parameter store:
-      Ready_To_Update : Boolean := False;
 {% for par in parameters %}
-      Is_{{ par.name }}_Staged : Boolean := False;
+      {{ par.name }}_Status : Parameter_Types.Parameter_Status := (State => Parameter_Types.Updated, Staged_By => 0);
       {{ par.name }}_Staged : {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %}{% if par.default_value %} := {{ par.default_value }}{% endif %};
 {% endfor %}
    end Protected_Staged_Parameters;
