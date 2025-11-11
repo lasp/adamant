@@ -114,7 +114,7 @@ package body Component.Ccsds_Serial_Interface.Implementation is
          end if;
       end loop;
 
-      -- OK we found an entire sync packet, now lets read
+      -- OK we found an entire sync packet, now let's read
       -- a CCSDS packet:
       declare
          Packet : Ccsds_Space_Packet.T;

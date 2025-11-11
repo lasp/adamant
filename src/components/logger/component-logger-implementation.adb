@@ -160,7 +160,7 @@ package body Component.Logger.Implementation is
          Self.Buffer.Init (Self.Bytes, Self.Meta_Data);
          -- Save off the initialized meta data. This only makes sense to do if we
          -- allocated the meta data on the heap, then the heap data is invalid anyways, so
-         -- lets overwrite it with properly initialized meta data:
+         -- let's overwrite it with properly initialized meta data:
          Self.Buffer.Save_Meta_Data;
       end if;
 

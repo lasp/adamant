@@ -1,7 +1,7 @@
 with History.Printable;
 
 -- A wrapper around History.Printable which makes it a bit more accessible, and similar
--- to use the the regular History package.
+-- to use the regular History package.
 generic
    type T is private;
    -- Function which returns string representation of item of type T

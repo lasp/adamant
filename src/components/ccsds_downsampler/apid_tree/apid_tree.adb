@@ -23,12 +23,12 @@ package body Apid_Tree is
       Self.Downsample_Entry.Init (Downsample_List'Length);
       -- For each item in the list, add the apid and filter factor to the internal tree
       for Id of Downsample_List.all loop
-         -- Make sure we dont add multiple of the same apid
+         -- Make sure we don't add multiple of the same apid
          Search_Status := Self.Downsample_Entry.Search (((Apid => Id.Apid, Filter_Factor => 1, Filter_Count => 0)), Ignore_2, Ignore_1);
          pragma Assert (not Search_Status, "Downsampler tree cannot add multiple nodes of the same APID.");
 
          Add_Status := Self.Downsample_Entry.Add (((Apid => Id.Apid, Filter_Factor => Id.Filter_Factor, Filter_Count => 0)));
-         -- Make sure we dont get a failure for some reason
+         -- Make sure we don't get a failure for some reason
          pragma Assert (Add_Status, "Downsampler tree too small to hold all APIDs in the input list.");
       end loop;
    end Init;
@@ -49,7 +49,7 @@ package body Apid_Tree is
          when True =>
             -- Check if we are filtering all first
             case Fetched_Entry.Filter_Factor is
-               -- When the factor is set to 0, we dont pass anything along.
+               -- When the factor is set to 0, we don't pass anything along.
                when 0 =>
                   -- Update counter
                   Self.Num_Filtered_Packets := @ + 1;
@@ -81,7 +81,7 @@ package body Apid_Tree is
       Index : Positive;
       Search_Status : constant Boolean := Self.Downsample_Entry.Search ((Apid => Apid, Filter_Factor => 1, Filter_Count => 0), Fetched_Entry, Index);
    begin
-      -- set the index output variable just in case we dont find the entry
+      -- set the index output variable just in case we don't find the entry
       Tree_Index := Positive'First;
       case Search_Status is
          when True =>
@@ -93,7 +93,7 @@ package body Apid_Tree is
             Tree_Index := Index;
             return Success;
          when False =>
-            -- Let the command know that we could not find the apid and seet the index to some value
+            -- Let the command know that we could not find the apid and set the index to some value
             return Invalid_Id;
       end case;
    end Set_Filter_Factor;

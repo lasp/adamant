@@ -187,7 +187,7 @@ package body Command_Router_Tests.Implementation is
       Ignore : Natural;
    begin
       -- Set the base id for reg cmds to 0. Usually we use 1, but 0 is reserved especially
-      -- for this command, so lets make sure it is 0.
+      -- for this command, so let's make sure it is 0.
       Reg_Cmds.Set_Id_Base (0);
 
       -- Make sure there was no registration errors:

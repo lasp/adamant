@@ -14,7 +14,7 @@ package body Extract_Data_Product is
          Buffer => [others => 0]
       );
 
-      -- Dont try to read if its going to overflow out of the packet.
+      -- Don't try to read if it's going to overflow out of the packet.
       if Offset + Length - 1 <= Natural (Pkt.Header.Packet_Length) then
          Dp.Buffer (Dp.Buffer'First .. Dp.Buffer'First + Length - 1) := Pkt.Data (Offset .. Offset + Length - 1);
          return Success;

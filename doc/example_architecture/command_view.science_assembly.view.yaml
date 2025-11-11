@@ -23,7 +23,7 @@ show_component_name: True
 show_connector_type: True
 # If set to false shows a dotted line around "groups" in the view
 hide_group_outline: True
-# If set to true shows the data depedency pseudo connectors
+# If set to true shows the data dependency pseudo connectors
 show_data_dependencies: False
 # Optional - the "rule" used to determine how the filters are
 # applied to the assembly graph. If not specified, then the rule

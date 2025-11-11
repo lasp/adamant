@@ -19,7 +19,7 @@ def split_model_file_name(model_filename):
 
     def regex_err(string):
         err(
-            "All dot-seperated fields in the model file name must match the regex \
+            "All dot-separated fields in the model file name must match the regex \
                     '^[a-zA-Z][_?a-zA-Z0-9]*$'. Spaces are not allowed. The file name field '"
             + string
             + "' does not comply."

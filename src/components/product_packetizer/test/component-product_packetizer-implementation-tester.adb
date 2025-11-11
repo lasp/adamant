@@ -152,7 +152,7 @@ package body Component.Product_Packetizer.Implementation.Tester is
       return To_Return;
    end Sys_Time_T_Return;
 
-   -- This connector is used to register the compoennt's commands.
+   -- This connector is used to register the component's commands.
    overriding procedure Command_Response_T_Recv_Sync (Self : in out Instance; Arg : in Command_Response.T) is
    begin
       -- Push the argument onto the test history for looking at later:

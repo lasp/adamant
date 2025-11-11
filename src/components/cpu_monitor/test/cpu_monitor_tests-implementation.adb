@@ -136,7 +136,7 @@ package body Cpu_Monitor_Tests.Implementation is
       T.Tick_T_Send (A_Tick);
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 7);
 
-      -- OK we cannot actually check the contents of a packet, but lets at least
+      -- OK we cannot actually check the contents of a packet, but let's at least
       -- check the headers of all the packets.
       Natural_Assert.Eq (T.Cpu_Usage_Packet_History.Get_Count, 7);
       for Idx in Positive range 1 .. 7 loop

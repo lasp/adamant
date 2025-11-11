@@ -37,7 +37,7 @@ class gprbuild_target_base(metaclass=abc.ABCMeta):
         Path files that apply to this target, meaning paths
         found with the path file names returned by this function
         will be included in the build path. A default implementation
-        is provided that returns the the class name of this target and
+        is provided that returns the class name of this target and
         all targets it inherits from, except the gprbuild_target_base
         and the bit file (ie. 32bit).
         If "example" is included in the list here than any directories with

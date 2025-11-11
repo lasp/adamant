@@ -1,5 +1,5 @@
 ---
-description: Record for the PTP Time Sync Message. This record includes a a time stamp which signifies when the message was received by the system. If the timestamp is set to zero, then time is retrieved at the receipt of this message by the component.
+description: Record for the PTP Time Sync Message. This record includes a time stamp which signifies when the message was received by the system. If the timestamp is set to zero, then time is retrieved at the receipt of this message by the component.
 fields:
   - name: Receive_Time
     description: The time when the PTP message was received by the system. If this is set to zeros, then the component will grab a timestamp when receiving this message and assume that as the received time.

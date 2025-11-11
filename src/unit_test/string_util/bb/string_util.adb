@@ -26,8 +26,8 @@ package body String_Util is
       end Get_Number;
       Cnt : Natural := 0;
    begin
-      for Indx in Bytes'Range loop
-         Toreturn ((Cnt * 4 + 1) .. (Cnt * 4 + 4)) := " " & Get_Number (Indx);
+      for Idx in Bytes'Range loop
+         Toreturn ((Cnt * 4 + 1) .. (Cnt * 4 + 4)) := " " & Get_Number (Idx);
          Cnt := @ + 1;
       end loop;
       return Prefix & Trim_Both (Toreturn) & Postfix;

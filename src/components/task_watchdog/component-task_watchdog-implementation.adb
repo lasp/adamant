@@ -224,7 +224,7 @@ package body Component.Task_Watchdog.Implementation is
                   when Fault_Failure =>
                      Self.Send_Fault (Idx, Timestamp);
                      Self.Event_T_Send_If_Connected (Self.Events.Component_Exceeded_Pet_Limit (Timestamp, (Index => Idx)));
-                  -- When its a repeated failure, all we need to know is if its critical which gets checked every time
+                  -- When it's a repeated failure, all we need to know is if it's critical which gets checked every time
                   when Repeat_Failure =>
                      null;
                end case;
