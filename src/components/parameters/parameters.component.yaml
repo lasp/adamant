@@ -5,13 +5,16 @@ execution: active
 init:
   description: "This init function provides the a list of parameter entries that describe the layout of the parameter table in memory. Calling this function also provides memory allocation for the parameter manager's internal parameter table. Preallocated memory can be provided via the \"bytes\" access type. Note the size of the preallocated memory MUST match the size of the parameter table exactly, as defined in the parameter_Entries parameter. If you would like to allocate the internal memory on the heap then \"bytes\" can be set to null."
   parameters:
-    - name: parameter_Table_Entries
+    - name: Parameter_Table_Entries
       type: Parameters_Component_Types.Parameter_Table_Entry_List_Access
       not_null: true
       description: "A pointer to an autocoded list of parameter table entries. This table tells the parameter manager how the parameters are laid out in memory, so that it knows how to construct parameter types to update downstream components."
-    - name: dump_Parameters_On_Change
+    - name: Table_Id 
+      type: Parameter_Types.Parameter_Table_Id
+      description: "Provide a unique parameter table ID for this parameter table. This item is autocoded in the same package as the parameter table entries list."
+    - name: Dump_Parameters_On_Change
       type: Boolean
-      description: If set to True, the component will dump the current parameter values any time a command or memory region is received to alter one or more parameter values. If set to False, parameters will only be dumped when requested by command.
+      description: "If set to True, the component will dump the current parameter values any time a command or memory region is received to alter one or more parameter values. If set to False, parameters will only be dumped when requested by command."
       default: "False"
 connectors:
   - description: The arrayed parameter request connector. Parameters stages, updates, and fetches are sent out this connector and a status is returned.

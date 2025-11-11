@@ -15,18 +15,35 @@ package Component.Parameters.Implementation is
    --------------------------------------------------
    -- Subprogram for implementation init method:
    --------------------------------------------------
-   -- This init function provides the a list of parameter entries that describe the layout of the parameter table in memory. Calling this function also provides memory allocation for the parameter manager's internal parameter table. Preallocated memory can be provided via the "bytes" access type. Note the size of the preallocated memory MUST match the size of the parameter table exactly, as defined in the parameter_Entries parameter. If you would like to allocate the internal memory on the heap then "bytes" can be set to null.
+   -- This init function provides the a list of parameter entries that describe the
+   -- layout of the parameter table in memory. Calling this function also provides
+   -- memory allocation for the parameter manager's internal parameter table.
+   -- Preallocated memory can be provided via the "bytes" access type. Note the size
+   -- of the preallocated memory MUST match the size of the parameter table exactly,
+   -- as defined in the parameter_Entries parameter. If you would like to allocate
+   -- the internal memory on the heap then "bytes" can be set to null.
    --
    -- Init Parameters:
-   -- parameter_Entries : Parameters_Component_Types.Parameter_Entry_List_Access - A pointer to an autocoded list of parameter entries. This table tells the parameter manager how the parameters are laid out in memory, so that it knows how to construct parameter types to update downstream components.
-   -- dump_Parameters_On_Change : Boolean - If set to True, the component will dump the current parameter values any time a command or memory region is received to alter one or more parameter values. If set to False, parameters will only be dumped when requested by command.
+   -- Parameter_Table_Entries :
+   -- Parameters_Component_Types.Parameter_Table_Entry_List_Access - A pointer to an
+   -- autocoded list of parameter table entries. This table tells the parameter
+   -- manager how the parameters are laid out in memory, so that it knows how to
+   -- construct parameter types to update downstream components.
+   -- Table_Id : Parameter_Types.Parameter_Table_Id - Provide a unique parameter
+   -- table ID for this parameter table. This item is autocoded in the same package
+   -- as the parameter table entries list.
+   -- Dump_Parameters_On_Change : Boolean - If set to True, the component will dump
+   -- the current parameter values any time a command or memory region is received to
+   -- alter one or more parameter values. If set to False, parameters will only be
+   -- dumped when requested by command.
    --
-   overriding procedure Init (Self : in out Instance; Parameter_Table_Entries : in not null Parameters_Component_Types.Parameter_Table_Entry_List_Access; Dump_Parameters_On_Change : in Boolean := False);
+   overriding procedure Init (Self : in out Instance; Parameter_Table_Entries : in not null Parameters_Component_Types.Parameter_Table_Entry_List_Access; Table_Id : in Parameter_Types.Parameter_Table_Id; Dump_Parameters_On_Change : in Boolean := False);
 
 private
 
    -- The component class instance record:
    type Instance is new Parameters.Base_Instance with record
+      Table_Id : Parameter_Types.Parameter_Table_Id := 1;
       Entries : Parameters_Component_Types.Parameter_Table_Entry_List_Access := null;
       Dump_Parameters_On_Change : Boolean := False;
       Stored_Crc : Crc_16.Crc_16_Type := [0, 0];

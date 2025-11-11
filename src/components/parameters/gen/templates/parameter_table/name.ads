@@ -1,10 +1,14 @@
 -- Standard includes:
 with Parameters_Component_Types; use Parameters_Component_Types;
+with Parameter_Types;
 
 {% if description %}
 {{ printMultiLine(description, '-- ') }}
 {% endif %}
 package {{ name[0]|upper }}{{ name[1:] }} is
+
+   -- The unique (to this assembly) ID for this parameter table.
+   Parameter_Table_Id : constant Parameter_Types.Parameter_Table_Id := {{ table_id }};
 
    -- The size of the parameter table (in bytes). This includes the size of the parameter
    -- table header (Parameter_Table_Header.T) plus the size of all the parameter table data.

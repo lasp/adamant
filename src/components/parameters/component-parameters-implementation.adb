@@ -15,19 +15,36 @@ package body Component.Parameters.Implementation is
    --------------------------------------------------
    -- Subprogram for implementation init method:
    --------------------------------------------------
-   -- This init function provides the a list of parameter entries that describe the layout of the parameter table in memory. Calling this function also provides memory allocation for the parameter manager's internal parameter table. Preallocated memory can be provided via the "bytes" access type. Note the size of the preallocated memory MUST match the size of the parameter table exactly, as defined in the parameter_Entries parameter. If you would like to allocate the internal memory on the heap then "bytes" can be set to null.
+   -- This init function provides the a list of parameter entries that describe the
+   -- layout of the parameter table in memory. Calling this function also provides
+   -- memory allocation for the parameter manager's internal parameter table.
+   -- Preallocated memory can be provided via the "bytes" access type. Note the size
+   -- of the preallocated memory MUST match the size of the parameter table exactly,
+   -- as defined in the parameter_Entries parameter. If you would like to allocate
+   -- the internal memory on the heap then "bytes" can be set to null.
    --
    -- Init Parameters:
-   -- parameter_Entries : Parameters_Component_Types.Parameter_Entry_List_Access - A pointer to an autocoded list of parameter entries. This table tells the parameter manager how the parameters are laid out in memory, so that it knows how to construct parameter types to update downstream components.
-   -- dump_Parameters_On_Change : Boolean - If set to True, the component will dump the current parameter values any time a command or memory region is received to alter one or more parameter values. If set to False, parameters will only be dumped when requested by command.
+   -- Parameter_Table_Entries :
+   -- Parameters_Component_Types.Parameter_Table_Entry_List_Access - A pointer to an
+   -- autocoded list of parameter table entries. This table tells the parameter
+   -- manager how the parameters are laid out in memory, so that it knows how to
+   -- construct parameter types to update downstream components.
+   -- Table_Id : Parameter_Types.Parameter_Table_Id - Provide a unique parameter
+   -- table ID for this parameter table. This item is autocoded in the same package
+   -- as the parameter table entries list.
+   -- Dump_Parameters_On_Change : Boolean - If set to True, the component will dump
+   -- the current parameter values any time a command or memory region is received to
+   -- alter one or more parameter values. If set to False, parameters will only be
+   -- dumped when requested by command.
    --
-   overriding procedure Init (Self : in out Instance; Parameter_Table_Entries : in not null Parameters_Component_Types.Parameter_Table_Entry_List_Access; Dump_Parameters_On_Change : in Boolean := False) is
+   overriding procedure Init (Self : in out Instance; Parameter_Table_Entries : in not null Parameters_Component_Types.Parameter_Table_Entry_List_Access; Table_Id : in Parameter_Types.Parameter_Table_Id; Dump_Parameters_On_Change : in Boolean := False) is
       use Parameter_Types;
       Current_Byte : Natural := 0;
    begin
       -- Initialize internal variables:
       Self.Dump_Parameters_On_Change := Dump_Parameters_On_Change;
       Self.Entries := Parameter_Table_Entries;
+      Self.Table_Id := Table_Id;
 
       --
       -- Let's do a few checks. This should be done by the autocoder, but there is no harm doing it
@@ -154,6 +171,7 @@ package body Component.Parameters.Implementation is
             use Parameter_Enums.Parameter_Operation_Type;
             Param_Entry : Parameters_Component_Types.Parameter_Table_Entry renames Self.Entries.all (Idx);
             Param_Update : Parameter_Update.T := (
+               Table_Id => Self.Table_Id,
                Operation => Fetch,
                Status => Success,
                Param => (Header => (Id => Param_Entry.Id, Buffer_Length => 0), Buffer => [others => 0]
@@ -348,6 +366,7 @@ package body Component.Parameters.Implementation is
       Param_Length : constant Parameter_Types.Parameter_Buffer_Length_Type := Param_Entry.End_Index - Param_Entry.Start_Index + 1;
       -- Create a parameter update record:
       Param_Update : Parameter_Update.T := (
+         Table_Id => Self.Table_Id,
          Operation => Stage,
          Status => Success,
          Param => (Header => (Id => Param_Entry.Id, Buffer_Length => Param_Length), Buffer => [others => 0]
@@ -380,6 +399,7 @@ package body Component.Parameters.Implementation is
       use Parameter_Enums.Parameter_Operation_Type;
       -- Create a parameter update record:
       Param_Validate : Parameter_Update.T := (
+         Table_Id => Self.Table_Id,
          Operation => Validate,
          Status => Success,
          Param => (Header => (Id => 0, Buffer_Length => 0), Buffer => [others => 0]
@@ -408,6 +428,7 @@ package body Component.Parameters.Implementation is
       use Parameter_Enums.Parameter_Operation_Type;
       -- Create a parameter update record:
       Param_Update : Parameter_Update.T := (
+         Table_Id => Self.Table_Id,
          Operation => Update,
          Status => Success,
          Param => (Header => (Id => 0, Buffer_Length => 0), Buffer => [others => 0]
