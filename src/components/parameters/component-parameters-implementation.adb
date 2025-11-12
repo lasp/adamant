@@ -9,6 +9,7 @@ with Basic_Types;
 with Memory_Region;
 with Parameter_Table_Header;
 with Serializer_Types;
+with Parameter;
 
 package body Component.Parameters.Implementation is
 
@@ -358,97 +359,104 @@ package body Component.Parameters.Implementation is
       return (Region => Region, Status => Status_To_Return);
    end Copy_Parameter_Table_To_Region;
 
-   -- Helper function to stage a single parameter within a connected component.
-   function Stage_Parameter (Self : in out Instance; Param_Entry : in Parameters_Component_Types.Parameter_Table_Entry; Value : in Parameter_Types.Parameter_Buffer_Type) return Parameter_Enums.Parameter_Update_Status.E is
+   -- Helper function to send an operation for a single components parameters:
+   function Send_Parameter_Operation (
+      Self : in out Instance;
+      Component_Id : in Connector_Types.Connector_Index_Type;
+      Operation : in Parameter_Enums.Parameter_Operation_Type.E;
+      Return_Id : out Parameter_Types.Parameter_Id;
+      Param : in Parameter.T := (Header => (Id => 0, Buffer_Length => 0), Buffer => [others => 0])
+   ) return Parameter_Enums.Parameter_Update_Status.E is
       use Parameter_Enums.Parameter_Update_Status;
-      use Parameter_Enums.Parameter_Operation_Type;
-      -- Calculate the parameter length:
-      Param_Length : constant Parameter_Types.Parameter_Buffer_Length_Type := Param_Entry.End_Index - Param_Entry.Start_Index + 1;
-      -- Create a parameter update record:
-      Param_Update : Parameter_Update.T := (
-         Table_Id => Self.Table_Id,
-         Operation => Stage,
-         Status => Success,
-         Param => (Header => (Id => Param_Entry.Id, Buffer_Length => Param_Length), Buffer => [others => 0]
-      ));
-      -- Component index:
-      Idx : constant Parameter_Update_T_Provide_Index := Parameter_Update_T_Provide_Index (Param_Entry.Component_Id);
-   begin
-      -- Copy over value into record:
-      Param_Update.Param.Buffer (Param_Update.Param.Buffer'First .. Param_Update.Param.Buffer'First + Param_Length - 1)
-         := Value (Param_Update.Param.Buffer'First .. Param_Update.Param.Buffer'First + Param_Length - 1);
 
-      -- Send the parameter fetch request to the appropriate component:
-      Self.Parameter_Update_T_Provide (Idx, Param_Update);
-
-      -- Make sure the status is successful. If it is not, then produce an event.
-      if Param_Update.Status /= Success then
-         Self.Event_T_Send_If_Connected (Self.Events.Parameter_Stage_Failed (Self.Sys_Time_T_Get, (
-            Operation => Param_Update.Operation,
-            Status => Param_Update.Status,
-            Id => Param_Update.Param.Header.Id)
-         ));
-      end if;
-
-      return Param_Update.Status;
-   end Stage_Parameter;
-
-   -- Helper function to send a validation for a single components parameters:
-   function Validate_Parameters (Self : in out Instance; Component_Id : in Connector_Types.Connector_Index_Type) return Parameter_Enums.Parameter_Update_Status.E is
-      use Parameter_Enums.Parameter_Update_Status;
-      use Parameter_Enums.Parameter_Operation_Type;
       -- Create a parameter update record:
       Param_Validate : Parameter_Update.T := (
          Table_Id => Self.Table_Id,
-         Operation => Validate,
+         Operation => Operation,
          Status => Success,
-         Param => (Header => (Id => 0, Buffer_Length => 0), Buffer => [others => 0]
-      ));
+         Param => Param
+      );
       -- Component index:
       Idx : constant Parameter_Update_T_Provide_Index := Parameter_Update_T_Provide_Index (Component_Id);
    begin
       -- Send the parameter fetch request to the appropriate component:
       Self.Parameter_Update_T_Provide (Idx, Param_Validate);
 
-      -- Make sure the status is successful. If it is not, then produce an event.
-      if Param_Validate.Status /= Success then
-         Self.Event_T_Send_If_Connected (Self.Events.Parameter_Validation_Failed (Self.Sys_Time_T_Get, (
-            Operation => Param_Validate.Operation,
-            Status => Param_Validate.Status,
-            Id => Param_Validate.Param.Header.Id)
-         ));
-      end if;
+      -- Set the return ID, used for events by caller.
+      Return_Id := Param_Validate.Param.Header.Id;
 
       return Param_Validate.Status;
+   end Send_Parameter_Operation;
+
+   -- Helper function to stage a single parameter within a connected component.
+   function Stage_Parameter (Self : in out Instance; Param_Entry : in Parameters_Component_Types.Parameter_Table_Entry; Value : in Parameter_Types.Parameter_Buffer_Type) return Parameter_Enums.Parameter_Update_Status.E is
+      use Parameter_Enums.Parameter_Update_Status;
+      use Parameter_Enums.Parameter_Operation_Type;
+
+      -- Calculate the parameter length:
+      Param_Length : constant Parameter_Types.Parameter_Buffer_Length_Type := Param_Entry.End_Index - Param_Entry.Start_Index + 1;
+      Param : Parameter.T := (Header => (Id => Param_Entry.Id, Buffer_Length => Param_Length), Buffer => [others => 0]);
+   begin
+      -- Copy over value into record:
+      Param.Buffer (Param.Buffer'First .. Param.Buffer'First + Param_Length - 1)
+         := Value (Param.Buffer'First .. Param.Buffer'First + Param_Length - 1);
+
+      declare
+         Return_Id : Parameter_Types.Parameter_Id;
+         Status : constant Parameter_Enums.Parameter_Update_Status.E :=
+            Self.Send_Parameter_Operation (Param_Entry.Component_Id, Stage, Return_Id, Param);
+      begin
+         -- Make sure the status is successful. If it is not, then produce an event.
+         if Status /= Success then
+            Self.Event_T_Send_If_Connected (Self.Events.Parameter_Stage_Failed (Self.Sys_Time_T_Get, (
+               Operation => Stage,
+               Status => Status,
+               Id => Return_Id)
+            ));
+         end if;
+
+         return Status;
+      end;
+   end Stage_Parameter;
+
+   -- Helper function to send a validation for a single components parameters:
+   function Validate_Parameters (Self : in out Instance; Component_Id : in Connector_Types.Connector_Index_Type) return Parameter_Enums.Parameter_Update_Status.E is
+      use Parameter_Enums.Parameter_Update_Status;
+      use Parameter_Enums.Parameter_Operation_Type;
+
+      Return_Id : Parameter_Types.Parameter_Id;
+      Status : constant Parameter_Enums.Parameter_Update_Status.E := Self.Send_Parameter_Operation (Component_Id, Validate, Return_Id);
+   begin
+      -- Make sure the status is successful. If it is not, then produce an event.
+      if Status /= Success then
+         Self.Event_T_Send_If_Connected (Self.Events.Parameter_Validation_Failed (Self.Sys_Time_T_Get, (
+            Operation => Validate,
+            Status => Status,
+            Id => Return_Id
+         )));
+      end if;
+
+      return Status;
    end Validate_Parameters;
 
    -- Helper function to send an update for a single components parameters:
    function Update_Parameters (Self : in out Instance; Component_Id : in Connector_Types.Connector_Index_Type) return Parameter_Enums.Parameter_Update_Status.E is
       use Parameter_Enums.Parameter_Update_Status;
       use Parameter_Enums.Parameter_Operation_Type;
-      -- Create a parameter update record:
-      Param_Update : Parameter_Update.T := (
-         Table_Id => Self.Table_Id,
-         Operation => Update,
-         Status => Success,
-         Param => (Header => (Id => 0, Buffer_Length => 0), Buffer => [others => 0]
-      ));
-      -- Component index:
-      Idx : constant Parameter_Update_T_Provide_Index := Parameter_Update_T_Provide_Index (Component_Id);
-   begin
-      -- Send the parameter fetch request to the appropriate component:
-      Self.Parameter_Update_T_Provide (Idx, Param_Update);
 
+      Return_Id : Parameter_Types.Parameter_Id;
+      Status : constant Parameter_Enums.Parameter_Update_Status.E := Self.Send_Parameter_Operation (Component_Id, Update, Return_Id);
+   begin
       -- Make sure the status is successful. If it is not, then produce an event.
-      if Param_Update.Status /= Success then
+      if Status /= Success then
          Self.Event_T_Send_If_Connected (Self.Events.Parameter_Update_Failed (Self.Sys_Time_T_Get, (
-            Operation => Param_Update.Operation,
-            Status => Param_Update.Status,
-            Id => Param_Update.Param.Header.Id)
-         ));
+            Operation => Update,
+            Status => Status,
+            Id => Return_Id
+         )));
       end if;
 
-      return Param_Update.Status;
+      return Status;
    end Update_Parameters;
 
    -- Helper function to stage all connected component's parameter tables from data within a provided memory region.
