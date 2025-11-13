@@ -535,8 +535,6 @@ package body Component.Parameters.Implementation is
       -- If the status returned is not success then set our status to return to a parameter error.
       procedure Set_Status (Stat : in Parameter_Enums.Parameter_Update_Status.E) is
       begin
-         -- Check the return status. Even if it is bad, we still continue to try to stage
-         -- the rest of the parameters.
          if Stat /= Success then
             Status_To_Return := Parameter_Error;
          end if;
@@ -548,15 +546,23 @@ package body Component.Parameters.Implementation is
       -- Stage all of the parameters:
       Status_To_Return := Self.Stage_Parameter_Table (Region);
 
-      -- OK, now we need to update all the parameters.
+      -- OK, now we need to validate all the parameters.
       for Idx in Self.Connector_Parameter_Update_T_Provide'Range loop
-         Set_Status (Self.Update_Parameters (Component_Id => Idx));
+         Set_Status (Self.Validate_Parameters (Component_Id => Idx));
       end loop;
 
-      -- Send out a new parameter's packet if configured to do so:
-      if Self.Dump_Parameters_On_Change then
-         -- Send the packet:
-         Set_Status (Self.Send_Parameters_Packet);
+      -- OK, now we need to update all the parameters. We only do this step if
+      -- all the validation before was successful.
+      if Status_To_Return = Success then
+         for Idx in Self.Connector_Parameter_Update_T_Provide'Range loop
+            Set_Status (Self.Update_Parameters (Component_Id => Idx));
+         end loop;
+
+         -- Send out a new parameter's packet if configured to do so:
+         if Self.Dump_Parameters_On_Change then
+            -- Send the packet:
+            Set_Status (Self.Send_Parameters_Packet);
+         end if;
       end if;
 
       -- Send info event:

@@ -9,7 +9,7 @@ init:
       type: Parameters_Component_Types.Parameter_Table_Entry_List_Access
       not_null: true
       description: "A pointer to an autocoded list of parameter table entries. This table tells the parameter manager how the parameters are laid out in memory, so that it knows how to construct parameter types to update downstream components."
-    - name: Table_Id 
+    - name: Table_Id
       type: Parameter_Types.Parameter_Table_Id
       description: "Provide a unique parameter table ID for this parameter table. This item is autocoded in the same package as the parameter table entries list."
     - name: Dump_Parameters_On_Change

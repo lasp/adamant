@@ -15,6 +15,8 @@ package Component.Test_Component_1.Implementation is
    -- Public subprograms to help simulate error conditions during unit testing.
    procedure Override_Parameter_Return (Self : in out Instance; Status : in Parameter_Enums.Parameter_Update_Status.E; Length : in Natural; Only_On_Update : in Boolean := False; Only_On_Fetch : in Boolean := False);
    procedure Disable_Parameter_Return_Override (Self : in out Instance);
+   procedure Override_Parameter_U16 (Self : in out Instance; Value : in Packed_U16.U);
+   procedure Override_Parameter_I32 (Self : in out Instance; Value : in Packed_I32.U);
 
 private
 
