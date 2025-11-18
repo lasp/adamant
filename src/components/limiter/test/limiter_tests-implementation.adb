@@ -223,7 +223,9 @@ package body Limiter_Tests.Implementation is
       -- Set the parameter to change sends per tick to zero
       Parameter_Update_Status_Assert.Eq (T.Stage_Parameter (T.Parameters.Max_Sends_Per_Tick ((Value => 0))), Success);
       Parameter_Update_Status_Assert.Eq (T.Fetch_Parameter (T.Parameters.Get_Max_Sends_Per_Tick_Id, Param), Success);
+      Parameter_Assert.Eq (Param, T.Parameters.Max_Sends_Per_Tick ((Value => 1))); -- the default
       Parameter_Update_Status_Assert.Eq (T.Update_Parameters, Success);
+      Parameter_Update_Status_Assert.Eq (T.Fetch_Parameter (T.Parameters.Get_Max_Sends_Per_Tick_Id, Param), Success);
       Parameter_Assert.Eq (Param, T.Parameters.Max_Sends_Per_Tick ((Value => 0)));
 
       -- Send some ticks and data, expect no sends, since sends are disabled.
@@ -247,8 +249,8 @@ package body Limiter_Tests.Implementation is
 
       -- Set the parameter to change sends per tick to two
       Parameter_Update_Status_Assert.Eq (T.Stage_Parameter (T.Parameters.Max_Sends_Per_Tick ((Value => 2))), Success);
-      Parameter_Update_Status_Assert.Eq (T.Fetch_Parameter (T.Parameters.Get_Max_Sends_Per_Tick_Id, Param), Success);
       Parameter_Update_Status_Assert.Eq (T.Update_Parameters, Success);
+      Parameter_Update_Status_Assert.Eq (T.Fetch_Parameter (T.Parameters.Get_Max_Sends_Per_Tick_Id, Param), Success);
       Parameter_Assert.Eq (Param, T.Parameters.Max_Sends_Per_Tick ((Value => 2)));
 
       -- Send tick, expect two items to be sent.
@@ -262,8 +264,8 @@ package body Limiter_Tests.Implementation is
 
       -- Set the parameter to change sends per tick to 1
       Parameter_Update_Status_Assert.Eq (T.Stage_Parameter (T.Parameters.Max_Sends_Per_Tick ((Value => 1))), Success);
-      Parameter_Update_Status_Assert.Eq (T.Fetch_Parameter (T.Parameters.Get_Max_Sends_Per_Tick_Id, Param), Success);
       Parameter_Update_Status_Assert.Eq (T.Update_Parameters, Success);
+      Parameter_Update_Status_Assert.Eq (T.Fetch_Parameter (T.Parameters.Get_Max_Sends_Per_Tick_Id, Param), Success);
       Parameter_Assert.Eq (Param, T.Parameters.Max_Sends_Per_Tick ((Value => 1)));
 
       -- Drain the queue.

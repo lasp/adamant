@@ -303,7 +303,8 @@ class component(base):
                 name="init_Base",
                 description=("This procedure allocates memory for the component base class including the "
                              "internal queue and/or arrayed connectors."),
-                parameters=init_base_parameters,
+                # Sort parameters for deterministic ordering.
+                parameters=sorted(init_base_parameters, key=lambda p: p.name.lower()),
             )
         else:
             self.init_base = None
@@ -367,7 +368,8 @@ class component(base):
                 description=("This procedure sets the component's internal identifier base numbers for "
                              "various entities like commands, events, data products, parameters, "
                              "faults, or packets."),
-                parameters=self.set_id_bases_parameters,
+                # Sort parameters for deterministic ordering.
+                parameters=sorted(self.set_id_bases_parameters, key=lambda p: p.name.lower()),
             )
         else:
             self.set_id_bases = None

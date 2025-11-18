@@ -47,7 +47,7 @@ package body Parameters_Tests.Implementation is
       Self.Tester.Connect;
 
       -- Call component init here.
-      Self.Tester.Component_Instance.Init (Parameter_Table_Entries => Test_Parameter_Table.Parameter_Table_Entries'Access, Dump_Parameters_On_Change => True);
+      Self.Tester.Component_Instance.Init (Parameter_Table_Entries => Test_Parameter_Table.Parameter_Table_Entries'Access, Table_Id => Test_Parameter_Table.Parameter_Table_Id, Dump_Parameters_On_Change => True);
 
       -- Call the component set up method that the assembly would normally call.
       Self.Tester.Component_Instance.Set_Up;
@@ -72,7 +72,7 @@ package body Parameters_Tests.Implementation is
             [(Id => 2, Entry_Id => 0, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Entry_Id => 1, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Entry_Id => 2, Component_Id => 1, Start_Index => 16, End_Index => 17),
              (Id => 3, Entry_Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Entry_Id => 4, Component_Id => 2, Start_Index => 20, End_Index => 23)];
       begin
-         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
+         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, 1, False);
       exception
          -- Not expecting exception to be thrown:
          when others =>
@@ -85,7 +85,7 @@ package body Parameters_Tests.Implementation is
             [(Id => 2, Entry_Id => 0, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Entry_Id => 1, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Entry_Id => 2, Component_Id => 1, Start_Index => 16, End_Index => 17),
              (Id => 3, Entry_Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 2, Entry_Id => 4, Component_Id => 2, Start_Index => 20, End_Index => 23)];
       begin
-         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
+         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, 1, False);
          Assert (False, "Unique Id init failed!");
       exception
          -- Expecting exception to be thrown:
@@ -99,7 +99,7 @@ package body Parameters_Tests.Implementation is
             [(Id => 2, Entry_Id => 0, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Entry_Id => 1, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Entry_Id => 2, Component_Id => 1, Start_Index => 16, End_Index => 17),
              (Id => 3, Entry_Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Entry_Id => 4, Component_Id => 5, Start_Index => 20, End_Index => 23)];
       begin
-         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
+         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, 1, False);
          Assert (False, "Component Id init failed!");
       exception
          -- Expecting exception to be thrown:
@@ -118,7 +118,7 @@ package body Parameters_Tests.Implementation is
          Self.Tester.Connect;
          -- Now run the test, which is to call component init with a custom parameter
          -- table entry list that causes it to access index 4, which is unconnected.
-         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
+         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, 1, False);
          Assert (False, "Unconnected Component Id init failed!");
       exception
          -- Expecting exception to be thrown:
@@ -132,7 +132,7 @@ package body Parameters_Tests.Implementation is
             [(Id => 2, Entry_Id => 0, Component_Id => 1, Start_Index => 2, End_Index => 0), (Id => 5, Entry_Id => 1, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Entry_Id => 2, Component_Id => 1, Start_Index => 16, End_Index => 17),
              (Id => 3, Entry_Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Entry_Id => 4, Component_Id => 2, Start_Index => 20, End_Index => 23)];
       begin
-         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
+         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, 1, False);
          Assert (False, "Bad Layout 2 init failed!");
       exception
          -- Expecting exception to be thrown:
@@ -146,7 +146,7 @@ package body Parameters_Tests.Implementation is
             [(Id => 2, Entry_Id => 0, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Entry_Id => 1, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Entry_Id => 2, Component_Id => 1, Start_Index => 16, End_Index => 17),
              (Id => 3, Entry_Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Entry_Id => 4, Component_Id => 2, Start_Index => 21, End_Index => 23)];
       begin
-         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
+         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, 1, False);
          Assert (False, "Bad Layout 2 init failed!");
       exception
          -- Expecting exception to be thrown:
@@ -161,7 +161,7 @@ package body Parameters_Tests.Implementation is
             [(Id => 2, Entry_Id => 0, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Entry_Id => 2, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Entry_Id => 3, Component_Id => 1, Start_Index => 16, End_Index => 17),
              (Id => 3, Entry_Id => 4, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Entry_Id => 5, Component_Id => 2, Start_Index => 20, End_Index => 23)];
       begin
-         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
+         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, 1, False);
          Assert (False, "Bad Entry_ID order init failed!");
       exception
          -- Expecting exception to be thrown:
@@ -176,7 +176,7 @@ package body Parameters_Tests.Implementation is
             [(Id => 2, Entry_Id => 0, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Entry_Id => 1, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Entry_Id => 2, Component_Id => 1, Start_Index => 16, End_Index => 17),
              (Id => 3, Entry_Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Entry_Id => 4, Component_Id => 10, Start_Index => 20, End_Index => 23)];
       begin
-         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
+         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, 1, False);
          Assert (False, "Component_ID out of range init failed!");
       exception
          -- Expecting exception to be thrown:
@@ -191,7 +191,7 @@ package body Parameters_Tests.Implementation is
             [(Id => 2, Entry_Id => 0, Component_Id => 1, Start_Index => 0, End_Index => 3), (Id => 5, Entry_Id => 1, Component_Id => 3, Start_Index => 4, End_Index => 15), (Id => 1, Entry_Id => 2, Component_Id => 1, Start_Index => 16, End_Index => 17),
              (Id => 3, Entry_Id => 3, Component_Id => 2, Start_Index => 18, End_Index => 19), (Id => 4, Entry_Id => 4, Component_Id => 2, Start_Index => 20, End_Index => 300)];
       begin
-         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, False);
+         T.Component_Instance.Init (Parameter_Table_Entries'Unchecked_Access, 1, False);
          Assert (False, "Parameter too large init failed!");
       exception
          -- Expecting exception to be thrown:
@@ -674,7 +674,6 @@ package body Parameters_Tests.Implementation is
       Table : aliased Basic_Types.Byte_Array (0 .. Test_Parameter_Table_Record.Size_In_Bytes - Crc_16.Crc_16_Type'Length - 1) := Dump (Dump'First + Crc_16.Crc_16_Type'Length .. Dump'Last);
       Crc : constant Crc_16.Crc_16_Type := Crc_16.Compute_Crc_16 (Table (Table'First + Parameter_Table_Header.Crc_Section_Length .. Table'Last));
       Region : constant Memory_Region.T := (Address => Table'Address, Length => Table'Length);
-      Pkt : Packet.T;
    begin
       -- Set the CRC:
       Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => Crc, Version => 1.0));
@@ -687,30 +686,19 @@ package body Parameters_Tests.Implementation is
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       -- Check events:
-      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 9);
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 5);
       Natural_Assert.Eq (T.Parameter_Stage_Failed_History.Get_Count, 2);
       Parameter_Operation_Status_Assert.Eq (T.Parameter_Stage_Failed_History.Get (1), (Operation => Stage, Status => Validation_Error, Id => 2));
       Parameter_Operation_Status_Assert.Eq (T.Parameter_Stage_Failed_History.Get (2), (Operation => Stage, Status => Validation_Error, Id => 1));
-      Natural_Assert.Eq (T.Parameter_Update_Failed_History.Get_Count, 1);
-      Parameter_Operation_Status_Assert.Eq (T.Parameter_Update_Failed_History.Get (1), (Operation => Update, Status => Validation_Error, Id => 0));
-      Natural_Assert.Eq (T.Parameter_Fetch_Failed_History.Get_Count, 2);
-      Parameter_Operation_Status_Assert.Eq (T.Parameter_Fetch_Failed_History.Get (1), (Operation => Fetch, Status => Validation_Error, Id => 2));
-      Parameter_Operation_Status_Assert.Eq (T.Parameter_Fetch_Failed_History.Get (2), (Operation => Fetch, Status => Validation_Error, Id => 1));
-      Natural_Assert.Eq (T.Dumping_Parameters_History.Get_Count, 1);
-      Natural_Assert.Eq (T.Finished_Dumping_Parameters_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Parameter_Validation_Failed_History.Get_Count, 1);
+      Parameter_Operation_Status_Assert.Eq (T.Parameter_Validation_Failed_History.Get (1), (Operation => Validate, Status => Validation_Error, Id => 0));
       Natural_Assert.Eq (T.Starting_Parameter_Table_Update_History.Get_Count, 1);
       Memory_Region_Assert.Eq (T.Starting_Parameter_Table_Update_History.Get (1), Region);
       Natural_Assert.Eq (T.Finished_Parameter_Table_Update_History.Get_Count, 1);
       Parameters_Memory_Region_Release_Assert.Eq (T.Finished_Parameter_Table_Update_History.Get (1), (Region, Parameter_Error));
 
-      -- A packet should have been automatically dumped.
-      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
-
-      -- Check packet length and contents:
-      Pkt := T.Packet_T_Recv_Sync_History.Get (1);
-      Natural_Assert.Eq (Pkt.Header.Buffer_Length, Test_Parameter_Table_Record.Size_In_Bytes);
-      Natural_Assert.Eq (Natural (Pkt.Header.Sequence_Count), 0);
-      Natural_Assert.Eq (Natural (Pkt.Header.Id), 0);
+      -- Failed update should not produce a table dump packet
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
 
       -- Make sure the memory location was released with the proper status:
       Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 1);
@@ -724,13 +712,13 @@ package body Parameters_Tests.Implementation is
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       -- Check events:
-      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 10);
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 6);
       Natural_Assert.Eq (T.Memory_Region_Crc_Invalid_History.Get_Count, 1);
       Invalid_Parameters_Memory_Region_Crc_Assert.Eq
          (T.Memory_Region_Crc_Invalid_History.Get (1), (Parameters_Region => (Region => (Address => Table'Address, Length => Table'Length), Operation => Set), Header => (Crc_Table => [6, 7], Version => 1.0), Computed_Crc => Crc));
 
       -- A packet should not have been automatically dumped.
-      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
 
       -- Make sure the memory location was released with the proper status:
       Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 2);
@@ -923,7 +911,7 @@ package body Parameters_Tests.Implementation is
       Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => Crc, Version => 0.0));
 
       -- Call component with dump_Parameters_On_Change => False
-      T.Component_Instance.Init (Parameter_Table_Entries => Test_Parameter_Table.Parameter_Table_Entries'Access, Dump_Parameters_On_Change => False);
+      T.Component_Instance.Init (Parameter_Table_Entries => Test_Parameter_Table.Parameter_Table_Entries'Access, Table_Id => Test_Parameter_Table.Parameter_Table_Id, Dump_Parameters_On_Change => False);
 
       -- Send a command to update a parameter value:
       pragma Assert (T.Commands.Update_Parameter (Param_Entry, Cmd) = Success);

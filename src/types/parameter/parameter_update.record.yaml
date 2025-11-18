@@ -1,6 +1,10 @@
 ---
 description: A record intended to be used as a provide/modify connector type for updating/fetching parameters.
 fields:
+  - name: Table_Id
+    description: The ID for the table that contains this parameter
+    type: Parameter_Types.Parameter_Table_Id
+    format: U16
   - name: Operation
     description: The parameter operation to perform.
     type: Parameter_Enums.Parameter_Operation_Type.E

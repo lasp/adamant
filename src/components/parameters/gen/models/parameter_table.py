@@ -144,6 +144,7 @@ class parameter_table(assembly_submodel):
         self.description = None
         self.parameter_name_list = []
         self.parameter_table_resolved = False
+        self.table_id = None
         self.parameters = OrderedDict()  # map from name to parameter_table_entry obj
         self.components = (
             OrderedDict()
@@ -522,6 +523,30 @@ class parameter_table(assembly_submodel):
                         f'Each parameter can only be managed by one Parameters component instance.'
                     )
 
+    # set parameter table id here somehow
+    # add ID to autocode output
+
+    def _assign_parameter_table_ids(self):
+
+        # If this table ID has not been assigned, then none of them have for
+        # any of the Parameters components in the assembly. So assign them all.
+        if self.table_id is None:
+            # Collect all parameter_table submodels (including self)
+            parameter_tables = [
+                sub
+                for _, sub in self.assembly.submodels.items()
+                if isinstance(sub, parameter_table)
+            ]
+
+            # Sort deterministically by submodel name
+            parameter_tables.sort(key=lambda s: s.name)
+
+            # Assign unique, deterministic table IDs starting at 1
+            for idx, sub in enumerate(parameter_tables, start=1):
+                sub.table_id = idx
+
+        assert self.table_id is not None and self.table_id >= 1
+
     @throw_exception_with_filename
     def set_assembly(self, assembly):
         """
@@ -536,3 +561,6 @@ class parameter_table(assembly_submodel):
 
         # Check for duplicate parameters across multiple parameter tables
         self._check_duplicate_parameters_across_tables()
+
+        # Assign unique parameter table ID to the table
+        self._assign_parameter_table_ids()

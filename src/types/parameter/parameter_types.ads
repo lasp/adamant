@@ -15,4 +15,15 @@ package Parameter_Types is
    subtype Parameter_Buffer_Type is Basic_Types.Byte_Array (Parameter_Buffer_Index_Type);
    -- Parameter table entry ID:
    type Parameter_Table_Entry_Id is new Natural range 0 .. 65_535;
+
+   -- Table Types
+   -- Id type:
+   type Parameter_Table_Id is new Natural range 0 .. 65_535;
+
+   -- Local parameter meta data types:
+   type Parameter_State is (Staged, Ready_To_Update, Updated);
+   type Parameter_Status is record
+      State : Parameter_State;
+      Staged_By : Parameter_Table_Id;
+   end record;
 end Parameter_Types;

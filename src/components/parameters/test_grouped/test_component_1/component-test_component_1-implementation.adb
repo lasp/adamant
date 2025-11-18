@@ -13,6 +13,16 @@ package body Component.Test_Component_1.Implementation is
       Self.Only_On_Fetch := Only_On_Fetch;
    end Override_Parameter_Return;
 
+   procedure Override_Parameter_U16 (Self : in out Instance; Value : in Packed_U16.U) is
+   begin
+      Self.Parameter_U16 := Value;
+   end Override_Parameter_U16;
+
+   procedure Override_Parameter_I32 (Self : in out Instance; Value : in Packed_I32.U) is
+   begin
+      Self.Parameter_I32 := Value;
+   end Override_Parameter_I32;
+
    procedure Disable_Parameter_Return_Override (Self : in out Instance) is
    begin
       Self.Do_Override := False;
