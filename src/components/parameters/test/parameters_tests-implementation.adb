@@ -419,6 +419,16 @@ package body Parameters_Tests.Implementation is
       -- Check packet contents:
       Byte_Array_Assert.Eq (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1), Expected_Packet_Data);
 
+      -- Check data products:
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Table_Status_History.Get_Count, 1);
+      Packed_Table_Operation_Status_Assert.Eq (T.Table_Status_History.Get (1), (
+         Active_Table_Version_Number => 1.0,
+         Active_Table_Update_Time => 0,
+         Active_Table_Crc => Crc,
+         Last_Table_Operation_Status => Success
+      ));
+
       -- Make sure the memory location was released with the proper status:
       Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 1);
       Parameters_Memory_Region_Release_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get (1), (Region, Success));
@@ -453,6 +463,16 @@ package body Parameters_Tests.Implementation is
 
       -- A packet should not have been automatically dumped.
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
+
+      -- Check data products:
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Table_Status_History.Get_Count, 1);
+      Packed_Table_Operation_Status_Assert.Eq (T.Table_Status_History.Get (1), (
+         Active_Table_Version_Number => 0.0,
+         Active_Table_Update_Time => 0,
+         Active_Table_Crc => [0, 0],
+         Last_Table_Operation_Status => Success
+      ));
 
       -- Make sure the memory location was released with the proper status:
       Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 1);
@@ -489,6 +509,9 @@ package body Parameters_Tests.Implementation is
 
       -- A packet should not have been automatically dumped.
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
+
+      -- Get operation should not send a data product:
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 0);
 
       -- Make sure the memory location was released with the proper status:
       Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 1);
@@ -718,6 +741,16 @@ package body Parameters_Tests.Implementation is
       -- Failed update should not produce a table dump packet
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
 
+      -- Check data products:
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Table_Status_History.Get_Count, 1);
+      Packed_Table_Operation_Status_Assert.Eq (T.Table_Status_History.Get (1), (
+         Active_Table_Version_Number => 0.0,
+         Active_Table_Update_Time => 0,
+         Active_Table_Crc => [0, 0],
+         Last_Table_Operation_Status => Parameter_Error
+      ));
+
       -- Make sure the memory location was released with the proper status:
       Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 1);
       Parameters_Memory_Region_Release_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get (1), (Region, Parameter_Error));
@@ -737,6 +770,16 @@ package body Parameters_Tests.Implementation is
 
       -- A packet should not have been automatically dumped.
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
+
+      -- Check data products (second one after CRC error):
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Table_Status_History.Get_Count, 2);
+      Packed_Table_Operation_Status_Assert.Eq (T.Table_Status_History.Get (2), (
+         Active_Table_Version_Number => 0.0,
+         Active_Table_Update_Time => 0,
+         Active_Table_Crc => [0, 0],
+         Last_Table_Operation_Status => Crc_Error
+      ));
 
       -- Make sure the memory location was released with the proper status:
       Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 2);
@@ -780,6 +823,16 @@ package body Parameters_Tests.Implementation is
       Natural_Assert.Eq (T.Finished_Parameter_Table_Validate_History.Get_Count, 1);
       Parameters_Memory_Region_Release_Assert.Eq (T.Finished_Parameter_Table_Validate_History.Get (1), (Region, Parameter_Error));
 
+      -- Check data products:
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Table_Status_History.Get_Count, 1);
+      Packed_Table_Operation_Status_Assert.Eq (T.Table_Status_History.Get (1), (
+         Active_Table_Version_Number => 0.0,
+         Active_Table_Update_Time => 0,
+         Active_Table_Crc => [0, 0],
+         Last_Table_Operation_Status => Parameter_Error
+      ));
+
       -- Make sure the memory location was released with the proper status:
       Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 1);
       Parameters_Memory_Region_Release_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get (1), (Region, Parameter_Error));
@@ -803,6 +856,16 @@ package body Parameters_Tests.Implementation is
 
       -- A packet should not have been automatically dumped.
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
+
+      -- Check data products (second one after CRC error):
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Table_Status_History.Get_Count, 2);
+      Packed_Table_Operation_Status_Assert.Eq (T.Table_Status_History.Get (2), (
+         Active_Table_Version_Number => 0.0,
+         Active_Table_Update_Time => 0,
+         Active_Table_Crc => [0, 0],
+         Last_Table_Operation_Status => Crc_Error
+      ));
 
       -- Make sure the memory location was released with the proper status:
       Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 2);
@@ -850,6 +913,9 @@ package body Parameters_Tests.Implementation is
       -- A packet should not have been automatically dumped.
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
 
+      -- Get operation should not send a data product even on error:
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 0);
+
       -- Make sure the memory location was released with the proper status:
       Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 1);
       Parameters_Memory_Region_Release_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get (1), (Region, Parameter_Error));
@@ -877,6 +943,9 @@ package body Parameters_Tests.Implementation is
 
       -- A packet should not have been automatically dumped.
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
+
+      -- Get operations should not send data products even on error:
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 0);
 
       -- Make sure the memory location was released with the proper status:
       Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 2);
