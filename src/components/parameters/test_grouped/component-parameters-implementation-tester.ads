@@ -4,13 +4,13 @@
 
 -- Includes:
 with Component.Parameters_Reciprocal;
-with Sys_Time;
 with Printable_History;
 with Parameter_Update.Representation;
 with Command_Response.Representation;
 with Parameters_Memory_Region_Release.Representation;
 with Packet.Representation;
 with Event.Representation;
+with Data_Product.Representation;
 with Sys_Time.Representation;
 with Event;
 with Parameter_Table_Entry_Id.Representation;
@@ -24,6 +24,8 @@ with Memory_Region.Representation;
 with Invalid_Command_Info.Representation;
 with Command_Header.Representation;
 with Parameters_Memory_Region.Representation;
+with Data_Product;
+with Packed_Table_Operation_Status.Representation;
 with Component.Test_Component_1.Implementation;
 with Component.Test_Component_2.Implementation;
 
@@ -46,6 +48,7 @@ package Component.Parameters.Implementation.Tester is
    package Parameters_Memory_Region_Release_T_Recv_Sync_History_Package is new Printable_History (Parameters_Memory_Region_Release.T, Parameters_Memory_Region_Release.Representation.Image);
    package Packet_T_Recv_Sync_History_Package is new Printable_History (Packet.T, Packet.Representation.Image);
    package Event_T_Recv_Sync_History_Package is new Printable_History (Event.T, Event.Representation.Image);
+   package Data_Product_T_Recv_Sync_History_Package is new Printable_History (Data_Product.T, Data_Product.Representation.Image);
    package Sys_Time_T_Return_History_Package is new Printable_History (Sys_Time.T, Sys_Time.Representation.Image);
 
    -- Event history packages:
@@ -72,6 +75,9 @@ package Component.Parameters.Implementation.Tester is
    package Command_Dropped_History_Package is new Printable_History (Command_Header.T, Command_Header.Representation.Image);
    package Memory_Region_Dropped_History_Package is new Printable_History (Parameters_Memory_Region.T, Parameters_Memory_Region.Representation.Image);
 
+   -- Data product history packages:
+   package Table_Status_History_Package is new Printable_History (Packed_Table_Operation_Status.T, Packed_Table_Operation_Status.Representation.Image);
+
    -- Packet history packages:
    package Active_Parameters_History_Package is new Printable_History (Packet.T, Packet.Representation.Image);
 
@@ -85,6 +91,7 @@ package Component.Parameters.Implementation.Tester is
       Parameters_Memory_Region_Release_T_Recv_Sync_History : Parameters_Memory_Region_Release_T_Recv_Sync_History_Package.Instance;
       Packet_T_Recv_Sync_History : Packet_T_Recv_Sync_History_Package.Instance;
       Event_T_Recv_Sync_History : Event_T_Recv_Sync_History_Package.Instance;
+      Data_Product_T_Recv_Sync_History : Data_Product_T_Recv_Sync_History_Package.Instance;
       Sys_Time_T_Return_History : Sys_Time_T_Return_History_Package.Instance;
       -- Event histories:
       Parameter_Update_Success_History : Parameter_Update_Success_History_Package.Instance;
@@ -109,6 +116,8 @@ package Component.Parameters.Implementation.Tester is
       Invalid_Command_Received_History : Invalid_Command_Received_History_Package.Instance;
       Command_Dropped_History : Command_Dropped_History_Package.Instance;
       Memory_Region_Dropped_History : Memory_Region_Dropped_History_Package.Instance;
+      -- Data product histories:
+      Table_Status_History : Table_Status_History_Package.Instance;
       -- Packet histories:
       Active_Parameters_History : Active_Parameters_History_Package.Instance;
       -- Booleans to control assertion if message is dropped on async queue:
@@ -131,7 +140,7 @@ package Component.Parameters.Implementation.Tester is
    ---------------------------------------
    -- Initialize component heap variables:
    ---------------------------------------
-   procedure Init_Base (Self : in out Instance; Queue_Size : in Natural; Parameter_Update_T_Provide_Count : in Connector_Count_Type);
+   procedure Init_Base (Self : in out Instance; Parameter_Update_T_Provide_Count : in Connector_Count_Type; Queue_Size : in Natural);
    procedure Final_Base (Self : in out Instance);
 
    ---------------------------------------
@@ -157,6 +166,8 @@ package Component.Parameters.Implementation.Tester is
    overriding procedure Packet_T_Recv_Sync (Self : in out Instance; Arg : in Packet.T);
    -- Events are sent out of this connector.
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T);
+   -- Data products are sent out of this connector.
+   overriding procedure Data_Product_T_Recv_Sync (Self : in out Instance; Arg : in Data_Product.T);
    -- The system time is retrieved via this connector.
    overriding function Sys_Time_T_Return (Self : in out Instance) return Sys_Time.T;
 
@@ -225,6 +236,15 @@ package Component.Parameters.Implementation.Tester is
    overriding procedure Command_Dropped (Self : in out Instance; Arg : in Command_Header.T);
    -- A memory region was dropped due to a full queue.
    overriding procedure Memory_Region_Dropped (Self : in out Instance; Arg : in Parameters_Memory_Region.T);
+
+   -----------------------------------------------
+   -- Data product handler primitives:
+   -----------------------------------------------
+   -- Description:
+   --    Data products for the Parameters component
+   -- The status of the last parameter table operation including version, update
+   -- time, CRC, and operation status.
+   overriding procedure Table_Status (Self : in out Instance; Arg : in Packed_Table_Operation_Status.T);
 
    -----------------------------------------------
    -- Packet handler primitives:

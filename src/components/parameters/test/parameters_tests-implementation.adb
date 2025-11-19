@@ -30,6 +30,7 @@ with Invalid_Parameters_Memory_Region_Crc.Assertion; use Invalid_Parameters_Memo
 with Parameter_Types;
 with Parameter_Table_Header;
 with Crc_16;
+with Packed_Table_Operation_Status.Assertion; use Packed_Table_Operation_Status.Assertion;
 with System.Storage_Elements; use System.Storage_Elements;
 
 package body Parameters_Tests.Implementation is
@@ -48,9 +49,6 @@ package body Parameters_Tests.Implementation is
 
       -- Call component init here.
       Self.Tester.Component_Instance.Init (Parameter_Table_Entries => Test_Parameter_Table.Parameter_Table_Entries'Access, Table_Id => Test_Parameter_Table.Parameter_Table_Id, Dump_Parameters_On_Change => True);
-
-      -- Call the component set up method that the assembly would normally call.
-      Self.Tester.Component_Instance.Set_Up;
    end Set_Up_Test;
 
    overriding procedure Tear_Down_Test (Self : in out Instance) is
@@ -198,6 +196,25 @@ package body Parameters_Tests.Implementation is
          when others =>
             null;
       end Init_Parameter_Too_Large;
+
+      procedure Init_Set_Up_Data_Product is
+         use Parameter_Enums.Parameter_Table_Update_Status;
+      begin
+         -- Call Set_Up on the component after a good initialization.
+         -- This should produce a data product with initialization values.
+         T.Component_Instance.Set_Up;
+
+         -- Check that exactly one data product was sent:
+         Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
+
+         -- Check that the data product contains the expected initialization values:
+         Packed_Table_Operation_Status_Assert.Eq (T.Table_Status_History.Get (1), (
+            Active_Table_Version_Number => 0.0,
+            Active_Table_Update_Time => 0,
+            Active_Table_Crc => [0, 0],
+            Last_Table_Operation_Status => Uninitialized
+         ));
+      end Init_Set_Up_Data_Product;
    begin
       -- Test different start-up scenarios:
       Init_Nominal;
@@ -209,6 +226,7 @@ package body Parameters_Tests.Implementation is
       Init_Bad_Entry_Id_Order;
       Init_Component_Id_Out_Of_Range;
       Init_Parameter_Too_Large;
+      Init_Set_Up_Data_Product;
    end Test_Init;
 
    overriding procedure Test_Nominal_Dump_Parameters (Self : in out Instance) is

@@ -10,10 +10,10 @@ package body Component.Parameters.Implementation.Tester is
    ---------------------------------------
    -- Initialize heap variables:
    ---------------------------------------
-   procedure Init_Base (Self : in out Instance; Queue_Size : in Natural; Parameter_Update_T_Provide_Count : in Connector_Count_Type) is
+   procedure Init_Base (Self : in out Instance; Parameter_Update_T_Provide_Count : in Connector_Count_Type; Queue_Size : in Natural) is
    begin
       -- Initialize component heap:
-      Self.Component_Instance.Init_Base (Queue_Size => Queue_Size, Parameter_Update_T_Provide_Count => Parameter_Update_T_Provide_Count);
+      Self.Component_Instance.Init_Base (Parameter_Update_T_Provide_Count => Parameter_Update_T_Provide_Count, Queue_Size => Queue_Size);
 
       -- Initialize tester heap:
       -- Connector histories:
@@ -22,6 +22,7 @@ package body Component.Parameters.Implementation.Tester is
       Self.Parameters_Memory_Region_Release_T_Recv_Sync_History.Init (Depth => 100);
       Self.Packet_T_Recv_Sync_History.Init (Depth => 100);
       Self.Event_T_Recv_Sync_History.Init (Depth => 100);
+      Self.Data_Product_T_Recv_Sync_History.Init (Depth => 100);
       Self.Sys_Time_T_Return_History.Init (Depth => 100);
       -- Event histories:
       Self.Parameter_Update_Success_History.Init (Depth => 100);
@@ -46,6 +47,8 @@ package body Component.Parameters.Implementation.Tester is
       Self.Invalid_Command_Received_History.Init (Depth => 100);
       Self.Command_Dropped_History.Init (Depth => 100);
       Self.Memory_Region_Dropped_History.Init (Depth => 100);
+      -- Data product histories:
+      Self.Table_Status_History.Init (Depth => 100);
       -- Packet histories:
       Self.Active_Parameters_History.Init (Depth => 100);
 
@@ -64,6 +67,7 @@ package body Component.Parameters.Implementation.Tester is
       Self.Parameters_Memory_Region_Release_T_Recv_Sync_History.Destroy;
       Self.Packet_T_Recv_Sync_History.Destroy;
       Self.Event_T_Recv_Sync_History.Destroy;
+      Self.Data_Product_T_Recv_Sync_History.Destroy;
       Self.Sys_Time_T_Return_History.Destroy;
       -- Event histories:
       Self.Parameter_Update_Success_History.Destroy;
@@ -88,6 +92,8 @@ package body Component.Parameters.Implementation.Tester is
       Self.Invalid_Command_Received_History.Destroy;
       Self.Command_Dropped_History.Destroy;
       Self.Memory_Region_Dropped_History.Destroy;
+      -- Data product histories:
+      Self.Table_Status_History.Destroy;
       -- Packet histories:
       Self.Active_Parameters_History.Destroy;
 
@@ -108,6 +114,7 @@ package body Component.Parameters.Implementation.Tester is
       Self.Component_Instance.Attach_Parameters_Memory_Region_Release_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Parameters_Memory_Region_Release_T_Recv_Sync_Access);
       Self.Component_Instance.Attach_Packet_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Packet_T_Recv_Sync_Access);
       Self.Component_Instance.Attach_Event_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Event_T_Recv_Sync_Access);
+      Self.Component_Instance.Attach_Data_Product_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Data_Product_T_Recv_Sync_Access);
       Self.Component_Instance.Attach_Sys_Time_T_Get (To_Component => Self'Unchecked_Access, Hook => Self.Sys_Time_T_Return_Access);
       Self.Attach_Command_T_Send (To_Component => Self.Component_Instance'Unchecked_Access, Hook => Self.Component_Instance.Command_T_Recv_Async_Access);
       Self.Attach_Parameters_Memory_Region_T_Send (To_Component => Self.Component_Instance'Unchecked_Access, Hook => Self.Component_Instance.Parameters_Memory_Region_T_Recv_Async_Access);
@@ -159,6 +166,15 @@ package body Component.Parameters.Implementation.Tester is
       -- Dispatch the event to the correct handler:
       Self.Dispatch_Event (Arg);
    end Event_T_Recv_Sync;
+
+   -- Data products are sent out of this connector.
+   overriding procedure Data_Product_T_Recv_Sync (Self : in out Instance; Arg : in Data_Product.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Data_Product_T_Recv_Sync_History.Push (Arg);
+      -- Dispatch the data product to the correct handler:
+      Self.Dispatch_Data_Product (Arg);
+   end Data_Product_T_Recv_Sync;
 
    -- The system time is retrieved via this connector.
    overriding function Sys_Time_T_Return (Self : in out Instance) return Sys_Time.T is
@@ -364,6 +380,19 @@ package body Component.Parameters.Implementation.Tester is
       -- Push the argument onto the test history for looking at later:
       Self.Memory_Region_Dropped_History.Push (Arg);
    end Memory_Region_Dropped;
+
+   -----------------------------------------------
+   -- Data product handler primitive:
+   -----------------------------------------------
+   -- Description:
+   --    Data products for the Parameters component
+   -- The status of the last parameter table operation including version, update
+   -- time, CRC, and operation status.
+   overriding procedure Table_Status (Self : in out Instance; Arg : in Packed_Table_Operation_Status.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Table_Status_History.Push (Arg);
+   end Table_Status;
 
    -----------------------------------------------
    -- Packet handler primitive:
