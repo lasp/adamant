@@ -1,0 +1,6 @@
+---
+description: Data products for the Parameters component
+data_products:
+  - name: Table_Status
+    description: The status of the last parameter table operation including version, update time, CRC, and operation status.
+    type: Packed_Table_Operation_Status.T

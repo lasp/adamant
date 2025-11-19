@@ -1,0 +1,21 @@
+---
+description: A packed record containing the parameter table operation status information.
+fields:
+  - name: Active_Table_Version_Number
+    description: The version number of the active parameter table.
+    type: Short_Float
+    format: F32
+  - name: Active_Table_Update_Time
+    description: The timestamp (in seconds) of the last parameter table operation.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Active_Table_Crc
+    description: The CRC of the active parameter table.
+    type: Crc_16.Crc_16_Type
+    format: U16
+    skip_validation: True
+    byte_image: True
+  - name: Last_Table_Operation_Status
+    description: The status of the last parameter table operation.
+    type: Parameter_Enums.Parameter_Table_Update_Status.E
+    format: E8
