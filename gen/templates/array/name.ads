@@ -7,6 +7,9 @@
 -- Standard Includes:
 with System;
 with Serializer;
+{% if length and (size % 32) == 0 %}
+with Word_Serializer;
+{% endif %}
 {% if not element.is_packed_type %}
 with Basic_Types;
 {% endif %}
@@ -62,6 +65,11 @@ package {{ name }} is
 {% endif %}
 {% if length %}
    Size_In_Bytes : constant Positive := (Size - 1) / 8 + 1;
+{% if (size % 32) == 0 %}
+
+   -- Packed type size in words (32-bit units).
+   Size_In_Words : constant Positive := Size / 32;
+{% endif %}
 {% endif %}
 
    -- Array index type:
@@ -426,6 +434,16 @@ package {{ name }} is
 {% endif %}
 {% if endianness in ["either", "little"] %}
    package Serialization_Le is new Serializer (T_Le);
+{% endif %}
+{% if length and (size % 32) == 0 %}
+
+   -- Word serializing functions for entire packed array:
+{% if endianness in ["either", "big"] %}
+   package Word_Serialization is new Word_Serializer (T);
+{% endif %}
+{% if endianness in ["either", "little"] %}
+   package Word_Serialization_Le is new Word_Serializer (T_Le);
+{% endif %}
 {% endif %}
 
 {% if element.is_packed_type %}

@@ -10,6 +10,9 @@ with System;
 with Serializer_Types; use Serializer_Types;
 {% if not variable_length %}
 with Serializer;
+{% if (size % 32) == 0 %}
+with Word_Serializer;
+{% endif %}
 {% endif %}
 {% if variable_length %}
 with Variable_Serializer;
@@ -48,6 +51,11 @@ package {{ name }} is
 
    -- Packed type size rounded up to nearest byte.
    Size_In_Bytes : constant Positive := (Size - 1) / Basic_Types.Byte'Object_Size + 1;
+{% if (size % 32) == 0 %}
+
+   -- Packed type size in words (32-bit units).
+   Size_In_Words : constant Positive := Size / 32;
+{% endif %}
 
    -- The total number of fields contained in the packed record, this includes
    -- any fields of packed records included directly as a member in this
@@ -469,6 +477,16 @@ package {{ name }} is
 {% endif %}
 {% if endianness in ["either", "little"] %}
    package Serialization_Le is new Serializer (T_Le);
+{% endif %}
+{% if (size % 32) == 0 %}
+
+   -- Word serializing functions for entire record:
+{% if endianness in ["either", "big"] %}
+   package Word_Serialization is new Word_Serializer (T);
+{% endif %}
+{% if endianness in ["either", "little"] %}
+   package Word_Serialization_Le is new Word_Serializer (T_Le);
+{% endif %}
 {% endif %}
 
 {% if endianness in ["either", "big"] %}
