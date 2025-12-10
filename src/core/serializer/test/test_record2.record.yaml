@@ -1,0 +1,22 @@
+---
+description: A 128-bit (4 word) record for testing the word serializer.
+preamble: |
+  subtype Status_Type is Natural range 0 .. 255;
+  subtype Id_Type is Natural range 0 .. 65535;
+fields:
+  - name: Id
+    description: The identifier
+    type: Id_Type
+    format: U16
+  - name: Status
+    description: The status code
+    type: Status_Type
+    format: U16
+  - name: Value
+    description: The main value
+    type: Natural
+    format: U32
+  - name: Counter
+    description: A 64-bit counter
+    type: Natural
+    format: U64

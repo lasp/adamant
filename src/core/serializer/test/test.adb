@@ -4,9 +4,11 @@ pragma Profile (Ravenscar);
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 with Test_Record.Representation; use Test_Record;
+with Test_Record2.Representation; use Test_Record2;
 with Basic_Types; use Basic_Types;
 with Ada.Streams.Stream_IO;
 with Serializer;
+with Word_Serializer;
 with Stream_Serializer;
 with System.Address_Image;
 with Command;
@@ -64,6 +66,73 @@ procedure Test is
       end loop;
       pragma Assert (Mypackedrecord2 = Mypackedrecord);
    end Test_Serializer;
+
+   procedure Test_Word_Serializer is
+      package Mywordserializer is new Word_Serializer (Test_Record2.T);
+      Myrecord : constant Test_Record2.U := (Id => 42, Status => 7, Value => 12345, Counter => 98765);
+      Myrecordcopy : Test_Record2.U := (Id => 0, Status => 0, Value => 0, Counter => 0);
+      Mypackedrecord : Test_Record2.T;
+      Mypackedrecordcopy : Test_Record2.T;
+      Mywordarray : Mywordserializer.Word_Array;
+      Mywordarraycopy : Mywordserializer.Word_Array;
+      Mywordarray_Le : Mywordserializer.Word_Array_Le;
+      Mywordarray_Le_Copy : Mywordserializer.Word_Array_Le;
+      Mywordarray_Be : Mywordserializer.Word_Array_Be;
+      Mywordarray_Be_Copy : Mywordserializer.Word_Array_Be;
+   begin
+      Put ("Packing record... ");
+      Mypackedrecord := Test_Record2.T (Myrecord);
+      Put_Line ("passed.");
+
+      Put ("Serialized length in words: ");
+      Put (Mywordserializer.Serialized_Length);
+      New_Line;
+      Put ("Serialized length in bytes: ");
+      Put (Mywordserializer.Serialized_Length_In_Bytes);
+      New_Line;
+
+      Put ("Converting record to word array (native)... ");
+      Mywordarray := Mywordserializer.To_Word_Array (Mypackedrecord);
+      Put_Line ("passed.");
+
+      Put ("Copying word array... ");
+      Mywordarraycopy := Mywordarray;
+      pragma Assert (Mywordarraycopy = Mywordarray);
+      Put_Line ("passed.");
+
+      Put ("Converting word array to record... ");
+      Mypackedrecordcopy := Mywordserializer.From_Word_Array (Mywordarraycopy);
+      pragma Assert (Mypackedrecordcopy = Mypackedrecord);
+      Put_Line ("passed.");
+      Put_Line ("Record: " & Test_Record2.Representation.Image (Mypackedrecordcopy));
+
+      Put ("Unpacking record... ");
+      Myrecordcopy := Test_Record2.U (Mypackedrecordcopy);
+      pragma Assert (Myrecordcopy = Myrecord);
+      Put_Line ("passed.");
+
+      Put ("Converting record to word array (little endian)... ");
+      Mywordarray_Le := Mywordserializer.To_Word_Array_Le (Mypackedrecord);
+      Put_Line ("passed.");
+
+      Put ("Converting word array (LE) to record... ");
+      Mywordarray_Le_Copy := Mywordarray_Le;
+      Mypackedrecordcopy := Mywordserializer.From_Word_Array_Le (Mywordarray_Le_Copy);
+      pragma Assert (Mypackedrecordcopy = Mypackedrecord);
+      Put_Line ("passed.");
+      Put_Line ("Record: " & Test_Record2.Representation.Image (Mypackedrecordcopy));
+
+      Put ("Converting record to word array (big endian)... ");
+      Mywordarray_Be := Mywordserializer.To_Word_Array_Be (Mypackedrecord);
+      Put_Line ("passed.");
+
+      Put ("Converting word array (BE) to record... ");
+      Mywordarray_Be_Copy := Mywordarray_Be;
+      Mypackedrecordcopy := Mywordserializer.From_Word_Array_Be (Mywordarray_Be_Copy);
+      pragma Assert (Mypackedrecordcopy = Mypackedrecord);
+      Put_Line ("passed.");
+      Put_Line ("Record: " & Test_Record2.Representation.Image (Mypackedrecordcopy));
+   end Test_Word_Serializer;
 
    procedure Test_Stream_Serializer is
       package Mystreamserializer is new Stream_Serializer (Test_Record.T);
@@ -213,6 +282,7 @@ procedure Test is
 -- Run all tests:
 begin
    Test_Serializer;
+   Test_Word_Serializer;
    Test_Stream_Serializer;
    Test_Single_Element_Serialization;
    Test_Errant_Serialization;
