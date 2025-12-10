@@ -37,6 +37,32 @@ with {{ include }};
 {{ printMultiLine(description, '-- ') }}
 {% endif %}
 package {{ name }} is
+
+   --
+   --  Packed record type trees:
+{% if endianness in ["either", "big"] %}
+   --
+   --  U (unpacked)
+   --  |
+   --  v
+   --  T (BE packed)
+   --  |
+   --  v
+   --  Volatile_T, Atomic_T, Register_T
+   --    ^ by-reference BE packed
+{% endif %}
+{% if endianness in ["either", "big"] %}
+   --
+   --  U (unpacked)
+   --  |
+   --  v
+   --  T_Le (LE packed)
+   --  |
+   --  v
+   --  Volatile_T_Le, Atomic_T_Le, Register_T_Le
+   --    ^ by-reference LE packed
+{% endif %}
+   --
 {% if preamble %}
 
    -- Preamble code:

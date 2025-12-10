@@ -5,6 +5,7 @@
 --------------------------------------------------------------------------------
 
 package body {{ name }} is
+{% if length %}
 
 {% if endianness in ["either", "big"] %}
    function Pack (Src : in U) return T is
@@ -63,5 +64,66 @@ package body {{ name }} is
       return Pack (Unpacked);
    end Swap_Endianness;
 
+{% endif %}
+{% else %}
+
+{% if endianness in ["either", "big"] %}
+   function Pack (Src : in Unconstrained) return T_Unconstrained is
+   begin
+{% if element.is_packed_type %}
+      return [for J in Src'Range => {{ element.type_package }}.Pack (Src (J))];
+{% else %}
+      return T_Unconstrained (Src);
+{% endif %}
+   end Pack;
+
+{% endif %}
+{% if endianness in ["either", "little"] %}
+   function Pack (Src : in Unconstrained) return T_Le_Unconstrained is
+   begin
+{% if element.is_packed_type %}
+      return [for J in Src'Range => {{ element.type_package }}.Pack (Src (J))];
+{% else %}
+      return T_Le_Unconstrained (Src);
+{% endif %}
+   end Pack;
+
+{% endif %}
+{% if endianness in ["either", "big"] %}
+   function Unpack (Src : in T_Unconstrained) return Unconstrained is
+   begin
+{% if element.is_packed_type %}
+      return [for J in Src'Range => {{ element.type_package }}.Unpack (Src (J))];
+{% else %}
+      return Unconstrained (Src);
+{% endif %}
+   end Unpack;
+
+{% endif %}
+{% if endianness in ["either", "little"] %}
+   function Unpack (Src : in T_Le_Unconstrained) return Unconstrained is
+   begin
+{% if element.is_packed_type %}
+      return [for J in Src'Range => {{ element.type_package }}.Unpack (Src (J))];
+{% else %}
+      return Unconstrained (Src);
+{% endif %}
+   end Unpack;
+
+{% endif %}
+{% if endianness in ["either"] %}
+   function Swap_Endianness (Src : in T_Unconstrained) return T_Le_Unconstrained is
+      Unpacked : constant Unconstrained := Unpack (Src);
+   begin
+      return Pack (Unpacked);
+   end Swap_Endianness;
+
+   function Swap_Endianness (Src : in T_Le_Unconstrained) return T_Unconstrained is
+      Unpacked : constant Unconstrained := Unpack (Src);
+   begin
+      return Pack (Unpacked);
+   end Swap_Endianness;
+
+{% endif %}
 {% endif %}
 end {{ name }};

@@ -38,7 +38,20 @@ class array(type):
         super(array, self)._load()
 
         # Extract length and set appropriate fields:
-        self.length = self.data["length"]
+        self.length = self.data.get("length", None)
+
+        # If length is not specified, only unconstrained array types will be generated.
+        # In this case, element size MUST be a multiple of 8 bits (byte-aligned) since
+        # unconstrained arrays must align with Storage_Element size.
+        if self.length is None and self.element.size % 8 != 0:
+            raise ModelException(
+                "Packed array '"
+                + self.name
+                + "' without a specified length must have elements with size that is a "
+                + "multiple of 8-bits (byte-aligned). Current element size is: "
+                + str(self.element.size)
+                + " bits. Unconstrained arrays cannot have non-byte-aligned elements."
+            )
 
         # If element is arrayed then the array components must be <= 8 bits otherwise
         # endianness cannot be guaranteed. In this case, the user should be using a
@@ -63,50 +76,55 @@ class array(type):
             )
 
         # Calculate the number of fields in the array:
-        if self.element.is_packed_type:
-            self.num_fields = self.element.type_model.num_fields * self.length
-            self.nested = True
+        if self.length is not None:
+            if self.element.is_packed_type:
+                self.num_fields = self.element.type_model.num_fields * self.length
+                self.nested = True
 
-            if (
-                self.element.type.endswith(".T")
-                or self.element.type.endswith(".Volatile_T")
-                or self.element.type.endswith(".Atomic_T")
-                or self.element.type.endswith(".Register_T")
-            ):
-                self.endianness = "big"
-            elif (
-                self.element.type.endswith(".T_Le")
-                or self.element.type.endswith(".Volatile_T_Le")
-                or self.element.type.endswith(".Atomic_T_Le")
-                or self.element.type.endswith(".Register_T_Le")
-            ):
-                self.endianness = "little"
+                if (
+                    self.element.type.endswith(".T")
+                    or self.element.type.endswith(".Volatile_T")
+                    or self.element.type.endswith(".Atomic_T")
+                    or self.element.type.endswith(".Register_T")
+                ):
+                    self.endianness = "big"
+                elif (
+                    self.element.type.endswith(".T_Le")
+                    or self.element.type.endswith(".Volatile_T_Le")
+                    or self.element.type.endswith(".Atomic_T_Le")
+                    or self.element.type.endswith(".Register_T_Le")
+                ):
+                    self.endianness = "little"
+                else:
+                    raise ModelException(
+                        "Array '"
+                        + self.name
+                        + '" cannot specify element "'
+                        + self.element.name
+                        + "' of type '"
+                        + self.element.type
+                        + "'. Nested packed types must either be '.*T' or '.*T_Le' types."
+                    )
             else:
+                self.num_fields = self.length
+
+            # Calculate total size:
+            self.size = self.element.size * self.length
+
+            # Check size and make sure it is byte aligned.
+            if self.size % 8 != 0:
                 raise ModelException(
-                    "Array '"
+                    "Packed array '"
                     + self.name
-                    + '" cannot specify element "'
-                    + self.element.name
-                    + "' of type '"
-                    + self.element.type
-                    + "'. Nested packed types must either be '.*T' or '.*T_Le' types."
+                    + "' must have size that is a multiple of 8-bits. Its current size is: "
+                    + str(self.size)
+                    + ". Packed arrays may have elements that are not byte aligned, but the "
+                    + "total packed array itself must be byte aligned."
                 )
         else:
-            self.num_fields = self.length
-
-        # Calculate total size:
-        self.size = self.element.size * self.length
-
-        # Check size and make sure it is byte aligned.
-        if self.size % 8 != 0:
-            raise ModelException(
-                "Packed array '"
-                + self.name
-                + "' must have size that is a multiple of 8-bits. Its current size is: "
-                + str(self.size)
-                + ". Packed arrays may have elements that are not byte aligned, but the "
-                + "total packed array itself must be byte aligned."
-            )
+            # For unconstrained arrays (no length specified), we can't calculate size or num_fields
+            self.num_fields = None
+            self.size = None
 
         # Make sure the array does not contain a variable length type:
         if self.variable_length:
@@ -120,14 +138,15 @@ class array(type):
         # Create a fields attribute similar to records so the array can be
         # used in a similar way for autocoding.
         self.fields = OrderedDict()
-        for idx in range(self.length):
-            # 1/8/2020 - cannot do this deep copy, it takes up too much memory and time
-            # for compilation on large arrays. Need to make sure we use the dictionary
-            # key name instead of self.element.name when using this dictionary. The
-            # flattened_names() function below uses this  pattern.
-            # e = deepcopy(self.element)
-            # e.name = self.element.name + "_" + str(idx)
-            self.fields[self.element.name + "_" + str(idx)] = self.element
+        if self.length is not None:
+            for idx in range(self.length):
+                # 1/8/2020 - cannot do this deep copy, it takes up too much memory and time
+                # for compilation on large arrays. Need to make sure we use the dictionary
+                # key name instead of self.element.name when using this dictionary. The
+                # flattened_names() function below uses this  pattern.
+                # e = deepcopy(self.element)
+                # e.name = self.element.name + "_" + str(idx)
+                self.fields[self.element.name + "_" + str(idx)] = self.element
 
         # Is this type holding a volatile component?
         self.is_volatile_type = self.element.is_volatile_type

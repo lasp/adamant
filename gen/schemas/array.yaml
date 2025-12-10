@@ -31,11 +31,12 @@ mapping:
     type: str
     required: False
   # The length of the array, ie. how many items are in the array.
+  # If not specified, only unconstrained array types will be generated.
   length:
     type: int
     range:
       min: 1
-    required: True
+    required: False
   # There is no predefined 'Image or autocoded .Image available for this element type
   # so instead just print the bytes as an array of unsigned_8 bit integers.
   byte_image:
