@@ -1,0 +1,5 @@
+---
+preamble: subtype Short_Int is Natural range 1 .. 999;
+type: Short_Int
+format: U16
+description: An unconstrained array of Short_Ints for testing unconstrained array generation

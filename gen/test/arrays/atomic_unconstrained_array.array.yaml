@@ -1,0 +1,4 @@
+---
+type: Interfaces.Unsigned_32
+format: U32
+description: An unconstrained array of 32-bit words for testing Atomic/Register types

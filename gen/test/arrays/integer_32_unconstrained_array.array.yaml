@@ -1,0 +1,4 @@
+---
+type: Interfaces.Integer_32
+format: I32
+description: An unconstrained array of signed 32-bit integers for testing Volatile/Atomic/Register unconstrained types
