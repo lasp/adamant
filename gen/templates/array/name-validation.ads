@@ -7,25 +7,30 @@
 
 with Interfaces;
 {% endif %}
+{% if length %}
 {% if "Basic_Types" not in includes %}
 
 with Basic_Types;
 {% endif %}
+{% endif %}
 
 -- Record validation package for {{ name }}
 package {{ name }}.Validation is
+{% if length %}
 
    -- We assume that for this autocoder to work, the "field" number for the
    -- packed array takes less than 32-bits to represent:
    use Interfaces;
    pragma Compile_Time_Error (Interfaces.Unsigned_32 ({{ num_fields }}) > Interfaces.Unsigned_32'Last,
       "The autocoded validation functions assume a field size that can fit in 32-bits. This array's field size is too large. Please write this file by hand.");
+{% endif %}
 
    -- Return True if the packed array is valid. The function performs
    -- range checks on all the fields of the array. If an element is invalid,
    -- False is returned. The errant_Field parameter is always 0.
    function Valid (R : in Unconstrained; Errant_Field : out Interfaces.Unsigned_32) return Boolean;
    -- ^ "Unpacked" can be passed into this function as well because it is a subtype of Unconstrained
+{% if length %}
 {% if endianness in ["either", "big"] %}
    -- Valid function for the T type. Optionally, a first or last index can be passed in to only check
    -- a portion of the array, otherwise the entire array is checked for validity.
@@ -58,6 +63,7 @@ package {{ name }}.Validation is
 {% endif %}
 {% if endianness in ["either", "little"] %}
    function Get_Field (Src : in T_Le; Field : in Interfaces.Unsigned_32) return Basic_Types.Poly_Type;
+{% endif %}
 {% endif %}
 
 end {{ name }}.Validation;

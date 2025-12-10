@@ -3,6 +3,7 @@
 #
 # Generated from {{ filename }} on {{ time }}.
 ################################################################################
+{% if length %}
 
 from base_classes.packed_type_base import PackedTypeBase
 from bitstring import BitArray
@@ -15,11 +16,15 @@ from {{ element.type_package|lower }} import {{ element.type_package }}
 # Internal packed type imports:
 from {{ element.type_package|lower }} import {{ element.type_model.name }}
 {% endif %}
+{% endif %}
 
-
+{% if length %}
 {% if description %}
+
 {{ printMultiLine(description, '# ') }}
 {% endif %}
+
+
 class {{ name }}(PackedTypeBase):
 
     def __init__(self, elements=[]):
@@ -153,3 +158,7 @@ class {{ name }}(PackedTypeBase):
             strn += str(e) + ", "
 {% endif %}
         return strn[:-2] + "]"
+{%- else %}
+# Python class not generated for unconstrained arrays (length not specified).
+# Unconstrained arrays have dynamic length and cannot be represented by this fixed-length class.
+{%- endif -%}

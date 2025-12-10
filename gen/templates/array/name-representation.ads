@@ -5,7 +5,9 @@
 --------------------------------------------------------------------------------
 
 -- Standard includes:
+{% if length or (not element.is_packed_type and not element.is_enum) %}
 with String_Util;
+{% endif %}
 {% if modeled_type_includes %}
 
 -- Array element Includes:
@@ -20,6 +22,7 @@ package {{ name }}.Representation is
    -------------------------------------------------
    -- Common to string functions:
    -------------------------------------------------
+{% if length %}
    -- Return string showing bytes in array:
    function To_Byte_String is new String_Util.To_Byte_String (U);
 {% if endianness in ["either", "big"] %}
@@ -28,13 +31,20 @@ package {{ name }}.Representation is
 {% if endianness in ["either", "little"] %}
    function To_Byte_String is new String_Util.To_Byte_String (T_Le);
 {% endif %}
+{% endif %}
 
    -- Display array as string:
-   function Image (R : in U) return String;
-{% if endianness in ["either", "big"] %}
+   function Image (R : in Unconstrained) return String;
+{% if (element.size % 8) == 0 and endianness in ["either", "big"] %}
+   function Image (R : in T_Unconstrained) return String;
+{% endif %}
+{% if (element.size % 8) == 0 and endianness in ["either", "little"] %}
+   function Image (R : in T_Le_Unconstrained) return String;
+{% endif %}
+{% if length and endianness in ["either", "big"] %}
    function Image (R : in T) return String;
 {% endif %}
-{% if endianness in ["either", "little"] %}
+{% if length and endianness in ["either", "little"] %}
    function Image (R : in T_Le) return String;
 {% endif %}
 
@@ -42,20 +52,32 @@ package {{ name }}.Representation is
    -- Less commonly used to string functions:
    -------------------------------------------------
    -- Return string representation of array components in form (element 1, element 2, etc.)
-   function To_Tuple_String (R : in U) return String;
-{% if endianness in ["either", "big"] %}
+   function To_Tuple_String (R : in Unconstrained) return String;
+{% if (element.size % 8) == 0 and endianness in ["either", "big"] %}
+   function To_Tuple_String (R : in T_Unconstrained) return String;
+{% endif %}
+{% if (element.size % 8) == 0 and endianness in ["either", "little"] %}
+   function To_Tuple_String (R : in T_Le_Unconstrained) return String;
+{% endif %}
+{% if length and endianness in ["either", "big"] %}
    function To_Tuple_String (R : in T) return String;
 {% endif %}
-{% if endianness in ["either", "little"] %}
+{% if length and endianness in ["either", "little"] %}
    function To_Tuple_String (R : in T_Le) return String;
 {% endif %}
 
    -- Return string representation of array elements and bytes
-   function Image_With_Prefix (R : in U; Prefix : in String) return String;
-{% if endianness in ["either", "big"] %}
+   function Image_With_Prefix (R : in Unconstrained; Prefix : in String) return String;
+{% if (element.size % 8) == 0 and endianness in ["either", "big"] %}
+   function Image_With_Prefix (R : in T_Unconstrained; Prefix : in String) return String;
+{% endif %}
+{% if (element.size % 8) == 0 and endianness in ["either", "little"] %}
+   function Image_With_Prefix (R : in T_Le_Unconstrained; Prefix : in String) return String;
+{% endif %}
+{% if length and endianness in ["either", "big"] %}
    function Image_With_Prefix (R : in T; Prefix : in String) return String;
 {% endif %}
-{% if endianness in ["either", "little"] %}
+{% if length and endianness in ["either", "little"] %}
    function Image_With_Prefix (R : in T_Le; Prefix : in String) return String;
 {% endif %}
 
@@ -64,31 +86,19 @@ package {{ name }}.Representation is
    -------------------------------------------------
 {% if element.is_packed_type %}
    function Element_To_Byte_String (R : in {{ element.type_package }}.U) return String renames {{ element.type_package }}.Representation.To_Byte_String;
-{% if endianness in ["either", "big"] %}
-   function Element_To_Byte_String (R : in {{ element.type_package }}.T) return String renames {{ element.type_package }}.Representation.To_Byte_String;
-{% endif %}
-{% if endianness in ["either", "little"] %}
-   function Element_To_Byte_String (R : in {{ element.type_package }}.T_Le) return String renames {{ element.type_package }}.Representation.To_Byte_String;
-{% endif %}
    function Element_Image (R : in {{ element.type_package }}.U) return String renames {{ element.type_package }}.Representation.Image;
-{% if endianness in ["either", "big"] %}
-   function Element_Image (R : in {{ element.type_package }}.T) return String renames {{ element.type_package }}.Representation.Image;
-{% endif %}
-{% if endianness in ["either", "little"] %}
-   function Element_Image (R : in {{ element.type_package }}.T_Le) return String renames {{ element.type_package }}.Representation.Image;
-{% endif %}
    function Element_To_Tuple_String (R : in {{ element.type_package }}.U) return String renames {{ element.type_package }}.Representation.To_Tuple_String;
-{% if endianness in ["either", "big"] %}
-   function Element_To_Tuple_String (R : in {{ element.type_package }}.T) return String renames {{ element.type_package }}.Representation.To_Tuple_String;
-{% endif %}
-{% if endianness in ["either", "little"] %}
-   function Element_To_Tuple_String (R : in {{ element.type_package }}.T_Le) return String renames {{ element.type_package }}.Representation.To_Tuple_String;
-{% endif %}
    function Element_Image_With_Prefix (R : in {{ element.type_package }}.U; Prefix : in String := "") return String renames {{ element.type_package }}.Representation.Image_With_Prefix;
-{% if endianness in ["either", "big"] %}
+{% if length and endianness in ["either", "big"] %}
+   function Element_To_Byte_String (R : in {{ element.type_package }}.T) return String renames {{ element.type_package }}.Representation.To_Byte_String;
+   function Element_Image (R : in {{ element.type_package }}.T) return String renames {{ element.type_package }}.Representation.Image;
+   function Element_To_Tuple_String (R : in {{ element.type_package }}.T) return String renames {{ element.type_package }}.Representation.To_Tuple_String;
    function Element_Image_With_Prefix (R : in {{ element.type_package }}.T; Prefix : in String := "") return String renames {{ element.type_package }}.Representation.Image_With_Prefix;
 {% endif %}
-{% if endianness in ["either", "little"] %}
+{% if length and endianness in ["either", "little"] %}
+   function Element_To_Byte_String (R : in {{ element.type_package }}.T_Le) return String renames {{ element.type_package }}.Representation.To_Byte_String;
+   function Element_Image (R : in {{ element.type_package }}.T_Le) return String renames {{ element.type_package }}.Representation.Image;
+   function Element_To_Tuple_String (R : in {{ element.type_package }}.T_Le) return String renames {{ element.type_package }}.Representation.To_Tuple_String;
    function Element_Image_With_Prefix (R : in {{ element.type_package }}.T_Le; Prefix : in String := "") return String renames {{ element.type_package }}.Representation.Image_With_Prefix;
 {% endif %}
 {% elif element.is_enum %}

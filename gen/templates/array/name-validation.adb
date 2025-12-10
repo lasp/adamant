@@ -3,10 +3,12 @@
 --
 -- Generated from {{ filename }} on {{ time }}.
 --------------------------------------------------------------------------------
-
+{% if length %}
 {% if unpacked_types %}
+
 -- Standard includes:
 with Byte_Array_Util;
+{% endif %}
 
 {% endif %}
 {% if packed_type_includes %}
@@ -17,6 +19,10 @@ with {{ include }}.Validation;
 
 {% endif %}
 package body {{ name }}.Validation is
+{% if not length %}
+
+   use Interfaces;
+{% endif %}
 
    function Valid (R : in Unconstrained; Errant_Field : out Unsigned_32) return Boolean is
 {% if packed_type_includes %}
@@ -82,6 +88,7 @@ package body {{ name }}.Validation is
          return False;
    end Valid;
 
+{% if length %}
 {% if endianness in ["either", "big"] %}
    function Valid (
       R : in T;
@@ -313,5 +320,6 @@ package body {{ name }}.Validation is
          return To_Return;
    end Get_Field;
 
+{% endif %}
 {% endif %}
 end {{ name }}.Validation;
