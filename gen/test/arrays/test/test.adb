@@ -323,4 +323,126 @@ begin
    Complex_Float_Array_U_Assert.Eq (Complex_Flt_U, [others => (Yo => 17, F => (One => 5, Two => 21.5, Three => 50.23459))], Epsilon => 0.2);
    Put_Line ("passed.");
    Put_Line ("");
+
+   Put_Line ("Testing Word_Serializer for packed arrays: ");
+   Put_Line ("Testing native endianness word serialization for Complex_Array...");
+   declare
+      Complex_Test : constant Complex_Array.T := [others => (One => 5, Two => 100, Three => 250)];
+      Words : Complex_Array.Word_Serialization.Word_Array;
+      Complex_Result : Complex_Array.T;
+   begin
+      -- Test function form:
+      Words := Complex_Array.Word_Serialization.To_Word_Array (Complex_Test);
+      pragma Assert (Words'Length = Complex_Array.Word_Serialization.Serialized_Length, "Word array length incorrect");
+      Put_Line ("Word array length: " & Natural'Image (Words'Length));
+
+      -- Convert back and verify:
+      Complex_Result := Complex_Array.Word_Serialization.From_Word_Array (Words);
+      Complex_Array_Assert.Eq (Complex_Result, Complex_Test);
+
+      -- Test procedure form:
+      Complex_Array.Word_Serialization.To_Word_Array (Words, Complex_Test);
+      Complex_Array.Word_Serialization.From_Word_Array (Complex_Result, Words);
+      Complex_Array_Assert.Eq (Complex_Result, Complex_Test);
+
+      Put_Line ("Native endianness word serialization passed.");
+   end;
+
+   Put_Line ("Testing little-endian word serialization for Complex_Array_Le...");
+   declare
+      Complex_Le_Test : constant Complex_Array_Le.T_Le := [others => (One => 10, Two => 200, Three => 500)];
+      Words_Le : Complex_Array_Le.Word_Serialization_Le.Word_Array_Le;
+      Complex_Le_Result : Complex_Array_Le.T_Le;
+   begin
+      -- Test function form:
+      Words_Le := Complex_Array_Le.Word_Serialization_Le.To_Word_Array_Le (Complex_Le_Test);
+      pragma Assert (Words_Le'Length = Complex_Array_Le.Word_Serialization_Le.Serialized_Length, "Word_Le array length incorrect");
+
+      -- Convert back and verify:
+      Complex_Le_Result := Complex_Array_Le.Word_Serialization_Le.From_Word_Array_Le (Words_Le);
+      Complex_Array_Le_Le_Assert.Eq (Complex_Le_Result, Complex_Le_Test);
+
+      -- Test procedure form:
+      Complex_Array_Le.Word_Serialization_Le.To_Word_Array_Le (Words_Le, Complex_Le_Test);
+      Complex_Array_Le.Word_Serialization_Le.From_Word_Array_Le (Complex_Le_Result, Words_Le);
+      Complex_Array_Le_Le_Assert.Eq (Complex_Le_Result, Complex_Le_Test);
+
+      Put_Line ("Little-endian word serialization passed.");
+   end;
+
+   Put_Line ("Testing big-endian word serialization for Complex_Array...");
+   declare
+      Complex_Test : constant Complex_Array.T := [others => (One => 15, Two => 99, Three => 777)];
+      Words_Be : Complex_Array.Word_Serialization.Word_Array_Be;
+      Complex_Result : Complex_Array.T;
+   begin
+      -- Test function form:
+      Words_Be := Complex_Array.Word_Serialization.To_Word_Array_Be (Complex_Test);
+      pragma Assert (Words_Be'Length = Complex_Array.Word_Serialization.Serialized_Length, "Word_Be array length incorrect");
+
+      -- Convert back and verify:
+      Complex_Result := Complex_Array.Word_Serialization.From_Word_Array_Be (Words_Be);
+      Complex_Array_Assert.Eq (Complex_Result, Complex_Test);
+
+      -- Test procedure form:
+      Complex_Array.Word_Serialization.To_Word_Array_Be (Words_Be, Complex_Test);
+      Complex_Array.Word_Serialization.From_Word_Array_Be (Complex_Result, Words_Be);
+      Complex_Array_Assert.Eq (Complex_Result, Complex_Test);
+
+      Put_Line ("Big-endian word serialization passed.");
+   end;
+
+   Put_Line ("Testing word serialization round-trip consistency for arrays...");
+   declare
+      Complex_Original : constant Complex_Array.T := [(One => 1, Two => 19, Three => 111),
+                                                       (One => 2, Two => 20, Three => 222),
+                                                       (One => 3, Two => 21, Three => 333),
+                                                       (One => 4, Two => 22, Three => 444),
+                                                       others => (One => 5, Two => 23, Three => 555)];
+      Words_Native : Complex_Array.Word_Serialization.Word_Array;
+      Words_Le : Complex_Array.Word_Serialization.Word_Array_Le;
+      Words_Be : Complex_Array.Word_Serialization.Word_Array_Be;
+      Complex_From_Native : Complex_Array.T;
+      Complex_From_Le : Complex_Array.T;
+      Complex_From_Be : Complex_Array.T;
+   begin
+      -- Convert to all three word array formats:
+      Words_Native := Complex_Array.Word_Serialization.To_Word_Array (Complex_Original);
+      Words_Le := Complex_Array.Word_Serialization.To_Word_Array_Le (Complex_Original);
+      Words_Be := Complex_Array.Word_Serialization.To_Word_Array_Be (Complex_Original);
+
+      -- Convert back from all three formats:
+      Complex_From_Native := Complex_Array.Word_Serialization.From_Word_Array (Words_Native);
+      Complex_From_Le := Complex_Array.Word_Serialization.From_Word_Array_Le (Words_Le);
+      Complex_From_Be := Complex_Array.Word_Serialization.From_Word_Array_Be (Words_Be);
+
+      -- All should match the original:
+      Complex_Array_Assert.Eq (Complex_From_Native, Complex_Original);
+      Complex_Array_Assert.Eq (Complex_From_Le, Complex_Original);
+      Complex_Array_Assert.Eq (Complex_From_Be, Complex_Original);
+
+      Put_Line ("Round-trip consistency verified for all endianness variants.");
+   end;
+
+   Put_Line ("Testing word serialization with Register_Array (32-bit atomic array)...");
+   declare
+      Reg_Test : constant Register_Array.Register_T := [1 => 111, 2 => 222, 3 => 333, others => 444];
+      Words : Register_Array.Word_Serialization.Word_Array;
+      Reg_Result : Register_Array.Register_T;
+   begin
+      -- Test function form:
+      Words := Register_Array.Word_Serialization.To_Word_Array (Register_Array.T (Reg_Test));
+      pragma Assert (Words'Length = Register_Array.Word_Serialization.Serialized_Length, "Register word array length incorrect");
+
+      -- Convert back and verify (need to cast):
+      Reg_Result := Register_Array.Register_T (Register_Array.Word_Serialization.From_Word_Array (Words));
+      pragma Assert (Reg_Result (1) = 111, "Register element 1 incorrect");
+      pragma Assert (Reg_Result (2) = 222, "Register element 2 incorrect");
+      pragma Assert (Reg_Result (3) = 333, "Register element 3 incorrect");
+
+      Put_Line ("Register array word serialization passed.");
+   end;
+
+   Put_Line ("All Word_Serializer tests for packed arrays passed!");
+   Put_Line ("");
 end Test;

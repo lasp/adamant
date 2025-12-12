@@ -869,4 +869,103 @@ begin
    Gg_Assert.Eq (G, (17, (5, 21.5, 50.2)), Epsilon => 0.1);
    Put_Line ("passed.");
    Put_Line ("");
+
+   Put_Line ("Testing Word_Serializer for packed records: ");
+   Put_Line ("Testing native endianness word serialization...");
+   declare
+      A_Test : constant Aa.T := (One => 10, Two => 100, Three => 1023);
+      Words : Aa.Word_Serialization.Word_Array;
+      A_Result : Aa.T;
+   begin
+      -- Test function form:
+      Words := Aa.Word_Serialization.To_Word_Array (A_Test);
+      pragma Assert (Words'Length = Aa.Word_Serialization.Serialized_Length, "Word array length incorrect");
+      Put_Line ("Word array length: " & Natural'Image (Words'Length));
+
+      -- Convert back and verify:
+      A_Result := Aa.Word_Serialization.From_Word_Array (Words);
+      Aa_Assert.Eq (A_Result, A_Test);
+
+      -- Test procedure form:
+      Aa.Word_Serialization.To_Word_Array (Words, A_Test);
+      Aa.Word_Serialization.From_Word_Array (A_Result, Words);
+      Aa_Assert.Eq (A_Result, A_Test);
+
+      Put_Line ("Native endianness word serialization passed.");
+   end;
+
+   Put_Line ("Testing little-endian word serialization...");
+   declare
+      A_Le_Test : constant Aa.T_Le := (One => 15, Two => 128, Three => 512);
+      Words_Le : Aa.Word_Serialization_Le.Word_Array_Le;
+      A_Le_Result : Aa.T_Le;
+   begin
+      -- Test function form:
+      Words_Le := Aa.Word_Serialization_Le.To_Word_Array_Le (A_Le_Test);
+      pragma Assert (Words_Le'Length = Aa.Word_Serialization_Le.Serialized_Length, "Word_Le array length incorrect");
+
+      -- Convert back and verify:
+      A_Le_Result := Aa.Word_Serialization_Le.From_Word_Array_Le (Words_Le);
+      Aa_Le_Assert.Eq (A_Le_Result, A_Le_Test);
+
+      -- Test procedure form:
+      Aa.Word_Serialization_Le.To_Word_Array_Le (Words_Le, A_Le_Test);
+      Aa.Word_Serialization_Le.From_Word_Array_Le (A_Le_Result, Words_Le);
+      Aa_Le_Assert.Eq (A_Le_Result, A_Le_Test);
+
+      Put_Line ("Little-endian word serialization passed.");
+   end;
+
+   Put_Line ("Testing big-endian word serialization...");
+   declare
+      A_Test : constant Aa.T := (One => 18, Two => 200, Three => 750);
+      Words_Be : Aa.Word_Serialization.Word_Array_Be;
+      A_Result : Aa.T;
+   begin
+      -- Test function form:
+      Words_Be := Aa.Word_Serialization.To_Word_Array_Be (A_Test);
+      pragma Assert (Words_Be'Length = Aa.Word_Serialization.Serialized_Length, "Word_Be array length incorrect");
+
+      -- Convert back and verify:
+      A_Result := Aa.Word_Serialization.From_Word_Array_Be (Words_Be);
+      Aa_Assert.Eq (A_Result, A_Test);
+
+      -- Test procedure form:
+      Aa.Word_Serialization.To_Word_Array_Be (Words_Be, A_Test);
+      Aa.Word_Serialization.From_Word_Array_Be (A_Result, Words_Be);
+      Aa_Assert.Eq (A_Result, A_Test);
+
+      Put_Line ("Big-endian word serialization passed.");
+   end;
+
+   Put_Line ("Testing word serialization round-trip consistency...");
+   declare
+      A_Original : constant Aa.T := (One => 12, Two => 45, Three => 678);
+      Words_Native : Aa.Word_Serialization.Word_Array;
+      Words_Le : Aa.Word_Serialization.Word_Array_Le;
+      Words_Be : Aa.Word_Serialization.Word_Array_Be;
+      A_From_Native : Aa.T;
+      A_From_Le : Aa.T;
+      A_From_Be : Aa.T;
+   begin
+      -- Convert to all three word array formats:
+      Words_Native := Aa.Word_Serialization.To_Word_Array (A_Original);
+      Words_Le := Aa.Word_Serialization.To_Word_Array_Le (A_Original);
+      Words_Be := Aa.Word_Serialization.To_Word_Array_Be (A_Original);
+
+      -- Convert back from all three formats:
+      A_From_Native := Aa.Word_Serialization.From_Word_Array (Words_Native);
+      A_From_Le := Aa.Word_Serialization.From_Word_Array_Le (Words_Le);
+      A_From_Be := Aa.Word_Serialization.From_Word_Array_Be (Words_Be);
+
+      -- All should match the original:
+      Aa_Assert.Eq (A_From_Native, A_Original);
+      Aa_Assert.Eq (A_From_Le, A_Original);
+      Aa_Assert.Eq (A_From_Be, A_Original);
+
+      Put_Line ("Round-trip consistency verified for all endianness variants.");
+   end;
+
+   Put_Line ("All Word_Serializer tests for packed records passed!");
+   Put_Line ("");
 end Test;
