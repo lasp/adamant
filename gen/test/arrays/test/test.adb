@@ -323,4 +323,208 @@ begin
    Complex_Float_Array_U_Assert.Eq (Complex_Flt_U, [others => (Yo => 17, F => (One => 5, Two => 21.5, Three => 50.23459))], Epsilon => 0.2);
    Put_Line ("passed.");
    Put_Line ("");
+
+   Put_Line ("Testing conversions between CONSTRAINED and UNCONSTRAINED array types: ");
+   Put_Line ("Testing Simple_Array.T (constrained) <-> Simple_Array.T_Unconstrained conversions...");
+   declare
+      Constrained : constant Simple_Array.T := [others => 42];
+      -- Convert constrained to unconstrained
+      Unc_From_Const : constant Simple_Array.T_Unconstrained := Simple_Array.T_Unconstrained (Constrained);
+      -- Convert back to constrained
+      Const_Back : constant Simple_Array.T := Simple_Array.T (Unc_From_Const);
+   begin
+      Put_Line ("Original constrained T: " & Simple_Array.Representation.Image (Constrained));
+      Put_Line ("Converted back to constrained T: " & Simple_Array.Representation.Image (Const_Back));
+
+      -- Verify roundtrip
+      Simple_Array_Assert.Eq (Constrained, Const_Back, "Constrained/Unconstrained T roundtrip should preserve values");
+      Put_Line ("Constrained <-> Unconstrained T conversion successful.");
+      Put_Line ("passed.");
+   end;
+
+   Put_Line ("Testing Simple_Array.T_Le (constrained) <-> Simple_Array.T_Le_Unconstrained conversions...");
+   declare
+      Constrained_Le : constant Simple_Array.T_Le := [others => 55];
+      -- Convert constrained to unconstrained
+      Unc_From_Const : constant Simple_Array.T_Le_Unconstrained := Simple_Array.T_Le_Unconstrained (Constrained_Le);
+      -- Convert back to constrained
+      Const_Back : constant Simple_Array.T_Le := Simple_Array.T_Le (Unc_From_Const);
+   begin
+      Put_Line ("Original constrained T_Le: " & Simple_Array.Representation.Image (Constrained_Le));
+      Put_Line ("Converted back to constrained T_Le: " & Simple_Array.Representation.Image (Const_Back));
+
+      -- Verify roundtrip
+      Simple_Array_Le_Assert.Eq (Constrained_Le, Const_Back, "Constrained/Unconstrained T_Le roundtrip should preserve values");
+      Put_Line ("Constrained <-> Unconstrained T_Le conversion successful.");
+      Put_Line ("passed.");
+   end;
+
+   Put_Line ("Testing Simple_Array.U (constrained) <-> Simple_Array.Unconstrained conversions...");
+   declare
+      Constrained_U : constant Simple_Array.U := [others => 100];
+      -- Convert constrained to unconstrained
+      Unc_From_Const : constant Simple_Array.Unconstrained := Simple_Array.Unconstrained (Constrained_U);
+      -- Convert back to constrained
+      Const_Back : constant Simple_Array.U := Simple_Array.U (Unc_From_Const);
+   begin
+      Put_Line ("Original constrained U: " & Simple_Array.Representation.Image (Constrained_U));
+      Put_Line ("Converted back to constrained U: " & Simple_Array.Representation.Image (Const_Back));
+
+      -- Verify roundtrip
+      Simple_Array_U_Assert.Eq (Constrained_U, Const_Back, "Constrained/Unconstrained U roundtrip should preserve values");
+      Put_Line ("Constrained <-> Unconstrained U conversion successful.");
+      Put_Line ("passed.");
+   end;
+
+   Put_Line ("Testing Complex_Array.T (constrained) <-> Complex_Array.T_Unconstrained conversions...");
+   declare
+      Constrained_T : constant Complex_Array.T := [others => (One => 1, Two => 20, Three => 300)];
+      -- Convert constrained to unconstrained
+      Unc_From_Const : constant Complex_Array.T_Unconstrained := Complex_Array.T_Unconstrained (Constrained_T);
+      -- Convert back to constrained
+      Const_Back : constant Complex_Array.T := Complex_Array.T (Unc_From_Const);
+   begin
+      Put_Line ("Original constrained complex T: " & Complex_Array.Representation.Image (Constrained_T));
+      Put_Line ("Converted back to constrained complex T: " & Complex_Array.Representation.Image (Const_Back));
+
+      -- Verify roundtrip
+      Complex_Array_Assert.Eq (Constrained_T, Const_Back, "Constrained/Unconstrained complex T roundtrip should preserve values");
+      Put_Line ("Constrained <-> Unconstrained complex T conversion successful.");
+      Put_Line ("passed.");
+   end;
+
+   Put_Line ("Testing Complex_Array.U (constrained) <-> Complex_Array.Unconstrained conversions...");
+   declare
+      Constrained_U : constant Complex_Array.U := [others => (One => 5, Two => 60, Three => 700)];
+      -- Convert constrained to unconstrained
+      Unc_From_Const : constant Complex_Array.Unconstrained := Complex_Array.Unconstrained (Constrained_U);
+      -- Convert back to constrained
+      Const_Back : constant Complex_Array.U := Complex_Array.U (Unc_From_Const);
+   begin
+      Put_Line ("Original constrained complex U: " & Complex_Array.Representation.Image (Constrained_U));
+      Put_Line ("Converted back to constrained complex U: " & Complex_Array.Representation.Image (Const_Back));
+
+      -- Verify roundtrip
+      Complex_Array_U_Assert.Eq (Constrained_U, Const_Back, "Constrained/Unconstrained complex U roundtrip should preserve values");
+      Put_Line ("Constrained <-> Unconstrained complex U conversion successful.");
+      Put_Line ("passed.");
+   end;
+   Put_Line ("");
+
+   Put_Line ("Testing UNCONSTRAINED array pack/unpack and swap endianness:");
+   Put_Line ("Pack/unpack test for Simple_Array.Unconstrained -> T_Unconstrained: ");
+   declare
+      -- Create an unpacked unconstrained array (different size than constrained to test flexibility)
+      Unpacked_Unc : constant Simple_Array.Unconstrained (0 .. 9) := [others => 42];
+      -- Pack it to get packed unconstrained array
+      Packed_Unc : constant Simple_Array.T_Unconstrained := Simple_Array.Pack (Unpacked_Unc);
+      -- Unpack it back
+      Unpacked_Back : constant Simple_Array.Unconstrained := Simple_Array.Unpack (Packed_Unc);
+   begin
+      Put_Line ("Unpacked unconstrained array size: " & Natural'Image (Unpacked_Unc'Length));
+      Put_Line ("After pack/unpack roundtrip size: " & Natural'Image (Unpacked_Back'Length));
+      -- Verify roundtrip preserves values
+      pragma Assert (Unpacked_Back'Length = Unpacked_Unc'Length, "Pack/Unpack should preserve array length");
+      pragma Assert (Unpacked_Back'First = Unpacked_Unc'First, "Pack/Unpack should preserve array first index");
+      pragma Assert (Unpacked_Back'Last = Unpacked_Unc'Last, "Pack/Unpack should preserve array last index");
+      for I in Unpacked_Unc'Range loop
+         pragma Assert (Unpacked_Back (I) = 42, "Pack/Unpack roundtrip should preserve values at index " & Natural'Image (I));
+      end loop;
+      Put_Line ("passed.");
+   end;
+   Put_Line ("");
+
+   Put_Line ("Pack/unpack test for Simple_Array.Unconstrained -> T_Le_Unconstrained: ");
+   declare
+      -- Create an unpacked unconstrained array (different size than constrained to test flexibility)
+      Unpacked_Unc : constant Simple_Array.Unconstrained (0 .. 9) := [others => 99];
+      -- Pack it to get little-endian packed unconstrained array
+      Packed_Le_Unc : constant Simple_Array.T_Le_Unconstrained := Simple_Array.Pack (Unpacked_Unc);
+      -- Unpack it back
+      Unpacked_Back : constant Simple_Array.Unconstrained := Simple_Array.Unpack (Packed_Le_Unc);
+   begin
+      Put_Line ("Unpacked unconstrained array size: " & Natural'Image (Unpacked_Unc'Length));
+      Put_Line ("After LE pack/unpack roundtrip size: " & Natural'Image (Unpacked_Back'Length));
+      -- Verify roundtrip preserves values
+      pragma Assert (Unpacked_Back'Length = Unpacked_Unc'Length, "LE Pack/Unpack should preserve array length");
+      pragma Assert (Unpacked_Back'First = Unpacked_Unc'First, "LE Pack/Unpack should preserve array first index");
+      pragma Assert (Unpacked_Back'Last = Unpacked_Unc'Last, "LE Pack/Unpack should preserve array last index");
+      for I in Unpacked_Unc'Range loop
+         pragma Assert (Unpacked_Back (I) = 99, "LE Pack/Unpack roundtrip should preserve values at index " & Natural'Image (I));
+      end loop;
+      Put_Line ("passed.");
+   end;
+   Put_Line ("");
+
+   Put_Line ("Swap endianness test for unconstrained arrays (T_Unconstrained <-> T_Le_Unconstrained): ");
+   declare
+      -- Create a packed big-endian unconstrained array (different size than constrained)
+      Packed_Be_Unc : constant Simple_Array.T_Unconstrained (0 .. 9) := [others => 77];
+      -- Swap to little-endian
+      Packed_Le_Unc : constant Simple_Array.T_Le_Unconstrained := Simple_Array.Swap_Endianness (Packed_Be_Unc);
+      -- Swap back to big-endian
+      Packed_Be_Back : constant Simple_Array.T_Unconstrained := Simple_Array.Swap_Endianness (Packed_Le_Unc);
+      -- Unpack to verify values
+      Unpacked_Back : constant Simple_Array.Unconstrained := Simple_Array.Unpack (Packed_Be_Back);
+   begin
+      Put_Line ("Packed BE unconstrained array size: " & Natural'Image (Packed_Be_Unc'Length));
+      Put_Line ("After endianness swap roundtrip size: " & Natural'Image (Packed_Be_Back'Length));
+      -- Verify roundtrip preserves values
+      pragma Assert (Packed_Be_Back'Length = Packed_Be_Unc'Length, "Swap_Endianness should preserve array length");
+      pragma Assert (Packed_Be_Back'First = Packed_Be_Unc'First, "Swap_Endianness should preserve array first index");
+      pragma Assert (Packed_Be_Back'Last = Packed_Be_Unc'Last, "Swap_Endianness should preserve array last index");
+      for I in Unpacked_Back'Range loop
+         pragma Assert (Unpacked_Back (I) = 77, "Swap_Endianness roundtrip should preserve values at index " & Natural'Image (I));
+      end loop;
+      Put_Line ("passed.");
+   end;
+   Put_Line ("");
+
+   Put_Line ("Pack/unpack test for Complex_Array.Unconstrained -> T_Unconstrained (nested packed type): ");
+   declare
+      -- Create an unpacked unconstrained array with nested packed types (different size than constrained)
+      Unpacked_Unc : constant Complex_Array.Unconstrained (0 .. 4) := [others => (One => 1, Two => 25, Three => 50)];
+      -- Pack it to get packed unconstrained array
+      Packed_Unc : constant Complex_Array.T_Unconstrained := Complex_Array.Pack (Unpacked_Unc);
+      -- Unpack it back
+      Unpacked_Back : constant Complex_Array.Unconstrained := Complex_Array.Unpack (Packed_Unc);
+   begin
+      Put_Line ("Unpacked unconstrained array (nested) size: " & Natural'Image (Unpacked_Unc'Length));
+      Put_Line ("After pack/unpack roundtrip size: " & Natural'Image (Unpacked_Back'Length));
+      -- Verify roundtrip preserves values
+      pragma Assert (Unpacked_Back'Length = Unpacked_Unc'Length, "Pack/Unpack should preserve array length (nested)");
+      pragma Assert (Unpacked_Back'First = Unpacked_Unc'First, "Pack/Unpack should preserve array first index (nested)");
+      pragma Assert (Unpacked_Back'Last = Unpacked_Unc'Last, "Pack/Unpack should preserve array last index (nested)");
+      for I in Unpacked_Unc'Range loop
+         pragma Assert (Unpacked_Back (I).One = 1, "Pack/Unpack should preserve One field at index " & Natural'Image (I));
+         pragma Assert (Unpacked_Back (I).Two = 25, "Pack/Unpack should preserve Two field at index " & Natural'Image (I));
+         pragma Assert (Unpacked_Back (I).Three = 50, "Pack/Unpack should preserve Three field at index " & Natural'Image (I));
+      end loop;
+      Put_Line ("passed.");
+   end;
+   Put_Line ("");
+
+   Put_Line ("Pack/unpack test for Complex_Array_Le.Unconstrained -> T_Le_Unconstrained (nested packed type): ");
+   declare
+      -- Create an unpacked unconstrained array with nested packed types (different size than constrained)
+      Unpacked_Le_Unc : constant Complex_Array_Le.Unconstrained (0 .. 4) := [others => (One => 2, Two => 30, Three => 60)];
+      -- Pack it to get little-endian packed unconstrained array
+      Packed_Le_Unc : constant Complex_Array_Le.T_Le_Unconstrained := Complex_Array_Le.Pack (Unpacked_Le_Unc);
+      -- Unpack it back
+      Unpacked_Back : constant Complex_Array_Le.Unconstrained := Complex_Array_Le.Unpack (Packed_Le_Unc);
+   begin
+      Put_Line ("Unpacked unconstrained array LE (nested) size: " & Natural'Image (Unpacked_Le_Unc'Length));
+      Put_Line ("After LE pack/unpack roundtrip size: " & Natural'Image (Unpacked_Back'Length));
+      -- Verify roundtrip preserves values
+      pragma Assert (Unpacked_Back'Length = Unpacked_Le_Unc'Length, "LE Pack/Unpack should preserve array length (nested)");
+      pragma Assert (Unpacked_Back'First = Unpacked_Le_Unc'First, "LE Pack/Unpack should preserve array first index (nested)");
+      pragma Assert (Unpacked_Back'Last = Unpacked_Le_Unc'Last, "LE Pack/Unpack should preserve array last index (nested)");
+      for I in Unpacked_Le_Unc'Range loop
+         pragma Assert (Unpacked_Back (I).One = 2, "LE Pack/Unpack should preserve One field at index " & Natural'Image (I));
+         pragma Assert (Unpacked_Back (I).Two = 30, "LE Pack/Unpack should preserve Two field at index " & Natural'Image (I));
+         pragma Assert (Unpacked_Back (I).Three = 60, "LE Pack/Unpack should preserve Three field at index " & Natural'Image (I));
+      end loop;
+      Put_Line ("passed.");
+   end;
+   Put_Line ("");
 end Test;
