@@ -90,7 +90,7 @@ package body Pid_Controller_Tests.Implementation is
       Byte_Array_Assert.Eq (T.Pid_Controller_Diagnostic_Packet_History.Get (1).Buffer (4 .. 15), [63, 128, 0, 0, 63, 128, 0, 0, 63, 128, 0, 0]); --subpacket from the first control input
       Byte_Array_Assert.Eq (T.Pid_Controller_Diagnostic_Packet_History.Get (1).Buffer (16 .. 27), [64, 0, 0, 0, 64, 0, 0, 0, 64, 0, 0, 0]); --subpacket from the second control input
 
-      -- Start a new packet and this time lets make sure we fill the packet and send.
+      -- Start a new packet and this time let's make sure we fill the packet and send.
       -- Need to find out how many subpackets we should issue to get at least one full packet sent plus a couple more
       Subpacket_Duration := Natural (Packet_Buffer_Length / Pid_Diagnostic_Subpacket.Max_Serialized_Length) + Extra_Packets;
 
@@ -251,7 +251,7 @@ package body Pid_Controller_Tests.Implementation is
       Packed_F32_Assert.Eq (T.Pid_Error_History.Get (1), (Value => 1.0));
       Short_Float_Assert.Eq (T.Control_Output_U_Recv_Sync_History.Get (1).Output_Value, 13.0, Epsilon => 0.001);
 
-      -- Now lets test the limiting on the integral term
+      -- Now let's test the limiting on the integral term
       T.Control_Input_U_Send (((0, 0), 1.0, 5.0, 0.0, False));
       T.Control_Input_U_Send (((0, 0), 1.0, 5.0, 0.0, False));
       T.Control_Input_U_Send (((0, 0), 1.0, 5.0, 0.0, False));
@@ -259,7 +259,7 @@ package body Pid_Controller_Tests.Implementation is
       Packed_F32_Assert.Eq (T.Pid_Error_History.Get (2), (Value => 4.0));
       Short_Float_Assert.Eq (T.Control_Output_U_Recv_Sync_History.Get (4).Output_Value, 48.794, Epsilon => 0.001);
 
-      -- Now lets test the limiting on the integral term in the negative direction
+      -- Now let's test the limiting on the integral term in the negative direction
       T.Control_Input_U_Send (((0, 0), 10.0, 1.0, 0.0, True));
       T.Control_Input_U_Send (((0, 0), 10.0, 1.0, 0.0, False));
       T.Control_Input_U_Send (((0, 0), 10.0, 1.0, 0.0, False));

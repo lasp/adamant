@@ -44,7 +44,7 @@ package body {{ name }}.Validation is
 
 {% if variable_length %}
       --
-      -- First lets check lengths and make sure they are valid:
+      -- First let's check lengths and make sure they are valid:
       --
 
 {% for field in variable_length_fields.values() %}

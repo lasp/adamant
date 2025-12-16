@@ -31,7 +31,7 @@ package body Seq_Config is
       Words_Parsed := Natural'First;
 
       -- First figure out where a comment might start and
-      -- ignor everything after it.
+      -- ignore everything after it.
       while I in S'Range loop
          if S (I) = ';' then
             End_Idx := I - 1;
@@ -97,7 +97,7 @@ package body Seq_Config is
             -- Parse the line into separate words.
             Parsed_Line := Parse_Line (A_Line, Words_Parsed);
 
-            -- If there are words found lets look continue
+            -- If there are words found let's look continue
             if Words_Parsed > 0 then
                -- Put_Line ("Found line:");
                -- for Word of Parsed_Line loop
@@ -129,7 +129,7 @@ package body Seq_Config is
                         );
                         Stat : Serialization_Status;
                      begin
-                        -- Transform pattern string into an an array of bytes
+                        -- Transform pattern string into an array of bytes
                         while Pattern_Str (Pattern_Idx) /= ASCII.NUL loop
                            Command_Bytes (Command_Bytes_Idx) := Basic_Types.Byte'Value ("16#" & Pattern_Str (Pattern_Idx .. Pattern_Idx + 1) & "#");
                            Command_Bytes_Idx := @ + 1;

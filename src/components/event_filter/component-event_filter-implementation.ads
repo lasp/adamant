@@ -61,9 +61,9 @@ private
       Event_Entries : Protected_Event_Filter_Entries;
       -- Packet variables for sending the state packet
       Send_Event_State_Packet : Protected_Boolean.Variable;
-      -- Event Filter count for lifetime of component. Tracked in the package, and a copy is stored here so that we dont send the data product if we dont have to
+      -- Event Filter count for lifetime of component. Tracked in the package, and a copy is stored here so that we don't send the data product if we don't have to
       Total_Event_Filtered_Count : Unsigned_32 := Unsigned_32'First;
-      -- Event unfiltered count for lifetime of component. Tracked in the package, and a copy is stored here so that we dont send the data product if we dont have to. Does not include invalid id counts.
+      -- Event unfiltered count for lifetime of component. Tracked in the package, and a copy is stored here so that we don't send the data product if we don't have to. Does not include invalid id counts.
       Total_Event_Unfiltered_Count : Unsigned_32 := Unsigned_32'First;
    end record;
 

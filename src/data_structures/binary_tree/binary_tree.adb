@@ -38,7 +38,7 @@ package body Binary_Tree is
             end if;
          end loop;
 
-         -- Insert the element and then then move the remainder
+         -- Insert the element and then move the remainder
          -- of the list up one index. If the found index is at
          -- the end then this loop will be skipped.
          for Index in Insert_Index .. Self.Size loop

@@ -79,7 +79,7 @@ class ccsds_downsampler_filters(base):
             the_products = filter_entry(packet)
             if the_products.name not in self.filter_products:
                 if the_products.apid not in self.filter_products:
-                    # Get the current list of products in the dictionary here and make sure we dont have a duplicate
+                    # Get the current list of products in the dictionary here and make sure we don't have a duplicate
                     self.filter_products[the_products.apid] = the_products
                 else:
                     raise ModelException(

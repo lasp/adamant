@@ -103,7 +103,7 @@ package body Component.Parameters.Implementation.Tester is
       -- Self.Component_Instance.Attach_Parameter_Update_T_Provide (From_Index => 1, To_Component => Self'Unchecked_Access, Hook => Self.Parameter_Update_T_Modify_Access);
       -- Self.Component_Instance.Attach_Parameter_Update_T_Provide (From_Index => 2, To_Component => Self'Unchecked_Access, Hook => Self.Parameter_Update_T_Modify_Access);
       -- Self.Component_Instance.Attach_Parameter_Update_T_Provide (From_Index => 3, To_Component => Self'Unchecked_Access, Hook => Self.Parameter_Update_T_Modify_Access);
-      -- ^^ Instead of connecting to the tester, lets connect the parameter component to actual component destinations
+      -- ^^ Instead of connecting to the tester, let's connect the parameter component to actual component destinations
       Self.Component_Instance.Attach_Parameter_Update_T_Provide (From_Index => 1, To_Component => Self.Component_A'Unchecked_Access, Hook => Self.Component_A.Parameter_Update_T_Modify_Access);
       Self.Component_Instance.Attach_Parameter_Update_T_Provide (From_Index => 2, To_Component => Self.Component_B'Unchecked_Access, Hook => Self.Component_B.Parameter_Update_T_Modify_Access);
       Self.Component_Instance.Attach_Parameter_Update_T_Provide (From_Index => 3, To_Component => Self.Component_C'Unchecked_Access, Hook => Self.Component_C.Parameter_Update_T_Modify_Access);

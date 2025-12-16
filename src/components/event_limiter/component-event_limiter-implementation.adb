@@ -178,7 +178,7 @@ package body Component.Event_Limiter.Implementation is
                Event_Status := Self.Event_Array.Get_Enable_State (Id, Event_State);
                case Event_Status is
                   when Success =>
-                     -- Using the Bit_Num type to enforce that we dont go past 8 and keep the case statement cleaner
+                     -- Using the Bit_Num type to enforce that we don't go past 8 and keep the case statement cleaner
                      Bit_Location := Bit_Num ((Id - Id_Start) mod 8);
                      case Bit_Location is
                         when 0 =>
@@ -223,7 +223,7 @@ package body Component.Event_Limiter.Implementation is
       -- Send the number of events limited since last tick because we never know what the previous amount was
       Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Limited_Events_Since_Tick (Timestamp, ((Value => Num_Events_Limited))));
 
-      -- If we have events that were limited, then send the event indicating such, but dont if there is nothing to send
+      -- If we have events that were limited, then send the event indicating such, but don't if there is nothing to send
       if Num_Event_Limited_Event.Num_Event_Ids > 0 then
          Num_Event_Limited_Event.Num_Events_Limited := Num_Events_Limited;
          Self.Event_T_Send_If_Connected (Self.Events.Events_Limited_Since_Last_Tick (Timestamp, Num_Event_Limited_Event));
@@ -244,7 +244,7 @@ package body Component.Event_Limiter.Implementation is
    begin
       -- Regardless of the global state, we call the increment. The global component enable/disable state as well as each individual id state is handled in the increment for efficiency.
       Self.Event_Array.Increment_Counter (Arg.Header.Id, Status);
-      -- Only when status is an Event_Max_Limit, then we dont do anything. Otherwise, the event gets passed on
+      -- Only when status is an Event_Max_Limit, then we don't do anything. Otherwise, the event gets passed on
       case Status is
          -- When invalid or successful, we just pass through the event (dont need to know if enabled or disabled)
          when Success | Invalid_Id =>

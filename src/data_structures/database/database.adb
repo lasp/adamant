@@ -54,7 +54,7 @@ package body Database is
             return Not_Enough_Memory;
          end if;
 
-         -- Ok there is space, lets allocate:
+         -- Ok there is space, let's allocate:
          Db_Index := Self.Head;
          Self.Index_Table (Id) := Db_Index;
 
@@ -93,7 +93,7 @@ package body Database is
       -- The index should ALWAYS be less than head.
       pragma Assert (Db_Index < Self.Head);
 
-      -- Index is valid, lets fetch the data:
+      -- Index is valid, let's fetch the data:
       Value := Self.Db_Table (Db_Index);
 
       return Success;

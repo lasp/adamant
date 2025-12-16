@@ -106,7 +106,7 @@ package Component.Product_Packetizer.Implementation.Tester is
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T);
    -- The system time is retrieved via this connector.
    overriding function Sys_Time_T_Return (Self : in out Instance) return Sys_Time.T;
-   -- This connector is used to register the compoennt's commands.
+   -- This connector is used to register the component's commands.
    overriding procedure Command_Response_T_Recv_Sync (Self : in out Instance; Arg : in Command_Response.T);
 
    ---------------------------------------

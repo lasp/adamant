@@ -48,7 +48,7 @@ package {{ name }}.Validation is
 {% endif %}
 
    -- Return a field (provided by a field number) as a polymorphic type.
-   -- This is useful for returning any field in a array in a very generic
+   -- This is useful for returning any field in an array in a very generic
    -- way. Fields bigger than the polymorphic type will only have their
    -- least significant bits returned. This function should be used in tandem
    -- with the validation functions above to create useful error messages for an invalid

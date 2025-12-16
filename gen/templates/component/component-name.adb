@@ -802,7 +802,7 @@ package body Component.{{ name }} is
                return Execute_To (Self, Cmd);
             end;
          else
-            -- Id is not valid for component, so call the invalid command handler and return the the error status:
+            -- Id is not valid for component, so call the invalid command handler and return the error status:
             declare
                P_Type : Basic_Types.Poly_Type := [others => 0];
             begin
@@ -1047,7 +1047,7 @@ package body Component.{{ name }} is
                return Stage_To (Self, Table_Id, Par);
             end;
          else
-            -- Id is not valid for component, so call the invalid parameter handler and return the the error status:
+            -- Id is not valid for component, so call the invalid parameter handler and return the error status:
             declare
                P_Type : Basic_Types.Poly_Type := [others => 0];
             begin
@@ -1150,7 +1150,7 @@ package body Component.{{ name }} is
                return Fetch_From (Self, Par);
             end;
          else
-            -- Id is not valid for component so return the the error status:
+            -- Id is not valid for component so return the error status:
             return Id_Error;
          end if;
       end;

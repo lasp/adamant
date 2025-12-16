@@ -403,7 +403,7 @@ package body Component.Event_Packetizer.Implementation is
       pragma Unreferenced (Errant_Field);
    begin
       -- The command was invalid. The only way this can happen is if the length of the command was invalid. In this case,
-      -- there is only a single command, send_packet, so lets just forget this error happened and send the packet
+      -- there is only a single command, send_packet, so let's just forget this error happened and send the packet
       -- anyways. This shouldn't hurt anything.
       Self.Send_Packet_Next_Tick := True;
    end Invalid_Command;
