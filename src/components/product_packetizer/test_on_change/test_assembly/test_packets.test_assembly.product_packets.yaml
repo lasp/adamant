@@ -1,0 +1,29 @@
+---
+description: This is an example set of packets.
+# starting id...
+# assuming 1 hz tick
+packets:
+  - name: Packet_1 # must be unique, enforce by autocoder
+    description: Baseline periodic packet used by the on-change tests for reference behavior.
+    id: 7
+    data_products:
+      - name: Test_Component_1_Instance.Data_Product_A
+        use_timestamp: False
+        include_timestamp: True
+        event_on_missing: True
+      - name: Test_Component_2_Instance.Data_Product_C
+        event_on_missing: False
+        use_timestamp: False
+        include_timestamp: False
+    period: "3" # create every 3 ticks
+    enabled: False
+  - name: Packet_6
+    description: Minimal packet dedicated to validating the On_Change feature.
+    id: 16
+    data_products:
+      - name: Test_Component_2_Instance.Data_Product_D
+        used_for_on_change: True # When True, this data product's timestamp drives the on-change decision.
+      - name: Test_Component_1_Instance.Data_Product_B
+        used_for_on_change: False # When False, the data is included but does not trigger on-change sends.
+    period: "1"
+    enabled: On_Change # Packets configured this way emit only when a tracked data product timestamp advances.

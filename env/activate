@@ -188,7 +188,10 @@ for path in "${paths[@]}"; do
       fi
     fi
 
-    # Activate the local python configuration:
+    # Activate the local python configuration. Note that any duplicate python
+    # file will favor the last activated environment, ie. the last path in
+    # the path. adamant/ is always first, so its behavior can always be overwritten
+    # by any project repository python files.
     . $ADAMANT_DIR/env/set_python_path.sh $path
 
     cd - &> /dev/null

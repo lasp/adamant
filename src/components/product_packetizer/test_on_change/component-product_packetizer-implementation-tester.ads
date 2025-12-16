@@ -7,6 +7,7 @@ with Component.Product_Packetizer_Reciprocal;
 with Sys_Time;
 with Printable_History;
 with Data_Product_Fetch.Representation;
+with Data_Product_Return;
 with Packet.Representation;
 with Event.Representation;
 with Sys_Time.Representation;
@@ -77,12 +78,22 @@ package Component.Product_Packetizer.Implementation.Tester is
       Command_T_Send_Dropped_Count : Natural := 0;
       -- Status for data product return:
       Data_Product_Fetch_Return_Status : Fetch_Status.E := Fetch_Status.Success;
+      -- Optional override for returning a specific data product when fetched.
+      Use_Data_Product_Return_Value : Boolean := False;
+      Data_Product_Return_Target_Id : Data_Product_Id := 0;
+      Data_Product_Return_Value : Data_Product_Return.T := (
+         The_Status => Fetch_Status.Success,
+         The_Data_Product => (
+            Header => (Time => (0, 0), Id => 0, Buffer_Length => 0),
+            Buffer => [others => 0]
+         )
+      );
       -- This variable is used to override the data product return length, which can be used to
       -- induce a length mismatch error during testing. A value of zero does NOT override, any
       -- other value does.
       Data_Product_Length_Override : Data_Product_Buffer_Length_Type := 0;
       -- Data product time:
-      Dp_Time : Sys_Time.T := (5, 11);
+      Dp_Time : Sys_Time.T := (0, 0);
    end record;
    type Instance_Access is access all Instance;
 
@@ -108,7 +119,7 @@ package Component.Product_Packetizer.Implementation.Tester is
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T);
    -- The system time is retrieved via this connector.
    overriding function Sys_Time_T_Return (Self : in out Instance) return Sys_Time.T;
-   -- This connector is used to register the component's commands.
+   -- This connector is used to register the compoennt's commands.
    overriding procedure Command_Response_T_Recv_Sync (Self : in out Instance; Arg : in Command_Response.T);
 
    ---------------------------------------
@@ -127,7 +138,7 @@ package Component.Product_Packetizer.Implementation.Tester is
    -- An packet was disabled.
    overriding procedure Packet_Disabled (Self : in out Instance; Arg : Packet_Period.T);
    -- An packet was enabled in on-change mode.
-   overriding procedure Packet_Enabled_On_Change (Self : in out Instance; Arg : in Packet_Period.T);
+   overriding procedure Packet_Enabled_On_Change (Self : in out Instance; Arg : Packet_Period.T);
    -- An packet period was set.
    overriding procedure Packet_Period_Set (Self : in out Instance; Arg : Packet_Period.T);
    -- A data product was missing when fetched for packet insertion.

@@ -31,9 +31,12 @@ mapping:
             type: int
             required: True
           # Is the packet enabled or disabled upon initialization. By default
-          # packets are enabled is this is not specified.
+          # packets are enabled if this is not specified. This field can be set to:
+          #   True - Packet is enabled and sent periodically
+          #   False - Packet is disabled
+          #   On_Change - Packet is only sent when data products have changed since last emission
           enabled:
-            type: bool
+            type: any
             required: False
           # The period (in ticks) in which to build the packet. This is the value set upon
           # initialization.
@@ -82,6 +85,14 @@ mapping:
                   # Include this data product's timestamp just before its value in the actual packet.
                   # By default this value is false.
                   include_timestamp:
+                    type: bool
+                    required: False
+                  # When the packet's enabled field is set to On_Change, this field determines whether
+                  # this data product's timestamp should be checked to trigger packet emission. If true,
+                  # the packet will be sent if this data product has been updated since the last packet
+                  # emission. If false, this data product's timestamp is ignored for on_change checks.
+                  # By default this value is true if not specified.
+                  used_for_on_change:
                     type: bool
                     required: False
                   # Pad bytes can be used to insert a n-number of bytes of unused data into a packet. This is

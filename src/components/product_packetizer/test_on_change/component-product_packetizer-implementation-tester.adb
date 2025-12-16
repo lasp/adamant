@@ -90,26 +90,36 @@ package body Component.Product_Packetizer.Implementation.Tester is
       -- Push the argument onto the test history for looking at later:
       Self.Data_Product_Fetch_T_Service_History.Push (Arg);
 
+      -- Allow tests to override the returned data product for a particular ID.
+      if Self.Use_Data_Product_Return_Value
+        and then Arg.Id = Self.Data_Product_Return_Target_Id
+      then
+         return Self.Data_Product_Return_Value;
+      end if;
+
       -- We need to simulate the return of an actual data product here:
-      Dp.Header.Time := Self.Dp_Time;
       case Arg.Id is
          -- A, U32
          when 1 =>
+            Dp.Header.Time := Self.Dp_Time;
             Dp.Header.Id := 0;
             Dp.Header.Buffer_Length := Packed_U32.Serialization.Byte_Array'Length;
             Dp.Buffer (Dp.Buffer'First .. Dp.Buffer'First + Dp.Header.Buffer_Length - 1) := Packed_U32.Serialization.To_Byte_Array ((Value => 23));
             -- B, Tick.T
          when 2 =>
+            Dp.Header.Time := Self.Dp_Time;
             Dp.Header.Id := 1;
             Dp.Header.Buffer_Length := Tick.Serialization.Byte_Array'Length;
             Dp.Buffer (Dp.Buffer'First .. Dp.Buffer'First + Dp.Header.Buffer_Length - 1) := Tick.Serialization.To_Byte_Array ((Dp.Header.Time, 13));
             -- C, Tick.T
          when 3 =>
+            Dp.Header.Time := Self.Dp_Time;
             Dp.Header.Id := 2;
             Dp.Header.Buffer_Length := Tick.Serialization.Byte_Array'Length;
             Dp.Buffer (Dp.Buffer'First .. Dp.Buffer'First + Dp.Header.Buffer_Length - 1) := Tick.Serialization.To_Byte_Array ((Dp.Header.Time, 14));
             -- D, U16
          when 4 =>
+            Dp.Header.Time := Self.Dp_Time;
             Dp.Header.Id := 3;
             Dp.Header.Buffer_Length := Packed_U16.Serialization.Byte_Array'Length;
             Dp.Buffer (Dp.Buffer'First .. Dp.Buffer'First + Dp.Header.Buffer_Length - 1) := Packed_U16.Serialization.To_Byte_Array ((Value => 33));
@@ -154,7 +164,7 @@ package body Component.Product_Packetizer.Implementation.Tester is
       return To_Return;
    end Sys_Time_T_Return;
 
-   -- This connector is used to register the component's commands.
+   -- This connector is used to register the compoennt's commands.
    overriding procedure Command_Response_T_Recv_Sync (Self : in out Instance; Arg : in Command_Response.T) is
    begin
       -- Push the argument onto the test history for looking at later:
@@ -201,7 +211,7 @@ package body Component.Product_Packetizer.Implementation.Tester is
    end Packet_Disabled;
 
    -- An packet was enabled in on-change mode.
-   overriding procedure Packet_Enabled_On_Change (Self : in out Instance; Arg : in Packet_Period.T) is
+   overriding procedure Packet_Enabled_On_Change (Self : in out Instance; Arg : Packet_Period.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Packet_Enabled_On_Change_History.Push (Arg);

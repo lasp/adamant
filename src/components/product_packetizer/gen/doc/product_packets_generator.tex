@@ -33,6 +33,22 @@ The main job of the generator in this case was to verify the input YAML packets 
 
 \adacodef{../../test/test_assembly/build/src/test_assembly_product_packets_test_packets.ads}
 
+\section{On-Change Packet Example}
+
+The Product Packetizer also supports ``on-change'' packets that emit only when one or more tracked data products have fresh timestamps relative to the last emission. The \texttt{enabled} enumeral value \texttt{On\_Change} puts a packet into this mode, while the optional \texttt{used\_for\_on\_change} flag attached to each item allows you to include data products that do not participate in the change detection. Any data product with \texttt{used\_for\_on\_change = True} (the default) will cause the packet to fire once its timestamp advances; data products tagged with \texttt{False} are still copied into the packet but will not on their own schedule a send. Note that the configured packet period still matters---the component evaluates on-change packets on those interval boundaries, but suppresses the transmission if no tracked data product reports a timestamp newer than the last emission.
+
+The dedicated on-change unit tests under \texttt{src/components/product\_packetizer/test\_on\_change} exercise this behavior in isolation. The YAML below matches the model compiled in those tests and is intentionally minimal so it can double as documentation for configuring the feature.
+
+\subsection{On-Change YAML Model}
+
+\yamlcodef{../../test_on_change/test_assembly/test_packets.test_assembly.product_packets.yaml}
+
+\subsection{Generated Output}
+
+Just like the periodic example, the generator produces an Ada structure that is supplied to the Product Packetizer instance. The output derived from the on-change YAML is shown below.
+
+\adacodef{../../test_on_change/test_assembly/build/src/test_assembly_product_packets_test_packets.ads}
+
 \section{Special Items}
 
 The Product Packetizer allows you to specify ``special" items to include in a packet that reflect internal data of the Product Packetizer component itself. Currently, the only supported ``special" items are packet periods of the packets produced by the Product Packetizer. Packet 5, specified above, includes these items by specifying a data product within the Product Packetizer, ie. \texttt{Product\_Packetizer\_Instance.Packet\_4\_Period}. The Product Packetizer doesn't actually have any data products, so this nomenclature instead denotes a special item. In this case, we want to include the current packet period value (a 4 byte unsigned integer) for Packet 4 into the packet. A period can be specified for any packet included in the YAML model using this pattern. Error checking at the modeling level will prevent you from specifying a packet period for a packet that does not exist.
