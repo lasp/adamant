@@ -48,7 +48,7 @@ enums:
     literals:
       - name: Uninitialized
         value: 0
-        description: No operation has been performed yet.
+        description: No table operation has been performed yet.
       - name: Success
         value: 1
         description: Parameter table update operation was successful.
@@ -64,6 +64,9 @@ enums:
       - name: Dropped
         value: 5
         description: The operation could not be performed because it was dropped from a full queue.
+      - name: Individual_Parameter_Modified
+        value: 6
+        description: An individual parameter was updated in the parameter table without updating the whole table. In this case, the reported CRC, version, and update time of the table can no longer be trusted to be accurate. This status will be reported when using the Update_Parameter command in the Parameters component, which is intended to be a backdoor, ground-use only command.
   - name: Parameter_Validation_Status
     description: This status enumeration provides information on the result of validating a set of parameters.
     literals:

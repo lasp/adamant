@@ -603,8 +603,8 @@ package body Component.Parameters.Implementation is
       -- Send info event:
       Self.Event_T_Send_If_Connected (Self.Events.Finished_Parameter_Table_Update (Self.Sys_Time_T_Get, (
          Region => Region,
-         Status => Status_To_Return)
-      ));
+         Status => Status_To_Return
+      )));
 
       -- Return the memory pointer with the status for deallocation.
       return (Region => Region, Status => Status_To_Return);
@@ -720,11 +720,13 @@ package body Component.Parameters.Implementation is
    -- Update the active parameter value in a component for a parameter table entry with the given ID, Length, and Value. If multiple parameters share the same entry ID (grouped parameters), all will be updated.
    overriding function Update_Parameter (Self : in out Instance; Arg : in Parameter_Table_Entry.T) return Command_Execution_Status.E is
       use Parameter_Enums.Parameter_Update_Status;
+      use Parameter_Enums.Parameter_Table_Update_Status;
       use Command_Execution_Status;
       use Parameter_Types;
       Entry_Found : Boolean := False;
       -- Track which components we need to update (to avoid duplicate updates)
       Components_To_Update : array (Self.Connector_Parameter_Update_T_Provide'Range) of Boolean := [others => False];
+      Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
    begin
       -- Search through our entries linearly to find all parameters with matching Entry_ID.
       -- For grouped parameters, multiple parameters may share the same Entry_ID.
@@ -741,7 +743,7 @@ package body Component.Parameters.Implementation is
                begin
                   -- See if the length in the header is what we expect.
                   if Arg.Header.Buffer_Length /= Param_Length then
-                     Self.Event_T_Send_If_Connected (Self.Events.Parameter_Update_Length_Mismatch (Self.Sys_Time_T_Get, (
+                     Self.Event_T_Send_If_Connected (Self.Events.Parameter_Update_Length_Mismatch (Time, (
                         Header => Arg.Header,
                         Expected_Length => Param_Length)
                      ));
@@ -764,7 +766,7 @@ package body Component.Parameters.Implementation is
 
       -- If we didn't find any entries with matching Entry_ID, report error.
       if not Entry_Found then
-         Self.Event_T_Send_If_Connected (Self.Events.Parameter_Update_Id_Not_Recognized (Self.Sys_Time_T_Get, (Id => Arg.Header.Id)));
+         Self.Event_T_Send_If_Connected (Self.Events.Parameter_Update_Id_Not_Recognized (Time, (Id => Arg.Header.Id)));
          return Failure;
       end if;
 
@@ -778,6 +780,17 @@ package body Component.Parameters.Implementation is
             end if;
          end if;
       end loop;
+
+      -- OK at this point, the parameter was successfully updated, so we need to update the
+      -- table status data product.
+      Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Table_Status (Time, (
+         -- We keep these first 3 items the same since they represent the "base table"
+         -- that this parameter modification was made on top of.
+         Active_Table_Version_Number => Self.Table_Version,
+         Active_Table_Update_Time => Self.Table_Update_Time,
+         Active_Table_Crc => Self.Stored_Crc,
+         Last_Table_Operation_Status => Individual_Parameter_Modified
+      )));
 
       -- Send out a new parameter's packet if configured to do so:
       if Self.Dump_Parameters_On_Change then

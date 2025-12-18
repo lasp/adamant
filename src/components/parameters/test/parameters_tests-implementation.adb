@@ -295,6 +295,7 @@ package body Parameters_Tests.Implementation is
    end Test_Nominal_Dump_Parameters;
 
    overriding procedure Test_Nominal_Update_Parameters (Self : in out Instance) is
+      use Parameter_Enums.Parameter_Table_Update_Status;
       T : Component.Parameters.Implementation.Tester.Instance_Access renames Self.Tester;
       Pkt : Packet.T;
       Param_Entry : Parameter_Table_Entry.T := (Header => (Id => 3, Buffer_Length => 2), Buffer => [0 => 0, 1 => 17, others => 0]);
@@ -337,6 +338,15 @@ package body Parameters_Tests.Implementation is
                Component_B_Parameter_I32 => (Value => -56)));
       Byte_Array_Assert.Eq (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1), Table_Bytes);
 
+      -- Check data product:
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
+      Packed_Table_Operation_Status_Assert.Eq (T.Table_Status_History.Get (1), (
+         Active_Table_Version_Number => 0.0,
+         Active_Table_Update_Time => 0,
+         Active_Table_Crc => [0, 0],
+         Last_Table_Operation_Status => Individual_Parameter_Modified
+      ));
+
       -- Send another command to update a parameter value (Entry_ID 0):
       Param_Entry := (Header => (Id => 0, Buffer_Length => 4), Buffer => [0 => 0, 1 => 0, 2 => 0, 3 => 99, others => 0]);
       pragma Assert (T.Commands.Update_Parameter (Param_Entry, Cmd) = Success);
@@ -372,6 +382,15 @@ package body Parameters_Tests.Implementation is
             ((Crc_Calculated => Crc, Header => (Crc_Table => [0, 0], Version => 0.0), Component_A_Parameter_I32 => (Value => 99), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 17),
                Component_B_Parameter_I32 => (Value => -56)));
       Byte_Array_Assert.Eq (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1), Table_Bytes);
+
+      -- Check data product:
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 2);
+      Packed_Table_Operation_Status_Assert.Eq (T.Table_Status_History.Get (2), (
+         Active_Table_Version_Number => 0.0,
+         Active_Table_Update_Time => 0,
+         Active_Table_Crc => [0, 0],
+         Last_Table_Operation_Status => Individual_Parameter_Modified
+      ));
    end Test_Nominal_Update_Parameters;
 
    overriding procedure Test_Nominal_Table_Upload (Self : in out Instance) is
@@ -604,6 +623,7 @@ package body Parameters_Tests.Implementation is
    overriding procedure Test_Update_Parameters_Error (Self : in out Instance) is
       use Parameter_Enums.Parameter_Update_Status;
       use Parameter_Enums.Parameter_Operation_Type;
+      use Parameter_Enums.Parameter_Table_Update_Status;
       T : Component.Parameters.Implementation.Tester.Instance_Access renames Self.Tester;
       Pkt : Packet.T;
       Param_Entry : Parameter_Table_Entry.T := (Header => (Id => 99, Buffer_Length => 2), Buffer => [0 => 0, 1 => 17, others => 0]);
@@ -638,6 +658,9 @@ package body Parameters_Tests.Implementation is
       -- No packets should have been dumped as a result of the above:
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
 
+      -- No data product.
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 0);
+
       -- Send a command to update a parameter value with good values. This time we make a component return a bad status on stage:
       Param_Entry.Header.Id := 0;
       Param_Entry.Header.Buffer_Length := 4;
@@ -657,6 +680,9 @@ package body Parameters_Tests.Implementation is
       -- A packet should not have been automatically dumped.
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
 
+      -- No data product.
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 0);
+
       -- Send a command to update a parameter value with good values. This time we make a component return a bad status on update:
       -- Set A to return a bad status:
       T.Component_A.Override_Parameter_Return (Status => Id_Error, Length => 0, Only_On_Update => True);
@@ -673,6 +699,9 @@ package body Parameters_Tests.Implementation is
 
       -- A packet should not have been automatically dumped.
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
+
+      -- No data product.
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 0);
 
       -- Send a command to update a parameter value with good values. This time we make a component return a bad status on fetch:
       -- Set A to return a bad status:
@@ -699,6 +728,16 @@ package body Parameters_Tests.Implementation is
       Natural_Assert.Eq (Pkt.Header.Buffer_Length, Test_Parameter_Table_Record.Size_In_Bytes);
       Natural_Assert.Eq (Natural (Pkt.Header.Sequence_Count), 0);
       Natural_Assert.Eq (Natural (Pkt.Header.Id), 0);
+
+      -- Check data product.
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Table_Status_History.Get_Count, 1);
+      Packed_Table_Operation_Status_Assert.Eq (T.Table_Status_History.Get (1), (
+         Active_Table_Version_Number => 0.0,
+         Active_Table_Update_Time => 0,
+         Active_Table_Crc => [0, 0],
+         Last_Table_Operation_Status => Individual_Parameter_Modified
+      ));
    end Test_Update_Parameters_Error;
 
    overriding procedure Test_Table_Upload_Error (Self : in out Instance) is
