@@ -145,6 +145,17 @@ package body Component.Parameters.Implementation is
       pragma Assert (Self.Parameter_Table_Length + Crc_16.Crc_16_Type'Length <= Packet_Types.Packet_Buffer_Type'Length, "The parameter table must not be larger than the maximum size packet!");
    end Init;
 
+   overriding procedure Set_Up (Self : in out Instance) is
+      use Parameter_Enums.Parameter_Table_Update_Status;
+   begin
+      Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Table_Status (Self.Sys_Time_T_Get, (
+         Active_Table_Version_Number => Self.Table_Version,
+         Active_Table_Update_Time => Self.Table_Update_Time,
+         Active_Table_Crc => Self.Stored_Crc,
+         Last_Table_Operation_Status => Uninitialized
+      )));
+   end Set_Up;
+
    ---------------------------------------
    -- Helper functions:
    ---------------------------------------
@@ -526,6 +537,18 @@ package body Component.Parameters.Implementation is
       return (Region => Region, Status => Status_To_Return);
    end Validate_Parameter_Table;
 
+   function Get_Table_Ptr_From_Region (Region : in Memory_Region.T; Table_Header : out Parameter_Table_Header.T) return Byte_Array_Pointer.Instance is
+      use Byte_Array_Pointer;
+      use Byte_Array_Pointer.Packed;
+
+      Ptr : constant Byte_Array_Pointer.Instance := Unpack (Region);
+      Ptr_Header : constant Byte_Array_Pointer.Instance := Slice (Ptr, Start_Index => 0, End_Index => Parameter_Table_Header.Size_In_Bytes - 1);
+      Header : constant Parameter_Table_Header.T := Parameter_Table_Header.Serialization.From_Byte_Array (To_Byte_Array (Ptr_Header));
+   begin
+      Table_Header := Header;
+      return Ptr;
+   end Get_Table_Ptr_From_Region;
+
    -- Helper function to update all connected component's parameter tables from data within a provided memory region.
    function Update_Parameter_Table (Self : in out Instance; Region : in Memory_Region.T) return Parameters_Memory_Region_Release.T is
       use Parameter_Enums.Parameter_Update_Status;
@@ -558,6 +581,18 @@ package body Component.Parameters.Implementation is
             Set_Status (Self.Update_Parameters (Component_Id => Idx));
          end loop;
 
+         -- At this point the table is committed to the components, so we need
+         -- to update our meta data. This is required prior to dumping parameters,
+         -- below, to ensure the dumped table reflects this new meta data.
+         declare
+            Table_Header : Parameter_Table_Header.T;
+            Ignore : constant Byte_Array_Pointer.Instance := Get_Table_Ptr_From_Region (Region, Table_Header);
+         begin
+            Self.Table_Version := Table_Header.Version;
+            Self.Stored_Crc := Table_Header.Crc_Table;
+            Self.Table_Update_Time := Self.Sys_Time_T_Get.Seconds;
+         end;
+
          -- Send out a new parameter's packet if configured to do so:
          if Self.Dump_Parameters_On_Change then
             -- Send the packet:
@@ -568,8 +603,8 @@ package body Component.Parameters.Implementation is
       -- Send info event:
       Self.Event_T_Send_If_Connected (Self.Events.Finished_Parameter_Table_Update (Self.Sys_Time_T_Get, (
          Region => Region,
-         Status => Status_To_Return)
-      ));
+         Status => Status_To_Return
+      )));
 
       -- Return the memory pointer with the status for deallocation.
       return (Region => Region, Status => Status_To_Return);
@@ -591,6 +626,8 @@ package body Component.Parameters.Implementation is
       use Parameter_Enums.Parameter_Table_Operation_Type;
       use Parameter_Enums.Parameter_Table_Update_Status;
       To_Return : Parameters_Memory_Region_Release.T := (Region => Arg.Region, Status => Success);
+      -- Track if we should send a data product:
+      Send_Data_Product : Boolean := False;
    begin
       -- First make sure that the memory region is of the expected size. If it is not then we will
       -- reject this request.
@@ -602,16 +639,14 @@ package body Component.Parameters.Implementation is
          case Arg.Operation is
             -- The memory region contains a fresh parameter table. We need to use this parameter table to
             -- update all the active parameters.
-            when Set .. Validate =>
+            when Set | Validate =>
                -- First check the CRC:
                declare
                   use Byte_Array_Pointer;
-                  use Byte_Array_Pointer.Packed;
                   use Basic_Types;
                   -- Extract the parameter table header:
-                  Ptr : constant Byte_Array_Pointer.Instance := Unpack (Arg.Region);
-                  Ptr_Header : constant Byte_Array_Pointer.Instance := Slice (Ptr, Start_Index => 0, End_Index => Parameter_Table_Header.Size_In_Bytes - 1);
-                  Table_Header : constant Parameter_Table_Header.T := Parameter_Table_Header.Serialization.From_Byte_Array (To_Byte_Array (Ptr_Header));
+                  Table_Header : Parameter_Table_Header.T;
+                  Ptr : constant Byte_Array_Pointer.Instance := Get_Table_Ptr_From_Region (Arg.Region, Table_Header);
                   -- Compute the CRC over the incoming table:
                   Computed_Crc : constant Crc_16.Crc_16_Type := Self.Crc_Parameter_Table (To_Byte_Array (Ptr));
                begin
@@ -620,9 +655,6 @@ package body Component.Parameters.Implementation is
                   if Table_Header.Crc_Table = Computed_Crc then
                      case Arg.Operation is
                         when Set =>
-                           -- Save off crc and version:
-                           Self.Table_Version := Table_Header.Version;
-                           Self.Stored_Crc := Table_Header.Crc_Table;
                            -- Update the parameter table:
                            To_Return := Self.Update_Parameter_Table (Arg.Region);
                         when Validate =>
@@ -638,10 +670,24 @@ package body Component.Parameters.Implementation is
                      Self.Event_T_Send_If_Connected (Self.Events.Memory_Region_Crc_Invalid (Self.Sys_Time_T_Get, (Parameters_Region => Arg, Header => Table_Header, Computed_Crc => Computed_Crc)));
                      To_Return := (Region => Arg.Region, Status => Crc_Error);
                   end if;
+                  -- Mark that we should send a data product:
+                  Send_Data_Product := True;
                end;
             when Get =>
                To_Return := Self.Copy_Parameter_Table_To_Region (Arg.Region);
          end case;
+      end if;
+
+      -- Send data product if this was a Set or Validate operation:
+      if Send_Data_Product then
+         -- Data product reflects the currently in use table and the
+         -- status of the latest operation just performed:
+         Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Table_Status (Self.Sys_Time_T_Get, (
+            Active_Table_Version_Number => Self.Table_Version,
+            Active_Table_Update_Time => Self.Table_Update_Time,
+            Active_Table_Crc => Self.Stored_Crc,
+            Last_Table_Operation_Status => To_Return.Status
+         )));
       end if;
 
       -- Return the memory pointer with the status for deallocation.
@@ -674,11 +720,13 @@ package body Component.Parameters.Implementation is
    -- Update the active parameter value in a component for a parameter table entry with the given ID, Length, and Value. If multiple parameters share the same entry ID (grouped parameters), all will be updated.
    overriding function Update_Parameter (Self : in out Instance; Arg : in Parameter_Table_Entry.T) return Command_Execution_Status.E is
       use Parameter_Enums.Parameter_Update_Status;
+      use Parameter_Enums.Parameter_Table_Update_Status;
       use Command_Execution_Status;
       use Parameter_Types;
       Entry_Found : Boolean := False;
       -- Track which components we need to update (to avoid duplicate updates)
       Components_To_Update : array (Self.Connector_Parameter_Update_T_Provide'Range) of Boolean := [others => False];
+      Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
    begin
       -- Search through our entries linearly to find all parameters with matching Entry_ID.
       -- For grouped parameters, multiple parameters may share the same Entry_ID.
@@ -695,7 +743,7 @@ package body Component.Parameters.Implementation is
                begin
                   -- See if the length in the header is what we expect.
                   if Arg.Header.Buffer_Length /= Param_Length then
-                     Self.Event_T_Send_If_Connected (Self.Events.Parameter_Update_Length_Mismatch (Self.Sys_Time_T_Get, (
+                     Self.Event_T_Send_If_Connected (Self.Events.Parameter_Update_Length_Mismatch (Time, (
                         Header => Arg.Header,
                         Expected_Length => Param_Length)
                      ));
@@ -718,7 +766,7 @@ package body Component.Parameters.Implementation is
 
       -- If we didn't find any entries with matching Entry_ID, report error.
       if not Entry_Found then
-         Self.Event_T_Send_If_Connected (Self.Events.Parameter_Update_Id_Not_Recognized (Self.Sys_Time_T_Get, (Id => Arg.Header.Id)));
+         Self.Event_T_Send_If_Connected (Self.Events.Parameter_Update_Id_Not_Recognized (Time, (Id => Arg.Header.Id)));
          return Failure;
       end if;
 
@@ -732,6 +780,17 @@ package body Component.Parameters.Implementation is
             end if;
          end if;
       end loop;
+
+      -- OK at this point, the parameter was successfully updated, so we need to update the
+      -- table status data product.
+      Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Table_Status (Time, (
+         -- We keep these first 3 items the same since they represent the "base table"
+         -- that this parameter modification was made on top of.
+         Active_Table_Version_Number => Self.Table_Version,
+         Active_Table_Update_Time => Self.Table_Update_Time,
+         Active_Table_Crc => Self.Stored_Crc,
+         Last_Table_Operation_Status => Individual_Parameter_Modified
+      )));
 
       -- Send out a new parameter's packet if configured to do so:
       if Self.Dump_Parameters_On_Change then

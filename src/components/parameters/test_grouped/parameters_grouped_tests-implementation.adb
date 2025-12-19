@@ -40,9 +40,6 @@ package body Parameters_Grouped_Tests.Implementation is
 
       -- Call component init here.
       Self.Tester.Component_Instance.Init (Parameter_Table_Entries => Test_Grouped_Params.Parameter_Table_Entries'Access, Table_Id => Test_Grouped_Params.Parameter_Table_Id, Dump_Parameters_On_Change => True);
-
-      -- Call the component set up method that the assembly would normally call.
-      Self.Tester.Component_Instance.Set_Up;
    end Set_Up_Test;
 
    overriding procedure Tear_Down_Test (Self : in out Instance) is

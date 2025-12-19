@@ -46,21 +46,27 @@ enums:
   - name: Parameter_Table_Update_Status
     description: This status enumeration provides information on the success/failure of a parameter table update.
     literals:
-      - name: Success
+      - name: Uninitialized
         value: 0
-        description: Parameter was successfully staged.
-      - name: Length_Error
+        description: No table operation has been performed yet.
+      - name: Success
         value: 1
+        description: Parameter table update operation was successful.
+      - name: Length_Error
+        value: 2
         description: Parameter table length was not correct.
       - name: Crc_Error
-        value: 2
+        value: 3
         description: The computed CRC of the table does not match the stored CRC.
       - name: Parameter_Error
-        value: 3
+        value: 4
         description: An individual parameter was found invalid due to a constraint error within a component, or failing component-specific validation.
       - name: Dropped
-        value: 4
+        value: 5
         description: The operation could not be performed because it was dropped from a full queue.
+      - name: Individual_Parameter_Modified
+        value: 6
+        description: An individual parameter was updated in the parameter table without updating the whole table. In this case, the reported CRC, version, and update time of the table can no longer be trusted to be accurate. This status will be reported when using the Update_Parameter command in the Parameters component, which is intended to be a backdoor, ground-use only command.
   - name: Parameter_Validation_Status
     description: This status enumeration provides information on the result of validating a set of parameters.
     literals:

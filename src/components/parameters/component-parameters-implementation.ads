@@ -48,6 +48,7 @@ private
       Dump_Parameters_On_Change : Boolean := False;
       Stored_Crc : Crc_16.Crc_16_Type := [0, 0];
       Table_Version : Short_Float := 0.0;
+      Table_Update_Time : Interfaces.Unsigned_32 := 0;
       -- Some useful constants calculated in Init:
       Parameter_Table_Data_Length : Natural := 0;
       Parameter_Table_Length : Natural := 0;
@@ -63,7 +64,7 @@ private
    -- safely until everything is up and running, ie. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
-   overriding procedure Set_Up (Self : in out Instance) is null;
+   overriding procedure Set_Up (Self : in out Instance);
 
    ---------------------------------------
    -- Invokee connector primitives:
@@ -88,6 +89,8 @@ private
    overriding procedure Packet_T_Send_Dropped (Self : in out Instance; Arg : in Packet.T) is null;
    -- This procedure is called when a Event_T_Send message is dropped due to a full queue.
    overriding procedure Event_T_Send_Dropped (Self : in out Instance; Arg : in Event.T) is null;
+   -- This procedure is called when a Data_Product_T_Send message is dropped due to a full queue.
+   overriding procedure Data_Product_T_Send_Dropped (Self : in out Instance; Arg : in Data_Product.T) is null;
 
    -----------------------------------------------
    -- Command handler primitives:

@@ -39,6 +39,9 @@ connectors:
   - description: Events are sent out of this connector.
     type: Event.T
     kind: send
+  - description: Data products are sent out of this connector.
+    type: Data_Product.T
+    kind: send
   - description: The system time is retrieved via this connector.
     return_type: Sys_Time.T
     kind: get
