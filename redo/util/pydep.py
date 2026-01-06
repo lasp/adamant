@@ -113,6 +113,10 @@ def _build_pydeps(source_file, path=[]):
                 for dep in deps_to_build:
                     _inner_build_pydeps(dep)
 
+        # Recurse on existing dependencies to collect their transitive deps
+        for dep in existing_deps:
+            _inner_build_pydeps(dep)
+
     _inner_build_pydeps(source_file)
     return list(set(deps_not_in_path)), list(set(all_existing_deps))
 
