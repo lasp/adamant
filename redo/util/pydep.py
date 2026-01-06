@@ -82,12 +82,18 @@ def _build_pydeps(source_file, path=[]):
     Recursively build any missing python module dependencies for
     a given source file.
     Collect any static existing dependencies.
+    Track processed files to guard against circular imports.
     """
     built_deps = []
     all_existing_deps = []
     deps_not_in_path = []
+    processed_files = set()
 
     def _inner_build_pydeps(source_file):
+        # Skip if already processed:
+        if source_file in processed_files:
+            return
+        processed_files.add(source_file)
         # Find the python dependencies:
         existing_deps, nonexistent_deps = pydep(source_file, path)
         all_existing_deps.extend(existing_deps)
