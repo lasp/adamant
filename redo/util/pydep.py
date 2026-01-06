@@ -92,10 +92,13 @@ def _build_pydeps(source_file, path=[]):
         existing_deps, nonexistent_deps = pydep(source_file, path)
         all_existing_deps.extend(existing_deps)
 
+        # Collect dependencies to recurse on
+        deps_to_recurse = list(existing_deps)
+
         # For the nonexistent dependencies, see if we have a rule
         # to build those:
+        deps_to_build = []
         if nonexistent_deps:
-            deps_to_build = []
             with py_source_database() as db:
                 deps_to_build = db.try_get_sources(nonexistent_deps)
 
@@ -108,13 +111,10 @@ def _build_pydeps(source_file, path=[]):
             if deps_to_build:
                 redo.redo_ifchange(deps_to_build)
                 built_deps.extend(deps_to_build)
+                deps_to_recurse.extend(deps_to_build)
 
-                # Run py deps on each of the build source files:
-                for dep in deps_to_build:
-                    _inner_build_pydeps(dep)
-
-        # Recurse on existing dependencies to collect their transitive deps
-        for dep in existing_deps:
+        # Recurse on all dependencies to collect their transitive deps
+        for dep in deps_to_recurse:
             _inner_build_pydeps(dep)
 
     _inner_build_pydeps(source_file)
