@@ -82,20 +82,29 @@ def _build_pydeps(source_file, path=[]):
     Recursively build any missing python module dependencies for
     a given source file.
     Collect any static existing dependencies.
+    Track processed files to guard against circular imports.
     """
     built_deps = []
     all_existing_deps = []
     deps_not_in_path = []
+    processed_files = set()
 
     def _inner_build_pydeps(source_file):
+        # Skip if already processed:
+        if source_file in processed_files:
+            return
+        processed_files.add(source_file)
         # Find the python dependencies:
         existing_deps, nonexistent_deps = pydep(source_file, path)
         all_existing_deps.extend(existing_deps)
 
+        # Collect dependencies to recurse on
+        deps_to_recurse = list(existing_deps)
+
         # For the nonexistent dependencies, see if we have a rule
         # to build those:
+        deps_to_build = []
         if nonexistent_deps:
-            deps_to_build = []
             with py_source_database() as db:
                 deps_to_build = db.try_get_sources(nonexistent_deps)
 
@@ -108,10 +117,11 @@ def _build_pydeps(source_file, path=[]):
             if deps_to_build:
                 redo.redo_ifchange(deps_to_build)
                 built_deps.extend(deps_to_build)
+                deps_to_recurse.extend(deps_to_build)
 
-                # Run py deps on each of the build source files:
-                for dep in deps_to_build:
-                    _inner_build_pydeps(dep)
+        # Recurse on all dependencies to collect their transitive deps
+        for dep in deps_to_recurse:
+            _inner_build_pydeps(dep)
 
     _inner_build_pydeps(source_file)
     return list(set(deps_not_in_path)), list(set(all_existing_deps))
