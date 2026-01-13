@@ -81,22 +81,64 @@ class {{ name }}(PackedTypeBase):
         self._min_serialized_length = self._size_in_bytes  # in bytes
         self._max_serialized_length = self._size_in_bytes  # in bytes
 
-    def __eq__(self, other):
+    def __eq__(self, other{% if has_float %}, epsilon=0.0{% endif %}):
+{% if has_float %}
+        if epsilon == 0.0:
+            return isinstance(other, self.__class__) and other.length == self.length and other.elements == self.elements
+        else:
+            if not isinstance(other, self.__class__) or other.length != self.length:
+                return False
+{% if element.is_packed_type %}
+            return all(
+                (a is None and b is None) or
+                (a is not None and b is not None and a.__eq__(b, epsilon=epsilon))
+                for a, b in zip(self.elements, other.elements)
+            )
+{% else %}
+            return all(
+                self._float_equals(a, b, epsilon)
+                for a, b in zip(self.elements, other.elements)
+            )
+{% endif %}
+{% else %}
         return isinstance(other, self.__class__) and other.length == self.length and other.elements == self.elements
+{% endif %}
 
     def serialized_length(self):  # in bytes
         return self._size_in_bytes
 
-    def is_equal(self, other, num_elements_to_compare=None):
+    def is_equal(self, other, num_elements_to_compare=None{% if has_float %}, epsilon=0.0{% endif %}):
         """
         Special __eq__ function when you only want to compare a certain number of elements in the array
         not every element in the array.
         """
         if num_elements_to_compare is None:
             num_elements_to_compare = self.length
+{% if has_float %}
+        if epsilon == 0.0:
+            return isinstance(other, self.__class__) and \
+                other.length == self.length and \
+                other.elements[:num_elements_to_compare] == self.elements[:num_elements_to_compare]
+        else:
+            if not isinstance(other, self.__class__) or other.length != self.length:
+                return False
+{% if element.is_packed_type %}
+            return all(
+                (a is None and b is None) or
+                (a is not None and b is not None and a.__eq__(b, epsilon=epsilon))
+                for a, b in zip(self.elements[:num_elements_to_compare], other.elements[:num_elements_to_compare])
+            )
+{% else %}
+            return all(
+                self._float_equals(a, b, epsilon)
+                for a, b in zip(self.elements[:num_elements_to_compare], other.elements[:num_elements_to_compare])
+            )
+{% endif %}
+{% else %}
         return isinstance(other, self.__class__) and \
             other.length == self.length and \
             other.elements[:num_elements_to_compare] == self.elements[:num_elements_to_compare]
+{% endif %}
 
     def _from_byte_array(self, stream):
         # Extract each element from the bitstream:

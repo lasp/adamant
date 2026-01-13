@@ -48,6 +48,13 @@ class PackedTypeBase(metaclass=abc.ABCMeta):
     def to_byte_string(self):
         return "[" + " ".join(["%02X" % a for a in list(self.to_byte_array())]) + "]"
 
+    @staticmethod
+    def _float_equals(a, b, epsilon=0.0):
+        """Helper function for epsilon-based float comparison."""
+        if a is None or b is None:
+            return a == b
+        return abs(a - b) <= epsilon
+
     def __repr__(self):
         return self.to_string()
 
