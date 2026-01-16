@@ -366,7 +366,7 @@ enums:
       - name: Global
         value: 3
         description: Found in the seq global variables (currently not supported in Adamant)
-  - name: Print_Type
+  - name: Seq_Print_Type
     description: The type of message associated with a print statement.
     literals:
       - name: Debug

@@ -278,7 +278,7 @@ private
       Seq_Id_To_Load : Sequence_Types.Sequence_Id := Sequence_Types.Sequence_Id'First;
       Spawn_Destination : Sequence_Engine_Id := Sequence_Engine_Id'First;
       Errant_Field : Interfaces.Unsigned_32 := 0;
-      String_To_Print : Seq_Print.T := (Print_Type => Print_Type.Debug, Encoded_String => [others => 0]);
+      String_To_Print : Seq_Print.T := (Print_Type => Seq_Print_Type.Debug, Encoded_String => [others => 0]);
    end record;
 
 end Seq_Runtime;
