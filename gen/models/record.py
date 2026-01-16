@@ -359,6 +359,20 @@ class record(packed_type):
                 seen_enums[obj.type_model.name] = obj.type_model
         self.enum_models = list(seen_enums.values())
 
+        # Check for field names that match their enum type names:
+        for obj in self.fields.values():
+            if obj.is_enum and obj.name == obj.type_model.name:
+                raise ModelException(
+                    "Record '"
+                    + self.name
+                    + "' has field '"
+                    + obj.name
+                    + "' with enum type '"
+                    + obj.type_model.name
+                    + "'. Field names cannot match their type names. Please rename the field "
+                    + "to something different."
+                )
+
         # Store all types that do NOT have a model associated with them:
         self.simple_typed_fields = list(
             OrderedDict.fromkeys([f for f in self.fields.values() if not f.type_model])
