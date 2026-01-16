@@ -372,6 +372,17 @@ class record(packed_type):
                     + "'. Field names cannot match their type names. Please rename the field "
                     + "to something different."
                 )
+            if obj.is_packed_type and obj.name == obj.type_package:
+                raise ModelException(
+                    "Record '"
+                    + self.name
+                    + "' has field '"
+                    + obj.name
+                    + "' with packed type '"
+                    + obj.type_package
+                    + "'. Field names cannot match their type names. Please rename the field "
+                    + "to something different."
+                )
 
         # Store all types that do NOT have a model associated with them:
         self.simple_typed_fields = list(
