@@ -763,7 +763,7 @@ package body Seq_Tests.Implementation is
       -- Test seq 17
       -- Sequence 17 tests print functions.
       declare
-         use Seq_Enums.Print_Type;
+         use Seq_Enums.Seq_Print_Type;
          Sequence : Memory_Region.T;
          Buffer : Basic_Types.Byte_Array_Access;
          Engine : Seq.Engine;
@@ -1968,7 +1968,7 @@ package body Seq_Tests.Implementation is
 
    -- A test for the Cmd Print Var instruction
    overriding procedure Cmd_Print_Var (Self : in out Instance) is
-      use Seq_Enums.Print_Type;
+      use Seq_Enums.Seq_Print_Type;
       use Seq_Enums.Seq_Data_Type;
 
       -- U8 - E8 - E8 - U8 - var record

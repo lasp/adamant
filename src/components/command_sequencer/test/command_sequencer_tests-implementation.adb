@@ -3670,7 +3670,7 @@ package body Command_Sequencer_Tests.Implementation is
 
    -- This unit test tests the sequencer print opcode which produces an event from the command sequencer.
    overriding procedure Test_Print (Self : in out Instance) is
-      use Seq_Enums.Print_Type;
+      use Seq_Enums.Seq_Print_Type;
       T : Component.Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
       Sequence_Buffer : Basic_Types.Byte_Array (0 .. 99999);
       Sequence_Size : constant Natural := Load_Sequence (File_Path => "test_sequences/build/bin/print_17.bin", Buffer => Sequence_Buffer);

@@ -11,5 +11,5 @@ fields:
     format: U16
   - name: Print_Type
     description: The type of print message (debug, info, critical, error).
-    type: Seq_Enums.Print_Type.E
+    type: Seq_Enums.Seq_Print_Type.E
     format: E8
