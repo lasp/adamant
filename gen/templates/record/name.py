@@ -144,7 +144,7 @@ class {{ name }}(PackedTypeBase):
         # Other attributes:
         self.num_fields = {{ num_fields }}
 
-    def __eq__(self, other{% if has_float %}, epsilon=0.0{% endif %}):
+    def __eq__(self, other{% if has_float %}, epsilon=None{% endif %}):
         return isinstance(other, self.__class__) and \
 {% for field in fields.values() %}
 {% if field.variable_length and field.is_packed_type %}

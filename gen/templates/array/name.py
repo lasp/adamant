@@ -81,7 +81,7 @@ class {{ name }}(PackedTypeBase):
         self._min_serialized_length = self._size_in_bytes  # in bytes
         self._max_serialized_length = self._size_in_bytes  # in bytes
 
-    def __eq__(self, other{% if has_float %}, epsilon=0.0{% endif %}):
+    def __eq__(self, other{% if has_float %}, epsilon=None{% endif %}):
 {% if has_float %}
         if epsilon == 0.0:
             return isinstance(other, self.__class__) and other.length == self.length and other.elements == self.elements
@@ -107,7 +107,7 @@ class {{ name }}(PackedTypeBase):
     def serialized_length(self):  # in bytes
         return self._size_in_bytes
 
-    def is_equal(self, other, num_elements_to_compare=None{% if has_float %}, epsilon=0.0{% endif %}):
+    def is_equal(self, other, num_elements_to_compare=None{% if has_float %}, epsilon=None{% endif %}):
         """
         Special __eq__ function when you only want to compare a certain number of elements in the array
         not every element in the array.
