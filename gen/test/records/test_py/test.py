@@ -10,6 +10,8 @@ pydep.build_py_deps()
 from aa import Aa
 from bb import Bb
 from cc import Cc
+from ff import Ff
+from gg import Gg
 from simple_variable import Simple_Variable
 from simple_variable_holder import Simple_Variable_Holder
 from simple_variable_offset import Simple_Variable_Offset
@@ -18,6 +20,7 @@ from another_header import Another_Header
 from simple_variable_array import Simple_Variable_Array
 from complex_array import Complex_Array
 from test_enums import Second_Enum
+from base_classes.packed_type_base import epsilon, get_epsilon, set_default_epsilon
 import sys
 
 
@@ -159,5 +162,72 @@ if __name__ == "__main__":
     arr2.from_byte_array(data)
     println(str(arr2))
     assert arr == arr2
+    println("passed.")
+    println()
+
+    println("testing Ff (record with floats):")
+    println("create Ff:")
+    f1 = Ff(One=1, Two=1.5, Three=2.5)
+    println(str(f1))
+    println(str(f1.to_tuple_string()))
+    println(str(f1.to_byte_array().hex()))
+    data = f1.to_byte_array()
+    println("create Ff2 from bytes:")
+    f2 = Ff.create_from_byte_array(data)
+    println(str(f2))
+    assert f1 == f2
+    println("passed.")
+    println()
+
+    println("testing Gg (nested record with floats):")
+    println("create Gg:")
+    g1 = Gg(Yo=42, F=f1)
+    println(str(g1))
+    println(str(g1.to_tuple_string()))
+    data = g1.to_byte_array()
+    println("create Gg2 from bytes:")
+    g2 = Gg.create_from_byte_array(data)
+    println(str(g2))
+    assert g1 == g2
+    println("passed.")
+    println()
+
+    println("testing epsilon:")
+    println("default epsilon is 0.0 (exact comparison):")
+    assert get_epsilon() == 0.0
+    f3 = Ff(One=1, Two=1.5, Three=2.5)
+    f4 = Ff(One=1, Two=1.5000001, Three=2.5)  # Slightly different float
+    println(f"f3.Two = {f3.Two}")
+    println(f"f4.Two = {f4.Two}")
+    println("exact comparison (default): f3 != f4")
+    assert f3 != f4  # Different with exact comparison
+    println("tolerant comparison with epsilon(0.0001):")
+    with epsilon(0.0001):
+        assert get_epsilon() == 0.0001
+        assert f3 == f4  # Equal within tolerance
+        println("f3 == f4 within epsilon")
+    println("back to exact comparison after context:")
+    assert get_epsilon() == 0.0
+    assert f3 != f4  # Back to exact comparison
+    println("passed.")
+    println()
+
+    println("testing epsilon with nested records:")
+    g3 = Gg(Yo=42, F=f3)
+    g4 = Gg(Yo=42, F=f4)
+    println("exact comparison (default): g3 != g4")
+    assert g3 != g4
+    println("tolerant comparison with epsilon(0.0001):")
+    with epsilon(0.0001):
+        assert g3 == g4  # Epsilon propagates to nested float fields
+        println("g3 == g4 within epsilon (propagates to nested fields)")
+    println("back to exact comparison: g3 != g4")
+    assert g3 != g4
+    println("passed.")
+    println()
+
+    println("testing explicit epsilon parameter:")
+    assert f3.__eq__(f4, epsilon=0.0001)  # Explicit epsilon
+    assert not f3.__eq__(f4, epsilon=0.0)  # Explicit exact comparison
     println("passed.")
     println()

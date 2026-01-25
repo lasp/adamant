@@ -13,7 +13,12 @@ from eight_bit_type_array import Eight_Bit_Type_Array
 from simple_array import Simple_Array
 from unaligned_array import Unaligned_Array
 from enum_array import Enum_Array
+from float_array import Float_Array
+from gg import Gg
+from ff import Ff
+from complex_float_array import Complex_Float_Array
 from test_enums import First_Enum
+from base_classes.packed_type_base import epsilon, get_epsilon
 import sys
 
 
@@ -119,5 +124,83 @@ if __name__ == "__main__":
     en2.from_byte_array(data)
     println(str(en2))
     assert en == en2
+    println("passed.")
+    println()
+
+    println("testing float_array:")
+    println("create float_array:")
+    fa1 = Float_Array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0])
+    println(str(fa1))
+    println(str(fa1.to_tuple_string()))
+    println(str(fa1.to_byte_array().hex()))
+    data = fa1.to_byte_array()
+    println("create float_array2 from bytes:")
+    fa2 = Float_Array.create_from_byte_array(data)
+    println(str(fa2))
+    assert fa1 == fa2
+    println("passed.")
+    println()
+
+    println("testing complex_float_array:")
+    println("create complex_float_array:")
+    f = Ff(One=1, Two=1.5, Three=2.5)
+    g = Gg(Yo=42, F=f)
+    cfa1 = Complex_Float_Array([g for idx in range(25)])
+    println(str(cfa1))
+    data = cfa1.to_byte_array()
+    println("create complex_float_array2 from bytes:")
+    cfa2 = Complex_Float_Array.create_from_byte_array(data)
+    println(str(cfa2))
+    assert cfa1 == cfa2
+    println("passed.")
+    println()
+
+    println("testing epsilon with float_array:")
+    println("default epsilon is 0.0 (exact comparison):")
+    assert get_epsilon() == 0.0
+    fa3 = Float_Array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0])
+    fa4 = Float_Array([1.0, 2.0, 3.0000001, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0])
+    println(f"fa3.elements[2] = {fa3.elements[2]}")
+    println(f"fa4.elements[2] = {fa4.elements[2]}")
+    println("exact comparison (default): fa3 != fa4")
+    assert fa3 != fa4
+    println("tolerant comparison with epsilon(0.0001):")
+    with epsilon(0.0001):
+        assert get_epsilon() == 0.0001
+        assert fa3 == fa4
+        println("fa3 == fa4 within epsilon")
+    println("back to exact comparison: fa3 != fa4")
+    assert get_epsilon() == 0.0
+    assert fa3 != fa4
+    println("passed.")
+    println()
+
+    println("testing epsilon with complex_float_array:")
+    f3 = Ff(One=1, Two=1.5, Three=2.5)
+    f4 = Ff(One=1, Two=1.5000001, Three=2.5)
+    g3 = Gg(Yo=42, F=f3)
+    g4 = Gg(Yo=42, F=f4)
+    cfa3 = Complex_Float_Array([g3 for idx in range(25)])
+    cfa4 = Complex_Float_Array([g4 for idx in range(25)])
+    println("exact comparison (default): cfa3 != cfa4")
+    assert cfa3 != cfa4
+    println("tolerant comparison with epsilon(0.0001):")
+    with epsilon(0.0001):
+        assert cfa3 == cfa4
+        println("cfa3 == cfa4 within epsilon (propagates through nested types)")
+    println("back to exact comparison: cfa3 != cfa4")
+    assert cfa3 != cfa4
+    println("passed.")
+    println()
+
+    println("testing is_equal with epsilon:")
+    println("is_equal with partial comparison and epsilon:")
+    fa5 = Float_Array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0])
+    fa6 = Float_Array([1.0, 2.0, 3.0000001, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 99.0])
+    # Compare only first 3 elements - difference is in element 2
+    assert not fa5.is_equal(fa6, num_elements_to_compare=3, epsilon=0.0)
+    assert fa5.is_equal(fa6, num_elements_to_compare=3, epsilon=0.0001)
+    # Compare only first 2 elements - no difference
+    assert fa5.is_equal(fa6, num_elements_to_compare=2, epsilon=0.0)
     println("passed.")
     println()
