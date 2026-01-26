@@ -29,3 +29,15 @@ if __name__ == "__main__":
     example2 = Example_Record.create_from_byte_array(data)
     assert example1 == example2
     print("done.")
+    print()
+
+    # Demonstrate epsilon comparison for floating-point fields
+    from base_classes.packed_type_base import epsilon
+
+    example3 = Example_Record(Value_1=2, Value_2=-1, Value_3=1, Value_4=0.5000001)
+    print("epsilon comparison:")
+    print(str(example3.to_tuple_string()))
+    assert example1 != example3  # Different with exact comparison
+    with epsilon(0.001):
+        assert example1 == example3  # Equal within tolerance
+    print("passed.")

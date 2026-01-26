@@ -1484,7 +1484,7 @@ The python classes use the \texttt{bitstring} python module which allows easily 
 \vspace{5mm} %5mm vertical space
 \begin{spaceditemize}
   \item \textbf{\texttt{\_\_init\_\_}} - Create a packed record. The record field values are optional upon initialization, and will be set to the default or \texttt{None} if there is no default. During initialization, the class performs extensive type checking of the record fields to make sure that their values adhere to ranges of the equivalent Ada types.
-  \item \textbf{\texttt{\_\_eq\_\_}} - Compares two packed records for equality.
+  \item \textbf{\texttt{\_\_eq\_\_}} - Compares two packed records for equality. For packed records containing floating-point fields, an optional \texttt{epsilon} parameter can be passed to allow tolerant comparisons (e.g., \texttt{a.\_\_eq\_\_(b, epsilon=0.0001)}). See below for additional details on epsilon comparisons.
   \item \textbf{\texttt{serialized\_length}} - Equivalent to the Ada \texttt{Serialized\_Length} function, returns the length of the packed type.
   \item \textbf{\texttt{to\_byte\_array} and \texttt{from\_byte\_array}} - Equivalent to the Ada serialization/deserialization functions \texttt{Serialization.To\_Byte\_Array} and \texttt{Serialization.From\_Byte\_Array}; converts the python class to a serialized byte array whose bits correspond to the layout of the packed big-endian type (\texttt{T}) in Ada, or takes a byte array of this form an turns it into a python class.
   \item \textbf{\texttt{create\_from\_byte\_array}} - Creates a new packed record object from a serialized byte array.
@@ -1493,7 +1493,50 @@ The python classes use the \texttt{bitstring} python module which allows easily 
 \end{spaceditemize}
 \vspace{5mm} %5mm vertical space
 
-An example of how this class can be used is shown below in a file called \textit{test.py}:
+\textbf{Epsilon Comparisons for Floating-Point Fields} \\
+
+When packed records contain floating-point fields, exact equality comparisons may fail due to floating-point representation differences. Adamant provides an \texttt{epsilon} context manager and related utilities to enable tolerant comparisons. These can be imported from the base classes module:
+
+\vspace{5mm} %5mm vertical space
+\begin{minted}{python}
+from base_classes.packed_type_base import epsilon, get_epsilon, set_default_epsilon
+\end{minted}
+\vspace{5mm} %5mm vertical space
+
+The following utilities are available:
+
+\vspace{5mm} %5mm vertical space
+\begin{spaceditemize}
+  \item \textbf{\texttt{epsilon(value)}} - A context manager that temporarily sets the tolerance for float comparisons within its scope. When comparing packed records inside a \texttt{with epsilon(...):} block, floating-point fields are considered equal if they differ by less than the specified epsilon value. After the context exits, the epsilon reverts to its previous value.
+  \item \textbf{\texttt{set\_default\_epsilon(value)}} - Sets a persistent default epsilon value for the current context. This is useful in environments where tolerant comparisons are always desired without repeatedly using the context manager.
+  \item \textbf{\texttt{get\_epsilon()}} - Returns the current epsilon value (default is \texttt{0.0}, meaning exact comparison).
+\end{spaceditemize}
+\vspace{5mm} %5mm vertical space
+
+The epsilon tolerance propagates to nested packed records and arrays, so comparisons of complex nested structures will use the same tolerance for all floating-point fields. An example of how these utilities can be used is shown below:
+
+\vspace{5mm} %5mm vertical space
+\begin{minted}{python}
+from base_classes.packed_type_base import epsilon
+
+# Exact comparison (default behavior, epsilon=0.0)
+record1 = My_Record(Value=1.0000001)
+record2 = My_Record(Value=1.0000002)
+assert record1 != record2  # Different with exact comparison
+
+# Tolerant comparison using context manager
+with epsilon(0.0001):
+    assert record1 == record2  # Equal within tolerance
+
+# Back to exact comparison after context exits
+assert record1 != record2
+
+# Explicit epsilon parameter on __eq__
+assert record1.__eq__(record2, epsilon=0.0001)  # Equal within tolerance
+\end{minted}
+\vspace{5mm} %5mm vertical space
+
+A more complete example of how the python class can be used is shown below in a file called \textit{test.py}:
 
 \pythoncodef{../example_architecture/record_py/test.py}
 
