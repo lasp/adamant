@@ -21,6 +21,7 @@ event_id_cls_dict = {
     {{ id }}: ecg.create_event_cls(
         "{{ event.suite.component.instance_name }}",
         "{{ event.name }}",
-        {% if event.type_model %}{{ event.type_package }}{% else %}None{% endif %}{{ "\n    " }}){{ "," if not loop.last }}
+        {% if event.type_model %}{{ event.type_package }}{% else %}None{% endif %},
+        "{{ event.description|default('', true)|replace('"', '\\"') }}"{{ "\n    " }}){{ "," if not loop.last }}
 {% endfor %}
 }
