@@ -231,3 +231,92 @@ if __name__ == "__main__":
     assert not f3.__eq__(f4, epsilon=0.0)  # Explicit exact comparison
     println("passed.")
     println()
+
+    println("testing epsilon does NOT affect integer comparisons:")
+    f5 = Ff(One=1, Two=1.5, Three=2.5)
+    f6 = Ff(One=2, Two=1.5, Three=2.5)  # Different integer field
+    println(f"f5.One = {f5.One}, f6.One = {f6.One}")
+    println("exact comparison (default): f5 != f6")
+    assert f5 != f6  # Different integers
+    println("with epsilon(1000.0) - large epsilon should NOT affect integer:")
+    with epsilon(1000.0):
+        assert f5 != f6  # Integer difference, epsilon doesn't help
+        println("f5 != f6 within epsilon (integer unaffected)")
+    println("passed.")
+    println()
+
+    println("testing epsilon does NOT affect integer in nested records:")
+    f_same = Ff(One=1, Two=1.5, Three=2.5)
+    g5 = Gg(Yo=42, F=f_same)
+    g6 = Gg(Yo=100, F=f_same)  # Different integer field Yo
+    println(f"g5.Yo = {g5.Yo}, g6.Yo = {g6.Yo}")
+    println("exact comparison (default): g5 != g6")
+    assert g5 != g6  # Different integers
+    println("with epsilon(1000.0) - large epsilon should NOT affect integer:")
+    with epsilon(1000.0):
+        assert g5 != g6  # Integer difference, epsilon doesn't help
+        println("g5 != g6 within epsilon (integer unaffected)")
+    println("passed.")
+    println()
+
+    println("testing combined integer and float differences:")
+    f7 = Ff(One=1, Two=1.5, Three=2.5)
+    f8 = Ff(One=1, Two=1.5000001, Three=2.5)  # Same integer, different float
+    f9 = Ff(One=2, Two=1.5000001, Three=2.5)  # Different integer, different float
+    println("f7: One=1, Two=1.5")
+    println("f8: One=1, Two=1.5000001")
+    println("f9: One=2, Two=1.5000001")
+    with epsilon(0.0001):
+        assert f7 == f8  # Same integer, float within epsilon
+        println("f7 == f8 within epsilon (same int, float tolerated)")
+        assert f7 != f9  # Different integer
+        println("f7 != f9 within epsilon (different int, not tolerated)")
+    println("passed.")
+    println()
+
+    println("testing serialization round-trip with epsilon:")
+    # Short_Float (F32) has limited precision, so round-trip may introduce small errors
+    f_original = Ff(One=5, Two=3.14159, Three=2.71828)
+    data = f_original.to_byte_array()
+    f_roundtrip = Ff.create_from_byte_array(data)
+    println(f"original Two = {f_original.Two}")
+    println(f"roundtrip Two = {f_roundtrip.Two}")
+    # F32 precision loss means exact comparison may fail
+    assert f_original != f_roundtrip  # Exact comparison fails due to F32 precision
+    println("exact comparison fails (expected due to F32 precision)")
+    with epsilon(0.0001):
+        assert f_original == f_roundtrip  # Tolerant comparison succeeds
+        println("tolerant comparison after roundtrip: passed")
+    # But if we modify the integer, it should fail regardless
+    f_bad_int = Ff(One=6, Two=3.14159, Three=2.71828)
+    with epsilon(1000.0):
+        assert f_original != f_bad_int  # Integer difference not tolerated
+        println("integer modification fails with large epsilon: passed")
+    println("passed.")
+    println()
+
+    println("testing set_default_epsilon:")
+    assert get_epsilon() == 0.0  # Default is 0.0
+    println("default epsilon is 0.0")
+    set_default_epsilon(0.001)
+    assert get_epsilon() == 0.001  # Now 0.001
+    println("after set_default_epsilon(0.001): get_epsilon() == 0.001")
+    # Test that comparisons use the new default
+    f_a = Ff(One=1, Two=1.5, Three=2.5)
+    f_b = Ff(One=1, Two=1.5000001, Three=2.5)
+    assert f_a == f_b  # Equal within default epsilon 0.001
+    println("comparison uses new default epsilon")
+    # Test that with epsilon() overrides the default
+    with epsilon(0.0):
+        assert get_epsilon() == 0.0
+        assert f_a != f_b  # Exact comparison
+        println("with epsilon(0.0) overrides default")
+    # After exiting, should return to set default, not 0.0
+    assert get_epsilon() == 0.001
+    println("after exiting context, returns to set default (0.001)")
+    # Reset to 0.0 for clean state
+    set_default_epsilon(0.0)
+    assert get_epsilon() == 0.0
+    println("reset to 0.0")
+    println("passed.")
+    println()

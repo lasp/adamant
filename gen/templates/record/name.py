@@ -154,10 +154,10 @@ class {{ name }}(PackedTypeBase):
                 (self.{{ field.name }}.is_equal(other.{{ field.name }}, num_elements_to_compare=(self.{{ field.variable_length }} + int({{ field.variable_length_offset }})){% if field.has_float %}, epsilon=epsilon{% endif %}))
             ){{ " and \\" if not loop.last }}
 {% elif field.has_float and field.is_packed_type %}
-            self.{{ field.name }} == other.{{ field.name }} if epsilon == 0.0 else (self.{{ field.name }} is None and other.{{ field.name }} is None) or (
+            (self.{{ field.name }} == other.{{ field.name }} if epsilon == 0.0 else (self.{{ field.name }} is None and other.{{ field.name }} is None) or (
                 (self.{{ field.name }} is not None and other.{{ field.name }} is not None) and
                 self.{{ field.name }}.__eq__(other.{{ field.name }}, epsilon=epsilon)
-            ){{ " and \\" if not loop.last }}
+            )){{ " and \\" if not loop.last }}
 {% elif field.has_float %}
             self._float_equals(self.{{ field.name }}, other.{{ field.name }}, epsilon){{ " and \\" if not loop.last }}
 {% else %}
