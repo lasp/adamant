@@ -10,6 +10,8 @@ pydep.build_py_deps()
 from aa import Aa
 from bb import Bb
 from cc import Cc
+from ff import Ff
+from gg import Gg
 from simple_variable import Simple_Variable
 from simple_variable_holder import Simple_Variable_Holder
 from simple_variable_offset import Simple_Variable_Offset
@@ -18,6 +20,7 @@ from another_header import Another_Header
 from simple_variable_array import Simple_Variable_Array
 from complex_array import Complex_Array
 from test_enums import Second_Enum
+from base_classes.packed_type_base import epsilon, get_epsilon, set_default_epsilon
 import sys
 
 
@@ -159,5 +162,161 @@ if __name__ == "__main__":
     arr2.from_byte_array(data)
     println(str(arr2))
     assert arr == arr2
+    println("passed.")
+    println()
+
+    println("testing Ff (record with floats):")
+    println("create Ff:")
+    f1 = Ff(One=1, Two=1.5, Three=2.5)
+    println(str(f1))
+    println(str(f1.to_tuple_string()))
+    println(str(f1.to_byte_array().hex()))
+    data = f1.to_byte_array()
+    println("create Ff2 from bytes:")
+    f2 = Ff.create_from_byte_array(data)
+    println(str(f2))
+    assert f1 == f2
+    println("passed.")
+    println()
+
+    println("testing Gg (nested record with floats):")
+    println("create Gg:")
+    g1 = Gg(Yo=42, F=f1)
+    println(str(g1))
+    println(str(g1.to_tuple_string()))
+    data = g1.to_byte_array()
+    println("create Gg2 from bytes:")
+    g2 = Gg.create_from_byte_array(data)
+    println(str(g2))
+    assert g1 == g2
+    println("passed.")
+    println()
+
+    println("testing epsilon:")
+    println("default epsilon is 0.0 (exact comparison):")
+    assert get_epsilon() == 0.0
+    f3 = Ff(One=1, Two=1.5, Three=2.5)
+    f4 = Ff(One=1, Two=1.5000001, Three=2.5)  # Slightly different float
+    println(f"f3.Two = {f3.Two}")
+    println(f"f4.Two = {f4.Two}")
+    println("exact comparison (default): f3 != f4")
+    assert f3 != f4  # Different with exact comparison
+    println("tolerant comparison with epsilon(0.0001):")
+    with epsilon(0.0001):
+        assert get_epsilon() == 0.0001
+        assert f3 == f4  # Equal within tolerance
+        println("f3 == f4 within epsilon")
+    println("back to exact comparison after context:")
+    assert get_epsilon() == 0.0
+    assert f3 != f4  # Back to exact comparison
+    println("passed.")
+    println()
+
+    println("testing epsilon with nested records:")
+    g3 = Gg(Yo=42, F=f3)
+    g4 = Gg(Yo=42, F=f4)
+    println("exact comparison (default): g3 != g4")
+    assert g3 != g4
+    println("tolerant comparison with epsilon(0.0001):")
+    with epsilon(0.0001):
+        assert g3 == g4  # Epsilon propagates to nested float fields
+        println("g3 == g4 within epsilon (propagates to nested fields)")
+    println("back to exact comparison: g3 != g4")
+    assert g3 != g4
+    println("passed.")
+    println()
+
+    println("testing explicit epsilon parameter:")
+    assert f3.__eq__(f4, epsilon=0.0001)  # Explicit epsilon
+    assert not f3.__eq__(f4, epsilon=0.0)  # Explicit exact comparison
+    println("passed.")
+    println()
+
+    println("testing epsilon does NOT affect integer comparisons:")
+    f5 = Ff(One=1, Two=1.5, Three=2.5)
+    f6 = Ff(One=2, Two=1.5, Three=2.5)  # Different integer field
+    println(f"f5.One = {f5.One}, f6.One = {f6.One}")
+    println("exact comparison (default): f5 != f6")
+    assert f5 != f6  # Different integers
+    println("with epsilon(1000.0) - large epsilon should NOT affect integer:")
+    with epsilon(1000.0):
+        assert f5 != f6  # Integer difference, epsilon doesn't help
+        println("f5 != f6 within epsilon (integer unaffected)")
+    println("passed.")
+    println()
+
+    println("testing epsilon does NOT affect integer in nested records:")
+    f_same = Ff(One=1, Two=1.5, Three=2.5)
+    g5 = Gg(Yo=42, F=f_same)
+    g6 = Gg(Yo=100, F=f_same)  # Different integer field Yo
+    println(f"g5.Yo = {g5.Yo}, g6.Yo = {g6.Yo}")
+    println("exact comparison (default): g5 != g6")
+    assert g5 != g6  # Different integers
+    println("with epsilon(1000.0) - large epsilon should NOT affect integer:")
+    with epsilon(1000.0):
+        assert g5 != g6  # Integer difference, epsilon doesn't help
+        println("g5 != g6 within epsilon (integer unaffected)")
+    println("passed.")
+    println()
+
+    println("testing combined integer and float differences:")
+    f7 = Ff(One=1, Two=1.5, Three=2.5)
+    f8 = Ff(One=1, Two=1.5000001, Three=2.5)  # Same integer, different float
+    f9 = Ff(One=2, Two=1.5000001, Three=2.5)  # Different integer, different float
+    println("f7: One=1, Two=1.5")
+    println("f8: One=1, Two=1.5000001")
+    println("f9: One=2, Two=1.5000001")
+    with epsilon(0.0001):
+        assert f7 == f8  # Same integer, float within epsilon
+        println("f7 == f8 within epsilon (same int, float tolerated)")
+        assert f7 != f9  # Different integer
+        println("f7 != f9 within epsilon (different int, not tolerated)")
+    println("passed.")
+    println()
+
+    println("testing serialization round-trip with epsilon:")
+    # Short_Float (F32) has limited precision, so round-trip may introduce small errors
+    f_original = Ff(One=5, Two=3.14159, Three=2.71828)
+    data = f_original.to_byte_array()
+    f_roundtrip = Ff.create_from_byte_array(data)
+    println(f"original Two = {f_original.Two}")
+    println(f"roundtrip Two = {f_roundtrip.Two}")
+    # F32 precision loss means exact comparison may fail
+    assert f_original != f_roundtrip  # Exact comparison fails due to F32 precision
+    println("exact comparison fails (expected due to F32 precision)")
+    with epsilon(0.0001):
+        assert f_original == f_roundtrip  # Tolerant comparison succeeds
+        println("tolerant comparison after roundtrip: passed")
+    # But if we modify the integer, it should fail regardless
+    f_bad_int = Ff(One=6, Two=3.14159, Three=2.71828)
+    with epsilon(1000.0):
+        assert f_original != f_bad_int  # Integer difference not tolerated
+        println("integer modification fails with large epsilon: passed")
+    println("passed.")
+    println()
+
+    println("testing set_default_epsilon:")
+    assert get_epsilon() == 0.0  # Default is 0.0
+    println("default epsilon is 0.0")
+    set_default_epsilon(0.001)
+    assert get_epsilon() == 0.001  # Now 0.001
+    println("after set_default_epsilon(0.001): get_epsilon() == 0.001")
+    # Test that comparisons use the new default
+    f_a = Ff(One=1, Two=1.5, Three=2.5)
+    f_b = Ff(One=1, Two=1.5000001, Three=2.5)
+    assert f_a == f_b  # Equal within default epsilon 0.001
+    println("comparison uses new default epsilon")
+    # Test that with epsilon() overrides the default
+    with epsilon(0.0):
+        assert get_epsilon() == 0.0
+        assert f_a != f_b  # Exact comparison
+        println("with epsilon(0.0) overrides default")
+    # After exiting, should return to set default, not 0.0
+    assert get_epsilon() == 0.001
+    println("after exiting context, returns to set default (0.001)")
+    # Reset to 0.0 for clean state
+    set_default_epsilon(0.0)
+    assert get_epsilon() == 0.0
+    println("reset to 0.0")
     println("passed.")
     println()

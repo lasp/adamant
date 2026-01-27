@@ -144,15 +144,22 @@ class {{ name }}(PackedTypeBase):
         # Other attributes:
         self.num_fields = {{ num_fields }}
 
-    def __eq__(self, other):
+    def __eq__(self, other{% if has_float %}, epsilon=None{% endif %}):
         return isinstance(other, self.__class__) and \
 {% for field in fields.values() %}
 {% if field.variable_length and field.is_packed_type %}
             (self.{{ field.name }} is None and other.{{ field.name }} is None) or \
             (
                 (self.{{ field.name }} is not None and other.{{ field.name }} is not None) and
-                (self.{{ field.name }}.is_equal(other.{{ field.name }}, num_elements_to_compare=(self.{{ field.variable_length }} + int({{ field.variable_length_offset }}))))
+                (self.{{ field.name }}.is_equal(other.{{ field.name }}, num_elements_to_compare=(self.{{ field.variable_length }} + int({{ field.variable_length_offset }})){% if field.has_float %}, epsilon=epsilon{% endif %}))
             ){{ " and \\" if not loop.last }}
+{% elif field.has_float and field.is_packed_type %}
+            (self.{{ field.name }} == other.{{ field.name }} if epsilon == 0.0 else (self.{{ field.name }} is None and other.{{ field.name }} is None) or (
+                (self.{{ field.name }} is not None and other.{{ field.name }} is not None) and
+                self.{{ field.name }}.__eq__(other.{{ field.name }}, epsilon=epsilon)
+            )){{ " and \\" if not loop.last }}
+{% elif field.has_float %}
+            self._float_equals(self.{{ field.name }}, other.{{ field.name }}, epsilon){{ " and \\" if not loop.last }}
 {% else %}
             self.{{ field.name }} == \
             other.{{ field.name }}{{ " and \\" if not loop.last }}
