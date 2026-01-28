@@ -1,9 +1,10 @@
-def create_event_cls(component_instance_name, event_name, param_type_cls):
+def create_event_cls(component_instance_name, event_name, param_type_cls, description=""):
     """
     This function is a class constructor (via closure). It creates an event class
     that is specific to a given component's event. The class is parameterized
-    by the component's name, the event's name, and the parameter class, which
-    is usually an autocoded python class inheriting from PackedTypeBase.
+    by the component's name, the event's name, the parameter class (which
+    is usually an autocoded python class inheriting from PackedTypeBase),
+    and an optional description string.
     """
     from event import Event
 
@@ -13,9 +14,10 @@ def create_event_cls(component_instance_name, event_name, param_type_cls):
             Override the __init__ function so that we can accept the
             actual parameter of type param_type_cls:
             """
-            # Store the event name:
+            # Store the event name and description:
             self.component_instance_name = component_instance_name
             self.event_name = event_name
+            self.description = description
             self.has_param = False  # Make sure param is of the appropriate class:
             param_buffer = None
             if Param is not None:
@@ -102,7 +104,7 @@ if __name__ == "__main__":
     from event_header import Event_Header
 
     # Create an event class with a tick as an argument parameter:
-    tick_event_cls = create_event_cls("My_Component", "The_Event", Tick)
+    tick_event_cls = create_event_cls("My_Component", "The_Event", Tick, "A tick event occurred.")
 
     # Instantiate two objects of this event type, one filled in, and one not:
     empty_event = tick_event_cls()
@@ -119,3 +121,6 @@ if __name__ == "__main__":
     empty_event.from_byte_array(filled_event.to_byte_array())
     sys.stderr.write(empty_event.pretty_print_string() + "\n")
     assert empty_event == filled_event
+
+    # Test description feature:
+    sys.stderr.write("Description: " + filled_event.description + "\n")
