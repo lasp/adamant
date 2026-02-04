@@ -14,7 +14,7 @@ with Command;
 -- instantiated with at initialization, then the Divide_By_Zero_In_Cpp command is
 -- not executed. This feature prevents inadvertent execution of this command. The
 -- usage of this component is dependent on the implementation of a Last Chance
--- Handler (LCH) in Ada in addition to a c++ termination hanlder, such that
+-- Handler (LCH) in Ada in addition to a c++ termination handler, such that
 -- exceptions thrown in c++ code cause the Ada LCH to be invoked. This component
 -- is specifically intended for use in testing the Ada LCH implementation. This
 -- component also supplies the packet definition for the assembly for a LCH packet
@@ -48,7 +48,9 @@ private
 
    -- The component class instance record:
    type Instance is new Zero_Divider_Cpp.Base_Instance with record
-      null; -- TODO
+      -- Set reasonable defaults for these if Init is not called for some reason.
+      Magic_Number : Magic_Number_Type := Magic_Number_Type'Last - 5;
+      Sleep_Before_Divide_Ms : Natural := 1_000; -- 1 second
    end record;
 
    ---------------------------------------
@@ -76,5 +78,17 @@ private
    overriding procedure Command_Response_T_Send_Dropped (Self : in out Instance; Arg : in Command_Response.T) is null;
    -- This procedure is called when a Event_T_Send message is dropped due to a full queue.
    overriding procedure Event_T_Send_Dropped (Self : in out Instance; Arg : in Event.T) is null;
+
+   -----------------------------------------------
+   -- Command handler primitives:
+   -----------------------------------------------
+   -- Description:
+   --    Commands for the Zero Divider component.
+   -- You must provide the correct magic number as argument to this command for it to
+   -- be executed.
+   overriding function Divide_By_Zero_In_Cpp (Self : in out Instance; Arg : in Packed_U32.T) return Command_Execution_Status.E;
+
+   -- Invalid command handler. This procedure is called when a command's arguments are found to be invalid:
+   overriding procedure Invalid_Command (Self : in out Instance; Cmd : in Command.T; Errant_Field_Number : in Unsigned_32; Errant_Field : in Basic_Types.Poly_Type);
 
 end Component.Zero_Divider_Cpp.Implementation;
