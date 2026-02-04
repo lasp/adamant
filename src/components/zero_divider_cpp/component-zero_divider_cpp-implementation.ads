@@ -42,7 +42,7 @@ package Component.Zero_Divider_Cpp.Implementation is
    -- receiving the command but before performing the divide by zero. This allows
    -- time for any events to be written by the component, if desired.
    --
-   overriding procedure Init (Self : in out Instance; Magic_Number : in Magic_Number_Type; Sleep_Before_Divide_Ms : in Natural := 1000);
+   overriding procedure Init (Self : in out Instance; Magic_Number : in Magic_Number_Type; Sleep_Before_Divide_Ms : in Natural := 1_000);
 
 private
 

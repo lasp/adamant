@@ -12,7 +12,7 @@ init:
     - name: Sleep_Before_Divide_Ms
       type: Natural
       description: The number of milliseconds to sleep after receiving the command but before performing the divide by zero. This allows time for any events to be written by the component, if desired.
-      default: "1000"
+      default: "1_000"
 connectors:
   - description: The command receive connector
     type: Command.T

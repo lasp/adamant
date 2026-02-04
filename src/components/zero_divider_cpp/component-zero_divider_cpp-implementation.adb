@@ -21,7 +21,7 @@ package body Component.Zero_Divider_Cpp.Implementation is
    -- receiving the command but before performing the divide by zero. This allows
    -- time for any events to be written by the component, if desired.
    --
-   overriding procedure Init (Self : in out Instance; Magic_Number : in Magic_Number_Type; Sleep_Before_Divide_Ms : in Natural := 1000) is
+   overriding procedure Init (Self : in out Instance; Magic_Number : in Magic_Number_Type; Sleep_Before_Divide_Ms : in Natural := 1_000) is
    begin
       -- Save off internal state:
       Self.Magic_Number := Magic_Number;
@@ -77,13 +77,11 @@ package body Component.Zero_Divider_Cpp.Implementation is
    -- Invalid command handler. This procedure is called when a command's arguments are found to be invalid:
    overriding procedure Invalid_Command (Self : in out Instance; Cmd : in Command.T; Errant_Field_Number : in Unsigned_32; Errant_Field : in Basic_Types.Poly_Type) is
    begin
-      -- TODO: Perform action to handle an invalid command.
-      -- Example:
-      -- -- Throw event:
-      -- Self.Event_T_Send_If_Connected (Self.Events.Invalid_Command_Received (
-      --    Self.Sys_Time_T_Get,
-      --    (Id => Cmd.Header.Id, Errant_Field_Number => Errant_Field_Number, Errant_Field => Errant_Field)
-      -- ));
+      -- Throw event:
+      Self.Event_T_Send_If_Connected (Self.Events.Invalid_Command_Received (
+        Self.Sys_Time_T_Get,
+        (Id => Cmd.Header.Id, Errant_Field_Number => Errant_Field_Number, Errant_Field => Errant_Field)
+      ));
       null;
    end Invalid_Command;
 
