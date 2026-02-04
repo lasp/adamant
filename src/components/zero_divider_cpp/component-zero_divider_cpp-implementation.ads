@@ -4,25 +4,27 @@
 
 -- Includes:
 with Command;
+with Zerodividercpp_C_H;
+use Zerodividercpp_C_H;
 
 -- The purpose of this component is to provide a safe, commandable way to cause
--- the Ada Last Chance Handler to be called. To accomplish this, this component
--- provides a Divide_By_Zero_In_Cpp command which divides an integer by zero in
--- c++, which causes a c++ exception to be thrown, which is purposely not handled.
--- The Divide_By_Zero_In_Cpp command must be passed a magic number as an argument.
--- If the magic number does not match the number that this component is
--- instantiated with at initialization, then the Divide_By_Zero_In_Cpp command is
--- not executed. This feature prevents inadvertent execution of this command. The
--- usage of this component is dependent on the implementation of a Last Chance
--- Handler (LCH) in Ada in addition to a c++ termination hanlder, such that
--- exceptions thrown in c++ code cause the Ada LCH to be invoked. This component
--- is specifically intended for use in testing the Ada LCH implementation. This
--- component also supplies the packet definition for the assembly for a LCH packet
--- that is created by the LCH itself (which is not usually implemented as an
--- Adamant component). This provides the ground system the LCH packet definition
--- so it can be parsed and stored. The component does not contain a Packet.T send
--- connector, so will not send out this packet itself. You Last Chance Handler
--- should produce a packet with this packet definition.
+-- the Ada Last Chance Handler (LCH) to be called. To accomplish this, this
+-- component provides a Divide_By_Zero_In_Cpp command which divides an integer by
+-- zero in C++. This causes a C++ exception to be thrown which is purposely not
+-- handled. The Divide_By_Zero_In_Cpp command must be passed a magic number as an
+-- argument. If the magic number does not match the number that this component is
+-- instantiated with, then the Divide_By_Zero_In_Cpp command will not execute.
+-- This feature prevents inadvertent execution of this command. The usage of this
+-- component is dependent on the implementation of a LCH, in addition to a C++
+-- termination handler, configured such that unhandled exceptions thrown in C++
+-- propagate to the LCH. This component is specifically intended for use in
+-- testing the LCH implementation. To this end, this component supplies the packet
+-- definition for the assembly of a Packed_Exception_Occurrence.T packet that is
+-- maintained in the Adamanet Last Chance Manager (LCM) component. It is intended
+-- that reporting of the exception information be managed by the LCH using the
+-- format established in the LCM Packed_Exception_Occurrence.T packet. This
+-- provides the ground system with a standardized exception information packet
+-- That can be used for all exceptions that cause the LCH to fire.
 package Component.Zero_Divider_Cpp.Implementation is
 
    -- The component class instance record:
@@ -42,13 +44,16 @@ package Component.Zero_Divider_Cpp.Implementation is
    -- receiving the command but before performing the divide by zero. This allows
    -- time for any events to be written by the component, if desired.
    --
-   overriding procedure Init (Self : in out Instance; Magic_Number : in Magic_Number_Type; Sleep_Before_Divide_Ms : in Natural := 1000);
+   overriding procedure Init (Self : in out Instance; Magic_Number : in Magic_Number_Type; Sleep_Before_Divide_Ms : in Natural := 1_000);
 
 private
 
    -- The component class instance record:
    type Instance is new Zero_Divider_Cpp.Base_Instance with record
-      null; -- TODO
+      -- This component is semi-stateless. Magic_Number is passed through and maintained
+      -- in the zeroDividerCpp class in the C++ in the Init.
+      Sleep_Before_Divide_Ms : Natural := 1_000;
+      Zero_Divider_Cpp : access Zerodividercpp_T := null;
    end record;
 
    ---------------------------------------
@@ -76,5 +81,17 @@ private
    overriding procedure Command_Response_T_Send_Dropped (Self : in out Instance; Arg : in Command_Response.T) is null;
    -- This procedure is called when a Event_T_Send message is dropped due to a full queue.
    overriding procedure Event_T_Send_Dropped (Self : in out Instance; Arg : in Event.T) is null;
+
+   -----------------------------------------------
+   -- Command handler primitives:
+   -----------------------------------------------
+   -- Description:
+   --    Commands for the Zero Divider Cpp component.
+   -- You must provide the correct magic number as an argument to this command for it
+   -- to be executed.
+   overriding function Divide_By_Zero_In_Cpp (Self : in out Instance; Arg : in Packed_U32.T) return Command_Execution_Status.E;
+
+   -- Invalid command handler. This procedure is called when a command's arguments are found to be invalid:
+   overriding procedure Invalid_Command (Self : in out Instance; Cmd : in Command.T; Errant_Field_Number : in Unsigned_32; Errant_Field : in Basic_Types.Poly_Type);
 
 end Component.Zero_Divider_Cpp.Implementation;
