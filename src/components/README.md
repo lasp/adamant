@@ -59,3 +59,4 @@ README.md when adding a new component to this directory.
  - [**time_at_tone_master**](time_at_tone_master/doc/time_at_tone_master.pdf) - This is the Time at Tone Master component. TaT is a protocol used to sync a slave clock to a master clock.
  - [**time_of_tone_master**](time_of_tone_master/doc/time_of_tone_master.pdf) - Like time_at_tone_master, but could potentially be more accurate in some assemblies.
  - [**zero_divider**](zero_divider/doc/zero_divider.pdf) - This component provides a safe, commandable way to cause the Ada Last Chance Handler to be called. This component divides by zero when a specific command is received.
+ - [**zero_divider_cpp**](zero_divider_cpp/doc/zero_divider_cpp.pdf) - This component provides a safe, commandable way to cause the Ada Last Chance Handler to be called. This component divides by zero in c++ when a specific command is received.
