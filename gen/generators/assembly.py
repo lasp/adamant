@@ -296,7 +296,7 @@ class assembly_flattened_packet_html(assembly_generator, generator_base):
                 )
 
             def output_filename(self, input_filename):
-                return out_dir_temp + os.sep + self.packet_name.lower() + ".html"
+                return out_dir_temp + os.sep + self.packet_name.lower().replace(".", "_") + ".html"
 
             def _generate_output(self, input_filename, packet_model):
                 output = packet_model.render(self.template, self.template_dir)
@@ -351,7 +351,7 @@ class assembly_flattened_packet_html(assembly_generator, generator_base):
         # Create an HTML for each packet:
         a = self.model_cls(input_filename)
         for id, p in a.packets.items():
-            fpm = _flattened_packet_html(p.name)
+            fpm = _flattened_packet_html(p.full_name)
             with open(fpm.output_filename(input_filename), "w") as ofile:
                 ofile.write(fpm._generate_output(input_filename, p))
 
