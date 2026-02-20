@@ -67,24 +67,79 @@ class parameters_packets(packets):
                 ] = self.entities[key].type_model
             # Handle a component other than the Parameters component that shares the parameter table type.
             elif pkt.name.endswith("Parameters"):
-                # First, lets get the path to the model file that will be the type for this packet:
+                # First, lets get the path to the model file that will be the type for this packet.
+                # The typical assembly pattern pairs each Parameter_Store with a Parameters component
+                # via a shared Parameter_Manager, so we use that topology as a heuristic:
+                #   Parameter_Manager --Working_..._Send--> Parameters (active table)
+                #   Parameter_Manager --Primary_..._Send--> Parameter_Store (stored table)
+                # By finding which Parameter_Manager routes to self.component (this Parameter_Store),
+                # we can then find which Parameters component shares that same manager.
+                # This assumes the above attachment convention. If the assembly deviates from this
+                # pattern, the connection trace will fail and the fallback below will be used instead,
+                # which finds the first Parameters component in the assembly. If neither approach
+                # produces the correct result, this component should not use the parameters_packets
+                # model type.
                 model_path = None
-                for comp in self.assembly.components.values():
-                    if comp.name == "Parameters":
-                        param_table = comp.init.get_parameter_value(
-                            "parameter_Table_Entries"
-                        )
-                        param_table_package = param_table.split(".")[0]
-                        model_name = param_table_package + "_record"
-                        model_path = model_loader.get_model_file_path(
-                            model_name, model_types=["record"]
-                        )
-                        if not model_path:
-                            raise ModelException(
-                                "Could not find Active_Parameters packet type model file: '"
-                                + model_name
-                                + "'."
+                model_name = None
+
+                # Step 1: Find the Parameter_Manager connected to this component instance.
+                # Use "is" (object identity) rather than "==" because the base model class
+                # defines __eq__ as filename comparison, which would match all instances of
+                # the same component type. "is" correctly distinguishes individual instances.
+                param_manager = None
+                for conn in self.assembly.connections:
+                    if (
+                        conn.to_component is self.component
+                        and conn.to_connector.name
+                        == "Parameters_Memory_Region_T_Recv_Async"
+                    ):
+                        param_manager = conn.from_component
+                        break
+
+                # Step 2: Find the Parameters component wired to that Parameter_Manager.
+                if param_manager is not None:
+                    for conn in self.assembly.connections:
+                        if (
+                            conn.from_component is param_manager
+                            and conn.to_component.name == "Parameters"
+                        ):
+                            param_table = conn.to_component.init.get_parameter_value(
+                                "parameter_Table_Entries"
                             )
+                            param_table_package = param_table.split(".")[0]
+                            model_name = param_table_package + "_record"
+                            model_path = model_loader.get_model_file_path(
+                                model_name, model_types=["record"]
+                            )
+                            if not model_path:
+                                raise ModelException(
+                                    "Could not find Stored_Parameters packet type model file: '"
+                                    + model_name
+                                    + "'."
+                                )
+                            break
+
+                # Fallback: search all components for a Parameters component. This preserves
+                # the original behavior for assemblies with a single parameter store that are
+                # not wired through a Parameter_Manager.
+                if model_path is None:
+                    for comp in self.assembly.components.values():
+                        if comp.name == "Parameters":
+                            param_table = comp.init.get_parameter_value(
+                                "parameter_Table_Entries"
+                            )
+                            param_table_package = param_table.split(".")[0]
+                            model_name = param_table_package + "_record"
+                            model_path = model_loader.get_model_file_path(
+                                model_name, model_types=["record"]
+                            )
+                            if not model_path:
+                                raise ModelException(
+                                    "Could not find Active_Parameters packet type model file: '"
+                                    + model_name
+                                    + "'."
+                                )
+                            break
 
                 if not model_path:
                     raise ModelException(
