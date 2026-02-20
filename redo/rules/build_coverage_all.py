@@ -1,5 +1,6 @@
 import os.path
 import sys
+import tempfile
 from util import redo
 from util import error
 from util import filesystem
@@ -122,83 +123,85 @@ class build_coverage_all(build_rule_base):
                 except BaseException:
                     pass
 
-        # Run gcovr at this directory.
-        command = "gcovr -r " + directory + " >&2"
-        rc, stderr, stdout = shell.try_run_command_capture_output(command)
-        sys.stderr.write(str(stdout))
-        sys.stderr.write(str(stderr))
-
-        # Write the output report to a text file:
+        # Run gcovr at this directory. All gcovr calls share a temp working directory
+        # so that intermediate .gcov.json.gz files written by gcov are isolated there
+        # and automatically cleaned up, even if gcovr fails.
         coverage_dir = directory + os.sep + "build" + os.sep + "coverage"
         coverage_file = coverage_dir + os.sep + "coverage.txt"
         filesystem.safe_makedir(coverage_dir)
-        with open(coverage_file, "w") as f:
-            f.write(stdout)
+        with tempfile.TemporaryDirectory() as gcov_tmp:
+            command = "cd " + gcov_tmp + " && gcovr -r " + directory + " >&2"
+            rc, stderr, stdout = shell.try_run_command_capture_output(command)
+            sys.stderr.write(str(stdout))
+            sys.stderr.write(str(stderr))
 
-        # Generate multiple filtered HTML reports
-        self._write_to_both("\nGenerating filtered coverage reports...\n")
+            # Write the output report to a text file:
+            with open(coverage_file, "w") as f:
+                f.write(stdout)
 
-        # 1. Flight code only (exclude test and generated code)
-        flight_html = coverage_dir + os.sep + "flight_coverage.html"
-        flight_txt = coverage_dir + os.sep + "flight_coverage.txt"
-        flight_command = (
-            "gcovr -r " + directory +
-            " --exclude '.*/test/.*' --exclude '.*/build/src/.*'" +
-            " --html --html-details -o " + flight_html
-        )
-        rc, stderr, stdout = shell.try_run_command_capture_output(flight_command)
-        if rc == 0:
-            self._write_to_both("Hand code coverage report generated successfully.\n")
-            # Also generate hand code text report
-            flight_txt_command = (
-                "gcovr -r " + directory +
-                " --exclude '.*/test/.*' --exclude '.*/build/src/.*'"
+            # Generate multiple filtered HTML reports
+            self._write_to_both("\nGenerating filtered coverage reports...\n")
+
+            # 1. Flight code only (exclude test and generated code)
+            flight_html = coverage_dir + os.sep + "flight_coverage.html"
+            flight_txt = coverage_dir + os.sep + "flight_coverage.txt"
+            flight_command = (
+                "cd " + gcov_tmp + " && gcovr -r " + directory +
+                " --exclude '.*/test/.*' --exclude '.*/build/src/.*'" +
+                " --html --html-details -o " + flight_html
             )
-            rc_txt, stderr_txt, stdout_txt = shell.try_run_command_capture_output(flight_txt_command)
-            if rc_txt == 0:
-                with open(flight_txt, "w") as f:
-                    f.write(stdout_txt)
-        else:
-            self._write_to_both("Warning: Hand code coverage report generation failed.\n")
+            rc, stderr, stdout = shell.try_run_command_capture_output(flight_command)
+            if rc == 0:
+                self._write_to_both("Hand code coverage report generated successfully.\n")
+                # Also generate hand code text report
+                flight_txt_command = (
+                    "cd " + gcov_tmp + " && gcovr -r " + directory +
+                    " --exclude '.*/test/.*' --exclude '.*/build/src/.*'"
+                )
+                rc_txt, stderr_txt, stdout_txt = shell.try_run_command_capture_output(flight_txt_command)
+                if rc_txt == 0:
+                    with open(flight_txt, "w") as f:
+                        f.write(stdout_txt)
+            else:
+                self._write_to_both("Warning: Hand code coverage report generation failed.\n")
 
-        # 2. Test code coverage (test directories only)
-        test_html = coverage_dir + os.sep + "test_coverage.html"
-        test_command = (
-            "gcovr -r " + directory +
-            " --filter '.*/test/.*'" +
-            " --html --html-details -o " + test_html
-        )
-        rc, stderr, stdout = shell.try_run_command_capture_output(test_command)
-        if rc == 0:
-            self._write_to_both("Test code coverage report generated successfully.\n")
-        else:
-            self._write_to_both("Warning: Test code coverage report generation failed.\n")
+            # 2. Test code coverage (test directories only)
+            test_html = coverage_dir + os.sep + "test_coverage.html"
+            test_command = (
+                "cd " + gcov_tmp + " && gcovr -r " + directory +
+                " --filter '.*/test/.*'" +
+                " --html --html-details -o " + test_html
+            )
+            rc, stderr, stdout = shell.try_run_command_capture_output(test_command)
+            if rc == 0:
+                self._write_to_both("Test code coverage report generated successfully.\n")
+            else:
+                self._write_to_both("Warning: Test code coverage report generation failed.\n")
 
-        # 3. Generated code coverage (build/src directories)
-        generated_html = coverage_dir + os.sep + "generated_coverage.html"
-        generated_command = (
-            "gcovr -r " + directory +
-            " --filter '.*/build/src/.*'" +
-            " --html --html-details -o " + generated_html
-        )
-        rc, stderr, stdout = shell.try_run_command_capture_output(generated_command)
-        if rc == 0:
-            self._write_to_both("Generated code coverage report generated successfully.\n")
-        else:
-            self._write_to_both("Warning: Generated code coverage report generation failed.\n")
+            # 3. Generated code coverage (build/src directories)
+            generated_html = coverage_dir + os.sep + "generated_coverage.html"
+            generated_command = (
+                "cd " + gcov_tmp + " && gcovr -r " + directory +
+                " --filter '.*/build/src/.*'" +
+                " --html --html-details -o " + generated_html
+            )
+            rc, stderr, stdout = shell.try_run_command_capture_output(generated_command)
+            if rc == 0:
+                self._write_to_both("Generated code coverage report generated successfully.\n")
+            else:
+                self._write_to_both("Warning: Generated code coverage report generation failed.\n")
 
-        # 4. Complete report - everything above combined
-        complete_html = coverage_dir + os.sep + "complete_coverage.html"
-        complete_command = (
-            "gcovr -r "
-            + directory
-            + " --html --html-details -o "
-            + complete_html
-            + " >&2"
-        )
-        rc, stderr, stdout = shell.try_run_command_capture_output(complete_command)
-        sys.stderr.write(str(stdout))
-        sys.stderr.write(str(stderr))
+            # 4. Complete report - everything above combined
+            complete_html = coverage_dir + os.sep + "complete_coverage.html"
+            complete_command = (
+                "cd " + gcov_tmp
+                + " && gcovr -r " + directory
+                + " --html --html-details -o " + complete_html
+                + " >&2"
+            )
+            rc, stderr, stdout = shell.try_run_command_capture_output(complete_command)
+            sys.stderr.write(str(stdout))
+            sys.stderr.write(str(stderr))
 
         # Generate index.html with links to all reports
         index_html = coverage_dir + os.sep + "index.html"

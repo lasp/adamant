@@ -93,6 +93,15 @@ class build_coverage(build_rule_base):
                 gcno_name = base_name.replace(".gcda", ".gcno")
                 gcno_file = new_dir + os.sep + gcno_name
 
+                # If the .gcno file is newer than the existing .gcda, the source was
+                # recompiled since the last test run. The old .gcda is incompatible with
+                # the new .gcno, so merging would produce a corrupt combined file that
+                # causes gcov to silently produce no output and gcovr to fail its sanity
+                # check. Simply replace the stale .gcda instead.
+                if os.path.exists(gcno_file) and os.path.getmtime(gcno_file) > os.path.getmtime(target_file):
+                    os.replace(gcda_file, target_file)
+                    continue
+
                 with tempfile.TemporaryDirectory() as temp_base:
                     existing_dir = os.path.join(temp_base, "existing")
                     new_data_dir = os.path.join(temp_base, "new")
@@ -143,28 +152,32 @@ class build_coverage(build_rule_base):
                 # No existing file - just move the new one
                 os.replace(gcda_file, target_file)
 
-        # Run gcovr on the directory above this test directory.
+        # Run gcovr on the directory above this test directory. Both gcovr calls share
+        # a temp working directory so that intermediate .gcov.json.gz files written by
+        # gcov are isolated there and automatically cleaned up, even if gcovr fails.
         src_dir = os.path.dirname(redo_arg.get_src_dir(redo_1))
-        command = "gcovr -r " + src_dir + " >&2"
-        rc, stderr, stdout = shell.try_run_command_capture_output(command)
-        sys.stderr.write(str(stdout))
-        sys.stderr.write(str(stderr))
-
-        # Write the output report to a text file:
         coverage_dir = directory + os.sep + "build" + os.sep + "coverage"
         coverage_file = coverage_dir + os.sep + "coverage.txt"
-        filesystem.safe_makedir(coverage_dir)
-        with open(coverage_file, "w") as f:
-            f.write(stdout)
-
-        # Generate html report:
         output_html = coverage_dir + os.sep + "test.html"
-        command = (
-            "gcovr -r " + src_dir + " --html --html-details -o " + output_html + " >&2"
-        )
-        rc, stderr, stdout = shell.try_run_command_capture_output(command)
-        sys.stderr.write(str(stdout))
-        sys.stderr.write(str(stderr))
+        filesystem.safe_makedir(coverage_dir)
+        with tempfile.TemporaryDirectory() as gcov_tmp:
+            command = "cd " + gcov_tmp + " && gcovr -r " + src_dir + " >&2"
+            rc, stderr, stdout = shell.try_run_command_capture_output(command)
+            sys.stderr.write(str(stdout))
+            sys.stderr.write(str(stderr))
+
+            # Write the output report to a text file:
+            with open(coverage_file, "w") as f:
+                f.write(stdout)
+
+            # Generate html report:
+            command = (
+                "cd " + gcov_tmp + " && gcovr -r " + src_dir
+                + " --html --html-details -o " + output_html + " >&2"
+            )
+            rc, stderr, stdout = shell.try_run_command_capture_output(command)
+            sys.stderr.write(str(stdout))
+            sys.stderr.write(str(stderr))
 
         # Print some info on commandline for user.
         sys.stderr.write("\n")
