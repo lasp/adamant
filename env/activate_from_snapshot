@@ -1,0 +1,50 @@
+#!/bin/bash
+
+# Fast activation from a cached environment snapshot.
+#
+# Loads environment variables from a snapshot file created by a previous
+# full activation, reducing per-exec overhead from seconds to milliseconds.
+# Falls back to full activation if no snapshot exists (e.g. first exec
+# after container start). The full activation creates the snapshot for
+# next time.
+#
+# Snapshots are stored in /tmp so they are automatically invalidated
+# when the container restarts.
+#
+# Usage:
+#   source activate_from_snapshot <snapshot_path> <fallback_activate> [guard_var]
+#
+# Arguments:
+#   snapshot_path      - Path to the cached environment snapshot file
+#   fallback_activate  - Path to the full activate script (used if no snapshot)
+#   guard_var          - Optional environment variable name to check; if already
+#                        set, activation is skipped entirely
+#
+# Example (standalone adamant):
+#   source $ADAMANT_DIR/env/activate_from_snapshot \
+#       /tmp/.adamant_env_snapshot $ADAMANT_DIR/env/activate ADAMANT_ENVIRONMENT_SET
+#
+# Example (project):
+#   source $ADAMANT_DIR/env/activate_from_snapshot \
+#       /tmp/.my_project_env_snapshot $PROJECT_DIR/env/activate PROJECT_ENVIRONMENT_SET
+
+_AFS_SNAPSHOT="${1:?Usage: source activate_from_snapshot <snapshot_path> <fallback_activate> [guard_var]}"
+_AFS_FALLBACK="${2:?Usage: source activate_from_snapshot <snapshot_path> <fallback_activate> [guard_var]}"
+_AFS_GUARD_VAR="${3:-}"
+
+# Already activated in this shell - nothing to do.
+if [ -n "$_AFS_GUARD_VAR" ] && [ -n "${!_AFS_GUARD_VAR}" ]; then
+    unset _AFS_SNAPSHOT _AFS_FALLBACK _AFS_GUARD_VAR
+    return 0 2>/dev/null || exit 0
+fi
+
+if [ -f "$_AFS_SNAPSHOT" ]; then
+    . "$_AFS_SNAPSHOT"
+    # Recreate the temp dir if it was cleaned up.
+    [ -n "$ADAMANT_TMP_DIR" ] && [ ! -d "$ADAMANT_TMP_DIR" ] && mkdir -p "$ADAMANT_TMP_DIR"
+else
+    # No cache yet - run full activation (which creates the snapshot).
+    . "$_AFS_FALLBACK"
+fi
+
+unset _AFS_SNAPSHOT _AFS_FALLBACK _AFS_GUARD_VAR
