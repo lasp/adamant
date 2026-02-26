@@ -216,5 +216,9 @@ echo ""
 # Signify the environment is set up
 export ADAMANT_ENVIRONMENT_SET="yes"
 
+# Save environment snapshot for fast re-activation by automated tools.
+# Stored in /tmp so it is automatically invalidated on container restart.
+export -p > /tmp/.adamant_env_snapshot
+
 # Adding redo tab completion feature to shell
 . $ADAMANT_DIR/env/redo_completion.sh
