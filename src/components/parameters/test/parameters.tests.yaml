@@ -12,7 +12,7 @@ tests:
   - name: Test_Nominal_Table_Validate
     description: This unit test tests the nominal validation of the parameter table by memory region upload.
   - name: Test_Nominal_Table_Fetch
-    description: This unit test tests the nominal fetching of the parameter table by into a provided memory region.
+    description: This unit test tests the nominal fetching of the parameter table into a provided memory region.
   - name: Test_Dump_Parameters_Error
     description: This unit test tests the behavior when dumping the parameter table fails.
   - name: Test_Update_Parameters_Error

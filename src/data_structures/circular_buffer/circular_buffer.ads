@@ -10,7 +10,7 @@ package Circular_Buffer is
    type Pop_Status is (Success, Empty);
 
    -- Basic Buffer definition:
-   -- This is the a base type for many other data structures which use
+   -- This is a base type for many other data structures which use
    -- a byte array buffer as their central functioning. This type is pretty
    -- useless on its own. It can be instantiated, deleted, and queried for
    -- meta data, but no access to the internal buffer is granted the user.
@@ -178,12 +178,12 @@ private
    function Push (Self : in out Base; Bytes : in Basic_Types.Byte_Array; Overwrite : in Boolean := False) return Push_Status;
    -- Pop data from buffer onto a byte array. The function attempts to return a number of bytes equal to
    -- the size of the provided "bytes" array. The actual number of bytes returned is returned in the
-   -- num_Bytes_Returned variable.
+   -- Num_Bytes_Returned variable.
    function Pop (Self : in out Base; Bytes : in out Basic_Types.Byte_Array; Num_Bytes_Returned : out Natural) return Pop_Status;
    -- Peek data from buffer onto a byte array. This function is like pop, except the bytes are not actually
    -- removed from the internal buffer. The function attempts to return a number of bytes equal to
    -- the size of the provided "bytes" array. The actual number of bytes returned is returned in the
-   -- num_Bytes_Returned variable. An offset can be provided to peek ahead a certain number of bytes
+   -- Num_Bytes_Returned variable. An offset can be provided to peek ahead a certain number of bytes
    -- from the head of the internal circular buffer.
    function Peek (Self : in Base; Bytes : in out Basic_Types.Byte_Array; Num_Bytes_Returned : out Natural; Offset : in Natural := 0) return Pop_Status;
 

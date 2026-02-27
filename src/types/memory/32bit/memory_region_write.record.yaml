@@ -1,5 +1,5 @@
 ---
-description: A memory region CRC report.
+description: A memory region write record.
 with:
   - Command_Types
   - Basic_Types

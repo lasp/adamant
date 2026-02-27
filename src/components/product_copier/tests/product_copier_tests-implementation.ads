@@ -2,7 +2,7 @@
 -- Product_Copier Tests Spec
 --------------------------------------------------------------------------------
 
--- This is a set of unit tests for the Simple_Package package.
+-- This is a set of unit tests for the Product_Copier component.
 package Product_Copier_Tests.Implementation is
 
    -- Test data and state:

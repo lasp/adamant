@@ -2,10 +2,10 @@
 description: This is a unit test suite for testing the system time arithmetic package
 tests:
   - name: Compare_Time
-    description: This unit test make sure that comparing two times produces the correct results.
+    description: This unit test makes sure that comparing two times produces the correct results.
   - name: Add_Time
-    description: This unit test make sure that adding two times produces the correct results.
+    description: This unit test makes sure that adding two times produces the correct results.
   - name: Subtract_Time
-    description: This unit test make sure that subtracting two times produces the correct results.
+    description: This unit test makes sure that subtracting two times produces the correct results.
   - name: Additional_Tests
     description: This unit test adds some additional testing.

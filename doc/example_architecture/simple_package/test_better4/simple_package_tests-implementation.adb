@@ -34,13 +34,13 @@ package body Simple_Package_Tests.Implementation is
       A : constant Integer := 7;
       B : constant Integer := -15;
    begin
-      -- Result should equal -9
+      -- Result should equal -8
       Self.Log ("Performing equals assertion: Added = " & Simple_Package.Add_Two_Numbers (A, B)'Image & " Expected = -8");
       Integer_Assert.Eq (Simple_Package.Add_Two_Numbers (A, B), -8);
       -- Result not equal -9
       Self.Log ("Performing not equal assertion: Added = " & Simple_Package.Add_Two_Numbers (A, B)'Image & " Expected /= -9");
       Integer_Assert.Neq (Simple_Package.Add_Two_Numbers (A, B), -9);
-      -- Result should less than 100
+      -- Result should be less than 100
       Self.Log ("Performing less than assertion: Added = " & Simple_Package.Add_Two_Numbers (A, B)'Image & " Expected < 100");
       Integer_Assert.Lt (Simple_Package.Add_Two_Numbers (A, B), 100);
       -- Result should be greater than or equal to -100

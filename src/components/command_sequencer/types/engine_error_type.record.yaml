@@ -1,5 +1,5 @@
 ---
-description: A packed record which holds a summary of the state for a particular sequence engine.
+description: A packed record which holds error information for a particular sequence engine.
 fields:
   - name: Engine_Id
     description: The sequence engine identifier.

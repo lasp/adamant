@@ -73,7 +73,7 @@ package body Component.Fault_Component.Implementation.Tester is
       Self.Discontinuous_Time_Fault_History.Push (Arg);
    end Discontinuous_Time_Fault;
 
-   -- A time restart at zero seconds epoc was detected by the component.
+   -- A time restart at zero seconds epoch was detected by the component.
    overriding procedure Zero_Time_Fault (Self : in out Instance) is
       Arg : constant Natural := 0;
    begin

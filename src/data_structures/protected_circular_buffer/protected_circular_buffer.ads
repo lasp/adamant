@@ -3,7 +3,7 @@ with Basic_Types;
 with Serializer_Types;
 
 -- This is a protected (thread safe) buffer that supports the pushing,
--- popping, and peaking of variable sized byte arrays or typed buffer
+-- popping, and peeking of variable sized byte arrays or typed buffer
 -- elements.
 package Protected_Circular_Buffer is
 
@@ -32,7 +32,7 @@ package Protected_Circular_Buffer is
    --
 
    -- Push data from a byte array onto the buffer. If not enough space remains on the internal buffer to read
-   -- store the entire byte array then Failure is returned.
+   -- store the entire byte array then Too_Full is returned.
    function Push (Self : in out Instance; Bytes : in Basic_Types.Byte_Array; Overwrite : in Boolean := False) return Push_Status
       with Inline => True;
       -- Pop data from buffer onto a byte array. The number of bytes returned will match the length

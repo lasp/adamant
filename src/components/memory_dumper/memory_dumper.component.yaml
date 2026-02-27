@@ -5,7 +5,7 @@ execution: active
 init:
   description: This component requires a list of memory regions which it can dump and CRC.
   parameters:
-    - name: memory_Regions
+    - name: Memory_Regions
       type: Memory_Manager_Types.Memory_Region_Array_Access
       not_null: true
       description: An access to a list of memory regions.

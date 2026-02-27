@@ -6,7 +6,7 @@ requirements:
   - text: The component shall contain a compile-time configurable sequence stack depth in each engine.
   - text: The component shall contain a compile-time configurable tick which determines the frequency of sequence waits and telemetry fetches.
   - text: The component shall prevent an executing sequence from executing a compile-time configurable number of instructions without yielding the CPU.
-  - text: The component shall execution commands within a running sequence in order, not running a subsequent command before a previous command has completed execution.
+  - text: The component shall execute commands within a running sequence in order, not running a subsequent command before a previous command has completed execution.
   - text: The component shall report the internal state, sequence ID, and sequence position of each sequence engine in telemetry.
   - text: The component shall provide a command to kill a sequence engine.
   - text: The component shall not execute a sequence if its CRC or length cannot be validated prior to load.

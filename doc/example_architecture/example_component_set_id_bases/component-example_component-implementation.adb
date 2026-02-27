@@ -51,7 +51,7 @@ package body Component.Example_Component.Implementation is
       -- -- Throw event:
       -- self.Event_T_Send_If_Connected(self.events.Invalid_Command_Received(
       --    self.Sys_Time_T_Get,
-      --    (Id => cmd.Header.Id, errant_Field_Number => errant_Field_Number, errant_Field => errant_Field)
+      --    (Id => cmd.Header.Id, Errant_Field_Number => Errant_Field_Number, Errant_Field => Errant_Field)
       -- ));
       null;
    end Invalid_Command;

@@ -7,7 +7,7 @@ package Crc_16 is
    -- is used instead of a 16-bit type to prevent endianness issues. We never
    -- want the order of these bytes to be swapped, on ANY architecture. They should
    -- be appended to a CCSDS packet in the order here, with the higher order bits in
-   -- position 0 and the lower order bits in position 1. This also aids is easily
+   -- position 0 and the lower order bits in position 1. This also aids in easily
    -- appending this checksum to a byte array without conversion.
    subtype Crc_16_Type is Basic_Types.Byte_Array (0 .. 1)
       with Object_Size => 2 * 8;

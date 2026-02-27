@@ -157,7 +157,7 @@ class database(object):
             pass
 
     def destroy(self):
-        """Completely remote the database from the filesystem."""
+        """Completely remove the database from the filesystem."""
         self.close()
         _destroy(self.filename)
 

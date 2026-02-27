@@ -11,7 +11,7 @@ with Event;
 with Ccsds_Primary_Header;
 with Packed_U32;
 
--- This component is meant to be a backdoor serial component which uses Ada.Text_IO to send a receive data over a serial port. On Linux, this will send/recv data to/from the terminal, but Ada.Text_IO is attached to a diagnostic uart on most embedded systems. This means that this component can be used as a quick and dirty serial interface without implementing hardware specific uart drivers.
+-- This component is meant to be a backdoor serial component which uses Ada.Text_IO to send and receive data over a serial port. On Linux, this will send/recv data to/from the terminal, but Ada.Text_IO is attached to a diagnostic uart on most embedded systems. This means that this component can be used as a quick and dirty serial interface without implementing hardware specific uart drivers.
 --
 package Component.Ccsds_Serial_Interface.Implementation.Tester is
 
@@ -57,7 +57,7 @@ package Component.Ccsds_Serial_Interface.Implementation.Tester is
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- On this connector the Socket Interface Component sends any data it received from the socket.
+   -- On this connector the Serial Interface Component sends any data it received from the serial port.
    overriding procedure Ccsds_Space_Packet_T_Recv_Sync (Self : in out Instance; Arg : in Ccsds_Space_Packet.T);
    -- Events are sent out of this connector.
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T);
@@ -73,11 +73,11 @@ package Component.Ccsds_Serial_Interface.Implementation.Tester is
    -----------------------------------------------
    -- Event handler primitive:
    -----------------------------------------------
-   -- Failed to send a packet over the socket because it has an invalid CCSDS header.
+   -- Failed to send a packet over the serial port because it has an invalid CCSDS header.
    overriding procedure Packet_Send_Failed (Self : in out Instance; Arg : Ccsds_Primary_Header.T);
-   -- Failed to receive a packet over the socket because it has an invalid CCSDS header.
+   -- Failed to receive a packet over the serial port because it has an invalid CCSDS header.
    overriding procedure Packet_Recv_Failed (Self : in out Instance; Arg : Ccsds_Primary_Header.T);
-   -- The component as received N number of bytes without seeing a sync pattern yet.
+   -- The component has received N number of bytes without seeing a sync pattern yet.
    overriding procedure Have_Not_Seen_Sync_Pattern (Self : in out Instance; Arg : Packed_U32.T);
 
    -----------------------------------------------

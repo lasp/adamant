@@ -1,8 +1,8 @@
 ---
-description: This record contains the definition for a two event ID type for ranges in the event limiter commands as well as an issue packet type for issuing packets
+description: This record contains the definition for a single event ID in the event filter commands as well as an issue packet type for issuing packets
 fields:
   - name: Event_To_Update
-    description: The starting event ID to begin the range
+    description: The event ID to update
     type: Event_Id.T
   - name: Issue_State_Packet
     description: Flag to indicate if we dump the states after the change is complete

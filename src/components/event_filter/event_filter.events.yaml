@@ -23,7 +23,7 @@ events:
     description: This event indicates that the command to change the event state to enabled failed since the event ID was out of range.
     param_type: Event_Filter_Single_Event_Cmd_Type.T
   - name: Unfilter_Event_Invalid_Id
-    description: This event indicates that the command to change the event state to disable failed since the event ID was out of range.
+    description: This event indicates that the command to change the event state to disabled failed since the event ID was out of range.
     param_type: Event_Filter_Single_Event_Cmd_Type.T
   - name: Filter_Event_Range_Invalid_Id
     description: This event indicates that changing the state for the range to enabled, failed due to an invalid id.
@@ -31,5 +31,5 @@ events:
   - name: Unfilter_Event_Range_Invalid_Id
     description: This event indicates that changing the state for the range to disabled, failed due to an invalid id.
     param_type: Event_Filter_Id_Range.T
-  - name: Dump_Event_States_Recieved
+  - name: Dump_Event_States_Received
     description: Event that indicates the process of building the packet that stores the event states has started and will send the packet once we go through a decrement cycle.

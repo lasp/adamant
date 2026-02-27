@@ -29,7 +29,7 @@ package body Component.Event_Filter.Implementation.Tester is
       Self.Unfilter_Event_Invalid_Id_History.Init (Depth => 100);
       Self.Filter_Event_Range_Invalid_Id_History.Init (Depth => 100);
       Self.Unfilter_Event_Range_Invalid_Id_History.Init (Depth => 100);
-      Self.Dump_Event_States_Recieved_History.Init (Depth => 100);
+      Self.Dump_Event_States_Received_History.Init (Depth => 100);
       -- Data product histories:
       Self.Total_Events_Filtered_History.Init (Depth => 100);
       Self.Total_Events_Unfiltered_History.Init (Depth => 100);
@@ -60,7 +60,7 @@ package body Component.Event_Filter.Implementation.Tester is
       Self.Unfilter_Event_Invalid_Id_History.Destroy;
       Self.Filter_Event_Range_Invalid_Id_History.Destroy;
       Self.Unfilter_Event_Range_Invalid_Id_History.Destroy;
-      Self.Dump_Event_States_Recieved_History.Destroy;
+      Self.Dump_Event_States_Received_History.Destroy;
       -- Data product histories:
       Self.Total_Events_Filtered_History.Destroy;
       Self.Total_Events_Unfiltered_History.Destroy;
@@ -225,12 +225,12 @@ package body Component.Event_Filter.Implementation.Tester is
    end Unfilter_Event_Range_Invalid_Id;
 
    -- Event that indicates the process of building the packet that stores the event states has started and will send the packet once we go through a decrement cycle.
-   overriding procedure Dump_Event_States_Recieved (Self : in out Instance) is
+   overriding procedure Dump_Event_States_Received (Self : in out Instance) is
       Arg : constant Natural := 0;
    begin
       -- Push the argument onto the test history for looking at later:
-      Self.Dump_Event_States_Recieved_History.Push (Arg);
-   end Dump_Event_States_Recieved;
+      Self.Dump_Event_States_Received_History.Push (Arg);
+   end Dump_Event_States_Received;
 
    -----------------------------------------------
    -- Data product handler primitive:

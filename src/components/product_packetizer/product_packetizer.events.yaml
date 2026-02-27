@@ -4,16 +4,16 @@ events:
     description: An invalid packet id was commanded for a given command.
     param_type: Invalid_Packet_Id.T
   - name: Packet_Enabled
-    description: An packet was enabled.
+    description: A packet was enabled.
     param_type: Packet_Period.T
   - name: Packet_Disabled
-    description: An packet was disabled.
+    description: A packet was disabled.
     param_type: Packet_Period.T
   - name: Packet_Enabled_On_Change
-    description: An packet was enabled in on-change mode.
+    description: A packet was enabled in on-change mode.
     param_type: Packet_Period.T
   - name: Packet_Period_Set
-    description: An packet period was set.
+    description: A packet period was set.
     param_type: Packet_Period.T
   - name: Data_Product_Missing_On_Fetch
     description: A data product was missing when fetched for packet insertion.

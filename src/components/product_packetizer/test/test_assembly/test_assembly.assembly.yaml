@@ -12,7 +12,7 @@ components:
   - type: Product_Packetizer
     execution: passive
     init_base:
-      - "queue_Size => 512"
+      - "Queue_Size => 512"
     discriminant:
-      - "packet_List => Test_Assembly_Product_Packets_Test_Packets.Packet_List'Access"
+      - "Packet_List => Test_Assembly_Product_Packets_Test_Packets.Packet_List'Access"
     init:

@@ -240,7 +240,7 @@ package body Event_Filter_Entry_Tests.Implementation is
       State_Filter_Status := Event_Filter.Filter_Event (0);
       Event_Filter_Status_Assert.Eq (State_Filter_Status, Unfiltered);
 
-      -- Same process as before but refersed on one that begins filtered
+      -- Same process as before but reversed on one that begins filtered
       State_Filter_Status := Event_Filter.Filter_Event (3);
       Event_Filter_Status_Assert.Eq (State_Filter_Status, Filtered);
 
@@ -365,7 +365,7 @@ package body Event_Filter_Entry_Tests.Implementation is
       Filter_Count := Event_Filter.Get_Event_Filtered_Count;
       Unsigned_32_Assert.Eq (Filter_Count, 11);
 
-      -- Send a few more out of range event ids to make sure they dont count as filtered
+      -- Send a few more out of range event ids to make sure they don't count as filtered
       State_Filter_Status := Event_Filter.Filter_Event (0);
       Event_Filter_Status_Assert.Eq (State_Filter_Status, Out_Of_Range);
       State_Filter_Status := Event_Filter.Filter_Event (0);
@@ -505,11 +505,11 @@ package body Event_Filter_Entry_Tests.Implementation is
       State_Filter_Status := Event_Filter.Filter_Event (11);
       Event_Filter_Status_Assert.Eq (State_Filter_Status, Unfiltered);
 
-      -- Count should now be 11
+      -- Count should now be 13
       Unfiltered_Count := Event_Filter.Get_Event_Unfiltered_Count;
       Unsigned_32_Assert.Eq (Unfiltered_Count, 13);
 
-      -- Send a few more out of range event ids to make sure they dont count as filtered
+      -- Send a few more out of range event ids to make sure they don't count as filtered
       State_Filter_Status := Event_Filter.Filter_Event (0);
       Event_Filter_Status_Assert.Eq (State_Filter_Status, Out_Of_Range);
       State_Filter_Status := Event_Filter.Filter_Event (0);

@@ -43,7 +43,7 @@ package Component.Event_Filter.Implementation.Tester is
    package Unfilter_Event_Invalid_Id_History_Package is new Printable_History (Event_Filter_Single_Event_Cmd_Type.T, Event_Filter_Single_Event_Cmd_Type.Representation.Image);
    package Filter_Event_Range_Invalid_Id_History_Package is new Printable_History (Event_Filter_Id_Range.T, Event_Filter_Id_Range.Representation.Image);
    package Unfilter_Event_Range_Invalid_Id_History_Package is new Printable_History (Event_Filter_Id_Range.T, Event_Filter_Id_Range.Representation.Image);
-   package Dump_Event_States_Recieved_History_Package is new Printable_History (Natural, Natural'Image);
+   package Dump_Event_States_Received_History_Package is new Printable_History (Natural, Natural'Image);
 
    -- Data product history packages:
    package Total_Events_Filtered_History_Package is new Printable_History (Packed_U32.T, Packed_U32.Representation.Image);
@@ -76,7 +76,7 @@ package Component.Event_Filter.Implementation.Tester is
       Unfilter_Event_Invalid_Id_History : Unfilter_Event_Invalid_Id_History_Package.Instance;
       Filter_Event_Range_Invalid_Id_History : Filter_Event_Range_Invalid_Id_History_Package.Instance;
       Unfilter_Event_Range_Invalid_Id_History : Unfilter_Event_Range_Invalid_Id_History_Package.Instance;
-      Dump_Event_States_Recieved_History : Dump_Event_States_Recieved_History_Package.Instance;
+      Dump_Event_States_Received_History : Dump_Event_States_Received_History_Package.Instance;
       -- Data product histories:
       Total_Events_Filtered_History : Total_Events_Filtered_History_Package.Instance;
       Total_Events_Unfiltered_History : Total_Events_Unfiltered_History_Package.Instance;
@@ -139,7 +139,7 @@ package Component.Event_Filter.Implementation.Tester is
    -- This event indicates that changing the state for the range to disabled, failed due to an invalid id.
    overriding procedure Unfilter_Event_Range_Invalid_Id (Self : in out Instance; Arg : in Event_Filter_Id_Range.T);
    -- Event that indicates the process of building the packet that stores the event states has started and will send the packet once we go through a decrement cycle.
-   overriding procedure Dump_Event_States_Recieved (Self : in out Instance);
+   overriding procedure Dump_Event_States_Received (Self : in out Instance);
 
    -----------------------------------------------
    -- Data product handler primitives:

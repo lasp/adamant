@@ -6,16 +6,16 @@
 with System;
 with Ada.Interrupts;
 
--- This is the Interrupt Listener component. It is attached to an interrupt and provides a connector which will give the caller a count. The count includes the number of times the interrupt has occurred since the last invocation of the connector. If the count reaches the maximum of a Natural, it stops incremending. This component should be made passive in order to function properly.
+-- This is the Interrupt Listener component. It is attached to an interrupt and provides a connector which will give the caller a count. The count includes the number of times the interrupt has occurred since the last invocation of the connector. If the count reaches the maximum of a Natural, it stops incrementing. This component should be made passive in order to function properly.
 generic
 package Component.Interrupt_Listener.Implementation is
 
    -- The component class instance record:
    --
    -- Discriminant Parameters:
-   -- custom_Interrupt_Procedure : Custom_Interrupt_Handler_Package.Interrupt_Procedure_Type - A custom procedure to be called within the interrupt handler. The null procedure can be used here if no specific behavior is desired.
-   -- interrupt_Id : Ada.Interrupts.Interrupt_Id - Interrupt identifier number for interrupt
-   -- interrupt_Priority : System.Interrupt_Priority - Interrupt priority for interrupt
+   -- Custom_Interrupt_Procedure : Custom_Interrupt_Handler_Package.Interrupt_Procedure_Type - A custom procedure to be called within the interrupt handler. The null procedure can be used here if no specific behavior is desired.
+   -- Interrupt_Id : Ada.Interrupts.Interrupt_Id - Interrupt identifier number for interrupt
+   -- Interrupt_Priority : System.Interrupt_Priority - Interrupt priority for interrupt
    --
    type Instance (Custom_Interrupt_Procedure : Custom_Interrupt_Handler_Package.Interrupt_Procedure_Type; Interrupt_Id : Ada.Interrupts.Interrupt_ID; Interrupt_Priority : System.Interrupt_Priority) is new Interrupt_Listener.Base_Instance with private;
 
@@ -24,9 +24,9 @@ private
    -- The component class instance record:
    --
    -- Discriminant Parameters:
-   -- custom_Interrupt_Procedure : Custom_Interrupt_Handler_Package.Interrupt_Procedure_Type - A custom procedure to be called within the interrupt handler. The null procedure can be used here if no specific behavior is desired.
-   -- interrupt_Id : Ada.Interrupts.Interrupt_Id - Interrupt identifier number for interrupt
-   -- interrupt_Priority : System.Interrupt_Priority - Interrupt priority for interrupt
+   -- Custom_Interrupt_Procedure : Custom_Interrupt_Handler_Package.Interrupt_Procedure_Type - A custom procedure to be called within the interrupt handler. The null procedure can be used here if no specific behavior is desired.
+   -- Interrupt_Id : Ada.Interrupts.Interrupt_Id - Interrupt identifier number for interrupt
+   -- Interrupt_Priority : System.Interrupt_Priority - Interrupt priority for interrupt
    --
    type Instance (Custom_Interrupt_Procedure : Custom_Interrupt_Handler_Package.Interrupt_Procedure_Type; Interrupt_Id : Ada.Interrupts.Interrupt_ID; Interrupt_Priority : System.Interrupt_Priority) is new Interrupt_Listener.Base_Instance with record
       -- The internal task signal protected object.

@@ -8,7 +8,7 @@ with Tick;
 with Command;
 with Product_Packet_Types;
 
--- The product packetizer requests data products from an external component and packetizes them into packets at a configurable rate. The packets that this component produces is configured via an autocoded table.
+-- The product packetizer requests data products from an external component and packetizes them into packets at a configurable rate. The packets that this component produces are configured via an autocoded table.
 --
 package Component.Product_Packetizer.Implementation is
 
@@ -16,14 +16,14 @@ package Component.Product_Packetizer.Implementation is
    -- This component requires a list of packet descriptions which outline the packets that the component is responsible for building.
    --
    -- Discriminant Parameters:
-   -- packet_List : Product_Packet_Types.Packet_Description_List_Access_Type - The list of packets to packetize.
+   -- Packet_List : Product_Packet_Types.Packet_Description_List_Access_Type - The list of packets to packetize.
    --
    type Instance (Packet_List : not null Product_Packet_Types.Packet_Description_List_Access_Type) is new Product_Packetizer.Base_Instance with private;
 
    --------------------------------------------------
    -- Subprogram for implementation init method:
    --------------------------------------------------
-   -- This initialization function is used to initialize the roll-over value for the packetizer's internal counter. It is calculated as the largest 32-bit multiple of all the provided periods in the packet_List. This ensures that no packets are skipped or sent too often when a rollover occurs. Note, that this only guarantees expected roll-over behavior if the period of the packets are not changed during runtime via command. If this happens, then the user accepts that a rollover may cause unwanted behavior.
+   -- This initialization function is used to initialize the roll-over value for the packetizer's internal counter. It is calculated as the largest 32-bit multiple of all the provided periods in the Packet_List. This ensures that no packets are skipped or sent too often when a rollover occurs. Note, that this only guarantees expected roll-over behavior if the period of the packets are not changed during runtime via command. If this happens, then the user accepts that a rollover may cause unwanted behavior.
    overriding procedure Init (Self : in out Instance; Commands_Dispatched_Per_Tick : in Positive := 3);
 
 private
@@ -35,7 +35,7 @@ private
    -- This component requires a list of packet descriptions which outline the packets that the component is responsible for building.
    --
    -- Discriminant Parameters:
-   -- packet_List : Product_Packet_Types.Packet_Description_List_Access_Type - The list of packets to packetize.
+   -- Packet_List : Product_Packet_Types.Packet_Description_List_Access_Type - The list of packets to packetize.
    --
    type Instance (Packet_List : not null Product_Packet_Types.Packet_Description_List_Access_Type) is new Product_Packetizer.Base_Instance with record
       Count : Positive := 1; -- The count is rolled over manually in adb

@@ -2,7 +2,7 @@
 description: These are enumerations that are used in the Adamant memory system.
 enums:
   - name: Memory_Copy_Status
-    description: This status enumerations provides information on the success/failure of a memory copy.
+    description: This status enumeration provides information on the success/failure of a memory copy.
     literals:
       - name: Success
         value: 0

@@ -37,11 +37,11 @@ private
    function Decode_Jump_Not_Equal (Self : in out Decoder_Instance; Output : in File_Type) return Seq_Position;
    function Decode_Return (Self : in out Decoder_Instance; Output : in File_Type) return Seq_Position;
    function Decode_Wait_If_Zero (Self : in out Decoder_Instance; Output : in File_Type) return Seq_Position;
-   -- function decode_Kill_Category             (self : in out Decoder_Instance) return Seq_Position; change to kill_All except this sequence
+   -- function Decode_Kill_Category             (self : in out Decoder_Instance) return Seq_Position; change to Kill_All except this sequence
    function Decode_Kill_Engine (Self : in out Decoder_Instance; Output : in File_Type) return Seq_Position;
-   -- function decode_Kill_Name                   (self : in out Decoder_Instance) return Seq_Position;
-   -- function decode_Subscribe                   (self : in out Decoder_Instance) return Seq_Position;
-   -- function decode_Unsubscribe                (self : in out Decoder_Instance) return Seq_Position;
+   -- function Decode_Kill_Name                   (self : in out Decoder_Instance) return Seq_Position;
+   -- function Decode_Subscribe                   (self : in out Decoder_Instance) return Seq_Position;
+   -- function Decode_Unsubscribe                (self : in out Decoder_Instance) return Seq_Position;
    function Decode_Eval_Flt (Self : in out Decoder_Instance; Output : in File_Type) return Seq_Position;
    function Decode_Cast_F_To_U (Self : in out Decoder_Instance; Output : in File_Type) return Seq_Position;
    function Decode_Cast_U_To_F (Self : in out Decoder_Instance; Output : in File_Type) return Seq_Position;
@@ -53,11 +53,11 @@ private
    function Decode_Wait_On_B (Self : in out Decoder_Instance; Output : in File_Type) return Seq_Position;
    function Decode_Wait_If_Zero_On_B (Self : in out Decoder_Instance; Output : in File_Type) return Seq_Position;
    function Decode_Str_Alloc (Self : in out Decoder_Instance; Output : in File_Type) return Seq_Position;
-   -- function decode_Str_Dealloc                (self : in out Decoder_Instance; output : in File_Type) return Seq_Position;
+   -- function Decode_Str_Dealloc                (self : in out Decoder_Instance; output : in File_Type) return Seq_Position;
    function Decode_Str_Set (Self : in out Decoder_Instance; Output : in File_Type) return Seq_Position;
-   -- function decode_Str_Update_Pattern      (self : in out Decoder_Instance; output : in File_Type) return Seq_Position;
-   -- function decode_Str_Copy                     (self : in out Decoder_Instance; output : in File_Type) return Seq_Position;
-   -- function decode_Str_Move                     (self : in out Decoder_Instance; output : in File_Type) return Seq_Position;
+   -- function Decode_Str_Update_Pattern      (self : in out Decoder_Instance; output : in File_Type) return Seq_Position;
+   -- function Decode_Str_Copy                     (self : in out Decoder_Instance; output : in File_Type) return Seq_Position;
+   -- function Decode_Str_Move                     (self : in out Decoder_Instance; output : in File_Type) return Seq_Position;
    function Decode_Print (Self : in out Decoder_Instance; Output : in File_Type) return Seq_Position;
    function Decode_Print_Var (Self : in out Decoder_Instance; Output : in File_Type) return Seq_Position;
    -- function Decode_Print_Str (Self : in out Decoder_Instance; Output : in File_Type) return Seq_Position;

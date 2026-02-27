@@ -1,5 +1,5 @@
 ---
-description: These are enumerations defined for the B.A.D. Data Parser.
+description: These are enumerations defined for the Task Watchdog component.
 enums:
   - name: Watchdog_Enabled_State
     description: The state for if each watchdog is enabled or disabled for checking

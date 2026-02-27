@@ -8,7 +8,7 @@ with Aa;
 with Bb;
 
 procedure Test is
-   --data_A : constant Aa.T := (One => 17, Two => 23, Three => 5);
+   --Data_A : constant Aa.T := (One => 17, Two => 23, Three => 5);
    --data_A2 : Aa.T;
    Data_B : constant Bb.T := (Element => 31, Element2 => 34);
    package Generic_Component_Base is new Component.Generic_Component (Aa.T, Bb.T);

@@ -16,7 +16,7 @@ package Product_Packet_Types is
       Include_Timestamp : Boolean := False;  -- Should we include the DP timestamp in front of the DP data
       Event_On_Missing : Boolean := False;   -- Should an event be issued if the data product is missing from the db?
       Used_For_On_Change : Boolean := True;  -- Should this DP's timestamp be used to determine if packet is sent on change?
-      Packet_Period_Item : Boolean := False; -- If set to true than the DP Id of this item is used to index into the
+      Packet_Period_Item : Boolean := False; -- If set to true then the DP Id of this item is used to index into the
       -- packet_description_list and extract the period of the packet to report
       -- instead of being used to grab a DP from the db.
       -- Size of the item in bytes:

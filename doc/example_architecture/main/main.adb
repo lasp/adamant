@@ -20,7 +20,7 @@ begin
    Science_Assembly.Init_Components;
 
    -- Wait for all the tasks to have reached their "wait" on the
-   -- suspecnsion object.
+   -- suspension object.
    declare
       Start_Time : constant Ada.Real_Time.Time := Ada.Real_Time.Clock + Wait_Time;
    begin

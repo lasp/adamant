@@ -134,7 +134,7 @@ package body Moving_Average is
          return Too_Large;
       end if;
 
-      -- Other update the length and reset the statistics
+      -- Otherwise update the length and reset the statistics
       Self.Items_Length := New_Sample_Length;
       Reset (Self);
 

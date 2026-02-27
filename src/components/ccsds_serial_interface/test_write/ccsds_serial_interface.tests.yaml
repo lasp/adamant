@@ -2,4 +2,4 @@
 description: This is the packet send unit test suite for the Serial Interface Component
 tests:
   - name: Test_Packet_Send
-    description: This unit makes sure that packets sent through the component's queue are forwarded through the socket.
+    description: This unit test makes sure that packets sent through the component's queue are forwarded through the serial port.

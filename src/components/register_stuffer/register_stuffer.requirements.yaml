@@ -3,5 +3,5 @@ description: The requirements for the Register Stuffer component are specified b
 requirements:
   - text: The component shall respond to commands to set a 32-bit little endian register.
   - text: The component shall respond to commands to read a 32-bit little endian register.
-  - text: The component shall publish a data product that reflect the last written register address and value.
-  - text: The component shall publish a data product that reflect the last read register address and value.
+  - text: The component shall publish a data product that reflects the last written register address and value.
+  - text: The component shall publish a data product that reflects the last read register address and value.

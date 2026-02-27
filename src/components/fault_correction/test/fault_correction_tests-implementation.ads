@@ -22,7 +22,7 @@ private
    overriding procedure Test_Clear_Fault_Response (Self : in out Instance);
    -- This unit test tests the reset data products command.
    overriding procedure Test_Reset_Data_Products (Self : in out Instance);
-   -- This unit test makes sure that commanding a change to a response with an unknown fault ID fauls.
+   -- This unit test makes sure that commanding a change to a response with an unknown fault ID fails.
    overriding procedure Test_Unrecognized_Fault_Id (Self : in out Instance);
    -- This unit test tests that appropriate actions are taken when items are dropped off a full queue.
    overriding procedure Test_Full_Queue (Self : in out Instance);

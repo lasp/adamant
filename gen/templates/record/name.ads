@@ -460,9 +460,9 @@ package {{ name }} is
    -- is invalid, or if the result is larger than Max_Serialized_Length, above.
    -- The calculated length value is returned regardless of the error Serialization_Status, if you
    -- need to report it in an error event, etc.
-   -- If the Serialization_Status is Failure and num_Bytes_Serialized is less than Max_Serialized_Length
+   -- If the Serialization_Status is Failure and Num_Bytes_Serialized is less than Max_Serialized_Length
    -- then the number symbolizes the byte at which serialization failed due to an out of bounds
-   -- length. If the Serialization_Status is Failure and num_Bytes_Serialized is greater than
+   -- length. If the Serialization_Status is Failure and Num_Bytes_Serialized is greater than
    -- Max_Serialized_Length, then the number symbolizes the actual calculated length, which is
    -- too large.
 {% if endianness in ["either", "big"] %}

@@ -8,7 +8,7 @@ fields:
     description: The sequence header.
     type: Sequence_Header.T
   - name: Computed_Crc
-    description: The FSW computed CRC of the parameter table stored in the memory region.
+    description: The FSW computed CRC of the sequence stored in the memory region.
     type: Crc_16.Crc_16_Type
     format: U16
     skip_validation: True

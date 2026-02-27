@@ -28,7 +28,7 @@ private
    overriding procedure Test_Nominal_Fetch_Data_Product (Self : in out Instance);
    -- This unit test tests loading and running a sequence that executes a conditional on a data product that is malformed.
    overriding procedure Test_Sequence_Telemetry_Compare_Error (Self : in out Instance);
-   -- This unit test tests tests a few corner cases related to telemetry comparisons and makes sure they behave as intended.
+   -- This unit test tests a few corner cases related to telemetry comparisons and makes sure they behave as intended.
    overriding procedure Test_Sequence_Telemetry_Compare_Corner_Cases (Self : in out Instance);
    -- This unit test tests loading and running a sequence that loads a sequence into another engine that does not exist.
    overriding procedure Test_Sequence_Spawn_Invalid_Engine (Self : in out Instance);
@@ -50,7 +50,7 @@ private
    overriding procedure Test_Issue_Details_Packet (Self : in out Instance);
    -- This unit test tests changing the summary packet period by command.
    overriding procedure Test_Set_Summary_Packet_Period (Self : in out Instance);
-   -- This unit test exercises commands send to invalid engine IDs and makes sure they do not execute.
+   -- This unit test exercises commands sent to invalid engine IDs and makes sure they do not execute.
    overriding procedure Test_Command_Invalid_Engine (Self : in out Instance);
    -- This unit test exercises that an invalid command throws the appropriate event.
    overriding procedure Test_Invalid_Command (Self : in out Instance);

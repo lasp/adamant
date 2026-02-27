@@ -60,7 +60,7 @@
 | 2      | Update Bit Pattern     | Update the internal command buffer (command arguments) with the value from a SEQ variable.                           |
 | 3      | Call                   | Load and run a subsequence in this engine.                                                                           |
 | 4      | Spawn                  | Load and run a sequence in another engine.                                                                           |
-| 5      | Start                  | Load and run an sequence in this engine, replacing the currently running sequence.                                   |
+| 5      | Start                  | Load and run a sequence in this engine, replacing the currently running sequence.                                   |
 | 6      | Push                   | Copy a SEQ variable to the argument buffer to prepare to call/spawn/start a new sequence.                            |
 | 7      | Eval                   | Perform an unsigned integer operation on internal variables A and B.                                                 |
 | 8      | Fetch Var A            | Fetch a SEQ variable or constant and store it into internal variable A.                                              |

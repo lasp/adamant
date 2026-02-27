@@ -1,7 +1,7 @@
 package body Interrupt_Handlers is
 
    protected body Task_Signal is
-      -- An procedure which waits for an interrupt to be handled.
+      -- A procedure which waits for an interrupt to be handled.
       entry Wait (Data : out T) when Signaled is
       begin
          -- Return data to the user:

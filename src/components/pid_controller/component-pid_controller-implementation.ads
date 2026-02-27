@@ -20,10 +20,10 @@ package Component.Pid_Controller.Implementation is
    --------------------------------------------------
    --
    -- Init Parameters:
-   -- control_Frequency : Short_Float - The frequency in Hz at which the PID controller is being driven. This determines the time step for the PID controller to use in the algorithm.
-   -- database_Update_Period : Unsigned_16 - The period in which to update the data products
-   -- diagnostic_Stats_Length : Unsigned_16 - The number of diagnostic samples to keep to perform the mean, variance, and max
-   -- moving_Average_Init_Samples: Integer - The number of samples to initialize the object with. Must be less than the max, and is optional to set to the max with -1
+   -- Control_Frequency : Short_Float - The frequency in Hz at which the PID controller is being driven. This determines the time step for the PID controller to use in the algorithm.
+   -- Database_Update_Period : Unsigned_16 - The period in which to update the data products
+   -- Moving_Average_Max_Samples : Natural - The number of diagnostic samples to keep to perform the mean, variance, and max
+   -- Moving_Average_Init_Samples : Integer - The number of samples to initialize the object with. Must be less than the max, and is optional to set to the max with -1
    --
    overriding procedure Init (Self : in out Instance; Control_Frequency : in Short_Float; Database_Update_Period : in Unsigned_16; Moving_Average_Max_Samples : in Natural; Moving_Average_Init_Samples : in Integer := -1);
 private
@@ -75,7 +75,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance) is null;

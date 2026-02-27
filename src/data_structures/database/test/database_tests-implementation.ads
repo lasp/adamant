@@ -17,7 +17,7 @@ private
    overriding procedure Test_Nominal_Update_Fetch (Self : in out Instance);
    -- This unit test tests trying to access the database with a bad Id.
    overriding procedure Test_Id_Out_Of_Range (Self : in out Instance);
-   -- This unit test tries to add to many items to the database.
+   -- This unit test tries to add too many items to the database.
    overriding procedure Test_Not_Enough_Memory (Self : in out Instance);
    -- This test tries to access data that has not yet been stored.
    overriding procedure Test_Data_Not_Available (Self : in out Instance);

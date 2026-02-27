@@ -25,7 +25,7 @@ with Command_Header.Representation;
 with Packet.Representation;
 with History;
 
--- The component manages access to a single memory location through a single pointer. When requested, the component loans out access to the pointer if it is available. The length of the pointer will always be the entire length of the memory region. The component will reject any requests to access the pointer again until the pointer is returned from the requester. Request/release memory transactions are each provided a unique ID. To release the memory, the same ID must be provided that was issues upon request. This mechanism reduces the risk of an inadvertent call to release from causing an unintended release of the memory. The component includes a data product relating whether the memory is currently allocated or not. The component responds to commands to CRC, dump, write, and force-release the memory region. Note that this component is active only to provide a separate thread of execution on which to execute the CRC command and the memory write command, each which could take a long time to execute.
+-- The component manages access to a single memory location through a single pointer. When requested, the component loans out access to the pointer if it is available. The length of the pointer will always be the entire length of the memory region. The component will reject any requests to access the pointer again until the pointer is returned from the requester. Request/release memory transactions are each provided a unique ID. To release the memory, the same ID must be provided that was issued upon request. This mechanism reduces the risk of an inadvertent call to release from causing an unintended release of the memory. The component includes a data product relating whether the memory is currently allocated or not. The component responds to commands to CRC, dump, write, and force-release the memory region. Note that this component is active only to provide a separate thread of execution on which to execute the CRC command and the memory write command, each of which could take a long time to execute.
 package Component.Memory_Manager.Implementation.Tester is
 
    use Component.Memory_Manager_Reciprocal;
@@ -131,7 +131,7 @@ package Component.Memory_Manager.Implementation.Tester is
    overriding procedure Memory_Unavailable (Self : in out Instance);
    -- Cannot release a memory region with an unexpected ID.
    overriding procedure Unexpected_Memory_Id (Self : in out Instance; Arg : in Ided_Memory_Region.T);
-   -- Cannot release a memory region when the memory region is currently available (ie. already released).
+   -- Cannot release a memory region when the memory region is currently available (i.e. already released).
    overriding procedure Memory_Already_Released (Self : in out Instance; Arg : in Ided_Memory_Region.T);
    -- The component is currently dumping the virtual memory location for the following region.
    overriding procedure Dumping_Memory (Self : in out Instance; Arg : in Virtual_Memory_Region_Positive.T);

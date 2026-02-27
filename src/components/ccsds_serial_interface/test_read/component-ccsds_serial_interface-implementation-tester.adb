@@ -55,7 +55,7 @@ package body Component.Ccsds_Serial_Interface.Implementation.Tester is
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- On this connector the Socket Interface Component sends any data it received from the socket.
+   -- On this connector the Serial Interface Component sends any data it received from the serial port.
    overriding procedure Ccsds_Space_Packet_T_Recv_Sync (Self : in out Instance; Arg : in Ccsds_Space_Packet.T) is
    begin
       -- Push the argument onto the test history for looking at later:
@@ -100,21 +100,21 @@ package body Component.Ccsds_Serial_Interface.Implementation.Tester is
    -----------------------------------------------
    -- Event handler primitive:
    -----------------------------------------------
-   -- Failed to send a packet over the socket because it has an invalid CCSDS header.
+   -- Failed to send a packet over the serial port because it has an invalid CCSDS header.
    overriding procedure Packet_Send_Failed (Self : in out Instance; Arg : Ccsds_Primary_Header.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Packet_Send_Failed_History.Push (Arg);
    end Packet_Send_Failed;
 
-   -- Failed to receive a packet over the socket because it has an invalid CCSDS header.
+   -- Failed to receive a packet over the serial port because it has an invalid CCSDS header.
    overriding procedure Packet_Recv_Failed (Self : in out Instance; Arg : Ccsds_Primary_Header.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Packet_Recv_Failed_History.Push (Arg);
    end Packet_Recv_Failed;
 
-   -- The component as received N number of bytes without seeing a sync pattern yet.
+   -- The component has received N number of bytes without seeing a sync pattern yet.
    overriding procedure Have_Not_Seen_Sync_Pattern (Self : in out Instance; Arg : Packed_U32.T) is
    begin
       -- Push the argument onto the test history for looking at later:

@@ -12,8 +12,8 @@ package Component.Discriminated_Component.Implementation is
    -- This is the component's discriminant. It initializes parameters during instantiation.
    --
    -- Discriminant Parameters:
-   -- packets_Per_Tick : Natural - The number of packets to send every time the Tick_T_Recv_Sync connector is invoked.
-   -- enabled_At_Startup : Boolean - If True, packets will be produced for every call to Tick_T_Recv_Sync. If False, no packets will be produced.
+   -- Packets_Per_Tick : Natural - The number of packets to send every time the Tick_T_Recv_Sync connector is invoked.
+   -- Enabled_At_Startup : Boolean - If True, packets will be produced for every call to Tick_T_Recv_Sync. If False, no packets will be produced.
    --
    type Instance (Packets_Per_Tick : Natural; Enabled_At_Startup : Boolean) is new Discriminated_Component.Base_Instance with private;
 
@@ -23,8 +23,8 @@ private
    -- This is the component's discriminant. It initializes parameters during instantiation.
    --
    -- Discriminant Parameters:
-   -- packets_Per_Tick : Natural - The number of packets to send every time the Tick_T_Recv_Sync connector is invoked.
-   -- enabled_At_Startup : Boolean - If True, packets will be produced for every call to Tick_T_Recv_Sync. If False, no packets will be produced.
+   -- Packets_Per_Tick : Natural - The number of packets to send every time the Tick_T_Recv_Sync connector is invoked.
+   -- Enabled_At_Startup : Boolean - If True, packets will be produced for every call to Tick_T_Recv_Sync. If False, no packets will be produced.
    --
    type Instance (Packets_Per_Tick : Natural; Enabled_At_Startup : Boolean) is new Discriminated_Component.Base_Instance with record
       null; -- TODO
@@ -37,7 +37,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance) is null;

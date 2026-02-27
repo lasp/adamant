@@ -1,6 +1,6 @@
 ---
 description: |
-  The Task Watchdog component receives pets from components that execute in a periodic manner throughout the assembly. The receipt of a pet indicates that the component is running well and is what is referred to as a watchdog. If it detects that the component has stopped executing for some configurable time, called a limit, it will either ignore the fault, throw a warning event, or throw a fault and possibly stop servicing an downstream watchdog (usually a hardware watchdog) based on the component's configuration. The configuration is dependent on the input list generated from a yaml model for this component. The input requires a connector name, a limit for the number of ticks without a pet, the criticality of the component, and the action to take if the limit is exceeded which is one of the three described before.
+  The Task Watchdog component receives pets from components that execute in a periodic manner throughout the assembly. The receipt of a pet indicates that the component is running well and is what is referred to as a watchdog. If it detects that the component has stopped executing for some configurable time, called a limit, it will either ignore the fault, throw a warning event, or throw a fault and possibly stop servicing a downstream watchdog (usually a hardware watchdog) based on the component's configuration. The configuration is dependent on the input list generated from a yaml model for this component. The input requires a connector name, a limit for the number of ticks without a pet, the criticality of the component, and the action to take if the limit is exceeded which is one of the three described before.
   In addition, the criticality of the task is also defined in the yaml model which determines if the watchdog component stops petting the downstream watchdog.
 execution: passive
 init:
@@ -17,7 +17,7 @@ connectors:
     type: Pet.T
     kind: recv_sync
     count: 0 # Length defined at runtime
-  - description: The pet send connector. This is used to service an downstream watchdog component, usually a component which services a hardware-based watchdog.
+  - description: The pet send connector. This is used to service a downstream watchdog component, usually a component which services a hardware-based watchdog.
     type: Pet.T
     kind: send
   - description: The command receive connector
@@ -29,7 +29,7 @@ connectors:
   - description: Faults are sent on this connector.
     type: Fault.T
     kind: send
-  - description: The post mortum log can be dumped using packets.
+  - description: The post mortem log can be dumped using events.
     type: Event.T
     kind: send
   - description: Data products for limit values and states.

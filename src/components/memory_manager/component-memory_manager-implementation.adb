@@ -114,7 +114,7 @@ package body Component.Memory_Manager.Implementation is
       if Bytes = null then
          -- If bytes is null make sure size is positive.
          pragma Assert (Size > 0, "Memory Manager Init Error: If a null 'bytes' pointer is provided, then a positive size must be provided to allocate memory on the heap.");
-         -- ALlocate the internal byte buffer:
+         -- Allocate the internal byte buffer:
          Self.Bytes := new Basic_Types.Byte_Array (0 .. Size - 1);
       else
          -- If bytes is non-null make sure size is negative.

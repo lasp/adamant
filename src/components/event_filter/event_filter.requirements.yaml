@@ -1,7 +1,7 @@
 ---
 description: These are the requirements for the Event Filter component.
 requirements:
-  - text: The Event Filter component shall accept all events and pass then on if not filtered or out of the beginning set range of IDs.
+  - text: The Event Filter component shall accept all events and pass them on if not filtered or out of the beginning set range of IDs.
   - text: The Event Filter component shall track the number of events that are filtered.
   - text: The Event Filter component shall not filter events if they are set to unfiltered.
   - text: The Event Filter component shall have the ability to filter or unfilter events by command.

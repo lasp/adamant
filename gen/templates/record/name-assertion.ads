@@ -51,7 +51,7 @@ package {{ name }}.Assertion is
 {% endif %}
 {% if variable_length %}
    -- This package compares all data in the variable length type, even data
-   -- that is "out of bounds", ie. past the variable type's length
+   -- that is "out of bounds", i.e. past the variable type's length
 {% else %}
    -- This package compares data without any Epsilon, using the
    -- Smart_Assert.Basic package.

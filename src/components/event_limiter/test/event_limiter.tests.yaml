@@ -1,5 +1,5 @@
 ---
-description: This is a unit test suite for the Pid Controller component
+description: This is a unit test suite for the Event Limiter component
 tests:
   - name: Test_Received_Event
     description: This unit test is to test incrementing counters for the range events as they come in with both enabled and disabled states.

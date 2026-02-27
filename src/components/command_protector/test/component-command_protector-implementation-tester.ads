@@ -111,7 +111,7 @@ package Component.Command_Protector.Implementation.Tester is
    overriding procedure Rejected_Protected_Command (Self : in out Instance; Arg : in Command_Header.T);
    -- A protected command was accepted because the component was armed.
    overriding procedure Accepted_Protected_Command (Self : in out Instance; Arg : in Command_Header.T);
-   -- The component received the arm command an is now armed.
+   -- The component received the arm command and is now armed.
    overriding procedure Armed (Self : in out Instance; Arg : in Packed_Arm_Timeout.T);
    -- The component received a command and is now unarmed.
    overriding procedure Unarmed (Self : in out Instance);

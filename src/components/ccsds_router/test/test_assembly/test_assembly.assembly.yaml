@@ -20,8 +20,8 @@ components:
   - type: Ccsds_Router
     execution: passive
     init_base:
-      - "queue_Size => 0"
-      - "ccsds_Space_Packet_T_Send_Count => 6"
+      - "Queue_Size => 0"
+      - "Ccsds_Space_Packet_T_Send_Count => 6"
     init:
       - "table => Test_Assembly_Ccsds_Router_Table.Router_Table"
 connections:

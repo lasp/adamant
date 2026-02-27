@@ -153,12 +153,12 @@ package body Variable_Tests.Implementation is
       -- Check the dumped memory meta data:
       Natural_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get_Count, 2);
       Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (1), (Head => 0, Count => Unsigned_32 (Idx), Size => 50));
-      -- Make sure pointer sent in event matches the pointer send via the dump:
+      -- Make sure pointer sent in event matches the pointer sent via the dump:
       Memory_Region_Assert.Eq (T.Dumping_Log_Memory_History.Get (1), Pack (T.Memory_Dump_Recv_Sync_History.Get (1).Memory_Pointer));
 
       -- Check the dumped memory data:
       Check_Dump (T.Memory_Dump_Recv_Sync_History.Get (2), 0, Idx);
-      -- Make sure pointer sent in event matches the pointer send via the dump:
+      -- Make sure pointer sent in event matches the pointer sent via the dump:
       Memory_Region_Assert.Eq (T.Dumping_Log_Memory_History.Get (2), Pack (T.Memory_Dump_Recv_Sync_History.Get (2).Memory_Pointer));
       Ptr := T.Memory_Dump_Recv_Sync_History.Get (2).Memory_Pointer;
       Bytes (0 .. Length (Ptr) - 1) := To_Byte_Array (Ptr);
@@ -175,12 +175,12 @@ package body Variable_Tests.Implementation is
       -- Check the dumped memory meta data:
       Natural_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get_Count, 4);
       Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (3), (Head => 0, Count => Unsigned_32 (Idx), Size => 50));
-      -- Make sure pointer sent in event matches the pointer send via the dump:
+      -- Make sure pointer sent in event matches the pointer sent via the dump:
       Memory_Region_Assert.Eq (T.Dumping_Log_Memory_History.Get (3), Pack (T.Memory_Dump_Recv_Sync_History.Get (3).Memory_Pointer));
 
       -- Check the dumped memory data:
       Check_Dump (T.Memory_Dump_Recv_Sync_History.Get (4), 0, 50);
-      -- Make sure pointer sent in event matches the pointer send via the dump:
+      -- Make sure pointer sent in event matches the pointer sent via the dump:
       Memory_Region_Assert.Eq (T.Dumping_Log_Memory_History.Get (4), Pack (T.Memory_Dump_Recv_Sync_History.Get (4).Memory_Pointer));
       Ptr := T.Memory_Dump_Recv_Sync_History.Get (4).Memory_Pointer;
       Bytes (0 .. Length (Ptr) - 1) := To_Byte_Array (Ptr);
@@ -197,12 +197,12 @@ package body Variable_Tests.Implementation is
       -- Check the dumped memory meta data:
       Natural_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get_Count, 6);
       Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (5), (Head => 0, Count => Unsigned_32 (Idx), Size => 50));
-      -- Make sure pointer sent in event matches the pointer send via the dump:
+      -- Make sure pointer sent in event matches the pointer sent via the dump:
       Memory_Region_Assert.Eq (T.Dumping_Log_Memory_History.Get (5), Pack (T.Memory_Dump_Recv_Sync_History.Get (5).Memory_Pointer));
 
       -- Check the dumped memory data:
       Check_Dump (T.Memory_Dump_Recv_Sync_History.Get (6), 0, Idx);
-      -- Make sure pointer sent in event matches the pointer send via the dump:
+      -- Make sure pointer sent in event matches the pointer sent via the dump:
       Memory_Region_Assert.Eq (T.Dumping_Log_Memory_History.Get (6), Pack (T.Memory_Dump_Recv_Sync_History.Get (6).Memory_Pointer));
       Ptr := T.Memory_Dump_Recv_Sync_History.Get (6).Memory_Pointer;
       Bytes (0 .. Length (Ptr) - 1) := To_Byte_Array (Ptr);
@@ -219,12 +219,12 @@ package body Variable_Tests.Implementation is
       -- Check the dumped memory meta data:
       Natural_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get_Count, 8);
       Check_Meta_Dump (T.Memory_Dump_Recv_Sync_History.Get (7), (Head => 0, Count => Unsigned_32 (Idx), Size => 50));
-      -- Make sure pointer sent in event matches the pointer send via the dump:
+      -- Make sure pointer sent in event matches the pointer sent via the dump:
       Memory_Region_Assert.Eq (T.Dumping_Log_Memory_History.Get (7), Pack (T.Memory_Dump_Recv_Sync_History.Get (7).Memory_Pointer));
 
       -- Check the dumped memory data:
       Check_Dump (T.Memory_Dump_Recv_Sync_History.Get (8), 0, Idx);
-      -- Make sure pointer sent in event matches the pointer send via the dump:
+      -- Make sure pointer sent in event matches the pointer sent via the dump:
       Memory_Region_Assert.Eq (T.Dumping_Log_Memory_History.Get (8), Pack (T.Memory_Dump_Recv_Sync_History.Get (8).Memory_Pointer));
       Ptr := T.Memory_Dump_Recv_Sync_History.Get (8).Memory_Pointer;
       Bytes (0 .. Length (Ptr) - 1) := To_Byte_Array (Ptr);

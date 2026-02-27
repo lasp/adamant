@@ -331,7 +331,7 @@ package body Component.Command_Sequencer.Implementation.Tester is
       Self.Starting_Sequence_History.Push (Arg);
    end Starting_Sequence;
 
-   -- The sequence engine as finished its execution of the parent sequence.
+   -- The sequence engine has finished its execution of the parent sequence.
    overriding procedure Finished_Sequence (Self : in out Instance; Arg : in Packed_Sequence_Engine_Id.T) is
    begin
       -- Push the argument onto the test history for looking at later:
@@ -493,7 +493,7 @@ package body Component.Command_Sequencer.Implementation.Tester is
       Self.Sequence_Execution_Error_History.Push (Arg);
    end Sequence_Execution_Error;
 
-   -- A sequence timed out waiting on a command response of subsequence load.
+   -- A sequence timed out waiting on a command response or subsequence load.
    overriding procedure Sequence_Timeout_Error (Self : in out Instance; Arg : in Engine_Error_Type.T) is
    begin
       -- Push the argument onto the test history for looking at later:

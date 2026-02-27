@@ -32,7 +32,7 @@ package Task_Synchronization is
    --
    -- This object does not implement any specific timing features in regards
    -- to the timeout. This must be implemented outside of the protected object.
-   -- There is simply a procure "Timeout" provided which is identical to "Release"
+   -- There is simply a procedure "Timeout" provided which is identical to "Release"
    -- with two exceptions, 1) it causes "Wait" to return Timeout_Out => True and
    -- it only sets the internal variables to True if there is indeed a task waiting,
    -- otherwise it has no effect.

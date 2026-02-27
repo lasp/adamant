@@ -12,7 +12,7 @@ execution: passive
 init:
   description: This component requires a list of protected command IDs at initialization.
   parameters:
-    - name: protected_Command_Id_List
+    - name: Protected_Command_Id_List
       type: Command_Id_List
       description: The list of command IDs to consider as protected commands.
 connectors:

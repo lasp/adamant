@@ -218,10 +218,10 @@ procedure Test is
       Check_Meta (2);
       -- Pop and check:
       Pop_Assert.Eq (Queue.Pop, Success);
-      -- Pop_Assert.eq(queue.Pop(bytes, Length => len), Success);
+      -- Pop_Assert.Eq (Queue.Pop (Bytes, Length => Len), Success);
       Put_Line ("Num_Bytes_Used: " & Natural'Image (Queue.Num_Bytes_Used));
       Natural_Assert.Eq (Queue.Num_Bytes_Used, 12);
-      -- Byte_Array_Assert.eq(bytes(0 .. len - 1), (0 .. len - 1 => 11));
+      -- Byte_Array_Assert.Eq (Bytes (0 .. Len - 1), (0 .. Len - 1 => 11));
       Check_Meta (1);
       Pop_Assert.Eq (Queue.Pop (Bytes, Length => Len), Success);
       Put_Line ("Num_Bytes_Used: " & Natural'Image (Queue.Num_Bytes_Used));
@@ -234,19 +234,19 @@ procedure Test is
    end Go;
 begin
 --   Put_Line("Create heap queue.");
---   heap_Queue.init(30);
+--   Heap_Queue.Init (30);
 --   Put_Line("Passed.");
 --   Put_Line("");
 --
 --   Put_Line("----------------------------------");
 --   Put_Line("Testing heap queue.");
 --   Put_Line("----------------------------------");
---   Go(heap_Queue);
+--   Go (Heap_Queue);
 --   Put_Line("----------------------------------");
 --   Put_Line("");
 --
 --   Put_Line("Destroy heap queue.");
---   heap_Queue.destroy;
+--   Heap_Queue.Destroy;
 --   Put_Line("Passed.");
 --   Put_Line("");
 --

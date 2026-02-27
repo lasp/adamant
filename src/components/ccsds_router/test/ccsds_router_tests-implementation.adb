@@ -452,7 +452,7 @@ package body Ccsds_Router_Tests.Implementation is
       Natural_Assert.Eq (T.Error_Packet_History.Get_Count, 3);
       Ccsds_Space_Packet_Assert.Eq (T.Error_Packet_History.Get (3), Packet_9);
 
-      -- Send packet 0 async and make sure it gets routed correctly:
+      -- Send packet 9 async and make sure it gets dropped:
       Packet_9.Header.Sequence_Count := 1;
       T.Ccsds_Space_Packet_T_Send_2 (Packet_9);
       Self.Check_Routing (0, 0, 0, 0, 0, 0);

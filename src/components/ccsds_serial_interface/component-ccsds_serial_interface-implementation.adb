@@ -32,7 +32,7 @@ package body Component.Ccsds_Serial_Interface.Implementation is
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- On this connector the Socket Interface Component receives data and sends it out of the socket.
+   -- On this connector the Serial Interface Component receives data and sends it out of the serial port.
    overriding procedure Ccsds_Space_Packet_T_Recv_Async (Self : in out Instance; Arg : in Ccsds_Space_Packet.T) is
       use Serializer_Types;
       Num_Bytes_Serialized : Natural;
@@ -70,7 +70,7 @@ package body Component.Ccsds_Serial_Interface.Implementation is
             pragma Warnings (On, "overlay changes scalar storage order");
          begin
             Diagnostic_Uart.Put (Sync_Pattern & Bytes (0 .. Num_Bytes_Serialized - 1));
-            --Put_Line(Standard_Error, Basic_Types.Representation.Image(sync_Pattern & bytes(0 .. num_Bytes_Serialized - 1)));
+            --Put_Line(Standard_Error, Basic_Types.Representation.Image(Sync_Pattern & bytes(0 .. Num_Bytes_Serialized - 1)));
             if Self.Interpacket_Gap_Ms > 0 then
                Sleep.Sleep_Ms (Self.Interpacket_Gap_Ms);
             end if;
@@ -96,7 +96,7 @@ package body Component.Ccsds_Serial_Interface.Implementation is
          -- Read byte and see if it matches the
          -- next byte in the sync pattern.
          A_Byte := Diagnostic_Uart.Get;
-         -- Put_Line(Standard_Error, "got: " & Natural'Image(Natural(a_Byte)));
+         -- Put_Line(Standard_Error, "got: " & Natural'Image(Natural(A_Byte)));
 
          -- Check against the sync pattern:
          if A_Byte = Sync_Pattern (Count) then

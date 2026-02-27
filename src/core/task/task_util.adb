@@ -28,7 +28,7 @@ package body Task_Util is
       -- Assume that the stack starts at the address of this variable.
       Stack_Start : constant Interfaces.Unsigned_32 := 16#DDDD_DDDD#;
    begin
-      -- Make sure the stack size is greater than the minimum supported. The rational here is to support
+      -- Make sure the stack size is greater than the minimum supported. The rationale here is to support
       -- a portable stack monitoring system we need some amount of margin. 2kb should always work for this.
       pragma Assert (Stack_Size >= 2_000, "Adamant supports a minimum stack size of 2kb at this time.");
 

@@ -1,5 +1,5 @@
 ---
-description: This is a unit test suite for the two_counter_entry object for help with the event_limiter
+description: This is a unit test suite for the event_filter_entry package
 tests:
   - name: Test_Init_List
     description: This test is intended to test the different permutations of the init of the byte array.

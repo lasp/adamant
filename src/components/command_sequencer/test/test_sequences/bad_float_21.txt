@@ -3,6 +3,6 @@ seq bad_float_21
   declare res f32
   set $var = -1.7014118346e+38
 
-  ; The following comupation should throw runtime error.
+  ; The following computation should throw runtime error.
   set $res = $var + $var
 endseq

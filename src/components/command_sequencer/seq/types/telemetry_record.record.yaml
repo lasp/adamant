@@ -18,6 +18,6 @@ fields:
     type: Seq_Enums.Seq_Data_Format.E
     format: E8
   - name: New_Value_Required
-    description: Flag for if this telemetry item is required to be
+    description: Flag for if this telemetry item is required to be a new value.
     type: Boolean
     format: E8

@@ -11,7 +11,7 @@ execution: active
 init:
   description: This component requires the maximum number of unique commands that it expects to need to route. This number will be used to size the internal router table on the heap. Any attempted command registrations beyond this limit will be reported as an error event and will not be registered.
   parameters:
-    - name: max_Number_Of_Commands
+    - name: Max_Number_Of_Commands
       type: Natural
       description: The maximum number of unique commands that can be registered with the command router component.
 connectors:
@@ -38,7 +38,7 @@ connectors:
   - description: This is the command receive connector for the Command Router. The NOOP commands sent on this connector will be executed by the command router. This connector will usually be connected in loopback from the Command_T_Send connector in order to provide aliveness test capabilities, or disconnected completely.
     type: Command.T
     kind: recv_async
-  - description: This connector is used to register the Command Router's NOOP commands at initialization, and respond to NOOP commands during ececution. It is usually connected in loopback to the Command_Response_T_Recv_Async connector.
+  - description: This connector is used to register the Command Router's NOOP commands at initialization, and respond to NOOP commands during execution. It is usually connected in loopback to the Command_Response_T_Recv_Async connector.
     type: Command_Response.T
     kind: send
   - description: Events are sent out of this connector.

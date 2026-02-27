@@ -11,22 +11,22 @@ preamble: |
 init:
   description: This component requires a list of interrupts and tasks ids to monitor.
   parameters:
-    - name: task_List
+    - name: Task_List
       type: Task_Types.Task_Info_List_Access
       not_null: true
       description: A list of task info records to monitor.
-    - name: interrupt_List
+    - name: Interrupt_List
       type: Interrupt_Types.Interrupt_Id_List_Access
       not_null: true
-      description: A list of task info records to monitor.
-    - name: execution_Periods
+      description: A list of interrupt ids to monitor.
+    - name: Execution_Periods
       type: Execution_Periods_Type
       description: The period (in ticks) that specify the duration of time that each CPU measurement is taken over.
       # If the primary tick is at 10 seconds this would produce a cpu time measured over 10s, 1 minute, and 5 minutes
       default: "[1, 6, 30]"
-    - name: packet_Period
+    - name: Packet_Period
       type: Interfaces.Unsigned_16
-      description: The period (in ticks) of how often to send out the cpu execution packet. A value of zero disable sending of the packet.
+      description: The period (in ticks) of how often to send out the cpu execution packet. A value of zero disables sending of the packet.
       default: "1"
 connectors:
   - description: This is the base tick for the component.

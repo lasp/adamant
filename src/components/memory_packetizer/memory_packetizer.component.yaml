@@ -3,7 +3,7 @@ description: |
   This active component receives memory pointer information on an asynchronous queue. It then reads the data that these pointers reference into packets, producing multiple maximum sized packets, if necessary, to packetize the entire memory region. Note that it does the packetization process on its own task. The priority of this task can be tuned by the user. Usually, this component will be made low priority, so packetization can happen in the background while nothing more important is running.
 execution: active
 init:
-  description: This initialization function is used to set a threshold for the maximum number of packets that the component will produce in a single time period. A time period is measured in an integer number of seconds. The component also needs to keep track of the sequence counts for each packet ID that is receives. To do this, it needs to allocate internal memory to keep track of the last sequence count for each packet. A maximum number of unique packet ids is provided in this function to allocate the necessary memory to keep track of this information.
+  description: This initialization function is used to set a threshold for the maximum number of packets that the component will produce in a single time period. A time period is measured in an integer number of seconds. The component also needs to keep track of the sequence counts for each packet ID that it receives. To do this, it needs to allocate internal memory to keep track of the last sequence count for each packet. A maximum number of unique packet ids is provided in this function to allocate the necessary memory to keep track of this information.
   parameters:
     - name: Max_Packets_Per_Time_Period
       type: Natural
@@ -11,11 +11,11 @@ init:
     - name: Time_Period_In_Seconds
       type: Positive
       default: "1"
-      description: The time period in seconds over which the measure the number of packets produced.
+      description: The time period in seconds over which to measure the number of packets produced.
     - name: Max_Packet_Ids
       type: Positive
       default: "10"
-      description: The maximum number of unique packet ids that this component is expected to receive during operations. This value is used to allocate a small amount of memory at initialization to keep track of the sequence count for each produced packet. If this memory becomes all used up, any new unique packet ids received will trigger an events and will be emitted with a sequence count of zero. This misconfiguration should easily be detectable during test.
+      description: The maximum number of unique packet ids that this component is expected to receive during operations. This value is used to allocate a small amount of memory at initialization to keep track of the sequence count for each produced packet. If this memory becomes fully used, any new unique packet ids received will trigger an event and will be emitted with a sequence count of zero. This misconfiguration should easily be detectable during test.
 connectors:
   - description: Send a packet of data.
     type: Packet.T

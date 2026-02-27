@@ -3,19 +3,19 @@ description: This record contains the type definition for the bit packing for th
 preamble: |
   type Event_Count_Type is new Natural range 0 .. 7;
 fields:
-  - name: top_Event_Enabled_State
+  - name: Top_Event_Enabled_State
     description: A single bit to indicate if the events are enabled for the first 4 bits
     type: Two_Counter_Entry_Enums.Event_State_Type.E
     format: E1
-  - name: top_Event_Count
+  - name: Top_Event_Count
     description: The count of the number of events seen for the first 4 bits
     type: Event_Count_Type
     format: U3
-  - name: bottom_Event_Enabled_State
+  - name: Bottom_Event_Enabled_State
     description: A single bit to indicate if the events are enabled for the last 4 bits
     type: Two_Counter_Entry_Enums.Event_State_Type.E
     format: E1
-  - name: bottom_Event_Count
+  - name: Bottom_Event_Count
     description: The count of the number of events seen for the last 4 bits
     type: Event_Count_Type
     format: U3

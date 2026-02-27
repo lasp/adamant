@@ -137,10 +137,10 @@ package body Seq_Runtime.Decoder is
             return Decode_Return (Self, Output);
          when Wait_If_Zero =>
             return Decode_Wait_If_Zero (Self, Output);
-         -- when Kill_Category =>         return self.decode_Kill_Category;
+         -- when Kill_Category =>         return Self.Decode_Kill_Category;
          when Kill_Engine =>
             return Decode_Kill_Engine (Self, Output);
-         -- when Kill_Name =>               return self.decode_Kill_Name;
+         -- when Kill_Name =>               return Self.Decode_Kill_Name;
          when Subscribe =>
             Put_Line (Output, "Ignore");
             return Self.Position + 4;
@@ -169,12 +169,12 @@ package body Seq_Runtime.Decoder is
             return Decode_Wait_If_Zero_On_B (Self, Output);
          when Str_Alloc =>
             return Decode_Str_Alloc (Self, Output);
-         -- when Str_Dealloc =>            return self.decode_Str_Dealloc;
+         -- when Str_Dealloc =>            return Self.Decode_Str_Dealloc;
          -- when Str_Set =>
          --    return Decode_Str_Set (Self, Output);
-         -- when Str_Update_Bit_Pattern => return self.decode_Str_Update_Pattern;
-         -- when Str_Copy =>                return self.decode_Str_Copy;
-         -- when Str_Move =>                return self.decode_Str_Move;
+         -- when Str_Update_Bit_Pattern => return Self.Decode_Str_Update_Pattern;
+         -- when Str_Copy =>                return Self.Decode_Str_Copy;
+         -- when Str_Move =>                return Self.Decode_Str_Move;
          when Print =>
             return Decode_Print (Self, Output);
          when Print_Var =>
@@ -711,7 +711,7 @@ package body Seq_Runtime.Decoder is
       Put_Line (Output, "Ignore");
       return Self.Next_Position;
    end Decode_Str_Alloc;
-   -- function decode_Str_Dealloc                (self : in out Decoder_Instance; output : in File_Type) return Seq_Position;
+   -- function Decode_Str_Dealloc                (Self : in out Decoder_Instance; output : in File_Type) return Seq_Position;
 
    function Decode_Str_Set (Self : in out Decoder_Instance; Output : in File_Type) return Seq_Position is
       Instruction : Str_Set_Record.T;
@@ -725,9 +725,9 @@ package body Seq_Runtime.Decoder is
       return Self.Next_Position;
    end Decode_Str_Set;
 
-   -- function decode_Str_Update_Pattern      (self : in out Decoder_Instance; output : in File_Type) return Seq_Position;
-   -- function decode_Str_Copy                     (self : in out Decoder_Instance; output : in File_Type) return Seq_Position;
-   -- function decode_Str_Move                     (self : in out Decoder_Instance; output : in File_Type) return Seq_Position;
+   -- function Decode_Str_Update_Pattern      (Self : in out Decoder_Instance; output : in File_Type) return Seq_Position;
+   -- function Decode_Str_Copy                     (Self : in out Decoder_Instance; output : in File_Type) return Seq_Position;
+   -- function Decode_Str_Move                     (Self : in out Decoder_Instance; output : in File_Type) return Seq_Position;
 
    function Decode_Print (Self : in out Decoder_Instance; Output : in File_Type) return Seq_Position is
       Instruction : Print_Record.T;

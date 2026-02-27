@@ -1,5 +1,5 @@
 ---
-description: These are the commands Example Science Component
+description: These are the commands for the Example Science Component
 commands:
   - name: Enable_Science
     description: Start collecting science.

@@ -170,7 +170,7 @@ package body Component.Product_Database.Implementation.Tester is
       Self.Override_Cleared_History.Push (Arg);
    end Override_Cleared;
 
-   -- Override condition cleared for all data productd.
+   -- Override condition cleared for all data products.
    overriding procedure Override_Cleared_For_All (Self : in out Instance) is
       Arg : constant Natural := 0;
    begin

@@ -64,7 +64,7 @@ class py_source_database(database):
         record = self.try_fetch(module_name)
 
         # If the record already exists, we need to be very careful about adding another source
-        # file. It must be the compliment to the source file that already exists. For example,
+        # file. It must be the complement to the source file that already exists. For example,
         # if hello.adb exists, we can add hello.ads, but nothing else. If we find another piece of
         # source, then we potentially have two different modules named the same thing, and we
         # should warn the user.

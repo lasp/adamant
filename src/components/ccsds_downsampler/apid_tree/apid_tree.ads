@@ -17,7 +17,7 @@ package Apid_Tree is
    -- Initialization/destruction functions:
    --
    -- Init Parameters:
-   -- Downsample_List : Ccsds_Downsampler_Types.Ccsds_Downsample_Product_Entry_List_Access - The list of apids and their associated starting filter factor to be added to the tree at init
+   -- Downsample_List : Ccsds_Downsampler_Types.Ccsds_Downsample_Packet_List_Access - The list of apids and their associated starting filter factor to be added to the tree at init
    --
    procedure Init (Self : in out Instance; Downsample_List : in Ccsds_Downsample_Packet_List_Access);
 

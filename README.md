@@ -3,7 +3,7 @@
 #
 
 [![Run All Unit Tests](https://github.com/lasp/adamant/actions/workflows/test_all.yml/badge.svg)](https://github.com/lasp/adamant/actions/workflows/test_all.yml)
-[![Check Style](https://github.com/lasp/adamant/actions/workflows/style_all.yml/badge.svg)](https://github.com/lasp/adamant/actions/workflows/styl_all.yml)
+[![Check Style](https://github.com/lasp/adamant/actions/workflows/style_all.yml/badge.svg)](https://github.com/lasp/adamant/actions/workflows/style_all.yml)
 [![Build All Documentation](https://github.com/lasp/adamant/actions/workflows/publish_all.yml/badge.svg)](https://github.com/lasp/adamant/actions/workflows/publish_all.yml)
 [![Build the User Guide](https://github.com/lasp/adamant/actions/workflows/build_user_guide.yml/badge.svg)](https://github.com/lasp/adamant/actions/workflows/build_user_guide.yml)
 

@@ -1,5 +1,5 @@
 ---
-description: This record holds sequence engine arguments that can be prodided to an engine prior to load of a sequence.
+description: This record holds sequence engine arguments that can be provided to an engine prior to load of a sequence.
 fields:
   - name: Engine_Id
     description: The sequence engine.

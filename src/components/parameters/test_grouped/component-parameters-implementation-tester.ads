@@ -30,9 +30,9 @@ with Component.Test_Component_1.Implementation;
 with Component.Test_Component_2.Implementation;
 
 -- The Parameters Component is responsible for staging, updating, and reporting
--- the values of the ``active" parameters being used in the system. The component
--- does not contain a parameter table itself. Instead it acts as an interface for
--- the rest of the system to component's internal staged parameters. The component
+-- the values of the "active" parameters being used in the system. The component
+-- does not contain a parameter table itself. Instead, it acts as an interface for
+-- the rest of the system to the components' internal staged parameters. The component
 -- allows the staging and updating of parameters through a table upload (via
 -- Memory_Region_T_Recv_Async) or updating of individual parameter values by
 -- command. The component also provides a command to fetch all of the parameters

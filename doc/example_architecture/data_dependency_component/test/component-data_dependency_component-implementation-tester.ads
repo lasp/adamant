@@ -45,7 +45,7 @@ package Component.Data_Dependency_Component.Implementation.Tester is
       -- value of this variable is returned.
       Data_Dependency_Return_Length_Override : Data_Product_Types.Data_Product_Buffer_Length_Type := 0;
       -- The timestamp to return with the data dependency. If this is set to (0, 0) then
-      -- the system_Time (above) is returned, otherwise, the value of this variable is returned.
+      -- the System_Time (above) is returned, otherwise, the value of this variable is returned.
       Data_Dependency_Timestamp_Override : Sys_Time.T := (0, 0);
    end record;
    type Instance_Access is access all Instance;

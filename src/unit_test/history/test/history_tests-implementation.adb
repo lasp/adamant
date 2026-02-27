@@ -68,7 +68,7 @@ package body History_Tests.Implementation is
       Boolean_Assert.Eq (Status, False);
       Status := Hist.Is_Empty;
       Boolean_Assert.Eq (Status, True);
-      -- ignore := hist.get(1); -- Should cause assertiong, but we can't actually test aunit with aunit :(
+      -- ignore := hist.get(1); -- Should cause assertion, but we can't actually test AUnit with AUnit :(
       Hist.Destroy;
       pragma Unreferenced (Hist);
    end Test_History;

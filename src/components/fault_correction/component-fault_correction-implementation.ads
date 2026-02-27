@@ -72,7 +72,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance);
@@ -112,7 +112,7 @@ private
    overriding function Disable_Fault_Response (Self : in out Instance; Arg : in Packed_Fault_Id.T) return Command_Execution_Status.E;
    -- Resets a fault response to the Enabled state of the provided ID. If the fault is latched, it unlatches the fault.
    overriding function Clear_Fault_Response (Self : in out Instance; Arg : in Packed_Fault_Id.T) return Command_Execution_Status.E;
-   -- Resets all fault responses to the ENabled state. Unlatches all latched fault responses.
+   -- Resets all fault responses to the Enabled state. Unlatches all latched fault responses.
    overriding function Clear_All_Fault_Responses (Self : in out Instance) return Command_Execution_Status.E;
    -- This command resets the values of all the component's data product to the values at initialization, except for the Fault_Response_Statuses data product which can be reset by the Clear_All_Fault_Responses command.
    overriding function Reset_Data_Products (Self : in out Instance) return Command_Execution_Status.E;

@@ -6,10 +6,10 @@ filters:
   - name: science
     type: component_name
     include:
-      - rate_Group_Instance
-      - science_Instance
-      - time_Instance
-      - logger_Instance
+      - Rate_Group_Instance
+      - Science_Instance
+      - Time_Instance
+      - Logger_Instance
   - name: everything
     type: component_type_context
     exclude:

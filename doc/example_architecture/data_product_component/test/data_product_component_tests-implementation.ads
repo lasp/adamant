@@ -2,7 +2,7 @@
 -- Data_Product_Component Tests Spec
 --------------------------------------------------------------------------------
 
--- This is a set of unit tests for the Event Component.
+-- This is a set of unit tests for the Data Product Component.
 package Data_Product_Component_Tests.Implementation is
    -- Test data and state:
    type Instance is new Data_Product_Component_Tests.Base_Instance with private;

@@ -8,7 +8,7 @@ package Task_Watchdog_Types is
    type Missed_Pet_Count_Type is new Natural range Natural'First .. 65535;
    subtype Missed_Pet_Limit_Type is Missed_Pet_Count_Type range Missed_Pet_Count_Type'First + 1 .. Missed_Pet_Count_Type'Last - 1;
 
-   -- Define internal downsampler entry:
+   -- Define internal task watchdog entry:
    type Task_Watchdog_Input_Entry is record
       -- The maximum number of ticks since receiving a pet before sending the specified action
       Max_Missed_Pet_Limit : Missed_Pet_Limit_Type := Missed_Pet_Limit_Type'First;

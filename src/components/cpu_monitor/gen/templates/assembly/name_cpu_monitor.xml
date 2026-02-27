@@ -35,7 +35,7 @@
           <label name="Rate #1     "/>
           <label name="Rate #2     "/>
           <label name="Rate #3     "/>
-        </tableHeading>>
+        </tableHeading>
 {% for interrupt in interrupt_list %}
         <tableRow>
           <label name="{{ interrupt.component_name }}"/>

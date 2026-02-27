@@ -12,7 +12,7 @@ private
    overriding procedure Set_Up_Test (Self : in out Instance);
    overriding procedure Tear_Down_Test (Self : in out Instance);
 
-   -- This unit test tests the packetizer's normal behavior and make sure it packetizes memory properly, metering out the packets according to its rate.
+   -- This unit test tests the packetizer's normal behavior and makes sure it packetizes memory properly, metering out the packets according to its rate.
    overriding procedure Test_Nominal_Packetization (Self : in out Instance);
    -- This unit test tests the Set_Max_Packet_Rate command, and ensures that the rate changes appropriately.
    overriding procedure Test_Set_Max_Packet_Rate (Self : in out Instance);

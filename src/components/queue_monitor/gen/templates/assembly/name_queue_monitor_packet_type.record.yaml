@@ -1,5 +1,5 @@
 ---
-description: This is the autocoded packet type for the Queue Monitor component. It contains queue utilization information for queued component in the assembly.
+description: This is the autocoded packet type for the Queue Monitor component. It contains queue utilization information for each queued component in the assembly.
 fields:
 {% if component_kind_dict["queued"] %}
 {% for component in component_kind_dict["queued"] %}

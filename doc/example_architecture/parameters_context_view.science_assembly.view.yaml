@@ -5,4 +5,4 @@ filters:
   - name: include_component_types
     type: component_name_context
     include:
-      - parameters_Instance
+      - Parameters_Instance

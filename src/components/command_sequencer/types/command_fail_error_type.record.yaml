@@ -1,5 +1,5 @@
 ---
-description: A packed record which holds a summary of the state for a particular sequence engine.
+description: A packed record which holds information about a command failure error from a sequence engine.
 fields:
   - name: Response
     description: The command response reporting the failure.

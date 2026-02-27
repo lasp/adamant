@@ -87,7 +87,7 @@ class record(packed_type):
                     + "' and format '"
                     + str(the_field.format)
                     + "'. Array components must be <=8 bits in size to guarantee endianness."
-                    + " Use a packed array to defined arrays with components >8 bits in size."
+                    + " Use a packed array to define arrays with components >8 bits in size."
                 )
 
             # Handle fields that are packed records or arrays themselves, ie. (nested packed records)

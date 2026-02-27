@@ -17,7 +17,7 @@ with Serializer_Types;
 -- The database will be sized to have entries for each possible Id between the minimum and maximum.
 --
 -- Note: You should NOT use a sparse ID set when using this database data structure or you
--- will be wasteing a lot of memory. This database is designed for a compact contiguous Id space to Value mapping.
+-- will be wasting a lot of memory. This database is designed for a compact contiguous Id space to Value mapping.
 --
 generic
    type Id_Type is (<>); -- Any discrete type: integer, modular, or enumeration.

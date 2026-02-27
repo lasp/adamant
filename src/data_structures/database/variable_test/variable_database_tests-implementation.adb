@@ -129,7 +129,7 @@ package body Variable_Database_Tests.Implementation is
          Simple_Variable_Assert.Eq (Value, (5, [others => 1]));
       end loop;
 
-      -- Add values and the should now be available:
+      -- Add values and they should now be available:
       for Id in Start_Id .. Stop_Id - 1 loop
          Value.Length := Cnt;
          Value.Buffer := [others => Cnt + 12];

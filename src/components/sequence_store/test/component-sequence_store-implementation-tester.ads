@@ -22,7 +22,7 @@ with Packed_Slot_Number.Representation;
 with Invalid_Command_Info.Representation;
 with Command_Header.Representation;
 
--- The Parameter Store component is responsible for storing and managing access to a set of memory regions (slots) which each hold a single sequence. The managed memory regions are usually located in nonvolatile storage and can be read or written to via this component.
+-- The Sequence Store component is responsible for storing and managing access to a set of memory regions (slots) which each hold a single sequence. The managed memory regions are usually located in nonvolatile storage and can be read or written to via this component.
 package Component.Sequence_Store.Implementation.Tester is
 
    use Component.Sequence_Store_Reciprocal;

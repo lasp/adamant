@@ -2,5 +2,5 @@
 description: Data products for the Rate Group component.
 data_products:
   - name: Timing_Report
-    description: Data relating timing performance of the component.
+    description: Data relating to timing performance of the component.
     type: Task_Timing_Report.T

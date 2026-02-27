@@ -74,7 +74,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance) is null;

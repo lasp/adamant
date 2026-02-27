@@ -11,7 +11,7 @@ private
    overriding procedure Set_Up_Test (Self : in out Instance);
    overriding procedure Tear_Down_Test (Self : in out Instance);
 
-   -- This unit makes sure that packets sent through the component's queue are forwarded through the socket.
+   -- This unit test makes sure that packets sent through the component's queue are forwarded through the serial port.
    overriding procedure Test_Packet_Send (Self : in out Instance);
 
    -- Test data and state:

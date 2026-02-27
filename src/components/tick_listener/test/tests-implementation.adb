@@ -47,7 +47,7 @@ package body Tests.Implementation is
       The_Count := T.Get_Tick_Count_Reciprocal;
       Packed_Natural_Assert.Eq (The_Count, (Value => 0));
 
-      -- Send an tick and make sure the count goes up:
+      -- Send a tick and make sure the count goes up:
       T.Tick_T_Send (The_Tick);
       Sleep_A_Bit;
       The_Count := T.Get_Tick_Count_Reciprocal;
@@ -57,7 +57,7 @@ package body Tests.Implementation is
       The_Count := T.Get_Tick_Count_Reciprocal;
       Packed_Natural_Assert.Eq (The_Count, (Value => 0));
 
-      -- Send a bunch of interrupts:
+      -- Send a bunch of ticks:
       T.Tick_T_Send (The_Tick);
       Sleep_A_Bit;
       T.Tick_T_Send (The_Tick);

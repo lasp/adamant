@@ -14,7 +14,7 @@
 -- the user Id space to an internal Id space used to index into the first table.
 --
 -- Note: You should NOT use a sparse ID set when using this database data structure or you
--- will be wasteing a lot of memory on the second table. This database is designed for
+-- will be wasting a lot of memory on the second table. This database is designed for
 -- compact Id space to Value mapping.
 --
 generic

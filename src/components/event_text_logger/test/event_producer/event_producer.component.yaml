@@ -1,5 +1,5 @@
 ---
-description: A simple compoonent which produces events for testing the event to text logger component.
+description: A simple component which produces events for testing the event to text logger component.
 execution: passive
 connectors:
   - description: Tick to regulate the execution of the component.

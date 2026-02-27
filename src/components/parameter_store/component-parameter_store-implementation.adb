@@ -17,8 +17,8 @@ package body Component.Parameter_Store.Implementation is
    -- The component is initialized by providing the memory region it is to manage which holds the parameter table.
    --
    -- Init Parameters:
-   -- bytes : Basic_Types.Byte_Array_Access - A pointer to an allocation of bytes to be used for storing the parameter table. The size of this byte array MUST be the exact size of the parameter table to be stored, or updating or fetch the table will be rejected with a length error.
-   -- dump_Parameters_On_Change : Boolean - If set to True, the component will dump the current parameter values any time a memory region is received to change the parameter table. If set to False, parameters will only be dumped when requested by command.
+   -- bytes : Basic_Types.Byte_Array_Access - A pointer to an allocation of bytes to be used for storing the parameter table. The size of this byte array MUST be the exact size of the parameter table to be stored, or updating or fetching the table will be rejected with a length error.
+   -- Dump_Parameters_On_Change : Boolean - If set to True, the component will dump the current parameter values any time a memory region is received to change the parameter table. If set to False, parameters will only be dumped when requested by command.
    --
    overriding procedure Init (Self : in out Instance; Bytes : in not null Basic_Types.Byte_Array_Access; Dump_Parameters_On_Change : in Boolean := False) is
    begin
@@ -34,7 +34,7 @@ package body Component.Parameter_Store.Implementation is
    -- Crc the parameter table bytes. The table bytes passed in MUST be the exact size as the parameter table:
    function Crc_Parameter_Table (Self : in Instance; Table_Bytes : in Basic_Types.Byte_Array) return Crc_16.Crc_16_Type is
    begin
-      -- Thus function assumes that the provided data is the exact length of the parameter table. Length
+      -- This function assumes that the provided data is the exact length of the parameter table. Length
       -- checks should be performed before calling this function:
       pragma Assert (Table_Bytes'Length = Self.Bytes.all'Length);
 
@@ -172,7 +172,7 @@ package body Component.Parameter_Store.Implementation is
    overriding procedure Parameters_Memory_Region_T_Recv_Async_Dropped (Self : in out Instance; Arg : in Parameters_Memory_Region.T) is
       use Parameter_Enums.Parameter_Table_Update_Status;
    begin
-      -- Even through the memory region was dropped, we still need to release it:
+      -- Even though the memory region was dropped, we still need to release it:
       Self.Parameters_Memory_Region_Release_T_Send_If_Connected ((Region => Arg.Region, Status => Dropped));
 
       -- Throw info event:

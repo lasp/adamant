@@ -36,7 +36,7 @@ package body {{ name }}.Validation is
 {% endif %}
    begin
       -- Sometimes the valid functions below will NEVER be false, since the type can never be out of range,
-      -- ie. with an Unsigned_16. If this is the case Ada warns that some code can never be executed. This
+      -- i.e. with an Unsigned_16. If this is the case Ada warns that some code can never be executed. This
       -- is OK and we want the compiler to delete this code, so ignore the warning.
       pragma Warnings (Off, "this code can never be executed and has been deleted");
       pragma Warnings (Off, "redundant conversion, expression is of type ""Natural""");
@@ -171,7 +171,7 @@ package body {{ name }}.Validation is
 {% endif %}
    begin
       -- Sometimes the valid functions below will NEVER be false, since the type can never be out of range,
-      -- ie. with an Unsigned_16. If this is the case Ada warns that some code can never be executed. This
+      -- i.e. with an Unsigned_16. If this is the case Ada warns that some code can never be executed. This
       -- is OK and we want the compiler to delete this code, so ignore the warning.
       pragma Warnings (Off, "this code can never be executed and has been deleted");
       pragma Warnings (Off, "redundant conversion, expression is of type ""Natural""");
@@ -179,7 +179,7 @@ package body {{ name }}.Validation is
 
 {% if variable_length %}
       --
-      -- First lets check lengths and make sure they are valid:
+      -- First let's check lengths and make sure they are valid:
       --
 
 {% for field in variable_length_fields.values() %}
@@ -305,7 +305,7 @@ package body {{ name }}.Validation is
 {% endif %}
    begin
       -- Sometimes the valid functions below will NEVER be false, since the type can never be out of range,
-      -- ie. with an Unsigned_16. If this is the case Ada warns that some code can never be executed. This
+      -- i.e. with an Unsigned_16. If this is the case Ada warns that some code can never be executed. This
       -- is OK and we want the compiler to delete this code, so ignore the warning.
       pragma Warnings (Off, "this code can never be executed and has been deleted");
       pragma Warnings (Off, "redundant conversion, expression is of type ""Natural""");
@@ -313,7 +313,7 @@ package body {{ name }}.Validation is
 
 {% if variable_length %}
       --
-      -- First lets check lengths and make sure they are valid:
+      -- First let's check lengths and make sure they are valid:
       --
 
 {% for field in variable_length_fields.values() %}
@@ -435,7 +435,7 @@ package body {{ name }}.Validation is
          when {{ field.start_field_number }} =>
             declare
                -- Copy field over to an unpacked var so that it is byte aligned. The value here is out of range,
-               -- and we know this, so suppresss any checks by the compiler for this copy.
+               -- and we know this, so suppress any checks by the compiler for this copy.
                pragma Suppress (Range_Check);
                pragma Suppress (Overflow_Check);
                Var : constant {{ field.type }} := Src.{{ field.name }};
@@ -482,7 +482,7 @@ package body {{ name }}.Validation is
          when {{ field.start_field_number }} =>
             declare
                -- Copy field over to an unpacked var so that it is byte aligned. The value here is out of range,
-               -- and we know this, so suppresss any checks by the compiler for this copy.
+               -- and we know this, so suppress any checks by the compiler for this copy.
                pragma Suppress (Range_Check);
                pragma Suppress (Overflow_Check);
                Var : constant {{ field.type }} := Src.{{ field.name }};

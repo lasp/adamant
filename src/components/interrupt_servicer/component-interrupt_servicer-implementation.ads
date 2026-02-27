@@ -13,9 +13,9 @@ package Component.Interrupt_Servicer.Implementation is
    -- The component class instance record:
    --
    -- Discriminant Parameters:
-   -- custom_Interrupt_Procedure : Custom_Interrupt_Handler_Package.Interrupt_Procedure_Type - A custom procedure to be called within the interrupt handler. The null procedure can be used here if no specific behavior is desired.
-   -- interrupt_Id : Ada.Interrupts.Interrupt_ID - Interrupt identifier number for interrupt
-   -- interrupt_Priority : System.Interrupt_Priority - Interrupt priority for interrupt
+   -- Custom_Interrupt_Procedure : Custom_Interrupt_Handler_Package.Interrupt_Procedure_Type - A custom procedure to be called within the interrupt handler. The null procedure can be used here if no specific behavior is desired.
+   -- Interrupt_Id : Ada.Interrupts.Interrupt_ID - Interrupt identifier number for interrupt
+   -- Interrupt_Priority : System.Interrupt_Priority - Interrupt priority for interrupt
    --
    type Instance (Custom_Interrupt_Procedure : Custom_Interrupt_Handler_Package.Interrupt_Procedure_Type; Interrupt_Id : Ada.Interrupts.Interrupt_ID; Interrupt_Priority : System.Interrupt_Priority) is new Interrupt_Servicer.Base_Instance with private;
 
@@ -24,9 +24,9 @@ private
    -- The component class instance record:
    --
    -- Discriminant Parameters:
-   -- custom_Interrupt_Procedure : Custom_Interrupt_Handler_Package.Interrupt_Procedure_Type - A custom procedure to be called within the interrupt handler. The null procedure can be used here if no specific behavior is desired.
-   -- interrupt_Id : Ada.Interrupts.Interrupt_ID - Interrupt identifier number for interrupt
-   -- interrupt_Priority : System.Interrupt_Priority - Interrupt priority for interrupt
+   -- Custom_Interrupt_Procedure : Custom_Interrupt_Handler_Package.Interrupt_Procedure_Type - A custom procedure to be called within the interrupt handler. The null procedure can be used here if no specific behavior is desired.
+   -- Interrupt_Id : Ada.Interrupts.Interrupt_ID - Interrupt identifier number for interrupt
+   -- Interrupt_Priority : System.Interrupt_Priority - Interrupt priority for interrupt
    --
    type Instance (Custom_Interrupt_Procedure : Custom_Interrupt_Handler_Package.Interrupt_Procedure_Type; Interrupt_Id : Ada.Interrupts.Interrupt_ID; Interrupt_Priority : System.Interrupt_Priority) is new Interrupt_Servicer.Base_Instance with record
       -- The internal task signal protected object.

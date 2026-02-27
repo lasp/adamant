@@ -15,7 +15,7 @@ init:
     - name: Timing_Report_Delay_Ticks
       type: Interfaces.Unsigned_16
       default: '3'
-      description: The number of tickes the component waits before calculating and sending a timing report data product. It is common for the first few executions of a rate group to have execution times longer than normal due to startup logic. In this case, it is often desirable to ignore these cycles in the timing report, especially for the maximum values.
+      description: The number of ticks the component waits before calculating and sending a timing report data product. It is common for the first few executions of a rate group to have execution times longer than normal due to startup logic. In this case, it is often desirable to ignore these cycles in the timing report, especially for the maximum values.
     - name: Issue_Time_Exceeded_Events
       type: Boolean
       default: 'False'

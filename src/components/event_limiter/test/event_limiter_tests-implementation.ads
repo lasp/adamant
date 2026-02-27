@@ -2,7 +2,7 @@
 -- Event_Limiter Tests Spec
 --------------------------------------------------------------------------------
 
--- This is a unit test suite for the Pid Controller component
+-- This is a unit test suite for the Event Limiter component
 package Event_Limiter_Tests.Implementation is
    -- Test data and state:
    type Instance is new Event_Limiter_Tests.Base_Instance with private;

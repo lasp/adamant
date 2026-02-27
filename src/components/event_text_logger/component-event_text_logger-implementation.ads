@@ -11,20 +11,20 @@ with Event;
 package Component.Event_Text_Logger.Implementation is
 
    -- The component class instance record:
-   -- The discriminant for this component takes an access of type event_To_Text_Function. The function provided should translate an event to a string for any given event in an assembly. A package with this function implementation is autocoded for each assembly, and can be passed into the Event Text Logger to configure it for a given assembly.
+   -- The discriminant for this component takes an access of type Event_To_Text_Function. The function provided should translate an event to a string for any given event in an assembly. A package with this function implementation is autocoded for each assembly, and can be passed into the Event Text Logger to configure it for a given assembly.
    --
    -- Discriminant Parameters:
-   -- event_To_Text : Event_To_Text_Function_Access - An access to an event to text function.
+   -- Event_To_Text : Event_To_Text_Function_Access - An access to an event to text function.
    --
    type Instance (Event_To_Text : Event_To_Text_Function_Access) is new Event_Text_Logger.Base_Instance with private;
 
 private
 
    -- The component class instance record:
-   -- The discriminant for this component takes an access of type event_To_Text_Function. The function provided should translate an event to a string for any given event in an assembly. A package with this function implementation is autocoded for each assembly, and can be passed into the Event Text Logger to configure it for a given assembly.
+   -- The discriminant for this component takes an access of type Event_To_Text_Function. The function provided should translate an event to a string for any given event in an assembly. A package with this function implementation is autocoded for each assembly, and can be passed into the Event Text Logger to configure it for a given assembly.
    --
    -- Discriminant Parameters:
-   -- event_To_Text : Event_To_Text_Function_Access - An access to an event to text function.
+   -- Event_To_Text : Event_To_Text_Function_Access - An access to an event to text function.
    --
    type Instance (Event_To_Text : Event_To_Text_Function_Access) is new Event_Text_Logger.Base_Instance with record
       null; -- No internal state

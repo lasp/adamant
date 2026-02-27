@@ -1,11 +1,11 @@
 ---
-description: This record contains information for changing the limit of a specific watchdog connector.
+description: This record contains information for changing the state of a specific watchdog connector.
 fields:
   - name: Index
     description: The index of the connector that the command wants to change the limit of
     type: Connector_Types.Connector_Index_Type
     format: U16
   - name: State
-    description: The new value of the limit for the specific associated connector
+    description: The new state value for the specific associated connector
     type: Task_Watchdog_Enums.Watchdog_Enabled_State.E
     format: E8

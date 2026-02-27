@@ -110,14 +110,14 @@ package body Command_Rejector_Tests.Implementation is
       T : Component.Command_Rejector.Implementation.Tester.Instance_Access renames Self.Tester;
       Cmd : Command.T := (Header => (Source_Id => 0, Id => 2, Arg_Buffer_Length => 19), Arg_Buffer => [others => 88]);
    begin
-      -- Send a command not in the proteced list:
+      -- Send a command not in the protected list:
       T.Command_T_To_Forward_Send (Cmd);
 
       -- Expect command to be forwarded:
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 1);
       Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (1), Cmd);
 
-      -- Send a command not in the proteced list:
+      -- Send a command not in the protected list:
       Cmd.Header.Id := 17;
       T.Command_T_To_Forward_Send (Cmd);
 
@@ -125,7 +125,7 @@ package body Command_Rejector_Tests.Implementation is
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 2);
       Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (2), Cmd);
 
-      -- Send a command not in the proteced list:
+      -- Send a command not in the protected list:
       Cmd.Header.Id := 1_001;
       T.Command_T_To_Forward_Send (Cmd);
 

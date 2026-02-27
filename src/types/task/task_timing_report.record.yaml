@@ -5,5 +5,5 @@ fields:
     description: The maximum recorded timing report since start up.
     type: Timing_Report.T
   - name: Recent_Max
-    description: The maximum recorded timing report during some recent time invterval.
+    description: The maximum recorded timing report during some recent time interval.
     type: Timing_Report.T

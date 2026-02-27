@@ -117,7 +117,7 @@ package body Component.Product_Packetizer.Implementation.Tester is
             pragma Assert (False, "Unexpected id received.");
       end case;
 
-      -- Override the length of necessary:
+      -- Override the length if necessary:
       if Self.Data_Product_Length_Override > 0 then
          Dp.Header.Buffer_Length := Self.Data_Product_Length_Override;
       end if;
@@ -186,28 +186,28 @@ package body Component.Product_Packetizer.Implementation.Tester is
       Self.Invalid_Packet_Id_Commanded_History.Push (Arg);
    end Invalid_Packet_Id_Commanded;
 
-   -- An packet was enabled.
+   -- A packet was enabled.
    overriding procedure Packet_Enabled (Self : in out Instance; Arg : Packet_Period.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Packet_Enabled_History.Push (Arg);
    end Packet_Enabled;
 
-   -- An packet was disabled.
+   -- A packet was disabled.
    overriding procedure Packet_Disabled (Self : in out Instance; Arg : Packet_Period.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Packet_Disabled_History.Push (Arg);
    end Packet_Disabled;
 
-   -- An packet was enabled in on-change mode.
+   -- A packet was enabled in on-change mode.
    overriding procedure Packet_Enabled_On_Change (Self : in out Instance; Arg : in Packet_Period.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Packet_Enabled_On_Change_History.Push (Arg);
    end Packet_Enabled_On_Change;
 
-   -- An packet period was set.
+   -- A packet period was set.
    overriding procedure Packet_Period_Set (Self : in out Instance; Arg : Packet_Period.T) is
    begin
       -- Push the argument onto the test history for looking at later:

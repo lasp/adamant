@@ -1,4 +1,4 @@
 ---
-description: This is the GNATprove configuration for the FSW image selection algorithm
+description: This is the GNATprove configuration for the SPARK compilation test
 level: 2
 mode: "gold"

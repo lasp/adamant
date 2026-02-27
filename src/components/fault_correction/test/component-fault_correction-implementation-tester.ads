@@ -21,7 +21,7 @@ with Command_Header.Representation;
 with Invalid_Command_Info.Representation;
 with Fault_Header.Representation;
 
--- The Fault Correction component receives faults asynchronously. When it processes a fault, it determines the correct command correction to send and sends it.
+-- The Fault Correction component receives faults asynchronously. When it processes a fault, it determines the correct command response to send and sends it.
 package Component.Fault_Correction.Implementation.Tester is
 
    use Component.Fault_Correction_Reciprocal;

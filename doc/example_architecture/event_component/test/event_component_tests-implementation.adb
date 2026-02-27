@@ -49,7 +49,7 @@ package body Event_Component_Tests.Implementation is
       Self.Tester.Tick_T_Send ((Time => (0, 0), Count => 0));
       Self.Tester.Tick_T_Send ((Time => (0, 0), Count => 0));
 
-      -- Make sure a total of 12 events were received.
+      -- Make sure a total of 13 events were received.
       Natural_Assert.Eq (Self.Tester.Event_T_Recv_Sync_History.Get_Count, 13);
 
       -- Check the individual event histories to make sure the correct

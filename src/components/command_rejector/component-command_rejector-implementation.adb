@@ -13,7 +13,7 @@ package body Component.Command_Rejector.Implementation is
    -- This component requires a list of command ID to reject at initialization.
    --
    -- Init Parameters:
-   -- command_Id_Reject_List : Command_Id_List - The list of command IDs to reject.
+   -- Command_Id_Reject_List : Command_Id_List - The list of command IDs to reject.
    --
    overriding procedure Init (Self : in out Instance; Command_Id_Reject_List : in Command_Id_List) is
    begin
@@ -62,7 +62,7 @@ package body Component.Command_Rejector.Implementation is
    ---------------------------------------
    -- Commands received on this connector will be checked against the command reject list. Commands not found in the command reject list they will be forwarded.
    overriding procedure Command_T_To_Forward_Recv_Sync (Self : in out Instance; Arg : in Command.T) is
-      -- Look up to see if this command is in the protected list list:
+      -- Look up to see if this command is in the protected list:
       Id_To_Find : Command_Id renames Arg.Header.Id;
       Ignore_Found_Id : Command_Id;
       Ignore_Found_Index : Natural;

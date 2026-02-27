@@ -46,7 +46,7 @@ package Byte_Array_Pointer is
    -- if you only want to copy data to/from certain indexes in the underlying byte array.
    function Slice (Self : in Instance; Start_Index : in Natural; End_Index : in Integer := -1) return Instance;
 
-   -- Is the pointer invalid (ie. internal length is negative):
+   -- Is the pointer invalid (i.e. internal length is negative):
    function Is_Null (Self : in Instance) return Boolean with
       Inline => True;
 

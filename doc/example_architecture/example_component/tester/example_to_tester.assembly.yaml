@@ -3,7 +3,7 @@ description: This is the example assembly.
 components:
   - type: example_component
     init_base:
-      - "packet_T_Send_Count => 3"
+      - "Packet_T_Send_Count => 3"
   - type: example_tester
 connections:
   - from_component: Example_Tester_Instance

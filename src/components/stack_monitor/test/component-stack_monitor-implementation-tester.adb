@@ -60,7 +60,7 @@ package body Component.Stack_Monitor.Implementation.Tester is
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- Send a packet of cpu execution times.
+   -- Send a packet of stack and secondary stack usage.
    overriding procedure Packet_T_Recv_Sync (Self : in out Instance; Arg : in Packet.T) is
    begin
       -- Push the argument onto the test history for looking at later:
@@ -126,7 +126,7 @@ package body Component.Stack_Monitor.Implementation.Tester is
    -- Data product handler primitive:
    -----------------------------------------------
    -- Description:
-   --    Data products for the CPU Monitor component.
+   --    Data products for the Stack Monitor component.
    -- The current packet period.
    overriding procedure Packet_Period (Self : in out Instance; Arg : in Packed_U16.T) is
    begin

@@ -87,7 +87,7 @@ package Seq_Types is
    -- Declare the seq string type which is 64 bytes in length:
    subtype Seq_String is Basic_Types.Byte_Array (0 .. Max_Seq_String_Size - 1);
 
-   -- A 2D array of byte_arrays. Seq can handle 16 local variables. Every local variable is stored a byte_array of length 4, except for strings which are at max 64 bits in length.
+   -- A 2D array of byte_arrays. Seq can handle 16 local variables. Every local variable is stored as a byte_array of length 4, except for strings which are at max 64 bytes in length.
    -- Variable type is only determined when some sort of action on a variable occurs.
    type Seq_Local_Id is range 0 .. Num_Seq_Variables - 1;
    type Variable_Array is array (Seq_Local_Id) of Packed_Poly_32_Type.T;

@@ -4,6 +4,6 @@ commands:
   - name: Enable_Time_At_Tone
     description: This enables the sending of time at tone messages.
   - name: Disable_Time_At_Tone
-    description: This enables the sending of time at tone messages.
+    description: This disables the sending of time at tone messages.
   - name: Sync_Once
     description: This sends a time at tone message followed by a tone message at the next tick, regardless of the current sync period. This is useful during testing to send a sync one time.

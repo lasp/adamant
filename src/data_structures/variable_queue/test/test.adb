@@ -132,7 +132,7 @@ begin
    Pop_Assert.Eq (Queue.Peek_Length (Len), Success);
    Put_Line ("len: " & Natural'Image (Len));
    Natural_Assert.Eq (Len, 10);
-   -- An offset here wouldn't usually work, but in this case the values of the array make is a success.
+   -- An offset here wouldn't usually work, but in this case the values of the array make it a success.
    Pop_Type_Assert.Eq (Peek_Simple_Variable (Queue, Variable_Var2, Offset => 1), Success);
    Put_Line ("Peeked: " & Simple_Variable.Representation.Image (Variable_Var2));
    Simple_Variable_Assert.Eq (Variable_Var2, (8, [8, 8, 8, 8, 8, 8, 8, 8, others => 0]));

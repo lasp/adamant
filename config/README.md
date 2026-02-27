@@ -29,11 +29,11 @@ $ cp adamant.configuration.yaml.original /path/to/my/project/conf/my_project.con
 
 You can now modify `my_project.configuration.yaml` and version control it within your project
 directory. To tell Adamant to use this file instead of the default configuration file you need
-to set the `ADAMANT_CONFIGURATION_YAML` variable, ie.
+to set the `ADAMANT_CONFIGURATION_YAML` variable, i.e.
 
 ```
 $ export ADAMANT_CONFIGURATION_YAML=/path/to/my/project/conf/my_project.configuration.yaml
 ```
 
 It is advisable to include the export command above within your environment files that get
-sourced whenever a new shell is opened, ie. from `~/.bashrc`.
+sourced whenever a new shell is opened, i.e. from `~/.bashrc`.

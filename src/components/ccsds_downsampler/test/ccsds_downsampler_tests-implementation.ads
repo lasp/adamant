@@ -2,7 +2,7 @@
 -- Ccsds_Downsampler Tests Spec
 --------------------------------------------------------------------------------
 
--- This is a unit test suite for the Event Filter component
+-- This is a unit test suite for the CCSDS Downsampler component
 package Ccsds_Downsampler_Tests.Implementation is
    -- Test data and state:
    type Instance is new Ccsds_Downsampler_Tests.Base_Instance with private;

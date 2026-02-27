@@ -48,7 +48,7 @@ package body Moving_Average_Tests.Implementation is
    begin
       -- Set the size to the default size of 6
       Ma.Init (Sample_Storage_Size => 6);
-      -- Calcuilate with no data:
+      -- Calculate with no data:
       Ma.Calculate_Mean_Variance_Max (Mean, Variance, Max);
       Short_Float_Assert.Eq (Mean, 0.0, Epsilon => 0.000001);
       Short_Float_Assert.Eq (Variance, 0.0, Epsilon => 0.000001);
@@ -203,7 +203,7 @@ package body Moving_Average_Tests.Implementation is
       -- Run mean with no data:
       Ma.Calculate_Mean_Variance_Max (Ignore_Mean, Ignore_Variance, Ignore_Max);
 
-      -- Test a invalid initialization
+      -- Test an invalid initialization
       --ma.init(Sample_Storage_Size => 6, Sample_Calculation_Size => 10);
       pragma Unreferenced (Ma);
    end Test_Not_Initialized;

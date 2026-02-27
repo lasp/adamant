@@ -132,7 +132,7 @@ package Component.Command_Router.Implementation.Tester is
    overriding procedure Command_T_Recv_Sync (Self : in out Instance; Arg : in Command.T);
    -- Command responses received from command executing components are forwarded back to their command sources using this arrayed connector. One index of this connector can be connected in loopback to the Command_Response_T_Recv_Async connector in order to command forwarding self test capabilities (see the Noop_Response command).
    overriding procedure Command_Response_T_To_Forward_Recv_Sync (Self : in out Instance; Arg : in Command_Response.T);
-   -- This connector is used to register the Command Router's NOOP commands at initialization, and respond to NOOP commands during ececution. It is usually connected in loopback to the Command_Response_T_Recv_Async connector.
+   -- This connector is used to register the Command Router's NOOP commands at initialization, and respond to NOOP commands during execution. It is usually connected in loopback to the Command_Response_T_Recv_Async connector.
    overriding procedure Command_Response_T_Recv_Sync (Self : in out Instance; Arg : in Command_Response.T);
    -- Events are sent out of this connector.
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T);

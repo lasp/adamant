@@ -1,6 +1,6 @@
 seq integer_command_23
   ;
-  ; Sequence that tests twos compliment upscaling.
+  ; Sequence that tests twos complement upscaling.
   ;
 
   ; Get a 16-bit signed telemetry value, but store it

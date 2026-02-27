@@ -4,4 +4,4 @@ requirements:
   - text: The component shall send the time at tone tone message at a compile-time configurable rate.
   - text: The component shall send the time at tone time message after sending each time at tone tone message.
   - text: The component shall send a time at tone transaction one time on command.
-  - text: The component shall produce a data product relating the number time at tone transactions sent since startup.
+  - text: The component shall produce a data product relating the number of time at tone transactions sent since startup.

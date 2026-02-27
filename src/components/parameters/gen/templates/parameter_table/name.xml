@@ -3,7 +3,7 @@
   <updateRate ms="1000"/>
   <page title="{{ name }}">
     <column>
-      <section name="Cpu Usage Packet Header:">
+      <section name="Parameter Packet Header:">
         <row label="Apid:" item="Ccsds-{{ parameters_instance_name }}-Active_Parameters-Ccsds_Primary_Header-Apid"/>
         <row label="Packet Length:" item="Ccsds-{{ parameters_instance_name }}-Active_Parameters-Ccsds_Primary_Header-Packet_Length"/>
         <row label="Sequence Count:" item="Ccsds-{{ parameters_instance_name }}-Active_Parameters-Ccsds_Primary_Header-Sequence_Count"/>

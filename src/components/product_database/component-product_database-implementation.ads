@@ -25,7 +25,7 @@ package Component.Product_Database.Implementation is
    --
    -- Init Parameters:
    -- Minimum_Data_Product_Id : Data_Product_Types.Data_Product_Id - The minimum data product identifier that the database will accept.
-   -- Maximum_Data_Product_Id : Data_Product_Types.Data_Product_Id - The maximum data product identifier that the database will accept. This value combined with the minimum_Data_Product_Id are used to allocate a table on the heap. Ids stored in this database should come from a compact Id space for most efficient memory usage.
+   -- Maximum_Data_Product_Id : Data_Product_Types.Data_Product_Id - The maximum data product identifier that the database will accept. This value combined with the Minimum_Data_Product_Id are used to allocate a table on the heap. Ids stored in this database should come from a compact Id space for most efficient memory usage.
    -- Send_Event_On_Missing : Boolean - By default the product database will send an event every time a data product is fetched that is missing. Sometimes this is expected behavior and the message is annoying. This flag allows that event to be disabled permanently on startup if needed.
    --
    overriding procedure Init (Self : in out Instance; Minimum_Data_Product_Id : in Data_Product_Types.Data_Product_Id; Maximum_Data_Product_Id : in Data_Product_Types.Data_Product_Id; Send_Event_On_Missing : in Boolean := True);
@@ -68,7 +68,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance);

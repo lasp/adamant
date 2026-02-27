@@ -1036,7 +1036,7 @@ package body Parameters_Tests.Implementation is
       -- Set the CRC:
       Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => Crc, Version => 0.0));
 
-      -- Call component with dump_Parameters_On_Change => False
+      -- Call component with Dump_Parameters_On_Change => False
       T.Component_Instance.Init (Parameter_Table_Entries => Test_Parameter_Table.Parameter_Table_Entries'Access, Table_Id => Test_Parameter_Table.Parameter_Table_Id, Dump_Parameters_On_Change => False);
 
       -- Send a command to update a parameter value:

@@ -21,10 +21,10 @@ package Component.Event_Limiter.Implementation is
    --------------------------------------------------
    --
    -- Init Parameters:
-   -- event_Id_Start : Event_Types.Event_Id - The number of packets that the component contains internally. This is the available buffer that the component has to store events. When all packets are exhausted, then the component begins dropping events. The component needs to be at least double buffered, meaning a minimum of two packets need to be allocated.
-   -- event_Id_Stop : Event_Types.Event_Id - The number of ticks that can be received before a partial packet timeout occurs. When a partial packet timeout occurs, a packet containing at least one event is sent out, and then the timeout is reset. A value of zero passed for this parameter will disable the partial packet timeout, meaning only full packets are ever sent out of the component.
-   -- event_Disable_List : Two_Counter_Entry.Event_Id_List - A list of event IDs that are enabled by default
-   -- event_Limit_Persistence : Two_Counter_Entry.Persistence_Type - The initial persistence of the number of events to allow before limiting them between ticks (1 to 7)
+   -- Event_Id_Start : Event_Types.Event_Id - The event ID that begins the range of ids that the component will include for potential limiting of events.
+   -- Event_Id_Stop : Event_Types.Event_Id - The event ID that ends the range of ids that the component will include for potential limiting of events.
+   -- Event_Disable_List : Two_Counter_Entry.Event_Id_List - A list of event IDs that are disabled by default
+   -- Event_Limit_Persistence : Two_Counter_Entry.Persistence_Type - The initial persistence of the number of events to allow before limiting them between ticks (1 to 7)
    --
    overriding procedure Init
       (Self : in out Instance; Event_Id_Start : in Event_Types.Event_Id; Event_Id_Stop : in Event_Types.Event_Id; Event_Disable_List : in Two_Counter_Entry.Event_Id_List := [1 .. 0 => 0]; Event_Limit_Persistence : in Two_Counter_Entry.Persistence_Type);
@@ -74,7 +74,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance);
@@ -107,7 +107,7 @@ private
    -- Command handler primitives:
    -----------------------------------------------
    -- Description:
-   --    These are the commands for the event packetizer component.
+   --    These are the commands for the event limiter component.
    -- Enable the event limiter for a specific event ID.
    overriding function Enable_Event_Limit (Self : in out Instance; Arg : in Event_Single_State_Cmd_Type.T) return Command_Execution_Status.E;
    -- Disable the event limiter for a specific event ID.

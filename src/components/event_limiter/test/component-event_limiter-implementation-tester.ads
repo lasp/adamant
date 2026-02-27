@@ -51,7 +51,7 @@ package Component.Event_Limiter.Implementation.Tester is
    package Event_Limit_Range_Enabled_Invalid_Id_History_Package is new Printable_History (Event_Limiter_Id_Range.T, Event_Limiter_Id_Range.Representation.Image);
    package Event_Limit_Range_Disabled_Invalid_Id_History_Package is new Printable_History (Event_Limiter_Id_Range.T, Event_Limiter_Id_Range.Representation.Image);
    package Set_New_Persistence_History_Package is new Printable_History (Event_Limiter_Persistence_Type.T, Event_Limiter_Persistence_Type.Representation.Image);
-   package Dump_Event_States_Recieved_History_Package is new Printable_History (Natural, Natural'Image);
+   package Dump_Event_States_Received_History_Package is new Printable_History (Natural, Natural'Image);
 
    -- Data product history packages:
    package Limited_Events_Since_Tick_History_Package is new Printable_History (Packed_U16.T, Packed_U16.Representation.Image);
@@ -88,7 +88,7 @@ package Component.Event_Limiter.Implementation.Tester is
       Event_Limit_Range_Enabled_Invalid_Id_History : Event_Limit_Range_Enabled_Invalid_Id_History_Package.Instance;
       Event_Limit_Range_Disabled_Invalid_Id_History : Event_Limit_Range_Disabled_Invalid_Id_History_Package.Instance;
       Set_New_Persistence_History : Set_New_Persistence_History_Package.Instance;
-      Dump_Event_States_Recieved_History : Dump_Event_States_Recieved_History_Package.Instance;
+      Dump_Event_States_Received_History : Dump_Event_States_Received_History_Package.Instance;
       -- Data product histories:
       Limited_Events_Since_Tick_History : Limited_Events_Since_Tick_History_Package.Instance;
       Total_Events_Limited_History : Total_Events_Limited_History_Package.Instance;
@@ -156,7 +156,7 @@ package Component.Event_Limiter.Implementation.Tester is
    -- Indicates that the persistence of the number of events until we limit was changed to a new value between 1 and 7.
    overriding procedure Set_New_Persistence (Self : in out Instance; Arg : in Event_Limiter_Persistence_Type.T);
    -- Event that indicates the process of building the packet that stores the event states has started and will send the packet once we go through a decrement cycle.
-   overriding procedure Dump_Event_States_Recieved (Self : in out Instance);
+   overriding procedure Dump_Event_States_Received (Self : in out Instance);
 
    -----------------------------------------------
    -- Data product handler primitives:

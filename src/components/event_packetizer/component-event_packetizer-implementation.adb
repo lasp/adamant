@@ -19,7 +19,7 @@ package body Component.Event_Packetizer.Implementation is
    -- Protected packet data structure:
    ---------------------------------------
 
-   -- Return status for the try_Insert_Event function:
+   -- Return status for the Try_Insert_Event function:
    type Try_Insert_Status is
       (Success, -- Packet inserted successfully and there is remaining space left in the packet
        Fail_Packet_Full -- The packet is too full to insert the event

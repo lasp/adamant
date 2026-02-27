@@ -2,7 +2,7 @@
 -- Monitor Tests Spec
 --------------------------------------------------------------------------------
 
--- This is a unit test suite for the crc 16 algorithm
+-- This is a unit test suite for the monitor utility
 package Monitor_Tests.Implementation is
    -- Test data and state:
    type Instance is new Monitor_Tests.Base_Instance with private;

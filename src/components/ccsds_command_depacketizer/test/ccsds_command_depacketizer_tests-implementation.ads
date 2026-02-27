@@ -22,7 +22,7 @@ private
    overriding procedure Test_Packet_Too_Small (Self : in out Instance);
    -- This unit test makes sure that packets that are too large to hold a valid command are reported and dropped.
    overriding procedure Test_Packet_Too_Large (Self : in out Instance);
-   -- This unit test makes sure that packets that do not include a secondary header are are reported and dropped.
+   -- This unit test makes sure that packets that do not include a secondary header are reported and dropped.
    overriding procedure Test_Packet_Without_Secondary_Header (Self : in out Instance);
    -- This unit test makes use of the function code in the secondary header to denote a different number of pad bytes. It makes sure the component responds appropriately.
    overriding procedure Test_Pad_Bytes (Self : in out Instance);

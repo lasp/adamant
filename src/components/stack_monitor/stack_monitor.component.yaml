@@ -5,11 +5,11 @@ execution: passive
 init:
   description: This component requires a list of tasks to monitor.
   parameters:
-    - name: task_List
+    - name: Task_List
       type: Task_Types.Task_Info_List_Access
       not_null: true
       description: A list of task info records to monitor.
-    - name: packet_Period
+    - name: Packet_Period
       type: Interfaces.Unsigned_16
       description: The period (in ticks) of how often to calculate value for and send out the packet. A period of zero disables sending of the packet.
       default: "1"
@@ -17,7 +17,7 @@ connectors:
   - description: This is the base tick for the component.
     type: Tick.T
     kind: recv_sync
-  - description: Send a packet of cpu execution times.
+  - description: Send a packet of stack and secondary stack usage.
     type: Packet.T
     kind: send
   - description: The system time is retrieved via this connector.

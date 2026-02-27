@@ -2,7 +2,7 @@
 description: These are enumerations that are used to interact with the Sequence Store component.
 enums:
   - name: Sequence_Store_Status
-    description: This status enumerations provides information on the success/failure of a sequence store operation.
+    description: This status enumeration provides information on the success/failure of a sequence store operation.
     literals:
       - name: Success
         value: 0
@@ -23,7 +23,7 @@ enums:
         value: 5
         description: The operation could not be performed because it was dropped from a full queue.
   - name: Sequence_Fetch_Status
-    description: This status enumerations provides information on the success/failure of a sequence fetch operation.
+    description: This status enumeration provides information on the success/failure of a sequence fetch operation.
     literals:
       - name: Success
         value: 0
@@ -36,7 +36,7 @@ enums:
     literals:
       - name: Inactive
         value: 0
-        description: The slot is inactive and the contained sequence can not be fetched.
+        description: The slot is inactive and the contained sequence cannot be fetched.
       - name: Active
         value: 1
         description: The slot is active and the contained sequence can be fetched.

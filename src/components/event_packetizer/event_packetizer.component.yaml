@@ -7,10 +7,10 @@ preamble: |
 init:
   description:
   parameters:
-    - name: num_Internal_Packets
+    - name: Num_Internal_Packets
       type: Two_Or_More
       description: The number of packets that the component contains internally. This is the available buffer that the component has to store events. When all packets are exhausted, then the component begins dropping events. The component needs to be at least double buffered, meaning a minimum of two packets need to be allocated.
-    - name: partial_Packet_Timeout
+    - name: Partial_Packet_Timeout
       type: Natural
       description: The number of ticks that can be received before a partial packet timeout occurs. When a partial packet timeout occurs, a packet containing at least one event is sent out, and then the timeout is reset. A value of zero passed for this parameter will disable the partial packet timeout, meaning only full packets are ever sent out of the component.
 connectors:

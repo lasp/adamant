@@ -20,7 +20,7 @@ package Component.Ccsds_Router.Implementation is
    --
    -- Init Parameters:
    -- table : Ccsds_Router_Types.Router_Table_Entry_Array - An array of router table entries which include routing and sequence count checking information.
-   -- report_Unrecognized_Apids : Boolean - Should the component report unrecognized APIDs by sending out an error packet and event, True, or should it not report them at all, False.
+   -- Report_Unrecognized_Apids : Boolean - Should the component report unrecognized APIDs by sending out an error packet and event, True, or should it not report them at all, False.
    --
    overriding procedure Init (Self : in out Instance; Table : in Ccsds_Router_Types.Router_Table_Entry_Array; Report_Unrecognized_Apids : in Boolean := True);
    not overriding procedure Final (Self : in out Instance);

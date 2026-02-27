@@ -2,4 +2,4 @@
 description: Packets for the Parameter Store component.
 packets:
   - name: Stored_Parameters
-    description: This packet contains a copy of all the parameter stored and managed by this component.
+    description: This packet contains a copy of all the parameters stored and managed by this component.

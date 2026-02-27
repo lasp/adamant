@@ -76,7 +76,7 @@ package body Component.Event_Component.Implementation.Tester is
       Self.Tick_Received_History.Push (Arg);
    end Tick_Received;
 
-   -- This event is produced for every 20 ticks and includes the total number of ticks received by the component.
+   -- This event is produced for every 10 ticks and includes the total number of ticks received by the component.
    overriding procedure Ten_More_Ticks_Received (Self : in out Instance; Arg : in Packed_U16.T) is
    begin
       -- Push the argument onto the test history for looking at later:

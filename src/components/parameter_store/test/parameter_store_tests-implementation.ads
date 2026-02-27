@@ -15,7 +15,7 @@ private
    overriding procedure Test_Nominal_Dump_Parameters (Self : in out Instance);
    -- This unit test tests the nominal updating of the parameter table by memory region upload.
    overriding procedure Test_Nominal_Table_Upload (Self : in out Instance);
-   -- This unit test tests the nominal fetching of the parameter table by into a provided memory region.
+   -- This unit test tests the nominal fetching of the parameter table into a provided memory region.
    overriding procedure Test_Nominal_Table_Fetch (Self : in out Instance);
    -- This unit test tests the behavior when updating the parameter table with a memory region of invalid length.
    overriding procedure Test_Table_Upload_Length_Error (Self : in out Instance);

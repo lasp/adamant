@@ -55,7 +55,7 @@ class _build_path(OrderedDict):
                     self[directory] = []
 
         # If there is an Adamant configuration yaml defined then we need
-        # to add it to the path.# This file is usually not in the path if
+        # to add it to the path. # This file is usually not in the path if
         # compiling within Adamant and not the project directory. Adamant
         # NEVER depends on any files within a project directory, except
         # for this one small exception. In this case, we want to include
@@ -271,7 +271,7 @@ def _setup(redo_1, redo_2, redo_3, sandbox=False):
     # (or its dependencies) are currently building. This file will be removed
     # when the building of this target is finished. The purpose of this file is
     # to help indicate to the build system when the temporary directory is no
-    # longer begin used, and thus can be removed, freeing up RAM space on the
+    # longer being used, and thus can be removed, freeing up RAM space on the
     # build machine.
     open(linkdir + os.sep + redo_1.replace(os.sep, "@@") + ".running", "a").close()
     # Create temporary directory to store object links. This optimization
@@ -304,7 +304,7 @@ def _setup(redo_1, redo_2, redo_3, sandbox=False):
     #   3) Every directory in the $EXTRA_BUILD_PATH
     #   4) The current source directory of the redo build target
     # Unless a user build path is provided, in which case we
-    # will just that instead.
+    # will just use that instead.
 
     # See if the user already set up a build path for us. If so
     # we don't need to search for a path at all, which means

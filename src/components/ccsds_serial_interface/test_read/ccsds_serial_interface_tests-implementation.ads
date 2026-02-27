@@ -11,7 +11,7 @@ private
    overriding procedure Set_Up_Test (Self : in out Instance);
    overriding procedure Tear_Down_Test (Self : in out Instance);
 
-   -- This unit test makes sure that packets received through the serial port are forwarded through the send connector. This test exercises the additional internal task of the Socket Interface Component.
+   -- This unit test makes sure that packets received through the serial port are forwarded through the send connector. This test exercises the additional internal task of the Serial Interface Component.
    overriding procedure Test_Packet_Receive (Self : in out Instance);
 
    -- Test data and state:

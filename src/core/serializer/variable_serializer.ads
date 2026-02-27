@@ -26,10 +26,10 @@ package Variable_Serializer is
    -- proper overlays are shown below:
    --
    -- -- Overlay a type with a Byte_Array
-   -- stat : constant Serialization_Status := Serialized_Length(src, num_Bytes_Serialized);
+   -- stat : constant Serialization_Status := Serialized_Length(src, Num_Bytes_Serialized);
    -- if stat = Success then
    --    declare
-   --       subtype Sized_Byte_Array_Index is Natural range 0 .. (num_Bytes_Serialized - 1);
+   --       subtype Sized_Byte_Array_Index is Natural range 0 .. (Num_Bytes_Serialized - 1);
    --       subtype Sized_Byte_Array is Basic_Types.Byte_Array(Sized_Byte_Array_Index);
    --       -- Perform overlay:
    --       overlay : constant Sized_Byte_Array with Import, Convention => Ada, Address => src'Address;
@@ -40,7 +40,7 @@ package Variable_Serializer is
    -- -- Overlay a Byte_Array with a type:
    -- dest : constant T with Import, Convention => Ada, Address => src'Address;
    -- -- Get the serialized length of the destination:
-   -- stat : constant Serialization_Status := Serialized_Length(dest, num_Bytes_Serialized);
+   -- stat : constant Serialization_Status := Serialized_Length(dest, Num_Bytes_Serialized);
    --
    -- The functions below use this pattern internally, but must perform a copy of the result
    -- to the caller, thus making them inefficient for some specific operations. When in

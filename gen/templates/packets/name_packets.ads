@@ -91,7 +91,7 @@ package {{ name }} is
    -- input item. Sometimes this is desirable over returning a Serialization_Error, like what would occur with the above function.
    not overriding function {{ p.name }}_Truncate (Self : in out Instance; Timestamp : in Sys_Time.T; Buf : in Basic_Types.Byte_Array) return Packet.T;
    -- This function returns a packet with the timestamp, id, and sequence number filled in, but with a data length of zero and no
-   -- zeroed buffed data. Sometimes this is more convenient to use than the functions above.
+   -- zeroed buffer data. Sometimes this is more convenient to use than the functions above.
    not overriding function {{ p.name }}_Empty (Self : in out Instance; Timestamp : in Sys_Time.T) return Packet.T;
 {% endif %}
 

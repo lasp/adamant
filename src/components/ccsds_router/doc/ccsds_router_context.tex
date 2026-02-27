@@ -22,7 +22,7 @@ It is also possible to achieve both synchronous and asynchronous routing using t
 
 \begin{figure}[H]
   \includegraphics[width=0.9\textwidth,center]{assembly/build/eps/context_mixed.eps}
-  \caption{Example usage of a passive CCSDS Router which routes packets on the thread of its caller.}
+  \caption{Example usage of a mixed CCSDS Router which supports both synchronous and asynchronous routing.}
 \end{figure}
 
 Note, there is a limitation with this use case. A CCSDS packet with the same APID should not be sent through both the synchronous and asynchronous invokee connectors at the same time if sequence number checking is enabled. Since the router table is not a protected object this could produce errant warnings about sequence number tracking, since it is expected that two updates to the sequence numbers tracked in this table will not occur to the same APID at the same time. There has been no real world use case identified which would require that the internal table become a protected object. If a use case is identified, this issue can be revisited.

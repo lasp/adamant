@@ -364,7 +364,7 @@ package body Component.Command_Router.Implementation is
       --
       -- Note: We only do this action the command response is NOT a registration. If we get a queue drop during
       -- registration, then there is nothing we can do. Trying to put this in the router table synchronously would
-      -- be a race condition. So in that case just throw the event below. If the status is anything but registratiom
+      -- be a race condition. So in that case just throw the event below. If the status is anything but registration
       -- then we know this was a normal command, so the forward will be OK.
       if Arg.Status /= Register and then Arg.Status /= Register_Source then
          declare
@@ -375,7 +375,7 @@ package body Component.Command_Router.Implementation is
          end;
       end if;
 
-      -- We report the drop in an event here with the original, unmodified command respoonse. The queue needs
+      -- We report the drop in an event here with the original, unmodified command response. The queue needs
       -- to be sized larger if this event ever gets thrown.
       Self.Event_T_Send_If_Connected (Self.Events.Command_Response_Dropped (Self.Sys_Time_T_Get, Arg));
    end Command_Response_T_Recv_Async_Dropped;

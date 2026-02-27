@@ -159,7 +159,7 @@ package body Component.Product_Copier.Implementation.Tester is
       Self.Source_Not_Available_History.Push (Arg);
    end Source_Not_Available;
 
-   -- A data product fetch resulted in an an Id_Out_Of_Range status, and was not read
+   -- A data product fetch resulted in an Id_Out_Of_Range status, and was not read
    -- from the source.
    overriding procedure Source_Id_Out_Of_Range (Self : in out Instance; Arg : in Product_Copier_Error_Info.T) is
    begin

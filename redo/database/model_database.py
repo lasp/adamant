@@ -32,7 +32,7 @@ def split_model_file_name(model_filename):
     if numFields <= 2:
         err("A model type must be provided before the '.yaml' extension.")
     if numFields > 4:
-        err("Too many dot-serparated fields were found before the '.yaml' extension.")
+        err("Too many dot-separated fields were found before the '.yaml' extension.")
 
     # Break up the model filename into its parts:
     assert (

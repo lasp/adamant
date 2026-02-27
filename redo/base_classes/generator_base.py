@@ -52,7 +52,7 @@ class generator_base(metaclass=abc.ABCMeta):
         Note: this function can be overridden by the inheriting class
         if this default behavior is not desired.
         """
-        # Call the enherited class output_filename method:
+        # Call the inherited class output_filename method:
         output = self.output_filename(input_filename)
 
         # Make sure the file is in a build/src directory:

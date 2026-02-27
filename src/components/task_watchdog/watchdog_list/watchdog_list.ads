@@ -1,4 +1,4 @@
--- This is a somewhat generic, unprotected binary tree for holding apids and filter factors for the downsampler component.
+-- This package stores task watchdog connector state and configuration entries.
 with Task_Watchdog_Types;
 with Task_Watchdog_Enums;
 with Connector_Types;

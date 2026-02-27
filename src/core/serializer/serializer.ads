@@ -26,11 +26,11 @@ package Serializer is
    --
    -- -- Overlay a type with a Byte_Array
    -- t : T;
-   -- overlaid_Bytes : constant Byte_Array with Import, Convention => Ada, Address => t'Address;
+   -- Overlaid_Bytes : constant Byte_Array with Import, Convention => Ada, Address => t'Address;
    --
    -- -- Overlay a Byte_Array with a type:
    -- b : Byte_Array -- make sure size is correct using Serialized_Length if necessary
-   -- overlaid_Type : constant T with Import, Convention => Ada, Address => b'Address;
+   -- Overlaid_Type : constant T with Import, Convention => Ada, Address => b'Address;
    --
    -- The functions below use this pattern internally, but must perform a copy of the result
    -- to the caller, thus making them inefficient for some specific operations. When in

@@ -6,4 +6,4 @@ data_products:
     type: Data_Product_Poly_Type.T
   - name: Database_Override
     description: If set to Enabled then the database contains at least one data product that has been overridden by command.
-    type: Packed_Enable_Disable_type.T
+    type: Packed_Enable_Disable_Type.T

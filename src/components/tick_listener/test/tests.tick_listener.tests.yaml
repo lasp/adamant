@@ -2,4 +2,4 @@
 description: This is a unit test suite for the Tick Listener component. It tests the component in a Linux environment, responding to ticks.
 tests:
   - name: Test_Tick_Handling
-    description: This unit test sends many ticks to the Interrupt Listener component and expects it count them correctly.
+    description: This unit test sends many ticks to the Tick Listener component and expects it to count them correctly.

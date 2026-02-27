@@ -1,5 +1,5 @@
 ---
-description: This is a unit test suite for the Event Filter component
+description: This is a unit test suite for the CCSDS Downsampler component
 tests:
   - name: Test_Downsample_Packet
     description: This unit test is to test the cases when the component will downsample an APID and permutations related to the filter factor.

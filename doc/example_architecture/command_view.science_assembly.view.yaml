@@ -1,7 +1,7 @@
 ---
 # Optional - a description of the view
 description: This is the command view.
-# Optional - layout direction, default is ;left-to-right'.
+# Optional - layout direction, default is 'left-to-right'.
 # Other options include: 'top-to-bottom', 'right-to-left',
 # and 'bottom-to-top'.
 layout: left-to-right
@@ -42,8 +42,8 @@ filters:
     #   component_execution - filter by component execution types (active or passive)
     #   component_context - filter by component and all it's immediate connections
     #   connector_name - filter by connector_names
-    #   connecter_type - filter by connector type
-    #   connecter_kind - filter by connector kinds (recv_async, recv_sync, send, request, service, get, return, provide, modify)
+    #   connector_type - filter by connector type
+    #   connector_kind - filter by connector kinds (recv_async, recv_sync, send, request, service, get, return, provide, modify)
     type: connector_type
     # Required (unless "exclude" is specified instead) -
     # Describes which items to INCLUDE in the view using the

@@ -122,14 +122,14 @@ package body Command_Protector_Tests.Implementation is
       T : Component.Command_Protector.Implementation.Tester.Instance_Access renames Self.Tester;
       Cmd : Command.T := (Header => (Source_Id => 0, Id => 2, Arg_Buffer_Length => 19), Arg_Buffer => [others => 88]);
    begin
-      -- Send a command not in the proteced list:
+      -- Send a command not in the protected list:
       T.Command_T_To_Forward_Send (Cmd);
 
       -- Expect command to be forwarded:
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 1);
       Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (1), Cmd);
 
-      -- Send a command not in the proteced list:
+      -- Send a command not in the protected list:
       Cmd.Header.Id := 17;
       T.Command_T_To_Forward_Send (Cmd);
 
@@ -137,7 +137,7 @@ package body Command_Protector_Tests.Implementation is
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 2);
       Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (2), Cmd);
 
-      -- Send a command not in the proteced list:
+      -- Send a command not in the protected list:
       Cmd.Header.Id := 1_001;
       T.Command_T_To_Forward_Send (Cmd);
 
@@ -166,7 +166,7 @@ package body Command_Protector_Tests.Implementation is
       Natural_Assert.Eq (T.Armed_State_Timeout_History.Get_Count, 1);
       Packed_Arm_Timeout_Assert.Eq (T.Armed_State_Timeout_History.Get (1), (Timeout => 55));
 
-      -- Send a command not in the proteced list:
+      -- Send a command not in the protected list:
       Cmd.Header.Id := 18;
       T.Command_T_To_Forward_Send (Cmd);
 
@@ -202,7 +202,7 @@ package body Command_Protector_Tests.Implementation is
       Natural_Assert.Eq (T.Armed_State_Timeout_History.Get_Count, 3);
       Packed_Arm_Timeout_Assert.Eq (T.Armed_State_Timeout_History.Get (3), (Timeout => 22));
 
-      -- Send a command not in the proteced list:
+      -- Send a command not in the protected list:
       Cmd.Header.Id := 44;
       T.Command_T_To_Forward_Send (Cmd);
 
@@ -243,7 +243,7 @@ package body Command_Protector_Tests.Implementation is
       Natural_Assert.Eq (T.Armed_State_Timeout_History.Get_Count, 1);
       Packed_Arm_Timeout_Assert.Eq (T.Armed_State_Timeout_History.Get (1), (Timeout => 55));
 
-      -- Send a command IN the proteced list:
+      -- Send a command IN the protected list:
       Cmd.Header.Id := 4;
       T.Command_T_To_Forward_Send (Cmd);
 
@@ -283,7 +283,7 @@ package body Command_Protector_Tests.Implementation is
       Natural_Assert.Eq (T.Armed_State_Timeout_History.Get_Count, 3);
       Packed_Arm_Timeout_Assert.Eq (T.Armed_State_Timeout_History.Get (3), (Timeout => 22));
 
-      -- Send a command not in the proteced list:
+      -- Send a command not in the protected list:
       Cmd.Header.Id := 19;
       T.Command_T_To_Forward_Send (Cmd);
 
@@ -311,7 +311,7 @@ package body Command_Protector_Tests.Implementation is
       T : Component.Command_Protector.Implementation.Tester.Instance_Access renames Self.Tester;
       Cmd : Command.T := (Header => (Source_Id => 0, Id => 2, Arg_Buffer_Length => 19), Arg_Buffer => [others => 88]);
    begin
-      -- OK dont arm the component:
+      -- OK don't arm the component:
       Cmd.Header.Id := 4;
       T.Command_T_To_Forward_Send (Cmd);
 
@@ -332,7 +332,7 @@ package body Command_Protector_Tests.Implementation is
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
       Packet_Assert.Eq (T.Packet_T_Recv_Sync_History.Get (1), T.Packets.Error_Packet_Truncate (T.System_Time, Cmd));
 
-      -- OK dont arm the component:
+      -- OK don't arm the component:
       Cmd.Header.Id := 77;
       T.Command_T_To_Forward_Send (Cmd);
 
@@ -425,7 +425,7 @@ package body Command_Protector_Tests.Implementation is
       Natural_Assert.Eq (T.Armed_State_Timeout_History.Get_Count, 7);
       Packed_Arm_Timeout_Assert.Eq (T.Armed_State_Timeout_History.Get (7), (Timeout => 1));
 
-      -- Send a command prior to timeout IN the proteced list:
+      -- Send a command prior to timeout IN the protected list:
       Cmd.Header.Id := 4;
       T.Command_T_To_Forward_Send (Cmd);
 
@@ -448,7 +448,7 @@ package body Command_Protector_Tests.Implementation is
       Natural_Assert.Eq (T.Protected_Command_Forward_Count_History.Get_Count, 1);
       Packed_U16_Assert.Eq (T.Protected_Command_Forward_Count_History.Get (1), (Value => 1));
 
-      -- OK now arm the component with infinite timouet:
+      -- OK now arm the component with infinite timeout:
       T.Command_T_Send (T.Commands.Arm ((Timeout => 0)));
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 3);
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (3), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Arm_Id, Status => Success));
@@ -492,7 +492,7 @@ package body Command_Protector_Tests.Implementation is
       Packed_Arm_Timeout_Assert.Eq (T.Armed_State_Timeout_History.Get (15), (Timeout => 0));
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 6);
 
-      -- Send a command prior to timeout IN the proteced list:
+      -- Send a command prior to timeout IN the protected list:
       Cmd.Header.Id := 4;
       T.Command_T_To_Forward_Send (Cmd);
 

@@ -14,7 +14,7 @@ package body Component.Command_Protector.Implementation is
    -- This component requires a list of protected command IDs at initialization.
    --
    -- Init Parameters:
-   -- protected_Command_Id_List : Command_Id_List - The list of command IDs to consider as protected commands.
+   -- Protected_Command_Id_List : Command_Id_List - The list of command IDs to consider as protected commands.
    --
    overriding procedure Init (Self : in out Instance; Protected_Command_Id_List : in Command_Id_List) is
    begin
@@ -101,7 +101,7 @@ package body Component.Command_Protector.Implementation is
       -- Get the armed state:
       Ignore_Timeout : Packed_Arm_Timeout.Arm_Timeout_Type;
       State : constant Command_Protector_Enums.Armed_State.E := Self.Command_Arm_State.Get_State (Ignore_Timeout);
-      -- Look up to see if this command is in the protected list list:
+      -- Look up to see if this command is in the protected list:
       Id_To_Find : Command_Id renames Arg.Header.Id;
       Ignore_Found_Id : Command_Id;
       Ignore_Found_Index : Natural;

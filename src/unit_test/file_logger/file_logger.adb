@@ -7,7 +7,7 @@ package body File_Logger is
 
    procedure Open (Self : in out Instance; File_Directory : in String) is
    begin
-      -- Check that the directory exist first. If not, create it before creating the file
+      -- Check that the directory exists first. If not, create it before creating the file
       if not Exists (Containing_Directory (File_Directory)) then
          Create_Directory (Containing_Directory (File_Directory));
       end if;
@@ -32,7 +32,7 @@ package body File_Logger is
    procedure Close (Self : in out Instance) is
    begin
       if Is_Open (Self.File) then
-         -- Write the calculated durration it into the file, and then close the file
+         -- Close the file after logging is complete.
          Close (Self.File);
       end if;
    end Close;

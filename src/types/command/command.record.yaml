@@ -5,7 +5,7 @@ fields:
     description: The command header
     type: Command_Header.T
   - name: Arg_Buffer
-    description: A buffer to that contains the command arguments
+    description: A buffer that contains the command arguments
     type: Command_Types.Command_Arg_Buffer_Type
     format: U8x{{ command_buffer_size }}
     variable_length: Header.Arg_Buffer_Length

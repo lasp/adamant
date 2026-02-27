@@ -1,7 +1,7 @@
 ---
 description: The requirements for the CCSDS downsampler component are specified below.
 requirements:
-  - text: The component shall take receive ccsds packets and forward on if not in the APID list.
-  - text: The component shall use a initial list of APIDs and associated filter factors and is configured at initialization.
-  - text: The component shall filter out packets when the APID match and the filter factor is indicates as such.
+  - text: The component shall receive ccsds packets and forward them on if not in the APID list.
+  - text: The component shall use an initial list of APIDs and associated filter factors and is configured at initialization.
+  - text: The component shall filter out packets when the APID matches and the filter factor indicates as such.
   - text: The component shall be able to receive commands that can change the filter factor cadence.

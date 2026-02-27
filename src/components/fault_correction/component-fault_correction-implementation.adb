@@ -26,7 +26,7 @@ package body Component.Fault_Correction.Implementation is
 
       -- Make sure we will be able to fit all the statuses for each fault response entry into a single
       -- data product. The design of this component currently requires this assumption be met in order
-      -- to product that data product. There are four statuses included per byte in the data product.
+      -- to produce that data product. There are four statuses included per byte in the data product.
       pragma Assert (((Fault_Response_Configurations'Length + 3) / 4) <= Data_Product_Types.Data_Product_Buffer_Type'Length,
          "Too many fault entries! Cannot fit statuses for all fault responses in a single data product.");
 
@@ -62,7 +62,7 @@ package body Component.Fault_Correction.Implementation is
 
             -- Make sure the Fault ID is not already stored in lookup. We require a unique set.
             Ret := Self.Fault_Response_Lookup.Search (Lookup_Entry, Ignore_1, Ignore_2);
-            pragma Assert (not Ret, "Duplicate Fault ID '" & Fault_Id'Image (Lookup_Entry.Id) & "' not allowed fault response table!");
+            pragma Assert (not Ret, "Duplicate Fault ID '" & Fault_Id'Image (Lookup_Entry.Id) & "' not allowed in fault response table!");
             -- Add entry to the lookup:
             Ret := Self.Fault_Response_Lookup.Add (Lookup_Entry);
             pragma Assert (Ret, "Binary tree too small to hold entry. This should never happen unless there is a bug.");
@@ -317,7 +317,7 @@ package body Component.Fault_Correction.Implementation is
          -- Grab the table entry:
          Table_Entry : Fault_Response_Table_Entry renames Self.Fault_Response_Table.all (Index);
       begin
-         -- Enable the response if disabled. If the status is in any other state (ie. Fault)
+         -- Enable the response if disabled. If the status is in any other state (i.e. Fault)
          -- we are just going to leave it.
          case Table_Entry.Status is
             when Disabled =>

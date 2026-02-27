@@ -59,7 +59,7 @@ class array(type):
                 + "' and format '"
                 + str(self.element.format)
                 + "'. Components of array type must be <=8 bits in size to guarantee endianness."
-                + " Use a packed array to defined arrays with components >8 bits in size."
+                + " Use a packed array to define arrays with components >8 bits in size."
             )
 
         # Calculate the number of fields in the array:

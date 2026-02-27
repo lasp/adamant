@@ -6,7 +6,7 @@ requirements:
     # Required - the requirement text, usually contains a "shall" statement
   - text: The component shall be passive and have less than three connectors.
     # Optional - a description of the requirement usually elaborating on the statement and
-    # providing rational
+    # providing rationale
     description: We want to be able to show a reader of the User Guide how a passive component is put together to show the important parts of a component without being distracted by the more complex details of queued components, active components, or components with IDed entities.
   - text: The component shall send a packet to any connected downstream component whenever it is scheduled to run.
   - text: The packet contents shall include a counter in the first data byte that increments with every schedule tick received.

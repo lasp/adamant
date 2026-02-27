@@ -11,12 +11,12 @@ package body Component.Precision_Time_Protocol_Master.Implementation is
    --------------------------------------------------
    --
    -- Init Parameters:
-   -- sync_Period : Positive - The number of ticks between sending precision time protocol messages. A value of zero disables syncing.
-   -- enabled_State : Ptp_State.Ptp_State_Type - Is precision time protocol enabled or disabled by default at startup.
+   -- Sync_Period : Positive - The number of ticks between sending precision time protocol messages.
+   -- Enabled_State : Ptp_State.Ptp_State_Type - Is precision time protocol enabled or disabled by default at startup.
    --
    overriding procedure Init (Self : in out Instance; Sync_Period : in Positive := 1; Enabled_State : in Ptp_State.Ptp_State_Type := Ptp_State.Enabled) is
    begin
-      -- Save of variables:
+      -- Save variables:
       Self.Sync_Period := Sync_Period;
       Self.State := Enabled_State;
    end Init;
@@ -95,7 +95,7 @@ package body Component.Precision_Time_Protocol_Master.Implementation is
       end if;
 
       -- Let's make sure this is a valid message. We are only expected to receive messages from slaves
-      -- requesting a delay_Response message. Anything else is unexpected and will be reported as an
+      -- requesting a Delay_Response message. Anything else is unexpected and will be reported as an
       -- event and counted.
       case Message.Message_Type is
          -- This is the message type we are expected:

@@ -1,6 +1,6 @@
 ---
 execution: passive
-description: This is an example component with an base package initialization.
+description: This is an example component with a base package initialization.
 connectors:
   - type: Tick.T
     # Any component with an asynchronous connector requires an internal queue.

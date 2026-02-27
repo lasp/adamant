@@ -109,7 +109,7 @@ package Seq_Runtime is
    procedure Set_Telemetry (Self : in out Instance; Telemetry : in Poly_32_Type);
 
    -- Get the ID of the sequence to load. This should be called after encountering a call/spawn/start
-   -- instruction, ie. in a Wait_Load_New_* state.
+   -- instruction, i.e. in a Wait_Load_New_* state.
    function Get_Seq_Id_To_Load (Self : in Instance) return Sequence_Types.Sequence_Id;
 
    -- Get the last time that the runtime was executed.
@@ -142,7 +142,7 @@ package Seq_Runtime is
    -- Get the engine kill start ID.
    function Get_Kill_Eng_Start (Self : in Instance) return Sequence_Engine_Id;
 
-   -- Get the engine kill stop ID.
+   -- Get the number of engines to kill.
    function Get_Num_Eng_Kill (Self : in Instance) return Sequence_Engine_Id;
 
    -- Get the string to print if in the Print state.
@@ -216,11 +216,11 @@ private
    function Cmd_Jump_Not_Equal (Self : in out Instance) return Seq_Position;
    function Cmd_Return (Self : in out Instance) return Seq_Position;
    function Cmd_Wait_If_Zero (Self : in out Instance) return Seq_Position;
-   -- function cmd_Kill_Category             (Self : in out Instance) return Seq_Position; Remove from compiler, this instruction will NOT be implemented!
+   -- function Cmd_Kill_Category             (Self : in out Instance) return Seq_Position; Remove from compiler, this instruction will NOT be implemented!
    function Cmd_Kill_Engine (Self : in out Instance) return Seq_Position;
-   -- function cmd_Kill_Name                   (Self : in out Instance) return Seq_Position; Remove from compiler, this instruction will NOT be implemented!
-   -- function cmd_Subscribe                   (Self : in out Instance) return Seq_Position; Not implemented, Adamant does not do sub/unsub for telemetry items.
-   -- function cmd_Unsubscribe                (Self : in out Instance) return Seq_Position; Not implemented, Adamant does not do sub/unsub for telemetry items.
+   -- function Cmd_Kill_Name                   (Self : in out Instance) return Seq_Position; Remove from compiler, this instruction will NOT be implemented!
+   -- function Cmd_Subscribe                   (Self : in out Instance) return Seq_Position; Not implemented, Adamant does not do sub/unsub for telemetry items.
+   -- function Cmd_Unsubscribe                (Self : in out Instance) return Seq_Position; Not implemented, Adamant does not do sub/unsub for telemetry items.
    function Cmd_Eval_Flt (Self : in out Instance) return Seq_Position;
    function Cmd_Cast_F_To_U (Self : in out Instance) return Seq_Position;
    function Cmd_Cast_U_To_F (Self : in out Instance) return Seq_Position;

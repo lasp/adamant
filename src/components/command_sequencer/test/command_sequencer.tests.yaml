@@ -18,7 +18,7 @@ tests:
   - name: Test_Sequence_Telemetry_Compare_Error
     description: This unit test tests loading and running a sequence that executes a conditional on a data product that is malformed.
   - name: Test_Sequence_Telemetry_Compare_Corner_Cases
-    description: This unit test tests tests a few corner cases related to telemetry comparisons and makes sure they behave as intended.
+    description: This unit test tests a few corner cases related to telemetry comparisons and makes sure they behave as intended.
   - name: Test_Sequence_Spawn_Invalid_Engine
     description: This unit test tests loading and running a sequence that loads a sequence into another engine that does not exist.
   - name: Test_Sequence_Spawn_Unavailable_Engine

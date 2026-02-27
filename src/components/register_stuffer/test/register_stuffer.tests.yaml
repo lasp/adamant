@@ -8,7 +8,7 @@ tests:
   - name: Test_Bad_Address
     description: This unit test makes sure the component rejects reading or writing registers that are not 4-byte aligned.
   - name: Test_Invalid_Command
-    description: This unit test makes sure an malformed command is rejected.
+    description: This unit test makes sure a malformed command is rejected.
   - name: Test_Protected_Register_Write
     description: This unit test makes sure the protected register write feature works as intended.
   - name: Test_Nominal_Dump_One_Registers

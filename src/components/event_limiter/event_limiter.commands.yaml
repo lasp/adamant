@@ -1,5 +1,5 @@
 ---
-description: These are the commands for the event packetizer component.
+description: These are the commands for the event limiter component.
 commands:
   - name: Enable_Event_Limit
     description: Enable the event limiter for a specific event ID.

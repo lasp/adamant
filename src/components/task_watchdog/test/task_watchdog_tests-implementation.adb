@@ -96,7 +96,7 @@ package body Task_Watchdog_Tests.Implementation is
       Data_Product_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get (5), Test_Create_Dp_Limit_Type (4, 1));
 
       -- Good tick where all checks should pass and the downstream petter should be called.
-      -- Note: The first petter fails here with a limit of 1, but is disabled so we dont see action taken.
+      -- Note: The first petter fails here with a limit of 1, but is disabled so we don't see action taken.
       T.Tick_T_Send (Input_Tick);
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
       Natural_Assert.Eq (T.Fault_T_Recv_Sync_History.Get_Count, 0);
@@ -131,7 +131,7 @@ package body Task_Watchdog_Tests.Implementation is
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, Init_Dp_Count);
       Natural_Assert.Eq (T.Pet_T_Recv_Sync_History.Get_Count, 6);
 
-      -- Now test that we dont get an event again from our warning case
+      -- Now test that we don't get an event again from our warning case
       T.Pet_T_Send (Connector_Count_Type (2), Input_Pet);
       T.Tick_T_Send (Input_Tick);
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
@@ -548,7 +548,7 @@ package body Task_Watchdog_Tests.Implementation is
       Natural_Assert.Eq (Natural (T.Component_Exceeded_Pet_Limit_History.Get (2).Index), 1);
       Natural_Assert.Eq (T.Pet_T_Recv_Sync_History.Get_Count, 9);
 
-      -- Make sure we dont get another event but still a pet
+      -- Make sure we don't get another event but still a pet
       T.Pet_T_Send (Connector_Count_Type (2), Input_Pet);
       T.Tick_T_Send (Input_Tick);
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 3);

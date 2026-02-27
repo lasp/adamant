@@ -3,4 +3,4 @@ description: These are the commands for the memory packetizer fixed id component
 commands:
   - name: Set_Max_Packet_Rate
     arg_type: Packets_Per_Period.T
-    description: Set a new value for the max_Packets_Per_Time_Period and the time_Period_In_Seconds to control the output rate of the emitted packets.
+    description: Set a new value for the Max_Packets_Per_Time_Period and the Time_Period_In_Seconds to control the output rate of the emitted packets.

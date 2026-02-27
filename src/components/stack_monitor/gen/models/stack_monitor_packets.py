@@ -10,7 +10,7 @@ class stack_monitor_packets(packets):
     class inherits from the normal packets model but adds some extra functionality
     needed to the stack monitor packet. In particular, the stack monitor packet's
     type is derived from data within the assembly that the packet is a part of. The
-    type itself gets filled in in the "load_assembly" method.
+    type itself gets filled in during the "load_assembly" method.
     """
     def submodel_name(self):
         """This is just a "decorated" packet object, so make sure everyone treats it like that."""

@@ -182,7 +182,7 @@ enums:
         description: Jumps to the given position if internal A is equal to 0.
       - name: Jump_Not_Zero
         value: 17
-        description: Jumpes to the given position if internal A does not equal 0.
+        description: Jumps to the given position if internal A does not equal 0.
       - name: Jump_If_Equal
         value: 18
         description: If the stored value and the value from internal var A are equal this will perform an absolute jump.
@@ -215,25 +215,25 @@ enums:
         description: Performs a mathematical operation on internal A and B as floating point values.
       - name: Cast_F_To_U
         value: 28
-        description: Cast's float to unsigned.
+        description: Casts float to unsigned.
       - name: Cast_U_To_F
         value: 29
-        description: Cast's unsigned to float.
+        description: Casts unsigned to float.
       - name: Eval_S
         value: 30
         description: Evaluates two signed integer values.
       - name: Cast_S_To_U
         value: 31
-        description: Cast's signed to unsigned.
+        description: Casts signed to unsigned.
       - name: Cast_U_To_S
         value: 32
-        description: Cast's unsigned to signed.
+        description: Casts unsigned to signed.
       - name: Cast_F_To_S
         value: 33
-        description: Cast's float to signed.
+        description: Casts float to signed.
       - name: Cast_S_To_F
         value: 34
-        description: Cast's signed to float.
+        description: Casts signed to float.
       - name: Wait_On_B
         value: 35
         description: Waits for the amount of time specified in internal B.

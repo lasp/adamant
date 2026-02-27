@@ -1,5 +1,5 @@
 ---
-description: This is a set of unit tests for the Simple_Package package.
+description: This is a set of unit tests for the Product_Copier component.
 tests:
   - name: Test_Dest_Conflict
     description: Tests whether two conflicting destinations raise an error.

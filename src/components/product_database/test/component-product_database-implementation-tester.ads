@@ -23,7 +23,7 @@ with Invalid_Command_Info.Representation;
 
 -- The product database component maintains a database of data product items. Only the latest single copy of each data product item is stored, and that value can be updated or fetched by ID via connectors. The component is configured by passing the minimum and maximum data product ID that the database can accept. The component allocates memory on the heap to store a maximum sized data product for every ID in range from the minimum to maximum ID provided. Invalid IDs received during requests are reported as events. The lookup algorithm is extremely fast, using the data product ID itself as a direct index into the database.
 --
--- Note that IDs stored in this database should come from a compact ID space for most efficient memory usage. If you are manually setting the data product ID bases in your assembly model and creating a sparse ID set than this database component should not be used, as it could waste an enormous amount of memory. This component is designed to work best with the default, Adamant-allocated ID space for data products which spans from 1 to number of data products used in the system.
+-- Note that IDs stored in this database should come from a compact ID space for most efficient memory usage. If you are manually setting the data product ID bases in your assembly model and creating a sparse ID set then this database component should not be used, as it could waste an enormous amount of memory. This component is designed to work best with the default, Adamant-allocated ID space for data products which spans from 1 to number of data products used in the system.
 package Component.Product_Database.Implementation.Tester is
 
    use Component.Product_Database_Reciprocal;
@@ -134,7 +134,7 @@ package Component.Product_Database.Implementation.Tester is
    overriding procedure Data_Product_Fetch_Id_Not_Available (Self : in out Instance; Arg : in Data_Product_Id.T);
    -- Override condition cleared for the data product of the provided ID.
    overriding procedure Override_Cleared (Self : in out Instance; Arg : in Data_Product_Id.T);
-   -- Override condition cleared for all data productd.
+   -- Override condition cleared for all data products.
    overriding procedure Override_Cleared_For_All (Self : in out Instance);
    -- Data product overridden by command.
    overriding procedure Data_Product_Overridden (Self : in out Instance; Arg : in Data_Product_Header.T);

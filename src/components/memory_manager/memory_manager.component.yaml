@@ -1,5 +1,5 @@
 ---
-description: The component manages access to a single memory location through a single pointer. When requested, the component loans out access to the pointer if it is available. The length of the pointer will always be the entire length of the memory region. The component will reject any requests to access the pointer again until the pointer is returned from the requester. Request/release memory transactions are each provided a unique ID. To release the memory, the same ID must be provided that was issues upon request. This mechanism reduces the risk of an inadvertent call to release from causing an unintended release of the memory. The component includes a data product relating whether the memory is currently allocated or not. The component responds to commands to CRC, dump, write, and force-release the memory region. Note that this component is active only to provide a separate thread of execution on which to execute the CRC command and the memory write command, each which could take a long time to execute.
+description: The component manages access to a single memory location through a single pointer. When requested, the component loans out access to the pointer if it is available. The length of the pointer will always be the entire length of the memory region. The component will reject any requests to access the pointer again until the pointer is returned from the requester. Request/release memory transactions are each provided a unique ID. To release the memory, the same ID must be provided that was issued upon request. This mechanism reduces the risk of an inadvertent call to release from causing an unintended release of the memory. The component includes a data product relating whether the memory is currently allocated or not. The component responds to commands to CRC, dump, write, and force-release the memory region. Note that this component is active only to provide a separate thread of execution on which to execute the CRC command and the memory write command, each of which could take a long time to execute.
 execution: active
 init:
   description: "This init function provides memory allocation for the managers internal memory region. Preallocated memory can be provided via the \"bytes\" access type, in which case \"size\" must be negative and will be ignored. If you would like to allocate the internal memory on the heap then \"bytes\" must be set to null, and \"size\" must be a positive number representing the number of bytes you would like to allocate."
@@ -11,7 +11,7 @@ init:
     - name: size
       type: Integer
       default: "-1"
-      description: "The number of bytes to allocate on the heap for the memory region. Note: This must be set to a negative value if the \"bytes\" parameters is not null."
+      description: "The number of bytes to allocate on the heap for the memory region. Note: This must be set to a negative value if the \"bytes\" parameter is not null."
 connectors:
   - name: Memory_Region_Request_T_Return
     return_type: Memory_Region_Request.T

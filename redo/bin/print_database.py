@@ -21,7 +21,7 @@ if __name__ == "__main__":
         print("")
         print("Note: you can find the session dir by doing the following:")
         print(
-            "1) Make sure Adamand does not clean up the session directory so you can inspect it"
+            "1) Make sure Adamant does not clean up the session directory so you can inspect it"
         )
         print("$ export ADAMANT_DISABLE_SESSION_CLEANUP=1")
         print("2) Turn on debug mode so that the session directory gets printed out")

@@ -1,7 +1,7 @@
 ---
 events:
   - name: Source_Not_Available
-    description: A data product fetch resulted in an a Not_Available status, and was not sent to the destination.
+    description: A data product fetch resulted in a Not_Available status, and was not sent to the destination.
     param_type: Product_Copier_Error_Info.T
   - name: Source_Id_Out_Of_Range
     description: A data product fetch resulted in an Id_Out_Of_Range status, and was not sent to the destination.

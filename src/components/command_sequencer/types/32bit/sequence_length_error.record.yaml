@@ -1,5 +1,5 @@
 ---
-description: This is a packed record that holds information invalid sequence length.
+description: This is a packed record that holds information about an invalid sequence length.
 fields:
   - name: Load
     description: The sequence load info.

@@ -1,5 +1,5 @@
 ---
-description: Record which holds wall time and execution time to describe the runtime performance some piece of code.
+description: Record which holds wall time and execution time to describe the runtime performance of some piece of code.
 fields:
   - name: Wall_Time
     description: The wall time associated with the measurement.

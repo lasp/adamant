@@ -18,10 +18,10 @@ package body Component.Cpu_Monitor.Implementation is
    -- This component requires a list of interrupts and tasks ids to monitor.
    --
    -- Init Parameters:
-   -- task_List : Task_Types.Task_Info_List_Access - A list of task info records to monitor.
-   -- interrupt_List : Interrupt_Types.Interrupt_Id_List_Access - A list of task info records to monitor.
-   -- execution_Periods : Execution_Periods_Type - The period (in ticks) that specify the duration of time that each CPU measurement is taken over.
-   -- packet_Period : Interfaces.Unsigned_16 - The period (in ticks) of how often to send out the cpu execution packet. A value of zero disable sending of the packet.
+   -- Task_List : Task_Types.Task_Info_List_Access - A list of task info records to monitor.
+   -- Interrupt_List : Interrupt_Types.Interrupt_Id_List_Access - A list of interrupt ids to monitor.
+   -- Execution_Periods : Execution_Periods_Type - The period (in ticks) that specify the duration of time that each CPU measurement is taken over.
+   -- Packet_Period : Interfaces.Unsigned_16 - The period (in ticks) of how often to send out the cpu execution packet. A value of zero disables sending of the packet.
    --
    overriding procedure Init
       (Self : in out Instance; Task_List : in not null Task_Types.Task_Info_List_Access; Interrupt_List : in not null Interrupt_Types.Interrupt_Id_List_Access; Execution_Periods : in Execution_Periods_Type := [1, 6, 30]; Packet_Period : in Interfaces.Unsigned_16 := 1)
@@ -60,8 +60,8 @@ package body Component.Cpu_Monitor.Implementation is
          Buffer => [others => 0]
       );
 
-      -- Calculate the max_Count. This is the rollover value for count. To make sure
-      -- rollover does not skip ticks we need to select a max_Count
+      -- Calculate the Max_Count. This is the rollover value for count. To make sure
+      -- rollover does not skip ticks we need to select a Max_Count
       -- value that is divisible by execution periods. The simplest way to do this is
       -- to simply multiply all the periods together.
       Self.Max_Count := 1;

@@ -100,7 +100,7 @@ package body Event_Filter_Entry is
       use Event_Filter_State;
       use Interfaces;
    begin
-      -- Check the component state. If its disabled then skip the logic altogther and just pass out that we are not filtered
+      -- Check the component state. If its disabled then skip the logic altogether and just pass out that we are not filtered
       if Self.Global_Enable_State = Global_Filter_State.Disabled then
          return Unfiltered;
       end if;

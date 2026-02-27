@@ -8,7 +8,7 @@ with Binary_Tree;
 with Command_Types; use Command_Types;
 with Interfaces;
 
--- This component is initialized with a list of commands to reject. The component receives commands, and checks their IDs against the reject command list. If a command is found in the list, then it is dropped and reported as an error packet. Commands that are not on the reject list are always forwarded. The reject command list is stored internally as a binary tree data structure that can determine if a command should be rejected or not in O(log(n)) time, where n is the number of commands to reject. Since most systems only manage a handful of commands on the reject list, the performance of this component should be acceptable for most missions. A common application for this component is to actively disallow commands eminating from certain sources, such as an onboard command sequence.
+-- This component is initialized with a list of commands to reject. The component receives commands, and checks their IDs against the reject command list. If a command is found in the list, then it is dropped and reported as an error packet. Commands that are not on the reject list are always forwarded. The reject command list is stored internally as a binary tree data structure that can determine if a command should be rejected or not in O(log(n)) time, where n is the number of commands to reject. Since most systems only manage a handful of commands on the reject list, the performance of this component should be acceptable for most missions. A common application for this component is to actively disallow commands emanating from certain sources, such as an onboard command sequence.
 package Component.Command_Rejector.Implementation is
 
    -- The component class instance record:
@@ -20,7 +20,7 @@ package Component.Command_Rejector.Implementation is
    -- This component requires a list of command ID to reject at initialization.
    --
    -- Init Parameters:
-   -- command_Id_Reject_List : Command_Id_List - The list of command IDs to reject.
+   -- Command_Id_Reject_List : Command_Id_List - The list of command IDs to reject.
    --
    overriding procedure Init (Self : in out Instance; Command_Id_Reject_List : in Command_Id_List);
    not overriding procedure Final (Self : in out Instance);
@@ -49,7 +49,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance);

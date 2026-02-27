@@ -8,11 +8,11 @@ tests:
   - name: Test_Packet_Set_Period
     description: This unit test tests changing a packet's period by command.
   - name: Test_Missing_Data_Product
-    description: This unit test tests the component's response to a receiving a missing data product.
+    description: This unit test tests the component's response to receiving a missing data product.
   - name: Test_Bad_Id_Data_Product
-    description: This unit test tests the component's response receiving a bad ID status as response to a data product request.
+    description: This unit test tests the component's response to receiving a bad ID status in response to a data product request.
   - name: Test_Data_Product_Size_Mismatch
-    description: This unit test tests the component's response receiving data product with an unexpected size.
+    description: This unit test tests the component's response to receiving a data product with an unexpected size.
   - name: Test_Roll_Over
     description: This unit test tests the component's behavior when rolling over its internal count.
   - name: Test_Bad_Commands
@@ -28,4 +28,4 @@ tests:
   - name: Test_Full_Queue
     description: This unit test tests a command being dropped due to a full queue.
   - name: Test_Packet_Period_Items
-    description: This unit test tests the special packet period items that can be emitted inside an product packetizer packet. This unit test also tests a special packet period item with a bad ID.
+    description: This unit test tests the special packet period items that can be emitted inside a product packetizer packet. This unit test also tests a special packet period item with a bad ID.

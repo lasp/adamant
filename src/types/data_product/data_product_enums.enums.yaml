@@ -24,7 +24,7 @@ enums:
         description: The data dependency is not available.
       - name: Error
         value: 2
-        description: An unpexpected error was encountered when parsing the data dependency. This indicates an assembly level synchronization error. The ID or Length of the fetched data product did not match the expected ID or Length of the data dependency.
+        description: An unexpected error was encountered when parsing the data dependency. This indicates an assembly-level synchronization error. The ID or length of the fetched data product did not match the expected ID or length of the data dependency.
       - name: Stale
         value: 3
         description: The data dependency is too old to be considered valid for use.

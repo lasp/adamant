@@ -6,7 +6,7 @@ fields:
     type: Interfaces.Unsigned_32
     format: U32
   - name: Var_Type
-    description: Types can be 0 - a constant, 1 - an local variable id, 2 - one of the fourt internal variables, or 3 - a global.
+    description: Types can be 0 - a constant, 1 - a local variable id, 2 - one of the four internal variables, or 3 - a global.
     type: Seq_Enums.Var_Origin.E
     format: E16
   - name: Pad

@@ -108,7 +108,7 @@ class generic_unit(object):
         #
         # The formal parameter we are looking for looks something like this for a type "T":
         #
-        # with function Serialized_Length (Src : in T; num_Bytes_Serialized : out Natural)
+        # with function Serialized_Length (Src : in T; Num_Bytes_Serialized : out Natural)
         #   return Serializer_Types.Serialization_Status;
         #
         # The regex used below should find any valid Ada (hopefully) that matches this function type.

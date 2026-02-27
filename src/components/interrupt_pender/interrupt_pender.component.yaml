@@ -17,7 +17,7 @@ preamble: |
   package Custom_Interrupt_Handler_Package is new Interrupt_Handlers (Interrupt_Data_Type);
 discriminant:
   parameters:
-    - name: custom_Interrupt_Procedure
+    - name: Custom_Interrupt_Procedure
       type: Custom_Interrupt_Handler_Package.Interrupt_Procedure_Type
       description: A custom procedure to be called within the interrupt handler. The null procedure can be used here if no specific behavior is desired.
 interrupts:

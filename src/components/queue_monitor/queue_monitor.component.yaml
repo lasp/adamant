@@ -11,7 +11,7 @@ init:
       description: A list of components to monitor.
     - name: Packet_Period
       type: Interfaces.Unsigned_16
-      description: The period (in ticks) of how often to send out the queue usage packet. A value of zero disable sending of the packet.
+      description: The period (in ticks) of how often to send out the queue usage packet. A value of zero disables sending of the packet.
       default: "1"
 connectors:
   - description: This is the base tick for the component.
