@@ -1,6 +1,6 @@
 ---
-description: Commands for the Zero Divider component.
+description: Commands for the Zero Divider Cpp component.
 commands:
   - name: Divide_By_Zero_In_Cpp
-    description: You must provide the correct magic number as argument to this command for it to be executed.
+    description: You must provide the correct magic number as an argument to this command for it to be executed.
     arg_type: Packed_U32.T
