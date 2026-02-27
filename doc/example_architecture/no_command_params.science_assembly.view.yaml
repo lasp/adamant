@@ -6,5 +6,5 @@ filters:
   - name: include_parameter_command
     type: component_name
     include:
-      - command_Router_Instance
-      - parameters_Instance
+      - Command_Router_Instance
+      - Parameters_Instance

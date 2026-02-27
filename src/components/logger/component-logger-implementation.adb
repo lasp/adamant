@@ -115,16 +115,16 @@ package body Component.Logger.Implementation is
    --
    -- Init Parameters:
    -- bytes : Basic_Types.Byte_Array_Access - A pointer to an allocation of bytes to be used for storing log data. If this is set to null, then memory will be allocated on the heap using the "size" parameter instead. Note: This must be set to null if the "size" parameter is positive below.
-   -- meta_Data : Circular_Buffer_Meta.T_Access - A pointer to an allocation of a meta data record for storing the log meta data. This can be used to place the meta data where desired in memory. This item must be set to null if "size" is positive, and non-null if "bytes" is non-null.
+   -- Meta_Data : Circular_Buffer_Meta.T_Access - A pointer to an allocation of a meta data record for storing the log meta data. This can be used to place the meta data where desired in memory. This item must be set to null if "size" is positive, and non-null if "bytes" is non-null.
    -- size : Integer - The number of bytes to allocate on the heap for memory storage. Note: This must be set to a negative value if the "bytes" parameters is not null.
-   -- initial_Mode : Logger_Enums.Logger_Mode.E - The initial mode of the logger (enabled/disabled) upon initialization
+   -- Initial_Mode : Logger_Enums.Logger_Mode.E - The initial mode of the logger (enabled/disabled) upon initialization
    --
    overriding procedure Init (Self : in out Instance; Bytes : in Basic_Types.Byte_Array_Access := null; Meta_Data : in Circular_Buffer_Meta.T_Access := null; Size : in Integer := -1; Initial_Mode : in Logger_Enums.Logger_Mode.E := Logger_Enums.Logger_Mode.Disabled)
    is
       use Basic_Types;
       use Circular_Buffer_Meta;
    begin
-      -- If bytes is null make sure size is positive and meta_Data is also null:
+      -- If bytes is null make sure size is positive and Meta_Data is also null:
       if Bytes = null then
          pragma Assert (Size > 0, "Logger Init Error: If a null 'bytes' pointer is provided, then a positive size must be provided to allocate memory on the heap.");
          pragma Assert (Meta_Data = null, "Logger Init Error: If a null 'bytes' pointer is provided, then a null meta_Data pointer must be provided.");

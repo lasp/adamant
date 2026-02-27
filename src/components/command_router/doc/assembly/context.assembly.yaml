@@ -7,16 +7,16 @@ components:
     stack_size: 2000
     secondary_stack_size: 1
     init:
-      - "max_Number_Of_Commands => 5"
+      - "Max_Number_Of_Commands => 5"
     init_base:
-      - "queue_Size => 0"
-      - "command_T_Send_Count => 4"
-      - "command_Response_T_To_Forward_Send_Count => 2"
+      - "Queue_Size => 0"
+      - "Command_T_Send_Count => 4"
+      - "Command_Response_T_To_Forward_Send_Count => 2"
   - type: Command_Sender
     name: Low_Pri_Cmd_Sender
     execution: passive
     init_base:
-      - "queue_Size => 0"
+      - "Queue_Size => 0"
   - type: Command_Sender
     name: Hi_Pri_Cmd_Sender
     execution: active
@@ -24,12 +24,12 @@ components:
     stack_size: 2000
     secondary_stack_size: 1
     init_base:
-      - "queue_Size => 0"
+      - "Queue_Size => 0"
   - type: Command_Receiver
     name: Cmd_Receiver_1
     execution: passive
     init_base:
-      - "queue_Size => 0"
+      - "Queue_Size => 0"
   - type: Command_Receiver
     name: Cmd_Receiver_2
     execution: active
@@ -37,12 +37,12 @@ components:
     stack_size: 2000
     secondary_stack_size: 1
     init_base:
-      - "queue_Size => 0"
+      - "Queue_Size => 0"
   - type: Command_Receiver
     name: Cmd_Receiver_3
     execution: passive
     init_base:
-      - "queue_Size => 0"
+      - "Queue_Size => 0"
 connections:
   - from_component: Low_Pri_Cmd_Sender
     from_connector: Command_T_Send

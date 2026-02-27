@@ -2,7 +2,7 @@
 description: This is a generic component that can be used to protect (as in protected object) the call to the input connector. The component serves as a multi-tasking safe synchronization point for multiple callers. When the T_Recv_Sync connector is called, the component immediately calls the T_Send connector, passing through any arguments. The T_Send connector is called from within a protected object, and so its execution is atomic with respect to other callers of T_Recv_Sync. That is, the call to T_Send will finish before another task is allowed to invoke T_Recv_Sync (and thus T_Send). The protection mechanism effectively makes all downstream connector calls of this component thread-safe. The advantage of this component is that deploying it appropriately in an assembly can provide thread-safety to components which are not designed to be thread-safe in and of themselves.
 execution: passive
 generic:
-  description: The is generic component in that it can be instantiated to protect a connector of any type at compile time.
+  description: This is a generic component in that it can be instantiated to protect a connector of any type at compile time.
   parameters:
     - name: T
       description: The generic type of data passed in and out of the component.

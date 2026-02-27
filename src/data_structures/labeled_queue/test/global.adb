@@ -66,7 +66,7 @@ package body Global is
                Pop_Type_Assert.Eq (Peek_Static (Queue, Label, Static_Var, Offset => 1), Deserialization_Failure);
                Pop_Type_Assert.Eq (Peek_Static (Queue, Label, Static_Var, Offset => 0), Success);
                Label_Assert.Eq (Label, Static_Type);
-               Put_Line ("Poppped: " & Static.Representation.Image (Static_Var));
+               Put_Line ("Popped: " & Static.Representation.Image (Static_Var));
                Static_Assert.Eq (Static_Var, (One => 15, Two => 13, Three => 12));
                Static_Var := (others => 0);
                Pop_Type_Assert.Eq (Pop_Static (Queue, Label, Static_Var, Offset => 0), Success);

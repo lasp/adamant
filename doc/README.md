@@ -1,6 +1,6 @@
 # Doc
 
-This directory contains documentation for the Adamant framework. The .tex used to generate these documents, as well as published PDF versions, can b e found in the subdirectories of this directory.
+This directory contains documentation for the Adamant framework. The .tex used to generate these documents, as well as published PDF versions, can be found in the subdirectories of this directory.
 
 ## Contents
 

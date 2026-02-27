@@ -24,9 +24,9 @@ package Component.Logger.Implementation is
    --
    -- Init Parameters:
    -- bytes : Basic_Types.Byte_Array_Access - A pointer to an allocation of bytes to be used for storing log data. If this is set to null, then memory will be allocated on the heap using the "size" parameter instead. Note: This must be set to null if the "size" parameter is positive below.
-   -- meta_Data : Circular_Buffer_Meta.T_Access - A pointer to an allocation of a meta data record for storing the log meta data. This can be used to place the meta data where desired in memory. This item must be set to null if "size" is positive, and non-null if "bytes" is non-null.
+   -- Meta_Data : Circular_Buffer_Meta.T_Access - A pointer to an allocation of a meta data record for storing the log meta data. This can be used to place the meta data where desired in memory. This item must be set to null if "size" is positive, and non-null if "bytes" is non-null.
    -- size : Integer - The number of bytes to allocate on the heap for memory storage. Note: This must be set to a negative value if the "bytes" parameters is not null.
-   -- initial_Mode : Logger_Enums.Logger_Mode.E - The initial mode of the logger (enabled/disabled) upon initialization
+   -- Initial_Mode : Logger_Enums.Logger_Mode.E - The initial mode of the logger (enabled/disabled) upon initialization
    --
    overriding procedure Init (Self : in out Instance; Bytes : in Basic_Types.Byte_Array_Access := null; Meta_Data : in Circular_Buffer_Meta.T_Access := null; Size : in Integer := -1; Initial_Mode : in Logger_Enums.Logger_Mode.E := Logger_Enums.Logger_Mode.Disabled);
    not overriding procedure Final (Self : in out Instance);
@@ -72,7 +72,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance);

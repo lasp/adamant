@@ -4,7 +4,7 @@ with Ada.Synchronous_Task_Control;
 with Serializer_Types;
 
 -- This is a protected (thread safe) queue that supports the pushing,
--- popping, and peaking of variable sized byte arrays or typed queue
+-- popping, and peeking of variable sized byte arrays or typed queue
 -- elements.
 package Variable_Queue is
 
@@ -16,7 +16,7 @@ package Variable_Queue is
    --
    -- There are many status types because the different functions below can fail in different
    -- ways. Instead of encompassing these in a single, bloated type, a type is created for each
-   -- so the called only has to handle the error cases the pertain to the function they are
+   -- so the caller only has to handle the error cases that pertain to the function they are
    -- calling.
    --
    -- Here is a general description of the enumeration literals:

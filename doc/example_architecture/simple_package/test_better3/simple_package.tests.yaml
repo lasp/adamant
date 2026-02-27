@@ -5,7 +5,7 @@ description: This is a set of unit tests for the Simple_Package package.
 tests:
     # Required - name of test
   - name: Test_That_Should_Pass
-    # Optionoal - descriptiono of test
+    # Optional - description of test
     description: This test should pass.
   - name: Test_That_Should_Fail
     description: This test should not pass.

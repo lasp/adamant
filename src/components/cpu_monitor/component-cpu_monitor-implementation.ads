@@ -21,10 +21,10 @@ package Component.Cpu_Monitor.Implementation is
    -- This component requires a list of interrupts and tasks ids to monitor.
    --
    -- Init Parameters:
-   -- task_List : Task_Types.Task_Info_List_Access - A list of task info records to monitor.
-   -- interrupt_List : Interrupt_Types.Interrupt_Id_List_Access - A list of task info records to monitor.
-   -- execution_Periods : Execution_Periods_Type - The period (in ticks) that specify the duration of time that each CPU measurement is taken over.
-   -- packet_Period : Interfaces.Unsigned_16 - The period (in ticks) of how often to send out the cpu execution packet. A value of zero disable sending of the packet.
+   -- Task_List : Task_Types.Task_Info_List_Access - A list of task info records to monitor.
+   -- Interrupt_List : Interrupt_Types.Interrupt_Id_List_Access - A list of interrupt ids to monitor.
+   -- Execution_Periods : Execution_Periods_Type - The period (in ticks) that specify the duration of time that each CPU measurement is taken over.
+   -- Packet_Period : Interfaces.Unsigned_16 - The period (in ticks) of how often to send out the cpu execution packet. A value of zero disables sending of the packet.
    --
    overriding procedure Init (Self : in out Instance; Task_List : in not null Task_Types.Task_Info_List_Access; Interrupt_List : in not null Interrupt_Types.Interrupt_Id_List_Access; Execution_Periods : in Execution_Periods_Type := [1, 6, 30]; Packet_Period : in Interfaces.Unsigned_16 := 1);
 
@@ -66,7 +66,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance);

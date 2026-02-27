@@ -44,7 +44,7 @@ package body Tests.Implementation is
       -- Init component:
       T.Component_Instance.Init (Dividers'Unchecked_Access);
 
-      -- Make sure count and max_Count are correct:
+      -- Make sure count and Max_Count are correct:
       Boolean_Assert.Eq (T.Check_Counts (Count => 0, Max_Count => 70), True);
 
       -- Send a series of ticks and make sure that we get all the expected calls:

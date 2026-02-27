@@ -1,6 +1,6 @@
 ---
 description: |
-  The Fault Correction component receives faults asynchronously. When it processes a fault, it determines the correct command correction to send and sends it.
+  The Fault Correction component receives faults asynchronously. When it processes a fault, it determines the correct command response to send and sends it.
 execution: active
 init:
   description: The component is initialized by providing an access to a list of fault response configuration records.

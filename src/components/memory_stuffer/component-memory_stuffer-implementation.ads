@@ -16,7 +16,7 @@ package Component.Memory_Stuffer.Implementation is
    --------------------------------------------------
    -- Subprogram for implementation init method:
    --------------------------------------------------
-   -- This component requires a list of memory regions which it can write to. These regions can either be protected (requiring and arm command prior to execution) or unprotected, as specified by the second parameter.
+   -- This component requires a list of memory regions which it can write to. These regions can either be protected (requiring an arm command prior to execution) or unprotected, as specified by the second parameter.
    --
    -- Init Parameters:
    -- Memory_Regions : Memory_Manager_Types.Memory_Region_Array_Access - An access to a list of memory regions.
@@ -43,7 +43,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance);
@@ -83,7 +83,7 @@ private
    --    These are the commands for the Memory Stuffer component.
    -- Write bytes to a region in memory.
    overriding function Write_Memory (Self : in out Instance; Arg : in Memory_Region_Write.T) return Command_Execution_Status.E;
-   -- An arm command which enables the next write write command to a protected memory to be accepted. The armed state of the component will expire on the next command to this component no matter what it is or after the configurable timeout.
+   -- An arm command which enables the next write command to a protected memory to be accepted. The armed state of the component will expire on the next command to this component no matter what it is or after the configurable timeout.
    overriding function Arm_Protected_Write (Self : in out Instance; Arg : in Packed_Arm_Timeout.T) return Command_Execution_Status.E;
 
    -- Invalid command handler. This procedure is called when a command's arguments are found to be invalid:

@@ -2,10 +2,10 @@
 description: This is a unit test suite for the moving average utility
 tests:
   - name: Test_Statistic_Values
-    description: This unit test tests the mathmatic values that are calculated from a known set of samples
+    description: This unit test tests the mathematical values that are calculated from a known set of samples
   - name: Test_Reset_Statistics
     description: This unit test tests resetting the appropriate values in the statistics to give a new start to the moving average
   - name: Test_Change_Sample_Length
-    description: This unit test changes the length of the number of samples the moving averages is calculated over.
+    description: This unit test changes the number of samples the moving average is calculated over.
   - name: Test_Not_Initialized
     description: This unit test makes sure that the call to Change_Sample_Length and Reset are safe if not initialized.

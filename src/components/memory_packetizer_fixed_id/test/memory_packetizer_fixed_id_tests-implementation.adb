@@ -398,15 +398,15 @@ package body Memory_Packetizer_Fixed_Id_Tests.Implementation is
          Sys_Time_Assert.Ge (T.Packet_T_Recv_Sync_History.Get (1).Header.Time, First_Time);
          Sys_Time_Assert.Lt (T.Packet_T_Recv_Sync_History.Get (1).Header.Time, One_Second_Later);
 
-         -- The second packet should be withint 3 to 4 seconds:
+         -- The second packet should be within 3 to 4 seconds:
          Sys_Time_Assert.Ge (T.Packet_T_Recv_Sync_History.Get (2).Header.Time, Three_Seconds_Later);
          Sys_Time_Assert.Lt (T.Packet_T_Recv_Sync_History.Get (2).Header.Time, Four_Seconds_Later);
 
-         -- The third packet should be withint 6 to 7 seconds:
+         -- The third packet should be within 6 to 7 seconds:
          Sys_Time_Assert.Ge (T.Packet_T_Recv_Sync_History.Get (3).Header.Time, Six_Seconds_Later);
          Sys_Time_Assert.Lt (T.Packet_T_Recv_Sync_History.Get (3).Header.Time, Seven_Seconds_Later);
 
-         -- The third packet should be withint 9 to 10 seconds:
+         -- The third packet should be within 9 to 10 seconds:
          Sys_Time_Assert.Ge (T.Packet_T_Recv_Sync_History.Get (4).Header.Time, Nine_Seconds_Later);
          Sys_Time_Assert.Lt (T.Packet_T_Recv_Sync_History.Get (4).Header.Time, Ten_Seconds_Later);
       end;

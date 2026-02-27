@@ -14,4 +14,4 @@ tests:
   - name: Test_Offsets
     description: This unit test tests the component with nonzero start and stop offsets for CCSDS extraction.
   - name: Test_Max_Subpackets_To_Extract
-    description: This unit test tests the component with a zero and positive max_Subpackets_To_Extract configuration and looks for appropriate behavior.
+    description: This unit test tests the component with a zero and positive Max_Subpackets_To_Extract configuration and looks for appropriate behavior.

@@ -9,7 +9,7 @@ with Ccsds_Space_Packet;
 with Ccsds_Primary_Header;
 with Command;
 
--- The CCSDS downsampler is a component that is intended to filter down packets that are listed in the downsample list. The input list has two items, one is the APID, and the other is the filter factor. The filter factor is used to know the cadence of filtering and sending packets. This is maintained by a protected binary tree object which takes the APID of the packets from the input list, and adding them to a binary tree with the filter factor. When the packet is received, the APID is checked for filtering and then the filter factor to determine if we send them on or not. Packets that are not in the input list will not be filtered and sent as normal. As a note, the larger that the downsampled list is, the more there is to check in the supporting binary tree. Its recommended that the downsampled list contain less than a couple hundred items.
+-- The CCSDS downsampler is a component that is intended to filter down packets that are listed in the downsample list. The input list has two items, one is the APID, and the other is the filter factor. The filter factor is used to know the cadence of filtering and sending packets. This is maintained by a protected binary tree object which takes the APID of the packets from the input list, and adding them to a binary tree with the filter factor. When the packet is received, the APID is checked for filtering and then the filter factor to determine if we send them on or not. Packets that are not in the input list will not be filtered and sent as normal. As a note, the larger that the downsampled list is, the more there is to check in the supporting binary tree. It's recommended that the downsampled list contain less than a couple hundred items.
 package Component.Ccsds_Downsampler.Implementation is
    use Ccsds_Primary_Header;
    use Ccsds_Downsampler_Types;
@@ -35,7 +35,7 @@ private
       procedure Init (Downsample_List : in Ccsds_Downsample_Packet_List_Access);
       -- Procedure to fetch the event range. This helps keep the component in sync with the package
       procedure Filter_Packet (Apid : in Ccsds_Apid_Type; Count : out Unsigned_16; Status : out Apid_Tree.Filter_Action_Status);
-      -- Prodedure to get the pointer for the array. This is so that we can quickly copy the whole thing into the state packet
+      -- Procedure to get the pointer for the array. This is so that we can quickly copy the whole thing into the state packet
       procedure Set_Filter_Factor (Apid : in Ccsds_Apid_Type; New_Filter_Factor : in Unsigned_16; Tree_Index : out Positive; Status : out Apid_Tree.Filter_Factor_Set_Status);
       -- Functions to get the first and last index of the tree
       function Get_Tree_First_Index return Positive;
@@ -60,7 +60,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance);

@@ -115,7 +115,7 @@ is
    end Accesses;
 
    --
-   -- Memory map compile-time checks. These checks helpt to ensure that there is not a bug in the autocoder.
+   -- Memory map compile-time checks. These checks help to ensure that there is not a bug in the autocoder.
    --
 
    -- Make sure map boundary addresses makes sense:

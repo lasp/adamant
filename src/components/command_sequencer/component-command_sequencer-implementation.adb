@@ -223,7 +223,7 @@ package body Component.Command_Sequencer.Implementation is
             when Unsigned_Word_Le | Unsigned_Long_Le | Signed_Word_Le | Signed_Long_Le | Float_Le =>
                return False;
             -- We need to know if the telemetry is signed, since bit representation must be
-            -- handled differently (two's compliment) than with other types.
+            -- handled differently (two's complement) than with other types.
             when Signed_Byte | Signed_Word_Be | Signed_Long_Be =>
                Is_Signed := True;
                return True;
@@ -787,7 +787,7 @@ package body Component.Command_Sequencer.Implementation is
                            else
                               -- NOTE: I am not sure this code is actually reachable, because the engine should be in the Reserve state
                               -- if a subsequence load occurs. We handle the timeout there too.
-                              -- We just failed to receive a subsequence load, ie. "call" in an appropriate amount of time.
+                              -- We just failed to receive a subsequence load, i.e. "call" in an appropriate amount of time.
                               -- Put the engine into the error state, because we don't want to just keep waiting forever. We need
                               -- to let the ground know something unrecoverable happened.
                               Engine.Set_Engine_Error (Load_Timeout);
@@ -942,7 +942,7 @@ package body Component.Command_Sequencer.Implementation is
             -- If the status of the command response is a Register_Source status, then we need to set our command
             -- source id. Otherwise we should perform the action associated with receiving a command response.
             for The_Engine of Self.Seq_Engines.all loop
-               -- Engine state can only go from Uninitialized to inactive via the set_Source_Id procedure.
+               -- Engine state can only go from Uninitialized to inactive via the Set_Source_Id procedure.
                if The_Engine.Get_Engine_State = Uninitialized then
                   The_Engine.Set_Source_Id (Arg.Source_Id);
                   Source_Id_Set := True;
@@ -1013,7 +1013,7 @@ package body Component.Command_Sequencer.Implementation is
       end if;
    end Command_Response_T_Recv_Async;
 
-   -- The command receive connector. Commands received on this connector are executed by the sequencer itself, ie. halting a sequence.
+   -- The command receive connector. Commands received on this connector are executed by the sequencer itself, i.e. halting a sequence.
    overriding procedure Command_T_Recv_Async (Self : in out Instance; Arg : in Command.T) is
       -- Execute the command:
       Stat : constant Command_Response_Status.E := Self.Execute_Command (Arg);
@@ -1110,7 +1110,7 @@ package body Component.Command_Sequencer.Implementation is
                      -- Load the sequence.
                      return Do_Load_And_Start_Sequence (Engine, Header);
                   -- We are loading over a sequence that has errored. Make sure to reset the sequence so that this new sequence gets loaded as the parent sequence
-                  -- (ie. the top of the engine stack)
+                  -- (i.e. the top of the engine stack)
                   when Error =>
                      -- Reset and load the sequence.
                      Engine.Reset;

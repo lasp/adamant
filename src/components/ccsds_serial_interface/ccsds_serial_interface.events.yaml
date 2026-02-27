@@ -1,11 +1,11 @@
 ---
 events:
   - name: Packet_Send_Failed
-    description: Failed to send a packet over the socket because it has an invalid CCSDS header.
+    description: Failed to send a packet over the serial port because it has an invalid CCSDS header.
     param_type: Ccsds_Primary_Header.T
   - name: Packet_Recv_Failed
-    description: Failed to receive a packet over the socket because it has an invalid CCSDS header.
+    description: Failed to receive a packet over the serial port because it has an invalid CCSDS header.
     param_type: Ccsds_Primary_Header.T
   - name: Have_Not_Seen_Sync_Pattern
-    description: The component as received N number of bytes without seeing a sync pattern yet.
+    description: The component has received N number of bytes without seeing a sync pattern yet.
     param_type: Packed_U32.T

@@ -18,7 +18,7 @@ package Protected_Variables is
       end Variable;
    end Generic_Variable;
 
-   -- A generic counter whose members set/fetched/incremented in a thread safe way.
+   -- A generic counter whose members are set/fetched/incremented in a thread safe way.
    generic
       -- Any modular type
       type T is mod <>;
@@ -39,7 +39,7 @@ package Protected_Variables is
       end Counter;
    end Generic_Protected_Counter;
 
-   -- A generic counter whose members set/fetched/incremented in a thread safe way.
+   -- A generic counter whose members are set/fetched/incremented in a thread safe way.
    generic
       -- Any modular type
       type T is range <>;
@@ -60,11 +60,11 @@ package Protected_Variables is
       end Counter;
    end Generic_Protected_Counter_Decrement;
 
-   -- A generic counter whose members set/fetched/incremented in a thread safe way.
+   -- A generic counter whose members are set/fetched/incremented in a thread safe way.
    -- The counter contains an incrementing counter and a period. This is usually used
    -- to hold data for a counter that, when reaches the period value, is reset to zero.
    -- The user usually checks to see when the counter has reached zero, using the
-   -- is_Count_At_Period function, and an action is performed if the returned value is true.
+   -- Is_Count_At_Period function, and an action is performed if the returned value is true.
    -- These variables often need to be grouped together into a single protected object
    -- to accommodate some operations that need to modify both automatically in a thread
    -- safe manner.

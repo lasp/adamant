@@ -19,8 +19,8 @@ package Component.Precision_Time_Protocol_Master.Implementation is
    --------------------------------------------------
    --
    -- Init Parameters:
-   -- sync_Period : Positive - The number of ticks between sending precision time protocol messages. A value of zero disables syncing.
-   -- enabled_State : Ptp_State.Ptp_State_Type - Is precision time protocol enabled or disabled by default at startup.
+   -- Sync_Period : Positive - The number of ticks between sending precision time protocol messages. A value of zero disables syncing.
+   -- Enabled_State : Ptp_State.Ptp_State_Type - Is precision time protocol enabled or disabled by default at startup.
    --
    overriding procedure Init (Self : in out Instance; Sync_Period : in Positive := 1; Enabled_State : in Ptp_State.Ptp_State_Type := Ptp_State.Enabled);
 
@@ -49,7 +49,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance);

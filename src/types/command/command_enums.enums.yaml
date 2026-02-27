@@ -2,7 +2,7 @@
 description: These are enumerations that are used in the Adamant command system.
 enums:
   - name: Command_Execution_Status
-    description: This status enumerations provides information on the success/failure of a command execution, as returned by the command handler.
+    description: This status enumeration provides information on the success/failure of command execution, as returned by the command handler.
     literals:
       - name: Success
         value: 0
@@ -11,7 +11,7 @@ enums:
         value: 1
         description: Command was not successfully executed.
   - name: Command_Response_Status
-    description: This status enumerations provides information on the success/failure of a command through the command response connector.
+    description: This status enumeration provides information on the success/failure of a command through the command response connector.
     literals:
       - name: Success
         value: 0

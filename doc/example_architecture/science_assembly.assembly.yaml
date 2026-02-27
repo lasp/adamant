@@ -28,7 +28,7 @@ components:
     # procedure) - specify the init_base parameter values as
     # key value pairs.
     init_base:
-      - "queue_Size => 1000" # in bytes
+      - "Queue_Size => 1000" # in bytes
   - type: example_command_router
     name: command_router_instance
     execution: active
@@ -39,49 +39,49 @@ components:
     # procedure) - specify the init_base parameter values as
     # key value pairs.
     init_base:
-      - "queue_Size => 1000" # in bytes
-      - "command_T_Send_Count => 3"
+      - "Queue_Size => 1000" # in bytes
+      - "Command_T_Send_Count => 3"
   - type: example_science
     name: science_instance
     init_base:
-      - "queue_Size => 1000" # in bytes
+      - "Queue_Size => 1000" # in bytes
     # Optional - declare the base id for an ided entity
     # suite. If not declared, or a parameter is omitted,
     # then Adamant will automatically figure out the base
     # id to use, selecting the lowest remaining ID
     # available.
     set_id_bases:
-      - "data_Product_Id_Base => 100"
+      - "Data_Product_Id_Base => 100"
     # Required (only for components that have a data_dependencies
     # model) - specify the data products that map to the data
     # dependencies
     map_data_dependencies:
       - data_dependency: sensor_1_Reading
-        data_product: data_Collector_Instance.Sensor_1_Data
+        data_product: Data_Collector_Instance.Sensor_1_Data
         stale_limit_us: 1000000
       - data_dependency: sensor_2_Reading
-        data_product: data_Collector_Instance.Sensor_2_Data
+        data_product: Data_Collector_Instance.Sensor_2_Data
         stale_limit_us: 1000000
   - type: example_time
     name: time_instance
     discriminant:
-      - "time_Source => Example_Time.Software"
+      - "Time_Source => Example_Time.Software"
   - type: example_parameters
     name: parameters_instance
     init_base:
-      - "parameter_Update_T_Provide_Count => 1"
+      - "Parameter_Update_T_Provide_Count => 1"
   - type: example_logger
     name: logger_instance
     priority: 1
     stack_size: 3000
     secondary_stack_size: 1000
     init_base:
-      - "queue_Size => 1000" # in bytes
+      - "Queue_Size => 1000" # in bytes
     # Required (only for components that have an "init"
     # procedure) - specify the init parameter values as
     # key value pairs.
     init:
-      - "is_Enabled => True"
+      - "Is_Enabled => True"
   - type: example_data_collector
     name: data_collector_instance
   - type: example_database
@@ -158,5 +158,5 @@ connections:
   # connector:
   - from_component: ignore
     from_connector: ignore
-    to_component: command_Router_Instance
+    to_component: Command_Router_Instance
     to_connector: Command_T_Recv_Async

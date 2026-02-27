@@ -6,7 +6,7 @@ from util import redo
 
 class task_watchdog_data_products(data_products):
     """
-    This model is a specialized data product suite for the product extractor data products. This
+    This model is a specialized data product suite for the task watchdog data products. This
     class inherits from the normal data products model but adds extra data products based on the user's model input.
     """
     def submodel_name(self):
@@ -17,7 +17,7 @@ class task_watchdog_data_products(data_products):
         # Make sure an assembly is set by the base class implementation.
         super(task_watchdog_data_products, self).set_assembly(assembly)
 
-        # Get the model for the downsampler to create data products for each item in the list
+        # Get the model for the task watchdog list to create data products for each item in the list
         data_product_list = self.component.init.get_parameter_value(
             "Task_Watchdog_Entry_Init_List"
         )

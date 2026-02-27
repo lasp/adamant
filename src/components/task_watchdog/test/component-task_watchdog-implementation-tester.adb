@@ -100,7 +100,7 @@ package body Component.Task_Watchdog.Implementation.Tester is
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- The pet send connector. This is used to service an downstream watchdog component, usually a component which services a hardware-based watchdog.
+   -- The pet send connector. This is used to service a downstream watchdog component, usually a component which services a hardware-based watchdog.
    overriding procedure Pet_T_Recv_Sync (Self : in out Instance; Arg : in Pet.T) is
    begin
       -- Push the argument onto the test history for looking at later:
@@ -123,7 +123,7 @@ package body Component.Task_Watchdog.Implementation.Tester is
       Self.Dispatch_Fault (Arg);
    end Fault_T_Recv_Sync;
 
-   -- The post mortum log can be dumped using packets.
+   -- The post mortem log can be dumped using packets.
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T) is
    begin
       -- Push the argument onto the test history for looking at later:

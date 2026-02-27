@@ -6,7 +6,7 @@ init:
     - name: Sync_Period
       type: Positive
       default: "1"
-      description: The number of ticks between sending precision time protocol messages. A value of zero disables syncing.
+      description: The number of ticks between sending precision time protocol messages.
     - name: Enabled_State
       type: Ptp_State.Ptp_State_Type
       default: "Ptp_State.Enabled"

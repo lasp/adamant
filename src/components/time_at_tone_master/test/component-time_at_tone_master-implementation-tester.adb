@@ -136,7 +136,7 @@ package body Component.Time_At_Tone_Master.Implementation.Tester is
       Self.Time_At_Tone_Disabled_History.Push (Arg);
    end Time_At_Tone_Disabled;
 
-   -- The component will sent the time at tone message and tone message at the next received tick.
+   -- The component will send the time at tone message and tone message at the next received tick.
    overriding procedure Sending_Sync_Once (Self : in out Instance) is
       Arg : constant Natural := 0;
    begin

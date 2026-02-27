@@ -11,7 +11,7 @@ with Tick;
 -- The use case in mind was for the two locations to be databases (e.g.
 -- Product_Database instances), and for this component to take snapshots of a
 -- source database at a fixed interval. The idea is that if the values stored in
--- source database is constantly in flux, then the destination database could
+-- the source database is constantly in flux, then the destination database could
 -- provide a stable view of the source -- within a tick, the values in the
 -- destination database will not change between reads.
 package Component.Product_Copier.Implementation is
@@ -60,7 +60,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance) is null;

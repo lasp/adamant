@@ -287,7 +287,7 @@ package body Component.Register_Stuffer.Implementation is
             pragma Assert (Serial_Status = Success);
             Self.Packet_T_Send_If_Connected (Packet_To_Send);
          end;
-         -- Update data product: (produce Last_register_read on last value)
+         -- Update data product: (produce Last_Register_Read on last value)
          Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Last_Register_Read (The_Time,
             (
                Address => Last_Addr,

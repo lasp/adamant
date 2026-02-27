@@ -20,4 +20,4 @@ faults:
     # id: 17
     # ^ Note: We are not specifying global IDs in this example
   - name: Zero_Time_Fault
-    description: A time restart at zero seconds epoc was detected by the component.
+    description: A time restart at zero seconds epoch was detected by the component.

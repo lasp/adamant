@@ -1,5 +1,5 @@
 procedure Test is
-   --   Declare then export an Integer entity called num_from_Ada using the
+   --   Declare then export an Integer entity called Num_From_Ada using the
    -- "with" syntax.
    My_Num : Integer := 10
      with Export => True, Convention => C, External_Name => "num_from_Ada";

@@ -11,7 +11,7 @@ private
    overriding procedure Set_Up_Test (Self : in out Instance);
    overriding procedure Tear_Down_Test (Self : in out Instance);
 
-   -- This unit test sends many ticks to the Interrupt Listener component and expects it count them correctly.
+   -- This unit test sends many ticks to the Tick Listener component and expects it to count them correctly.
    overriding procedure Test_Tick_Handling (Self : in out Instance);
 
    -- Test data and state:

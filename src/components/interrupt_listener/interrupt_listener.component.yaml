@@ -4,7 +4,7 @@ execution: passive
 with:
   - Interrupt_Handlers
 generic:
-  description: The Interrupt Listened is parameterized by the Interrupt_Data_Type. The instantiation of this type is often determined by what data needs to be collected during an interrupt and how a connected component intends to process that data. This type is a user defined type that is passed into the user's custom interrupt handler as an in-out parameter and then passed to a downstream components out of the Interrupt_Data_Type_Return connector. Usually, this type will be used to capture data related to an interrupt in the interrupt handler.
+  description: The Interrupt Listener is parameterized by the Interrupt_Data_Type. The instantiation of this type is often determined by what data needs to be collected during an interrupt and how a connected component intends to process that data. This type is a user defined type that is passed into the user's custom interrupt handler as an in-out parameter and then passed to a downstream components out of the Interrupt_Data_Type_Return connector. Usually, this type will be used to capture data related to an interrupt in the interrupt handler.
   parameters:
     - name: Interrupt_Data_Type
       description: The user's custom datatype that is set in the custom interrupt handler and then passed to downstream components. If you do not foresee needing to collect specific data in the interrupt handler for the downstream component, consider using the Tick.T type, which includes a timestamp and a count.
@@ -13,7 +13,7 @@ preamble: |
   package Custom_Interrupt_Handler_Package is new Interrupt_Handlers (Interrupt_Data_Type);
 discriminant:
   parameters:
-    - name: custom_Interrupt_Procedure
+    - name: Custom_Interrupt_Procedure
       type: Custom_Interrupt_Handler_Package.Interrupt_Procedure_Type
       description: A custom procedure to be called within the interrupt handler. The null procedure can be used here if no specific behavior is desired.
 interrupts:

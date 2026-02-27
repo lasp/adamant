@@ -2,7 +2,7 @@
 -- Cpu_Monitor Tests Spec
 --------------------------------------------------------------------------------
 
--- This is a unit test suite for the Stack Monitor component. Testing the actual correctness of the produced CPU monitor packet is not easy to do at the unit test level. This will be done at an integrated test level. The unit tests below make sure commanding and packet generation of the component works as expected.
+-- This is a unit test suite for the CPU Monitor component. Testing the actual correctness of the produced CPU monitor packet is not easy to do at the unit test level. This will be done at an integrated test level. The unit tests below make sure commanding and packet generation of the component works as expected.
 package Cpu_Monitor_Tests.Implementation is
    -- Test data and state:
    type Instance is new Cpu_Monitor_Tests.Base_Instance with private;

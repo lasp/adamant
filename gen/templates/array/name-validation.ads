@@ -23,7 +23,7 @@ package {{ name }}.Validation is
 
    -- Return True if the packed array is valid. The function performs
    -- range checks on all the fields of the array. If an element is invalid,
-   -- False is returned. The errant_Field parameter is always 0.
+   -- False is returned. The Errant_Field parameter is always 0.
    function Valid (R : in Unconstrained; Errant_Field : out Interfaces.Unsigned_32) return Boolean;
    -- ^ "Unpacked" can be passed into this function as well because it is a subtype of Unconstrained
 {% if endianness in ["either", "big"] %}

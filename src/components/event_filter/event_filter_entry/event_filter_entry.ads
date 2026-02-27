@@ -25,9 +25,9 @@ package Event_Filter_Entry is
    -- Initialization/destruction functions:
    --
    -- Init Parameters:
-   -- event_Id_Start : Event_Id - The number of packets that the component contains internally. This is the available buffer that the component has to store events. When all packets are exhausted, then the component begins dropping events. The component needs to be at least double buffered, meaning a minimum of two packets need to be allocated.
-   -- event_Id_Stop : Event_Id - The number of ticks that can be received before a partial packet timeout occurs. When a partial packet timeout occurs, a packet containing at least one event is sent out, and then the timeout is reset. A value of zero passed for this parameter will disable the partial packet timeout, meaning only full packets are ever sent out of the component.
-   -- event_Filter_List : Event_Id_List - A list of event IDs that are enabled for filtering by default
+   -- Event_Id_Start : Event_Id - The event ID that begins the range of ids that the component will include for filtering of events.
+   -- Event_Id_Stop : Event_Id - The event ID that ends the range of ids that the component will include for filtering of events.
+   -- Event_Filter_List : Event_Id_List - A list of event IDs that are enabled for filtering by default
    --
    procedure Init (Self : in out Instance; Event_Id_Start : in Event_Id; Event_Id_Stop : in Event_Id; Event_Filter_List : in Event_Id_List);
    procedure Destroy (Self : in out Instance);
@@ -60,7 +60,7 @@ private
       -- Track the number of events filtered and unfiltered
       Num_Events_Filtered : Interfaces.Unsigned_32 := Interfaces.Unsigned_32'First;
       Num_Events_Unfiltered : Interfaces.Unsigned_32 := Interfaces.Unsigned_32'First;
-      -- Value to indicate if the entire package/component should be enabled/disabled. Note that this uses the same enumeration as the states but is used global switch.
+      -- Value to indicate if the entire package/component should be enabled/disabled. Note that this uses the same enumeration as the states but is used as a global switch.
       -- It is also only used in the component, but stored here to be protected with the rest of the internal data structures
       Global_Enable_State : Global_Filter_State.E := Global_Filter_State.Enabled;
    end record;

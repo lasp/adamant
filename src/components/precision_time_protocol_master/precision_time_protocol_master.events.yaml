@@ -5,7 +5,7 @@ events:
     description: Received a message of unexpected type, message is sent as parameter.
     param_type: Ptp_Time_Message.T
   - name: Unexpected_Transaction_Count
-    description: Received a message of unexpected type, message is sent as parameter along with the expected transaction number.
+    description: Received a message with an unexpected transaction count; message is sent as a parameter along with the expected transaction number.
     param_type: Unexpected_Ptp_Transaction_Count.T
   - name: Ptp_Enabled
     description: The PTP has been enabled by command.

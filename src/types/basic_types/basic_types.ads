@@ -75,7 +75,7 @@ package Basic_Types is
    --
    -- Note: In contrast, the Ada standard Natural uses only 31-bits of the 32-bit object size so
    -- that it can maintain its compatibility as a subtype of Integer. Basically a Natural only contains the positive
-   -- portion of a two's compliment 32-bit integer. The type below acts like a Natural, except uses the entire
+   -- portion of a two's complement 32-bit integer. The type below acts like a Natural, except uses the entire
    -- 32-bit object size and gives up the property of being the subtype of an integer.
    type Natural_32 is range 0 .. 4294967295;   -- 0 .. 2^32-1
    subtype Positive_32 is Natural_32 range 1 .. Natural_32'Last; -- 1 .. 2^32-1

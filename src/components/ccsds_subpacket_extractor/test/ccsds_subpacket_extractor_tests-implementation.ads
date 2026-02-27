@@ -23,7 +23,7 @@ private
    overriding procedure Test_Dropped_Packet (Self : in out Instance);
    -- This unit test tests the component with nonzero start and stop offsets for CCSDS extraction.
    overriding procedure Test_Offsets (Self : in out Instance);
-   -- This unit test tests the component with a zero and positive max_Subpackets_To_Extract configuration and looks for appropriate behavior.
+   -- This unit test tests the component with a zero and positive Max_Subpackets_To_Extract configuration and looks for appropriate behavior.
    overriding procedure Test_Max_Subpackets_To_Extract (Self : in out Instance);
 
    -- Test data and state:

@@ -3,7 +3,6 @@
 --------------------------------------------------------------------------------
 
 -- Includes:
--- Includes:
 with Tick;
 with Pet;
 with Command;
@@ -12,7 +11,7 @@ with Task_Watchdog_Types;
 with Task_Watchdog_Enums;
 with Fault_Types;
 
--- The Task Watchdog component receives pets from components that execute in a periodic manner throughout the assembly. The receipt of a pet indicates that the component is running well. If it detects that the component has stopped executing for some configurable time, it will throw a warning event, a fault, or stop servicing an downstream watchdog (usually a hardware watchdog) based on the component's configuration.
+-- The Task Watchdog component receives pets from components that execute in a periodic manner throughout the assembly. The receipt of a pet indicates that the component is running well. If it detects that the component has stopped executing for some configurable time, it will throw a warning event, a fault, or stop servicing a downstream watchdog (usually a hardware watchdog) based on the component's configuration.
 package Component.Task_Watchdog.Implementation is
    use Task_Watchdog_Types;
    use Task_Watchdog_Enums;
@@ -73,7 +72,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance);

@@ -2,7 +2,7 @@
 -- Apid_Tree Tests Spec
 --------------------------------------------------------------------------------
 
--- This is a unit test suite for the apid_ tree object for help with the ccsds_downsampler
+-- This is a unit test suite for the apid tree object for help with the ccsds_downsampler
 package Apid_Tree_Tests.Implementation is
    -- Test data and state:
    type Instance is new Apid_Tree_Tests.Base_Instance with private;

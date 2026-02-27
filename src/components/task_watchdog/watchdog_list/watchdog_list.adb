@@ -10,7 +10,7 @@ package body Watchdog_List is
       pragma Assert (Task_Watchdog_Entry_Init_List'Length > 0, "Watchdog Init Entry list cannot be empty.");
       -- pragma assert
       Self.Task_Watchdog_Pet_Connections := new Task_Watchdog_Pet_List (Task_Watchdog_Entry_Init_List'First .. Task_Watchdog_Entry_Init_List'First + Task_Watchdog_Entry_Init_List'Length - 1);
-      -- Save off the list so that we can use it in in a protected fashion.
+      -- Save off the list so that we can use it in a protected fashion.
       for Index in Task_Watchdog_Entry_Init_List'Range loop
          Self.Task_Watchdog_Pet_Connections (Index).Missed_Pet_Limit := Task_Watchdog_Entry_Init_List (Index).Max_Missed_Pet_Limit;
          Self.Task_Watchdog_Pet_Connections (Index).Critical := Task_Watchdog_Entry_Init_List (Index).Critical;

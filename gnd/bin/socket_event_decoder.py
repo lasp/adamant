@@ -12,7 +12,7 @@ from datetime import datetime
 # and prints its output to the commandline and to a file:
 if __name__ == "__main__":
     # Parse the commandline arguments:
-    parser = argparse.ArgumentParser(description="Decode a event log dump.")
+    parser = argparse.ArgumentParser(description="Decode an event log dump.")
     parser.add_argument(
         "ip", metavar="IP", type=str, help="IP of socket you want to connect to"
     )
@@ -136,7 +136,7 @@ if __name__ == "__main__":
     packet_len = temp_pack._max_serialized_length
     min_packet_len = temp_pack._min_serialized_length
 
-    # Decode incomoing packets:
+    # Decode incoming packets:
     print_log("Starting event logging at " + timestamp_str() + ":")
     while True:
         try:

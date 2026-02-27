@@ -1,5 +1,5 @@
 ---
-description: This is a unit test suite for the apid_ tree object for help with the ccsds_downsampler
+description: This is a unit test suite for the apid tree object for help with the ccsds_downsampler
 tests:
   - name: Test_Init_List
     description: This test is intended to test the different permutations of the init of the apid and filter factor type array.

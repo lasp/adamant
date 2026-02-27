@@ -177,7 +177,7 @@ class base(renderable_object, metaclass=base_meta):
             return do_load_from_cache(filename)
 
         # If this model has submodels, we need to make sure a new submodel
-        # as not been created. For example, if a name.events.yaml for name.component.yaml
+        # has not been created. For example, if a name.events.yaml for name.component.yaml
         # gets created on disk, this means the cached entry for name.component.yaml is
         # invalid. This is true for the parent model of any newly created submodel.
         if were_new_submodels_created(filename):
@@ -192,7 +192,7 @@ class base(renderable_object, metaclass=base_meta):
 
         # We have a model we can use from cache. It was written in a previous
         # session. This is only safe to use if none of the model dependencies
-        # have not changed on disk either. If a model is not up to date, or was
+        # have changed on disk either. If a model is not up to date, or was
         # just recently cached this session, then it likely contains new data that
         # will modify this current model, so we should not reload the cached version
         # of this model.

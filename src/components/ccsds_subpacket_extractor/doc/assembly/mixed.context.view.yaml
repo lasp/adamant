@@ -5,5 +5,5 @@ filters:
   - name: rm_component
     type: component_name
     exclude:
-      - ccsds_Sync_Sender
-      - passive_Ccsds_Subpacket_Extractor
+      - Ccsds_Sync_Sender
+      - Passive_Ccsds_Subpacket_Extractor

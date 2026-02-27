@@ -361,27 +361,27 @@ package body Seq_Tests.Implementation is
       --    error_code : Seq_Error.E;
       -- begin
       --    buffer := new Basic_Types.Byte_Array (0 .. 16383);
-      --    engine.set_Source_Id (0);
+      --    engine.Set_Source_Id (0);
       --    engine.initialize (stack_depth => 1, engine_id => 1);
-      --    sequence := load_Sequence_In_Memory ("test_sequences/build/bin/7.bin", buffer);
+      --    sequence := Load_Sequence_In_Memory ("test_sequences/build/bin/7.bin", buffer);
       --    State_Assert.eq (engine.Get_Running_Sequence_State, UNLOADED);
       --    Load_Status_Assert.eq (engine.load (sequence), Success);
       --    Engine_State_Assert.eq (engine.get_engine_state, Active);
       --    Exec_State_Assert.eq (engine.execute (1000, time), Seq_Execute_State.ERROR);
-      --    Seq_Error_Code_Assert.eq (engine.get_Seq_Error_Code, EVAL);
-      --    engine.ignore_Error;
+      --    Seq_Error_Code_Assert.eq (engine.Get_Seq_Error_Code, EVAL);
+      --    engine.Ignore_Error;
       --    Exec_State_Assert.eq (engine.execute (1000, time), Seq_Execute_State.ERROR);
-      --    Seq_Error_Code_Assert.eq (engine.get_Seq_Error_Code, EVAL);
-      --    engine.ignore_Error;
+      --    Seq_Error_Code_Assert.eq (engine.Get_Seq_Error_Code, EVAL);
+      --    engine.Ignore_Error;
       --    Exec_State_Assert.eq (engine.execute (1000, time), Seq_Execute_State.ERROR);
-      --    Seq_Error_Code_Assert.eq (engine.get_Seq_Error_Code, EVAL);
-      --    engine.ignore_Error;
+      --    Seq_Error_Code_Assert.eq (engine.Get_Seq_Error_Code, EVAL);
+      --    engine.Ignore_Error;
       --    Exec_State_Assert.eq (engine.execute (1000, time), Seq_Execute_State.ERROR);
-      --    Seq_Error_Code_Assert.eq (engine.get_Seq_Error_Code, CAST);
-      --    engine.ignore_Error;
+      --    Seq_Error_Code_Assert.eq (engine.Get_Seq_Error_Code, CAST);
+      --    engine.Ignore_Error;
       --    Exec_State_Assert.eq (engine.execute (1000, time), Seq_Execute_State.ERROR);
-      --    Seq_Error_Code_Assert.eq (engine.get_Seq_Error_Code, EVAL);
-      --    engine.ignore_Error;
+      --    Seq_Error_Code_Assert.eq (engine.Get_Seq_Error_Code, EVAL);
+      --    engine.Ignore_Error;
       --    Exec_State_Assert.eq (engine.execute (1000, time), Seq_Execute_State.UNLOADED);
       --    engine.destroy;
       --    pragma Unreferenced (Engine);
@@ -436,7 +436,7 @@ package body Seq_Tests.Implementation is
       end;
 
       -- Test seq 10
-      -- Sequence 10 tests the telemetery routines, both regular waits and wait on B
+      -- Sequence 10 tests the telemetry routines, both regular waits and wait on B
       declare
          Sequence : Memory_Region.T;
          Buffer : Basic_Types.Byte_Array_Access;
@@ -499,7 +499,7 @@ package body Seq_Tests.Implementation is
       end;
 
       -- Test seq 10 with timeouts
-      -- Sequence 10 tests the telemetery routines, both regular waits and wait on B
+      -- Sequence 10 tests the telemetry routines, both regular waits and wait on B
       declare
          Sequence : Memory_Region.T;
          Buffer : Basic_Types.Byte_Array_Access;
@@ -557,7 +557,7 @@ package body Seq_Tests.Implementation is
       end;
 
       -- Test seq 10 with absolute time in the past.
-      -- Sequence 10 tests the telemetery routines, both regular waits and wait on B
+      -- Sequence 10 tests the telemetry routines, both regular waits and wait on B
       declare
          Sequence : Memory_Region.T;
          Buffer : Basic_Types.Byte_Array_Access;

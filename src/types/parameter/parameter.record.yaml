@@ -5,7 +5,7 @@ fields:
     description: The parameter header
     type: Parameter_Header.T
   - name: Buffer
-    description: A buffer to that contains the parameter type
+    description: A buffer that contains the parameter type
     type: Parameter_Types.Parameter_Buffer_Type
     format: U8x{{ parameter_buffer_size }}
     variable_length: Header.Buffer_Length

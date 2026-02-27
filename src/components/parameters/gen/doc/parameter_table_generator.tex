@@ -15,7 +15,7 @@ Note the examples shown in this documentation are used in the unit test suites o
 
 \section{Schema}
 
-The following pykwalify schema is used to validate the input YAML model. The schema is commented to show what each of the available YAML keys are and what they accomplish. Even without knowing the specifics of pykwalify schemas, you should be able to gleam some knowledge from the file below.
+The following pykwalify schema is used to validate the input YAML model. The schema is commented to show what each of the available YAML keys are and what they accomplish. Even without knowing the specifics of pykwalify schemas, you should be able to glean some knowledge from the file below.
 
 \yamlcodef{../schemas/parameter_table.yaml}
 
@@ -37,7 +37,7 @@ The main job of the generator in this case was to verify the input YAML for vali
 
 \section{Grouped Parameters}
 
-The parameter table generator supports supports a feature called \textit{grouped parameters}, which allows multiple parameters from different component instances to share the same memory location (entry) in the parameter table. This is useful when you want multiple components to use the exact same parameter value, essentially creating a union of parameters that must be kept synchronized. Of course, all parameters in a group must have the same type (and size), as they will be sharing the same memory.
+The parameter table generator supports a feature called \textit{grouped parameters}, which allows multiple parameters from different component instances to share the same memory location (entry) in the parameter table. This is useful when you want multiple components to use the exact same parameter value, essentially creating a union of parameters that must be kept synchronized. Of course, all parameters in a group must have the same type (and size), as they will be sharing the same memory.
 
 When parameters are grouped together, they share the same \texttt{Entry\_Id} in the parameter table, but retain unique \texttt{Parameter\_Id} values. The key behaviors are:
 

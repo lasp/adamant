@@ -65,9 +65,9 @@ package body Component.Product_Database.Implementation is
    -- This component requires the minimum and maximum acceptable data product IDs in order to size its internal database. Memory will be allocated to store a maximum sized data product for every ID in the range provided.
    --
    -- Init Parameters:
-   -- minimum_Data_Product_Id : Data_Product_Types.Data_Product_Id - The minimum data product identifier that the database will accept.
-   -- maximum_Data_Product_Id : Data_Product_Types.Data_Product_Id - The maximum data product identifier that the database will accept. This value combined with the minimum_Data_Product_Id are used to allocate a table on the heap. Ids stored in this database should come from a compact Id space for most efficient memory usage.
-   -- send_Event_On_Missing : Boolean - By default the product database will send an event every time a data product is fetched that is missing. Sometimes this is expected behavior and the message is annoying. This flag allows that event to be disabled permanently on startup if needed.
+   -- Minimum_Data_Product_Id : Data_Product_Types.Data_Product_Id - The minimum data product identifier that the database will accept.
+   -- Maximum_Data_Product_Id : Data_Product_Types.Data_Product_Id - The maximum data product identifier that the database will accept. This value combined with the Minimum_Data_Product_Id are used to allocate a table on the heap. Ids stored in this database should come from a compact Id space for most efficient memory usage.
+   -- Send_Event_On_Missing : Boolean - By default the product database will send an event every time a data product is fetched that is missing. Sometimes this is expected behavior and the message is annoying. This flag allows that event to be disabled permanently on startup if needed.
    --
    overriding procedure Init (Self : in out Instance; Minimum_Data_Product_Id : in Data_Product_Types.Data_Product_Id; Maximum_Data_Product_Id : in Data_Product_Types.Data_Product_Id; Send_Event_On_Missing : in Boolean := True) is
    begin

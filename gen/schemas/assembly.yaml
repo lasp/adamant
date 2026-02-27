@@ -53,7 +53,7 @@ mapping:
   # The following can be use to set the ID bases of different assembly wide entities.
   # This can be used, for instance, to start all event IDs at 0x500, ex:
   # id_bases:
-  #   - "event_Id_Base => 1280"
+  #   - "Event_Id_Base => 1280"
   #   - etc.
   id_bases:
     seq:

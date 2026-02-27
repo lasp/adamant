@@ -36,7 +36,7 @@ class data_product_entry(object):
         # Make sure the way we timestamp the data product is specified in the enumeration
         if self.time_type not in ["current_time", "packet_time"]:
             raise ModelException(
-                "The time type must be extracted_time or packet_time: "
+                "The time type must be current_time or packet_time: "
                 + str(self.time_type)
             )
 

@@ -34,8 +34,8 @@ begin
       -------------------------------------------------------------
       ---- Should cause harness to error and then continue on
       ---- unblocking us.
-      --the_Action.set(Push_Error);
-      --pragma Assert(my_Queue.Push_Block(queue_Length) = Success);
+      --The_Action.Set (Push_Error);
+      --pragma Assert (My_Queue.Push_Block (Queue_Length) = Success);
       -- -------------------------------------------------------------
       -----------------------------------------------------------
       -- Should block until test harness pops item.
@@ -64,8 +64,8 @@ begin
       -- -----------------------------------------------------------
       -- -- Should cause harness to error and then continue on
       -- -- unblocking us.
-      -- the_Action.set(Pop_Error);
-      -- pragma Assert(my_Queue.Peek_Block(value) = Success);
+      -- The_Action.Set (Pop_Error);
+      -- pragma Assert (My_Queue.Peek_Block (Value) = Success);
       -- -----------------------------------------------------------
       -----------------------------------------------------------
       -- Should block until test harness pushes item.

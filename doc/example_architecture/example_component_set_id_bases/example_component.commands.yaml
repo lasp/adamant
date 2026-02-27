@@ -1,5 +1,5 @@
 ---
-description: These are the commands for the Command Router component. They are NOOP commands that produce events to facilitate unit testing and aliveness checks during flight.
+description: These are the commands for the Example Component. They are NOOP commands that produce events to facilitate unit testing and aliveness checks during flight.
 commands:
   - name: Noop
     description: Simple NOOP command which produces an event saying that it was triggered. This can be used to self test the command routing system and verify system aliveness.

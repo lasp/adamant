@@ -168,7 +168,7 @@ package body Component.Memory_Manager.Implementation.Tester is
       Self.Unexpected_Memory_Id_History.Push (Arg);
    end Unexpected_Memory_Id;
 
-   -- Cannot release a memory region when the memory region is currently available (ie. already released).
+   -- Cannot release a memory region when the memory region is currently available (i.e. already released).
    overriding procedure Memory_Already_Released (Self : in out Instance; Arg : in Ided_Memory_Region.T) is
    begin
       -- Push the argument onto the test history for looking at later:

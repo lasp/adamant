@@ -6,7 +6,7 @@ components:
     execution: passive
     init:
     init_base:
-      - "queue_Size => 0"
+      - "Queue_Size => 0"
   - type: Ccsds_Subpacket_Extractor
     name: Active_Ccsds_Subpacket_Extractor
     execution: active
@@ -15,7 +15,7 @@ components:
     priority: 1
     init:
     init_base:
-      - "queue_Size => 0"
+      - "Queue_Size => 0"
   - type: Ccsds_Sender
     name: Ccsds_Sync_Sender
   - type: Ccsds_Sender
@@ -24,7 +24,7 @@ components:
     name: Ccsds_High_Priority_Sender
   - type: Ccsds_Receiver
     init_base:
-      - "queue_Size => 0"
+      - "Queue_Size => 0"
 connections:
   - from_component: Ccsds_Sync_Sender
     from_connector: Ccsds_Space_Packet_T_Send

@@ -11,7 +11,7 @@ private
    overriding procedure Set_Up_Test (Self : in out Instance);
    overriding procedure Tear_Down_Test (Self : in out Instance);
 
-   -- This unit test exercises the nominal behavior of the event packetizer with a single internal packet.
+   -- This unit test exercises the nominal behavior of the event packetizer with 3 internal packets.
    overriding procedure Test_Nominal_Packetization (Self : in out Instance);
    -- This unit test exercises the partial packet timeout feature.
    overriding procedure Test_Partial_Packet_Timeout (Self : in out Instance);

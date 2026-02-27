@@ -15,8 +15,8 @@ package body Component.Stack_Monitor.Implementation is
    -- This component requires a list of tasks to monitor.
    --
    -- Init Parameters:
-   -- task_List : Task_Types.Task_Info_List_Access - A list of task info records to monitor.
-   -- packet_Period : Interfaces.Unsigned_16 - The period (in ticks) of how often to calculate value for and send out the packet. A period of zero disables sending of the packet.
+   -- Task_List : Task_Types.Task_Info_List_Access - A list of task info records to monitor.
+   -- Packet_Period : Interfaces.Unsigned_16 - The period (in ticks) of how often to calculate value for and send out the packet. A period of zero disables sending of the packet.
    --
    overriding procedure Init (Self : in out Instance; Task_List : in not null Task_Types.Task_Info_List_Access; Packet_Period : in Interfaces.Unsigned_16 := 1) is
    begin
@@ -96,7 +96,7 @@ package body Component.Stack_Monitor.Implementation is
             -- Move the stack index back 100 bytes.
             Start_Index := @ - 100;
 
-            -- If the start index went negative then reset it to zero and we we will start from there.
+            -- If the start index went negative then reset it to zero and we will start from there.
             if Start_Index <= 0 then
                Start_Index := 0;
                exit;
@@ -130,7 +130,7 @@ package body Component.Stack_Monitor.Implementation is
                Index := @ + 1;
             end loop;
 
-            -- Ok, we found the first bye not matching the pattern. Save the index we found to speed up this
+            -- Ok, we found the first byte not matching the pattern. Save the index we found to speed up this
             -- calculation next time and return the result as a percentage.
             Stack_Index := Index;
             return Byte ((Unsigned_32 (Stack_Bytes'Last - Index) * 100) / Unsigned_32 (Stack_Bytes'Last));

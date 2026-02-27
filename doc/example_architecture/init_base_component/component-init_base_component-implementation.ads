@@ -5,7 +5,7 @@
 -- Includes:
 with Tick;
 
--- This is an example component with an base package initialization.
+-- This is an example component with a base package initialization.
 package Component.Init_Base_Component.Implementation is
 
    -- The component class instance record:
@@ -25,7 +25,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance) is null;

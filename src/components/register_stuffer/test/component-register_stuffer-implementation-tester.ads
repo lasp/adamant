@@ -20,12 +20,12 @@ with Register_Dump_Packet_Header.Representation;
 with Data_Product;
 with Packed_Arm_State.Representation;
 
--- This component services a commands to stuff and dump registers. This component
+-- This component services commands to stuff and dump registers. This component
 -- is different than the memory stuffer/dumper in that it atomically sets 32-bit
 -- little endian registers, which is a requirement on some hardware. It rejects
 -- commands to stuff or dump addresses that are not on a 4-byte boundary. Note
 -- that this component assumes all registers it accesses are little endian.
--- Another version of this component needs to be used to access registers as that
+-- Another version of this component needs to be used to access registers that
 -- are big endian.
 package Component.Register_Stuffer.Implementation.Tester is
 
@@ -130,7 +130,7 @@ package Component.Register_Stuffer.Implementation.Tester is
    -- The specified register could not be written because the component was not armed
    -- first.
    overriding procedure Rejected_Protected_Register_Write (Self : in out Instance; Arg : in Register_Value.T);
-   -- The component received the arm command an is now armed.
+   -- The component received the arm command and is now armed.
    overriding procedure Armed (Self : in out Instance; Arg : in Packed_Arm_Timeout.T);
    -- The component received a command and is now unarmed.
    overriding procedure Unarmed (Self : in out Instance);

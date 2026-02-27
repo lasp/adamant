@@ -45,10 +45,10 @@ package body Component.Pid_Controller.Implementation is
    --------------------------------------------------
    --
    -- Init Parameters:
-   -- control_Frequency : Short_Float - The frequency in Hz at which the PID controller is being driven. This determines the time step for the PID controller to use in the algorithm.
-   -- database_Update_Period : Unsigned_16 - The period in which to update the data products
-   -- moving_Average_Max_Samples : Natural - The number of diagnostic samples to keep to perform the mean, variance, and max for the maximum duration
-   -- moving_Average_Init_Samples: Integer - The number of samples to initialize the object with. Must be less than the max, and is optional to set to the max with -1
+   -- Control_Frequency : Short_Float - The frequency in Hz at which the PID controller is being driven. This determines the time step for the PID controller to use in the algorithm.
+   -- Database_Update_Period : Unsigned_16 - The period in which to update the data products
+   -- Moving_Average_Max_Samples : Natural - The number of diagnostic samples to keep to perform the mean, variance, and max for the maximum duration
+   -- Moving_Average_Init_Samples: Integer - The number of samples to initialize the object with. Must be less than the max, and is optional to set to the max with -1
    --
    overriding procedure Init (Self : in out Instance; Control_Frequency : in Short_Float; Database_Update_Period : in Unsigned_16; Moving_Average_Max_Samples : in Natural; Moving_Average_Init_Samples : in Integer := -1) is
    begin
@@ -111,7 +111,7 @@ package body Component.Pid_Controller.Implementation is
          Pid_Proportional_Output : constant Short_Float := Self.P_Gain.Value * Pid_Control_Error;
          -- Integral control
          Pid_Integral_Output : Short_Float := Self.Control_Out_Prev_I + Self.I_Gain.Value * Self.Time_Step * Self.Control_Error_Prev;
-         -- Derivataive control
+         -- Derivative control
          Pid_Derivative_Output : constant Short_Float := Self.Control_Out_Prev_D * (1.0 - (Self.N_Filter.Value * Self.Time_Step)) + (Pid_Control_Error - Self.Control_Error_Prev) * Self.D_Gain.Value * Self.N_Filter.Value;
          -- Total control output
          Pid_Control_Output : Short_Float;

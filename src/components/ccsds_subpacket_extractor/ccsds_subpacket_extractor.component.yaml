@@ -2,17 +2,17 @@
 description: This component extracts CCSDS formatted subpackets from a larger CCSDS formatted packet. Incoming CCSDS packets are assumed to contain smaller CCSDS subpackets in their data section. Static offsets can be provided at initialization to skip bytes at the beginning or end of the incoming packet data. A maximum number of subpackets to extract can also be provided during initialization. If extracting a subpacket fails because the subpacket length is too large, the bytes are dropped and reported as an error packet. Note that this component can receive packets either synchronously, or asynchronously and can be made either active or passive depending on the desired use case. Different use cases are presented in the Design section.
 execution: either
 init:
-  description: The component extracts CCSDS subpackets from the data section of a larger CCSDS packet. The init function allows the component to ignore the first, start_Offset, or last, stop_Offset, number of bytes during extraction. This might be useful to ignore a leading secondary header or a trailing checksum.
+  description: The component extracts CCSDS subpackets from the data section of a larger CCSDS packet. The init function allows the component to ignore the first, Start_Offset, or last, Stop_Offset, number of bytes during extraction. This might be useful to ignore a leading secondary header or a trailing checksum.
   parameters:
-    - name: start_Offset
+    - name: Start_Offset
       type: Natural
       default: "0"
       description: The number of bytes past the primary CCSDS header to start extracting subpackets from.
-    - name: stop_Offset
+    - name: Stop_Offset
       type: Natural
       default: "0"
-      description: The number of bytes at the end of CCSDS packet to not attempt to extract subpackets from. This value should be used to ignore stop_Offset number of bytes at the end of a packet.
-    - name: max_Subpackets_To_Extract
+      description: The number of bytes at the end of CCSDS packet to not attempt to extract subpackets from. This value should be used to ignore Stop_Offset number of bytes at the end of a packet.
+    - name: Max_Subpackets_To_Extract
       type: Integer
       default: "-1"
       description: The maximum number of subpackets to attempt to extract from an incoming packet. A negative number indicates that there is no upper limit to the amount of subpackets that can be extracted. A value of zero disables any subpacketization, which might be useful to disable this component during testing.

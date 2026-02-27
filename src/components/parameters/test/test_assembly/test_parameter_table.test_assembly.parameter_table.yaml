@@ -7,10 +7,10 @@ parameters_instance_name: Parameters_Instance
 # Required - A list of parameters to include in the table in order
 parameters:
   # You may specify a parameter name in the form:
-  #   "component_Instance_Name"."Parameter_Name"
-  - component_A.Parameter_I32
-  - component_C.The_Tick
-  - component_A.Parameter_U16
-  # Or add ALL the parameters for a component on order
+  #   "Component_Instance_Name"."Parameter_Name"
+  - Component_A.Parameter_I32
+  - Component_C.The_Tick
+  - Component_A.Parameter_U16
+  # Or add ALL the parameters for a component in order
   # by simply specifying the "Component_Instance_Name"
-  - component_B
+  - Component_B

@@ -38,7 +38,7 @@ def try_get_target():
 
 def get_default_target():
     """
-    Get the target, if it doesn not exist, return the
+    Get the target, if it does not exist, return the
     default target which is the result of running
     "uname" from the command line.
     """

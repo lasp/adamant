@@ -36,7 +36,7 @@ package body Smart_Assert is
       -- A storage error gets thrown when smart assert is used outside of
       -- the context of an AUnit powered unit test, and a test fails. I am
       -- not sure why, but it would be really nice if we could use this
-      -- smart assert library anywhere. So let's catch the starge error
+      -- smart assert library anywhere. So let's catch the storage error
       -- and just display the error message ourselves.
       when Storage_Error =>
          Raise_Assertion_Failure;

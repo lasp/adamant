@@ -92,7 +92,7 @@ package body Component.{{ name }} is
 {% endfor %}
       -- Single update function to copy all the parameters from the
       -- staged versions to the working copy passed in. This function
-      -- also resets the parameters_Updated boolean to False.
+      -- also resets the Parameters_Updated boolean to False.
       procedure Copy_From_Staged (
 {% for par in parameters %}
          {{ par.name }} : in out {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %}{{ ";" if not loop.last }}
@@ -201,7 +201,7 @@ package body Component.{{ name }} is
 {% endif %}
 {% if set_id_bases %}
    -----------------------------------------------------------------------
-   -- Initialize the id_Bases for any commands, data products, or events:
+   -- Initialize the Id_Bases for any commands, data products, or events:
    -----------------------------------------------------------------------
 {% if set_id_bases.description %}
 {{ printMultiLine(set_id_bases.description, '   -- ') }}
@@ -303,7 +303,7 @@ package body Component.{{ name }} is
                Dispatch_To : constant Dispatch_Procedure := Dispatch_Table (Id_Record.Id);
             begin
                Dispatch_To (Self{% if connectors.arrayed_invokee() %}, Id_Record.Index{% endif %}, Bytes (Bytes'First .. Bytes'First + Length - 1));
-               pragma Annotate (GNASAS, False_Positive, "range check", "We never put items on queue larger than Bytes'Length.");
+               pragma Annotate (GNATSAS, False_Positive, "range check", "We never put items on queue larger than Bytes'Length.");
             end;
          -- Error was returned:
          when Error =>
@@ -319,7 +319,7 @@ package body Component.{{ name }} is
 {% if connectors.requires_priority_queue() %}
          -- Unexpected status was returned:
          when Too_Small =>
-            -- The buffer should never be to small since it is sized to match the largest possible queue element size.
+            -- The buffer should never be too small since it is sized to match the largest possible queue element size.
             pragma Assert (False);
 {% endif %}
       end case;
@@ -360,7 +360,7 @@ package body Component.{{ name }} is
 {% if connectors.requires_priority_queue() %}
          -- Unexpected status was returned:
          when Too_Small =>
-            -- The buffer should never be to small since it is sized to match the largest possible queue element size.
+            -- The buffer should never be too small since it is sized to match the largest possible queue element size.
             pragma Assert (False);
             return False;
 {% endif %}
@@ -435,7 +435,7 @@ package body Component.{{ name }} is
                when Full => return Message_Dropped;
                -- Push too large, this shouldn't ever happen.
                when Too_Large =>
-                  -- The buffer should never be to large the queue elements are sized to match the largest possible type.
+                  -- The buffer should never be too large the queue elements are sized to match the largest possible type.
                   pragma Assert (False);
 {% else %}
                -- Push failed, return to caller.
@@ -494,7 +494,7 @@ package body Component.{{ name }} is
 {% endif %}
 {% if connectors.requires_priority_queue() %}
                   when Too_Large =>
-                     -- The buffer should never be to large the queue elements are sized to match the largest possible type.
+                     -- The buffer should never be too large the queue elements are sized to match the largest possible type.
                      pragma Assert (False);
 {% endif %}
                end case;
@@ -682,12 +682,12 @@ package body Component.{{ name }} is
 {% endif %}
 {% if connector.count == 0 %}
       -- Convert the index to the correct connector specific index type. If this type
-      -- conversion fails, then there is a bug, since this was already checked an enqueue.
+      -- conversion fails, then there is a bug, since this was already checked at enqueue.
       subtype Constrained_{{ connector.name }}_Index is {{ connector.name }}_Index range {{ connector.name }}_Index'First .. {{ connector.name }}_Index'First + Self.{{ connector.name }}_Count - 1;
       Idx : constant Constrained_{{ connector.name }}_Index := Constrained_{{ connector.name }}_Index (Index);
 {% elif connector.count > 1 %}
       -- Convert the index to the correct connector specific index type. If this type
-      -- conversion fails, then there is a bug, since this was already checked an enqueue.
+      -- conversion fails, then there is a bug, since this was already checked at enqueue.
       Idx : constant {{ connector.name }}_Index := {{ connector.name }}_Index (Index);
 {% endif %}
    begin
@@ -857,7 +857,7 @@ package body Component.{{ name }} is
    begin
       -- Copy length into poly type:
       Byte_Array_Util.Safe_Right_Copy (P_Type, Command_Arg_Buffer_Length.Serialization.To_Byte_Array ((Arg_Buffer_Length => Cmd.Header.Arg_Buffer_Length)));
-      -- Call up to the command_Invalid function for handling.
+      -- Call up to the Command_Invalid function for handling.
       Base_Instance'Class (Self).Invalid_Command (Cmd, Unsigned_32'Last, P_Type);
    end Handle_Command_Length_Error;
 
@@ -934,7 +934,7 @@ package body Component.{{ name }} is
                   -- Copy args into poly type:
                   Byte_Array_Util.Safe_Right_Copy (P_Type, Cmd.Arg_Buffer (Cmd.Arg_Buffer'First .. Cmd.Arg_Buffer'First + Arg_Deserializer.Serialized_Length - 1));
 {% endif %}
-                  -- Call up to the command_Invalid function for handling.
+                  -- Call up to the Command_Invalid function for handling.
                   Base_Instance'Class (Self).Invalid_Command (Cmd, Errant_Field, P_Type);
                   return Command_Response_Status.Validation_Error;
                end;
@@ -1065,7 +1065,7 @@ package body Component.{{ name }} is
    begin
       -- Copy length into poly type:
       Byte_Array_Util.Safe_Right_Copy (P_Type, Parameter_Buffer_Length.Serialization.To_Byte_Array ((Buffer_Length => Par.Header.Buffer_Length)));
-      -- Call up to the parameter_Invalid function for handling.
+      -- Call up to the Parameter_Invalid function for handling.
       Base_Instance'Class (Self).Invalid_Parameter (Par, Unsigned_32'Last, P_Type);
    end Handle_Parameter_Length_Error;
 
@@ -1120,7 +1120,7 @@ package body Component.{{ name }} is
                   -- Copy parameter value into poly type:
                   Byte_Array_Util.Safe_Right_Copy (P_Type, Par.Buffer (Par.Buffer'First .. Par.Buffer'First + Buffer_Deserializer.Serialized_Length - 1));
 {% endif %}
-                  -- Call up to the parameter_Invalid function for handling.
+                  -- Call up to the Parameter_Invalid function for handling.
                   Base_Instance'Class (Self).Invalid_Parameter (Par, Errant_Field, P_Type);
                   return Parameter_Update_Status.Validation_Error;
                end;

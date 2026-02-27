@@ -153,7 +153,7 @@ package body Circular_Buffer is
 
       if Bytes_To_Dump > 0 then
          declare
-            -- Calculate new head that starts num_Bytes_To_Dump in front of the tail:
+            -- Calculate new head that starts Num_Bytes_To_Dump in front of the tail:
             New_Head : constant Natural := (Self.Head + (Self.Count - Bytes_To_Dump)) mod Self.Bytes'Length;
             Tail : constant Natural := (Self.Head + Self.Count) mod Self.Bytes'Length;
          begin
@@ -174,7 +174,7 @@ package body Circular_Buffer is
 
       if Bytes_To_Dump > 0 then
          declare
-            -- Calculate new tail that starts num_Bytes_To_Dump behind the head:
+            -- Calculate new tail that starts Num_Bytes_To_Dump behind the head:
             Tail : constant Natural := (Self.Head + Self.Count) mod Self.Bytes'Length;
             New_Tail : constant Natural := (Tail - (Self.Count - Bytes_To_Dump)) mod Self.Bytes'Length;
          begin

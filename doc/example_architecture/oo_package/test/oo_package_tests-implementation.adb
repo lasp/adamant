@@ -39,7 +39,7 @@ package body Oo_Package_Tests.Implementation is
       -- The result should equal -8;
       Integer_Assert.Eq (Self.Oo.Add_N (7), -8);
 
-      -- Make sure the the operation above did not alter the
+      -- Make sure the operation above did not alter the
       -- object's internal state. Only the Init function should
       -- be able to do that.
       Integer_Assert.Eq (Oo_Package.Tester.Get_N (Self.Oo), -15);

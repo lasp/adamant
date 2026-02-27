@@ -6,7 +6,7 @@
 with Command;
 with Crc_16;
 
--- The Parameters Component is responsible for updating and reporting the values of the ``active" parameters being used in the system. The component does not contain a parameter table itself. Instead it acts as an interface for the rest of the system to component's internal staged parameters. The component allows updating of parameters through a table upload (via Memory_Region.T) or updating of individual parameter values by command. The component also provides a command to fetch all of the parameters held within components and produce a packet with the fetched values. The component can be configured to produce this packet automatically any time a parameter change is requested.
+-- The Parameters Component is responsible for updating and reporting the values of the "active" parameters being used in the system. The component does not contain a parameter table itself. Instead it acts as an interface for the rest of the system to component's internal staged parameters. The component allows updating of parameters through a table upload (via Memory_Region.T) or updating of individual parameter values by command. The component also provides a command to fetch all of the parameters held within components and produce a packet with the fetched values. The component can be configured to produce this packet automatically any time a parameter change is requested.
 package Component.Parameters.Implementation is
 
    -- The component class instance record:
@@ -15,12 +15,12 @@ package Component.Parameters.Implementation is
    --------------------------------------------------
    -- Subprogram for implementation init method:
    --------------------------------------------------
-   -- This init function provides the a list of parameter entries that describe the
+   -- This init function provides a list of parameter entries that describe the
    -- layout of the parameter table in memory. Calling this function also provides
    -- memory allocation for the parameter manager's internal parameter table.
    -- Preallocated memory can be provided via the "bytes" access type. Note the size
    -- of the preallocated memory MUST match the size of the parameter table exactly,
-   -- as defined in the parameter_Entries parameter. If you would like to allocate
+   -- as defined in the Parameter_Entries parameter. If you would like to allocate
    -- the internal memory on the heap then "bytes" can be set to null.
    --
    -- Init Parameters:
@@ -61,7 +61,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance);
@@ -73,7 +73,7 @@ private
    overriding procedure Command_T_Recv_Async (Self : in out Instance; Arg : in Command.T);
    -- This procedure is called when a Command_T_Recv_Async message is dropped due to a full queue.
    overriding procedure Command_T_Recv_Async_Dropped (Self : in out Instance; Arg : in Command.T);
-   -- When a memory region is received on this connector it can either be a parameter table that is used to stage and update the parameters of all connected components, or it can be a memory region that is used to store the current value of the parameters stored within the component. The operation field determines which logic is run. For a ``set" operation, the memory region length MUST match the length of the managed parameter table, otherwise the update will not be processed.
+   -- When a memory region is received on this connector it can either be a parameter table that is used to stage and update the parameters of all connected components, or it can be a memory region that is used to store the current value of the parameters stored within the component. The operation field determines which logic is run. For a "set" operation, the memory region length MUST match the length of the managed parameter table, otherwise the update will not be processed.
    overriding procedure Parameters_Memory_Region_T_Recv_Async (Self : in out Instance; Arg : in Parameters_Memory_Region.T);
    -- This procedure is called when a Parameters_Memory_Region_T_Recv_Async message is dropped due to a full queue.
    overriding procedure Parameters_Memory_Region_T_Recv_Async_Dropped (Self : in out Instance; Arg : in Parameters_Memory_Region.T);

@@ -21,7 +21,7 @@ with Packed_Positive.Representation;
 with Data_Product;
 with Packed_F32.Representation;
 
--- This component is a generic component for PID control that uses proportional, integral, and derivative gains. The component input is the measured and commanded positions which is used to find an error, as well as a feed-forward value to overcome friction and jitter. The component uses the error with the PID gains that are set by the user in the parameter table to perform the correct control for the particular system. Any one of the gains can be set to 0 to turn off that particular term. The component also has the ability to limit the integral term to prevent wind-up of that term and potential kickback in the physical system. There are also optional statistics for the mean, variance, and max of the error which is disabled by setting the moving_Average_Max_Samples initialization parameter to 0. Lastly, the component also has the ability to produce diagnostics over a particular amount of time set by command, which contains the error and reference positions.
+-- This component is a generic component for PID control that uses proportional, integral, and derivative gains. The component input is the measured and commanded positions which is used to find an error, as well as a feed-forward value to overcome friction and jitter. The component uses the error with the PID gains that are set by the user in the parameter table to perform the correct control for the particular system. Any one of the gains can be set to 0 to turn off that particular term. The component also has the ability to limit the integral term to prevent wind-up of that term and potential kickback in the physical system. There are also optional statistics for the mean, variance, and max of the error which is disabled by setting the Moving_Average_Max_Samples initialization parameter to 0. Lastly, the component also has the ability to produce diagnostics over a particular amount of time set by command, which contains the error and reference positions.
 package Component.Pid_Controller.Implementation.Tester is
 
    use Component.Pid_Controller_Reciprocal;
@@ -155,7 +155,7 @@ package Component.Pid_Controller.Implementation.Tester is
    -- Packet handler primitives:
    -----------------------------------------------
    -- Description:
-   --    Data products for the pid controller component.
+   --    Packets for the PID controller component.
    -- The diagnostic packet that is issued based on the number of samples set by command. Samples are taken at the control rate. Includes error, reference, and current.
    overriding procedure Pid_Controller_Diagnostic_Packet (Self : in out Instance; Arg : in Packet.T);
 

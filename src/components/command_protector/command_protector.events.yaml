@@ -7,7 +7,7 @@ events:
     description: A protected command was accepted because the component was armed.
     param_type: Command_Header.T
   - name: Armed
-    description: The component received the arm command an is now armed.
+    description: The component received the arm command and is now armed.
     param_type: Packed_Arm_Timeout.T
   - name: Unarmed
     description: The component received a command and is now unarmed.

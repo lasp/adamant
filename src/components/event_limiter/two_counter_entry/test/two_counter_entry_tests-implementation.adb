@@ -74,7 +74,7 @@ package body Two_Counter_Entry_Tests.Implementation is
       -- Last one out of range
       State_Return_Status := My_Counter.Get_Enable_State (6, Event_State);
       Event_State_Status_Assert.Eq (State_Return_Status, Two_Counter_Entry.Invalid_Id);
-      Event_State_Assert.Eq (Event_State, Event_State_Type.Disabled); -- Make sure we dont have something uninitialized
+      Event_State_Assert.Eq (Event_State, Event_State_Type.Disabled); -- Make sure we don't have something uninitialized
       My_Counter.Destroy;
 
       -- Single event init, default list

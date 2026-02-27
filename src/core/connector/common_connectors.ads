@@ -23,7 +23,7 @@ package Common_Connectors is
    -- This package contains definitions for commonly employed connectors in the
    -- Adamant system. The purpose of this package is to consolidate instantiation
    -- of these generic packages into a single place that can be used by multiple
-   -- component. Doing this provides a huge savings on the resulting code size
+   -- components. Doing this provides a huge savings on the resulting code size
    -- of the compiled binary, by not duplicating generic connector instantiations.
    package Sys_Time_T_Return_Connector is new Return_Connector (Sys_Time.T);
    package Data_Product_T_In_Connector is new In_Connector (Data_Product.T);

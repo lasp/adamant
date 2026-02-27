@@ -6,7 +6,7 @@ events:
   - name: Time_At_Tone_Disabled
     description: The time at tone has been disabled by command.
   - name: Sending_Sync_Once
-    description: The component will sent the time at tone message and tone message at the next received tick.
+    description: The component will send the time at tone message and tone message at the next received tick.
   - name: Invalid_Command_Received
     description: A command was received with invalid parameters.
     param_type: Invalid_Command_Info.T

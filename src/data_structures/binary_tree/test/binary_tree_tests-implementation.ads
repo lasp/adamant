@@ -4,7 +4,7 @@
 
 with Binary_Tree.Tester;
 
--- This is a unit test suite for the router_table object
+-- This is a unit test suite for the binary tree object
 package Binary_Tree_Tests.Implementation is
    -- Test data and state:
    type Instance is new Binary_Tree_Tests.Base_Instance with private;

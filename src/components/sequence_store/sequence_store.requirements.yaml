@@ -7,5 +7,5 @@ requirements:
   - text: The component shall produce a packet reflecting the sequence IDs stored in the sequence slots.
   - text: The component shall produce a sequence store packet upon command.
   - text: The component shall produce a sequence store packet whenever a new sequence has been uploaded.
-  - text: The component shall reject storing a new sequence if is has an invalid length.
+  - text: The component shall reject storing a new sequence if it has an invalid length.
   - text: The component shall reject storing a new sequence if it has an invalid CRC.

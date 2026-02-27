@@ -24,7 +24,7 @@ with Command_Header.Representation;
 with Test_Assembly_Product_Packets_Test_Packets;
 with Data_Product_Enums; use Data_Product_Enums;
 
--- The product packetizer requests data products from an external component and packetizes them into packets at a configurable rate. The packets that this component produces is configured via an autocoded table.
+-- The product packetizer requests data products from an external component and packetizes them into packets at a configurable rate. The packets that this component produces are configured via an autocoded table.
 package Component.Product_Packetizer.Implementation.Tester is
 
    -- Invoker connector history packages:
@@ -122,13 +122,13 @@ package Component.Product_Packetizer.Implementation.Tester is
    -----------------------------------------------
    -- An invalid packet id was commanded for a given command.
    overriding procedure Invalid_Packet_Id_Commanded (Self : in out Instance; Arg : Invalid_Packet_Id.T);
-   -- An packet was enabled.
+   -- A packet was enabled.
    overriding procedure Packet_Enabled (Self : in out Instance; Arg : Packet_Period.T);
-   -- An packet was disabled.
+   -- A packet was disabled.
    overriding procedure Packet_Disabled (Self : in out Instance; Arg : Packet_Period.T);
-   -- An packet was enabled in on-change mode.
+   -- A packet was enabled in on-change mode.
    overriding procedure Packet_Enabled_On_Change (Self : in out Instance; Arg : in Packet_Period.T);
-   -- An packet period was set.
+   -- A packet period was set.
    overriding procedure Packet_Period_Set (Self : in out Instance; Arg : Packet_Period.T);
    -- A data product was missing when fetched for packet insertion.
    overriding procedure Data_Product_Missing_On_Fetch (Self : in out Instance; Arg : Packet_Data_Product_Ids.T);

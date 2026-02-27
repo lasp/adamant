@@ -16,7 +16,7 @@ package body Component.Memory_Copier.Implementation is
    -- Initialization parameters for the Memory Copier.
    --
    -- Init Parameters:
-   -- ticks_Until_Timeout : Natural - The component will wait until it has received at least this many ticks before reporting a timeout error while waiting for a memory copy to complete. For example, if the component is attached to a 10Hz rate group and this value is set to 7, then the component will wait between 700 and 800 ms before declaring a timeout error from an unresponsive downstream component.
+   -- Ticks_Until_Timeout : Natural - The component will wait until it has received at least this many ticks before reporting a timeout error while waiting for a memory copy to complete. For example, if the component is attached to a 10Hz rate group and this value is set to 7, then the component will wait between 700 and 800 ms before declaring a timeout error from an unresponsive downstream component.
    --
    overriding procedure Init (Self : in out Instance; Ticks_Until_Timeout : in Natural) is
    begin
@@ -27,7 +27,7 @@ package body Component.Memory_Copier.Implementation is
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- The component should be attached to a periodic tick that is used to timeout waiting for a memory region copy response. See the ticks_Until_Timeout initialization parameter.
+   -- The component should be attached to a periodic tick that is used to timeout waiting for a memory region copy response. See the Ticks_Until_Timeout initialization parameter.
    overriding procedure Timeout_Tick_Recv_Sync (Self : in out Instance; Arg : in Tick.T) is
       Ignore : Tick.T renames Arg;
    begin
@@ -68,7 +68,7 @@ package body Component.Memory_Copier.Implementation is
       --
       -- Note, the protected buffer and the sync object are both protected objects, so there
       -- is no risk of data corruption (which would be a serious problem), there is just risk of
-      -- out of order synchronization, which should not occur is the assembly is designed
+      -- out of order synchronization, which should not occur if the assembly is designed
       -- correctly, as described above.
    end Memory_Region_Release_T_Recv_Sync;
 
@@ -80,13 +80,13 @@ package body Component.Memory_Copier.Implementation is
    end Command_T_Recv_Async_Dropped;
 
    -- Helper which requests source memory region and does some basic error handling on it. The returned
-   -- region from this function will have the address and length specified by the virtual_Region parameter.
+   -- region from this function will have the address and length specified by the Virtual_Region parameter.
    function Request_Memory_Region (Self : in out Instance; Virtual_Region : in Virtual_Memory_Region.T; Returned_Physical_Region : out Ided_Memory_Region.T) return Boolean is
       use Memory_Manager_Enums.Memory_Request_Status;
       -- Request the source memory region:
       Request : constant Memory_Region_Request.T := Self.Memory_Region_Request_T_Get;
       -- Calculate the minimum length that the requested region must have in order for
-      -- the virtual memoy region to be valid.
+      -- the virtual memory region to be valid.
       Min_Length : constant Natural := Virtual_Region.Address + Virtual_Region.Length;
    begin
       -- Initialize out parameter to null in case we fail to find memory region

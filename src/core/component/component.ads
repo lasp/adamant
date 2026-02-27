@@ -4,7 +4,7 @@ with System;
 with Basic_Types;
 
 -- This is a base component. There is not much here, but
--- this provides an base type for which other types can
+-- this provides a base type for which other types can
 -- use to operate on more specific components.
 package Component is
 
@@ -36,7 +36,7 @@ package Component is
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be overridden to do these things
    -- if necessary.
    procedure Set_Up (Self : in out Core_Instance) is null;
@@ -54,7 +54,7 @@ package Component is
    -- Get the maximum percent usage of the component's internal queue, if there
    -- is one, else assert. This function is used by the queue monitor component
    -- as a backdoor convenience to bypass the connector system, reducing complexity
-   -- of reporting queue usage for every component. ie. "high water mark"
+   -- of reporting queue usage for every component. i.e. "high water mark"
    function Get_Queue_Maximum_Percent_Used (Self : in out Core_Instance) return Basic_Types.Byte;
 
 end Component;

@@ -9,7 +9,7 @@ disp("");
 disp(example1.to_byte_string());
 disp("");
 
-("serializing and deserializing example record:");
+disp("serializing and deserializing example record:");
 data = example1.to_byte_array();
 example2 = Example_Record.create_from_byte_array(data);
 assert(example1 == example2);

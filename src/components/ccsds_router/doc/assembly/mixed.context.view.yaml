@@ -1,9 +1,9 @@
 ---
-description: This view shows the passive context.
+description: This view shows the mixed context.
 layout: left-to-right
 filters:
   - name: rm_component
     type: component_name
     exclude:
-      - ccsds_Sync_Sender
-      - passive_Ccsds_Router
+      - Ccsds_Sync_Sender
+      - Passive_Ccsds_Router

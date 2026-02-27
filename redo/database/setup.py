@@ -54,7 +54,7 @@ def reset():
     """
     This function alerts the build system that the database
     is not currently setup. After calling the function, a
-    suspequent call to "setup()" above, will recreate the
+    subsequent call to "setup()" above, will recreate the
     databases.
     """
     try:

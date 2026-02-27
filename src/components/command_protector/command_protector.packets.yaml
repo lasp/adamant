@@ -3,4 +3,4 @@ description: Packets for the Command Protector component.
 packets:
   - name: Error_Packet
     type: Command.T
-    description: This packet contains a protected command that was dropped due the component not being `armed'.
+    description: This packet contains a protected command that was dropped due to the component not being `armed'.

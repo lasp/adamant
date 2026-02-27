@@ -19,7 +19,7 @@ package {{ name }}.Validation is
 
    -- Return True if the packed record is valid. The function performs
    -- range checks on all the fields of the record. If a field is invalid,
-   -- False is returned and the errant_Field parameter is filled in with a
+   -- False is returned and the Errant_Field parameter is filled in with a
    -- Natural specifying which field was out of range.
    function Valid (R : in U; Errant_Field : out Interfaces.Unsigned_32) return Boolean;
 {% if endianness in ["either", "big"] %}

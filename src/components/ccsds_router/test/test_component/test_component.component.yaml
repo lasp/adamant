@@ -2,10 +2,10 @@
 description: A simple component which receives CCSDS packets from the router.
 execution: passive
 connectors:
-  - description: Data products are sent out on every tick.
+  - description: Receives CCSDS packets from the router.
     type: Ccsds_Space_Packet.T
     kind: recv_sync
-  - description: Data products are sent out on every tick.
+  - description: Receives CCSDS packets from the router on a second connector.
     type: Ccsds_Space_Packet.T
     name: Ccsds_Space_Packet_T_Recv_Sync_2
     kind: recv_sync

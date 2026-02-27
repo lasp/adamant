@@ -21,7 +21,7 @@ package Interrupt_Handlers is
    -- be passed by a user to the instantiation of a handler (defined below) and will
    -- be executed in the interrupt handler itself when an interrupt is received.
    -- Using this method, platform or hardware specific code that needs to be executed
-   -- within interrupt handlers can be wrapped by and Interrupt_Procedure_Type and passed
+   -- within interrupt handlers can be wrapped by an Interrupt_Procedure_Type and passed
    -- to a handler.
    --
    -- The interrupt procedure type contains an in out parameter of generic type T. This
@@ -36,7 +36,7 @@ package Interrupt_Handlers is
    -- This interrupt handler can be used to implement a signal/wait pattern for a
    -- task with an infinite loop.
    protected type Task_Signal (Pri : System.Interrupt_Priority; Int_Id : Ada.Interrupts.Interrupt_ID; Custom_Procedure : Interrupt_Procedure_Type) is
-      -- An "noop" procedure which does not return until an interrupt has been signaled.
+      -- A "no-op" procedure which does not return until an interrupt has been signaled.
       -- This can be used to release a task in an infinite loop.
       entry Wait (Data : out T);
       function Get_Data return T;

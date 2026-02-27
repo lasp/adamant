@@ -10,13 +10,13 @@ with:
 init:
   description:
   parameters:
-    - name: event_Id_Start_Range
+    - name: Event_Id_Start_Range
       type: Event_Types.Event_Id
       description: The event ID that begins the range of ids that the component will include for filtering of events.
-    - name: event_Id_End_Range
+    - name: Event_Id_End_Range
       type: Event_Types.Event_Id
       description: The event ID that ends the range of ids that the component will include for filtering of events.
-    - name: event_Filter_List
+    - name: Event_Filter_List
       type: Event_Filter_Entry.Event_Id_List
       description: A list of event IDs that are filtered by default
       default: "[1 .. 0 => 0]"

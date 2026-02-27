@@ -5,14 +5,14 @@ output_directory=$2
 
 if test -z "$directory"
 then
-  echo "usage: build_all_matlab_autocode.sh /path/to/top/directory /path/to/output/directory"
+  echo "usage: copy_all_matlab_autocode.sh /path/to/top/directory /path/to/output/directory"
   echo "description: Copy all matlab autocode found recursively from the provided directory to the output directory."
   exit 1
 fi
 
 if test -z "$output_directory"
 then
-  echo "usage: build_all_matlab_autocode.sh /path/to/top/directory /path/to/output/directory"
+  echo "usage: copy_all_matlab_autocode.sh /path/to/top/directory /path/to/output/directory"
   echo "description: Copy all matlab autocode found recursively from the provided directory to the output directory."
   exit 1
 fi

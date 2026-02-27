@@ -97,7 +97,7 @@ package Component.Time_At_Tone_Master.Implementation.Tester is
    overriding procedure Time_At_Tone_Enabled (Self : in out Instance);
    -- The time at tone has been disabled by command.
    overriding procedure Time_At_Tone_Disabled (Self : in out Instance);
-   -- The component will sent the time at tone message and tone message at the next received tick.
+   -- The component will send the time at tone message and tone message at the next received tick.
    overriding procedure Sending_Sync_Once (Self : in out Instance);
    -- A command was received with invalid parameters.
    overriding procedure Invalid_Command_Received (Self : in out Instance; Arg : in Invalid_Command_Info.T);

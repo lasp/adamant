@@ -1,5 +1,5 @@
 ---
-description: A packed record which holds parameter table header data. This data is will be prepended to the table data upon upload.
+description: A packed record which holds parameter table header data. This data will be prepended to the table data upon upload.
 preamble: |
   -- Declare the start index at which to begin calculating the CRC. The
   -- start index is dependent on this type, and so is declared here so that

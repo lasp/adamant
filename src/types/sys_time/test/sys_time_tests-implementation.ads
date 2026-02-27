@@ -39,11 +39,11 @@ private
    overriding procedure Set_Up_Test (Self : in out Instance);
    overriding procedure Tear_Down_Test (Self : in out Instance);
 
-   -- This unit test make sure that comparing two times produces the correct results.
+   -- This unit test makes sure that comparing two times produces the correct results.
    overriding procedure Compare_Time (Self : in out Instance);
-   -- This unit test make sure that adding two times produces the correct results.
+   -- This unit test makes sure that adding two times produces the correct results.
    overriding procedure Add_Time (Self : in out Instance);
-   -- This unit test make sure that subtracting two times produces the correct results.
+   -- This unit test makes sure that subtracting two times produces the correct results.
    overriding procedure Subtract_Time (Self : in out Instance);
    -- This unit test adds some additional testing.
    overriding procedure Additional_Tests (Self : in out Instance);

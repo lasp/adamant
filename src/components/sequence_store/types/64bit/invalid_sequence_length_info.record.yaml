@@ -1,5 +1,5 @@
 ---
-description: This is a packed record that holds information about a sequence to store with invalid Length.
+description: This is a packed record that holds information about a sequence to store with invalid length.
 fields:
   - name: Store
     description: The to-store info.

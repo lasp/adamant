@@ -20,7 +20,7 @@ private
    -- bytes of data put into the packet. Since this data can be set by
    -- multiple external tasks simultaneously, and could be being copied
    -- into a packet at the same time, we need to protect access to the
-   -- data too ensure there is no race condition and that the data never
+   -- data to ensure there is no race condition and that the data never
    -- gets corrupted.
    protected type Protected_Data is
       -- Set the data.
@@ -44,7 +44,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance) is null;

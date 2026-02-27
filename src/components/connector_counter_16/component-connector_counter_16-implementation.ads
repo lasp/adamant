@@ -6,7 +6,7 @@
 with Command;
 with Protected_Variables;
 
--- This generic component attaches to a connector and counts the invocations occurring on that connector. It then reports this count as a data product and passes the connector invocation through to a connected component on the other side. The count rolls over at 255 and is 1 byte wide.
+-- This generic component attaches to a connector and counts the invocations occurring on that connector. It then reports this count as a data product and passes the connector invocation through to a connected component on the other side. The count rolls over at 65535 and is 2 bytes wide.
 generic
 package Component.Connector_Counter_16.Implementation is
 
@@ -30,7 +30,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance);

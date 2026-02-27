@@ -6,7 +6,7 @@ preamble: |
 discriminant:
   description: The discriminant is used to specify the time source.
   parameters:
-    - name: time_Source
+    - name: Time_Source
       type: Time_Source_Type
       description: Specify whether the source for system time should be driven by the hardware or software.
 connectors:

@@ -121,7 +121,7 @@ package Component.Parameter_Store.Implementation.Tester is
    overriding procedure Dumped_Parameters (Self : in out Instance);
    -- Parameter table updated from a received memory region.
    overriding procedure Parameter_Table_Updated (Self : in out Instance; Arg : in Memory_Region.T);
-   -- Starting fetching of the parameters into received memory region.
+   -- Starting parameter fetch into the received memory region.
    overriding procedure Parameter_Table_Fetched (Self : in out Instance; Arg : in Memory_Region.T);
    -- A command was received with invalid parameters.
    overriding procedure Invalid_Command_Received (Self : in out Instance; Arg : in Invalid_Command_Info.T);
@@ -129,7 +129,7 @@ package Component.Parameter_Store.Implementation.Tester is
    overriding procedure Command_Dropped (Self : in out Instance; Arg : in Command_Header.T);
    -- A memory region was dropped due to a full queue.
    overriding procedure Memory_Region_Dropped (Self : in out Instance; Arg : in Parameters_Memory_Region.T);
-   -- Produced a packet with the contents of the parameter store.
+   -- Parameter table validation is not supported.
    overriding procedure Table_Validation_Not_Supported (Self : in out Instance; Arg : in Memory_Region.T);
 
    -----------------------------------------------
@@ -137,7 +137,7 @@ package Component.Parameter_Store.Implementation.Tester is
    -----------------------------------------------
    -- Description:
    --    Packets for the Parameter Store component.
-   -- This packet contains a copy of all the parameter stored and managed by this component.
+   -- This packet contains a copy of all the parameters stored and managed by this component.
    overriding procedure Stored_Parameters (Self : in out Instance; Arg : in Packet.T);
 
    -----------------------------------------------

@@ -9,7 +9,7 @@ init:
       type: Basic_Types.Byte_Array_Access
       not_null: true
       description: "A pointer to an allocation of bytes to be used for storing the parameter table. The size of this byte array MUST be the exact size of the parameter table to be stored, or updating or fetch the table will be rejected with a length error."
-    - name: dump_Parameters_On_Change
+    - name: Dump_Parameters_On_Change
       type: Boolean
       description: If set to True, the component will dump the current parameter values any time a memory region is received to change the parameter table. If set to False, parameters will only be dumped when requested by command.
       default: "False"

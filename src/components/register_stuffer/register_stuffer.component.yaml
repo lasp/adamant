@@ -1,5 +1,5 @@
 ---
-description: This component services a commands to stuff and dump registers. This component is different than the memory stuffer/dumper in that it atomically sets 32-bit little endian registers, which is a requirement on some hardware. It rejects commands to stuff or dump addresses that are not on a 4-byte boundary. Note that this component assumes all registers it accesses are little endian. Another version of this component needs to be used to access registers as that are big endian.
+description: This component services commands to stuff and dump registers. This component is different than the memory stuffer/dumper in that it atomically sets 32-bit little endian registers, which is a requirement on some hardware. It rejects commands to stuff or dump addresses that are not on a 4-byte boundary. Note that this component assumes all registers it accesses are little endian. Another version of this component needs to be used to access registers that are big endian.
 execution: passive
 init:
   description: Configuration for the register stuffer component.

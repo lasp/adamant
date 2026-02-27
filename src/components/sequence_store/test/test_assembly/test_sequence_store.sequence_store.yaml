@@ -2,7 +2,7 @@
 # Optional - Description of sequence store
 description: This is an example sequence store layout.
 # Required - A list of slots that the store should manage. These
-# slots should not overlap in anyway. Overlap will be checked for
+# slots should not overlap in any way. Overlap will be checked for
 # within the component Init.
 slots:
   # Required - Address of first slot. This may be a numerical address

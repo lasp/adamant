@@ -12,7 +12,7 @@ with Event;
 with Socket_Address.Representation;
 with Ccsds_Primary_Header.Representation;
 
--- The Socket Interface Component is an interface component which connects the rest of the assembly to an outside entity (usually the ground system) via a TCP/IP socket. It spawns an internal task to listen to the socket for incoming data. It also provides an asynchronous receive connector which it services on it's task, sending any data it receives out of the socket. The data send and receive connectors are CCSDS.
+-- The Socket Interface Component is an interface component which connects the rest of the assembly to an outside entity (usually the ground system) via a TCP/IP socket. It spawns an internal task to listen to the socket for incoming data. It also provides an asynchronous receive connector which it services on its task, sending any data it receives out of the socket. The data send and receive connectors are CCSDS.
 package Component.Ccsds_Socket_Interface.Implementation.Tester is
 
    use Component.Ccsds_Socket_Interface_Reciprocal;

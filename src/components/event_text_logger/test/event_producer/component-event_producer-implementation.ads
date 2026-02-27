@@ -5,7 +5,7 @@
 -- Invokee Connector Includes:
 with Tick;
 
--- A simple compoonent which produces events for testing the event to text logger component.
+-- A simple component which produces events for testing the event to text logger component.
 package Component.Event_Producer.Implementation is
 
    -- The component class instance record:

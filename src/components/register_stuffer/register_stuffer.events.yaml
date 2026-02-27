@@ -17,7 +17,7 @@ events:
     description: The specified register could not be written because the component was not armed first.
     param_type: Register_Value.T
   - name: Armed
-    description: The component received the arm command an is now armed.
+    description: The component received the arm command and is now armed.
     param_type: Packed_Arm_Timeout.T
   - name: Unarmed
     description: The component received a command and is now unarmed.
@@ -27,5 +27,5 @@ events:
     description: The specified registers were dumped.
     param_type: Register_Dump_Packet_Header.T
   - name: Address_Range_Overflow
-    description: The specified registers were dumped.
+    description: The specified register address range overflows the address space.
     param_type: Register_Dump_Packet_Header.T

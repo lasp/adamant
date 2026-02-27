@@ -38,7 +38,7 @@ fields:
     type: Short_Float
     format: F32
   - name: Value_5
-    description: This is the fifth value it and contains an Adamant-modeled enumeration type.
+    description: This is the fifth value and it contains an Adamant-modeled enumeration type.
     type: Example_Enums.Second_Enum.E
     default: Example_Enums.Second_Enum.Spaceship
     format: E4

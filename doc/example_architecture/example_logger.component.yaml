@@ -4,7 +4,7 @@ execution: active
 init:
   description: An initialization function for the logger.
   parameters:
-    - name: is_Enabled
+    - name: Is_Enabled
       type: Boolean
       default: "True"
       description: Should the logger log to a file by default on startup?

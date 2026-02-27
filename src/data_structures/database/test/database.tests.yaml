@@ -6,6 +6,6 @@ tests:
   - name: Test_Id_Out_Of_Range
     description: This unit test tests trying to access the database with a bad Id.
   - name: Test_Not_Enough_Memory
-    description: This unit test tries to add to many items to the database.
+    description: This unit test tries to add too many items to the database.
   - name: Test_Data_Not_Available
     description: This test tries to access data that has not yet been stored.

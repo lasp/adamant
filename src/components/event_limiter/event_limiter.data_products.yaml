@@ -1,5 +1,5 @@
 ---
-description: Data products for the pid controller component.
+description: Data products for the event limiter component.
 data_products:
   - name: Limited_Events_Since_Tick
     description: The number of events that were limited since the last tick.

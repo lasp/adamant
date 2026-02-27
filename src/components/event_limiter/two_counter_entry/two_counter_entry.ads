@@ -1,5 +1,5 @@
--- This is a generic, unprotected statistics data structure.
--- The user can instantiate this class with any type that they choose.
+-- This is a two-counter entry data structure for event limiting.
+-- Each entry packs two event counters and their enable states into a single byte.
 with Basic_Types;
 with Event_Types;
 with Two_Counter_Entry_Enums;
@@ -28,9 +28,9 @@ package Two_Counter_Entry is
    -- Initialization/destruction functions:
    --
    -- Init Parameters:
-   -- event_Id_Start : Event_Id - The number of packets that the component contains internally. This is the available buffer that the component has to store events. When all packets are exhausted, then the component begins dropping events. The component needs to be at least double buffered, meaning a minimum of two packets need to be allocated.
-   -- event_Id_Stop : Event_Id - The number of ticks that can be received before a partial packet timeout occurs. When a partial packet timeout occurs, a packet containing at least one event is sent out, and then the timeout is reset. A value of zero passed for this parameter will disable the partial packet timeout, meaning only full packets are ever sent out of the component.
-   -- event_Disable_List : Event_Id_List - A list of event IDs that are disabled by default
+   -- Event_Id_Start : Event_Id - The starting event ID for the range of events to be managed by this limiter.
+   -- Event_Id_Stop : Event_Id - The ending event ID for the range of events to be managed by this limiter (inclusive).
+   -- Event_Disable_List : Event_Id_List - A list of event IDs that are disabled by default.
    --
    procedure Init (Self : in out Instance; Event_Id_Start : in Event_Id; Event_Id_Stop : in Event_Id; Event_Disable_List : in Event_Id_List; Event_Limit_Persistence : in Persistence_Type);
    procedure Destroy (Self : in out Instance);

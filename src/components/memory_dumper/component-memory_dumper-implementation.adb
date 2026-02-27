@@ -14,7 +14,7 @@ package body Component.Memory_Dumper.Implementation is
    -- This component requires a list of memory regions which it can dump and CRC.
    --
    -- Init Parameters:
-   -- memory_Regions : Memory_Manager_Types.Memory_Region_Array_Access - An access to a list of memory regions.
+   -- Memory_Regions : Memory_Manager_Types.Memory_Region_Array_Access - An access to a list of memory regions.
    --
    overriding procedure Init (Self : in out Instance; Memory_Regions : in not null Memory_Manager_Types.Memory_Region_Array_Access) is
    begin

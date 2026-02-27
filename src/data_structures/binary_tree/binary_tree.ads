@@ -16,7 +16,7 @@
 -- Removal of elements is done in a similar way to insertion, and takes
 -- O(n) time.
 --
--- If you need fast insertion/removel time into the binary tree, you should
+-- If you need fast insertion/removal time into the binary tree, you should
 -- not use this binary tree package, as these operations could get cripplingly
 -- slow as the value of N gets very large.
 --

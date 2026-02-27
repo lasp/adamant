@@ -10,7 +10,7 @@ tests:
   - name: Test_Set_Enable_State
     description: This unit test tests changing the enable status to a desired value for a given ID.
   - name: Test_Set_Persistence
-    description: This unit test is to test changing the persisence count
+    description: This unit test is to test changing the persistence count
   - name: Test_Event_Limited_Count
     description: The unit test that makes sure the count increments as expected, can be retrieved, and reset.
   - name: Test_Get_Event_Range

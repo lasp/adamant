@@ -167,10 +167,10 @@ package body Tests.Implementation is
       --   Natural_Assert.eq(t.dispatch_all, 1);
 
       --   -- Check events:
-      --   Natural_Assert.eq(t.Cycle_Slip_History.get_Count, 0);
-      --   Natural_Assert.eq(t.Max_Cycle_Time_Exceeded_History.get_Count, 2);
+      --   Natural_Assert.eq(t.Cycle_Slip_History.Get_Count, 0);
+      --   Natural_Assert.eq(t.Max_Cycle_Time_Exceeded_History.Get_Count, 2);
       --   Time_Exceeded_Assert.eq(t.Max_Cycle_Time_Exceeded_History.get(2), (Time_Delta => (4, 0), Count => 2));
-      --   Natural_Assert.eq(t.Max_Execution_Time_Exceeded_History.get_Count, 1);
+      --   Natural_Assert.eq(t.Max_Execution_Time_Exceeded_History.Get_Count, 1);
 
       --   --------------------------------------------------
       --   -- For this test change the time delta so more
@@ -178,17 +178,17 @@ package body Tests.Implementation is
       --   -- should trigger the mex execution time. The
       --   -- tick time is set high enough that a new
       --   -- cycle time should not be thrown:
-      --   t.seconds_Delta := 2;
-      --   t.subseconds_Delta := 0;
+      --   t.Seconds_Delta := 2;
+      --   t.Subseconds_Delta := 0;
       --   t.Tick_T_Send(theTick3);
 
       --   -- Execute the component:
       --   Natural_Assert.eq(t.dispatch_all, 1);
 
       --   -- Check events:
-      --   Natural_Assert.eq(t.Cycle_Slip_History.get_Count, 0);
-      --   Natural_Assert.eq(t.Max_Cycle_Time_Exceeded_History.get_Count, 2);
-      --   Natural_Assert.eq(t.Max_Execution_Time_Exceeded_History.get_Count, 2);
+      --   Natural_Assert.eq(t.Cycle_Slip_History.Get_Count, 0);
+      --   Natural_Assert.eq(t.Max_Cycle_Time_Exceeded_History.Get_Count, 2);
+      --   Natural_Assert.eq(t.Max_Execution_Time_Exceeded_History.Get_Count, 2);
       --   Time_Exceeded_Assert.eq(t.Max_Execution_Time_Exceeded_History.get(2), (Time_Delta => (4, 0), Count => 3));
    end Time_Reporting;
 

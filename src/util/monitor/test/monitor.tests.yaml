@@ -1,5 +1,5 @@
 ---
-description: This is a unit test suite for the crc 16 algorithm
+description: This is a unit test suite for the monitor utility
 tests:
   - name: Test_Monitor_Green_To_Red
     description: This test makes sure monitor transitions from green to red correctly.

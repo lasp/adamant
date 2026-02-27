@@ -95,7 +95,7 @@ is
    end Accesses;
 
    --
-   -- Register map compile-time checks. These checks helpt to ensure that there is not a bug in the autocoder.
+   -- Register map compile-time checks. These checks help to ensure that there is not a bug in the autocoder.
    --
 
 {% for item_name, item in items.items() %}

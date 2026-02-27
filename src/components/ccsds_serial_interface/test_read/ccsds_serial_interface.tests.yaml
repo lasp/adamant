@@ -2,4 +2,4 @@
 description: This is the packet send unit test suite for the Serial Interface Component
 tests:
   - name: Test_Packet_Receive
-    description: This unit test makes sure that packets received through the serial port are forwarded through the send connector. This test exercises the additional internal task of the Socket Interface Component.
+    description: This unit test makes sure that packets received through the serial port are forwarded through the send connector. This test exercises the additional internal task of the Serial Interface Component.

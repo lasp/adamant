@@ -17,9 +17,9 @@ package Component.Ccsds_Subpacket_Extractor.Implementation is
    -- The component extracts CCSDS subpackets from the data section of a larger CCSDS packet. The init function allows the component to ignore the first, n, or last, m, number of bytes during extraction. This might be useful to ignore a leading secondary header or a trailing checksum.
    --
    -- Init Parameters:
-   -- start_Offset : Natural - The number of bytes past the primary CCSDS header to start extracting subpackets from.
-   -- stop_Offset : Natural - The number of bytes at the end of CCSDS packet (calculated using the primary header length field) to not extract subpackets from. This value should be used to ignore X number of bytes at the end of a packet.
-   -- max_Subpackets_To_Extract : Integer - The maximum number of subpackets to attempt to extract from an incoming packet. A negative number indicates that there is no upper limit to the amount of subpackets that can be extracted. A value of zero disables any subpacketization, which might be useful to disable this component during testing.
+   -- Start_Offset : Natural - The number of bytes past the primary CCSDS header to start extracting subpackets from.
+   -- Stop_Offset : Natural - The number of bytes at the end of CCSDS packet (calculated using the primary header length field) to not extract subpackets from. This value should be used to ignore X number of bytes at the end of a packet.
+   -- Max_Subpackets_To_Extract : Integer - The maximum number of subpackets to attempt to extract from an incoming packet. A negative number indicates that there is no upper limit to the amount of subpackets that can be extracted. A value of zero disables any subpacketization, which might be useful to disable this component during testing.
    --
    overriding procedure Init (Self : in out Instance; Start_Offset : in Natural := 0; Stop_Offset : in Natural := 0; Max_Subpackets_To_Extract : in Integer := -1);
 

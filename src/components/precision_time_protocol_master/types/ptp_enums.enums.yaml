@@ -15,4 +15,4 @@ enums:
         description: The Delay_Request message is sent from the slave to the master to request the master send a Delay_Response message.
       - name: Delay_Response
         value: 3
-        description: The Delay_Response message is sent from the master to the slave and provides enough information for the slave to know it's clock offset from the master.
+        description: The Delay_Response message is sent from the master to the slave and provides enough information for the slave to know its clock offset from the master.

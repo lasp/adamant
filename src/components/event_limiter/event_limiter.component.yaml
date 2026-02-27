@@ -21,7 +21,7 @@ init:
       description: The event ID that ends the range of ids that the component will include for potential limiting of events.
     - name: Event_Disable_List
       type: Two_Counter_Entry.Event_Id_List
-      description: A list of event IDs that are enabled by default
+      description: A list of event IDs that are disabled by default
       default: "[1 .. 0 => 0]"
     - name: Event_Limit_Persistence
       type: Two_Counter_Entry.Persistence_Type

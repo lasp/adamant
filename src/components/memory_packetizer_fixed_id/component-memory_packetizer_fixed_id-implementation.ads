@@ -19,8 +19,8 @@ package Component.Memory_Packetizer_Fixed_Id.Implementation is
    -- This initialization function is used to set a threshold for the maximum number of packets that the component will produce in a single time period. A time period is measured in an integer number of seconds.
    --
    -- Init Parameters:
-   -- max_Packets_Per_Time_Period : Natural - The maximum number of packets that this component will produce in a single second. The component will stop producing packets if the threshold is met, until the end of a second period has elapsed.
-   -- time_Period_In_Seconds : Positive - The time period in seconds over which the measure the number of packets produced.
+   -- Max_Packets_Per_Time_Period : Natural - The maximum number of packets that this component will produce in a single second. The component will stop producing packets if the threshold is met, until the end of a second period has elapsed.
+   -- Time_Period_In_Seconds : Positive - The time period in seconds over which to measure the number of packets produced.
    --
    overriding procedure Init (Self : in out Instance; Max_Packets_Per_Time_Period : in Natural; Time_Period_In_Seconds : in Positive := 1);
 
@@ -46,7 +46,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance);
@@ -80,7 +80,7 @@ private
    -----------------------------------------------
    -- Description:
    --    These are the commands for the memory packetizer fixed id component.
-   -- Set a new value for the max_Packets_Per_Time_Period and the time_Period_In_Seconds to control the output rate of the emitted packets.
+   -- Set a new value for the Max_Packets_Per_Time_Period and the Time_Period_In_Seconds to control the output rate of the emitted packets.
    overriding function Set_Max_Packet_Rate (Self : in out Instance; Arg : in Packets_Per_Period.T) return Command_Execution_Status.E;
 
    -- Invalid command handler. This procedure is called when a command's arguments are found to be invalid:

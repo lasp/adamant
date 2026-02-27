@@ -7,8 +7,8 @@ components:
     init:
       - "table => null"
     init_base:
-      - "queue_Size => 0"
-      - "ccsds_Space_Packet_T_Send_Count => 3"
+      - "Queue_Size => 0"
+      - "Ccsds_Space_Packet_T_Send_Count => 3"
   - type: Ccsds_Router
     name: Active_Ccsds_Router
     execution: active
@@ -18,8 +18,8 @@ components:
     init:
       - "table => null"
     init_base:
-      - "queue_Size => 0"
-      - "ccsds_Space_Packet_T_Send_Count => 3"
+      - "Queue_Size => 0"
+      - "Ccsds_Space_Packet_T_Send_Count => 3"
   - type: Ccsds_Sender
     name: Ccsds_Sync_Sender
   - type: Ccsds_Sender
@@ -29,15 +29,15 @@ components:
   - type: Ccsds_Receiver
     name: First_Ccsds_Receiver
     init_base:
-      - "queue_Size => 0"
+      - "Queue_Size => 0"
   - type: Ccsds_Receiver
     name: Second_Ccsds_Receiver
     init_base:
-      - "queue_Size => 0"
+      - "Queue_Size => 0"
   - type: Ccsds_Receiver
     name: Third_Ccsds_Receiver
     init_base:
-      - "queue_Size => 0"
+      - "Queue_Size => 0"
 connections:
   - from_component: Ccsds_Sync_Sender
     from_connector: Ccsds_Space_Packet_T_Send

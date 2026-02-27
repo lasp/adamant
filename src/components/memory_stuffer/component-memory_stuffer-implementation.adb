@@ -13,7 +13,7 @@ package body Component.Memory_Stuffer.Implementation is
    --------------------------------------------------
    -- Subprogram for implementation init method:
    --------------------------------------------------
-   -- This component requires a list of memory regions which it can write to. These regions can either be protected (requiring and arm command prior to execution) or unprotected, as specified by the second parameter.
+   -- This component requires a list of memory regions which it can write to. These regions can either be protected (requiring an arm command prior to execution) or unprotected, as specified by the second parameter.
    --
    -- Init Parameters:
    -- Memory_Regions : Memory_Manager_Types.Memory_Region_Array_Access - An access to a list of memory regions.
@@ -91,7 +91,7 @@ package body Component.Memory_Stuffer.Implementation is
       -- There is no protected region checking here, since this is a backdoor copy that
       -- bypasses a direct stuff.
 
-      -- Do copy memory is the destination region is valid. We do not necessarily manage the source
+      -- Do copy memory if the destination region is valid. We do not necessarily manage the source
       -- region, so we don't check it.
       if Memory_Manager_Types.Is_Region_Valid (Destination_Region, Self.Regions, Ptr, Ignore) then
          -- OK the memory region is valid. Perform actual memory copy:
@@ -138,7 +138,7 @@ package body Component.Memory_Stuffer.Implementation is
    -----------------------------------------------
    -- Description:
    --    These are the commands for the Memory Stuffer component.
-   -- An "arm" command which enables the next write write command to a protected memory to be accepted. The "armed" state of the component will expire on the next command to this component no matter what it is or after the configurable timeout.
+   -- An "arm" command which enables the next write command to a protected memory to be accepted. The "armed" state of the component will expire on the next command to this component no matter what it is or after the configurable timeout.
    overriding function Arm_Protected_Write (Self : in out Instance; Arg : in Packed_Arm_Timeout.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
    begin
@@ -234,7 +234,7 @@ package body Component.Memory_Stuffer.Implementation is
    begin
       -- Perform action to handle an invalid command.
       Self.Event_T_Send_If_Connected (Self.Events.Invalid_Command_Received (Self.Sys_Time_T_Get, (Id => Cmd.Header.Id, Errant_Field_Number => Errant_Field_Number, Errant_Field => Errant_Field)));
-      -- Disabled protected write:
+      -- Disable protected write:
       Do_Unarm (Self);
    end Invalid_Command;
 

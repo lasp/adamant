@@ -5,6 +5,6 @@ filters:
   - name: rm_component
     type: component_name
     exclude:
-      - ccsds_High_Priority_Sender
-      - ccsds_Sync_Sender
-      - passive_Ccsds_Router
+      - Ccsds_High_Priority_Sender
+      - Ccsds_Sync_Sender
+      - Passive_Ccsds_Router

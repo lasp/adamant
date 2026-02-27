@@ -11,12 +11,12 @@ with Basic_Types;
 --
 -- Insertion and removal
 -- time from the queue is O(log n). The priority queue uses an internal stable
--- heap data structure to determine the order items are poppped from the queue.
+-- heap data structure to determine the order items are popped from the queue.
 -- Higher priority items leave the queue first. Items of equal priority leave
 -- the queue in FIFO order.
 --
 -- The queue stores both a generic priority type, which can also contain other user
--- meta data. The user of this generic data type must also specify an Greater_Than
+-- meta data. The user of this generic data type must also specify a Greater_Than
 -- and Equal_To function to compare priorities. Note that this priority type is
 -- often copied during a push or pop operation, so the type should be kept as small
 -- as possible.
@@ -52,7 +52,7 @@ package Protected_Priority_Queue is
    -- Provide the size of each queue element in bytes and the depth of the queue. The amount
    -- of data allocated on the heap to service this queue will be (in bytes):
    --
-   --    queue_Storage = element_Size*depth + (Priority_Type'Size + Natural'Size)*depth
+   --    Queue_Storage = Element_Size*depth + (Priority_Type'Size + Natural'Size)*depth
    --
    procedure Init (Self : in out Instance; Element_Size : in Positive; Depth : in Positive);
    -- Destroy all bytes on the queue:

@@ -1,6 +1,6 @@
 ---
 description: |
-  This component is meant to be a backdoor serial component which uses Ada.Text_IO to send a receive data over a serial port. On Linux, this will send/recv data to/from the terminal, but Ada.Text_IO is attached to a diagnostic uart on most embedded systems. This means that this component can be used as a quick and dirty serial interface without implementing hardware specific uart drivers.
+  This component is meant to be a backdoor serial component which uses Ada.Text_IO to send and receive data over a serial port. On Linux, this will send/recv data to/from the terminal, but Ada.Text_IO is attached to a diagnostic uart on most embedded systems. This means that this component can be used as a quick and dirty serial interface without implementing hardware specific uart drivers.
 execution: active
 subtasks:
   - name: Listener
@@ -13,10 +13,10 @@ init:
       default: "0"
       description: Amount of time in milliseconds to wait in between transmission of each CCSDS packet. Some UART protocols rely on a gap to differentiate between packets, and this can be used to enforce that.
 connectors:
-  - description: On this connector the Socket Interface Component receives data and sends it out of the socket.
+  - description: On this connector the Serial Interface Component receives data and sends it out of the serial port.
     type: Ccsds_Space_Packet.T
     kind: recv_async
-  - description: On this connector the Socket Interface Component sends any data it received from the socket.
+  - description: On this connector the Serial Interface Component sends any data it received from the serial port.
     type: Ccsds_Space_Packet.T
     kind: send
   - description: Events are sent out of this connector.

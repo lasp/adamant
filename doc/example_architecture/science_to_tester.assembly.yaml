@@ -5,7 +5,7 @@ components:
     name: science_instance
     execution: passive
     init_base:
-      - "queue_Size => 10"
+      - "Queue_Size => 10"
   - type: example_science_tester
     name: science_tester_instance
     execution: passive

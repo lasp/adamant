@@ -40,7 +40,7 @@ package body Event_Filter_Tests.Implementation is
       Self.Tester.Connect;
 
       -- Call component init here.
-      -- self.tester.component_Instance.Init(event_Id_Start_Range => TBD, event_Id_End_Range => TBD, event_Filter_List => TBD);
+      -- Self.Tester.Component_Instance.Init (Event_Id_Start_Range => TBD, Event_Id_End_Range => TBD, Event_Filter_List => TBD);
 
       -- Call the component set up method that the assembly would normally call.
       Self.Tester.Component_Instance.Set_Up;
@@ -117,7 +117,7 @@ package body Event_Filter_Tests.Implementation is
       T.Event_T_Send (Incoming_Event);
       Natural_Assert.Eq (T.Event_Forward_T_Recv_Sync_History.Get_Count, 3);
 
-      -- Make sure no data products were thrown since we dont call a tick
+      -- Make sure no data products were thrown since we don't call a tick
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 3);
 
    end Test_Received_Event;
@@ -256,7 +256,7 @@ package body Event_Filter_Tests.Implementation is
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Dump_Event_States_Id, Status => Success));
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
-      Natural_Assert.Eq (T.Dump_Event_States_Recieved_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Dump_Event_States_Received_History.Get_Count, 1);
 
       -- Induce the packet through the tick
       T.Tick_T_Send (Input_Tick);
@@ -292,7 +292,7 @@ package body Event_Filter_Tests.Implementation is
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 5);
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (5), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Dump_Event_States_Id, Status => Success));
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 5);
-      Natural_Assert.Eq (T.Dump_Event_States_Recieved_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Dump_Event_States_Received_History.Get_Count, 2);
 
       -- Induce the packet through the tick
       T.Tick_T_Send (Input_Tick);
@@ -307,7 +307,7 @@ package body Event_Filter_Tests.Implementation is
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (6), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Unfilter_Event_Range_Id, Status => Success));
       -- Increases twice here for the issue of the packet
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 7);
-      Natural_Assert.Eq (T.Dump_Event_States_Recieved_History.Get_Count, 3);
+      Natural_Assert.Eq (T.Dump_Event_States_Received_History.Get_Count, 3);
       Natural_Assert.Eq (T.Unfiltered_Event_Range_History.Get_Count, 1);
 
       -- Get the packet
@@ -356,7 +356,7 @@ package body Event_Filter_Tests.Implementation is
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 2);
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (2), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Filter_Event_Id, Status => Success));
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 3);
-      Natural_Assert.Eq (T.Dump_Event_States_Recieved_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Dump_Event_States_Received_History.Get_Count, 1);
       Natural_Assert.Eq (T.Filtered_Event_History.Get_Count, 2);
 
       -- Issue the packet through a tick
@@ -386,7 +386,7 @@ package body Event_Filter_Tests.Implementation is
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 4);
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (4), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Unfilter_Event_Id, Status => Success));
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 6);
-      Natural_Assert.Eq (T.Dump_Event_States_Recieved_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Dump_Event_States_Received_History.Get_Count, 2);
       Natural_Assert.Eq (T.Unfiltered_Event_History.Get_Count, 2);
 
       -- Issue the packet through a tick
@@ -534,7 +534,7 @@ package body Event_Filter_Tests.Implementation is
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 3);
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (3), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Filter_Event_Range_Id, Status => Success));
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 4);
-      Natural_Assert.Eq (T.Dump_Event_States_Recieved_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Dump_Event_States_Received_History.Get_Count, 1);
       Natural_Assert.Eq (T.Filtered_Event_Range_History.Get_Count, 4); -- This is 4 due to the conflict of event ids and how we pass them into the component
 
       -- Issue the packet through a tick
@@ -548,7 +548,7 @@ package body Event_Filter_Tests.Implementation is
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 4);
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (4), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Unfilter_Event_Range_Id, Status => Success));
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 6);
-      Natural_Assert.Eq (T.Dump_Event_States_Recieved_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Dump_Event_States_Received_History.Get_Count, 2);
       Natural_Assert.Eq (T.Unfiltered_Event_Range_History.Get_Count, 4);
 
       T.Tick_T_Send (Input_Tick);
@@ -669,7 +669,7 @@ package body Event_Filter_Tests.Implementation is
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (2), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Enable_Event_Filtering_Id, Status => Success));
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
       Natural_Assert.Eq (T.Enable_Event_Filter_History.Get_Count, 1);
-      -- Data product, no tick so the total counts dont get updated here
+      -- Data product, no tick so the total counts don't get updated here
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 5);
       Natural_Assert.Eq (T.Component_Filter_State_History.Get_Count, 3);
       Component_State_Assert.Eq (T.Component_Filter_State_History.Get (3).Component_Filter_State, Event_Filter_Entry_Enums.Global_Filter_State.Enabled);

@@ -128,7 +128,7 @@ package Seq is
                    Self.Get_Engine_State /= Uninitialized);
 
    -- Execute the sequence until it reaches a blocking state. The state the sequence reaches upon block is returned. If more than "Instruction_Limit"
-   -- instructions are executed before a blocking state is reached, an error will be returned. This safe-gaurd prevents an poorly written sequence
+   -- instructions are executed before a blocking state is reached, an error will be returned. This safeguard prevents a poorly written sequence
    -- with an infinite loop from taking over the CPU.
    function Execute (Self : in out Engine; Instruction_Limit : in Positive; Timestamp : in Sys_Time.T) return Seq_Execute_State.E with
       Pre => (Self.Get_Engine_State /= Uninitialized and then
@@ -199,7 +199,7 @@ package Seq is
    -- Get the sequence ID of the first engine to kill.
    function Get_Kill_Eng_Start (Self : in Engine) return Sequence_Engine_Id;
 
-   -- Get the sequence ID of the last engine to kill.
+   -- Get the number of engines to kill.
    function Get_Num_Eng_Kill (Self : in Engine) return Sequence_Engine_Id;
 
    -- Get the string to print if in the Print state.
@@ -213,7 +213,7 @@ private
    type Seq_Array is array (Max_Seq_Num range <>) of Seq_Runtime.Instance;
    type Seq_Access is access all Seq_Array;
 
-   -- Checks if the engine is ok to transfer to the inactive state, ie. all required initialization
+   -- Checks if the engine is ok to transfer to the inactive state, i.e. all required initialization
    -- has been completed.
    procedure Finish_Initialization (Self : in out Engine);
 

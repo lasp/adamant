@@ -17,8 +17,8 @@ package Component.Initialized_Component.Implementation is
    -- This is the component's init procedure. It initializes parameters during initialization.
    --
    -- Init Parameters:
-   -- packets_Per_Tick : Natural - The number of packets to send every time the Tick_T_Recv_Sync connector is invoked.
-   -- enabled_At_Startup : Boolean - If True, packets will be produced for every call to Tick_T_Recv_Sync. If False, no packets will be produced.
+   -- Packets_Per_Tick : Natural - The number of packets to send every time the Tick_T_Recv_Sync connector is invoked.
+   -- Enabled_At_Startup : Boolean - If True, packets will be produced for every call to Tick_T_Recv_Sync. If False, no packets will be produced.
    --
    overriding procedure Init (Self : in out Instance; Packets_Per_Tick : in Natural; Enabled_At_Startup : in Boolean := True);
 

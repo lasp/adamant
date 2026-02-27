@@ -16,12 +16,12 @@ package body Component.Parameters.Implementation is
    --------------------------------------------------
    -- Subprogram for implementation init method:
    --------------------------------------------------
-   -- This init function provides the a list of parameter entries that describe the
+   -- This init function provides a list of parameter entries that describe the
    -- layout of the parameter table in memory. Calling this function also provides
    -- memory allocation for the parameter manager's internal parameter table.
    -- Preallocated memory can be provided via the "bytes" access type. Note the size
    -- of the preallocated memory MUST match the size of the parameter table exactly,
-   -- as defined in the parameter_Entries parameter. If you would like to allocate
+   -- as defined in the Parameter_Entries parameter. If you would like to allocate
    -- the internal memory on the heap then "bytes" can be set to null.
    --
    -- Init Parameters:
@@ -256,7 +256,7 @@ package body Component.Parameters.Implementation is
    -- Crc the parameter table bytes. The table bytes passed in MUST be the exact size as the parameter table:
    function Crc_Parameter_Table (Self : in Instance; Table_Bytes : in Basic_Types.Byte_Array) return Crc_16.Crc_16_Type is
    begin
-      -- Thus function assumes that the provided data is the exact length of the parameter table. Length
+      -- This function assumes that the provided data is the exact length of the parameter table. Length
       -- checks should be performed before calling this function:
       pragma Assert (Table_Bytes'Length = Self.Parameter_Table_Length);
 
@@ -272,13 +272,13 @@ package body Component.Parameters.Implementation is
    end Crc_Parameter_Table;
 
    -- Fetch parameters from all downstream components and form the parameter table data structure complete with the
-   -- table header and computed CRC. The table is returned via the table_Bytes parameter, which MUST be the exact
+   -- table header and computed CRC. The table is returned via the Table_Bytes parameter, which MUST be the exact
    -- size as the parameter table.
    function Fetch_Parameter_Table (Self : in out Instance; Table_Bytes : in out Basic_Types.Byte_Array) return Parameter_Enums.Parameter_Update_Status.E is
       -- The return status:
       To_Return : Parameter_Enums.Parameter_Update_Status.E;
    begin
-      -- Thus function assumes that the provided data is the exact length of the parameter table. Length
+      -- This function assumes that the provided data is the exact length of the parameter table. Length
       -- checks should be performed before calling this function:
       pragma Assert (Table_Bytes'Length = Self.Parameter_Table_Length);
 
@@ -705,7 +705,7 @@ package body Component.Parameters.Implementation is
    overriding procedure Parameters_Memory_Region_T_Recv_Async_Dropped (Self : in out Instance; Arg : in Parameters_Memory_Region.T) is
       use Parameter_Enums.Parameter_Table_Update_Status;
    begin
-      -- Even through the memory region was dropped, we still need to release it:
+      -- Even though the memory region was dropped, we still need to release it:
       Self.Parameters_Memory_Region_Release_T_Send_If_Connected ((Region => Arg.Region, Status => Dropped));
 
       -- Throw info event:
@@ -804,7 +804,7 @@ package body Component.Parameters.Implementation is
          end;
       end if;
 
-      -- If we got here than everything worked as expected:
+      -- If we got here, then everything worked as expected:
       Self.Event_T_Send_If_Connected (Self.Events.Parameter_Update_Success (Self.Sys_Time_T_Get, (Id => Arg.Header.Id)));
       return Success;
    end Update_Parameter;

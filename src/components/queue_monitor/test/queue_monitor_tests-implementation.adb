@@ -204,7 +204,7 @@ package body Queue_Monitor_Tests.Implementation is
       T.Tick_T_Send (A_Tick);
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 4);
 
-      -- Send a command to disable to packet sending.
+      -- Send a command to disable packet sending.
       T.Command_T_Send (T.Commands.Set_Packet_Period ((Value => 0)));
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Set_Packet_Period_Id, Status => Success));

@@ -20,7 +20,7 @@ package Component.Memory_Copier.Implementation is
    -- Initialization parameters for the Memory Copier.
    --
    -- Init Parameters:
-   -- ticks_Until_Timeout : Natural - The component will wait until it has received at least this many ticks before reporting a timeout error while waiting for a memory copy to complete. For example, if the component is attached to a 10Hz rate group and this value is set to 7, then the component will wait between 700 and 800 ms before declaring a timeout error from an unresponsive downstream component.
+   -- Ticks_Until_Timeout : Natural - The component will wait until it has received at least this many ticks before reporting a timeout error while waiting for a memory copy to complete. For example, if the component is attached to a 10Hz rate group and this value is set to 7, then the component will wait between 700 and 800 ms before declaring a timeout error from an unresponsive downstream component.
    --
    overriding procedure Init (Self : in out Instance; Ticks_Until_Timeout : in Natural);
 
@@ -46,7 +46,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance) is null;
@@ -54,7 +54,7 @@ private
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- The component should be attached to a periodic tick that is used to timeout waiting for a memory region copy response. See the ticks_Until_Timeout initialization parameter.
+   -- The component should be attached to a periodic tick that is used to timeout waiting for a memory region copy response. See the Ticks_Until_Timeout initialization parameter.
    overriding procedure Timeout_Tick_Recv_Sync (Self : in out Instance; Arg : in Tick.T);
    -- The command receive connector.
    overriding procedure Command_T_Recv_Async (Self : in out Instance; Arg : in Command.T);

@@ -62,7 +62,7 @@ package Component.Fault_Component.Implementation.Tester is
    --    A set of faults for the Fault Component.
    -- A discontinuous time was detected by the component.
    overriding procedure Discontinuous_Time_Fault (Self : in out Instance; Arg : in Packed_U32.T);
-   -- A time restart at zero seconds epoc was detected by the component.
+   -- A time restart at zero seconds epoch was detected by the component.
    overriding procedure Zero_Time_Fault (Self : in out Instance);
 
 end Component.Fault_Component.Implementation.Tester;

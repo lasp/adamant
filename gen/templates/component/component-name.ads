@@ -65,7 +65,7 @@ package Component.{{ name }} is
    -- Get the maximum percent usage of the component's internal queue, if there
    -- is one, else assert. This function is used by the queue monitor component
    -- as a backdoor convenience to bypass the connector system, reducing complexity
-   -- of reporting queue usage for every component. ie. "high water mark"
+   -- of reporting queue usage for every component. i.e. "high water mark"
    overriding function Get_Queue_Maximum_Percent_Used (Self : in out Base_Instance) return Basic_Types.Byte
       with Inline => True;
 
@@ -111,7 +111,7 @@ package Component.{{ name }} is
 {% endif %}
 {% if set_id_bases %}
    -----------------------------------------------------------------------
-   -- Initialize the id_Bases for any commands, data products, or events:
+   -- Initialize the Id_Bases for any commands, data products, or events:
    -----------------------------------------------------------------------
 {% if set_id_bases.description %}
 {{ printMultiLine(set_id_bases.description, '   -- ') }}

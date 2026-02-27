@@ -3,7 +3,7 @@ execution: active
 init:
   description: An initialization function for this component.
   parameters:
-    - name: is_Enabled
+    - name: Is_Enabled
       type: Boolean
       default: "True"
 connectors:

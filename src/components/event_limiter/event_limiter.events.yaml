@@ -26,7 +26,7 @@ events:
     description: This event indicates that the command to change the event state to enabled failed since the event ID was out of range.
     param_type: Event_Single_State_Cmd_Type.T
   - name: Event_Limit_Disable_Invalid_Id
-    description: This event indicates that the command to change the event state to disable failed since the event ID was out of range.
+    description: This event indicates that the command to change the event state to disabled failed since the event ID was out of range.
     param_type: Event_Single_State_Cmd_Type.T
   - name: Event_Limit_Range_Enabled_Invalid_Id
     description: This event indicates that changing the state for the range to enabled, failed due to an invalid id.
@@ -37,5 +37,5 @@ events:
   - name: Set_New_Persistence
     description: Indicates that the persistence of the number of events until we limit was changed to a new value between 1 and 7.
     param_type: Event_Limiter_Persistence_Type.T
-  - name: Dump_Event_States_Recieved
+  - name: Dump_Event_States_Received
     description: Event that indicates the process of building the packet that stores the event states has started and will send the packet once we go through a decrement cycle.

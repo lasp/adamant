@@ -19,12 +19,12 @@ package body Component.Memory_Packetizer.Implementation is
    --------------------------------------------------
    -- Subprogram for implementation init method:
    --------------------------------------------------
-   -- This initialization function is used to set a threshold for the maximum number of packets that the component will produce in a single time period. A time period is measured in an integer number of seconds. The component also needs to keep track of the sequence counts for each packet ID that is receives. To do this, it needs to allocate internal memory to keep track of the last sequence count for each packet. A maximum number of unique packet ids is provided in this function to allocate the necessary memory to keep track of this information.
+   -- This initialization function is used to set a threshold for the maximum number of packets that the component will produce in a single time period. A time period is measured in an integer number of seconds. The component also needs to keep track of the sequence counts for each packet ID that it receives. To do this, it needs to allocate internal memory to keep track of the last sequence count for each packet. A maximum number of unique packet IDs is provided in this function to allocate the necessary memory to keep track of this information.
    --
    -- Init Parameters:
-   -- max_Packets_Per_Time_Period : Natural - The maximum number of packets that this component will produce in a single second. The component will stop producing packets if the threshold is met, until the end of a second period has elapsed.
-   -- time_Period_In_Seconds : Positive - The time period in seconds over which the measure the number of packets produced.
-   -- max_Packet_Ids : Positive - The maximum number of unique packet ids that this component is expected to receive during operations. This value is used to allocate a small amount of memory at initialization to keep track of the sequence count for each produced packet. If this memory becomes all used up, any new unique packet ids received will trigger an events and will be emitted with a sequence count of zero. This misconfiguration should easily be detectable during test.
+   -- Max_Packets_Per_Time_Period : Natural - The maximum number of packets that this component will produce in a single second. The component will stop producing packets if the threshold is met, until the end of a second period has elapsed.
+   -- Time_Period_In_Seconds : Positive - The time period in seconds over which the measure the number of packets produced.
+   -- Max_Packet_Ids : Positive - The maximum number of unique packet IDs that this component is expected to receive during operations. This value is used to allocate a small amount of memory at initialization to keep track of the sequence count for each produced packet. If this memory becomes fully used, any new unique packet IDs received will trigger an event and will be emitted with a sequence count of zero. This misconfiguration should easily be detectable during test.
    --
    overriding procedure Init (Self : in out Instance; Max_Packets_Per_Time_Period : in Natural; Time_Period_In_Seconds : in Positive := 1; Max_Packet_Ids : in Positive := 10) is
    begin
@@ -203,7 +203,7 @@ package body Component.Memory_Packetizer.Implementation is
    -- Description:
    --    These are the commands for the memory packetizer component.
 
-   -- Set a new value for the max_Packets_Per_Time_Period and the time_Period_In_Seconds to control the output rate of the emitted packets.
+   -- Set a new value for the Max_Packets_Per_Time_Period and the Time_Period_In_Seconds to control the output rate of the emitted packets.
    overriding function Set_Max_Packet_Rate (Self : in out Instance; Arg : in Packets_Per_Period.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
       The_Time : constant Sys_Time.T := Self.Sys_Time_T_Get;

@@ -7,7 +7,7 @@ with Command;
 with Parameter;
 with Protected_Variables;
 
--- This is the limiter component. This component receives a generic type of data and queues that data. It then meters the output of the data theourh a "send" connector at a commandable rate. The rate is set upon initialization, can be changed by command, or by parameter. The command or parameter connections may be omitted if these features are not used.
+-- This is the limiter component. This component receives a generic type of data and queues that data. It then meters the output of the data through a "send" connector at a commandable rate. The rate is set upon initialization, can be changed by command, or by parameter. The command or parameter connections may be omitted if these features are not used.
 generic
 package Component.Limiter.Implementation is
 
@@ -20,7 +20,7 @@ package Component.Limiter.Implementation is
    -- This initialization function is used to set a threshold for the maximum number of data sends that the component will produce when a tick is received.
    --
    -- Init Parameters:
-   -- max_Sends_Per_Tick : Interfaces.Unsigned_16 - The maximum number of sends that this component will produce when a tick is received. The component will stop producing packets if the threshold is met or when the queue is empty, whichever happens first.
+   -- Max_Sends_Per_Tick : Interfaces.Unsigned_16 - The maximum number of sends that this component will produce when a tick is received. The component will stop producing packets if the threshold is met or when the queue is empty, whichever happens first.
    --
    overriding procedure Init (Self : in out Instance; Max_Sends_Per_Tick : in Interfaces.Unsigned_16);
 
@@ -44,7 +44,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance);

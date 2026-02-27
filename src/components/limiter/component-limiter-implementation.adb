@@ -10,7 +10,7 @@ package body Component.Limiter.Implementation is
    -- This initialization function is used to set a threshold for the maximum number of data sends that the component will produce when a tick is received.
    --
    -- Init Parameters:
-   -- max_Sends_Per_Tick : Interfaces.Unsigned_16 - The maximum number of sends that this component will produce when a tick is received. The component will stop producing packets if the threshold is met or when the queue is empty, whichever happens first.
+   -- Max_Sends_Per_Tick : Interfaces.Unsigned_16 - The maximum number of sends that this component will produce when a tick is received. The component will stop producing packets if the threshold is met or when the queue is empty, whichever happens first.
    --
    overriding procedure Init (Self : in out Instance; Max_Sends_Per_Tick : in Interfaces.Unsigned_16) is
    begin

@@ -13,7 +13,7 @@ events:
     description: Override condition cleared for the data product of the provided ID.
     param_type: Data_Product_Id.T
   - name: Override_Cleared_For_All
-    description: Override condition cleared for all data productd.
+    description: Override condition cleared for all data products.
   - name: Data_Product_Overridden
     description: Data product overridden by command.
     param_type: Data_Product_Header.T

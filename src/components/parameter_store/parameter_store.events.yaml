@@ -13,7 +13,7 @@ events:
     description: Parameter table updated from a received memory region.
     param_type: Memory_Region.T
   - name: Parameter_Table_Fetched
-    description: Starting fetching of the parameters into received memory region.
+    description: Starting parameter fetch into the received memory region.
     param_type: Memory_Region.T
   - name: Invalid_Command_Received
     description: A command was received with invalid parameters.
@@ -25,5 +25,5 @@ events:
     description: A memory region was dropped due to a full queue.
     param_type: Parameters_Memory_Region.T
   - name: Table_Validation_Not_Supported
-    description: Produced a packet with the contents of the parameter store.
+    description: Parameter table validation is not supported.
     param_type: Memory_Region.T

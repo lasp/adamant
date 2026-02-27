@@ -43,7 +43,7 @@ package body Sys_Time_Tests.Implementation is
       Status := To_Sys_Time (Time_Of (Seconds_Count (0), To_Time_Span (Duration (abs (Arg_In)))), To_Return);
       if Status = Overflow and then Print_Flag1 then
          Put_Line ("Long_Float_to_Sys_Time returned an Overflow status, input Long_Float was outside valid range:" & Long_Float'Image (Arg_In));
-         Put_Line ("This is the expected for some conversions and is part of the test");
+         Put_Line ("This is expected for some conversions and is part of the test");
          New_Line;
          Print_Flag1 := False;
       end if;
@@ -118,7 +118,7 @@ package body Sys_Time_Tests.Implementation is
          if Status /= Success then
             if Print_Flag2  then
                Put_Line ("random add span returned " & Sys_Time_Status'Image (Status));
-               Put_Line ("This is the expected for some additions and is part of the test");
+               Put_Line ("This is expected for some additions and is part of the test");
                New_Line;
             end if;
             Print_Flag2 := False;
@@ -578,7 +578,7 @@ package body Sys_Time_Tests.Implementation is
       Status : Sys_Time.Arithmetic.Sys_Time_Status;
       Time_Correction : Signed_Delta_Time.T;
 
-      -- This test below reveals and issue if we do not handle the case where
+      -- This test below reveals an issue if we do not handle the case where
       -- fixed point duration is rounded UP while converting to an unsigned
       -- integer, causing the subseconds to overflow.
       procedure Test_Subtract_Problematic is

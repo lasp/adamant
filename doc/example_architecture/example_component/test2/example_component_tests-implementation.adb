@@ -52,7 +52,7 @@ package body Example_Component_Tests.Implementation is
       -- have requested Time one time through the Sys_Time.T connector.
       Natural_Assert.Eq (Self.Tester.Sys_Time_T_Return_History.Get_Count, 1);
 
-      -- The component should have send out 3 packets, one two each of its
+      -- The component should have sent out 3 packets, one to each of its
       -- 3 Packet.T connections. All three of these connectors are connected
       -- to the tester Packet_T_Recv_Sync connector, so we should have gotten
       -- 3 packets in that history.
@@ -83,7 +83,7 @@ package body Example_Component_Tests.Implementation is
       -- Send the example component a tick:
       Self.Tester.Tick_T_Send ((Time => (0, 0), Count => 0));
 
-      -- This is going to now not going to fail.
+      -- This is now not going to fail.
       Natural_Assert.Eq (Self.Tester.Packet_T_Recv_Sync_History.Get_Count, 3);
    end Test_That_Should_Fail;
 

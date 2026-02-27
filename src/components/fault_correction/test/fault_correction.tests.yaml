@@ -12,7 +12,7 @@ tests:
   - name: Test_Reset_Data_Products
     description: This unit test tests the reset data products command.
   - name: Test_Unrecognized_Fault_Id
-    description: This unit test makes sure that commanding a change to a response with an unknown fault ID fauls.
+    description: This unit test makes sure that commanding a change to a response with an unknown fault ID fails.
   - name: Test_Full_Queue
     description: This unit test tests that appropriate actions are taken when items are dropped off a full queue.
   - name: Test_Invalid_Command

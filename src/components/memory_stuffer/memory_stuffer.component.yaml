@@ -3,13 +3,13 @@ description: |
   The memory stuffer component is an active component that can stuff (write to) memory regions. It reports an error if an action is requested on a memory region outside of the address space that it is configured with during initialization. The component can manage both protected memory regions (which require an arm command prior to stuffing) and unprotected regions (which require no arm prior to stuffing). In addition, the component has a connector to accept a memory region copy request, which will stuff memory with data from another system address. The memory region copy and release connectors may be disconnected if this feature is not needed.
 execution: active
 init:
-  description: This component requires a list of memory regions which it can write to. These regions can either be protected (requiring and arm command prior to execution) or unprotected, as specified by the second parameter.
+  description: This component requires a list of memory regions which it can write to. These regions can either be protected (requiring an arm command prior to execution) or unprotected, as specified by the second parameter.
   parameters:
-    - name: memory_Regions
+    - name: Memory_Regions
       type: Memory_Manager_Types.Memory_Region_Array_Access
       not_null: true
       description: An access to a list of memory regions.
-    - name: memory_Region_Protection_List
+    - name: Memory_Region_Protection_List
       type: Memory_Manager_Types.Memory_Protection_Array_Access
       default: "null"
       description: An access to a list of the protected/unprotected state of each memory region. The index in this array corresponds to the index of the memory region affected in the previous parameter. If the array is null, then it is assumed that all memory regions are unprotected.

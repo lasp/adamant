@@ -2,6 +2,6 @@
 description: Single component record containing the ID for a command registration request.
 fields:
   - name: Registration_Id
-    description: The registration ID. A ID assigned to each registration which can be used for anything.
+    description: The registration ID. An ID assigned to each registration which can be used for anything.
     type: Command_Types.Command_Registration_Id
     format: U16

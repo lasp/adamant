@@ -21,7 +21,7 @@ init:
       type: Basic_Types.Byte_Array_Access
       default: "null"
       description: "A pointer to an allocation of bytes to be used for storing log data. If this is set to null, then memory will be allocated on the heap using the \"size\" parameter instead. Note: This must be set to null if the \"size\" parameter is positive below."
-    - name: meta_Data
+    - name: Meta_Data
       type: Circular_Buffer_Meta.T_Access
       default: "null"
       description: "A pointer to an allocation of a meta data record for storing the log meta data. This can be used to place the meta data where desired in memory. This item must be set to null if \"size\" is positive, and non-null if \"bytes\" is non-null."
@@ -29,7 +29,7 @@ init:
       type: Integer
       default: "-1"
       description: "The number of bytes to allocate on the heap for memory storage. Note: This must be set to a negative value if the \"bytes\" parameters is not null."
-    - name: initial_Mode
+    - name: Initial_Mode
       type: Logger_Enums.Logger_Mode.E
       default: "Logger_Enums.Logger_Mode.Disabled"
       description: "The initial mode of the logger (enabled/disabled) upon initialization"

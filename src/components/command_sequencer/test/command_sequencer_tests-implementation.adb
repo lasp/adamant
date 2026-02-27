@@ -1310,7 +1310,7 @@ package body Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
 
-      -- Ok n ext telemetry comparison = Passes
+      -- Ok next telemetry comparison = Passes
       T.Component_B_Data_Product_1 := (Value => 1);
       T.Tick_T_Send (((0, 0), 0));
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -3914,7 +3914,7 @@ package body Command_Sequencer_Tests.Implementation is
          Stack_Level => 0
       ));
 
-      -- Expect acommand to be output:
+      -- Expect a command to be output:
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 1);
       Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (1), Component_A_Commands.Command_3 ((Value => 19)));
 

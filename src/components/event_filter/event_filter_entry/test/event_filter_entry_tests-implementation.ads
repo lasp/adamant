@@ -2,7 +2,7 @@
 -- Event_Filter_Entry Tests Spec
 --------------------------------------------------------------------------------
 
--- This is a unit test suite for the two_counter_entry object for help with the event_limiter
+-- This is a unit test suite for the event_filter_entry package
 package Event_Filter_Entry_Tests.Implementation is
    -- Test data and state:
    type Instance is new Event_Filter_Entry_Tests.Base_Instance with private;

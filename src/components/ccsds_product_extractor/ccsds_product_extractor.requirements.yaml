@@ -1,7 +1,7 @@
 ---
-description: The requirements for the CCSDS downsampler component are specified below.
+description: The requirements for the CCSDS Product Extractor component are specified below.
 requirements:
-  - text: The component shall take receive ccsds packets and extract a data type if it is part of the initial list of products.
+  - text: The component shall receive CCSDS packets and extract a data type if it is part of the initial list of products.
   - text: The component shall check the type of the extracted product and verify that it is valid.
   - text: The component shall forward data products when extracted and verified.
   - text: The component shall send errors when the extraction is invalid or out of the range of the packet.

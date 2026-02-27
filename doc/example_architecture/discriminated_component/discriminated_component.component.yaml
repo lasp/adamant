@@ -8,14 +8,14 @@ discriminant:
   # Optional - list of parameters to pass to component's discriminant
   parameters:
       # Required - parameter name
-    - name: packets_Per_Tick
+    - name: Packets_Per_Tick
       # Required - parameter type
       type: Natural
       # Optional - puts "not null" in front of the type. Defaults to false, and only should be used for access types
       not_null: false
       # Optional - parameter description
       description: The number of packets to send every time the Tick_T_Recv_Sync connector is invoked.
-    - name: enabled_At_Startup
+    - name: Enabled_At_Startup
       type: Boolean
       description: If True, packets will be produced for every call to Tick_T_Recv_Sync. If False, no packets will be produced.
 connectors:

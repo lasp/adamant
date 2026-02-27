@@ -17,7 +17,7 @@ with Data_Product;
 with Packed_U32.Representation;
 with Tat_State.Representation;
 
--- This is the Time of Tone Master component. It provides an alternate implementation to the Time at Tone Master component also provided within Adamant. This implementation could potentially provide more accurate time syncing if your system has the ability to accurately determine the time at which the tone is sent outside of this component (ie. the time when the tone leaves the serial port). If your tone is implemented in hardware (ie. a GPIO signal) then the standard Time at Tone Master implementation will probably be more accurate.
+-- This is the Time of Tone Master component. It provides an alternate implementation to the Time at Tone Master component also provided within Adamant. This implementation could potentially provide more accurate time syncing if your system has the ability to accurately determine the time at which the tone is sent outside of this component (i.e. the time when the tone leaves the serial port). If your tone is implemented in hardware (i.e. a GPIO signal) then the standard Time at Tone Master implementation will probably be more accurate.
 --
 -- TaT is a protocol used to sync a slave clock to a master clock. Two messages are sent from the master to the slave component. First a 'tone' message is sent which signals to the slave clock to save its current time. Next, a 'time' message is sent which provides the master time at which the 'tone' was sent. This time combined with the time the slave recorded when the 'tone' was received can be used to calculate a time delta of the slave clock with respect to the master. This component implements the master side of the protocol. This component outputs the time message and the tone as Tick.T send connectors. This design is intended to be generic enough to implement time at tone in many different manners on the other end of these connectors. For instance, you could convert the time message Tick.T to a CCSDS packet and the tone Tick.T to a GPIO pulse.
 package Component.Time_Of_Tone_Master.Implementation.Tester is
@@ -101,7 +101,7 @@ package Component.Time_Of_Tone_Master.Implementation.Tester is
    overriding procedure Time_At_Tone_Enabled (Self : in out Instance);
    -- The time at tone has been disabled by command.
    overriding procedure Time_At_Tone_Disabled (Self : in out Instance);
-   -- The component will sent the time at tone message and tone message at the next received tick.
+   -- The component will send the time at tone message and tone message at the next received tick.
    overriding procedure Sending_Sync_Once (Self : in out Instance);
    -- A command was received with invalid parameters.
    overriding procedure Invalid_Command_Received (Self : in out Instance; Arg : in Invalid_Command_Info.T);

@@ -8,7 +8,7 @@ with Sys_Time;
 with Command;
 with Protected_Variables;
 
--- This is the Time of Tone Master component. It provides an alternate implementation to the Time at Tone Master component also provided within Adamant. This implementation could potentially provide more accurate time syncing if your system has the ability to accurately determine the time at which the tone is sent outside of this component (ie. the time when the tone leaves the serial port). If your tone is implemented in hardware (ie. a GPIO signal) then the standard Time at Tone Master implementation will probably be more accurate.
+-- This is the Time of Tone Master component. It provides an alternate implementation to the Time at Tone Master component also provided within Adamant. This implementation could potentially provide more accurate time syncing if your system has the ability to accurately determine the time at which the tone is sent outside of this component (i.e. the time when the tone leaves the serial port). If your tone is implemented in hardware (i.e. a GPIO signal) then the standard Time at Tone Master implementation will probably be more accurate.
 --
 -- TaT is a protocol used to sync a slave clock to a master clock. Two messages are sent from the master to the slave component. First a 'tone' message is sent which signals to the slave clock to save its current time. Next, a 'time' message is sent which provides the master time at which the 'tone' was sent. This time combined with the time the slave recorded when the 'tone' was received can be used to calculate a time delta of the slave clock with respect to the master. This component implements the master side of the protocol. This component outputs the time message and the tone as Tick.T send connectors. This design is intended to be generic enough to implement time at tone in many different manners on the other end of these connectors. For instance, you could convert the time message Tick.T to a CCSDS packet and the tone Tick.T to a GPIO pulse.
 package Component.Time_Of_Tone_Master.Implementation is
@@ -21,8 +21,8 @@ package Component.Time_Of_Tone_Master.Implementation is
    --------------------------------------------------
    --
    -- Init Parameters:
-   -- sync_Period : Positive - The number of ticks between sending clock sync messages.
-   -- enabled_State : Tat_State.Tat_State_Type - Is time at tone enabled or disabled by default at startup.
+   -- Sync_Period : Positive - The number of ticks between sending clock sync messages.
+   -- Enabled_State : Tat_State.Tat_State_Type - Is time at tone enabled or disabled by default at startup.
    --
    overriding procedure Init (Self : in out Instance; Sync_Period : in Positive := 1; Enabled_State : in Tat_State.Tat_State_Type := Tat_State.Enabled);
 
@@ -51,7 +51,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance);

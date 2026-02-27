@@ -1,27 +1,27 @@
 ---
 description: The set of parameters for the gains in the pid controller
 parameters:
-  - name: p_Gain
+  - name: P_Gain
     description: The proportional gain used in the PID controller. Uses the error to determine the first step of control
     type: Packed_F32.T
     default: "(Value => 0.0)"
-  - name: i_Gain
+  - name: I_Gain
     description: The integral gain used in the PID controller. Uses previous errors to help smoothly reach the desired location as well as determine overshoot and settling time.
     type: Packed_F32.T
     default: "(Value => 0.0)"
-  - name: d_Gain
+  - name: D_Gain
     description: The derivative gain used in the PID controller. Determines how quickly the controller will attempt to reach the commanded position.
     type: Packed_F32.T
     default: "(Value => 0.0)"
-  - name: n_Filter
+  - name: N_Filter
     description: The derivative filter used in the PID controller. Used in the control law to help dampen the derivative gain.
     type: Packed_F32.T
     default: "(Value => 0.0)"
-  - name: i_Min_Limit
+  - name: I_Min_Limit
     description: The minimum (negative direction) integral windup limit used in the PID controller. If the integrator goes below this limit then the integrator is capped at this limit. This prevents runaway integral windup in the negative direction. The negative and positive limits are separated to allow configuration of asymmetrical windup limits, which might be needed for control systems that cannot control in both directions, ie. a heater controller.
     type: Packed_F32.T
     default: "(Value => -1.0 * Short_Float'Large)"
-  - name: i_Max_Limit
+  - name: I_Max_Limit
     description: The maximum (positive direction) integral windup limit used in the PID controller. If the integrator goes above this limit then the integrator is capped at this limit. This prevents runaway integral windup in the positive direction. The negative and positive limits are separated to allow configuration of asymmetrical windup limits, which might be needed for control systems that cannot control in both directions, ie. a heater controller.
     type: Packed_F32.T
     default: "(Value => Short_Float'Large)"

@@ -82,7 +82,7 @@ classdef Bit_Array
                 data_idx = data_idx + 1;
             end
 
-            % Convert to two's compliment if necessary:
+            % Convert to two's complement if necessary:
             if is_signed
               if data < 2^(num_bits - 1)
                 data = typecast(data, orig_type);
@@ -130,7 +130,7 @@ classdef Bit_Array
                data = typecast(data, type);
             end
 
-            % Convert two's compliment to unsigned representation for bit operations:
+            % Convert two's complement to unsigned representation for bit operations:
             if is_signed
               if data >= 0
                 data = typecast(data, type);

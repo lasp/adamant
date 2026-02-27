@@ -20,7 +20,7 @@ package Component.Rate_Group.Implementation is
    --
    -- Init Parameters:
    -- Ticks_Per_Timing_Report : Interfaces.Unsigned_16 - The period (in ticks) that the component should wait before sending a timing report data product. A value of zero prevents the component from sending the data product.
-   -- Timing_Report_Delay_Ticks : Interfaces.Unsigned_16 - The number of tickes the component waits before calculating and sending a timing report data product. It is common for the first few executions of a rate group to have execution times longer than normal due to startup logic. In this case, it is often desirable to ignore these cycles in the timing report, especially for the maximum values.
+   -- Timing_Report_Delay_Ticks : Interfaces.Unsigned_16 - The number of ticks the component waits before calculating and sending a timing report data product. It is common for the first few executions of a rate group to have execution times longer than normal due to startup logic. In this case, it is often desirable to ignore these cycles in the timing report, especially for the maximum values.
    -- Issue_Time_Exceeded_Events : Boolean - If set to True, an event will be issued any time the maximum execution or wall clock time of the component is exceeded. If set to False, these events will never be issued. The same information is accessible via the component's data products, so enabling the event may become a redundant annoyance.
    --
    overriding procedure Init (Self : in out Instance; Ticks_Per_Timing_Report : in Interfaces.Unsigned_16 := 1; Timing_Report_Delay_Ticks : in Interfaces.Unsigned_16 := 3; Issue_Time_Exceeded_Events : in Boolean := False);
@@ -52,7 +52,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance) is null;

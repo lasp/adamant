@@ -18,8 +18,8 @@ package Component.Queue_Monitor.Implementation is
    -- This component requires a list of components whose queues it needs to monitor.
    --
    -- Init Parameters:
-   -- queued_Component_List : Component.Component_List_Access - A list of components to monitor.
-   -- packet_Period : Interfaces.Unsigned_16 - The period (in ticks) of how often to send out the queue usage packet. A value of zero disable sending of the packet.
+   -- Queued_Component_List : Component.Component_List_Access - A list of components to monitor.
+   -- Packet_Period : Interfaces.Unsigned_16 - The period (in ticks) of how often to send out the queue usage packet. A value of zero disables sending of the packet.
    --
    overriding procedure Init (Self : in out Instance; Queued_Component_List : in not null Component.Component_List_Access; Packet_Period : in Interfaces.Unsigned_16 := 1);
 
@@ -42,7 +42,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance);

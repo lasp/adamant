@@ -1,5 +1,5 @@
 ---
-description: A packed record which holds an fault identifier.
+description: A packed record which holds a fault identifier.
 fields:
   - name: Id
     description: The fault identifier

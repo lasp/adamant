@@ -1,5 +1,5 @@
 ---
-description: These are the commands for the Parameter Store component.
+description: These are the commands for the Sequence Store component.
 commands:
   - name: Activate_Slot
     description: Activate a sequence slot so that its contents can be fetched.
@@ -13,4 +13,4 @@ commands:
   - name: Check_All_Slots
     description: Check the CRC of sequences in all sequence store slots to see if they match the CRCs found in their headers.
   - name: Dump_Summary
-    description: Produce a packet with the currently storage slot summary information.
+    description: Produce a packet with the currently stored slot summary information.

@@ -142,7 +142,7 @@ package body Component.Command_Router.Implementation.Tester is
       Self.Command_Response_T_To_Forward_Recv_Sync_History.Push (Arg);
    end Command_Response_T_To_Forward_Recv_Sync;
 
-   -- This connector is used to register the Command Router's NOOP commands at initialization, and respond to NOOP commands during ececution. It is usually connected in loopback to the Command_Response_T_Recv_Async connector.
+   -- This connector is used to register the Command Router's NOOP commands at initialization, and respond to NOOP commands during execution. It is usually connected in loopback to the Command_Response_T_Recv_Async connector.
    overriding procedure Command_Response_T_Recv_Sync (Self : in out Instance; Arg : in Command_Response.T) is
    begin
       -- Push the argument onto the test history for looking at later:

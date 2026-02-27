@@ -38,7 +38,7 @@ package body Variable_Stream_Serializer is
       Num_Bytes_Serialized : Natural := 0;
    begin
       -- Read the minimum length of bytes from the stream. We are trying to read the header of the variable type
-      -- so that we can compute it's full size.
+      -- so that we can compute its full size.
       Ada.Streams.Read (Stream.all, Bytes (Constrained_Stream_Array'First .. Constrained_Stream_Array'First + Stream_Element_Offset (Minimum_Length - 1)), Ignore);
 
       -- Compute the variable type's full size:

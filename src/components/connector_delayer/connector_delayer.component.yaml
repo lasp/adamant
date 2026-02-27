@@ -7,7 +7,7 @@ execution: active
 with:
   - Serializer_Types
 generic:
-  description: The is generic component in that it can be instantiated to protect a connector of any type at compile time.
+  description: This is a generic component in that it can be instantiated to delay a connector of any type at compile time.
   parameters:
     - name: T
       description: The generic type of data passed in and out of the component.

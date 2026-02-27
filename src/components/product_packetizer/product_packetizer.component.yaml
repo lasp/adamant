@@ -1,6 +1,6 @@
 ---
 description: |
-  The product packetizer requests data products from an external component and packetizes them into packets at a configurable rate. The packets that this component produces is configured via an autocoded table provided at instantiation.
+  The product packetizer requests data products from an external component and packetizes them into packets at a configurable rate. The packets that this component produces are configured via an autocoded table provided at instantiation.
 execution: passive
 discriminant:
   description: This component requires a list of packet descriptions which outline the packets that the component is responsible for building. This list should be provided as an autocoded output from a product_packets.yaml file.
@@ -10,7 +10,7 @@ discriminant:
       description: The list of packets to packetize.
       not_null: true
 init:
-  description: This initialization function is used to initialize the roll-over value for the packetizer's internal counter. It is calculated as the largest 32-bit multiple of all the provided periods in the packet_List. This ensures that no packets are skipped or sent too often when a rollover occurs. Note, that this only guarantees expected roll-over behavior if the period of the packets are not changed during runtime via command. If this happens, then the user accepts that a rollover may cause unwanted behavior.
+  description: This initialization function is used to initialize the roll-over value for the packetizer's internal counter. It is calculated as the largest 32-bit multiple of all the provided periods in the Packet_List. This ensures that no packets are skipped or sent too often when a rollover occurs. Note, that this only guarantees expected roll-over behavior if the period of the packets are not changed during runtime via command. If this happens, then the user accepts that a rollover may cause unwanted behavior.
   parameters:
     - name: Commands_Dispatched_Per_Tick
       type: Positive

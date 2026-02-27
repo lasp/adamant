@@ -3,21 +3,21 @@ description:
 
   This component is a generic component for PID control that uses proportional, integral, and derivative gains. The component input is the measured and commanded positions which is used to find an error, as well as a feed-forward value to overcome friction and jitter.
   The component uses the error with the PID gains that are set by the user in the parameter table to perform the correct control for the particular system. Any one of the gains can be set to 0 to turn off that particular term.
-  The component also has the ability to limit the integral term to prevent wind-up of that term and potential kickback in the physical system. There are also optional statistics for the mean, variance, and max of the error which is disabled by setting the moving_Average_Max_Samples initialization parameter to 0.
+  The component also has the ability to limit the integral term to prevent wind-up of that term and potential kickback in the physical system. There are also optional statistics for the mean, variance, and max of the error which is disabled by setting the Moving_Average_Max_Samples initialization parameter to 0.
   Lastly, the component also has the ability to produce diagnostics over a particular amount of time set by command, which contains the error and reference positions.
 execution: passive
 init:
   parameters:
-    - name: control_Frequency
+    - name: Control_Frequency
       description: The frequency in Hz at which the PID controller is being driven. This determines the time step for the PID controller to use in the algorithm.
       type: Short_Float
-    - name: database_Update_Period
+    - name: Database_Update_Period
       type: Unsigned_16
       description: The period in which to update the data products
-    - name: moving_Average_Max_Samples
+    - name: Moving_Average_Max_Samples
       type: Natural
       description: The number of diagnostic samples to keep to perform the mean, variance, and max for the maximum duration
-    - name: moving_Average_Init_Samples
+    - name: Moving_Average_Init_Samples
       type: Integer
       description: The number of samples to initialize the object with. Must be less than the max, and is optional to set to the max with -1
       default: "-1"

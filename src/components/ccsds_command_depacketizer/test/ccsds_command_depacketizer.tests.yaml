@@ -12,7 +12,7 @@ tests:
   - name: Test_Packet_Too_Large
     description: This unit test makes sure that packets that are too large to hold a valid command are reported and dropped.
   - name: Test_Packet_Without_Secondary_Header
-    description: This unit test makes sure that packets that do not include a secondary header are are reported and dropped.
+    description: This unit test makes sure that packets that do not include a secondary header are reported and dropped.
   - name: Test_Pad_Bytes
     description: This unit test makes use of the function code in the secondary header to denote a different number of pad bytes. It makes sure the component responds appropriately.
   - name: Test_Reset_Counts

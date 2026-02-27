@@ -269,7 +269,7 @@ package body Component.Precision_Time_Protocol_Master.Implementation.Tester is
       Self.Unexpected_Messages_Received_History.Push (Arg);
    end Unexpected_Messages_Received;
 
-   -- The disable/enable state of the time at tone component.
+   -- The disable/enable state of the PTP component.
    overriding procedure Precision_Time_Protocol_State (Self : in out Instance; Arg : in Ptp_State.T) is
    begin
       -- Push the argument onto the test history for looking at later:

@@ -20,9 +20,9 @@ package Component.Event_Filter.Implementation is
    --------------------------------------------------
    --
    -- Init Parameters:
-   -- event_Id_Start_Range : Event_Types.Event_Id - The event ID that begins the range of ids that the component will include for filtering of events.
-   -- event_Id_End_Range : Event_Types.Event_Id - The event ID that ends the range of ids that the component will include for filtering of events.
-   -- event_Filter_List : Event_Filter_Entry.Event_Id_List - A list of event IDs that are filtered by default
+   -- Event_Id_Start_Range : Event_Types.Event_Id - The event ID that begins the range of ids that the component will include for filtering of events.
+   -- Event_Id_End_Range : Event_Types.Event_Id - The event ID that ends the range of ids that the component will include for filtering of events.
+   -- Event_Filter_List : Event_Filter_Entry.Event_Id_List - A list of event IDs that are filtered by default
    --
    overriding procedure Init (Self : in out Instance; Event_Id_Start_Range : in Event_Types.Event_Id; Event_Id_End_Range : in Event_Types.Event_Id; Event_Filter_List : in Event_Filter_Entry.Event_Id_List := [1 .. 0 => 0]);
 
@@ -74,7 +74,7 @@ private
    -- set up code. This method is generally called by the assembly
    -- main.adb after all component initialization and tasks have been started.
    -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, ie. command registration, initial
+   -- safely until everything is up and running, i.e. command registration, initial
    -- data product updates. This procedure should be implemented to do these things
    -- if necessary.
    overriding procedure Set_Up (Self : in out Instance);

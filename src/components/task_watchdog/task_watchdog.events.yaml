@@ -14,7 +14,7 @@ events:
     description: Event indicating there was an error for the index range in the set limit command.
     param_type: Packed_Connector_Index.T
   - name: Watchdog_Action_Change_Index_Out_Of_Range
-    description: Event indicating there was an error for the index range in the set limit command.
+    description: Event indicating there was an error for the index range in the set action command.
     param_type: Packed_Connector_Index.T
   - name: Watchdog_Action_Change_Invalid_Transition_To_Fault
     description: Event indicating there was an error trying to set the action to fault. The petter did not have a fault declared in the model so the action cannot be set to fault.

@@ -64,11 +64,11 @@ package body Byte_Array_Util is
       Ignore := Safe_Left_Copy (Dest, Src);
    end Safe_Left_Copy;
 
-   -- Create a bit mask of ones starting from LSB. ie. for a size of 6 create the mask
+   -- Create a bit mask of ones starting from LSB. i.e. for a size of 6 create the mask
    -- 0x3F or 0b00111111
    function Bit_Mask (Num_Ones : in Natural) return Unsigned_8 is (Shift_Left (1, Num_Ones) - 1)
       with Inline => True;
-   -- Does a modula 8 operation but the result is between 1-8 instead of 0-7. So 8 is traded for 0.
+   -- Does a modulo 8 operation but the result is between 1-8 instead of 0-7. So 8 is traded for 0.
    function Mod_1_8 (Val : in Natural) return Natural is (((Val - 1) mod 8) + 1)
       with Inline => True;
 
@@ -98,7 +98,7 @@ package body Byte_Array_Util is
          -- Index for grabbing bytes out of source array.
          Src_Idx : Natural := Last_Src_Idx;
          -- Calculate the number of bits we need to shift everything right, this 8 minus the offset mod 8,
-         -- ie. the number of padding bits between the last bit we care about and the last whole byte we need
+         -- i.e. the number of padding bits between the last bit we care about and the last whole byte we need
          -- data from.
          Left_Shift : constant Natural := (Offset + Size) mod Byte'Object_Size;
          Right_Shift : constant Natural := (Byte'Object_Size - Left_Shift) mod Byte'Object_Size;
@@ -127,7 +127,7 @@ package body Byte_Array_Util is
       end;
 
       -- If the value we extracted is signed, then we need to handle the case where the value is
-      -- negative (ie. the left-most bit is set to 1). If this is the case, and we extracted some
+      -- negative (i.e. the left-most bit is set to 1). If this is the case, and we extracted some
       -- value with a size less than the 32-bit poly type, then we have leading zeros in the polytype
       -- which is not going to give the appropriate value for a 32-bit signed integer (or any integer
       -- of greater representation size than the size of the extracted value). In this case we need

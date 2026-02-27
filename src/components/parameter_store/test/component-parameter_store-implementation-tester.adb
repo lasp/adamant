@@ -182,7 +182,7 @@ package body Component.Parameter_Store.Implementation.Tester is
       Self.Parameter_Table_Updated_History.Push (Arg);
    end Parameter_Table_Updated;
 
-   -- Starting fetching of the parameters into received memory region.
+   -- Starting parameter fetch into the received memory region.
    overriding procedure Parameter_Table_Fetched (Self : in out Instance; Arg : in Memory_Region.T) is
    begin
       -- Push the argument onto the test history for looking at later:
@@ -210,7 +210,7 @@ package body Component.Parameter_Store.Implementation.Tester is
       Self.Memory_Region_Dropped_History.Push (Arg);
    end Memory_Region_Dropped;
 
-   -- Produced a packet with the contents of the parameter store.
+   -- Parameter table validation is not supported.
    overriding procedure Table_Validation_Not_Supported (Self : in out Instance; Arg : in Memory_Region.T) is
    begin
       -- Push the argument onto the test history for looking at later:
@@ -222,7 +222,7 @@ package body Component.Parameter_Store.Implementation.Tester is
    -----------------------------------------------
    -- Description:
    --    Packets for the Parameter Store component.
-   -- This packet contains a copy of all the parameter stored and managed by this component.
+   -- This packet contains a copy of all the parameters stored and managed by this component.
    overriding procedure Stored_Parameters (Self : in out Instance; Arg : in Packet.T) is
    begin
       -- Push the argument onto the test history for looking at later:

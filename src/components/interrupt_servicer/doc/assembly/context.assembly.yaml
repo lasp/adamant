@@ -10,9 +10,9 @@ components:
       - "Interrupt_Data_Type => Control_Data.T"
       - "Set_Interrupt_Data_Time => Control_Data_Set_Time"
     discriminant:
-      - "interrupt_Priority => System.Interrupt_Priority'Last"
-      - "interrupt_Id => Ada.Interrupts.Names.SIGUSR1"
-      - "custom_Interrupt_Procedure => Control_Data_Interrupt_Handler'Access"
+      - "Interrupt_Priority => System.Interrupt_Priority'Last"
+      - "Interrupt_Id => Ada.Interrupts.Names.SIGUSR1"
+      - "Custom_Interrupt_Procedure => Control_Data_Interrupt_Handler'Access"
 connections:
   - from_component: Interrupt_Servicer_Instance
     from_connector: Interrupt_Data_Type_Send

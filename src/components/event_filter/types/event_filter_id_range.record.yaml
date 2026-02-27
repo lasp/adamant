@@ -1,10 +1,10 @@
 ---
-description: This record contains the definition for a two event ID type for ranges in the event limiter commands as well as an issue packet type for issuing packets
+description: This record contains the definition for a two event ID type for ranges in the event filter commands as well as an issue packet type for issuing packets
 fields:
-  - name: start_Event_Id
+  - name: Start_Event_Id
     description: The starting event ID to begin the range
     type: Event_Id.T
-  - name: stop_Event_Id
+  - name: Stop_Event_Id
     description: The last event ID to end the range
     type: Event_Id.T
   - name: Issue_State_Packet

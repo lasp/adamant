@@ -1,5 +1,5 @@
 ---
-description: A passive component which sends ccsds
+description: A passive component which sends commands
 execution: either
 connectors:
   - type: Command.T

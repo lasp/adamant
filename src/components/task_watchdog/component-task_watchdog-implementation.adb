@@ -146,7 +146,7 @@ package body Component.Task_Watchdog.Implementation is
                   if Record_Slot = 3 or else Index = (Pet_T_Recv_Sync_Index'First + Self.Pet_T_Recv_Sync_Count - 1) then
                      -- Note: We won't overflow this based on assertions in Init.
                      To_Send.Buffer (Product_Buffer_Index) := State_Byte;
-                     pragma Annotate (GNATSAS, False_Positive, "array index check", "Product_Buffer_Index bounds guaranteed assertions in the Init");
+                     pragma Annotate (GNATSAS, False_Positive, "array index check", "Product_Buffer_Index bounds guaranteed by assertions in the Init");
                      if Product_Buffer_Index < Data_Product_Types.Data_Product_Buffer_Length_Type'Last then
                         Product_Buffer_Index := @ + 1;
                      end if;

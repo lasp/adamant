@@ -1,6 +1,6 @@
 ---
 description: |
-  This active component receives memory pointer information on an asynchronous queue. It then reads the data that these pointers reference into packets, producing multiple maximum sized packets, if necessary, to packetize the entire memory region. This component is similar to the Memory Packetizer except that all packets produced have the same packet ID, assigned to this component at initialization. This component ignores the ID field found in the Memory_Dump_Recv_Sync connector. Note that it does the packetization process on its own task. The priority of this task can be tuned by the user. Usually, this component will be made low priority, so packetization can happen in the background while nothing more important is running.
+  This active component receives memory pointer information on an asynchronous queue. It then reads the data that these pointers reference into packets, producing multiple maximum sized packets, if necessary, to packetize the entire memory region. This component is similar to the Memory Packetizer except that all packets produced have the same packet ID, assigned to this component at initialization. This component ignores the ID field found in the Memory_Dump_Recv_Async connector. Note that it does the packetization process on its own task. The priority of this task can be tuned by the user. Usually, this component will be made low priority, so packetization can happen in the background while nothing more important is running.
 execution: active
 init:
   description: This initialization function is used to set a threshold for the maximum number of packets that the component will produce in a single time period. A time period is measured in an integer number of seconds.
@@ -11,7 +11,7 @@ init:
     - name: Time_Period_In_Seconds
       type: Positive
       default: "1"
-      description: The time period in seconds over which the measure the number of packets produced.
+      description: The time period in seconds over which to measure the number of packets produced.
 connectors:
   - description: Send a packet of data.
     type: Packet.T

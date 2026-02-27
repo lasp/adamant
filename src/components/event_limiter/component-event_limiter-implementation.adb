@@ -99,10 +99,10 @@ package body Component.Event_Limiter.Implementation is
    --------------------------------------------------
    --
    -- Init Parameters:
-   -- event_Id_Start : Event_Types.Event_Id - The number of packets that the component contains internally. This is the available buffer that the component has to store events. When all packets are exhausted, then the component begins dropping events. The component needs to be at least double buffered, meaning a minimum of two packets need to be allocated.
-   -- event_Id_Stop : Event_Types.Event_Id - The number of ticks that can be received before a partial packet timeout occurs. When a partial packet timeout occurs, a packet containing at least one event is sent out, and then the timeout is reset. A value of zero passed for this parameter will disable the partial packet timeout, meaning only full packets are ever sent out of the component.
-   -- event_Disable_List : Two_Counter_Entry.Event_Id_List - A list of event IDs that are enabled by default
-   -- event_Limit_Persistence : Two_Counter_Entry.Persistence_Type - The initial persistence of the number of events to allow before limiting them between ticks (1 to 7)
+   -- Event_Id_Start : Event_Types.Event_Id - The event ID that begins the range of ids that the component will include for potential limiting of events.
+   -- Event_Id_Stop : Event_Types.Event_Id - The event ID that ends the range of ids that the component will include for potential limiting of events.
+   -- Event_Disable_List : Two_Counter_Entry.Event_Id_List - A list of event IDs that are enabled by default
+   -- Event_Limit_Persistence : Two_Counter_Entry.Persistence_Type - The initial persistence of the number of events to allow before limiting them between ticks (1 to 7)
    --
    overriding procedure Init
       (Self : in out Instance; Event_Id_Start : in Event_Types.Event_Id; Event_Id_Stop : in Event_Types.Event_Id; Event_Disable_List : in Two_Counter_Entry.Event_Id_List := [1 .. 0 => 0]; Event_Limit_Persistence : in Two_Counter_Entry.Persistence_Type)
@@ -153,7 +153,7 @@ package body Component.Event_Limiter.Implementation is
                      Num_Event_Limited_Event.Event_Id_Limited_Array (Integer (Num_Event_Limited_Event.Num_Event_Ids)) := Dec_Event_Id;
                      Num_Event_Limited_Event.Num_Event_Ids := @ + 1;
                   end if;
-                  -- Assert on the status. We know the range so we shouldn't get an invalid_Id error
+                  -- Assert on the status. We know the range so we shouldn't get an Invalid_Id error
                when Invalid_Id =>
                   pragma Assert (False, "Invalid_Id found when decrementing all event limiter counters which should not be possible: " & Natural'Image (Natural (Dec_Event_Id)));
             end case;
@@ -246,7 +246,7 @@ package body Component.Event_Limiter.Implementation is
       Self.Event_Array.Increment_Counter (Arg.Header.Id, Status);
       -- Only when status is an Event_Max_Limit, then we don't do anything. Otherwise, the event gets passed on
       case Status is
-         -- When invalid or successful, we just pass through the event (dont need to know if enabled or disabled)
+         -- When invalid or successful, we just pass through the event (don't need to know if enabled or disabled)
          when Success | Invalid_Id =>
             Self.Event_Forward_T_Send_If_Connected (Arg);
             -- If we hit a max, then the package takes care of the accounting and knows it was enabled.
@@ -269,7 +269,7 @@ package body Component.Event_Limiter.Implementation is
    -- Command handler primitives:
    -----------------------------------------------
    -- Description:
-   --    These are the commands for the event packetizer component.
+   --    These are the commands for the event limiter component.
    -- Enable the event limiter for a specific event ID.
    overriding function Enable_Event_Limit (Self : in out Instance; Arg : in Event_Single_State_Cmd_Type.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
@@ -291,7 +291,7 @@ package body Component.Event_Limiter.Implementation is
          when Issue_Packet_Type.Issue =>
             Ret := Self.Dump_Event_States;
          when Issue_Packet_Type.No_Issue =>
-            null; -- Dont send a packet so nothing to do
+            null; -- Don't send a packet so nothing to do
       end case;
 
       return Ret;
@@ -318,7 +318,7 @@ package body Component.Event_Limiter.Implementation is
          when Issue_Packet_Type.Issue =>
             Ret := Self.Dump_Event_States;
          when Issue_Packet_Type.No_Issue =>
-            null; -- Dont send a packet so nothing to do
+            null; -- Don't send a packet so nothing to do
       end case;
 
       return Ret;
@@ -355,7 +355,7 @@ package body Component.Event_Limiter.Implementation is
          when Issue_Packet_Type.Issue =>
             Ret := Self.Dump_Event_States;
          when Issue_Packet_Type.No_Issue =>
-            null; -- Dont send a packet so nothing to do
+            null; -- Don't send a packet so nothing to do
       end case;
 
       return Ret;
@@ -392,7 +392,7 @@ package body Component.Event_Limiter.Implementation is
          when Issue_Packet_Type.Issue =>
             Ret := Self.Dump_Event_States;
          when Issue_Packet_Type.No_Issue =>
-            null; -- Dont send a packet so nothing to do
+            null; -- Don't send a packet so nothing to do
       end case;
 
       return Ret;
@@ -443,7 +443,7 @@ package body Component.Event_Limiter.Implementation is
       use Command_Execution_Status;
    begin
       Self.Send_Event_State_Packet.Set_Var (True);
-      Self.Event_T_Send_If_Connected (Self.Events.Dump_Event_States_Recieved (Self.Sys_Time_T_Get));
+      Self.Event_T_Send_If_Connected (Self.Events.Dump_Event_States_Received (Self.Sys_Time_T_Get));
       return Success;
    end Dump_Event_States;
 

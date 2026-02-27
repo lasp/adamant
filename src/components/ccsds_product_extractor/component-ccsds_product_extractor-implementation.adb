@@ -40,7 +40,7 @@ package body Component.Ccsds_Product_Extractor.Implementation is
       for Packet_Products of Data_Product_Extraction_List.all loop
          -- Fill in the binary tree with the products from the list. Assert that we are not adding a duplicate APID in.
          Search_Status := Self.Extracted_Products_Tree.Search (Packet_Products, Fetched_Entry, Ignore);
-         pragma Assert (not Search_Status, "Apid in the tree already exist!");
+         pragma Assert (not Search_Status, "Apid in the tree already exists!");
          Add_Status := Self.Extracted_Products_Tree.Add (Packet_Products);
          pragma Assert (Add_Status, "Product Extractor tree can not hold all APIDs and associated data in the input list.");
       end loop;

@@ -244,7 +244,7 @@ This section contains what you need to know in order to get started with Adamant
 
 \subsection{Project Setup} \label{Project Setup}
 
-One of the goals of Adamant is to produce highly modular embedded software. This goal does not end with the final deployed system, however. The same principles permeates through the implementation of Adamant and even to how one sets up their project. The Adamant framework itself is currently contained in a single repository that contains the generic code, generators, reusable components, and build system. What is not included in the Adamant repository is a final deployment of embedded software, known in Adamant as an \textit{assembly}. \textit{Assemblies}, by design, are always tailored to a specific project's requirements and target platform. In the Adamant ecosystem, this code is thought of as mission-specific code and thus is always contained in a repository separate from the Adamant framework, which is scoped to be generic and reusable. \\
+One of the goals of Adamant is to produce highly modular embedded software. This goal does not end with the final deployed system, however. The same principles permeate through the implementation of Adamant and even to how one sets up their project. The Adamant framework itself is currently contained in a single repository that contains the generic code, generators, reusable components, and build system. What is not included in the Adamant repository is a final deployment of embedded software, known in Adamant as an \textit{assembly}. \textit{Assemblies}, by design, are always tailored to a specific project's requirements and target platform. In the Adamant ecosystem, this code is thought of as mission-specific code and thus is always contained in a repository separate from the Adamant framework, which is scoped to be generic and reusable. \\
 
 When working with Adamant you will always have a minimum of 2 repositories, one that includes the Adamant framework, and another that contains your mission specific deployment, or \textit{assembly}. However, it may make sense to have 3, 4, or more repositories that make up your system. Adamant poses no limit on how you modularize your system, and allows you to tie the compilation of everything together via the \textit{build path}, which is detailed in Section \ref{The Build Path}. \\
 
@@ -271,7 +271,7 @@ Now that we have the directory set up with the repositories, we need to set up t
 
 Adamant uses a virtual environment for development for a few reasons. First, using a virtual environment makes it easy to install all the necessary dependencies without cluttering up the host system. Secondly, it bypasses the classic ``it works on my machine" problem that is so prevalent in software development, since all developers are using the same exact machine. \\
 
-Developers can be picky about the tools they install, the editors they use, and whether or not to use spaces or tabs (you should use spaces!). Adamant does its best to not force the use of any tool on any developer, with the exception of using \texttt{redo}, discussed in Section \ref{Using Redo}. To accomplish this, the Adamant virtual environment shares the project directory, discussed in the last section, between the host and the virtual machine. In this way, the developer can install whatever tools they want on either the host or the virtual machine, to interact with the system how they please. The only requirement is that you must run build commands, ie. \texttt{redo}, from within the virtual machine via the virtual environment GUI or an \texttt{ssh} session. \\
+Developers can be picky about the tools they install, the editors they use, and whether or not to use spaces or tabs (you should use spaces!). Adamant does its best to not force the use of any tool on any developer, with the exception of using \texttt{redo}, discussed in Section \ref{Using Redo}. To accomplish this, the Adamant virtual environment shares the project directory, discussed in the last section, between the host and the virtual machine. In this way, the developer can install whatever tools they want on either the host or the virtual machine, to interact with the system how they please. The only requirement is that you must run build commands, i.e. \texttt{redo}, from within the virtual machine via the virtual environment GUI or an \texttt{ssh} session. \\
 
 The virtual environment for Adamant is based on Linux, because it is ubiquitous, easy to configure, open source, and widely supported. Currently the virtual environment managed by \href{https://www.docker.com/}{\texttt{\textcolor{blue}{Docker}}}. To ensure that you use the most up to date instructions for setting up the example repository it is recommended you follow the repository specific directions stored in \href{https://github.com/lasp/adamant_example/blob/main/docker/README.md}{\textcolor{blue}{this README.md}}. Please follow those instructions to bring up your machine. \\
 
@@ -302,7 +302,7 @@ Version controlling the configuration file is usually desirable. To accomplish t
 \end{minted}
 \vspace{5mm} %5mm vertical space
 
-You can now modify \textit{project.configuration.yaml} and version control it within your project directory. To tell Adamant to use this file instead of the default configuration file, you need to set the \texttt{ADAMANT\_CONFIGURATION\_YAML} variable, ie.
+You can now modify \textit{project.configuration.yaml} and version control it within your project directory. To tell Adamant to use this file instead of the default configuration file, you need to set the \texttt{ADAMANT\_CONFIGURATION\_YAML} variable, i.e.
 
 \vspace{5mm} %5mm vertical space
 \begin{minted}{text}
@@ -310,7 +310,7 @@ You can now modify \textit{project.configuration.yaml} and version control it wi
 \end{minted}
 \vspace{5mm} %5mm vertical space
 
-It is advisable to include the export command above within your environment files that get sourced whenever a new shell is opened, ie. from .bashrc. \\
+It is advisable to include the export command above within your environment files that get sourced whenever a new shell is opened, i.e. from .bashrc. \\
 
 A good example for how to set up the configuration file for you project is to look at the \href{https://github.com/lasp/adamant_example/tree/main}{\textcolor{blue}{example repository}} which includes its configuration within the \textit{config/} directory, and sets the \texttt{ADAMANT\_CONFIGURATION\_YAML} variable using the \textit{env/setenv.sh} script.
 
@@ -406,7 +406,7 @@ In Adamant, all autogenerated source code, documentation, diagrams, compiled obj
 \vspace{5mm} %5mm vertical space
 \begin{spaceditemize}
   \item \textbf{\texttt{build/src}} - autogenerated source files, which are automatically added to the build path if the directory containing \textit{build/} is in the build path.
-  \item \textbf{\texttt{build/template}} - autogenerated source files that are meant to be copied out and used as starting points (ie. ``templates") for handwritten code
+  \item \textbf{\texttt{build/template}} - autogenerated source files that are meant to be copied out and used as starting points (i.e. ``templates") for handwritten code
   \item \textbf{\texttt{build/obj/Linux}} - compiled object files for the \texttt{Linux} target
   \item \textbf{\texttt{build/obj/Linux\_Test}} - compiled object files for the \texttt{Linux\_Test} target
   \item \textbf{\texttt{build/bin/Linux}} - compiled executable files (\textit{.elf}) for the \texttt{Linux} target
@@ -489,9 +489,9 @@ In addition to specific commands, Adamant also provides a set of build commands 
   \item \textbf{\texttt{redo clean\_all}} - removes all \textit{build/} directories from this entire repository
   \item \textbf{\texttt{redo clear\_cache}} - remove the persistent model cache that the build system uses to increase performance, see Section \ref{The Model Cache}
   \item \textbf{\texttt{redo templates}} - finds and builds all autocoded templates (in \textit{build/template/}) that can be built from this directory
-  \item \textbf{\texttt{redo test\_all}} - finds and runs all unit tests from this directory an all below it. Note: Add a \textit{.skip\_test} file to a directory to exclude it from being run by \texttt{redo test\_all}.
-  \item \textbf{\texttt{redo coverage\_all}} - finds and runs all unit tests from this directory an all below it and generates coverage reports for each. Note: Add a \textit{.skip\_test} or \textit{.skip\_coverage} file to a directory to exclude it from being run by \texttt{redo coverage\_all}.
-  \item \textbf{\texttt{redo publish}} - builds all autocoded documentation from this directory an all below it, and copies over the ``published" version of that documentation
+  \item \textbf{\texttt{redo test\_all}} - finds and runs all unit tests from this directory and all below it. Note: Add a \textit{.skip\_test} file to a directory to exclude it from being run by \texttt{redo test\_all}.
+  \item \textbf{\texttt{redo coverage\_all}} - finds and runs all unit tests from this directory and all below it and generates coverage reports for each. Note: Add a \textit{.skip\_test} or \textit{.skip\_coverage} file to a directory to exclude it from being run by \texttt{redo coverage\_all}.
+  \item \textbf{\texttt{redo publish}} - builds all autocoded documentation from this directory and all below it, and copies over the ``published" version of that documentation
   \item \textbf{\texttt{redo targets}} - shows a list of all available \textit{build targets}, see Section \ref{The Build Target}
   \item \textbf{\texttt{redo prove}} - runs \texttt{GNATprove} to analyze any SPARK code found within the current directory, see Section \ref{Creating a SPARK Package}
   \item \textbf{\texttt{redo test}} - compiles and runs a unit test - note: this command is only available if a \textit{test.adb}, \textit{test.c(pp)}, or \textit{test.py} file is found in this directory
@@ -565,14 +565,14 @@ The Adamant build system supports building binary object and executable files fo
 
 \vspace{5mm} %5mm vertical space
 \begin{spacedenumerate}
-  \item The set of code that is used to compile for the target, ie. \textit{the build path} discussed in the next section
-  \item The platform for which the code is being compiled, ie. the name of the compiler, linker, and binding programs
+  \item The set of code that is used to compile for the target, i.e. \textit{the build path} discussed in the next section
+  \item The platform for which the code is being compiled, i.e. the name of the compiler, linker, and binding programs
   \item The compiler configuration determined by compiler options (flags)
   \item The Ada \textit{runtime} that the application code will run on top of
 \end{spacedenumerate}
 \vspace{5mm} %5mm vertical space
 
-The Ada compiler used in Adamant is generally GNAT based \texttt{gcc} for Native Linux compiles, and \texttt{gcc}-based cross compilers for embedded targets (ie. \texttt{arm-eabi-gcc} for ARM). The compiler, compilation flags, and runtime are all determined by the \textit{build target}. The Adamant \textit{build path} determines which source code is compilable for a given \textit{build target} and is discussed in the following section. To add a custom build target for your system see Section \ref{Adding a Build Target} for details. \\
+The Ada compiler used in Adamant is generally GNAT based \texttt{gcc} for Native Linux compiles, and \texttt{gcc}-based cross compilers for embedded targets (i.e. \texttt{arm-eabi-gcc} for ARM). The compiler, compilation flags, and runtime are all determined by the \textit{build target}. The Adamant \textit{build path} determines which source code is compilable for a given \textit{build target} and is discussed in the following section. To add a custom build target for your system see Section \ref{Adding a Build Target} for details. \\
 
 As background, it is important to understand the Ada runtime system, on top of which an Ada application runs. The Ada runtime provides the tasking logic necessary to implement the Ada language. Adamant utilizes bare metal runtimes provided by AdaCore, which come in the following flavors:
 
@@ -607,7 +607,7 @@ Ada also allows the user to restrict the use and behavior of the language by spe
 
 In summary, the \textit{Production} mode should be used for deployed software on target hardware. The \textit{Development} mode should be the most commonly used mode, as it should be preferred for most development and testing on target hardware. The \textit{Debug} mode turns off optimization of application and runtime code to make tracking down hard to find bugs easier. The \textit{Test} and \textit{Coverage} modes are designed for unit testing. These modes are an attempt at standardization of build configurations, but of course you can create a custom build target that does not adhere to any of these conventions. See Section \ref{Adding a Build Target} for details. \\
 
-Adamant \textit{build targets} are generally named in the form \texttt{\textit{platform}\_\textit{mode}}, ie. \texttt{Linux\_Test} or \texttt{ARM\_Production}. To configure which target is currently being used you must set the \texttt{TARGET} environment variable to the name of the build target you wish to use. If \texttt{TARGET} is not set, then the Adamant system assumes you want to build for the native target, and uses the result of the \texttt{uname} command as \texttt{TARGET}. This is usually ``\texttt{Linux}" on a Linux based system. The \texttt{TARGET} variable can be configured from the command line using the following commands:
+Adamant \textit{build targets} are generally named in the form \texttt{\textit{platform}\_\textit{mode}}, i.e. \texttt{Linux\_Test} or \texttt{ARM\_Production}. To configure which target is currently being used you must set the \texttt{TARGET} environment variable to the name of the build target you wish to use. If \texttt{TARGET} is not set, then the Adamant system assumes you want to build for the native target, and uses the result of the \texttt{uname} command as \texttt{TARGET}. This is usually ``\texttt{Linux}" on a Linux based system. The \texttt{TARGET} variable can be configured from the command line using the following commands:
 
 \vspace{5mm} %5mm vertical space
 \begin{minted}{text}
@@ -617,7 +617,7 @@ Adamant \textit{build targets} are generally named in the form \texttt{\textit{p
 \end{minted}
 \vspace{5mm} %5mm vertical space
 
-The target can also be set globally in your shell configuration file (ie. \textit{.bashrc}) or from any local \texttt{.do} or \texttt{env.py} file. To see the all the supported build targets on your system run:
+The target can also be set globally in your shell configuration file (i.e. \textit{.bashrc}) or from any local \texttt{.do} or \texttt{env.py} file. To see the all the supported build targets on your system run:
 
 \vspace{5mm} %5mm vertical space
 \begin{minted}{text}
@@ -684,7 +684,7 @@ The Adamant build system uses a \textit{build path} in the form \texttt{\url{/pa
 \vspace{5mm} %5mm vertical space
 \begin{spacedenumerate}
   \item Any directory found with a \texttt{.all\_path} file present is added to the build path.
-  \item Any directory found with a \texttt{.TARGET\_path} file present, where \texttt{TARGET} is the name of the currently set build target (ie. the \texttt{TARGET} environment variable), is added to the build path.
+  \item Any directory found with a \texttt{.TARGET\_path} file present, where \texttt{TARGET} is the name of the currently set build target (i.e. the \texttt{TARGET} environment variable), is added to the build path.
   \item Any directory found with a \textit{path file} present that is specified in the build target's \texttt{path\_files} definition (see Section \ref{Adding a Build Target}) is added to the build path.
 \end{spacedenumerate}
 \vspace{5mm} %5mm vertical space
@@ -810,7 +810,7 @@ We can see that two directories were created under \textit{build/}: \textit{obj/
 
 A few things should be noted about this example. First, we did not need to add the \textit{hello\_world} directory to the \textit{build path}, see Section \ref{The Build Path}, since this is a main file, and will not be imported by any other package. Adamant automatically adds your current working directory to the \textit{build path} so was able to compile the program without issue. Second, a \texttt{redo run} rule will be available any time a \textit{main.adb} is found in a directory. This rule allows effortless compilation and running of any executable program, so long as it is named \texttt{main.adb}. You will likely end up with many \textit{main.adb} programs in your repository during development. Again, none of these directories should be added to the \textit{build path} because 1) they do not need to be and 2) there would be many name conflicts that violate the Adamant constraint of only allowing unique file names within the \textit{build path}. \\
 
-The next section further expands on this example by creating an Ada package an unit testing it.
+The next section further expands on this example by creating an Ada package and unit testing it.
 
 \subsection{Creating a Package}
 
@@ -987,7 +987,7 @@ You can also use the special \texttt{redo templates} command to do the same thin
 \end{minted}
 \vspace{5mm} %5mm vertical space
 
-Note, it is common while developing to write the source code for few unit tests only to realize later that you need some more unit tests defined to fully test your package. In this case, the standard procedure is to update the model file, ie. \textit{simple\_package.tests.yaml}, with your new test definitions, rebuild the templates as seen above, and then manually merge the templates with the unit test code that you have been writing. \texttt{diff}, \texttt{git diff}, or a more sophisticated merge tool may aid you in this process. While this process can be cumbersome, achieving this automatically would be difficult and error prone, at best. \\
+Note, it is common while developing to write the source code for few unit tests only to realize later that you need some more unit tests defined to fully test your package. In this case, the standard procedure is to update the model file, i.e. \textit{simple\_package.tests.yaml}, with your new test definitions, rebuild the templates as seen above, and then manually merge the templates with the unit test code that you have been writing. \texttt{diff}, \texttt{git diff}, or a more sophisticated merge tool may aid you in this process. While this process can be cumbersome, achieving this automatically would be difficult and error prone, at best. \\
 
 Know that if you make a mistake while merging, Adamant will catch most issues, like forgetting to implement a test, through modeling errors and compilation errors. Specifically, Adamant ensures that you implement all the tests that you define in your model through the use of \texttt{abstract} functions defined at the unit test base package level. Feel free to take a look at these abstract definitions in the autocoded files \textit{build/src/simple\_package\_tests.ads} and \textit{build/src/simple\_package\_tests.adb}. These files are not shown here for brevity. \\
 
@@ -1254,7 +1254,7 @@ Everything works as expected and produces the test output:
 
 Often in embedded systems, communication protocols and hardware devices require a very specific binary format for transferred bytes or bits to properly function. However, technical differences in processors and compilers can often make code built to talk to these devices difficult to implement in a cross-platform and portable way. For instance, processors used in the design of embedded systems can be either big or little endian, depending on the chosen platform. Embedded systems often communicate with other embedded processors or end-user systems which have an endianness different from their own. If not carefully handled, these differences in endianness can be one of the largest sources of defects encountered while debugging embedded software. Besides endianness issues, the ``packed"-ness, that is, the amount of padding supplied around individual types, of a struct or array in processor memory differs based on the compiler used. The differences in endianness and ``packed"-ness can make writing portable software difficult without a layer of abstraction to handle the differences. \\
 
-Adamant aims to solve these problem through the use of \textit{packed types}.  In Adamant, packed types are modeled using a YAML specification. From the specification, the following type definitions are generated:
+Adamant aims to solve these problems through the use of \textit{packed types}.  In Adamant, packed types are modeled using a YAML specification. From the specification, the following type definitions are generated:
 
 \vspace{5mm} %5mm vertical space
 \begin{spaceditemize}
@@ -1264,7 +1264,7 @@ Adamant aims to solve these problem through the use of \textit{packed types}.  I
 \end{spaceditemize}
 \vspace{5mm} %5mm vertical space
 
-The \texttt{T} and \texttt{T\_Le} types can be thought of as the \textit{serialized} version of the record, where the bit layout and endianness is known, no matter the compiler or processor that the code is running on. The \texttt{U} version of the type can be thought of as the \textit{native} version of the type, which has been optimized by the compiler for the target processor. Adamant provides subprograms to convert between these 3 types so that a user can easily pack, unpack, or swap the endianness of the data at will. Subprogams to reinterpret packed types as an array of bytes (serialization) or to reinterpret an array of bytes as a packed type (deserialization) are also provided. \\
+The \texttt{T} and \texttt{T\_Le} types can be thought of as the \textit{serialized} version of the record, where the bit layout and endianness is known, no matter the compiler or processor that the code is running on. The \texttt{U} version of the type can be thought of as the \textit{native} version of the type, which has been optimized by the compiler for the target processor. Adamant provides subprograms to convert between these 3 types so that a user can easily pack, unpack, or swap the endianness of the data at will. Subprograms to reinterpret packed types as an array of bytes (serialization) or to reinterpret an array of bytes as a packed type (deserialization) are also provided. \\
 
 For each of the types above, Adamant also provides facilities to validate that the values in the type are within range, pretty print the type, check the value of the type during testing via assertions, and produce HTML and PDF documentation for the type. These features are discussed in the following subsections.
 
@@ -1287,7 +1287,7 @@ Below is the example packed record definition called \textit{example\_record}, s
 
 \yamlcodef{../example_architecture/example_record.record.yaml}
 
-This YAML model file above contains comments explaining whether or not each field is optional or required. The main portion of the model is the packed record \textit{fields} which require a \textit{name}, \textit{type}, and \textit{format} specification. The type of the field can be any Ada type, including arrays, records, enumerations, packed arrays, or other packed records. The \textit{format} field is where a developer can describe out how the field is represented in memory in its packed form. This field takes an enumeration of the form \textit{U}, \textit{I}, \textit{F} or \textit{E} (for unsigned, signed, floating point, or enumeration) followed by the number of bits used to represent it. A table of example memory representations is laid out below:
+This YAML model file above contains comments explaining whether or not each field is optional or required. The main portion of the model is the packed record \textit{fields} which require a \textit{name}, \textit{type}, and \textit{format} specification. The type of the field can be any Ada type, including arrays, records, enumerations, packed arrays, or other packed records. The \textit{format} field is where a developer can describe how the field is represented in memory in its packed form. This field takes an enumeration of the form \textit{U}, \textit{I}, \textit{F} or \textit{E} (for unsigned, signed, floating point, or enumeration) followed by the number of bits used to represent it. A table of example memory representations is laid out below:
 
 \captionof{table}{Example Packed Record Format Specifications}
 \begin{xltabular}{\textwidth}{ | l | X | }
@@ -1304,9 +1304,9 @@ This YAML model file above contains comments explaining whether or not each fiel
     \texttt{E5x10} & an array of ten 5-bit enumerations \\ \hline
 \end{xltabular}
 
-Ada uses the \textit{format} specification to understand the number of bits taken up by the type. If the number of bits specified in the representation field is not compatible with the type specified in the type field, the Ada compiler will warn or error, telling the user to fix the inconsistency. The enumeration portion of the \textit{format} is needed is to make the record visible to a ground system, such as Hydra. Adamant currently supports the display of many representations in Hydra including all signed and unsigned integers from 1 to 64 bits and floating point numbers of 32 and 64 precision and enumeration types. There is no support in Adamant or Hydra to display values with representations over 64 bits in length. The record should be further divided or an array \textit{format} should be used in this case. Note that an entire record's length must end on a 1 byte (8-bit) boundary, or a error message will be produced. Add additional fields of pad bytes to make the total length of the record end on an 8-bit boundary. \\
+Ada uses the \textit{format} specification to understand the number of bits taken up by the type. If the number of bits specified in the representation field is not compatible with the type specified in the type field, the Ada compiler will warn or error, telling the user to fix the inconsistency. The enumeration portion of the \textit{format} is needed is to make the record visible to a ground system, such as Hydra. Adamant currently supports the display of many representations in Hydra including all signed and unsigned integers from 1 to 64 bits and floating point numbers of 32 and 64 precision and enumeration types. There is no support in Adamant or Hydra to display values with representations over 64 bits in length. The record should be further divided or an array \textit{format} should be used in this case. Note that an entire record's length must end on a 1 byte (8-bit) boundary, or an error message will be produced. Add additional fields of pad bytes to make the total length of the record end on an 8-bit boundary. \\
 
-Note that packed records can also specify fields with types that are themselves other packed records (or packed arrays, discussed in Section \ref{Packed Arrays}). In this case, a \textit{format} specification for that field is not necessary. The concept of nesting packed records within other packed records is discussed further in Section \ref{Nested Packed Records}. Including records or arrays defined in raw Ada packages (ie. not modeled using Adamant) are not allowed to be included in packed records, since they are, by default, unpacked in representation and their lengths and bit layout is not known to the Adamant modeling system.
+Note that packed records can also specify fields with types that are themselves other packed records (or packed arrays, discussed in Section \ref{Packed Arrays}). In this case, a \textit{format} specification for that field is not necessary. The concept of nesting packed records within other packed records is discussed further in Section \ref{Nested Packed Records}. Including records or arrays defined in raw Ada packages (i.e. not modeled using Adamant) are not allowed to be included in packed records, since they are, by default, unpacked in representation and their lengths and bit layout is not known to the Adamant modeling system.
 
 \subsubsection{Packed Record Ada Specification} \label{Packed Record Ada Specification}
 
@@ -1343,7 +1343,7 @@ Note also that with every packed record there are a series of \texttt{Serialized
 
 \subsubsection{Packed Record Validation} \label{Packed Record Validation}
 
-Using the serialization and deserialization functions shown in the previous section can be error prone. Consider the field in our record \texttt{Value\_2}, which only has a valid integer range between -2 and 3. It is possible that when calling the deserialization function \texttt{From\_Byte\_Array}, the incoming byte array might contain a bit representation the puts the \texttt{Value\_2} field out of range, ie. 5. The call to \texttt{From\_Byte\_Array} will not fail, but any subsequent operation using the \texttt{packed\_Type} variable will fail with an Ada constraint error, due the range check failing on \texttt{Value\_2}. \\
+Using the serialization and deserialization functions shown in the previous section can be error prone. Consider the field in our record \texttt{Value\_2}, which only has a valid integer range between -2 and 3. It is possible that when calling the deserialization function \texttt{From\_Byte\_Array}, the incoming byte array might contain a bit representation that puts the \texttt{Value\_2} field out of range, i.e. 5. The call to \texttt{From\_Byte\_Array} will not fail, but any subsequent operation using the \texttt{packed\_Type} variable will fail with an Ada constraint error, due to the range check failing on \texttt{Value\_2}. \\
 
 Adamant packed records have a method for mitigating this using an autocoded child package which performs validation on the type. To build the validation child package run the following:
 
@@ -1486,7 +1486,7 @@ The python classes use the \texttt{bitstring} python module which allows easily 
   \item \textbf{\texttt{\_\_init\_\_}} - Create a packed record. The record field values are optional upon initialization, and will be set to the default or \texttt{None} if there is no default. During initialization, the class performs extensive type checking of the record fields to make sure that their values adhere to ranges of the equivalent Ada types.
   \item \textbf{\texttt{\_\_eq\_\_}} - Compares two packed records for equality. For packed records containing floating-point fields, an optional \texttt{epsilon} parameter can be passed to allow tolerant comparisons (e.g., \texttt{a.\_\_eq\_\_(b, epsilon=0.0001)}). See below for additional details on epsilon comparisons.
   \item \textbf{\texttt{serialized\_length}} - Equivalent to the Ada \texttt{Serialized\_Length} function, returns the length of the packed type.
-  \item \textbf{\texttt{to\_byte\_array} and \texttt{from\_byte\_array}} - Equivalent to the Ada serialization/deserialization functions \texttt{Serialization.To\_Byte\_Array} and \texttt{Serialization.From\_Byte\_Array}; converts the python class to a serialized byte array whose bits correspond to the layout of the packed big-endian type (\texttt{T}) in Ada, or takes a byte array of this form an turns it into a python class.
+  \item \textbf{\texttt{to\_byte\_array} and \texttt{from\_byte\_array}} - Equivalent to the Ada serialization/deserialization functions \texttt{Serialization.To\_Byte\_Array} and \texttt{Serialization.From\_Byte\_Array}; converts the python class to a serialized byte array whose bits correspond to the layout of the packed big-endian type (\texttt{T}) in Ada, or takes a byte array of this form and turns it into a python class.
   \item \textbf{\texttt{create\_from\_byte\_array}} - Creates a new packed record object from a serialized byte array.
   \item \textbf{\texttt{\_\_repr\_\_}, \texttt{\_\_str\_\_} and \texttt{to\_string}} - Equivalent to the Ada \texttt{Representation.Image} function; creates a human readable string version of the packed record.
   \item \textbf{\texttt{to\_tuple\_string}} - Equivalent to the Ada \texttt{Representation.To\_Tuple\_String} function; creates a log-friendly string of the packed record.
@@ -1576,11 +1576,11 @@ The MATLAB classes use the \texttt{Bit\_Array} MATLAB class, found in \textit{gn
 
 \vspace{5mm} %5mm vertical space
 \begin{spaceditemize}
-  \item \textbf{\texttt{Example\_Record}} - The constructor used to create a packed record object. The record field values are optional required initialization. The class performs extensive type checking of the record fields to make sure that their values adhere to ranges of the equivalent Ada types, where possible.
+  \item \textbf{\texttt{Example\_Record}} - The constructor used to create a packed record object. The record field values are optionally required upon initialization. The class performs extensive type checking of the record fields to make sure that their values adhere to ranges of the equivalent Ada types, where possible.
   \item \textbf{\texttt{eq}} - Compares two packed records for equality.
   \item \textbf{\texttt{ne}} - Opposite of \texttt{eq}.
   \item \textbf{\texttt{serialized\_length}} - Equivalent to the Ada \texttt{Serialized\_Length} function, returns the length of the packed type.
-  \item \textbf{\texttt{to\_byte\_array} and \texttt{from\_byte\_array}} - Equivalent to the Ada serialization/deserialization functions \texttt{Serialization.To\_Byte\_Array} and \texttt{Serialization.From\_Byte\_Array}; converts the MATLAB class to a serialized byte array whose bits correspond to the layout of the packed big-endian type (\texttt{T}) in Ada, or takes a byte array of this form an turns it into a MATLAB class.
+  \item \textbf{\texttt{to\_byte\_array} and \texttt{from\_byte\_array}} - Equivalent to the Ada serialization/deserialization functions \texttt{Serialization.To\_Byte\_Array} and \texttt{Serialization.From\_Byte\_Array}; converts the MATLAB class to a serialized byte array whose bits correspond to the layout of the packed big-endian type (\texttt{T}) in Ada, or takes a byte array of this form and turns it into a MATLAB class.
   \item \textbf{\texttt{create\_from\_byte\_array}} - Creates a new packed record object from a serialized byte array.
   \item \textbf{\texttt{create\_empty}} - Creates a new packed record object where the default values of all fields is zero, or the lowest legal value where zero is not allowed.
   \item \textbf{\texttt{to\_string}} - Equivalent to the Ada \texttt{Representation.Image} function; creates a human readable string version of the packed record.
@@ -1628,7 +1628,7 @@ Note that it is up to the user to make sure their MATLAB path is configured to i
 
 \subsubsection{Nested Packed Records} \label{Nested Packed Records}
 
-Packed records or packed arrays (discussed in in Section \ref{Packed Arrays}) can also contain fields that are themselves packed records (or arrays). These types can be nested arbitrarily deep, but there are some limitations on nesting that will be discussed in this section. \\
+Packed records or packed arrays (discussed in Section \ref{Packed Arrays}) can also contain fields that are themselves packed records (or arrays). These types can be nested arbitrarily deep, but there are some limitations on nesting that will be discussed in this section. \\
 
 See an example below, a packed record that includes two fields that are of packed record type:
 
@@ -1640,7 +1640,7 @@ Nesting of packed types carries with it the following limitations/constraints:
 
 \vspace{5mm} %5mm vertical space
 \begin{spacedenumerate}
-  \item Only \texttt{T} or \texttt{T\_Le} types are allowed to be included as a packed record field type, since they represent ``packed'' types with known endianness and bit representation. \texttt{U} types are not allowed to be declared in a packed record or packed array since the bit representation is determined by the compiler. Similarly, arrays or records declared in a raw Ada package (ie. not modeled using Adamant) are also not allowed, since these, by default, are also unpacked types.
+  \item Only \texttt{T} or \texttt{T\_Le} types are allowed to be included as a packed record field type, since they represent ``packed'' types with known endianness and bit representation. \texttt{U} types are not allowed to be declared in a packed record or packed array since the bit representation is determined by the compiler. Similarly, arrays or records declared in a raw Ada package (i.e. not modeled using Adamant) are also not allowed, since these, by default, are also unpacked types.
   \item If a big-endian \texttt{T} type is used as a field type, then any other nested packed types must also be big-endian \texttt{T} types. Mixing endian is not currently supported. In this case, a \texttt{T\_Le} type is not generated for the packed record, only a \texttt{T} and \texttt{U} type will be provided. Consequently, no \texttt{Swap\_Endianness} function is provided either. The converse is true if little-endian \texttt{T\_Le} types are nested in a packed record.
 \end{spacedenumerate}
 \vspace{5mm} %5mm vertical space
@@ -1664,7 +1664,7 @@ Adamant variable length packed records are optimized for speed, at the cost of f
 
 \vspace{5mm} %5mm vertical space
 \begin{spacedenumerate}
-  \item There may only be a single variable length field, ie. \textit{array of values}, in a packed record.
+  \item There may only be a single variable length field, i.e. \textit{array of values}, in a packed record.
   \item The variable length field of the record must be the last field specified in the packed record.
   \item All fields in a variable length record must be byte aligned. 
 \end{spacedenumerate}
@@ -1682,7 +1682,7 @@ Note that the variable length field may be any type as long as it is an array. T
 
 For the most part, variable length packed records have the same facilities available to them as their non-variable length counterparts including a serialization package, validation package, representation package, and an assertion package. There are subtle differences in the subprogram interface for some of the utilities, so see the specification of the autogenerated code to make sure that you are making the right calls, and providing proper error handling. In particular, serialization and deserialization of a variable length packed record can fail if the length field is larger than the array it is describing. In this case, any serialization and deserialization calls return a status to the caller that must be handled appropriately. Similarly, for assertions, there exists an assertion call to compare an entire variable length record against another up to the maximum size, and another which only compares the ``used" variable length data, and ignores the data beyond.
 
-The mechanism for determining a variable length record's length is the autocoded \texttt{Serialized\_Length} subprograms provided in the specification. These subprograms allow the user to determine the length of a type (in bytes). While the length of most packed records are static, meaning the function will always return the same value, variable length packed records will return different values based on the type's content, ie. the \texttt{variable\_length} field. These \texttt{Serialized\_Length} subprograms are important because they are required by all generic packages within adamant that deal with variable length packed records, including Adamant's variable queue package used for component queues, see Section \ref{The Component Queue}.
+The mechanism for determining a variable length record's length is the autocoded \texttt{Serialized\_Length} subprograms provided in the specification. These subprograms allow the user to determine the length of a type (in bytes). While the length of most packed records are static, meaning the function will always return the same value, variable length packed records will return different values based on the type's content, i.e. the \texttt{variable\_length} field. These \texttt{Serialized\_Length} subprograms are important because they are required by all generic packages within adamant that deal with variable length packed records, including Adamant's variable queue package used for component queues, see Section \ref{The Component Queue}.
 
 \subsubsection{C/C++ Packed Records} \label{C Packed Records}
 
@@ -1712,7 +1712,7 @@ To define a packed array, a developer should create a YAML model file of the for
 
 \yamlcodef{../example_architecture/example_array.array.yaml}
 
-This YAML model file above contains comments explaining whether or not each field is optional or required. The main portion of the model is the packed array \textit{type}, \textit{length}, and \textit{format} specification. The type of the field can be any Ada type, including arrays, records, enumerations, packed records, or other packed arrays. The \textit{format} field is where a developer can describe out how the field will be represented in memory in its packed form, and is identical to the format specification for packed records. The \textit{format} specification is not necessary if the array type is a packed record or packed array since the length of the type in memory is known from that type's model, see Section \ref{Nested Packed Records}. See the previous sections for more details on \textit{format}. The \textit{length} field specifies how many elements the packed array contains. Unconstrained packed arrays are not currently supported in Adamant.
+This YAML model file above contains comments explaining whether or not each field is optional or required. The main portion of the model is the packed array \textit{type}, \textit{length}, and \textit{format} specification. The type of the field can be any Ada type, including arrays, records, enumerations, packed records, or other packed arrays. The \textit{format} field is where a developer can describe how the field will be represented in memory in its packed form, and is identical to the format specification for packed records. The \textit{format} specification is not necessary if the array type is a packed record or packed array since the length of the type in memory is known from that type's model, see Section \ref{Nested Packed Records}. See the previous sections for more details on \textit{format}. The \textit{length} field specifies how many elements the packed array contains. Unconstrained packed arrays are not currently supported in Adamant.
 
 \subsubsection{Packed Array Ada Specification}
 
@@ -2027,7 +2027,7 @@ MATLAB classes can also be autogenerated for packed records and packed arrays, s
 
 \subsection{Packed Registers}
 
-Adamant packed records and arrays allow a developer to specify the exact bit representation of a type within the Ada language. This feature makes it ideal for describing hardware register definitions and memory mapped IO. However, using regular packed record types \texttt{.T} (for big endian machines) and \texttt{.T\_Le} (for little endian machines) is often not enough to ensure correct interaction with the hardware. On many hardware platforms, registers must be read in their entirety (ie. all 32-bits) with a single CPU instruction without interruptions from other tasks in the system, and without reads and writes being removed by compiler optimizations. Adamant provides a method for circumventing these issues using special Volatile, Atomic, and Register packed records and packed record sets, which are described in the subsequent sections.
+Adamant packed records and arrays allow a developer to specify the exact bit representation of a type within the Ada language. This feature makes it ideal for describing hardware register definitions and memory mapped IO. However, using regular packed record types \texttt{.T} (for big endian machines) and \texttt{.T\_Le} (for little endian machines) is often not enough to ensure correct interaction with the hardware. On many hardware platforms, registers must be read in their entirety (i.e. all 32-bits) with a single CPU instruction without interruptions from other tasks in the system, and without reads and writes being removed by compiler optimizations. Adamant provides a method for circumventing these issues using special Volatile, Atomic, and Register packed records and packed record sets, which are described in the subsequent sections.
 
 \subsubsection{Volatile, Atomic, and Volatile Full Access in Ada}
 
@@ -2043,7 +2043,7 @@ The Ada language provides a few facilities for specifying how an object or type 
 
 In general, \texttt{Volatile\_Full\_Access} should be used for all hardware interaction, particularly if you need to guarantee that an entire register is read from/written to (instead of just a portion). \texttt{Volatile} should be used when you want to access a memory region that could be written to / read from by some external source, such as an FPGA shared buffer. \texttt{Atomic} should be used rarely, but is sometimes useful if a variable needs to be shared between interrupt handlers, where using a protected object may impose too much of a performance penalty. You should almost always prefer the use of protected objects over \texttt{Atomic} variables. \\
 
-These pragmas can be applied to types, ie.
+These pragmas can be applied to types, i.e.
 
 \vspace{5mm} %5mm vertical space
 \begin{minted}{ada}
@@ -2056,7 +2056,7 @@ type A_Array is new array(Natural range 1 .. 10) of Positive
 \end{minted}
 \vspace{5mm} %5mm vertical space
 
-and also to objects, ie.
+and also to objects, i.e.
 
 \vspace{5mm} %5mm vertical space
 \begin{minted}{ada}
@@ -2114,7 +2114,7 @@ The register set can be used like any normal packed record, except that accessin
 
 \subsubsection{Packed Register Arrays}
 
-If all the registers in a register set are of the same type you can used a packed array instead of a packed record to described the hardware. For example, to describe a set of 10 32-bit registers that should be interpreted as unsigned integers you can define the following packed array.
+If all the registers in a register set are of the same type you can use a packed array instead of a packed record to describe the hardware. For example, to describe a set of 10 32-bit registers that should be interpreted as unsigned integers you can define the following packed array.
 
 \yamlcodef{../example_architecture/example_register_array.array.yaml}
 
@@ -2286,7 +2286,7 @@ This should generate and compile two files \textit{build/src/component-example\_
 \textit{component-example\_component.ads}:
 \adacodef{../example_architecture/example_component/build/src/component-example_component.ads}
 
-The first thing to recognize is the type \texttt{Instance} which extends the type \texttt{Component.Instance}, declared in the framework's core \texttt{Component} package. The details of the \texttt{Instance} type are private, and thus listed in the private section. Also, note that the type is declared as \texttt{abstract} since it contains some abstract subprograms, ie. primitives that are unimplemented. This means that \texttt{Instance} cannot be instantiated or used by itself, since it is not a complete type. We must inherit from this type and implement the abstract subprograms before we can instantiate an object that uses this code. We will see how that is done in the next section. \\
+The first thing to recognize is the type \texttt{Instance} which extends the type \texttt{Component.Instance}, declared in the framework's core \texttt{Component} package. The details of the \texttt{Instance} type are private, and thus listed in the private section. Also, note that the type is declared as \texttt{abstract} since it contains some abstract subprograms, i.e. primitives that are unimplemented. This means that \texttt{Instance} cannot be instantiated or used by itself, since it is not a complete type. We must inherit from this type and implement the abstract subprograms before we can instantiate an object that uses this code. We will see how that is done in the next section. \\
 
 In the public section there is also a very important abstract procedure \texttt{Tick\_T\_Recv\_Sync} which is the handler for our \texttt{Tick\_T\_Recv\_Sync} invokee connector. Note that it has the exact same name as the connector itself, so is easy to remember. This procedure MUST be implemented in the hand-coded implementation package, otherwise a compilation error will result. We will hand-code the behavior of this invokee connector handler in the following section. \\
 
@@ -2484,7 +2484,7 @@ redo build/template/test.adb
 \end{minted}
 \vspace{5mm} %5mm vertical space
 
-We can map the the files above to their package names in the package diagram shown in Section \ref{Anatomy of a Component Unit Test}. Below is the map of package names to the location of their autogenerated source:
+We can map the files above to their package names in the package diagram shown in Section \ref{Anatomy of a Component Unit Test}. Below is the map of package names to the location of their autogenerated source:
 
 \vspace{5mm} %5mm vertical space
 \begin{spaceditemize}
@@ -2651,7 +2651,7 @@ If we modify the second test so that it passes, we get the lovely output:
 \inputminted{text}{../example_architecture/example_component/test2/output.txt}
 \vspace{5mm} %5mm vertical space
 
-Note, it is common while developing tests to write the source code for few unit tests only to realize later that you need some more unit tests defined to fully test your component. In this case, the standard procedure is to update the model file, ie. \textit{example\_component.tests.yaml}, with your new test definitions, rebuild the templates as seen in Section \ref{Creating a Unit Test Model}, and then manually merge the templates with the unit test code that you have been writing. \texttt{diff}, \texttt{git diff}, or a more sophisticated merge tool may aid you in this process. Know that if you make a mistake while merging, Adamant will catch most issues, like forgetting to implement a test, through modeling errors and compilation errors. \\
+Note, it is common while developing tests to write the source code for few unit tests only to realize later that you need some more unit tests defined to fully test your component. In this case, the standard procedure is to update the model file, i.e. \textit{example\_component.tests.yaml}, with your new test definitions, rebuild the templates as seen in Section \ref{Creating a Unit Test Model}, and then manually merge the templates with the unit test code that you have been writing. \texttt{diff}, \texttt{git diff}, or a more sophisticated merge tool may aid you in this process. Know that if you make a mistake while merging, Adamant will catch most issues, like forgetting to implement a test, through modeling errors and compilation errors. \\
 
 This section demonstrated how to ``black-box" test the \textit{example\_component} by invoking its connectors and checking the output packets. The next section will introduce the concept of ``white-box" testing, which allows us to probe the internals of the component during unit test.
 
@@ -2809,7 +2809,7 @@ In some situations, asynchronous communication might be advantageous. Consider a
 
 A queued component is any component that has one or more asynchronous invoker connectors. If an Adamant component contains at least one asynchronous invoker connector than a single internal queue is instantiated within the component. This queue is generic and can hold items of many different types. If a component contains multiple asynchronous connectors, all of these items are still enqueued on the same single internal queue. Using a single queue makes makes the execution logic of a component simple to understand and implement. When a component ``pops" and item off the queue, a label is included that tell the component which asynchronous connector the item is associated with. Using the label, the component autocode can then call the correct invokee handler procedure to process the connector call. \\
 
-The standard Adamant component queue package can be found \textit{src/data\_structures/labeled\_queue/}. The queue itself is allocated as an array of bytes on the heap. The length of the queue (in bytes) is determined at component initialization and is specified in the assembly model. Each item put on the queue takes up 5 bytes of additional overhead to store the length of the item enqueued and a label which specifies the type of the item, ie. which asynchronous connector the data belongs to. The component queue is implemented as an Ada \textit{protected object}. This means that access to the queue by multiple tasks in the system is safe and free from corruption. Because of this the queue can also be used for task synchronization, as will be shown in Section \ref{Creating an Active Component}. \\
+The standard Adamant component queue package can be found \textit{src/data\_structures/labeled\_queue/}. The queue itself is allocated as an array of bytes on the heap. The length of the queue (in bytes) is determined at component initialization and is specified in the assembly model. Each item put on the queue takes up 5 bytes of additional overhead to store the length of the item enqueued and a label which specifies the type of the item, i.e. which asynchronous connector the data belongs to. The component queue is implemented as an Ada \textit{protected object}. This means that access to the queue by multiple tasks in the system is safe and free from corruption. Because of this the queue can also be used for task synchronization, as will be shown in Section \ref{Creating an Active Component}. \\
 
 Note that Adamant also offers a priority queue as an alternative to the standard queue for when dequeuing items in first-in-first-out (FIFO) order is not sufficient. Creating a component with a priority queue is discussed in Section \ref{Implementing a Priority Queued Component}. \\
 
@@ -2972,7 +2972,7 @@ There are times, however, when we actually \textit{want} to overflow a queue dur
 \textit{queued\_component\_tests-implementation.adb}:
 \adacodef{../example_architecture/queued_component/test2/queued_component_tests-implementation.adb}
 
-In this case, we have added the line \texttt{Self.Tester.Sxpect\_Packed\_U16\_T\_Send\_Dropped := True;} which tells the tester component that the next connector call will overflow the queue. When this is set, the component will not throw an assertion. See the new output below.
+In this case, we have added the line \texttt{Self.Tester.Expect\_Packed\_U16\_T\_Send\_Dropped := True;} which tells the tester component that the next connector call will overflow the queue. When this is set, the component will not throw an assertion. See the new output below.
 
 \vspace{5mm} %5mm vertical space
 \inputminted{text}{../example_architecture/queued_component/test2/output.txt}
@@ -2995,7 +2995,7 @@ Adamant provides priority queueing for a component if a \texttt{priority} is spe
 \textit{priority\_queued\_component.component.yaml}
 \yamlcodef{../example_architecture/priority_queued_component/priority_queued_component.component.yaml}
 
-You can that a priority of 1 has been specified for the \texttt{Packed\_Byte\_T\_Recv\_Async} connector and a priority of 2 has been specified for the \texttt{Packed\_U16\_T\_Recv\_Async} connector. Connector's of higher numeric valued priorities will be serviced before connectors of lower numeric valued priorities. So in this case if both an \texttt{Packed\_U16\_T\_Recv\_Async} and a \texttt{Packed\_Byte\_T\_Recv\_Async} item are put on the queue, the \texttt{Packed\_U16\_T\_Recv\_Async} item will be dequeued first, no matter the order in which the items were enqueued. \\
+You can see that a priority of 1 has been specified for the \texttt{Packed\_Byte\_T\_Recv\_Async} connector and a priority of 2 has been specified for the \texttt{Packed\_U16\_T\_Recv\_Async} connector. Connectors of higher numeric valued priorities will be serviced before connectors of lower numeric valued priorities. So in this case if both an \texttt{Packed\_U16\_T\_Recv\_Async} and a \texttt{Packed\_Byte\_T\_Recv\_Async} item are put on the queue, the \texttt{Packed\_U16\_T\_Recv\_Async} item will be dequeued first, no matter the order in which the items were enqueued. \\
 
 The connector \texttt{priority} can be any integer value between 0 and 255, inclusive. Connectors with an identical priority value will have their enqueued items serviced in FIFO order. Note that if not specified, the priority for a \texttt{recv\_async} connector is assumed to be 0. If all connectors have the same priority, the component is instantiated with a standard Adamant queue instead of a priority queue. Specifying \texttt{priority} for a connector not of kind \texttt{recv\_async} is considered illegal and will produce a modeling error. \\
 
@@ -3171,7 +3171,7 @@ which produces the output
 
 \subsection{Creating a Background Component} \label{Creating a Background Component}
 
-As discussed in the previous section, active components in Adamant almost always have an asynchronous queue which aids in metering the execution of that component. There are a few instances where not having an asynchronous connector makes sense, mostly in the case of the lowest priority background component (ie. memory scrubbing), or a component whose execution is metered internally by sleeping periodically. This section will briefly show a component of this nature and explain how to unit test it.
+As discussed in the previous section, active components in Adamant almost always have an asynchronous queue which aids in metering the execution of that component. There are a few instances where not having an asynchronous connector makes sense, mostly in the case of the lowest priority background component (i.e. memory scrubbing), or a component whose execution is metered internally by sleeping periodically. This section will briefly show a component of this nature and explain how to unit test it.
 
 \subsubsection{Implementing a Background Component} \label{Implementing a Background Component}
 
@@ -3699,7 +3699,7 @@ Below is a unit test implementation package that provides a single unit test, \t
 \textit{event\_component\_tests-implementation.adb}:
 \adacodef{../example_architecture/event_component/test/event_component_tests-implementation.adb}
 
-If a component has a event model, the autocoded tester package includes some modifications to make unit testing events simpler. Just as with connectors, a distinct history is included for every event defined in the component's event model within the tester component. This history can be queried and assertions can be run against it in the same way you would a connector history. \\
+If a component has an event model, the autocoded tester package includes some modifications to make unit testing events simpler. Just as with connectors, a distinct history is included for every event defined in the component's event model within the tester component. This history can be queried and assertions can be run against it in the same way you would a connector history. \\
 
 As can be seen in the unit test code above, some \texttt{Tick.T}s are sent to the component which causes many events to be produced. The total number of events produced is checked using the event connector history. The amount and content of each individual event received is checked by asserting against the individual event histories provided in the tester component. \\
 
@@ -3984,7 +3984,7 @@ However, it is important to know what is included in this package. First, we can
 
 Also provided as an input parameter to the \texttt{Set\_Ids\_And\_Limits} initialization procedure are \textit{stale limits} for each data dependency. The stale limit is an Ada \texttt{Time\_Span} type which is used to determine if a fetched data dependency's timestamp is too old to be considered valid. For example, if the stale limit is set to 1 second, and the timestamp of the data dependency is more than 1 second older than the current time, the data product is considered to be stale, or too old to use. The numerical values used for the stale limits are set at the assembly modeling level, and eventually get passed to the \texttt{Set\_Ids\_And\_Limits} procedure during initialization. These stale limits are store in the \texttt{Instance} record. Note that a stale limit value of zero indicates that the data dependency can never go stale. A periodically produced data product like a temperature may reasonably go stale if it stops being produced, however some data products such as a system mode may only be produced when they are changed. Thus some data products may be considered valid, even if they are days, months, or years older than the current time. Due to this mission specific nature, stale limits must necessarily be set at the assembly modeling level. See \ref{Modeling an Assembly} for more details on how these limits are set at the assembly level. \\
 
-For each data dependency there are two functions provided. The first retrieves the data dependency's ID, ie. \texttt{Get\_Counter\_Id}, and the other parses out the data dependency type from a generic data product, ie. \texttt{Extract\_Counter}. Again, these functions rarely need to be called directly by component implementation code, but it is good to know they exist. We will discuss how they get used in the following section.
+For each data dependency there are two functions provided. The first retrieves the data dependency's ID, i.e. \texttt{Get\_Counter\_Id}, and the other parses out the data dependency type from a generic data product, i.e. \texttt{Extract\_Counter}. Again, these functions rarely need to be called directly by component implementation code, but it is good to know they exist. We will discuss how they get used in the following section.
 
 \subsubsection{Fetching Data Dependencies}
 
@@ -4049,7 +4049,7 @@ Below is a unit test implementation package that provides a single unit test, \t
 \textit{data\_dependency\_component\_tests-implementation.adb}:
 \adacodef{../example_architecture/data_dependency_component/test/data_dependency_component_tests-implementation.adb}
 
-If a component has a data dependency model, the autocoded tester package includes some modifications to make unit testing data products simpler. First, a variable for each data dependency is included within the tester package, ie. \texttt{Self.Tester.Counter} and \texttt{Self.Tester.Temperature}. The value of these variables is returned directly to the component when the data dependencies are requested. Note that by default, during unit testing the \textit{stale limits} of all data dependencies is initialized to 1 second. So if a data dependency is received that is older than one second when compared to the unit test time, \texttt{Self.Tester.System\_Time} then it will look stale to the component. \\
+If a component has a data dependency model, the autocoded tester package includes some modifications to make unit testing data products simpler. First, a variable for each data dependency is included within the tester package, i.e. \texttt{Self.Tester.Counter} and \texttt{Self.Tester.Temperature}. The value of these variables is returned directly to the component when the data dependencies are requested. Note that by default, during unit testing the \textit{stale limits} of all data dependencies is initialized to 1 second. So if a data dependency is received that is older than one second when compared to the unit test time, \texttt{Self.Tester.System\_Time} then it will look stale to the component. \\
 
 In the unit test, the first thing we do is set these variables to reasonable value. Next, we send a \texttt{Tick.T} to the component to tell it to grab these data dependencies. Next, we set the temperature to a value above the static limit and sent the \texttt{Tick.T} again. \\
 
@@ -4195,7 +4195,7 @@ The following is the hand-coded implementation package body for the \textit{pack
 \textit{component-packet\_component-implementation.adb}:
 \adacodef{../example_architecture/packet_component/component-packet_component-implementation.adb}
 
-As can be seen, the component record contains the variable \texttt{Self.Count} which is sent out as a packet. Packets are constructed using the packet creation functions provided by \texttt{Self.Packets}, which is an instantiation of \texttt{Packet\_Component\_Packets.Instance}. Packets are created and then sent out of the \texttt{packet\_T\_Send} connector. Note that since no type was provided for the \texttt{Counter} packet in the model, we have to supply our own byte array to populate the packet. In this case, they byte array is generated by serializing the \texttt{Self.Count} value using the \texttt{Packed\_U16} packed record serialization function.
+As can be seen, the component record contains the variable \texttt{Self.Count} which is sent out as a packet. Packets are constructed using the packet creation functions provided by \texttt{Self.Packets}, which is an instantiation of \texttt{Packet\_Component\_Packets.Instance}. Packets are created and then sent out of the \texttt{packet\_T\_Send} connector. Note that since no type was provided for the \texttt{Counter} packet in the model, we have to supply our own byte array to populate the packet. In this case, the byte array is generated by serializing the \texttt{Self.Count} value using the \texttt{Packed\_U16} packed record serialization function.
 
 \subsubsection{Packet Unit Testing}
 
@@ -4372,7 +4372,7 @@ The two command handler functions are named after the commands that they service
 
 Note, all command handler functions return a type of \texttt{Command\_Execution\_Status.E}, which is an enumeration with only two states, \texttt{Success} and \texttt{Failure}. One of the two must be returned by the developer. The base package autocode will copy the return value into the command response message that gets forwarded out after command execution. The command response type itself is described in the following section. \\
 
-Finally, there is a \texttt{Invalid\_Command} procedure defined. This procedure must be implemented anytime a component includes a command model. The procedure gets called by the autocoded base package if the command is not valid, ie. it does not have a valid ID, length, or command arguments. Usually this function sends out an event alerting the operator of the system that their command was invalid. In this case we just print some text to standard out. \\
+Finally, there is a \texttt{Invalid\_Command} procedure defined. This procedure must be implemented anytime a component includes a command model. The procedure gets called by the autocoded base package if the command is not valid, i.e. it does not have a valid ID, length, or command arguments. Usually this function sends out an event alerting the operator of the system that their command was invalid. In this case we just print some text to standard out. \\
 
 \subsubsection{The Command Response Type}
 
@@ -4517,7 +4517,7 @@ The most commonly used functions are the parameter creation functions. Each func
 
 \subsubsection{Updating and Using Parameters}
 
-When a parameter model is found for a component, the component base package \texttt{Instance} record is altered to contain those parameter variables. For our \textit{parameter\_component}, two variables are added to the base package \texttt{Instance} record: \texttt{Start\_Count} and \texttt{Hello\_World\_Value}. These variables can be accessed just like any other component variable, ie. via \texttt{Self.Start\_Count} and \texttt{Self.Hello\_World\_Value}. The only difference is that these variables can be updated or fetched by a call to the component's \texttt{Parameter\_Update.T} modify connector. \\
+When a parameter model is found for a component, the component base package \texttt{Instance} record is altered to contain those parameter variables. For our \textit{parameter\_component}, two variables are added to the base package \texttt{Instance} record: \texttt{Start\_Count} and \texttt{Hello\_World\_Value}. These variables can be accessed just like any other component variable, i.e. via \texttt{Self.Start\_Count} and \texttt{Self.Hello\_World\_Value}. The only difference is that these variables can be updated or fetched by a call to the component's \texttt{Parameter\_Update.T} modify connector. \\
 
 Note that if the type of the parameter is a \textit{packed type}, then the \texttt{U} version of the type is used within the component base package \texttt{Instance} record for the best performance. Since the \texttt{U} type uses the machine native representation of the variable, it often provides faster access than the packed type. \\
 
@@ -4542,14 +4542,14 @@ When a parameter \texttt{Stage} operation is received by a component, the compon
   \item The parameter ID is checked for validity. If it is out of range an \texttt{Id\_Error} return status is set.
   \item The parameter length is checked for validity. If it does not match the expected length a \texttt{Length\_Error} return status is set.
   \item The parameter type is checked for validity by making sure it is within the Ada range(s) defined for that type. If it is not valid, then a \texttt{Validation\_Error} return status is set.
-  \item If all the previous checks pass, the parameter is ``staged", ie. stored in a \textit{staged} variable.
+  \item If all the previous checks pass, the parameter is ``staged", i.e. stored in a \textit{staged} variable.
   \item The set parameter status is returned to the parameter update invoker.
 \end{spacedenumerate}
 \vspace{5mm} %5mm vertical space
 
 The reader can verify this logic by building and inspecting \textit{build/src/component-parameter\_component.ads} and \textit{build/src/component-parameter\_component.adb}. \\
 
-Note that after validation, a parameters is not immediately copied over to the component \texttt{Instance} variables holding the parameters. Instead the parameters are ``staged", ie. copied to a temporary staging variable. This is done for a few reasons:
+Note that after validation, a parameters is not immediately copied over to the component \texttt{Instance} variables holding the parameters. Instead the parameters are ``staged", i.e. copied to a temporary staging variable. This is done for a few reasons:
 
 \vspace{5mm} %5mm vertical space
 \begin{spacedenumerate}
@@ -4558,7 +4558,7 @@ Note that after validation, a parameters is not immediately copied over to the c
 \end{spacedenumerate}
 \vspace{5mm} %5mm vertical space
 
-To circumvent these issues, parameters are staged. A component is alerted that all new values for parameters have been staged when the \texttt{Update} operation is received on the \texttt{Parameter\_Update.T} connector. Once alerted, the component is able to atomically update its local parameter variables stored in \texttt{Instance} by making a call to the autocoded base package procedure \texttt{Update\_Parameters}. This procedure will copy all the parameters from the staging area to their working local copy in \texttt{Instance}. The call to this function will only execute this logic after all parameters for the component have been staged, ie. once the \texttt{Update} operation has been received, making sure the parameters are updated atomically. \\
+To circumvent these issues, parameters are staged. A component is alerted that all new values for parameters have been staged when the \texttt{Update} operation is received on the \texttt{Parameter\_Update.T} connector. Once alerted, the component is able to atomically update its local parameter variables stored in \texttt{Instance} by making a call to the autocoded base package procedure \texttt{Update\_Parameters}. This procedure will copy all the parameters from the staging area to their working local copy in \texttt{Instance}. The call to this function will only execute this logic after all parameters for the component have been staged, i.e. once the \texttt{Update} operation has been received, making sure the parameters are updated atomically. \\
 
 The following is the hand-coded implementation package body for the \textit{parameter\_component} which demonstrates how to properly use parameters within a component. For directions on generating the templates for this file see Section \ref{Component Implementation Package}. \\
 
@@ -4573,7 +4573,7 @@ Next, we access one of the component's parameters, \texttt{Self.Hello\_World\_Va
 
 The standard practice when using parameters within components is to call \texttt{Self.Update\_Parameters} at the beginning of execution to make sure that all parameters are up to date before continuing on. Once the parameters are atomically updated, they can be used freely. \\
 
-The next procedure that is defined is \texttt{Update\_Parameters\_Action}. This procedure gets called any time the parameters have been successfully updated via a call to \texttt{Self.Update\_Parameters}. Note that it is not called if not all the parameters have been staged yet, ie. an \texttt{Update} operation has not yet been received. By default, the implementation of this procedure is \texttt{null}, and it rarely needs to actually be implemented by the developer. The purpose of the procedure is to allow the developer to implement an action that runs whenever the parameters have been updated. This is often used to keep hardware state in sync with software parameters. For instance, one can use this procedure to write parameter values to hardware registers. In this way, you can always ensure that if the software parameter values get updated, so do the analogous hardware registers. \\
+The next procedure that is defined is \texttt{Update\_Parameters\_Action}. This procedure gets called any time the parameters have been successfully updated via a call to \texttt{Self.Update\_Parameters}. Note that it is not called if not all the parameters have been staged yet, i.e. an \texttt{Update} operation has not yet been received. By default, the implementation of this procedure is \texttt{null}, and it rarely needs to actually be implemented by the developer. The purpose of the procedure is to allow the developer to implement an action that runs whenever the parameters have been updated. This is often used to keep hardware state in sync with software parameters. For instance, one can use this procedure to write parameter values to hardware registers. In this way, you can always ensure that if the software parameter values get updated, so do the analogous hardware registers. \\
 
 In this case, we use the \texttt{Update\_Parameters\_Action} procedure to update our local variable \texttt{Self.Count} with the parameter value \texttt{Self.Start\_Count.Value} anytime the parameters are updated. In this way, the parameters can be used to set \texttt{Self.Count} to any value during execution.
 
@@ -4909,7 +4909,7 @@ To generate a PDF from this file run:
 \end{minted}
 \vspace{5mm} %5mm vertical space
 
-By default, PDF files are generated in the \textit{build/pdf/} directory. This allows the developer to review the output documentation before ``publishing" it, ie. saving it in the repository. Once the documentation looks good, you can publish it manually by copying it into the \textit{doc/} directory:
+By default, PDF files are generated in the \textit{build/pdf/} directory. This allows the developer to review the output documentation before ``publishing" it, i.e. saving it in the repository. Once the documentation looks good, you can publish it manually by copying it into the \textit{doc/} directory:
 
 \vspace{5mm} %5mm vertical space
 \begin{minted}{text}
@@ -4949,7 +4949,7 @@ This section presents component design topics that are for more experienced Adam
 
 Adamant provides a feature that allows for a component to operate on one or more generic parameters. This uses the underlying Ada feature for \href{https://learn.adacore.com/courses/intro-to-ada/chapters/generics.html}{\textcolor{blue}{generic packages}}. The advantage of defining a component with generic parameters is that these parameters can be used as connector types, allowing the component to operate on data in a generic manner. The actual type that the component operates on is not determined until the generic component is instantiated in an assembly. If components can be generic, they are much more likely to be reusable. \\
 
-Two good example components that use this feature in Adamant are the the \textit{logger} component, which logs data of a generic type to an in-memory circular buffer, \textit{src/components/loggers/logger}, and the \textit{splitter} component, which can split any \textit{send} connector into an array of outputs, \textit{src/components/splitter}. The splitter component is simple and demonstrates a minimal usage of the generic feature, so it is ideal to use as an example for this section of the document. \\
+Two good example components that use this feature in Adamant are the \textit{logger} component, which logs data of a generic type to an in-memory circular buffer, \textit{src/components/loggers/logger}, and the \textit{splitter} component, which can split any \textit{send} connector into an array of outputs, \textit{src/components/splitter}. The splitter component is simple and demonstrates a minimal usage of the generic feature, so it is ideal to use as an example for this section of the document. \\
 
 Let's begin by taking a look at the \textit{splitter} component model: \\
 
@@ -4958,7 +4958,7 @@ Let's begin by taking a look at the \textit{splitter} component model: \\
 
 As can be seen, this component uses the YAML tag \texttt{generic} to define the component's generic types. An optional \texttt{description} is provided followed by a list of generic parameters. Each parameter must include a parameter \texttt{name} and optionally a \texttt{description}. \\
 
-Each parameter can also specify two other tags that are not specified for the \textit{splitter} component, \texttt{formal\_type} and \texttt{optional}. If not specified, the \texttt{formal\_type} for the generic is assumed to be \texttt{Type T is private;}. This formal generic type has specific semantic meaning in Ada. For a list of the different formal types available in Ada see the table found in the \href{https://en.wikibooks.org/wiki/Ada_Programming/Generics#Generic_formal_types}{\textcolor{blue}{Ada Wiki}}. As can be seen from the link, the default \texttt{formal\_type} defines a generic parameter that can be any nonlimited definite type. To override this conservative generic formal type, you can specify the \texttt{formal\_type} field manually. See the \textit{logger} component for an example of manually defining a \texttt{formal\_type}. \\
+Each parameter can also specify two other tags that are not specified for the \textit{splitter} component, \texttt{formal\_type} and \texttt{optional}. If not specified, the \texttt{formal\_type} for the generic is assumed to be \texttt{Type T is private;}. This formal generic type has specific semantic meaning in Ada. For a list of the different formal types available in Ada see the table found in the \href{https://en.wikibooks.org/wiki/Ada_Programming/Generics#Generic_Formal_Types}{\textcolor{blue}{Ada Wiki}}. As can be seen from the link, the default \texttt{formal\_type} defines a generic parameter that can be any nonlimited definite type. To override this conservative generic formal type, you can specify the \texttt{formal\_type} field manually. See the \textit{logger} component for an example of manually defining a \texttt{formal\_type}. \\
 
 If the \texttt{formal\_type} field includes a default value, you can inform the Adamant modeling system of this by setting the \texttt{optional} field to \texttt{True}. This will enable a user to instantiate the component without defining a concrete type for the generic parameter, using the provided default instead. \\
 
@@ -5015,7 +5015,7 @@ generic:
       description: The generic type of data passed to this components recv_async connector.
     - name: Serialized_Length
       description: A method that returns the serialized length of an item of type T. This is useful for serializing variable length packed types onto the queue.
-      formal_type: "with function Serialized_Length(src : in T; num_Bytes_Serialized : out Natural) return Serializer_Types.Serialization_Status;"
+      formal_type: "with function Serialized_Length(src : in T; Num_Bytes_Serialized : out Natural) return Serializer_Types.Serialization_Status;"
 ...
 etc.
 \end{yamlcode}
@@ -5062,9 +5062,9 @@ components:
       - "Interrupt_Data_Type => Tick.T"
       - "Set_Interrupt_Data_Time => Tick_Interrupt_Handler.Set_Tick_Time"
     discriminant:
-      - "interrupt_Priority => System.Interrupt_Priority'Last"
-      - "interrupt_Id => Ada.Interrupts.Names.SIGUSR1"
-      - "custom_Interrupt_Procedure => Tick_Interrupt_Handler.Handler'Access"
+      - "Interrupt_Priority => System.Interrupt_Priority'Last"
+      - "Interrupt_Id => Ada.Interrupts.Names.SIGUSR1"
+      - "Custom_Interrupt_Procedure => Tick_Interrupt_Handler.Handler'Access"
   ... 
 connections: 
   ...
@@ -5107,7 +5107,7 @@ components:
     stack_size: 50000
     secondary_stack_size: 10000
     init_base:
-      - "queue_Size => 8192"
+      - "Queue_Size => 8192"
     init:
       - "addr => \"127.0.0.1\""
       - "port => 2001"
@@ -5298,17 +5298,17 @@ In addition, Adamant will always produce a list of warning for any unconnected c
 
 \vspace{5mm} %5mm vertical space
 \begin{minted}{text}
-Warning science_assembly.assembly.yaml: component 'rate_Group_Instance' has 
+Warning science_assembly.assembly.yaml: component 'Rate_Group_Instance' has 
   unattached connector 'Tick_T_Recv_Sync'.
-Warning science_assembly.assembly.yaml: component 'rate_Group_Instance' has 
+Warning science_assembly.assembly.yaml: component 'Rate_Group_Instance' has 
   unattached connector 'Tick_T_Send[2]'.
-Warning science_assembly.assembly.yaml: component 'rate_Group_Instance' has 
+Warning science_assembly.assembly.yaml: component 'Rate_Group_Instance' has 
   unattached connector 'Tick_T_Send[3]'.
-Warning science_assembly.assembly.yaml: component 'rate_Group_Instance' has 
+Warning science_assembly.assembly.yaml: component 'Rate_Group_Instance' has 
   unattached connector 'Tick_T_Send[4]'.
-Warning science_assembly.assembly.yaml: component 'rate_Group_Instance' has 
+Warning science_assembly.assembly.yaml: component 'Rate_Group_Instance' has 
   unattached connector 'Tick_T_Send[5]'.
-Warning science_assembly.assembly.yaml: component 'command_Router_Instance' has 
+Warning science_assembly.assembly.yaml: component 'Command_Router_Instance' has 
   unattached connector 'Command_T_Recv_Async'.
 \end{minted}
 \vspace{5mm} %5mm vertical space
@@ -5598,7 +5598,7 @@ While generating any outputs of an assembly model, including the autocode, the m
 
 Using this system, the developer can choose the ID space they want for each type of entity. Often the IDs for commands will be defined manually to create a sparse ID space. Working this way makes sure that command IDs remain relatively stable over the course of a project, which might be beneficial for debugging and trending. Conversely, data product IDs are rarely specified manually, since these IDs are not configuration controlled like commands. The resulting compact ID space makes a database of data products easy to implement in an efficient manner, using Adamant's ID assigning behavior to its advantage. See \textit{src/components/product\_database} for an example of a data product database component. \\
 
-Sometimes you want Adamant to define a compact ID space for the IDed entity, but you want to define where the ID space starts, ie. the minimum ID. Adamant allows a developer to specify minimum on a per ID type basis using the following pattern within an assembly model: \\
+Sometimes you want Adamant to define a compact ID space for the IDed entity, but you want to define where the ID space starts, i.e. the minimum ID. Adamant allows a developer to specify minimum on a per ID type basis using the following pattern within an assembly model: \\
 
 \textit{id\_base\_demo\_assembly.assembly.yaml:}
 \vspace{5mm} %5mm vertical space
@@ -5607,8 +5607,8 @@ Sometimes you want Adamant to define a compact ID space for the IDed entity, but
 # We set events to start at  0x1000 and data products to 
 # start at 0x2000
 id_bases: 
-  - "event_Id_Base => 4096"
-  - "data_Product_Id_Base => 8192"
+  - "Event_Id_Base => 4096"
+  - "Data_Product_Id_Base => 8192"
 
 # Below is the rest of the assembly model.
   ...
@@ -5622,7 +5622,7 @@ connections:
 
 The above model sets the event and data product ID spaces separately. Other IDed entity types, those not specified, will start at their default minimum of 0 or 1. In this way we can make the autogenerated ID space start wherever we like. \\
 
-Data dependency ID specification is done in a slightly different manner, via the \texttt{set\_data\_dependencies} tag within the assembly. For example, within the \textit{science\_assembly.assembly.yaml} model, Section \ref{Modeling an Assembly}, we map the \texttt{science\_Instance}'s two data dependencies to two external data products in the system, ie. \texttt{"sensor\_1\_Reading => data\_Collector\_Instance.Sensor\_1\_Data"} which maps the \texttt{science\_Instance}'s \texttt{sensor\_1\_Reading} data dependency to the \texttt{data\_Collector\_Instance}'s \texttt{Sensor\_1\_Data} data product. Adamant will ensure that both the data product and data dependency exist in the assembly and are of the same type. If these checks pass, then the IDs of the data dependencies will be resolved to the appropriate data product IDs in the \texttt{Set\_Id\_Bases} procedure within the assembly package's autocoded body. In this way, components can safely share data among one another while retaining their compile-time independent property.
+Data dependency ID specification is done in a slightly different manner, via the \texttt{set\_data\_dependencies} tag within the assembly. For example, within the \textit{science\_assembly.assembly.yaml} model, Section \ref{Modeling an Assembly}, we map the \texttt{science\_Instance}'s two data dependencies to two external data products in the system, i.e. \texttt{"sensor\_1\_Reading => data\_Collector\_Instance.Sensor\_1\_Data"} which maps the \texttt{science\_Instance}'s \texttt{sensor\_1\_Reading} data dependency to the \texttt{data\_Collector\_Instance}'s \texttt{Sensor\_1\_Data} data product. Adamant will ensure that both the data product and data dependency exist in the assembly and are of the same type. If these checks pass, then the IDs of the data dependencies will be resolved to the appropriate data product IDs in the \texttt{Set\_Id\_Bases} procedure within the assembly package's autocoded body. In this way, components can safely share data among one another while retaining their compile-time independent property.
 
 \subsubsection{IDed Entity Ada Specification}
 
@@ -5721,8 +5721,8 @@ There are three different types of view filters: 1) those that filter components
 
 \vspace{5mm} %5mm vertical space
 \begin{spaceditemize}
-  \item \textbf{\texttt{component\_name}} - Filter by component instance names, ie. \texttt{Command\_Router\_Instance}.
-  \item \textbf{\texttt{component\_type}} - Filter by component type names, ie \texttt{Example\_Command\_Router}.
+  \item \textbf{\texttt{component\_name}} - Filter by component instance names, i.e. \texttt{Command\_Router\_Instance}.
+  \item \textbf{\texttt{component\_type}} - Filter by component type names, i.e. \texttt{Example\_Command\_Router}.
   \item \textbf{\texttt{component\_execution}} - Filter by component execution, either \texttt{active} or \texttt{passive}.
   \item \textbf{\texttt{component\_name\_context}} - Keep (or remove in the case of an \texttt{exclude} list) all components that have immediate connections with the specified component instances.
   \item \textbf{\texttt{component\_type\_context}} - Keep (or remove in the case of an \texttt{exclude} list) all components that have immediate connections with the specified component types.
@@ -5734,8 +5734,8 @@ A connector filter will remove any connectors that do not meet the filter criter
 \vspace{5mm} %5mm vertical space
 \begin{spaceditemize}
   \item \textbf{\texttt{connector\_name}} - Filter by connector name in the form \texttt{\url{component\_instance\_name.connector\_name}}.
-  \item \textbf{\texttt{connector\_type}} - Filter by connector type ie. something like \texttt{Command.T}.
-  \item \textbf{\texttt{connector\_kind}} - Filter by connector kind, ie. \texttt{recv\_async}, \texttt{recv\_sync}, \texttt{send}, \texttt{request}, \texttt{service}, \texttt{get}, \texttt{return}, \texttt{provide}, or \texttt{modify}
+  \item \textbf{\texttt{connector\_type}} - Filter by connector type i.e. something like \texttt{Command.T}.
+  \item \textbf{\texttt{connector\_kind}} - Filter by connector kind, i.e. \texttt{recv\_async}, \texttt{recv\_sync}, \texttt{send}, \texttt{request}, \texttt{service}, \texttt{get}, \texttt{return}, \texttt{provide}, or \texttt{modify}
 \end{spaceditemize}
 \vspace{5mm} %5mm vertical space
 
@@ -5745,8 +5745,8 @@ Data dependency filters should always be used in conjunction with \textbf{\textt
 
 \vspace{5mm} %5mm vertical space
 \begin{spaceditemize}
-  \item \textbf{\texttt{data\_dependency\_name}} - Filter by data dependency or data product names, ie. \texttt{Register\_Stuffer\_Consumer\_Instance.Last\_Register\_Written} or \texttt{Register\_Stuffer\_Instance.Last\_Register\_Written}.
-  \item \textbf{\texttt{data\_dependency\_type}} - Filter by type passed along a data dependency, ie \texttt{Register\_Value.T}.
+  \item \textbf{\texttt{data\_dependency\_name}} - Filter by data dependency or data product names, i.e. \texttt{Register\_Stuffer\_Consumer\_Instance.Last\_Register\_Written} or \texttt{Register\_Stuffer\_Instance.Last\_Register\_Written}.
+  \item \textbf{\texttt{data\_dependency\_type}} - Filter by type passed along a data dependency, i.e. \texttt{Register\_Value.T}.
 \end{spaceditemize}
 \vspace{5mm} %5mm vertical space
 
@@ -6067,7 +6067,7 @@ To generate a PDF from this file run:
 \end{minted}
 \vspace{5mm} %5mm vertical space
 
-By default, PDF files are generated in the \textit{build/pdf/} directory. This allows the developer to review the output documentation before ``publishing" it, ie. saving it in the repository. Once the documentation looks good, you can publish it manually by copying it into the \textit{doc/} directory:
+By default, PDF files are generated in the \textit{build/pdf/} directory. This allows the developer to review the output documentation before ``publishing" it, i.e. saving it in the repository. Once the documentation looks good, you can publish it manually by copying it into the \textit{doc/} directory:
 
 \vspace{5mm} %5mm vertical space
 \begin{minted}{text}
@@ -6202,7 +6202,7 @@ This section provides discussion on various advanced usages of Adamant. These to
 
 Ada includes extensive facilities to support multi-language development. See, \href{https://learn.adacore.com/courses/intro-to-embedded-sys-prog/chapters/multi_language_development.html}{\texttt{\textcolor{blue}{AdaCore Learn}}} for specific details. In Adamant, we have formalized Ada calling into external C or C++ libraries and provided some tooling to make this easier. Note, this assumes Ada is still being used as the \textit{main program}. If you would rather learn by example see the \texttt{c\_demo} or \texttt{cpp\_demo} components in the \textit{example repository}. \\
 
-To include a C or C++ library we must first include the library in the Adamant build path, just like we would with Ada source code, ie.
+To include a C or C++ library we must first include the library in the Adamant build path, just like we would with Ada source code, i.e.
 
 \vspace{5mm} %5mm vertical space
 \begin{minted}{text}
@@ -6493,7 +6493,7 @@ Which produces the metrics for the executable in the output file \textit{\url{bu
 \textit{test.elf.txt:}
 \textcodef[breaklines=false]{../example_architecture/simple_package/test_better3/build/metric/Linux_Test/test.elf.txt}
 
-Adamant splits the output into three sections, the metrics of the generated code (ie. any code found in a \textit{build/src} directory), the metrics of hand-code, and the total metrics of both generated and hand-code combined. In this way, you can compare the number of lines of code that are generated vs hand-coded in your program. In Adamant, it is not uncommon for an assembly binary to be made up of ~75\% autocoded SLOC.
+Adamant splits the output into three sections, the metrics of the generated code (i.e. any code found in a \textit{build/src} directory), the metrics of hand-code, and the total metrics of both generated and hand-code combined. In this way, you can compare the number of lines of code that are generated vs hand-coded in your program. In Adamant, it is not uncommon for an assembly binary to be made up of ~75\% autocoded SLOC.
 
 \subsubsection{YAML SLOC}
 
@@ -6825,7 +6825,7 @@ As seen in previous sections  the build system is configured based on the user's
 
 \vspace{5mm} %5mm vertical space
 \begin{spacedenumerate}
-  \item Adding environment variables to the shell's configuration file (ie. \textit{.bashrc}).
+  \item Adding environment variables to the shell's configuration file (i.e. \textit{.bashrc}).
   \item Adding an \textit{env.py} file to a directory to configure the environment for \texttt{redo} rules run within that directory.
   \item Any custom redo rules written in a \textit{.do} file can tailor their environment by setting the environment variables within.
 \end{spacedenumerate}
@@ -6837,7 +6837,7 @@ Option 2 is commonly used to configure the environment for \texttt{redo} command
 
 \pythoncodef{../example_architecture/test/env.py}
 
-which sets the \textit{build target} to the test version for the current target, ie. if the \texttt{TARGET} is currently \texttt{Linux} then the \textit{env.py} will change \texttt{TARGET} for the test directory to \texttt{Linux\_Test} instead, unless the current \texttt{TARGET} ends in \texttt{Coverage}. This \textit{env.py} shows the standard Adamant unit test environment and should be included in every unit test directory. \\
+which sets the \textit{build target} to the test version for the current target, i.e. if the \texttt{TARGET} is currently \texttt{Linux} then the \textit{env.py} will change \texttt{TARGET} for the test directory to \texttt{Linux\_Test} instead, unless the current \texttt{TARGET} ends in \texttt{Coverage}. This \textit{env.py} shows the standard Adamant unit test environment and should be included in every unit test directory. \\
 
 The unit test \textit{env.py} is slightly complicated, but note that anything can by written in an \textit{env.py}, and it will be executed. More often, a user simply uses the python \texttt{os} module to set and unset environment variables. For instance, if you always want to be in debug mode in a certain directory you can simply create an \textit{env.py} that looks like:
 
@@ -6887,7 +6887,7 @@ The default behavior of the Adamant build system is provided by the \textit{.do}
 \vspace{5mm} %5mm vertical space
 \begin{spacedenumerate}
   \item Add your new build rule in \textit{redo/rules} within the Adamant repository or, add it to your project repository if the new rule only applies to your specific project. Build rules are python classes that must inherit from the \texttt{base\_classes.build\_rule\_base} class. Follow the many examples provided in that directory to write your own build rule. Note that you will need to override the \texttt{input\_file\_regex} and \texttt{output\_filename} functions in order to provide \texttt{redo what} support for your new build rule.
-  \item Next, you need to ``wire" your build rule to \texttt{redo} by defining or modifying a \texttt{.do} file at the top level of the Adamant repository (and your project repository). If your build rule applies to a new file output type then you will need to create a new \texttt{.do} file. If your build rule does not produce a concrete output and is \textit{abstract}, ie. similar to \texttt{redo what}, \texttt{redo test\_all}, or \texttt{redo publish}, then you will need to modify the \texttt{default.do} file to add your new rule. 
+  \item Next, you need to ``wire" your build rule to \texttt{redo} by defining or modifying a \texttt{.do} file at the top level of the Adamant repository (and your project repository). If your build rule applies to a new file output type then you will need to create a new \texttt{.do} file. If your build rule does not produce a concrete output and is \textit{abstract}, i.e. similar to \texttt{redo what}, \texttt{redo test\_all}, or \texttt{redo publish}, then you will need to modify the \texttt{default.do} file to add your new rule. 
   \item Test your new rule by trying to build something with it using \texttt{redo}.
 \end{spacedenumerate}
 \vspace{5mm} %5mm vertical space
@@ -6938,7 +6938,7 @@ Model files are always named as \textit{model\_name.model\_type.yaml}. So in thi
 
 Note that the whole process above begins when the command \textit{redo ./build/src/example.adb} is run. This invokes the Adamant build system, which searches for the correct build rule to construct the file. When the build rule is found, it will indicate that a file named \textit{example.type.yaml} must exist in order to build the desired output. The build system will ensure that this file exists, and then the generator process shown in the diagram commences. \\
 
-The first step is that a generator python module with the same name as the model file type, ie. \textit{type}, will load the model file from disk. The model file is the validated by comparing it against a YAML schema. The schema used is also named by the model file type. Adamant schemas are written in the \href{https://pykwalify.readthedocs.io/en/unstable/}{\textcolor{blue}{pykwalify}} schema language. Many of the schemas are included in the Appendix of this document. \\
+The first step is that a generator python module with the same name as the model file type, i.e. \textit{type}, will load the model file from disk. The model file is the validated by comparing it against a YAML schema. The schema used is also named by the model file type. Adamant schemas are written in the \href{https://pykwalify.readthedocs.io/en/unstable/}{\textcolor{blue}{pykwalify}} schema language. Many of the schemas are included in the Appendix of this document. \\
 
 If validation is successful, the generator loads the yaml model file into a python model class, also with the same name as the model type. This model class consists of object-oriented python that ingests the YAML data into a more suitable data structure for computation. As part of this process some checking of the model integrity may occur that cannot be accomplished at the schema level. Calculations may also be performed to derive extra data from the model data. It is also common for model classes to load additional model classes to gather more data. This is the case with component models, which load IDed entity models to gather information about the component's events, data products, etc. \\
 

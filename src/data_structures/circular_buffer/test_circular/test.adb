@@ -34,7 +34,7 @@ procedure Test is
          for Idx in Natural range 0 .. Expected_Cnt - 1 loop
             Pop_Assert.Eq (Buf.Peek (Bytes, Num_Bytes, Offset => Cnt), Success, "Peek not successful!", Filename, Line);
             Natural_Assert.Eq (Num_Bytes, Expected_Cnt - Cnt, "num_Bytes_Returned wrong!", Filename, Line);
-            -- Put_Line(Basic_Types.Representation.Image(bytes(0 .. num_Bytes - 1)));
+            -- Put_Line(Basic_Types.Representation.Image(bytes(0 .. Num_Bytes - 1)));
             Byte_Array_Assert.Eq (Bytes (0 .. Num_Bytes - 1), Bytes_To_Compare (Bytes_To_Compare'First + Cnt .. Bytes_To_Compare'First + Cnt + Num_Bytes - 1), "byte compare failed at iteration: " & Natural'Image (Idx), Filename, Line);
             Cnt := @ + 1;
          end loop;
@@ -51,7 +51,7 @@ procedure Test is
             Cnt : Natural := 0;
          begin
             for D of Dump loop
-               -- Copy pointers to bytes_To_Compare:
+               -- Copy pointers to Bytes_To_Compare:
                if (not Is_Null (D)) and then Length (D) > 0 then
                   Bytes_To_Compare (Cnt .. Cnt + Length (D) - 1) := To_Byte_Array (D);
                   Cnt := @ + Length (D);
