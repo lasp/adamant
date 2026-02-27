@@ -1,0 +1,11 @@
+---
+events:
+  - name: Dividing_By_Zero_In_Cpp
+    description: A Divide_By_Zero_In_Cpp command was received, and the magic number was correct. The division will occur in N milliseconds, where N is provided as the event parameter.
+    param_type: Packed_Natural.T
+  - name: Invalid_Magic_Number
+    description: A Divide_By_Zero_In_Cpp command was received, but the magic number was incorrect. The division will not occur.
+    param_type: Packed_U32.T
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T
