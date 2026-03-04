@@ -82,7 +82,7 @@ private
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- This is the base tick for the component. Upon reception the component will decrement the count of each ID unless it is already 0. Every 10 ticks, an event of what is filtered will be sent.
+   -- This is the base tick for the component. Upon reception the component will decrement the count of each ID unless it is already 0. Every tick, an event of what has been filtered will be sent.
    overriding procedure Tick_T_Recv_Sync (Self : in out Instance; Arg : in Tick.T);
    -- Events are received synchronously on this connector and checked for the number of events of that ID.
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T);
@@ -120,7 +120,7 @@ private
    overriding function Enable_Event_Limiting (Self : in out Instance) return Command_Execution_Status.E;
    -- Disable the event limiters for all event IDs.
    overriding function Disable_Event_Limiting (Self : in out Instance) return Command_Execution_Status.E;
-   -- Set the persistence of the event limiter for all events that are limited. Value must be between 0 and 7.
+   -- Set the persistence of the event limiter for all events that are limited. Value must be between 1 and 7.
    overriding function Set_Event_Limit_Persistence (Self : in out Instance; Arg : in Event_Limiter_Persistence_Type.T) return Command_Execution_Status.E;
    -- Dump a packet for the state of all events on if they are limited or not.
    overriding function Dump_Event_States (Self : in out Instance) return Command_Execution_Status.E;

@@ -101,16 +101,16 @@ package body Component.Event_Limiter.Implementation is
    -- Init Parameters:
    -- Event_Id_Start : Event_Types.Event_Id - The event ID that begins the range of ids that the component will include for potential limiting of events.
    -- Event_Id_Stop : Event_Types.Event_Id - The event ID that ends the range of ids that the component will include for potential limiting of events.
-   -- Event_Disable_List : Two_Counter_Entry.Event_Id_List - A list of event IDs that are enabled by default
+   -- Event_Disable_List : Two_Counter_Entry.Event_Id_List - A list of event IDs that are disabled by default
    -- Event_Limit_Persistence : Two_Counter_Entry.Persistence_Type - The initial persistence of the number of events to allow before limiting them between ticks (1 to 7)
    --
    overriding procedure Init
       (Self : in out Instance; Event_Id_Start : in Event_Types.Event_Id; Event_Id_Stop : in Event_Types.Event_Id; Event_Disable_List : in Two_Counter_Entry.Event_Id_List := [1 .. 0 => 0]; Event_Limit_Persistence : in Two_Counter_Entry.Persistence_Type)
    is
    begin
-      Self.Event_Array.Init (Event_Id_Start, Event_Id_Stop, Event_Disable_List, Event_Limit_Persistence);
       -- This is asserted in the package as well but added here for extra clarity
       pragma Assert (Event_Id_Stop >= Event_Id_Start, "Stop id must be equal to or greater than the start ID for the event limiter");
+      Self.Event_Array.Init (Event_Id_Start, Event_Id_Stop, Event_Disable_List, Event_Limit_Persistence);
 
       -- Divide by 8 to determine the number of ids we need to accommodate (1 id per bit). Add eight since the difference needs to account for an extra byte if we have ids that need to fil up some of the next byte
       Self.State_Packet_Size := Natural (Event_Id_Stop - Event_Id_Start + 8) / 8;
@@ -124,7 +124,7 @@ package body Component.Event_Limiter.Implementation is
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- This is the base tick for the component. Upon reception the component will decrement the count of each ID unless it is already 0. Every 10 ticks, an event of what is filtered will be sent.
+   -- This is the base tick for the component. Upon reception the component will decrement the count of each ID unless it is already 0. Every tick, an event of what has been filtered will be sent.
    overriding procedure Tick_T_Recv_Sync (Self : in out Instance; Arg : in Tick.T) is
       use Event_State_Type;
       -- Get the timestamp for the package
@@ -149,7 +149,7 @@ package body Component.Event_Limiter.Implementation is
                   null; -- do nothing here and move on
                   -- Save the event id into our event that indicates this id was limited (if room is available)
                when Event_Max_Limit =>
-                  if Num_Event_Limited_Event.Num_Event_Ids <= Num_Event_Limited_Event.Event_Id_Limited_Array'Length then
+                  if Num_Event_Limited_Event.Num_Event_Ids < Num_Event_Limited_Event.Event_Id_Limited_Array'Length then
                      Num_Event_Limited_Event.Event_Id_Limited_Array (Integer (Num_Event_Limited_Event.Num_Event_Ids)) := Dec_Event_Id;
                      Num_Event_Limited_Event.Num_Event_Ids := @ + 1;
                   end if;
@@ -203,7 +203,7 @@ package body Component.Event_Limiter.Implementation is
                            Byte_Num := @ + 1;
                      end case;
                   when Invalid_Id =>
-                     pragma Assert (False, "Invalid_Id found when decrementing all event limiter counters which should not be possible: " & Natural'Image (Natural (Id)));
+                     pragma Assert (False, "Invalid_Id found when getting enable state for event limiter state packet which should not be possible: " & Natural'Image (Natural (Id)));
                end case;
             end loop;
             -- Finish the last byte of the packet if necessary
@@ -428,7 +428,7 @@ package body Component.Event_Limiter.Implementation is
       return Success;
    end Disable_Event_Limiting;
 
-   -- Change the persistence of the event limiter for all events that are limited. Value must be between 0 and 7.
+   -- Change the persistence of the event limiter for all events that are limited. Value must be between 1 and 7.
    overriding function Set_Event_Limit_Persistence (Self : in out Instance; Arg : in Event_Limiter_Persistence_Type.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
    begin

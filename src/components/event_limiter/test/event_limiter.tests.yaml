@@ -17,4 +17,6 @@ tests:
     description: This unit test exercises updating the persistence and ensures it was set correctly.
   - name: Test_Invalid_Command
     description: This unit test exercises that an invalid command throws the appropriate event.
+  - name: Test_Event_Limited_Array_Boundary
+    description: This unit test verifies that when more event IDs hit their limit than can fit in the Event_Id_Limited_Array, the component handles the overflow gracefully without writing past the array bounds.
 
