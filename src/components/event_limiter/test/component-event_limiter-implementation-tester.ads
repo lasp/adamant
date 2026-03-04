@@ -162,7 +162,7 @@ package Component.Event_Limiter.Implementation.Tester is
    -- Data product handler primitives:
    -----------------------------------------------
    -- Description:
-   --    Data products for the pid controller component.
+   --    Data products for the event limiter component.
    -- The number of events that were limited since the last tick.
    overriding procedure Limited_Events_Since_Tick (Self : in out Instance; Arg : in Packed_U16.T);
    -- The total number of events that have been limited so far

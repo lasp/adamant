@@ -30,6 +30,9 @@ private
    overriding procedure Test_Persistence_Change (Self : in out Instance);
    -- This unit test exercises that an invalid command throws the appropriate event.
    overriding procedure Test_Invalid_Command (Self : in out Instance);
+   -- This unit test verifies that when more event IDs hit their limit than can fit in the Event_Id_Limited_Array,
+   -- the component handles the overflow gracefully without writing past the array bounds.
+   overriding procedure Test_Event_Limited_Array_Boundary (Self : in out Instance);
 
    -- Test data and state:
    type Instance is new Event_Limiter_Tests.Base_Instance with record

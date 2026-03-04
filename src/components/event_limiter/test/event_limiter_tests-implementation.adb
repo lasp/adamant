@@ -967,6 +967,8 @@ package body Event_Limiter_Tests.Implementation is
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Set_Event_Limit_Persistence_Id, Status => Success));
       Natural_Assert.Eq (T.Set_New_Persistence_History.Get_Count, 1);
+      -- Verify the persistence value in the event matches the commanded value
+      Natural_Assert.Eq (Natural (T.Set_New_Persistence_History.Get (1).Persistence), 4);
 
       -- Test that the persistence took effect
       T.Event_Forward_T_Recv_Sync_History.Clear;
@@ -1012,5 +1014,48 @@ package body Event_Limiter_Tests.Implementation is
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
       Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Disable_Event_Limit_Range_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 0]));
    end Test_Invalid_Command;
+
+   overriding procedure Test_Event_Limited_Array_Boundary (Self : in out Instance) is
+      T : Component.Event_Limiter.Implementation.Tester.Instance_Access renames Self.Tester;
+      Input_Tick : constant Tick.T := ((0, 0), 0);
+      Incoming_Event : Event.T;
+   begin
+      Put_Line ("");
+      Put_Line ("--------------------------------------------------");
+      Put_Line ("Testing Event_Id_Limited_Array boundary overflow:");
+      Put_Line ("--------------------------------------------------");
+
+      -- Initialize with 11 event IDs (0..10), which exceeds the 10-slot
+      -- Event_Id_Limited_Array. Persistence of 3 means the 4th occurrence
+      -- of each event ID hits the limit.
+      Self.Tester.Component_Instance.Init (Event_Id_Start => 0, Event_Id_Stop => 10, Event_Disable_List => [1 .. 0 => 0], Event_Limit_Persistence => 3);
+      T.Data_Product_T_Recv_Sync_History.Clear;
+      T.Event_T_Recv_Sync_History.Clear;
+      T.Events_Limited_Since_Last_Tick_History.Clear;
+      T.Event_Forward_T_Recv_Sync_History.Clear;
+
+      -- Send 4 events for each of the 11 IDs so all hit their limit:
+      for Id in Event_Types.Event_Id range 0 .. 10 loop
+         Incoming_Event.Header.Id := Id;
+         for Count in 1 .. 4 loop
+            T.Event_T_Send (Incoming_Event);
+         end loop;
+      end loop;
+
+      -- Clear history right before tick to get a clean count:
+      T.Events_Limited_Since_Last_Tick_History.Clear;
+      T.Event_T_Recv_Sync_History.Clear;
+
+      -- Now tick. This iterates all 11 IDs, finds all at Event_Max_Limit,
+      -- and tries to add each to the 10-slot array.
+      T.Tick_T_Send (Input_Tick);
+
+      -- Verify the event was sent with the limited count.
+      Natural_Assert.Eq (T.Events_Limited_Since_Last_Tick_History.Get_Count, 1);
+      Natural_Assert.Eq (Natural (T.Events_Limited_Since_Last_Tick_History.Get (1).Num_Event_Ids), 10);
+
+      -- Verify all 11 events were actually limited (total count):
+      Natural_Assert.Eq (Natural (T.Events_Limited_Since_Last_Tick_History.Get (1).Num_Events_Limited), 11);
+   end Test_Event_Limited_Array_Boundary;
 
 end Event_Limiter_Tests.Implementation;
