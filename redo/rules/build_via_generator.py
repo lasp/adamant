@@ -7,6 +7,7 @@ from util import meta
 from database.generator_database import generator_database
 from base_classes.build_rule_base import build_rule_base
 from models.exceptions import ModelException
+from util.build_profiler import profiler
 import sys
 
 
@@ -100,10 +101,13 @@ def _generate(output_filename):
         + ") -> "
         + output_filename
     )
+    gen_label = "codegen:" + class_name + ":" + os.path.basename(input_filename)
+    profiler.start(gen_label)
     try:
         generator.generate(input_filename)
     except ModelException as e:
         error_print(generator, e)
+    profiler.stop(gen_label)
 
 
 class build_via_generator(build_rule_base):

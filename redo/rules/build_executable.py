@@ -16,6 +16,7 @@ from database.build_target_database import build_target_database
 from database.source_database import source_database
 from database.c_source_database import c_source_database
 from collections import OrderedDict
+from util.build_profiler import profiler
 
 
 def _get_build_target_instance(target_name):
@@ -166,6 +167,7 @@ class build_executable(build_rule_base):
         redo.redo_ifchange(deps)
 
         # Build all the objects that are required for this executable:
+        profiler.start("executable:build_all_obj_deps")
         deps_to_write = deps
         with source_database() as db:
             deps_to_write.extend(
@@ -173,6 +175,7 @@ class build_executable(build_rule_base):
                     local_module, db, build_target, obj_dir
                 )
             )
+        profiler.stop("executable:build_all_obj_deps")
 
         # Form temporary files paths:
         build_dir, base_name = redo_arg.split_redo_arg(redo_2)
@@ -318,8 +321,12 @@ class build_executable(build_rule_base):
         # Run the link and bind commands in .gpr directory:
         cwd = os.getcwd()
         os.chdir(gpr_project_file_dir)
+        profiler.start("executable:bind")
         shell.run_command(bind_command, debug=do_debug)
+        profiler.stop("executable:bind")
+        profiler.start("executable:link")
         shell.run_command(link_command, debug=do_debug)
+        profiler.stop("executable:link")
         os.chdir(cwd)
 
         # Move the temporary stuff over to the final location:

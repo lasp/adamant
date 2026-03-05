@@ -15,6 +15,7 @@ from base_classes.build_target_base import build_target
 from database.source_database import source_database
 from database.c_source_database import c_source_database
 from database.build_target_database import build_target_database
+from util.build_profiler import profiler
 
 
 # Private helper functions:
@@ -435,8 +436,10 @@ def _build_all_ada_and_c_dependencies_for_object(object_files, dry_run=False):
 
 
 def _precompile_objects(object_files):
+    profiler.start("precompile:resolve_deps")
     # Get and build all source files dependencies for these object files
     sources_to_compile, sources_to_depend, build_target_instance = _build_all_ada_and_c_dependencies_for_object(object_files)
+    profiler.stop("precompile:resolve_deps")
 
     # Info print if we are compiling a lot of objects, so the user is informed what is going on.
     num_objects = len(object_files)
@@ -450,7 +453,9 @@ def _precompile_objects(object_files):
 
     # Run gprbuild to compile the sources:
     temp_object_dir = os.environ["OBJECT_PRE_BUILD_DIR"]
+    profiler.start("precompile:gprbuild")
     _run_gprbuild_command(build_target_instance, sources_to_compile, source_dependencies=sources_to_depend, object_dir=temp_object_dir)
+    profiler.stop("precompile:gprbuild")
 
     if num_objects >= 10:
         redo.info_print(
