@@ -60,12 +60,6 @@ class build_all(build_rule_base):
                 bo._precompile_objects(objects_to_prebuild)
                 profiler.stop("build_all:precompile_objects")
 
-        # Now build them proper while tracking dependencies. This will just copy the files from the line above
-        # to the appropriate location while calling redo to track the dependencies.
-        profiler.start("build_all:redo_ifchange_objects")
-        redo.redo_ifchange(objects)
-        profiler.stop("build_all:redo_ifchange_objects")
-
         # Build all non object targets that are in this "build" directory:
         to_build = []
         for target in targets:
@@ -81,12 +75,11 @@ class build_all(build_rule_base):
                 # and not assertion_obj_reg.match(target):
                 to_build.append(target)
 
-        # Build files - we build objects in bulk using the hidden
-        # 'redo objects' command. If prebuild is enabled, then this
-        # will be faster then compiling the objects one at a time.
-        profiler.start("build_all:redo_ifchange_non_objects")
-        redo.redo_ifchange(to_build)
-        profiler.stop("build_all:redo_ifchange_non_objects")
+        # Build objects and non-object targets together in a single redo_ifchange
+        # call. This allows better parallelism and reduces redo coordination overhead.
+        profiler.start("build_all:redo_ifchange_all")
+        redo.redo_ifchange(objects + to_build)
+        profiler.stop("build_all:redo_ifchange_all")
 
     # No need to provide these for "redo all"
     # def input_file_regex(self): pass
