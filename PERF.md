@@ -137,3 +137,84 @@
 **Analysis:** The Docker container has minimal user site-packages, so `PYTHONNOUSERSITE` saves negligible time. `PYTHONDONTWRITEBYTECODE` avoids .pyc writes but .pyc files are already cached from previous runs, so the overhead of checking/writing them is minimal. These are good hygiene settings but don't move the needle in this environment.
 
 **Verdict:** KEEP (zero risk, good practice) but no performance impact.
+
+---
+
+## perf/09-lazy-pickle-import — Defer pickle/unqlite Imports
+
+**Change:** Lazy-import `pickle` (~10ms) and `unqlite` (~4ms) in database.py, deferring them until the first actual database open or fetch call. Also moves `sys.setrecursionlimit(5000)` into the pickle init path.
+
+**Result:** ~60.1s (2 runs: 60.2s, 60.0s) — **no improvement over perf/07**
+
+**Analysis:** Nearly every redo subprocess accesses at least one database, so the imports are merely deferred, not avoided. The total import cost is the same — it just happens slightly later in each process. This would only help if there were subprocesses that don't touch any database (there aren't many).
+
+**Verdict:** KEEP (cleaner lazy-loading pattern, no regression) but no wall-time impact.
+
+---
+
+## perf/09-lazy-pickle-import — Defer pickle/unqlite Imports
+
+**Change:** Lazy-import `pickle` (~10ms) and `unqlite` (~4ms) in database.py, deferring them until the first actual database open or fetch call. Also moves `sys.setrecursionlimit(5000)` into the pickle init path.
+
+**Result:** ~60.1s (2 runs: 60.2s, 60.0s) — **no improvement over perf/07**
+
+**Analysis:** Nearly every redo subprocess accesses at least one database, so the imports are merely deferred, not avoided. The total import cost is the same — it just happens slightly later in each process. This would only help if there were subprocesses that don't touch any database (there aren't many).
+
+**Verdict:** KEEP (cleaner lazy-loading pattern, no regression) but no wall-time impact.
+
+---
+
+## perf/21-precompile-deps-sidecar — Per-object prebuilt deps sidecar
+
+**Change:** During `_precompile_objects`, write precomputed deps metadata for prebuilt objects and use it in `_handle_prebuilt_object` instead of always recalculating dependencies with `_build_all_ada_and_c_dependencies_for_object([redo_1], dry_run=True)`.
+
+**Result:** `60.33s` wall time (single run)
+
+- vs baseline `65.5s`: **7.89% faster**
+- vs perf/09 `60.1s`: **0.38% slower**
+
+**Analysis:** This removes a lot of redundant dependency re-resolution work on the hot prebuilt path, but first implementation still had fallback overhead for some cross-batch precompiled objects.
+
+---
+
+## perf/22-lazy-imports-prebuilt-path — Defer heavy imports off prebuilt fast path
+
+**Change:** Converted heavy top-level imports to lazy helpers (`source_database`, `c_source_database`, `build_target_database`, `build_target`, `rmtree`) so prebuilt-object subprocesses avoid importing DB-heavy modules unless they miss the prebuilt fast path.
+
+**Result:** `60.75s` wall time (single run)
+
+- vs baseline `65.5s`: **7.25% faster**
+- vs perf/09 `60.1s`: **1.08% slower**
+
+**Analysis:** No measurable gain over perf/21 in this run; likely import savings are small compared to remaining per-subprocess redo/dependency bookkeeping.
+
+---
+
+## perf/23-reduce-prebuilt-subprocess-work — Shared manifest + less redo_ifchange
+
+**Change:**
+- Replaced per-object sidecars with a single manifest (`_prebuilt_deps_manifest.json`) for all prebuilt objects.
+- Added per-process manifest cache in module scope.
+- In `_handle_prebuilt_object`, skip `redo_ifchange` for pure source-file deps; only run it for non-source deps.
+
+**Result:** `53.83s` wall time (single run)
+
+- vs baseline `65.5s`: **17.82% faster**
+- vs perf/09 `60.1s`: **10.43% faster**
+
+**Analysis:** This is the first major improvement in this series. It meaningfully reduces per-object subprocess work on prebuilt paths.
+
+---
+
+## perf/24-skip-prebuilt-dep-ifchange — Skip dep redo_ifchange when precompile resolved
+
+**Change:**
+- `_precompile_objects` sets `PRECOMPILE_DEPS_RESOLVED=1`.
+- `_handle_prebuilt_object` skips dependency `redo_ifchange` when that flag is set; it only writes the `.deps` file and moves outputs.
+
+**Result:** `53.16s` wall time (single run)
+
+- vs baseline `65.5s`: **18.84% faster**
+- vs perf/09 `60.1s`: **11.55% faster**
+
+**Analysis:** Best result among tested branches. Confirms that post-precompile per-object dep checks were mostly redundant in clean builds.
