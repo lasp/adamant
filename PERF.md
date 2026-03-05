@@ -113,3 +113,15 @@
 **Analysis:** This is the first optimization to produce a meaningful wall-time reduction. The filelock/asyncio import was happening in every single redo subprocess (262 of them), adding ~54ms × 262 ≈ 14s of cumulative import time. Since redo runs 8 parallel jobs, this translates to ~1.8s wall-time per parallel slot, totaling ~5-6s real improvement. Read-only subprocesses (majority of the 262) never need filelock.
 
 **Verdict:** KEEP. Significant win with zero risk — lazy import is semantically identical.
+
+---
+
+## perf/06-combined-redo-ifchange — Combine Object + Non-Object redo_ifchange Calls
+
+**Change:** In `build_all.py`, instead of two separate `redo_ifchange` calls (one for objects, one for generated files), combine all targets into a single `redo_ifchange` call. This gives the redo scheduler better visibility into all work, improving parallelism.
+
+**Result:** ~59.5s (2 runs: 59.7s, 59.2s) — **marginal improvement over perf/05**
+
+**Analysis:** The two separate `redo_ifchange` calls were already somewhat parallel, but combining them eliminates the serialization point between object compilation and code generation. The improvement is small (~0.5s) because most generated files were already being built in parallel with compilation via the precompile step.
+
+**Verdict:** KEEP. Small but consistent improvement with cleaner code.
