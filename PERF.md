@@ -77,3 +77,15 @@
 3. source.db still opened 367 times across different processes
 
 **Verdict:** Keep this change (reduces overhead, enables future improvements). But the real win requires reducing the number of redo subprocess spawns or sharing database state across processes.
+
+---
+
+## perf/03-fetch-cache — In-Memory Fetch Cache
+
+**Change:** Cache deserialized pickle results in a dict within READ_ONLY database instances. Repeated fetches of the same key skip both UnQLite lookup and pickle deserialization.
+
+**Result:** ~65.95s (baseline: ~65.5s) — **no wall-time improvement**
+
+**Analysis:** Pickle deserialization per call was already fast (~5-9ms for models.db/model_cache.db). The cache helps with repeated same-key lookups within a process, but most lookups are unique keys (different package names). The 262 redo subprocesses each build their own cache from scratch.
+
+**Verdict:** Minimal impact. Keep for correctness/future use but this isn't the bottleneck.
