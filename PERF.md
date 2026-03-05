@@ -51,3 +51,29 @@
 4. **Code generation is already fast** — individual generators take 30-70ms. Not worth optimizing yet.
 
 5. **Compilation is already fast** — gprbuild at 8.4s with parallel compilation is near-optimal.
+
+---
+
+## perf/02-database-connection-cache — Read-Only DB Connection Caching
+
+**Change:** Cache read-only UnQLite connections within each redo subprocess using module-level dict with refcounting. Subsequent `with database() as db:` calls reuse the connection instead of opening/closing.
+
+**Result:** ~66.9s wall time (baseline: ~65.5s) — **no significant wall-time improvement**
+
+**However, database overhead dropped significantly:**
+
+| Database | Before (calls/time) | After (calls/time) | Reduction |
+|---|---|---|---|
+| source.db | 607 / 73.0s | 367 / 67.0s | -40% calls, -8% time |
+| generator.db | 280 / 27.7s | 140 / 5.5s | -50% calls, **-80% time** |
+| build_target.db | 262 / 10.3s | 131 / 1.9s | -50% calls, **-82% time** |
+| model_cache.db | 1124 / 5.1s | 562 / 2.5s | -50% calls, -51% time |
+| models.db | 786 / 6.9s | 393 / 0.4s | -50% calls, **-94% time** |
+| redo_target.db | 8 / 60.8s | 4 / 0.6s | -50% calls, **-99% time** |
+
+**Analysis:** The caching works within each process, cutting calls ~50%. But redo spawns many **separate processes** (each `redo_ifchange` can fork), so the cache is per-process, not shared. The remaining wall-time bottleneck is:
+1. Process spawn overhead (Python import + module init per subprocess)
+2. Pickle deserialization of database values (not just file open)
+3. source.db still opened 367 times across different processes
+
+**Verdict:** Keep this change (reduces overhead, enables future improvements). But the real win requires reducing the number of redo subprocess spawns or sharing database state across processes.
