@@ -218,3 +218,101 @@
 - vs perf/09 `60.1s`: **11.55% faster**
 
 **Analysis:** Best result among tested branches. Confirms that post-precompile per-object dep checks were mostly redundant in clean builds.
+
+---
+
+## perf/26-batch-redo-done-manifest — Batch redo-done via manifest file
+
+**Change:** Modified redo-done (Haskell) to support `@manifest:<path>` syntax for batch registration. After `_precompile_objects` compiles all objects, moves them to final locations in Python, writes a tab-separated manifest file, and calls `redo-done @manifest:<path>` once instead of per-object .do script invocations. Removes prebuilt objects from subsequent redo_ifchange call.
+
+**Result:** ~61.0s (baseline perf/24: ~59.0s) — **slight regression (3.4%)**
+
+**Analysis:** The batch redo-done successfully eliminates all per-object redo subprocess spawns (verified: only 1 redo target in build output). However, the manifest generation + single Haskell redo-done call adds overhead (reading .do files, initializing databases for each target), and the objects that were previously handled by fast .do scripts (just file moves) were already cheap in perf/24. The net effect is slightly worse due to manifest I/O overhead.
+
+**Verdict:** Not beneficial. Per-object .do scripts with perf/24 optimizations are already fast enough.
+
+---
+
+## perf/27-fast-executable-deps — Fast executable dep resolution via .deps files
+
+**Change:** Added `_collect_all_object_deps_from_files()` function in build_executable.py that uses BFS traversal of .deps files to collect all transitive object dependencies. When .deps files exist (from prior object builds via build_all precompile), skips the recursive `_build_all_ada_object_dependencies()` which made many iterative redo_ifchange calls. Does a single redo_ifchange on all collected deps.
+
+**Result:** ~51.8s avg (2 runs: 51.7s, 52.0s)
+
+- vs baseline 65s: **20.3% faster**
+- vs perf/24 59.0s: **12.2% faster**
+
+**Analysis:** This is the biggest single improvement in this round. The recursive dep resolution in build_executable spent ~23.6s (cumulative, 2 calls) doing iterative redo_ifchange on objects that were already built. The BFS approach reads .deps files directly (no subprocess spawns) and does a single bulk redo_ifchange at the end. The .deps files are created by build_object during the precompile phase, so they always exist when build_executable runs.
+
+**Verdict:** KEEP. Significant win with clean fallback to original behavior when .deps files dont
+
+
+---
+
+## perf/26-batch-redo-done-manifest — Batch redo-done via manifest file
+
+**Change:** Modified redo-done (Haskell) to support @manifest:path syntax for batch registration. After _precompile_objects compiles all objects, moves them to final locations in Python, writes a tab-separated manifest file, and calls redo-done once instead of per-object .do script invocations.
+
+**Result:** ~61.0s (baseline perf/24: ~59.0s) — **slight regression (3.4%)**
+
+**Analysis:** The batch redo-done successfully eliminates all per-object redo subprocess spawns. However, the manifest generation + Haskell redo-done call adds overhead, and the objects were already handled cheaply by perf/24's fast .do scripts.
+
+**Verdict:** Not beneficial. Per-object .do scripts with perf/24 optimizations are already fast enough.
+
+---
+
+## perf/27-fast-executable-deps — Fast executable dep resolution via .deps files
+
+**Change:** Added BFS traversal of .deps files in build_executable.py to collect all transitive object dependencies without recursive redo_ifchange calls. When .deps files exist (from build_all precompile), does a single redo_ifchange on all collected deps instead of iterative resolution.
+
+**Result:** ~51.8s avg (2 runs: 51.7s, 52.0s)
+
+- vs baseline 65s: **20.3% faster**
+- vs perf/24 59.0s: **12.2% faster**
+
+**Analysis:** Biggest improvement in this round. The recursive dep resolution in build_executable spent ~23.6s cumulative doing iterative redo_ifchange on already-built objects. BFS reads .deps files directly (no subprocess spawns) and does a single bulk redo_ifchange.
+
+**Verdict:** KEEP. Significant win with clean fallback.
+
+---
+
+## perf/28-skip-exe-dep-ifchange — Skip redo_ifchange for existing source deps
+
+**Change:** In _build_all_ada_dependencies, filter out already-existing source files before calling redo_ifchange. Only call redo_ifchange for missing (generated) files. Based on perf/27.
+
+**Result:** ~51.8s — **same as perf/27**
+
+**Analysis:** Most Ada source files already exist; redo_ifchange on them is cheap (just stamp checks). Filtering adds negligible overhead.
+
+**Verdict:** Marginal. No measurable wall-time impact.
+
+---
+
+## perf/29-combined-optimizations — Combined skip-existing optimizations
+
+**Change:** Extends perf/28 by also skipping redo_ifchange for existing immediate source deps and C binding deps.
+
+**Result:** ~51.9s avg (2 runs: 51.7s, 52.0s)
+
+- vs baseline 65s: **20.2% faster**
+- vs perf/24 59.0s: **12.0% faster**
+
+**Analysis:** No additional improvement over perf/27. The skip-existing optimizations are marginal.
+
+**Verdict:** perf/27 is the recommended branch.
+
+---
+
+## Summary of perf/26-29
+
+| Branch | Time | vs 65s baseline | vs perf/24 (59s) | Key Change |
+|--------|------|-----------------|------------------|------------|
+| perf/26 | 61.0s | -6.2% | +3.4% | Batch redo-done manifest |
+| perf/27 | 51.8s | -20.3% | -12.2% | Fast exe dep resolution via .deps |
+| perf/28 | 51.8s | -20.3% | -12.2% | + Skip existing source redo_ifchange |
+| perf/29 | 51.9s | -20.2% | -12.0% | Combined all optimizations |
+
+**Best result: perf/27** at ~51.8s.
+
+### Important benchmark note
+Always clear ~/.redo and /tmp/redo-* before benchmarking. Stale redo metadata from branch switches causes incorrect results.
