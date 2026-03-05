@@ -125,3 +125,15 @@
 **Analysis:** The two separate `redo_ifchange` calls were already somewhat parallel, but combining them eliminates the serialization point between object compilation and code generation. The improvement is small (~0.5s) because most generated files were already being built in parallel with compilation via the precompile step.
 
 **Verdict:** KEEP. Small but consistent improvement with cleaner code.
+
+---
+
+## perf/07-skip-site-import — PYTHONNOUSERSITE and PYTHONDONTWRITEBYTECODE
+
+**Change:** Set `PYTHONNOUSERSITE=1` and `PYTHONDONTWRITEBYTECODE=1` in `env/activate` to skip user site-packages scanning and .pyc file writing in all redo subprocesses.
+
+**Result:** ~60.0s (2 runs: 59.9s, 60.4s) — **no measurable improvement over perf/06**
+
+**Analysis:** The Docker container has minimal user site-packages, so `PYTHONNOUSERSITE` saves negligible time. `PYTHONDONTWRITEBYTECODE` avoids .pyc writes but .pyc files are already cached from previous runs, so the overhead of checking/writing them is minimal. These are good hygiene settings but don't move the needle in this environment.
+
+**Verdict:** KEEP (zero risk, good practice) but no performance impact.
