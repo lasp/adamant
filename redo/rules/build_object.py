@@ -21,6 +21,23 @@ _build_target_base = None
 _rmtree = None
 
 
+_prebuilt_manifest_cache = None
+
+
+def _get_prebuilt_manifest(temp_object_dir):
+    """Load and cache the prebuilt deps manifest."""
+    global _prebuilt_manifest_cache
+    if _prebuilt_manifest_cache is None:
+        import json
+        manifest_path = os.path.join(temp_object_dir, "_prebuilt_deps_manifest.json")
+        if os.path.isfile(manifest_path):
+            with open(manifest_path, "r") as f:
+                _prebuilt_manifest_cache = json.load(f)
+        else:
+            _prebuilt_manifest_cache = {}
+    return _prebuilt_manifest_cache
+
+
 def _lazy_source_database():
     global _source_database
     if _source_database is None:
@@ -32,6 +49,7 @@ def _lazy_source_database():
 def _lazy_c_source_database():
     global _c_source_database
     if _c_source_database is None:
+        from database.c_source_database import c_source_database
         _c_source_database = c_source_database
     return _c_source_database
 
@@ -497,12 +515,21 @@ def _precompile_objects(object_files):
     _run_gprbuild_command(build_target_instance, sources_to_compile, source_dependencies=sources_to_depend, object_dir=temp_object_dir)
     profiler.stop("precompile:gprbuild")
 
-    # Write per-object sidecar deps files so _handle_prebuilt_object can skip
-    # the expensive _build_all_ada_and_c_dependencies_for_object call.
+    # Write a single manifest file with deps for all prebuilt objects.
+    # Each subprocess reads this once (cached via module-level var).
+    import json
+    manifest_path = os.path.join(temp_object_dir, "_prebuilt_deps_manifest.json")
+    manifest = {}
     for obj_file in object_files:
-        sidecar_path = os.path.join(temp_object_dir, os.path.basename(obj_file) + ".deps.prebuilt")
-        with open(sidecar_path, "w") as f:
-            f.write("\n".join(sources_to_depend))
+        manifest[os.path.basename(obj_file)] = sources_to_depend
+    # Merge with existing manifest if present (from other precompile batches)
+    if os.path.isfile(manifest_path):
+        with open(manifest_path, "r") as f:
+            existing = json.load(f)
+        existing.update(manifest)
+        manifest = existing
+    with open(manifest_path, "w") as f:
+        json.dump(manifest, f)
 
     if num_objects >= 10:
         redo.info_print(
@@ -539,13 +566,11 @@ def _handle_prebuilt_object(redo_1, redo_2, redo_3):
             if f != temp_object_file:
                 move(f, os.path.join(build_dir, os.path.basename(f)))
 
-        # Read pre-computed deps from sidecar file written by _precompile_objects,
+        # Read pre-computed deps from manifest written by _precompile_objects,
         # avoiding the expensive _build_all_ada_and_c_dependencies_for_object call.
-        sidecar_path = os.path.join(temp_object_dir, os.path.basename(redo_1) + ".deps.prebuilt")
-        if os.path.isfile(sidecar_path):
-            with open(sidecar_path, "r") as f:
-                sources_to_depend = [line for line in f.read().split("\n") if line]
-        else:
+        manifest = _get_prebuilt_manifest(temp_object_dir)
+        sources_to_depend = manifest.get(os.path.basename(redo_1))
+        if sources_to_depend is None:
             # Fallback for objects precompiled in a different batch
             _, sources_to_depend, _ = _build_all_ada_and_c_dependencies_for_object([redo_1], dry_run=True)
 
@@ -555,9 +580,14 @@ def _handle_prebuilt_object(redo_1, redo_2, redo_3):
         ) as f:
             f.write("\n".join(sources_to_depend))
 
-        # Finally, tell redo to depend on these dependencies. Again
-        # all of these should be built already, so this should be fast.
-        redo.redo_ifchange(sources_to_depend)
+        # Finally, tell redo to depend on non-source dependencies only.
+        # Source files do not need redo building, so skip them.
+        non_source_deps = [
+            dep for dep in sources_to_depend
+            if not dep.endswith((".ads", ".adb", ".c", ".cpp", ".h", ".hpp", ".s", ".S"))
+        ]
+        if non_source_deps:
+            redo.redo_ifchange(non_source_deps)
 
         # Exit early, we are done, no need to compile...
         return True
