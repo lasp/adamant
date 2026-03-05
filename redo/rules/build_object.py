@@ -1,6 +1,5 @@
 import os.path
 from shutil import move
-from shutil import rmtree
 from os import environ
 from util import redo
 from util import error
@@ -11,18 +10,61 @@ from util import redo_arg
 from util import shell
 from util import debug
 from base_classes.build_rule_base import build_rule_base
-from base_classes.build_target_base import build_target
-from database.source_database import source_database
-from database.c_source_database import c_source_database
-from database.build_target_database import build_target_database
 from util.build_profiler import profiler
+
+# Lazy imports - these are heavy (DB modules, etc.) and not needed for the
+# prebuilt object fast-path. Deferred to first use.
+_source_database = None
+_c_source_database = None
+_build_target_database = None
+_build_target_base = None
+_rmtree = None
+
+
+def _lazy_source_database():
+    global _source_database
+    if _source_database is None:
+        from database.source_database import source_database
+        _source_database = source_database
+    return _source_database
+
+
+def _lazy_c_source_database():
+    global _c_source_database
+    if _c_source_database is None:
+        _c_source_database = c_source_database
+    return _c_source_database
+
+
+def _lazy_build_target_database():
+    global _build_target_database
+    if _build_target_database is None:
+        from database.build_target_database import build_target_database
+        _build_target_database = build_target_database
+    return _build_target_database
+
+
+def _lazy_build_target():
+    global _build_target_base
+    if _build_target_base is None:
+        from base_classes.build_target_base import build_target
+        _build_target_base = build_target
+    return _build_target_base
+
+
+def _lazy_rmtree():
+    global _rmtree
+    if _rmtree is None:
+        from shutil import rmtree
+        _rmtree = rmtree
+    return _rmtree
 
 
 # Private helper functions:
 def _get_build_target_instance(target_name):
     """Get the build target object instance."""
     try:
-        with build_target_database() as db:
+        with _lazy_build_target_database()() as db:
             instance, filename = db.get_build_target_instance(target_name)
     except KeyError:
         error.error_abort(
@@ -30,7 +72,7 @@ def _get_build_target_instance(target_name):
         )
     try:
         instance.ada_compiler_depends_on()
-        return build_target(instance), filename
+        return _lazy_build_target()(instance), filename
     except AttributeError:
         return instance, filename
 
@@ -121,12 +163,12 @@ def _build_all_ada_dependencies(ada_source_files, source_db, dry_run=False):
         c_sources = []
         for source in new_ads_sources:
             if source.endswith("_h.ads"):
-                with c_source_database() as db:
+                with _lazy_c_source_database()() as db:
                     binded_sources = db.try_get_sources([os.path.basename(source[:-6])])
                     if binded_sources:
                         c_sources.extend(binded_sources)
             if source.endswith("_hpp.ads"):
-                with c_source_database() as db:
+                with _lazy_c_source_database()() as db:
                     binded_sources = db.try_get_sources([os.path.basename(source[:-8])])
                     if binded_sources:
                         c_sources.extend(binded_sources)
@@ -223,7 +265,7 @@ def get_c_source_dependencies(source_file, build_target_instance, c_source_db=No
     if c_source_db:
         includes = "-I" + " -I".join(c_source_db.get_all_source_dirs())
     else:
-        with c_source_database() as db:
+        with _lazy_c_source_database()() as db:
             includes = "-I" + " -I".join(db.get_all_source_dirs())
 
     # Run g++ -MM to generate dependencies for a source file in a .d output:
@@ -341,7 +383,7 @@ def _get_object_sources(object_file):
     # source code.
     package_name = ada.file_name_to_package_name(object_file)
     source_files = None
-    with source_database() as db:
+    with _lazy_source_database()() as db:
         source_files = db.try_get_sources(package_name)
 
     if source_files:
@@ -359,8 +401,7 @@ def _get_object_sources(object_file):
 
     else:
         # No Ada source found, let's look for C/C++ source
-        from database.c_source_database import c_source_database
-        with c_source_database() as db:
+        with _lazy_c_source_database()() as db:
             source_files = db.try_get_sources(package_name)
 
         # GCC wants an c or cpp file if it exists, since we cannot
@@ -413,7 +454,7 @@ def _build_all_ada_and_c_dependencies_for_object(object_files, dry_run=False):
 
     # Discover and build all Ada dependencies for this object recursively.
     if ada_sources_to_depend:
-        with source_database() as db:
+        with _lazy_source_database()() as db:
             sources_to_depend.extend(
                 _build_all_ada_dependencies(
                     ada_sources_to_depend, db, dry_run=dry_run
@@ -422,8 +463,7 @@ def _build_all_ada_and_c_dependencies_for_object(object_files, dry_run=False):
 
     # Discover and build all C/C++ dependencies for this object recursively.
     if c_sources_to_depend:
-        from database.c_source_database import c_source_database
-        with c_source_database() as db:
+        with _lazy_c_source_database()() as db:
             sources_to_depend.extend(
                 _build_all_c_dependencies(
                     c_sources_to_depend, db, build_target_instance, dry_run=dry_run
@@ -544,7 +584,7 @@ def _compile_single_object(redo_1, redo_2, redo_3, build_target_instance, source
     move(temp_file, redo_3)
     for f in os.listdir(temp_dir):
         move(os.path.join(temp_dir, f), os.path.join(build_dir, f))
-    rmtree(temp_dir)
+    _lazy_rmtree()(temp_dir)
 
     # Write a file with the object's full dependencies:
     with open(redo_1 + ".deps", "w") as f:
@@ -658,7 +698,7 @@ class build_object(build_rule_base):
         # source code.
         package_name = ada.file_name_to_package_name(redo_2)
         source_files = None
-        with source_database() as db:
+        with _lazy_source_database()() as db:
             source_files = db.try_get_sources(package_name)
 
             # Indeed this is Ada source, compile it.
@@ -672,10 +712,9 @@ class build_object(build_rule_base):
         # Try to grab C or C++ source files based on the
         # basename.
         basename = redo_arg.get_base_no_ext(redo_2)
-        from database.c_source_database import c_source_database
         import unqlite
 
-        with c_source_database() as db:
+        with _lazy_c_source_database()() as db:
             # A lot of the time a c database won't even exist, so we but a try/except
             # block to catch this case and display the appropriate error message.
             try:
