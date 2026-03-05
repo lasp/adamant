@@ -457,6 +457,13 @@ def _precompile_objects(object_files):
     _run_gprbuild_command(build_target_instance, sources_to_compile, source_dependencies=sources_to_depend, object_dir=temp_object_dir)
     profiler.stop("precompile:gprbuild")
 
+    # Write per-object sidecar deps files so _handle_prebuilt_object can skip
+    # the expensive _build_all_ada_and_c_dependencies_for_object call.
+    for obj_file in object_files:
+        sidecar_path = os.path.join(temp_object_dir, os.path.basename(obj_file) + ".deps.prebuilt")
+        with open(sidecar_path, "w") as f:
+            f.write("\n".join(sources_to_depend))
+
     if num_objects >= 10:
         redo.info_print(
             "Moving "
@@ -492,11 +499,15 @@ def _handle_prebuilt_object(redo_1, redo_2, redo_3):
             if f != temp_object_file:
                 move(f, os.path.join(build_dir, os.path.basename(f)))
 
-        # Discover all Ada and C dependencies for this object recursively. We already built
-        # these dependencies in the precompile, so they should all exist already,
-        # thus we can optimize by setting dry_run=True, which will ensure that no
-        # calls to redo are made.
-        _, sources_to_depend, _ = _build_all_ada_and_c_dependencies_for_object([redo_1], dry_run=True)
+        # Read pre-computed deps from sidecar file written by _precompile_objects,
+        # avoiding the expensive _build_all_ada_and_c_dependencies_for_object call.
+        sidecar_path = os.path.join(temp_object_dir, os.path.basename(redo_1) + ".deps.prebuilt")
+        if os.path.isfile(sidecar_path):
+            with open(sidecar_path, "r") as f:
+                sources_to_depend = [line for line in f.read().split("\n") if line]
+        else:
+            # Fallback for objects precompiled in a different batch
+            _, sources_to_depend, _ = _build_all_ada_and_c_dependencies_for_object([redo_1], dry_run=True)
 
         # Write deps file out to save computed object dependencies
         with open(
