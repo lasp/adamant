@@ -494,6 +494,9 @@ def _build_all_ada_and_c_dependencies_for_object(object_files, dry_run=False):
 
 
 def _precompile_objects(object_files):
+    # Signal prebuilt object handlers that dependency resolution was already done.
+    os.environ["PRECOMPILE_DEPS_RESOLVED"] = "1"
+
     profiler.start("precompile:resolve_deps")
     # Get and build all source files dependencies for these object files
     sources_to_compile, sources_to_depend, build_target_instance = _build_all_ada_and_c_dependencies_for_object(object_files)
@@ -580,14 +583,16 @@ def _handle_prebuilt_object(redo_1, redo_2, redo_3):
         ) as f:
             f.write("\n".join(sources_to_depend))
 
-        # Finally, tell redo to depend on non-source dependencies only.
-        # Source files do not need redo building, so skip them.
-        non_source_deps = [
-            dep for dep in sources_to_depend
-            if not dep.endswith((".ads", ".adb", ".c", ".cpp", ".h", ".hpp", ".s", ".S"))
-        ]
-        if non_source_deps:
-            redo.redo_ifchange(non_source_deps)
+        # Finally, tell redo to depend on deps unless precompile already resolved
+        # everything for this process.
+        if os.environ.get("PRECOMPILE_DEPS_RESOLVED") != "1":
+            # Depend on non-source dependencies only.
+            non_source_deps = [
+                dep for dep in sources_to_depend
+                if not dep.endswith((".ads", ".adb", ".c", ".cpp", ".h", ".hpp", ".s", ".S"))
+            ]
+            if non_source_deps:
+                redo.redo_ifchange(non_source_deps)
 
         # Exit early, we are done, no need to compile...
         return True
