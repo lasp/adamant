@@ -213,6 +213,12 @@ echo ""
 echo "Adamant environment activated successfully."
 echo ""
 
+# Reduce Python startup overhead for redo subprocesses:
+# - PYTHONDONTWRITEBYTECODE: skip .pyc write checks
+# - PYTHONNOUSERSITE: skip user site-packages scan
+export PYTHONDONTWRITEBYTECODE=1
+export PYTHONNOUSERSITE=1
+
 # Signify the environment is set up
 export ADAMANT_ENVIRONMENT_SET="yes"
 
