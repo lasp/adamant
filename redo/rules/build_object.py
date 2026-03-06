@@ -464,7 +464,7 @@ def _build_all_ada_and_c_dependencies_for_object(object_files, dry_run=False):
 
     # Depend on and build immediate source files dependencies:
     if not dry_run:
-        redo.redo_ifchange(sources_to_depend)
+        pregenerate_and_ifchange(sources_to_depend)
 
     # Sort sources by Ada and C/C++
     ada_sources_to_depend = [dep for dep in sources_to_depend if dep.endswith('.ads') or dep.endswith('.adb')]
@@ -593,7 +593,7 @@ def _handle_prebuilt_object(redo_1, redo_2, redo_3):
                 if not dep.endswith((".ads", ".adb", ".c", ".cpp", ".h", ".hpp", ".s", ".S"))
             ]
             if non_source_deps:
-                redo.redo_ifchange(non_source_deps)
+                pregenerate_and_ifchange(non_source_deps)
 
         # Exit early, we are done, no need to compile...
         return True
