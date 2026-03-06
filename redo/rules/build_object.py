@@ -2,6 +2,7 @@ import os.path
 from shutil import move
 from os import environ
 from util import redo
+from util.codegen_cache import pregenerate_and_ifchange
 from util import error
 from util import ada
 from util import target
@@ -197,9 +198,9 @@ def _build_all_ada_dependencies(ada_source_files, source_db, dry_run=False):
 
         if new_ads_sources:
             if fast_compile:
-                # Depend on new sources:
+                # Depend on new sources (pre-generate codegen in-process):
                 if not dry_run:
-                    redo.redo_ifchange(new_ads_sources)
+                    pregenerate_and_ifchange(new_ads_sources)
 
                 # Add them to the overall dependency list:
                 deps.extend(new_ads_sources)
@@ -223,9 +224,9 @@ def _build_all_ada_dependencies(ada_source_files, source_db, dry_run=False):
                             if adb_source.endswith(adb_basename):
                                 required_adb_sources.append(adb_source)
 
-                # Depend on adb sources:
+                # Depend on adb sources (pre-generate codegen in-process):
                 if not dry_run:
-                    redo.redo_ifchange(required_adb_sources)
+                    pregenerate_and_ifchange(required_adb_sources)
 
                 # Add them to the overall dependency list:
                 deps.extend(required_adb_sources)
@@ -238,9 +239,9 @@ def _build_all_ada_dependencies(ada_source_files, source_db, dry_run=False):
                 # and all adb files
                 new_sources = new_ads_sources + new_adb_sources
 
-                # Depend on new sources:
+                # Depend on new sources (pre-generate codegen in-process):
                 if not dry_run:
-                    redo.redo_ifchange(new_sources)
+                    pregenerate_and_ifchange(new_sources)
 
                 # Add them to the overall dependency list:
                 deps.extend(new_sources)
