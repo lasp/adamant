@@ -316,3 +316,75 @@
 
 ### Important benchmark note
 Always clear ~/.redo and /tmp/redo-* before benchmarking. Stale redo metadata from branch switches causes incorrect results.
+
+---
+
+## perf/36-universal-codegen-precompile — In-process codegen + BFS deps (combined)
+
+**Change:** Combines perf/27 (BFS .deps) with universal in-process codegen precompilation. Instead of spawning redo subprocesses for code generation, the `pregenerate_and_ifchange()` function identifies generator targets, runs them in-process (caching generator instances), and only calls `redo_ifchange` on non-generator sources. Applied to 5 call sites in `build_object.py`.
+
+**Result (command_router test_all, clean build, 2026-03-06):**
+- No parallelism: **~19.1s** (3 runs: 19.5s, 19.3s, 19.1s)
+- With -j8: **~18.8s** (command_router too small to benefit from parallelism)
+- vs 65s baseline: **70.6% faster**
+- vs perf/27 51.8s: **63.1% faster**
+
+**Profile breakdown (cumulative across 30 redo subprocesses):**
+
+| Phase | Cumulative Time | Calls | Notes |
+|-------|----------------|-------|-------|
+| db:source.db | 15.66s | 30 | Still #1 bottleneck |
+| db:generator.db | 7.26s | 43 | |
+| executable:build_all_obj_deps | 6.50s | 2 | |
+| db:c_source.db | 5.47s | 7 | |
+| db:py_source.db | 5.46s | 2 | |
+| precompile:gprbuild | 4.16s | 3 | Actual compilation |
+| precompile:resolve_deps | 0.86s | 3 | |
+| executable:link | 0.96s | 2 | |
+| executable:bind | 0.89s | 2 | |
+
+**Analysis:** The in-process codegen eliminates ~138 subprocess invocations for code generation. Combined with BFS dep resolution from perf/27, the total subprocess count dropped from ~262 (baseline) to 30. The remaining 19s wall time is:
+- ~4s actual compilation (gprbuild) — irreducible
+- ~1s link + bind
+- ~14s Python/DB overhead across 30 subprocesses on 8 cores
+
+Profile "duration" for DB entries represents total held-open time (open → close), not just open overhead. Microbenchmarks show actual per-open cost is ~1-2ms; the cumulative numbers reflect the wall time during which the DB connection is active.
+
+**Verdict:** KEEP. Best result overall. Massive improvement from combining codegen precompilation with BFS deps.
+
+---
+
+## perf/37 (abandoned) — Pickle DB snapshot cache
+
+**Attempted:** Serialize entire UnQLite databases to pickle snapshot files after creation. On read-only open, load the pickle dict instead of UnQLite. Microbenchmarks showed 13x faster per-open (0.9ms vs 12ms).
+
+**Result:** Regressed to ~39s (2x slower than perf/36).
+
+**Root cause:** Writing `.snap` files into the session temp directory confused redo's file change detection, causing targets to be rebuilt 3-4x. Profile showed 120 source.db opens (vs 30 on perf/36) and 10,989 model_cache.db calls (vs 234).
+
+**Verdict:** Abandoned. The redo change detection mechanism is sensitive to file modifications in the session directory.
+
+---
+
+## Summary — Current Best Results
+
+| Metric | Baseline | perf/36 | Improvement |
+|--------|----------|---------|-------------|
+| command_router test_all (no -j) | 65.0s | 19.1s | **70.6%** |
+| Redo subprocess count | ~262 | 30 | **88.5%** |
+| gprbuild (compilation) | 8.4s | 4.2s | 50% (fewer redundant compiles) |
+
+### Remaining bottleneck analysis
+
+The 19s wall time breaks down as:
+- **~4s** gprbuild compilation (irreducible)
+- **~1s** link + bind (irreducible)
+- **~14s** Python overhead (DB reads, dep resolution, imports)
+
+The Python overhead is distributed across 30 redo subprocesses. Each subprocess opens multiple databases, deserializes pickle values, and resolves dependencies. With 8 cores, ~4 processes run in parallel, so 30 processes × ~2s avg = ~8s wall time for the parallel portion.
+
+Further optimization options:
+1. **Reduce subprocess count further** — batch more work into the main orchestration process
+2. **Faster serialization** — replace pickle with msgpack or marshal for DB values
+3. **Shared memory DB** — use mmap'd shared dict across processes (complex)
+4. **Redo-level parallelism** — only helps larger builds (command_router is too small)
