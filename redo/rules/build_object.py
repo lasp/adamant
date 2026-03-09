@@ -435,6 +435,24 @@ def _build_all_ada_and_c_dependencies_for_object(object_files, dry_run=False):
 
 
 def _precompile_objects(object_files):
+    """
+    Batch-compile a list of object files using a single gprbuild invocation,
+    then move each compiled object to its final build directory and register
+    it with redo-done.
+
+    This is a speed optimization. Instead of compiling objects one at a time
+    through individual .do scripts (each spawning its own gprbuild process),
+    we compile the entire batch in one gprbuild call and then register each
+    result with redo-done so that redo treats them as up-to-date.
+
+    For each object, per-object transitive dependencies are resolved via
+    _build_all_ada_and_c_dependencies_for_object(dry_run=True) and passed
+    to redo-done, ensuring correct incremental rebuild behavior.
+
+    After registration, redo will not invoke individual .do scripts for
+    these objects unless their dependencies change. The old per-object
+    _handle_prebuilt_object fallback path is effectively bypassed.
+    """
     # Get and build all source files dependencies for these object files
     sources_to_compile, sources_to_depend, build_target_instance = _build_all_ada_and_c_dependencies_for_object(object_files)
 
@@ -460,11 +478,52 @@ def _precompile_objects(object_files):
             + ("s..." if num_objects > 1 else "...")
         )
 
+    # Move compiled objects to final locations and register with redo-done.
+    # This replaces the per-object _handle_prebuilt_object path entirely —
+    # redo-done marks each target as up-to-date with its dependencies,
+    # so redo won't invoke individual .do scripts for these objects.
+    import glob
+    for obj_file in object_files:
+        temp_object_file = os.path.join(temp_object_dir, os.path.basename(obj_file))
+        if not os.path.isfile(temp_object_file):
+            continue
+
+        # Move object + associated files (.ali, etc.) to final build dir
+        build_dir = os.path.dirname(obj_file)
+        filesystem.safe_makedir(build_dir)
+        temp_object_glob = temp_object_file[:-1] + "*"
+        files_to_copy = glob.glob(temp_object_glob)
+        final_object = os.path.join(build_dir, os.path.basename(obj_file))
+        move(temp_object_file, final_object)
+        for f in files_to_copy:
+            if f != temp_object_file:
+                move(f, os.path.join(build_dir, os.path.basename(f)))
+
+        # Discover the correct per-object transitive dependencies.
+        # This mirrors _handle_prebuilt_object's approach, resolve all Ada/C
+        # deps recursively for this single object. dry_run=True skips redo
+        # calls since we know all sources are already built.
+        _, obj_sources_to_depend, _ = _build_all_ada_and_c_dependencies_for_object([obj_file], dry_run=True)
+
+        # Write .deps file listing source dependencies for this object.
+        # build_executable uses these to resolve transitive object deps.
+        with open(obj_file + ".deps", "w") as f:
+            f.write("\n".join(obj_sources_to_depend))
+
+        # Register with redo-done using per-object transitive deps.
+        redo.redo_done(obj_file, obj_sources_to_depend)
+
 
 def _handle_prebuilt_object(redo_1, redo_2, redo_3):
     """
     Returns true if the object has already been built. In this case the object is moved to
     the final location and dependency tracking has been handled.
+
+    Note: With the redo-done integration in _precompile_objects, objects are now moved to
+    their final locations and registered with redo-done during precompilation instead. This
+    means the temp_object_file check below will no longer match, and this code path is
+    effectively unreachable. We are leaving it as a fallback in case the redo-done path is
+    bypassed.
     """
     # First see if the object has already been compiled and is in the object temp dir. This
     # is a speed optimization that may have already occurred.
