@@ -63,6 +63,11 @@ def redo_always(args):
     __invoke_redo_subprocess("redo-always", args)
 
 
+def redo_done(target, deps=[]):
+    """Call redo-done to register a pre-built target with its dependencies."""
+    __invoke_redo_subprocess("redo-done", [target] + deps)
+
+
 def redo_ood(args):
     """
     Call redo-ood with a list of targets. This call returns the
