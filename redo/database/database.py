@@ -3,7 +3,18 @@ import pickle
 import os
 import time
 from enum import Enum
-from filelock import FileLock, Timeout
+# Lazy-load filelock to avoid importing heavy asyncio in read-only subprocesses
+FileLock = None
+Timeout = None
+
+
+def _ensure_filelock():
+    global FileLock, Timeout
+    if FileLock is None:
+        from filelock import FileLock as _FL, Timeout as _TO
+        FileLock = _FL
+        Timeout = _TO
+
 
 # Large recursive items sometimes fail to pickle due to reaching the
 # recursion limit. Let's increase that to something more reasonable
@@ -51,6 +62,7 @@ def _get_flock_filename(filename):
 
 
 def _get_flock(filename):
+    _ensure_filelock()
     return FileLock(_get_flock_filename(filename), timeout=10)
 
 
