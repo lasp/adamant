@@ -22,7 +22,7 @@ jobs:
           docker run --rm --platform linux/arm64 \
             -v ${{ github.workspace }}:/workspace \
             -w /workspace \
-            ghcr.io/lasp/adamant:0.1 \
+            ghcr.io/lasp/adamant:0.2 \
             bash env/github_run.sh "redo doc/user_guide/build_user_guide"
 
       - name: Archive user guide PDF
@@ -37,7 +37,7 @@ jobs:
           docker run --rm --platform linux/arm64 \
             -v ${{ github.workspace }}:/workspace \
             -w /workspace \
-            ghcr.io/lasp/adamant:0.1 \
+            ghcr.io/lasp/adamant:0.2 \
             bash env/github_run.sh "redo doc/architecture_description_document/build/pdf/architecture_description_document.pdf"
 
       - name: Archive architecture description document PDF
