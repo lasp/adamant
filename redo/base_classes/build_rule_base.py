@@ -1,5 +1,7 @@
 import abc
+import os
 import os.path
+import sys
 
 
 class build_rule_base(metaclass=abc.ABCMeta):
@@ -66,11 +68,18 @@ class build_rule_base(metaclass=abc.ABCMeta):
 
         did_setup = database.setup.setup(redo_1, redo_2, redo_3)
 
+        sys.stderr.write("  build_rule: did_setup={} SESSION_TMP_DIR={} target={}\n".format(
+            did_setup, os.environ.get("SESSION_TMP_DIR", "UNSET"), os.path.basename(redo_1)))
+        sys.stderr.flush()
+
         # Call the abstract build method:
         to_return = self._build(redo_1, redo_2, redo_3)
 
         # Clean up the build system:
         if did_setup:
+            sys.stderr.write("  build_rule: CLEANUP for {} SESSION_TMP_DIR={}\n".format(
+                os.path.basename(redo_1), os.environ.get("SESSION_TMP_DIR", "UNSET")))
+            sys.stderr.flush()
             database.setup.cleanup(redo_1, redo_2, redo_3)
 
         return to_return

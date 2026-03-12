@@ -96,6 +96,9 @@ def pregenerate_codegen_targets(source_files):
     call_start = time.monotonic()
 
     pregenerated = []
+    sys.stderr.write("  pregen: SESSION_TMP_DIR={} ADAMANT_SESSION_ID={}\n".format(
+        os.environ.get("SESSION_TMP_DIR", "UNSET"), os.environ.get("ADAMANT_SESSION_ID", "UNSET")))
+    sys.stderr.flush()
     try:
         with generator_database(mode=DATABASE_MODE.READ_ONLY) as db:
             for source in source_files:

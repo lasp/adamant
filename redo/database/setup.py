@@ -99,6 +99,13 @@ def create_sandbox(redo_1, redo_2, redo_3, target_to_set=None):
         target.set_default_target()
         prev_target = target.get_target()
 
+    # Save entire environment before sandbox overwrites it. The sandbox
+    # setup modifies SESSION_TMP_DIR, ADAMANT_SESSION_ID, ADAMANT_SETUP,
+    # and other env vars. We need to restore all of these when the sandbox
+    # is destroyed, otherwise the calling process ends up with a corrupted
+    # environment pointing at a deleted session directory.
+    prev_env = os.environ.copy()
+
     # If there if a local environment, run that
     # first:
     _run_env_file(redo_1, redo_2, redo_3)
@@ -109,15 +116,21 @@ def create_sandbox(redo_1, redo_2, redo_3, target_to_set=None):
     # Set environment with current command:
     os.environ["CURRENT_BUILD_TARGET"] = redo_1
 
-    # Return the previous target to the caller.
-    return prev_target
+    # Return the previous target and saved environment to the caller.
+    return prev_target, prev_env
 
 
-def destroy_sandbox(redo_1, redo_2, redo_3, target_to_restore=None):
-    # Cleanup the sandbox and then reset the build system so it can
-    # be created from scratch again.
+def destroy_sandbox(redo_1, redo_2, redo_3, target_to_restore=None, prev_env=None):
+    # Cleanup the sandbox temporary directory.
     immediate_cleanup(redo_1, redo_2, redo_3)
-    reset()
+
+    # Restore the environment to its pre-sandbox state.
+    if prev_env is not None:
+        os.environ.clear()
+        os.environ.update(prev_env)
+    else:
+        # Fallback for callers that don't pass prev_env.
+        reset()
 
     # Restore a previous target:
     if target_to_restore:
