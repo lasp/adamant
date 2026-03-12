@@ -4,6 +4,7 @@ from shutil import move
 from shutil import rmtree
 from os import environ
 from util import redo
+from util.pregenerate import pregenerate_and_redo_done
 from util import error
 from util import ada
 from util import target
@@ -137,9 +138,9 @@ def _build_all_ada_dependencies(ada_source_files, source_db, dry_run=False):
 
         if new_ads_sources:
             if fast_compile:
-                # Depend on new sources:
+                # Depend on new sources via pregeneration and redo-done:
                 if not dry_run:
-                    redo.redo_ifchange(new_ads_sources)
+                    pregenerate_and_redo_done(new_ads_sources)
 
                 # Add them to the overall dependency list:
                 deps.extend(new_ads_sources)
@@ -163,9 +164,9 @@ def _build_all_ada_dependencies(ada_source_files, source_db, dry_run=False):
                             if adb_source.endswith(adb_basename):
                                 required_adb_sources.append(adb_source)
 
-                # Depend on adb sources:
+                # Depend on adb sources via pregeneration and redo-done:
                 if not dry_run:
-                    redo.redo_ifchange(required_adb_sources)
+                    pregenerate_and_redo_done(required_adb_sources)
 
                 # Add them to the overall dependency list:
                 deps.extend(required_adb_sources)
@@ -178,9 +179,9 @@ def _build_all_ada_dependencies(ada_source_files, source_db, dry_run=False):
                 # and all adb files
                 new_sources = new_ads_sources + new_adb_sources
 
-                # Depend on new sources:
+                # Depend on new sources via pregeneration and redo-done:
                 if not dry_run:
-                    redo.redo_ifchange(new_sources)
+                    pregenerate_and_redo_done(new_sources)
 
                 # Add them to the overall dependency list:
                 deps.extend(new_sources)
@@ -404,7 +405,7 @@ def _build_all_ada_and_c_dependencies_for_object(object_files, dry_run=False):
 
     # Depend on and build immediate source files dependencies:
     if not dry_run:
-        redo.redo_ifchange(sources_to_depend)
+        pregenerate_and_redo_done(sources_to_depend)
 
     # Sort sources by Ada and C/C++
     ada_sources_to_depend = [dep for dep in sources_to_depend if dep.endswith('.ads') or dep.endswith('.adb')]
@@ -581,8 +582,10 @@ def _handle_prebuilt_object(redo_1, redo_2, redo_3):
         ) as f:
             f.write("\n".join(sources_to_depend))
 
-        # Finally, tell redo to depend on these dependencies. Again
-        # all of these should be built already, so this should be fast.
+        # Tell redo to depend on all dependencies for this object.
+        # This path should rarely fire now that _precompile_objects
+        # registers objects via redo_done, but if it does, ensure
+        # redo has the full dependency picture.
         redo.redo_ifchange(sources_to_depend)
 
         # Exit early, we are done, no need to compile...
