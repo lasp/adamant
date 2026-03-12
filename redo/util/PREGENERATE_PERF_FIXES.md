@@ -15,6 +15,8 @@ overhead. On native Linux Docker, overlay is native kernel I/O.
 
 ## Profiling Data (from instrumented clean build)
 
+### Baseline (no fixes)
+
 | Phase         | Time   | % of Total |
 |---------------|--------|------------|
 | depends_on()  | 90.9s  | 67%        |
@@ -25,55 +27,58 @@ overhead. On native Linux Docker, overlay is native kernel I/O.
 | Get instance  | 0.052s | ~0%        |
 | **Total**     | 136.6s |            |
 
-130 files pregenerated out of 207 checked.
+130 files pregenerated, 0 failed.
+
+### After Fix 1 (single DB connection)
+
+| Phase         | Time   | % of Total |
+|---------------|--------|------------|
+| depends_on()  | 80.3s  | 61%        |
+| generate()    | 42.6s  | 32%        |
+| redo-done     | 8.0s   | 6%         |
+| **Total**     | 131.3s |            |
+
+133 files pregenerated, 0 failed. ~12% reduction in depends_on().
+
+### After Fix 1 + Fix 2 (generate before depends_on)
+
+| Phase         | Time   | % of Total |
+|---------------|--------|------------|
+| depends_on()  | 2.7s   | 2%         |
+| generate()    | 81.8s  | 60%        |
+| redo-done     | 7.3s   | 5%         |
+| **Total**     | 136.8s |            |
+
+128 files pregenerated, 16 failed (fall through to redo-ifchange).
+depends_on() reduced by 97%. Model loading cost now correctly attributed to generate().
 
 ---
 
-## Fix 1: Keep model_cache_database open across calls (HIGH IMPACT, EASY)
+## Fix 1: Keep model_cache_database open across calls — APPLIED
 
+**Commit**: `5bccb730`
 **File**: `gen/models/base.py`, function `load_from_cache()` (line 125)
 
-Instead of opening/closing the DB for every sub-query in `load_from_cache()`, open
-it once in READ_ONLY mode and pass the handle through all the helper functions:
+Refactored all inner helper functions to accept a `db` parameter. One `with
+model_cache_database()` wraps all READ_ONLY operations. Only
+`mark_model_cached_this_session()` opens a separate READ_WRITE connection.
 
-```python
-def load_from_cache(cls, filename):
-    with model_cache_database() as db:
-        # All reads use same open handle — 1 open instead of 4+2N
-        if is_model_cached_this_session(db, filename):
-            return do_load_from_cache(db, filename)
-        if were_new_submodels_created(db, filename):
-            return None
-        if is_cached_model_up_to_date(db, filename):
-            model = do_load_from_cache(db, filename)
-            if model:
-                for dep in model.get_dependencies():
-                    if not is_cached_model_up_to_date(db, dep) or \
-                           is_model_cached_this_session(db, dep):
-                        return None
-    # Single READ_WRITE open for the mark
-    mark_model_cached_this_session(filename)
-    return model
-```
-
-This reduces 50-100 DB opens to 1-2 per model load.
+Reduces 50-100 DB opens to 1-2 per model load. Measured ~12% reduction in
+depends_on() time.
 
 ---
 
-## Fix 2: Skip depends_on() during pregeneration entirely (HIGH IMPACT, EASY)
+## Fix 2: Move depends_on() after generate() — APPLIED
 
+**Commit**: `c1154993`
 **File**: `redo/util/pregenerate.py`, function `pregenerate_codegen_targets()`
 
-The `depends_on()` result is only used to check if all dependency files exist on disk
-(lines 154-159). For a clean build, dependencies often won't exist yet and files get
-skipped. Options:
+Both `depends_on()` and `generate()` call `model_object()`, which caches the
+result. By running `generate()` first, the expensive pickle deserialization
+happens once and `depends_on()` afterwards is free (cached lookup).
 
-- Store dependency info in the generator_database alongside generator info, avoiding
-  the need to load the full model
-- Skip the `depends_on()` check during pregeneration and let redo handle stale deps
-  via the `redo-done` registration (deps are still registered, just not pre-validated)
-- Only call `depends_on()` for non-assembly generators (component-level models are
-  fast, assembly models are the bottleneck)
+16 files that fail generation (due to missing deps) fall through to redo-ifchange
+which handles them through the normal build path.
 
 ---
 
@@ -87,3 +92,40 @@ reuse it for all files in the batch, rather than letting each `depends_on()` →
 
 This would require threading the DB handle through the generator API, which is more
 invasive than Fix 1.
+
+---
+
+## Fix 4: Reduce pickle size via __getstate__/__setstate__ (HIGH IMPACT, HARD)
+
+**Files**: `gen/models/base.py`, `gen/models/component.py`, `gen/models/assembly.py`
+
+### Current state
+
+The entire model object graph is pickled with NO `__getstate__`/`__setstate__`:
+- All submodel objects (commands, events, faults, parameters, packets, data_products)
+- All type model objects (recursive — types containing types)
+- All enum models
+- Circular references (assembly ↔ component ↔ submodel)
+- Full `self.data` dictionary (parsed YAML)
+- A component model can be 5-10MB pickled
+- Assembly models are even larger (reference all component models)
+
+### Options
+
+**A. Add __getstate__ to exclude reconstructable data:**
+- Exclude nested model objects that can be re-loaded from their own cache entries
+- Exclude the raw `self.data` dict (can be re-parsed from YAML)
+- Keep only essential computed fields + dependency list
+- Risk: subtle bugs from incomplete reconstruction
+
+**B. Store dependencies as a separate lightweight DB key:**
+- In `model_cache_database.store_model()`, also store
+  `model_file + "_deps@@"` → `model.get_dependencies()`
+- Add `get_model_dependencies(filename)` that fetches just the dep list
+- Pregenerate.py (or `depends_on()`) can read deps without full deserialization
+- Low risk, targeted improvement
+
+**C. Store submodels as separate DB entries:**
+- Instead of pickling the full object graph, pickle each submodel independently
+- Reconstruct references on load
+- Biggest potential win but most invasive change
