@@ -139,25 +139,6 @@ def pregenerate_codegen_targets(source_files):
                     generator = _get_generator_instance(module_name, class_name, file_name)
                     _timing["get_instance"] += time.monotonic() - t0
 
-                    # Resolve the generator's declared dependencies (model
-                    # files, submodels, etc.). If any dependency is missing,
-                    # we can't safely generate in-process — fall through to
-                    # redo-ifchange which will build the missing deps first.
-                    t0 = time.monotonic()
-                    try:
-                        dependencies = generator.depends_on(input_filename)
-                    except Exception:
-                        _timing["depends_on"] += time.monotonic() - t0
-                        continue
-                    _timing["depends_on"] += time.monotonic() - t0
-
-                    if dependencies:
-                        if isinstance(dependencies, str):
-                            dependencies = [dependencies]
-                        if not all(os.path.isfile(dep) for dep in dependencies):
-                            _timing["files_skipped_no_deps"] += 1
-                            continue
-
                     filesystem.safe_makedir(os.path.dirname(source))
 
                     # Generators write to stdout (matching how build_via_generator
@@ -165,6 +146,12 @@ def pregenerate_codegen_targets(source_files):
                     # the content to the output file ourselves. Stderr is not
                     # captured and thus will be printed to the screen as it
                     # normally would.
+                    #
+                    # We run generate() BEFORE depends_on() because both load the
+                    # model (expensive pickle deserialization), and model_object()
+                    # caches the result. By generating first, depends_on() is free.
+                    # If generate() fails (e.g. missing deps), we catch it and let
+                    # redo handle the file through its normal .do script path.
                     t0 = time.monotonic()
                     old_stdout = sys.stdout
                     sys.stdout = captured = io.StringIO()
@@ -178,6 +165,18 @@ def pregenerate_codegen_targets(source_files):
                     with open(source, "w") as f:
                         f.write(captured.getvalue())
                     _timing["write_file"] += time.monotonic() - t0
+
+                    # Resolve the generator's declared dependencies. This is
+                    # now free because generate() already loaded and cached the
+                    # model via model_object().
+                    t0 = time.monotonic()
+                    try:
+                        dependencies = generator.depends_on(input_filename)
+                    except Exception:
+                        dependencies = None
+                    if dependencies and isinstance(dependencies, str):
+                        dependencies = [dependencies]
+                    _timing["depends_on"] += time.monotonic() - t0
 
                     # Register with redo-done so redo records this target as
                     # built with its full dependency set. This mirrors what
