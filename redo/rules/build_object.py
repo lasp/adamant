@@ -1,4 +1,5 @@
 import os.path
+import glob
 from shutil import move
 from shutil import rmtree
 from os import environ
@@ -434,6 +435,38 @@ def _build_all_ada_and_c_dependencies_for_object(object_files, dry_run=False):
     return sources_to_compile, [build_target_file, __file__] + sources_to_depend, build_target_instance
 
 
+def _register_precompiled_object(temp_object_dir, obj_file):
+    """
+    Move a compiled object to its final location, resolve its
+    transitive dependencies, write the .deps file, and register
+    with redo-done. Designed to run in parallel across objects.
+    """
+    temp_object_file = os.path.join(temp_object_dir, os.path.basename(obj_file))
+    if not os.path.isfile(temp_object_file):
+        return
+
+    # Move object + associated files (.ali, etc.) to final build dir
+    build_dir = os.path.dirname(obj_file)
+    filesystem.safe_makedir(build_dir)
+    temp_object_glob = temp_object_file[:-1] + "*"
+    files_to_copy = glob.glob(temp_object_glob)
+    final_object = os.path.join(build_dir, os.path.basename(obj_file))
+    move(temp_object_file, final_object)
+    for f in files_to_copy:
+        if f != temp_object_file:
+            move(f, os.path.join(build_dir, os.path.basename(f)))
+
+    # Discover the correct per-object transitive dependencies.
+    _, obj_sources_to_depend, _ = _build_all_ada_and_c_dependencies_for_object([obj_file], dry_run=True)
+
+    # Write .deps file listing source dependencies for this object.
+    with open(obj_file + ".deps", "w") as f:
+        f.write("\n".join(obj_sources_to_depend))
+
+    # Register with redo-done using per-object transitive deps.
+    redo.redo_done(obj_file, obj_sources_to_depend)
+
+
 def _precompile_objects(object_files):
     """
     Batch-compile a list of object files using a single gprbuild invocation,
@@ -478,40 +511,32 @@ def _precompile_objects(object_files):
             + ("s..." if num_objects > 1 else "...")
         )
 
-    # Move compiled objects to final locations and register with redo-done.
-    # This replaces the per-object _handle_prebuilt_object path entirely —
-    # redo-done marks each target as up-to-date with its dependencies,
-    # so redo won't invoke individual .do scripts for these objects.
-    import glob
-    for obj_file in object_files:
-        temp_object_file = os.path.join(temp_object_dir, os.path.basename(obj_file))
-        if not os.path.isfile(temp_object_file):
-            continue
-
-        # Move object + associated files (.ali, etc.) to final build dir
-        build_dir = os.path.dirname(obj_file)
-        filesystem.safe_makedir(build_dir)
-        temp_object_glob = temp_object_file[:-1] + "*"
-        files_to_copy = glob.glob(temp_object_glob)
-        final_object = os.path.join(build_dir, os.path.basename(obj_file))
-        move(temp_object_file, final_object)
-        for f in files_to_copy:
-            if f != temp_object_file:
-                move(f, os.path.join(build_dir, os.path.basename(f)))
-
-        # Discover the correct per-object transitive dependencies.
-        # This mirrors _handle_prebuilt_object's approach, resolve all Ada/C
-        # deps recursively for this single object. dry_run=True skips redo
-        # calls since we know all sources are already built.
-        _, obj_sources_to_depend, _ = _build_all_ada_and_c_dependencies_for_object([obj_file], dry_run=True)
-
-        # Write .deps file listing source dependencies for this object.
-        # build_executable uses these to resolve transitive object deps.
-        with open(obj_file + ".deps", "w") as f:
-            f.write("\n".join(obj_sources_to_depend))
-
-        # Register with redo-done using per-object transitive deps.
-        redo.redo_done(obj_file, obj_sources_to_depend)
+    # Move compiled objects to final locations, resolve per-object deps,
+    # and register with redo-done in parallel. This replaces the per-object
+    # _handle_prebuilt_object path entirely. redo-done marks each target as
+    # up-to-date with its dependencies, so redo won't invoke individual .do
+    # scripts for these objects.
+    #
+    # Note that we use ThreadPoolExecutor (not multiprocessing.Pool) because:
+    # 1. multiprocessing.Pool uses fork(), which clones the entire Python
+    #    process including loaded modules and Adamant build state — workers
+    #    inherit stale database connections and environment that cause hangs.
+    # 2. The work here is I/O-bound (file moves, subprocess calls to
+    #    redo-done), so the CPython Global Interpreter Lock (GIL) is not a
+    #    bottleneck.
+    # 3. Threads share the process address space, avoiding pickle issues
+    #    with closures, database handles, etc.
+    from concurrent.futures import ThreadPoolExecutor
+    from functools import partial
+    import multiprocessing
+    register_fn = partial(_register_precompiled_object, temp_object_dir)
+    num_workers = min(multiprocessing.cpu_count(), len(object_files))
+    if num_workers > 1:
+        with ThreadPoolExecutor(max_workers=num_workers) as executor:
+            list(executor.map(register_fn, object_files))
+    else:
+        for obj_file in object_files:
+            register_fn(obj_file)
 
 
 def _handle_prebuilt_object(redo_1, redo_2, redo_3):
@@ -531,8 +556,6 @@ def _handle_prebuilt_object(redo_1, redo_2, redo_3):
     temp_object_file = os.path.join(temp_object_dir, os.path.basename(redo_1))
     if os.path.isfile(temp_object_file):
         debug.debug_print("object already built at location " + temp_object_file)
-        import glob
-
         temp_object_glob = temp_object_file[:-1] + "*"
         files_to_copy = glob.glob(temp_object_glob)
 
