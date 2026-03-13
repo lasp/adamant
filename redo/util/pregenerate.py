@@ -1,165 +1,190 @@
 """
-In-process code pre-generation to avoid redo subprocess overhead.
+Parallel in-process code pre-generation.
 
-Normally, each generated source file (e.g. autocoded .ads/.adb) is built
-by redo spawning a subprocess that invokes build_via_generator. For large
-builds this means hundreds of Python subprocess invocations just for
-codegen. This module short-circuits that by running generators directly
-in the current process, writing output files to disk, and registering
-them with redo-done so redo knows they are up-to-date.
+Normally each generated source file is built by redo spawning a subprocess
+that runs build_via_generator.  For large builds this means hundreds of
+Python subprocess invocations just for codegen.  This module short-circuits
+that by running generators directly in a multiprocessing pool, writing
+output files to disk, and registering them with redo-done so redo knows
+they are up-to-date.
 
-Generator instances are cached at module level so that repeated calls
-(e.g. across the recursive dependency walk in build_object.py) reuse
-the same generator objects and avoid redundant module imports.
+Generation is parallelized across all available CPU cores.  Each worker
+process creates its own generator instances and in-memory model cache.
+The shared on-disk model_cache.db supports concurrent readers (READ_ONLY
+requires no lock) and serializes the occasional cache-miss write via file
+locks, so no additional synchronization is needed here.
+
+After all workers finish, the main process registers every successfully
+generated file with redo-done in serial.  redo-done is a subprocess call
+that updates redo's own database, and we have not verified that redo's
+database handles concurrent writes, so we keep this step single-threaded.
 """
+import io
+import multiprocessing
 import os
 import sys
-import io
-
-# Cache generator instances across calls to avoid redundant imports.
-# Keyed by (module_name, class_name, file_name) -> generator instance.
-_generator_cache = {}
 
 
-def _get_generator_instance(module_name, class_name, file_name):
-    """Get or create a cached generator instance."""
-    key = (module_name, class_name, file_name)
-    if key not in _generator_cache:
+# ---------------------------------------------------------------------------
+# Worker function — runs in a child process via multiprocessing.Pool
+# ---------------------------------------------------------------------------
+
+def _generate_one(work_item):
+    """
+    Generate a single source file in a worker process.
+
+    Returns (source_path, dep_list) on success, or None on failure.
+    Failures are logged to stderr and the caller falls back to the
+    normal redo-ifchange path for that file.
+    """
+    source, module_name, class_name, file_name, input_filename = work_item
+
+    try:
         from util import meta
-        module = meta.import_module_from_filename(file_name, module_name)
-        generator_class = getattr(module, class_name)
-        _generator_cache[key] = generator_class()
-    return _generator_cache[key]
+        from util import filesystem
 
+        # Each worker creates its own generator instance.  The generator's
+        # model_object() method caches the deserialized model in-memory, so
+        # the second call (generate after depends_on) is essentially free.
+        module = meta.import_module_from_filename(file_name, module_name)
+        generator = getattr(module, class_name)()
+
+        filesystem.safe_makedir(os.path.dirname(source))
+
+        # Resolve dependencies first, matching build_via_generator.py order.
+        try:
+            dependencies = generator.depends_on(input_filename)
+        except Exception:
+            dependencies = None
+        if dependencies and isinstance(dependencies, str):
+            dependencies = [dependencies]
+
+        # Generators write to stdout (redo convention).  Capture the output
+        # and write it to the target file ourselves.
+        old_stdout = sys.stdout
+        sys.stdout = captured = io.StringIO()
+        try:
+            generator.generate(input_filename)
+        finally:
+            sys.stdout = old_stdout
+
+        with open(source, "w") as f:
+            f.write(captured.getvalue())
+
+        # Build the full dep list for redo-done: input model file, the
+        # generator's Python module, plus any generator-declared deps.
+        generator_module_file = sys.modules[generator.__module__].__file__
+        all_deps = [input_filename, generator_module_file]
+        if dependencies:
+            all_deps.extend(dependencies)
+
+        return (source, all_deps)
+
+    except Exception as e:
+        # Log so the failure is visible, then clean up any partial output.
+        # The file will fall through to redo-ifchange in the caller.
+        sys.stderr.write(
+            "  pregen: FAILED {} — {}\n".format(os.path.basename(source), e)
+        )
+        try:
+            if os.path.exists(source):
+                os.remove(source)
+        except Exception:
+            pass
+        return None
+
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
 
 def pregenerate_codegen_targets(source_files):
     """
-    Given source files about to be redo_ifchange'd, identify which ones
-    are generator targets, run their generators in-process, write the
-    output, and register each with redo-done so redo tracks their
-    dependencies for future incremental builds.
+    Identify generator targets among *source_files*, run their generators
+    in parallel, and register each result with redo-done.
 
-    Returns the list of successfully pre-generated targets so the caller
-    can exclude them from redo_ifchange (since redo-done already recorded
-    their state).
+    Returns the list of successfully pre-generated file paths.  The caller
+    should exclude these from its redo-ifchange call since redo-done has
+    already recorded them.
     """
     from database.generator_database import generator_database
     from database.database import DATABASE_MODE
-    from util import filesystem
     from util import redo
 
     if not source_files:
         return []
 
-    pregenerated = []
+    # --- Phase 1: build work list (serial, fast) --------------------------
+    # Query the generator database to figure out which source files are
+    # produced by a code generator and can be pre-generated in-process.
+    work_items = []
     try:
         with generator_database(mode=DATABASE_MODE.READ_ONLY) as db:
             for source in source_files:
-                # Check if this source is a generator target. Most source
-                # files are not generated, so KeyError is the common case.
                 try:
                     gen_info = db.get_generator(source)
                 except KeyError:
                     continue
 
-                # If the file already exists on disk, don't regenerate it.
-                # Instead, let it fall through to redo-ifchange in the caller
-                # so redo can check whether it's stale and rebuild if needed.
+                # File already exists — let redo-ifchange handle staleness.
                 if os.path.isfile(source):
                     continue
 
-                module_name = gen_info[0]
-                class_name = gen_info[1]
-                file_name = gen_info[2]
-                input_filename = gen_info[3]
+                module_name, class_name, file_name, input_filename = gen_info
 
-                # The generator's input model file must exist. If it doesn't,
-                # we can't generate in-process — fall through to redo-ifchange
-                # which will build the input first.
+                # Input model must already exist on disk; if not, redo will
+                # need to build it first via the normal .do path.
                 if not os.path.isfile(input_filename):
                     continue
 
-                try:
-                    generator = _get_generator_instance(module_name, class_name, file_name)
-                    filesystem.safe_makedir(os.path.dirname(source))
-
-                    # Resolve the generator's declared dependencies first,
-                    # matching the order in build_via_generator.py.
-                    try:
-                        dependencies = generator.depends_on(input_filename)
-                    except Exception:
-                        dependencies = None
-                    if dependencies and isinstance(dependencies, str):
-                        dependencies = [dependencies]
-
-                    # Generators write to stdout (matching how build_via_generator
-                    # works with redo's output capture). Capture stdout and write
-                    # the content to the output file ourselves.
-                    old_stdout = sys.stdout
-                    sys.stdout = captured = io.StringIO()
-                    try:
-                        generator.generate(input_filename)
-                    finally:
-                        sys.stdout = old_stdout
-
-                    with open(source, "w") as f:
-                        f.write(captured.getvalue())
-
-                    # Register with redo-done so redo records this target as
-                    # built with its full dependency set. This mirrors what
-                    # build_via_generator.py does implicitly via redo-ifchange
-                    # calls inside a .do script. Without this, redo would have
-                    # no record of the target and would re-invoke the .do script
-                    # on the next build even if nothing changed.
-                    #
-                    # The deps match build_via_generator: the input model file,
-                    # the generator module file, plus generator-specific deps.
-                    generator_module_file = sys.modules[generator.__module__].__file__
-                    all_deps = [input_filename, generator_module_file]
-                    if dependencies:
-                        all_deps.extend(dependencies)
-                    redo.redo_done(source, all_deps)
-
-                    pregenerated.append(source)
-                except Exception:
-                    # Generation failed. Clean up any partial output and let
-                    # redo handle this target through its normal .do script path.
-                    try:
-                        if os.path.exists(source):
-                            os.remove(source)
-                    except Exception:
-                        pass
+                work_items.append((
+                    source, module_name, class_name, file_name, input_filename
+                ))
     except Exception:
-        # If we can't even open the generator database (e.g. it doesn't
-        # exist yet on a fresh build), fall back gracefully — all files
-        # will go through the normal redo-ifchange path.
-        pass
+        return []
+
+    if not work_items:
+        return []
+
+    # --- Phase 2: generate in parallel ------------------------------------
+    # Each worker process loads its own generator and model objects.  The
+    # on-disk model_cache.db is safe for concurrent reads; occasional
+    # cache-miss writes are serialized by filelock inside the DB layer.
+    num_workers = multiprocessing.cpu_count()
+    if num_workers > 1 and len(work_items) > 1:
+        with multiprocessing.Pool(processes=num_workers) as pool:
+            results = pool.map(_generate_one, work_items)
+    else:
+        results = [_generate_one(item) for item in work_items]
+
+    # --- Phase 3: register with redo-done (serial) ------------------------
+    # redo-done is a subprocess that updates redo's build database.  We run
+    # these serially to avoid concurrent writes to redo's database.
+    pregenerated = []
+    for result in results:
+        if result is not None:
+            source, all_deps = result
+            redo.redo_done(source, all_deps)
+            pregenerated.append(source)
 
     return pregenerated
 
 
 def pregenerate_and_redo_done(source_files):
     """
-    Pre-generate source file targets in-process, then redo-ifchange the
-    remaining (non-pre-generated) sources. This is the main entry point
-    used by build_object.py wherever it would normally call
-    redo.redo_ifchange on source files.
+    Pre-generate what we can in parallel, then redo-ifchange the rest.
+
+    Drop-in replacement for redo.redo_ifchange() on source file lists.
     """
     from util import redo
 
     if not source_files:
         return
 
-    # Deduplicate to avoid redundant generation or redo-ifchange calls.
-    source_files = list(dict.fromkeys(source_files))
+    source_files = list(dict.fromkeys(source_files))  # deduplicate
 
-    # Generate what we can in-process. These targets are registered
-    # with redo-done and don't need redo-ifchange.
     pregenerated = set(pregenerate_codegen_targets(source_files))
 
-    # Everything else (non-generator sources, existing files that need
-    # staleness checks, generators we couldn't run) goes through
-    # redo-ifchange.
     remaining = [s for s in source_files if s not in pregenerated]
     if remaining:
         redo.redo_ifchange(remaining)
