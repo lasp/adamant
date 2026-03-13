@@ -15,51 +15,10 @@ the same generator objects and avoid redundant module imports.
 import os
 import sys
 import io
-import time
 
 # Cache generator instances across calls to avoid redundant imports.
 # Keyed by (module_name, class_name, file_name) -> generator instance.
 _generator_cache = {}
-
-# Timing accumulators for profiling pregeneration.
-_timing = {
-    "db_lookup": 0.0,
-    "get_instance": 0.0,
-    "depends_on": 0.0,
-    "generate": 0.0,
-    "write_file": 0.0,
-    "redo_done": 0.0,
-    "total": 0.0,
-    "files_checked": 0,
-    "files_generated": 0,
-    "files_skipped_exists": 0,
-    "files_skipped_no_gen": 0,
-    "files_skipped_no_input": 0,
-    "files_skipped_no_deps": 0,
-    "files_failed": 0,
-    "call_count": 0,
-}
-
-
-def _print_timing():
-    """Print accumulated timing stats to stderr."""
-    t = _timing
-    sys.stderr.write("\n=== PREGENERATE TIMING (call #{}) ===\n".format(t["call_count"]))
-    sys.stderr.write("  Total wall time:      {:.3f}s\n".format(t["total"]))
-    sys.stderr.write("  DB lookup:            {:.3f}s\n".format(t["db_lookup"]))
-    sys.stderr.write("  Get generator inst:   {:.3f}s\n".format(t["get_instance"]))
-    sys.stderr.write("  depends_on():         {:.3f}s\n".format(t["depends_on"]))
-    sys.stderr.write("  generate():           {:.3f}s\n".format(t["generate"]))
-    sys.stderr.write("  Write file:           {:.3f}s\n".format(t["write_file"]))
-    sys.stderr.write("  redo-done:            {:.3f}s\n".format(t["redo_done"]))
-    sys.stderr.write("  Files checked:        {}\n".format(t["files_checked"]))
-    sys.stderr.write("  Files generated:      {}\n".format(t["files_generated"]))
-    sys.stderr.write("  Skipped (exists):     {}\n".format(t["files_skipped_exists"]))
-    sys.stderr.write("  Skipped (no gen):     {}\n".format(t["files_skipped_no_gen"]))
-    sys.stderr.write("  Skipped (no input):   {}\n".format(t["files_skipped_no_input"]))
-    sys.stderr.write("  Skipped (no deps):    {}\n".format(t["files_skipped_no_deps"]))
-    sys.stderr.write("  Failed:               {}\n".format(t["files_failed"]))
-    sys.stderr.write("===================================\n\n")
 
 
 def _get_generator_instance(module_name, class_name, file_name):
@@ -92,36 +51,21 @@ def pregenerate_codegen_targets(source_files):
     if not source_files:
         return []
 
-    _timing["call_count"] += 1
-    call_start = time.monotonic()
-
     pregenerated = []
-    sys.stderr.write("  pregen: SESSION_TMP_DIR={} ADAMANT_SESSION_ID={}\n".format(
-        os.environ.get("SESSION_TMP_DIR", "UNSET"), os.environ.get("ADAMANT_SESSION_ID", "UNSET")))
-    sys.stderr.flush()
     try:
         with generator_database(mode=DATABASE_MODE.READ_ONLY) as db:
             for source in source_files:
-                _timing["files_checked"] += 1
-
                 # Check if this source is a generator target. Most source
                 # files are not generated, so KeyError is the common case.
-                t0 = time.monotonic()
                 try:
                     gen_info = db.get_generator(source)
                 except KeyError:
-                    _timing["db_lookup"] += time.monotonic() - t0
-                    _timing["files_skipped_no_gen"] += 1
                     continue
-                _timing["db_lookup"] += time.monotonic() - t0
 
                 # If the file already exists on disk, don't regenerate it.
                 # Instead, let it fall through to redo-ifchange in the caller
                 # so redo can check whether it's stale and rebuild if needed.
-                # If it is already up to date, the redo-ifchange call will be
-                # lightning fast.
                 if os.path.isfile(source):
-                    _timing["files_skipped_exists"] += 1
                     continue
 
                 module_name = gen_info[0]
@@ -133,46 +77,33 @@ def pregenerate_codegen_targets(source_files):
                 # we can't generate in-process — fall through to redo-ifchange
                 # which will build the input first.
                 if not os.path.isfile(input_filename):
-                    _timing["files_skipped_no_input"] += 1
                     continue
 
                 try:
-                    # Grab the generator for this file.
-                    t0 = time.monotonic()
                     generator = _get_generator_instance(module_name, class_name, file_name)
-                    _timing["get_instance"] += time.monotonic() - t0
-
                     filesystem.safe_makedir(os.path.dirname(source))
 
                     # Resolve the generator's declared dependencies first,
                     # matching the order in build_via_generator.py.
-                    t0 = time.monotonic()
                     try:
                         dependencies = generator.depends_on(input_filename)
                     except Exception:
                         dependencies = None
                     if dependencies and isinstance(dependencies, str):
                         dependencies = [dependencies]
-                    _timing["depends_on"] += time.monotonic() - t0
 
                     # Generators write to stdout (matching how build_via_generator
                     # works with redo's output capture). Capture stdout and write
-                    # the content to the output file ourselves. Stderr is not
-                    # captured and thus will be printed to the screen as it
-                    # normally would.
-                    t0 = time.monotonic()
+                    # the content to the output file ourselves.
                     old_stdout = sys.stdout
                     sys.stdout = captured = io.StringIO()
                     try:
                         generator.generate(input_filename)
                     finally:
                         sys.stdout = old_stdout
-                    _timing["generate"] += time.monotonic() - t0
 
-                    t0 = time.monotonic()
                     with open(source, "w") as f:
                         f.write(captured.getvalue())
-                    _timing["write_file"] += time.monotonic() - t0
 
                     # Register with redo-done so redo records this target as
                     # built with its full dependency set. This mirrors what
@@ -183,24 +114,14 @@ def pregenerate_codegen_targets(source_files):
                     #
                     # The deps match build_via_generator: the input model file,
                     # the generator module file, plus generator-specific deps.
-                    t0 = time.monotonic()
                     generator_module_file = sys.modules[generator.__module__].__file__
                     all_deps = [input_filename, generator_module_file]
                     if dependencies:
                         all_deps.extend(dependencies)
                     redo.redo_done(source, all_deps)
-                    _timing["redo_done"] += time.monotonic() - t0
 
-                    # Track this file as pre-generated.
                     pregenerated.append(source)
-                    _timing["files_generated"] += 1
-
-                    # Per-file progress log
-                    elapsed = time.monotonic() - call_start
-                    sys.stderr.write("  pregen [{:.1f}s] {}\n".format(elapsed, os.path.basename(source)))
-                except Exception as e:
-                    _timing["files_failed"] += 1
-                    sys.stderr.write("  pregen FAILED: {} — {}\n".format(os.path.basename(source), e))
+                except Exception:
                     # Generation failed. Clean up any partial output and let
                     # redo handle this target through its normal .do script path.
                     try:
@@ -208,14 +129,11 @@ def pregenerate_codegen_targets(source_files):
                             os.remove(source)
                     except Exception:
                         pass
-    except Exception as e:
+    except Exception:
         # If we can't even open the generator database (e.g. it doesn't
         # exist yet on a fresh build), fall back gracefully — all files
         # will go through the normal redo-ifchange path.
-        sys.stderr.write("  pregen: generator_database open failed: {}\n".format(e))
-
-    _timing["total"] += time.monotonic() - call_start
-    _print_timing()
+        pass
 
     return pregenerated
 
