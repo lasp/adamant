@@ -61,7 +61,7 @@ class map_ads_generator(basic_generator):
         # even if we are compiling for an embedded target. So we create a build system sandbox to
         # run the prover, and then destroy it after running the prover.
         #
-        old_target = setup.create_sandbox(
+        old_target, prev_env = setup.create_sandbox(
             output_filename,
             os.path.splitext(output_filename)[0],
             output_filename,
@@ -81,6 +81,7 @@ class map_ads_generator(basic_generator):
             os.path.splitext(output_filename)[0],
             output_filename,
             old_target,
+            prev_env,
         )
 
         # Exit early if error occurred:
