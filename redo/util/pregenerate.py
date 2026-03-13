@@ -14,10 +14,8 @@ The shared on-disk model_cache.db supports concurrent readers (READ_ONLY
 requires no lock) and serializes the occasional cache-miss write via file
 locks, so no additional synchronization is needed here.
 
-After all workers finish, the main process registers every successfully
-generated file with redo-done in serial.  redo-done is a subprocess call
-that updates redo's own database, and we have not verified that redo's
-database handles concurrent writes, so we keep this step single-threaded.
+Each worker registers its generated file with redo-done immediately after
+writing it.  Redo's database handles concurrent writes safely.
 """
 import io
 import multiprocessing
@@ -75,7 +73,10 @@ def _generate_one(work_item):
         if dependencies:
             all_deps.extend(dependencies)
 
-        return (source, all_deps)
+        from util import redo
+        redo.redo_done(source, all_deps)
+
+        return source
 
     except Exception:
         # Generation failed. Clean up any partial output and let
@@ -99,7 +100,6 @@ def _pregenerate_codegen_targets(source_files):
     """
     from database.generator_database import generator_database
     from database.database import DATABASE_MODE
-    from util import redo
 
     if not source_files:
         return []
@@ -145,7 +145,7 @@ def _pregenerate_codegen_targets(source_files):
 
     # Step 2: Generate outputs in parallel and register with redo-done
     # Each worker process loads its own generator and model objects. The
-    # on-disk model_cache.db is safe for concurrent reads; occasional
+    # on-disk model_cache.db is safe for concurrent reads, occasional
     # cache-miss writes are serialized by filelock inside the DB layer.
     num_workers = multiprocessing.cpu_count()
     if num_workers > 1 and len(work_items) > 1:
@@ -154,16 +154,8 @@ def _pregenerate_codegen_targets(source_files):
     else:
         results = [_generate_one(item) for item in work_items]
 
-    # Step 3: Register with redo-done in serial
-    # redo-done is a subprocess that updates redo's build database. We run
-    # these serially to avoid concurrent writes to redo's database.
-    pregenerated = []
-    for result in results:
-        if result is not None:
-            source, all_deps = result
-            redo.redo_done(source, all_deps)
-            pregenerated.append(source)
-
+    # Collect and return results
+    pregenerated = [r for r in results if r is not None]
     return pregenerated
 
 
