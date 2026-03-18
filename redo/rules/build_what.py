@@ -1,5 +1,6 @@
 from database.redo_target_database import redo_target_database
-from database.persistent_target_cache import get_persistent_db_path, save_persistent_db, update_persistent_db_targets
+from database.persistent_target_cache import get_persistent_db_path, get_cache_dir, update_persistent_db_targets
+from database.database import database, DATABASE_MODE
 import os.path
 import os
 import sys
@@ -11,6 +12,36 @@ from rules.build_what_predefined import get_predefined_targets
 def _uniquify_preserve_order(lst):
     """Remove duplicates while preserving first-occurrence order."""
     return sorted(set(lst), key=lambda x: lst.index(x))
+
+
+def _dir_to_key(directory):
+    """
+    Encode a directory path as a filename: /foo/bar → _foo_bar.
+
+    Must match the shell's encoding in redo_completion.sh:
+        dir_key="${abs_dir//\\//_}"
+    """
+    return directory.replace("/", "_")
+
+
+def save_text_cache(directory, lines):
+    """
+    Write redo what output lines to the text cache for a directory.
+
+    The text cache stores one target per line as plain text for instant
+    shell-side reads with no Python invocation.
+    """
+    try:
+        cache_dir = get_cache_dir()
+        dir_key = _dir_to_key(directory)
+        text_path = os.path.join(cache_dir, "what", dir_key + ".txt")
+        os.makedirs(os.path.dirname(text_path), exist_ok=True)
+        tmp_path = text_path + ".tmp"
+        with open(tmp_path, "w") as f:
+            f.write("\n".join(lines) + "\n")
+        os.replace(tmp_path, text_path)
+    except Exception:
+        pass
 
 
 class build_what(build_rule_base):
@@ -40,10 +71,12 @@ class build_what(build_rule_base):
             try:
                 self._build_from_persistent(redo_1, directory, persistent_db)
                 return
+            except KeyError:
+                pass  # Directory not in DB, fall through to slow path
             except Exception:
-                pass  # DB corrupt or missing dir — fall through to slow path
+                pass  # DB corrupt, fall through to slow path
         # No persistent DB or DB corrupt.
-        # Setup for just this directory (fast ~300ms).
+        # Setup for just this directory (slower path).
         # Mark that we're running 'redo what' so _delayed_cleanup skips
         # overwriting the persistent DB with our partial single-directory data.
         environ["_REDO_WHAT_ACTIVE"] = "1"
@@ -57,29 +90,35 @@ class build_what(build_rule_base):
             except Exception:
                 pass
 
+    @staticmethod
+    def _output_targets(directory, redo_targets):
+        """Write targets to stderr and save text cache for shell completion."""
+        unique = _uniquify_preserve_order(redo_targets)
+        sys.stderr.write("redo " + "\nredo ".join(unique) + "\n")
+        try:
+            save_text_cache(directory, unique)
+        except Exception:
+            pass
+
     def _build_from_persistent(self, redo_1, directory, persistent_db):
         """Read targets from the persistent DB without running setup.
 
-        Raises RuntimeError if no targets found for the directory,
-        which signals the caller to fall back to the slow path.
+        Raises RuntimeError if the directory is not in the persistent DB
+        at all (KeyError), which signals the caller to fall back to the
+        slow path.  An empty target list is a valid cache hit. It means
+        the directory exists in the project but has no file-level build
+        targets (only predefined ones like all/clean/style).
         """
         redo_targets = get_predefined_targets()
-        from database.database import database, DATABASE_MODE
         with database(persistent_db, DATABASE_MODE.READ_ONLY) as db:
-            try:
-                targets = list(db.fetch(directory))
-            except Exception:
-                targets = []
-        if not targets:
-            raise RuntimeError("No targets in persistent DB for " + directory)
+            # Let KeyError propagate. That's a real cache miss.
+            targets = list(db.fetch(directory))
         if targets:
             targets.sort()
             for target in targets:
                 rel_target = os.path.relpath(target, directory)
                 redo_targets.append(rel_target)
-        sys.stderr.write(
-            "redo " + "\nredo ".join(_uniquify_preserve_order(redo_targets)) + "\n"
-        )
+        self._output_targets(directory, redo_targets)
 
     def _build(self, redo_1, redo_2, redo_3):
         # Define the special targets that exist everywhere...
@@ -97,9 +136,7 @@ class build_what(build_rule_base):
             for target in targets:
                 rel_target = os.path.relpath(target, directory)
                 redo_targets.append(rel_target)
-        sys.stderr.write(
-            "redo " + "\nredo ".join(_uniquify_preserve_order(redo_targets)) + "\n"
-        )
+        self._output_targets(directory, redo_targets)
 
     # No need to provide these for "redo what"
     # def input_file_regex(self): pass

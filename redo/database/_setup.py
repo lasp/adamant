@@ -159,6 +159,21 @@ def _get_user_build_roots():
     return _get_path_from_env("BUILD_ROOTS")
 
 
+def _compute_build_roots(cwd):
+    """
+    Compute the build roots for the current environment.
+
+    If the user provided BUILD_PATH, no roots are needed (returns empty).
+    Otherwise uses BUILD_ROOTS (or git root fallback) plus EXTRA_BUILD_ROOTS.
+    """
+    user_build_path = _get_user_build_path()
+    if user_build_path:
+        roots = []
+    else:
+        roots = _get_build_roots(cwd)
+    return _sanitize_path(roots + _get_extra_build_roots())
+
+
 def _get_user_remove_build_path():
     """
     Get the remove build path, as provided by the
@@ -310,15 +325,10 @@ def _setup(redo_1, redo_2, redo_3, sandbox=False):
     # we don't need to search for a path at all, which means
     # we don't need a build root.
     user_build_path = _get_user_build_path()
-    roots = []
     additional_path = []
     run_dir = redo_arg.get_src_dir(redo_2)
     if user_build_path:
         additional_path = user_build_path
-    # A build path was not given, instead should construct the path
-    # from the build roots.
-    else:
-        roots = _get_build_roots(run_dir)
 
     # The total additional path is sum of the user build path, the extra
     # build path and the source directory of the current redo target.
@@ -326,10 +336,8 @@ def _setup(redo_1, redo_2, redo_3, sandbox=False):
         additional_path + _get_extra_build_path() + [run_dir]
     )
 
-    # The total build roots are the sum of the user build roots (or the
-    # assumed build root if that was not available) and the extra build
-    # roots:
-    roots = _sanitize_path(roots + _get_extra_build_roots())
+    # Compute build roots using the shared helper.
+    roots = _compute_build_roots(run_dir)
 
     # If the build target is defined in the redo target ie. something like:
     #   redo build/obj/Linux/main.elf

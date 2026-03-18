@@ -122,6 +122,79 @@ def save_persistent_db(session_db_path):
         pass
 
 
+def generate_text_caches(persistent_db_path=None):
+    """
+    Generate text cache files for every directory in the persistent DB.
+
+    This gives shell completion instant reads without needing to spawn a
+    Python subprocess on the first TAB press for each directory.  Called
+    at the end of build_full_target_cache() so that activate pre-warms
+    both the persistent DB and the text caches.
+    """
+    from rules.build_what import save_text_cache, _uniquify_preserve_order
+    from rules.build_what_predefined import get_predefined_targets
+
+    if persistent_db_path is None:
+        persistent_db_path = get_persistent_db_path()
+    if not os.path.isfile(persistent_db_path):
+        return
+
+    predefined = get_predefined_targets()
+
+    try:
+        # Collect all directories and their targets from the DB.
+        # Intermediate dirs like /project/src/components/ won't have
+        # DB entries but still need text caches with predefined targets
+        # so that tab completion is instant.
+        all_dirs = {}  # directory → target list
+        with database(persistent_db_path, DATABASE_MODE.READ_ONLY) as db:
+            for directory, targets in db.items():
+                try:
+                    all_dirs[directory] = list(targets)
+                except Exception:
+                    all_dirs[directory] = []
+
+        # Determine build roots, the top-level directories where we
+        # stop generating ancestor text caches.
+        from database.setup import get_build_roots
+        build_roots = set(os.path.abspath(r) for r in get_build_roots())
+
+        # Add ancestor directories (stop at build roots).
+        # For each leaf directory in the DB, walk up the tree and
+        # create text caches for intermediate dirs (src/, src/components/,
+        # etc.) that have no DB entries.  Skip this when build roots are
+        # unknown, since the walk would have no stopping point.
+        if build_roots:
+            ancestor_dirs = set()
+            for directory in list(all_dirs):
+                if directory in build_roots:
+                    continue
+                parent = os.path.dirname(directory)
+                while parent and parent != directory:
+                    if parent in all_dirs or parent in ancestor_dirs:
+                        break
+                    ancestor_dirs.add(parent)
+                    if parent in build_roots:
+                        break
+                    directory = parent
+                    parent = os.path.dirname(parent)
+            for d in ancestor_dirs:
+                if d not in all_dirs:
+                    all_dirs[d] = []  # predefined targets only
+
+        # Write text cache for each directory
+        for directory, targets in all_dirs.items():
+            redo_targets = list(predefined)
+            if targets:
+                targets.sort()
+                for target in targets:
+                    redo_targets.append(os.path.relpath(target, directory))
+                redo_targets = _uniquify_preserve_order(redo_targets)
+            save_text_cache(directory, redo_targets)
+    except Exception:
+        pass
+
+
 def build_full_target_cache():
     """
     Build the full project target database and save it to the persistent
@@ -151,6 +224,9 @@ def build_full_target_cache():
         session_dir = _get_session_dir()
         session_db = os.path.join(session_dir, "db", "redo_target.db")
         save_persistent_db(session_db)
+        # Generate text caches for all directories so shell completion
+        # is instant from the very first TAB press.
+        generate_text_caches()
         # Clean up
         database.setup.cleanup(redo_1, redo_2, redo_3)
 

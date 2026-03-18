@@ -20,6 +20,21 @@ def _do_setup(redo_1, redo_2, redo_3, sandbox=False):
     os.environ["ADAMANT_SETUP"] = "TRUE"
 
 
+def get_build_roots():
+    """
+    Return the list of build root directories for the current environment.
+
+    Prefers COMPUTED_BUILD_ROOTS (set after setup() runs). When that is
+    not available, computes roots using the same logic as setup().
+    """
+    computed = os.environ.get("COMPUTED_BUILD_ROOTS", "")
+    if computed:
+        return [p for p in computed.split(os.pathsep) if p.strip()]
+
+    from database._setup import _compute_build_roots
+    return _compute_build_roots(os.getcwd())
+
+
 def setup(redo_1, redo_2, redo_3):
     """
     This function sets up the databases for the build system if
