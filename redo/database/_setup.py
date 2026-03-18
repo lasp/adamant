@@ -428,6 +428,21 @@ def _delayed_cleanup(redo_1, redo_2, redo_3):
     can detect if a process is still using the temp directory by the presence of
     *.running files in the directory.
     """
+    # Save the target database to a persistent location before cleanup.
+    # This allows 'redo what' to read it directly without rebuilding.
+    # Skip when 'redo what' is the caller — it sets _REDO_WHAT_ACTIVE
+    # and handles its own per-directory cache updates via
+    # update_persistent_db_targets(), so saving the full session DB here
+    # would overwrite complete data with single-directory data.
+    if not os.environ.get("_REDO_WHAT_ACTIVE"):
+        try:
+            from database.persistent_target_cache import save_persistent_db
+            session_dir = _get_session_dir()
+            session_db = os.path.join(session_dir, "db", "redo_target.db")
+            save_persistent_db(session_db)
+        except Exception:
+            pass  # Don't let cache save failures break cleanup
+
     if not os.environ.get("ADAMANT_DISABLE_SESSION_CLEANUP"):
         # First remove our .running file to signify to other processes that we are no
         # longer using the temporary directory, and from our perspective it can be cleaned.
