@@ -123,43 +123,37 @@ class base(renderable_object, metaclass=base_meta):
     #################################################
 
     def load_from_cache(cls, filename):
-        def is_model_cached_this_session(filename):
-            with model_cache_database() as db:
-                # Get the time when we last cached the model from this file:
-                cached_sesion_id = db.get_model_session_id(filename)
-                if cached_sesion_id is not None and cached_sesion_id == os.environ["ADAMANT_SESSION_ID"]:
-                    return True
+        def is_model_cached_this_session(db, filename):
+            # Get the time when we last cached the model from this file:
+            cached_sesion_id = db.get_model_session_id(filename)
+            if cached_sesion_id is not None and cached_sesion_id == os.environ["ADAMANT_SESSION_ID"]:
+                return True
             return False
 
-        def is_cached_model_up_to_date(filename):
+        def is_cached_model_up_to_date(db, filename):
             # See if the model is stored in the database cache stored on disk:
-            with model_cache_database() as db:
-                # Get the time when we last cached the model from this file:
-                cache_time_stamp = db.get_model_time_stamp(filename)
-                if cache_time_stamp is None:
-                    return False
+            # Get the time when we last cached the model from this file:
+            cache_time_stamp = db.get_model_time_stamp(filename)
+            if cache_time_stamp is None:
+                return False
 
-                # If the cache time is newer than the file modification time
-                # then we can safely use the cached model:
-                try:
-                    file_time_stamp = os.path.getmtime(filename)
-                except FileNotFoundError:
-                    return False
-                if cache_time_stamp >= file_time_stamp:
-                    return True
+            # If the cache time is newer than the file modification time
+            # then we can safely use the cached model:
+            try:
+                file_time_stamp = os.path.getmtime(filename)
+            except FileNotFoundError:
+                return False
+            if cache_time_stamp >= file_time_stamp:
+                return True
 
-        def do_load_from_cache(filename):
-            with model_cache_database() as db:
-                return db.get_model(filename)  # This can return None
+        def do_load_from_cache(db, filename):
+            return db.get_model(filename)  # This can return None
 
-        def mark_model_cached_this_session(filename):
-            with model_cache_database(mode=DATABASE_MODE.READ_WRITE) as db:
-                db.mark_cached_model_up_to_date_for_session(filename)
+        def mark_model_cached_this_session(db, filename):
+            db.mark_cached_model_up_to_date_for_session(filename)
 
-        def were_new_submodels_created(filename):
-            cached_submodels = None
-            with model_cache_database() as db:
-                cached_submodels = db.get_model_submodels(filename)
+        def were_new_submodels_created(db, filename):
+            cached_submodels = db.get_model_submodels(filename)
 
             if cached_submodels:
                 _, _, model_name, _, _ = redo_arg.split_model_filename(filename)
@@ -169,47 +163,51 @@ class base(renderable_object, metaclass=base_meta):
             # If this model does not have submodels, then return False
             return False
 
-        # If the model was cached this redo session, then we know it is safe to use
-        # directly from cache without any additional checking. Dependencies do not
-        # need to be checked, since this would have been done earlier in this session,
-        # ie. milliseconds ago.
-        if is_model_cached_this_session(filename):
-            return do_load_from_cache(filename)
+        # Use a single database connection for all read operations to avoid
+        # repeatedly opening/closing the large model_cache.db file.
+        with model_cache_database() as db:
+            # If the model was cached this redo session, then we know it is safe to use
+            # directly from cache without any additional checking. Dependencies do not
+            # need to be checked, since this would have been done earlier in this session,
+            # ie. milliseconds ago.
+            if is_model_cached_this_session(db, filename):
+                return do_load_from_cache(db, filename)
 
-        # If this model has submodels, we need to make sure a new submodel
-        # has not been created. For example, if a name.events.yaml for name.component.yaml
-        # gets created on disk, this means the cached entry for name.component.yaml is
-        # invalid. This is true for the parent model of any newly created submodel.
-        if were_new_submodels_created(filename):
-            return None
+            # If this model has submodels, we need to make sure a new submodel
+            # has not been created. For example, if a name.events.yaml for name.component.yaml
+            # gets created on disk, this means the cached entry for name.component.yaml is
+            # invalid. This is true for the parent model of any newly created submodel.
+            if were_new_submodels_created(db, filename):
+                return None
 
-        # If the model was written from a previous session, then we need to check its
-        # write timestamp against the file timestamp to determine if the cached entry is
-        # still valid:
-        model = None
-        if is_cached_model_up_to_date(filename):
-            model = do_load_from_cache(filename)
+            # If the model was written from a previous session, then we need to check its
+            # write timestamp against the file timestamp to determine if the cached entry is
+            # still valid:
+            model = None
+            if is_cached_model_up_to_date(db, filename):
+                model = do_load_from_cache(db, filename)
 
-        # We have a model we can use from cache. It was written in a previous
-        # session. This is only safe to use if none of the model dependencies
-        # have changed on disk either. If a model is not up to date, or was
-        # just recently cached this session, then it likely contains new data that
-        # will modify this current model, so we should not reload the cached version
-        # of this model.
-        if model is not None:
-            # sys.stderr.write("deps: " + str(model.get_dependencies()) + "\n")
-            for dep_model_filename in model.get_dependencies():
-                if not is_cached_model_up_to_date(dep_model_filename) or \
-                       is_model_cached_this_session(dep_model_filename):
-                    # One of the dependencies models has recently changed on disk,
-                    # so we need to reload this model from scratch. We cannot safely
-                    # use the cached version.
-                    return None
+            # We have a model we can use from cache. It was written in a previous
+            # session. This is only safe to use if none of the model dependencies
+            # have changed on disk either. If a model is not up to date, or was
+            # just recently cached this session, then it likely contains new data that
+            # will modify this current model, so we should not reload the cached version
+            # of this model.
+            if model is not None:
+                # sys.stderr.write("deps: " + str(model.get_dependencies()) + "\n")
+                for dep_model_filename in model.get_dependencies():
+                    if not is_cached_model_up_to_date(db, dep_model_filename) or \
+                           is_model_cached_this_session(db, dep_model_filename):
+                        # One of the dependencies models has recently changed on disk,
+                        # so we need to reload this model from scratch. We cannot safely
+                        # use the cached version.
+                        return None
 
         # This cached model has been fully validated for this session. So if we use it again
         # during the session, we can short circuit the full validation and return from
         # is_model_cached_this_session()
-        mark_model_cached_this_session(filename)
+        with model_cache_database(mode=DATABASE_MODE.READ_WRITE) as db:
+            mark_model_cached_this_session(db, filename)
 
         return model
 

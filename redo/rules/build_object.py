@@ -1,8 +1,10 @@
 import os.path
+import glob
 from shutil import move
 from shutil import rmtree
 from os import environ
 from util import redo
+from util.pregenerate import pregenerate_and_redo_done
 from util import error
 from util import ada
 from util import target
@@ -136,9 +138,9 @@ def _build_all_ada_dependencies(ada_source_files, source_db, dry_run=False):
 
         if new_ads_sources:
             if fast_compile:
-                # Depend on new sources:
+                # Depend on new sources via pregeneration and redo-done:
                 if not dry_run:
-                    redo.redo_ifchange(new_ads_sources)
+                    pregenerate_and_redo_done(new_ads_sources)
 
                 # Add them to the overall dependency list:
                 deps.extend(new_ads_sources)
@@ -162,9 +164,9 @@ def _build_all_ada_dependencies(ada_source_files, source_db, dry_run=False):
                             if adb_source.endswith(adb_basename):
                                 required_adb_sources.append(adb_source)
 
-                # Depend on adb sources:
+                # Depend on adb sources via pregeneration and redo-done:
                 if not dry_run:
-                    redo.redo_ifchange(required_adb_sources)
+                    pregenerate_and_redo_done(required_adb_sources)
 
                 # Add them to the overall dependency list:
                 deps.extend(required_adb_sources)
@@ -177,9 +179,9 @@ def _build_all_ada_dependencies(ada_source_files, source_db, dry_run=False):
                 # and all adb files
                 new_sources = new_ads_sources + new_adb_sources
 
-                # Depend on new sources:
+                # Depend on new sources via pregeneration and redo-done:
                 if not dry_run:
-                    redo.redo_ifchange(new_sources)
+                    pregenerate_and_redo_done(new_sources)
 
                 # Add them to the overall dependency list:
                 deps.extend(new_sources)
@@ -403,7 +405,7 @@ def _build_all_ada_and_c_dependencies_for_object(object_files, dry_run=False):
 
     # Depend on and build immediate source files dependencies:
     if not dry_run:
-        redo.redo_ifchange(sources_to_depend)
+        pregenerate_and_redo_done(sources_to_depend)
 
     # Sort sources by Ada and C/C++
     ada_sources_to_depend = [dep for dep in sources_to_depend if dep.endswith('.ads') or dep.endswith('.adb')]
@@ -434,7 +436,57 @@ def _build_all_ada_and_c_dependencies_for_object(object_files, dry_run=False):
     return sources_to_compile, [build_target_file, __file__] + sources_to_depend, build_target_instance
 
 
+def _register_precompiled_object(temp_object_dir, obj_file):
+    """
+    Move a compiled object to its final location, resolve its
+    transitive dependencies, write the .deps file, and register
+    with redo-done. Designed to run in parallel across objects.
+    """
+    temp_object_file = os.path.join(temp_object_dir, os.path.basename(obj_file))
+    if not os.path.isfile(temp_object_file):
+        return
+
+    # Move object + associated files (.ali, etc.) to final build dir
+    build_dir = os.path.dirname(obj_file)
+    filesystem.safe_makedir(build_dir)
+    temp_object_glob = temp_object_file[:-1] + "*"
+    files_to_copy = glob.glob(temp_object_glob)
+    final_object = os.path.join(build_dir, os.path.basename(obj_file))
+    move(temp_object_file, final_object)
+    for f in files_to_copy:
+        if f != temp_object_file:
+            move(f, os.path.join(build_dir, os.path.basename(f)))
+
+    # Discover the correct per-object transitive dependencies.
+    _, obj_sources_to_depend, _ = _build_all_ada_and_c_dependencies_for_object([obj_file], dry_run=True)
+
+    # Write .deps file listing source dependencies for this object.
+    with open(obj_file + ".deps", "w") as f:
+        f.write("\n".join(obj_sources_to_depend))
+
+    # Register with redo-done using per-object transitive deps.
+    redo.redo_done(obj_file, obj_sources_to_depend)
+
+
 def _precompile_objects(object_files):
+    """
+    Batch-compile a list of object files using a single gprbuild invocation,
+    then move each compiled object to its final build directory and register
+    it with redo-done.
+
+    This is a speed optimization. Instead of compiling objects one at a time
+    through individual .do scripts (each spawning its own gprbuild process),
+    we compile the entire batch in one gprbuild call and then register each
+    result with redo-done so that redo treats them as up-to-date.
+
+    For each object, per-object transitive dependencies are resolved via
+    _build_all_ada_and_c_dependencies_for_object(dry_run=True) and passed
+    to redo-done, ensuring correct incremental rebuild behavior.
+
+    After registration, redo will not invoke individual .do scripts for
+    these objects unless their dependencies change. The old per-object
+    _handle_prebuilt_object fallback path is effectively bypassed.
+    """
     # Get and build all source files dependencies for these object files
     sources_to_compile, sources_to_depend, build_target_instance = _build_all_ada_and_c_dependencies_for_object(object_files)
 
@@ -460,11 +512,44 @@ def _precompile_objects(object_files):
             + ("s..." if num_objects > 1 else "...")
         )
 
+    # Move compiled objects to final locations, resolve per-object deps,
+    # and register with redo-done in parallel. This replaces the per-object
+    # _handle_prebuilt_object path entirely. redo-done marks each target as
+    # up-to-date with its dependencies, so redo won't invoke individual .do
+    # scripts for these objects.
+    #
+    # Note that we use ThreadPoolExecutor (not multiprocessing.Pool) because:
+    # 1. multiprocessing.Pool uses fork(), which clones the entire Python
+    #    process including loaded modules and Adamant build state — workers
+    #    inherit stale database connections and environment that cause hangs.
+    # 2. The work here is I/O-bound (file moves, subprocess calls to
+    #    redo-done), so the CPython Global Interpreter Lock (GIL) is not a
+    #    bottleneck.
+    # 3. Threads share the process address space, avoiding pickle issues
+    #    with closures, database handles, etc.
+    from concurrent.futures import ThreadPoolExecutor
+    from functools import partial
+    import multiprocessing
+    register_fn = partial(_register_precompiled_object, temp_object_dir)
+    num_workers = min(multiprocessing.cpu_count(), len(object_files))
+    if num_workers > 1:
+        with ThreadPoolExecutor(max_workers=num_workers) as executor:
+            list(executor.map(register_fn, object_files))
+    else:
+        for obj_file in object_files:
+            register_fn(obj_file)
+
 
 def _handle_prebuilt_object(redo_1, redo_2, redo_3):
     """
     Returns true if the object has already been built. In this case the object is moved to
     the final location and dependency tracking has been handled.
+
+    Note: With the redo-done integration in _precompile_objects, objects are now moved to
+    their final locations and registered with redo-done during precompilation instead. This
+    means the temp_object_file check below will no longer match, and this code path is
+    effectively unreachable. We are leaving it as a fallback in case the redo-done path is
+    bypassed.
     """
     # First see if the object has already been compiled and is in the object temp dir. This
     # is a speed optimization that may have already occurred.
@@ -472,8 +557,6 @@ def _handle_prebuilt_object(redo_1, redo_2, redo_3):
     temp_object_file = os.path.join(temp_object_dir, os.path.basename(redo_1))
     if os.path.isfile(temp_object_file):
         debug.debug_print("object already built at location " + temp_object_file)
-        import glob
-
         temp_object_glob = temp_object_file[:-1] + "*"
         files_to_copy = glob.glob(temp_object_glob)
 
@@ -499,8 +582,10 @@ def _handle_prebuilt_object(redo_1, redo_2, redo_3):
         ) as f:
             f.write("\n".join(sources_to_depend))
 
-        # Finally, tell redo to depend on these dependencies. Again
-        # all of these should be built already, so this should be fast.
+        # Tell redo to depend on all dependencies for this object.
+        # This path should rarely fire now that _precompile_objects
+        # registers objects via redo_done, but if it does, ensure
+        # redo has the full dependency picture.
         redo.redo_ifchange(sources_to_depend)
 
         # Exit early, we are done, no need to compile...
