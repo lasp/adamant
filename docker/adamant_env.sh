@@ -38,11 +38,13 @@ execute () {
 }
 
 usage() {
-  echo "Usage: $1 [start, stop, login, exec, pull, push, build, buildx, pushx, remove]" >&2
+  echo "Usage: $1 [start, stop, login, exec, refresh, pull, push, build, buildx, pushx, remove]" >&2
   echo "*  start: create and start the ${PROJECT_NAME} container" >&2
   echo "*  stop: stop the running ${PROJECT_NAME} container" >&2
   echo "*  login: login to the ${PROJECT_NAME} container" >&2
   echo "*  exec: execute a command in the container (fast activation)" >&2
+  echo "*  refresh: re-activate and rebuild the cached environment snapshot" >&2
+  echo "           (needed after changing activate, requirements, __init__.py, etc.)" >&2
   echo "*  pull: pull the latest image from the Docker registry" >&2
   echo "*  push: push the image to the Docker registry" >&2
   echo "*  build: build the image from the Dockerfile (single platform)" >&2
@@ -72,6 +74,12 @@ case $1 in
     shift
     ${DOCKER_COMPOSE_COMMAND} -f ${DOCKER_COMPOSE_CONFIG} exec -u user ${PROJECT_NAME} \
       /home/user/${PROJECT_NAME}/env/container_run.sh "$@"
+    ;;
+  refresh )
+    execute "${DOCKER_COMPOSE_COMMAND} -f ${DOCKER_COMPOSE_CONFIG} exec -u user ${PROJECT_NAME} \
+      bash /home/user/${PROJECT_NAME}/env/refresh_snapshot.sh"
+    echo ""
+    echo "Environment snapshot refreshed."
     ;;
   pull )
     execute "${DOCKER_COMPOSE_COMMAND} -f ${DOCKER_COMPOSE_CONFIG} pull"
