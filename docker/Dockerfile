@@ -94,7 +94,7 @@ RUN cd /root \
 # Install redo
 FROM base AS install_redo
 ARG TARGETARCH
-ENV REDO_VERSION="v0.2.2"
+ENV REDO_VERSION="v0.2.3"
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -yq wget \
     && mkdir -p /root/redo \
     && cd /root/redo \
