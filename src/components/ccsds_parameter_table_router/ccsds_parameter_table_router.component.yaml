@@ -1,0 +1,59 @@
+---
+description: |
+  This component receives segmented CCSDS packets containing parameter tables,
+  reassembles them in a staging buffer, and routes completed tables to downstream
+  components that accept a Parameters_Memory_Region type. It supports loading
+  parameter tables from a designated component on command, which will often be a
+  Parameter_Store sitting in front of persistent storage.
+
+  A generator exists to produce the routing table that maps parameter table IDs
+  to output connector indexes. See the gen/ subdirectory for documentation.
+execution: active
+with:
+  - Ccsds_Parameter_Table_Router_Types
+init:
+  description: Initialization parameters for the Parameter Table Router.
+  parameters:
+    - name: Table
+      type: Ccsds_Parameter_Table_Router_Types.Router_Table
+      description: The routing table mapping parameter table IDs to destination connector indexes. Typically produced by the generator.
+    - name: Buffer_Size
+      type: Positive
+      description: The size in bytes of the internal staging buffer for reassembling segmented CCSDS packets.
+    - name: Ticks_Until_Timeout
+      type: Natural
+      description: The number of timeout ticks to wait for a response from a downstream component before declaring a timeout.
+    - name: Load_All_Parameter_Tables_On_Set_Up
+      type: Boolean
+      default: "False"
+      description: If True, all parameter tables that have a load_from source will be loaded from persistent storage during Set_Up.
+connectors:
+  - description: Receives segmented CCSDS packets containing parameter table data.
+    type: Ccsds_Space_Packet.T
+    kind: recv_async
+  - description: The command receive connector.
+    type: Command.T
+    kind: recv_async
+  - description: Periodic tick used for timeout counting when waiting for downstream responses.
+    name: Timeout_Tick_Recv_Sync
+    type: Tick.T
+    kind: recv_sync
+  - description: Synchronous response from downstream components after a Set or Get operation.
+    type: Parameters_Memory_Region_Release.T
+    kind: recv_sync
+  - description: Arrayed output connector for sending parameter table memory regions to downstream components.
+    type: Parameters_Memory_Region.T
+    kind: send
+    count: 0 # variable size
+  - description: Send command responses.
+    type: Command_Response.T
+    kind: send
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send
+  - description: Data products are sent out of this connector.
+    type: Data_Product.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get
