@@ -1,0 +1,11 @@
+---
+description: Argument type for the Int_Divide_By_Zero_In_Cpp command carrying both the magic number and the integer dividend.
+fields:
+  - name: Magic_Number
+    description: The magic number that must match for the command to execute.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Dividend
+    description: The integer value to be divided by zero.
+    type: Interfaces.Integer_32
+    format: I32

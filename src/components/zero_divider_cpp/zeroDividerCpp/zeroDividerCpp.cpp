@@ -1,4 +1,5 @@
 #include "zeroDividerCpp.h"
+#include <exception>
 
 boolean_32 ZeroDividerCpp::CheckMagicNumber(unsigned int magicNumber)
 {
@@ -12,8 +13,19 @@ boolean_32 ZeroDividerCpp::CheckMagicNumber(unsigned int magicNumber)
     }
 }
 
-int ZeroDividerCpp::DivideByZero(void)
+int ZeroDividerCpp::IntDivideByZero(int dividend)
 {
-    volatile unsigned int zero = 0;
-    return p_magicNumber / zero;
+    volatile int zero = 0;
+    return dividend / zero;
+}
+
+float ZeroDividerCpp::FpDivideByZero(float dividend)
+{
+    volatile float zero = 0.0f;
+    return dividend / zero;
+}
+
+void ZeroDividerCpp::RaiseException(void)
+{
+    throw std::exception();
 }
