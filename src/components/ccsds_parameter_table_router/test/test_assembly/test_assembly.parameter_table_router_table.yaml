@@ -1,0 +1,36 @@
+---
+description: This is an example routing table for the Parameter Table Router unit test.
+# The name of the Parameter Table Router component in the assembly:
+parameter_table_router_instance_name: Ccsds_Parameter_Table_Router_Instance
+# The routing table:
+table:
+  # Table ID 10: Specified as a raw numeric ID.
+  # Routes to Working_Params and Primary_Param_Store (with load_from).
+  - table_id: 10
+    destinations:
+      - component_name: Working_Params
+      - component_name: Primary_Param_Store
+        load_from: true
+    description: Parameter table 10 with working and primary store.
+  # Table ID by name: References the "Test_Parameter_Table" parameter table model.
+  # The generator resolves this to the numeric ID assigned by the framework.
+  - table_id: Test_Parameter_Table
+    destinations:
+      - component_name: Another_Params
+      - component_name: Primary_Param_Store
+        load_from: true
+    description: Parameter table referenced by name.
+  # Table ID 3: Routes to three destinations with load_from on one.
+  - table_id: 3
+    destinations:
+      - component_name: Working_Params
+      - component_name: Another_Params
+      - component_name: Primary_Param_Store
+        load_from: true
+    description: Parameter table 3 with multiple destinations and load_from.
+  # Table ID 4: Routes to Multi_Connector_Dest on a specific connector,
+  # exercising the dot-notation syntax.
+  - table_id: 4
+    destinations:
+      - component_name: Multi_Connector_Dest.Parameters_Memory_Region_T_Recv_Sync_2
+    description: Parameter table 4 using explicit connector name.
