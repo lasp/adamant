@@ -222,3 +222,18 @@ export -p > /tmp/.adamant_env_snapshot
 
 # Adding redo tab completion feature to shell
 . $ADAMANT_DIR/env/redo_completion.sh
+
+# Pre-warm the persistent target cache in the background if it does not
+# already exist. We use the breadcrumb file written by 
+# redo/database/persistent_target_cache.py's get_cache_dir() to find
+# the correct cache path without duplicating the hash logic in shell.
+_redo_breadcrumb="/tmp/redo-$(id -u)/cache_dir"
+_redo_need_warmup=true
+if [ -f "$_redo_breadcrumb" ]; then
+    _redo_cache_dir=$(cat "$_redo_breadcrumb")
+    [ -f "$_redo_cache_dir/redo_target.db" ] && _redo_need_warmup=false
+fi
+if [ "$_redo_need_warmup" = true ]; then
+    (python3 -m database.persistent_target_cache >/dev/null 2>&1 &)
+fi
+unset _redo_breadcrumb _redo_cache_dir _redo_need_warmup

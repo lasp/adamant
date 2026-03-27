@@ -257,6 +257,16 @@ class database(object):
             values.append(self.fetch(key))
         return values
 
+    def items(self):
+        """Yield (key, deserialized value) pairs from the database."""
+        for key, raw_value in self.db:
+            yield key, pickle.loads(raw_value)
+
+    def __iter__(self):
+        """Iterate over keys in the database."""
+        for key, _raw_value in self.db:
+            yield key
+
     def does_key_exist(self, key):
         """
         Return True is a key exists in the database, otherwise
