@@ -10,16 +10,13 @@
 class ZeroDividerCpp 
 {
     public:
-        /**
-         * @brief Default magic number for class construction
-         */
-        static constexpr unsigned int DEFAULT_MAGIC_NUMBER = 42;
 
         /**
          * @brief Constructor for ZeroDividerCpp class
          * @param magicNumber The magic number to be stored in the class
          */
-        explicit ZeroDividerCpp(unsigned int magicNumber = DEFAULT_MAGIC_NUMBER) : p_magicNumber(magicNumber) {}
+        explicit ZeroDividerCpp(unsigned int magicNumber)
+            : p_magicNumber(magicNumber) {}
 
         /**
          * @brief Checks if the provided magic number matches the stored magic number
@@ -29,12 +26,26 @@ class ZeroDividerCpp
         boolean_32 CheckMagicNumber(unsigned int magicNumber);
         
         /**
-         * @brief Divides the given magic number by zero
+         * @brief Divides the given dividend by zero using integer arithmetic.
+         * @param dividend The integer value to divide by zero
          * @return Result of division
          */
-        int DivideByZero(void);
-    
+        int IntDivideByZero(int dividend);
+
+        /**
+         * @brief Divides the given dividend by zero using floating-point arithmetic.
+         * @param dividend The floating-point value to divide by zero
+         * @return Result of floating-point division (IEEE 754 infinity)
+         */
+        float FpDivideByZero(float dividend);
+
+        /**
+         * @brief Throws a standard exception.
+         */
+        void RaiseException(void);
+
     private:
+    
         /**
          * @brief A private stored magic number
          */

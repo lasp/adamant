@@ -1,6 +1,12 @@
 ---
 description: Commands for the Zero Divider Cpp component.
 commands:
-  - name: Divide_By_Zero_In_Cpp
-    description: You must provide the correct magic number as an argument to this command for it to be executed.
+  - name: Int_Divide_By_Zero_In_Cpp
+    description: Performs an integer division by zero in C++. You must provide the correct value for the magic number and an integer dividend for this command to execute.
+    arg_type: Int_Divide_By_Zero_In_Cpp_Arg.T
+  - name: FP_Divide_By_Zero_In_Cpp
+    description: Performs a floating-point division by zero in C++. You must provide the correct value for the magic number and a floating-point dividend for this command to execute.
+    arg_type: Fp_Divide_By_Zero_In_Cpp_Arg.T
+  - name: Raise_Exception_In_Cpp
+    description: Raises a standard exception in C++. You must provide the correct value for the magic number argument of this command for it to be executed.
     arg_type: Packed_U32.T

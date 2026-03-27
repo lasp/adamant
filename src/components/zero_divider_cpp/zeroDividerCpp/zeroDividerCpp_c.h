@@ -19,23 +19,14 @@ typedef enum {
 } boolean_32;
 
 /**
- * @brief Creates an instance of ZeroDividerCpp class with default magic number
- * @return Pointer to the created instance
- */
-ZeroDividerCpp* ZeroDividerCpp_CreateWithDefaultMagicNumber();
-
-/**
  * @brief Creates an instance of ZeroDividerCpp class with specified magic number
  * @param magicNumber The magic number to be stored in the class
- * @return Pointer to the created instance. 
+ * @return Pointer to the created instance.
+ * @note No corresponding destroy function is provided. The allocated instance is
+ *       intentionally never freed, as this component is used exclusively for testing
+ *       the Last Chance Handler, where recovery without a full reset is not supported.
  */
-ZeroDividerCpp* ZeroDividerCpp_CreateWithMagicNumber(unsigned int magicNumber);
-
-/**
- * @brief Destroys an instance of ZeroDividerCpp class
- * @param self Pointer to the instance to be destroyed
- */
-void ZeroDividerCpp_Destroy(ZeroDividerCpp *self);
+ZeroDividerCpp* ZeroDividerCpp_Create(unsigned int magicNumber);
 
 /**
  * @brief Checks if the provided magic number matches the magic number stored in the class
@@ -43,14 +34,29 @@ void ZeroDividerCpp_Destroy(ZeroDividerCpp *self);
  * @param magicNumber The magic number to check against the stored value
  * @return True if the magic numbers match, false otherwise
  */
-boolean_32 ZeroDividerCpp_CheckMagicNumber(ZeroDividerCpp *self, int magicNumber);
+boolean_32 ZeroDividerCpp_CheckMagicNumber(ZeroDividerCpp *self, unsigned int magicNumber);
 
 /**
- * @brief Divides the magic number stored in the class by zero.
+ * @brief Divides the given dividend by zero using integer arithmetic.
  * @param self Pointer to the instance of ZeroDividerCpp class.
+ * @param dividend The integer value to divide by zero.
  * @return Result of division.
  */
-int ZeroDividerCpp_DivideByZero(ZeroDividerCpp *self);
+int ZeroDividerCpp_IntDivideByZero(ZeroDividerCpp *self, int dividend);
+
+/**
+ * @brief Divides the given dividend by zero using floating-point arithmetic.
+ * @param self Pointer to the instance of ZeroDividerCpp class.
+ * @param dividend The floating-point value to divide by zero.
+ * @return Result of floating-point division (IEEE 754 infinity).
+ */
+float ZeroDividerCpp_FpDivideByZero(ZeroDividerCpp *self, float dividend);
+
+/**
+ * @brief Raises a standard exception.
+ * @param self Pointer to the instance of ZeroDividerCpp class.
+ */
+void ZeroDividerCpp_RaiseException(ZeroDividerCpp *self);
 
 #ifdef __cplusplus
 } // extern "C"

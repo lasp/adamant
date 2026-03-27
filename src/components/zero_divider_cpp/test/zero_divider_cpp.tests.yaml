@@ -1,9 +1,13 @@
 ---
-description: This is a unit test suite for the Zero Divider Cpp component.
+description: This is a test suite for the Zero Divider Cpp component.
 tests:
   - name: Test_Bad_Magic_Number
-    description: This unit test makes sure the Divide_By_Zero_In_Cpp command does not execute if the correct magic number is not provided.
-  - name: Test_Divide_By_Zero_In_Cpp
-    description: This unit test makes sure a divide by zero exception is thrown when the Divide_By_Zero_In_Cpp command executes.
+    description: This test makes sure the Int_Divide_By_Zero_In_Cpp, FP_Divide_By_Zero_In_Cpp, and Raise_Exception_In_Cpp commands do not execute if the incorrect magic number is provided.
+  - name: Test_Int_Divide_By_Zero_In_Cpp
+    description: This test makes sure a division by zero occurs, the result is returned to Ada and a constraint error is thrown.
+  - name: Test_FP_Divide_By_Zero_In_Cpp
+    description: This test makes sure a floating-point division by zero occurs in C++, the result (infinity) is returned to Ada and a constraint error is thrown.
+  - name: Test_Raise_Exception_In_Cpp
+    description: This test makes sure a C++ exception is raised and propagated.
   - name: Test_Invalid_Command
-    description: This unit test makes sure an invalid command is rejected.
+    description: This test makes sure an invalid command is rejected.
