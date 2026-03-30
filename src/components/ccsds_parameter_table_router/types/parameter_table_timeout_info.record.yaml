@@ -1,0 +1,11 @@
+---
+description: Information about a parameter table operation that timed out waiting for a downstream response.
+fields:
+  - name: Table_Id
+    type: Parameter_Types.Parameter_Table_Id
+    format: U16
+    description: The parameter table ID that the operation was attempted for.
+  - name: Connector_Index
+    type: Connector_Types.Connector_Index_Type
+    format: U16
+    description: The connector index of the destination that timed out.

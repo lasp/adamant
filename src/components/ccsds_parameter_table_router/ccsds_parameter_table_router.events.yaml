@@ -1,0 +1,55 @@
+---
+description: Events for the Parameter Table Router component.
+events:
+  - name: Receiving_New_Table
+    description: A new parameter table FirstSegment has been received and buffering has started.
+    param_type: Parameter_Table_Id.T
+  - name: Table_Received
+    description: A complete parameter table has been reassembled from CCSDS segments.
+    param_type: Parameter_Table_Id.T
+  - name: Table_Updated
+    description: A parameter table has been successfully sent to all downstream destinations.
+    param_type: Parameter_Table_Id.T
+  - name: Loading_Table
+    description: Starting to load a parameter table from its load_from source.
+    param_type: Parameter_Table_Id.T
+  - name: Table_Loaded
+    description: A parameter table has been successfully loaded from persistent storage and sent to all destinations.
+    param_type: Parameter_Table_Id.T
+  - name: Table_Update_Failure
+    description: A downstream component rejected a parameter table update. Includes the table ID, connector index, and release status.
+    param_type: Parameter_Table_Operation_Failure_Info.T
+  - name: Table_Update_Timeout
+    description: Timed out waiting for a response from a downstream component during table update.
+    param_type: Parameter_Table_Timeout_Info.T
+  - name: Table_Load_Failure
+    description: Failed to load a parameter table from persistent storage. Includes the table ID, connector index, and release status.
+    param_type: Parameter_Table_Operation_Failure_Info.T
+  - name: No_Load_Source
+    description: Load_Parameter_Table command received for a table ID that has no load_from destination configured.
+    param_type: Parameter_Table_Id.T
+  - name: Unrecognized_Table_Id
+    description: Received a parameter table with a Table ID not found in the routing table.
+    param_type: Parameter_Table_Id.T
+  - name: Packet_Ignored
+    description: A CCSDS packet was ignored (continuation/last segment without prior first segment, or unsegmented).
+    param_type: Ccsds_Primary_Header.T
+  - name: Too_Small_Table
+    description: A FirstSegment packet was too small to contain a Table ID (less than 2 bytes of data).
+    param_type: Ccsds_Primary_Header.T
+  - name: Staging_Buffer_Overflow
+    description: The staging buffer is full. Dropping packets until a new FirstSegment resets the buffer.
+    param_type: Ccsds_Primary_Header.T
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T
+  - name: Command_Dropped
+    description: A command was dropped due to a full queue.
+    param_type: Command_Header.T
+  - name: Packet_Dropped
+    description: A CCSDS packet was dropped due to a full queue.
+    param_type: Ccsds_Primary_Header.T
+  - name: Loading_All_Parameter_Tables
+    description: Starting to load all parameter tables that have a load_from source.
+  - name: All_Parameter_Tables_Loaded
+    description: Finished loading all parameter tables.

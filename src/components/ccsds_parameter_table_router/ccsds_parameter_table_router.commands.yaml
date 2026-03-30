@@ -1,0 +1,8 @@
+---
+description: Commands for the Parameter Table Router component.
+commands:
+  - name: Load_Parameter_Table
+    description: Load a single parameter table from its load_from source and distribute to other destinations.
+    arg_type: Parameter_Table_Id.T
+  - name: Load_All_Parameter_Tables
+    description: Load all parameter tables that have a load_from source configured and distribute to their destinations.

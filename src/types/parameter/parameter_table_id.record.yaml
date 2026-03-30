@@ -1,0 +1,7 @@
+---
+description: A packed record wrapping a parameter table ID.
+fields:
+  - name: Id
+    type: Parameter_Types.Parameter_Table_Id
+    format: U16
+    description: The parameter table ID.
