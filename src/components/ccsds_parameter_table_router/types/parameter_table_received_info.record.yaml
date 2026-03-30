@@ -1,0 +1,22 @@
+---
+description: Information about the current or most recent parameter table operation.
+fields:
+  - name: Table_Id
+    type: Parameter_Types.Parameter_Table_Id
+    format: U16
+    description: The parameter table ID (0 if no table has been received).
+  - name: Status
+    type: Ccsds_Parameter_Table_Router_Enums.Table_Status.E
+    format: E8
+    description: The current status of the table operation.
+  - name: Bytes_Received
+    type: Natural
+    format: U32
+    description: Number of table data bytes currently in the staging buffer.
+  - name: Packets_Received
+    type: Natural
+    format: U32
+    description: Number of CCSDS packets received for the current table.
+  - name: Timestamp
+    type: Sys_Time.T
+    description: The time of the most recent status update.
