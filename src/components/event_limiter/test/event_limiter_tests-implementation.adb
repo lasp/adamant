@@ -297,11 +297,13 @@ package body Event_Limiter_Tests.Implementation is
       Natural_Assert.Eq (T.Events_Limited_Since_Last_Tick_History.Get_Count, 0);
 
       -- Now increment a few ids for the whole range and one of the disabled, then we will decrement and check that we got the appropriate event and data product out
+      -- Note: Avoid using event ID 1 here since it matches Events_Limited_Since_Last_Tick_Id
+      -- which is bypassed from limiting to prevent an infinite loop.
       Natural_Assert.Eq (T.Event_Forward_T_Recv_Sync_History.Get_Count, 0);
-      Incoming_Event.Header.Id := 1;
+      Incoming_Event.Header.Id := 5;
       T.Event_T_Send (Incoming_Event);
       Natural_Assert.Eq (T.Event_Forward_T_Recv_Sync_History.Get_Count, 1);
-      Event_Id_Assert.Eq (T.Event_Forward_T_Recv_Sync_History.Get (1).Header.Id, 1);
+      Event_Id_Assert.Eq (T.Event_Forward_T_Recv_Sync_History.Get (1).Header.Id, 5);
       T.Event_T_Send (Incoming_Event);
       Natural_Assert.Eq (T.Event_Forward_T_Recv_Sync_History.Get_Count, 2);
       T.Event_T_Send (Incoming_Event);
@@ -385,7 +387,7 @@ package body Event_Limiter_Tests.Implementation is
       Natural_Assert.Eq (T.Event_Forward_T_Recv_Sync_History.Get_Count, 5);
 
       -- Now call the tick to decrement. Get the event and data product and check the values
-      Natural_Assert.Eq (T.Events_Limited_Since_Last_Tick_History.Get_Count, 3);
+      Natural_Assert.Eq (T.Events_Limited_Since_Last_Tick_History.Get_Count, 0);
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
       T.Tick_T_Send (Input_Tick);
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 3);
@@ -393,10 +395,10 @@ package body Event_Limiter_Tests.Implementation is
       Packed_U32_Assert.Eq (T.Total_Events_Limited_History.Get (1), (Value => 6));
       -- Event
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
-      Natural_Assert.Eq (T.Events_Limited_Since_Last_Tick_History.Get_Count, 4);
+      Natural_Assert.Eq (T.Events_Limited_Since_Last_Tick_History.Get_Count, 1);
       Event_Assert.Eq
          (T.Event_T_Recv_Sync_History.Get (1),
-          (Header => (Time => (0, 0), Id => T.Events.Get_Events_Limited_Since_Last_Tick_Id, Param_Buffer_Length => 23), Param_Buffer => [0, 6, 4, 0, 1, 0, 7, 0, 10, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
+          (Header => (Time => (0, 0), Id => T.Events.Get_Events_Limited_Since_Last_Tick_Id, Param_Buffer_Length => 23), Param_Buffer => [0, 6, 4, 0, 5, 0, 7, 0, 10, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
 
       -- Now test if there is an event being limited, that each tick there is one event that we get between each tick
       T.Event_Forward_T_Recv_Sync_History.Clear;
@@ -412,7 +414,7 @@ package body Event_Limiter_Tests.Implementation is
       T.Event_T_Send (Incoming_Event);
       Natural_Assert.Eq (T.Event_Forward_T_Recv_Sync_History.Get_Count, 3);
       -- Perform a tick now that we are limited
-      Natural_Assert.Eq (T.Events_Limited_Since_Last_Tick_History.Get_Count, 4);
+      Natural_Assert.Eq (T.Events_Limited_Since_Last_Tick_History.Get_Count, 1);
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 3);
       T.Tick_T_Send (Input_Tick);
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 5);
@@ -420,7 +422,7 @@ package body Event_Limiter_Tests.Implementation is
       Packed_U32_Assert.Eq (T.Total_Events_Limited_History.Get (2), (Value => 7));
       -- Event
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
-      Natural_Assert.Eq (T.Events_Limited_Since_Last_Tick_History.Get_Count, 5);
+      Natural_Assert.Eq (T.Events_Limited_Since_Last_Tick_History.Get_Count, 2);
       Event_Assert.Eq
          (T.Event_T_Recv_Sync_History.Get (2),
           (Header => (Time => (0, 0), Id => T.Events.Get_Events_Limited_Since_Last_Tick_Id, Param_Buffer_Length => 23), Param_Buffer => [0, 1, 1, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
@@ -432,7 +434,7 @@ package body Event_Limiter_Tests.Implementation is
       T.Event_T_Send (Incoming_Event);
       Natural_Assert.Eq (T.Event_Forward_T_Recv_Sync_History.Get_Count, 4);
       -- Perform another cycle
-      Natural_Assert.Eq (T.Events_Limited_Since_Last_Tick_History.Get_Count, 5);
+      Natural_Assert.Eq (T.Events_Limited_Since_Last_Tick_History.Get_Count, 2);
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 5);
       T.Tick_T_Send (Input_Tick);
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 7);
@@ -440,7 +442,7 @@ package body Event_Limiter_Tests.Implementation is
       Packed_U32_Assert.Eq (T.Total_Events_Limited_History.Get (3), (Value => 9));
       -- Event
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 3);
-      Natural_Assert.Eq (T.Events_Limited_Since_Last_Tick_History.Get_Count, 6);
+      Natural_Assert.Eq (T.Events_Limited_Since_Last_Tick_History.Get_Count, 3);
       Event_Assert.Eq
          (T.Event_T_Recv_Sync_History.Get (3),
           (Header => (Time => (0, 0), Id => T.Events.Get_Events_Limited_Since_Last_Tick_Id, Param_Buffer_Length => 23), Param_Buffer => [0, 2, 1, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
@@ -949,11 +951,13 @@ package body Event_Limiter_Tests.Implementation is
       Self.Tester.Component_Instance.Init (Event_Id_Start => 0, Event_Id_Stop => 10, Event_Limit_Persistence => 2);
 
       -- Make sure we first hit the persistence that is set
+      -- Note: Avoid using event ID 1 here since it matches Events_Limited_Since_Last_Tick_Id
+      -- which is bypassed from limiting to prevent an infinite loop.
       Natural_Assert.Eq (T.Event_Forward_T_Recv_Sync_History.Get_Count, 0);
-      Incoming_Event.Header.Id := 1;
+      Incoming_Event.Header.Id := 5;
       T.Event_T_Send (Incoming_Event);
       Natural_Assert.Eq (T.Event_Forward_T_Recv_Sync_History.Get_Count, 1);
-      Event_Id_Assert.Eq (T.Event_Forward_T_Recv_Sync_History.Get (1).Header.Id, 1);
+      Event_Id_Assert.Eq (T.Event_Forward_T_Recv_Sync_History.Get (1).Header.Id, 5);
       T.Event_T_Send (Incoming_Event);
       Natural_Assert.Eq (T.Event_Forward_T_Recv_Sync_History.Get_Count, 2);
       T.Event_T_Send (Incoming_Event);
@@ -1051,11 +1055,13 @@ package body Event_Limiter_Tests.Implementation is
       T.Tick_T_Send (Input_Tick);
 
       -- Verify the event was sent with the limited count.
+      -- Event ID 1 (Events_Limited_Since_Last_Tick_Id) is bypassed from limiting,
+      -- so only 10 of the 11 IDs are actually limited.
       Natural_Assert.Eq (T.Events_Limited_Since_Last_Tick_History.Get_Count, 1);
       Natural_Assert.Eq (Natural (T.Events_Limited_Since_Last_Tick_History.Get (1).Num_Event_Ids), 10);
 
-      -- Verify all 11 events were actually limited (total count):
-      Natural_Assert.Eq (Natural (T.Events_Limited_Since_Last_Tick_History.Get (1).Num_Events_Limited), 11);
+      -- Verify 10 events were actually limited (total count):
+      Natural_Assert.Eq (Natural (T.Events_Limited_Since_Last_Tick_History.Get (1).Num_Events_Limited), 10);
    end Test_Event_Limited_Array_Boundary;
 
 end Event_Limiter_Tests.Implementation;

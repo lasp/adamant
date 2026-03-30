@@ -7,6 +7,7 @@ with Tick;
 with Event;
 with Command;
 with Protected_Variables;
+with Event_Types;
 with Two_Counter_Entry;
 with Two_Counter_Entry_Enums;
 
@@ -65,6 +66,8 @@ private
       State_Packet_Size : Natural := Natural'First;
       -- Event limited count for lifetime of component
       Total_Event_Limited_Count : Unsigned_32 := Unsigned_32'First;
+      -- Cached event ID for Events_Limited_Since_Last_Tick to avoid a getter call on every received event
+      Events_Limited_Since_Last_Tick_Id : Event_Types.Event_Id := Event_Types.Event_Id'First;
    end record;
 
    ---------------------------------------
