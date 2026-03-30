@@ -1,0 +1,60 @@
+---
+description: Unit tests for the Parameter Table Router component.
+tests:
+  # Init and Set_Up:
+  - name: Test_Init
+    description: Verify Init populates binary tree, creates staging buffer, and validates routing table.
+  - name: Test_Set_Up
+    description: Verify Set_Up publishes initial data product values.
+  - name: Test_Set_Up_Load_All
+    description: Init with Load_All_Parameter_Tables_On_Set_Up. Verify tables are loaded during Set_Up.
+  # Packet reception - nominal:
+  - name: Test_Nominal_Segmented_Upload
+    description: Send First + Continuation + Last for a known table ID. Verify events and data products.
+  - name: Test_Unsegmented_Upload
+    description: Send a single Unsegmented packet for a known table ID. Verify events and data products.
+  - name: Test_Multi_Destination_Order
+    description: Verify non-Load_From destinations sent first in YAML order, Load_From last.
+  # Packet reception - errors:
+  - name: Test_Packet_Ignored
+    description: Continuation and Last without prior First produce Packet_Ignored events.
+  - name: Test_Too_Small_Table
+    description: FirstSegment with less than 2 bytes produces Too_Small_Table event.
+  - name: Test_Buffer_Overflow
+    description: Data exceeding buffer capacity produces Staging_Buffer_Overflow event.
+  - name: Test_Unrecognized_Table_Id
+    description: Complete table with unknown ID produces Unrecognized_Table_Id event and increments invalid counter.
+  # Downstream failure and timeout:
+  - name: Test_Destination_Failure
+    description: Downstream returns failure status. Verify Table_Update_Failure event with correct info.
+  - name: Test_Destination_Timeout
+    description: Downstream does not respond. Verify Table_Update_Timeout event.
+  - name: Test_Partial_Failure_Stops
+    description: Multi-destination table where first destination fails. Remaining destinations not sent to.
+  # Commands - Load_Parameter_Table:
+  - name: Test_Load_Table_Nominal
+    description: Load a table from its load_from source. Verify Loading_Table and Table_Loaded events.
+  - name: Test_Load_Table_No_Load_Source
+    description: Load command for table with no load_from. Verify No_Load_Source event and command failure.
+  - name: Test_Load_Table_Unrecognized
+    description: Load command for unknown table ID. Verify event and command failure.
+  - name: Test_Load_Table_Failure
+    description: Load fails during Get or Set. Verify failure events and command failure.
+  # Commands - Load_All_Parameter_Tables:
+  - name: Test_Load_All_Nominal
+    description: Load all tables. Verify start/end events and per-table events.
+  - name: Test_Load_All_Partial_Failure
+    description: One table fails during load all. Verify command failure and other tables still attempted.
+  # Dropped handlers:
+  - name: Test_Packet_Dropped
+    description: Overflow CCSDS packet queue. Verify Packet_Dropped event.
+  - name: Test_Command_Dropped
+    description: Overflow command queue. Verify Command_Dropped event.
+  # Invalid command:
+  - name: Test_Invalid_Command
+    description: Send command with corrupted arguments. Verify Invalid_Command_Received event.
+  # Coverage gap tests:
+  - name: Test_Load_From_Destination_Failure
+    description: Upload table where non-Load_From succeeds but Load_From (sent last) fails.
+  - name: Test_Load_Command_Set_Failure
+    description: Load command where Get succeeds but subsequent Set to non-Load_From fails.
