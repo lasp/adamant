@@ -67,14 +67,23 @@ class build_what(build_rule_base):
         persistent_db = get_persistent_db_path()
         if persistent_db and os.path.isfile(persistent_db):
             # Fast path: read from persistent DB, no setup needed.
-            # Data may be stale but that's fine — next build refreshes.
+            # Skip if the directory has been modified since the persistent
+            # DB was last written (e.g. a file was added or removed),
+            # since the DB won't know about the new file's targets.
             try:
-                self._build_from_persistent(redo_1, directory, persistent_db)
-                return
-            except KeyError:
-                pass  # Directory not in DB, fall through to slow path
-            except Exception:
-                pass  # DB corrupt, fall through to slow path
+                db_mtime = os.path.getmtime(persistent_db)
+                dir_mtime = os.path.getmtime(directory)
+            except OSError:
+                db_mtime = 0
+                dir_mtime = 0
+            if db_mtime >= dir_mtime:
+                try:
+                    self._build_from_persistent(redo_1, directory, persistent_db)
+                    return
+                except KeyError:
+                    pass  # Directory not in DB, fall through to slow path
+                except Exception:
+                    pass  # DB corrupt, fall through to slow path
         # No persistent DB or DB corrupt.
         # Setup for just this directory (slower path).
         # Mark that we're running 'redo what' so _delayed_cleanup skips
