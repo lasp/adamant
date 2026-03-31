@@ -549,6 +549,38 @@ def create(build_path):
                                 )
                                 redo_target_dict.add_target(directory, output_filename)
 
+    ###########################################
+    # Discover targets in doc/ subdirectories:
+    ###########################################
+    # doc/ subdirectories are not part of the build path (they have no
+    # .all_path marker) but may contain hand-written source files (e.g.
+    # .tex) that produce build targets.  Generators already put their
+    # .tex output into doc/build/tex/ and those targets are discovered
+    # via the parent component directory, but hand-written files in doc/
+    # itself are missed unless we scan here.
+    for directory in list(build_path.keys()):
+        doc_dir = os.path.join(directory, "doc")
+        if doc_dir not in build_path and os.path.isdir(doc_dir):
+            doc_files = [
+                os.path.join(doc_dir, f)
+                for f in os.listdir(doc_dir)
+                if os.path.isfile(os.path.join(doc_dir, f))
+                and not f.startswith(".")
+            ]
+            for regex_string, (cregex, do_cregex, rules) in rule_regex_dict.items():
+                for input_filename in _filter_by_regex(cregex, doc_files):
+                    for rule in rules:
+                        try:
+                            output_filename = rule.output_filename(input_filename)
+                        except Exception as e:
+                            _output_filename_error(e, rule, input_filename)
+
+                        if output_filename:
+                            output_filename = _format_output_filename(
+                                output_filename, rule
+                            )
+                            redo_target_dict.add_target(doc_dir, output_filename)
+
     #######################################
     # Utility database load:
     #######################################
