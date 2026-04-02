@@ -15,7 +15,12 @@ package body Component.Zero_Divider_Cpp.Implementation.Tester is
       Self.Sys_Time_T_Return_History.Init (Depth => 100);
       Self.Event_T_Recv_Sync_History.Init (Depth => 100);
       -- Event histories:
-      Self.Dividing_By_Zero_In_Cpp_History.Init (Depth => 100);
+      Self.Raising_Exception_In_Cpp_History.Init (Depth => 100);
+      Self.Raise_Exception_In_Cpp_No_Exception_History.Init (Depth => 100);
+      Self.Int_Dividing_By_Zero_In_Cpp_History.Init (Depth => 100);
+      Self.Int_Divide_By_Zero_No_Exception_History.Init (Depth => 100);
+      Self.Fp_Dividing_By_Zero_In_Cpp_History.Init (Depth => 100);
+      Self.Fp_Divide_By_Zero_No_Exception_History.Init (Depth => 100);
       Self.Invalid_Magic_Number_History.Init (Depth => 100);
       Self.Invalid_Command_Received_History.Init (Depth => 100);
       -- Packet histories:
@@ -30,7 +35,12 @@ package body Component.Zero_Divider_Cpp.Implementation.Tester is
       Self.Sys_Time_T_Return_History.Destroy;
       Self.Event_T_Recv_Sync_History.Destroy;
       -- Event histories:
-      Self.Dividing_By_Zero_In_Cpp_History.Destroy;
+      Self.Raising_Exception_In_Cpp_History.Destroy;
+      Self.Raise_Exception_In_Cpp_No_Exception_History.Destroy;
+      Self.Int_Dividing_By_Zero_In_Cpp_History.Destroy;
+      Self.Int_Divide_By_Zero_No_Exception_History.Destroy;
+      Self.Fp_Dividing_By_Zero_In_Cpp_History.Destroy;
+      Self.Fp_Divide_By_Zero_No_Exception_History.Destroy;
       Self.Invalid_Magic_Number_History.Destroy;
       Self.Invalid_Command_Received_History.Destroy;
       -- Packet histories:
@@ -80,17 +90,63 @@ package body Component.Zero_Divider_Cpp.Implementation.Tester is
    -----------------------------------------------
    -- Event handler primitive:
    -----------------------------------------------
-   -- A Divide_By_Zero_In_Cpp command was received, and the magic number was correct.
-   -- The division will occur in N milliseconds, where N is provided as the event
-   -- parameter.
-   overriding procedure Dividing_By_Zero_In_Cpp (Self : in out Instance; Arg : in Packed_Natural.T) is
+   -- A Raise_Exception_In_Cpp command was received and the magic number was correct.
+   -- The exception will be raised in N milliseconds, where N is provided as the
+   -- event parameter.
+   overriding procedure Raising_Exception_In_Cpp (Self : in out Instance; Arg : in Packed_U32.T) is
    begin
       -- Push the argument onto the test history for looking at later:
-      Self.Dividing_By_Zero_In_Cpp_History.Push (Arg);
-   end Dividing_By_Zero_In_Cpp;
+      Self.Raising_Exception_In_Cpp_History.Push (Arg);
+   end Raising_Exception_In_Cpp;
 
-   -- A Divide_By_Zero_In_Cpp command was received, but the magic number was
-   -- incorrect. The division will not occur.
+   -- The C++ exception raise did not propagate as expected. This event should never
+   -- fire under normal operation and indicates the target does not propagate C++
+   -- exceptions to Ada as expected.
+   overriding procedure Raise_Exception_In_Cpp_No_Exception (Self : in out Instance) is
+      Arg : constant Natural := 0;
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Raise_Exception_In_Cpp_No_Exception_History.Push (Arg);
+   end Raise_Exception_In_Cpp_No_Exception;
+
+   -- An Int_Divide_By_Zero_In_Cpp command was received and the magic number was
+   -- correct. The division will occur in N milliseconds, where N is provided as the
+   -- event parameter.
+   overriding procedure Int_Dividing_By_Zero_In_Cpp (Self : in out Instance; Arg : in Packed_U32.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Int_Dividing_By_Zero_In_Cpp_History.Push (Arg);
+   end Int_Dividing_By_Zero_In_Cpp;
+
+   -- The integer divide-by-zero in C++ did not raise an exception and returned a
+   -- value. This indicates the target does not trap on integer division by zero. The
+   -- parameter is the raw result returned by C++.
+   overriding procedure Int_Divide_By_Zero_No_Exception (Self : in out Instance; Arg : in Packed_I32.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Int_Divide_By_Zero_No_Exception_History.Push (Arg);
+   end Int_Divide_By_Zero_No_Exception;
+
+   -- An Fp_Divide_By_Zero_In_Cpp command was received and the magic number was
+   -- correct. The floating-point division will occur in N milliseconds, where N is
+   -- provided as the event parameter.
+   overriding procedure Fp_Dividing_By_Zero_In_Cpp (Self : in out Instance; Arg : in Packed_U32.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Fp_Dividing_By_Zero_In_Cpp_History.Push (Arg);
+   end Fp_Dividing_By_Zero_In_Cpp;
+
+   -- The floating-point divide-by-zero in C++ returned a value that did not trigger
+   -- a Constraint_Error. This event should never fire under normal operation and
+   -- indicates the target does not conform to the C++ reference for IEEE floating-
+   -- point division by zero. The parameter is the raw result returned by C++.
+   overriding procedure Fp_Divide_By_Zero_No_Exception (Self : in out Instance; Arg : in Packed_F32.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Fp_Divide_By_Zero_No_Exception_History.Push (Arg);
+   end Fp_Divide_By_Zero_No_Exception;
+
+   -- A command was received, but the magic number was incorrect.
    overriding procedure Invalid_Magic_Number (Self : in out Instance; Arg : in Packed_U32.T) is
    begin
       -- Push the argument onto the test history for looking at later:
@@ -108,12 +164,12 @@ package body Component.Zero_Divider_Cpp.Implementation.Tester is
    -- Packet handler primitive:
    -----------------------------------------------
    -- Description:
-   --    The second packet listed here is not actually produced by the Last Chance
-   --    Manager component, but instead should be produced by the implementation of the
-   --    Last\_Chance\_Handler. This packet definition exists to ensure that the packet
-   --    gets reflected in the documentation and ground system definitions.
+   --    The packet listed here is not actually produced by this component, but instead
+   --    should be produced by the implementation of the Last_Chance_Handler. This
+   --    packet definition exists to ensure that the packet gets reflected in the
+   --    documentation and ground system definitions.
    -- This packet contains information regarding an exception occurrence that
-   -- triggers the Last\_Chance\_Handler to get invoked. This packet is not produced
+   -- triggers the Last_Chance_Handler to get invoked. This packet is not produced
    -- directly by this component, and should be produced by the last chance handler
    -- implementation. This packet definition exists to ensure that the packet gets
    -- reflected in the documentation and ground system definitions.

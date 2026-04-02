@@ -1,10 +1,28 @@
 ---
 events:
-  - name: Dividing_By_Zero_In_Cpp
-    description: A Divide_By_Zero_In_Cpp command was received, and the magic number was correct. The division will occur in N milliseconds, where N is provided as the event parameter.
-    param_type: Packed_Natural.T
+  # Raise Exception Events
+  - name: Raising_Exception_In_Cpp
+    description: A Raise_Exception_In_Cpp command was received and the magic number was correct. The exception will be raised in N milliseconds, where N is provided as the event parameter.
+    param_type: Packed_U32.T
+  - name: Raise_Exception_In_Cpp_No_Exception
+    description: The C++ exception raise did not propagate as expected. This event should never fire under normal operation and indicates the target does not propagate C++ exceptions to Ada as expected.
+  # Integer Divide By Zero Events
+  - name: Int_Dividing_By_Zero_In_Cpp
+    description: An Int_Divide_By_Zero_In_Cpp command was received and the magic number was correct. The division will occur in N milliseconds, where N is provided as the event parameter.
+    param_type: Packed_U32.T
+  - name: Int_Divide_By_Zero_No_Exception
+    description: The integer divide-by-zero in C++ did not raise an exception and returned a value. This indicates the target does not trap on integer division by zero. The parameter is the raw result returned by C++.
+    param_type: Packed_I32.T
+  # Floating Point Divide By Zero Events
+  - name: Fp_Dividing_By_Zero_In_Cpp
+    description: An Fp_Divide_By_Zero_In_Cpp command was received and the magic number was correct. The floating-point division will occur in N milliseconds, where N is provided as the event parameter.
+    param_type: Packed_U32.T
+  - name: Fp_Divide_By_Zero_No_Exception
+    description: The floating-point divide-by-zero in C++ returned a value that did not trigger a Constraint_Error. This event should never fire under normal operation and indicates the target does not conform to the C++ reference for IEEE floating-point division by zero. The parameter is the raw result returned by C++.
+    param_type: Packed_F32.T
+  # General Events
   - name: Invalid_Magic_Number
-    description: A Divide_By_Zero_In_Cpp command was received, but the magic number was incorrect. The division will not occur.
+    description: A command was received, but the magic number was incorrect.
     param_type: Packed_U32.T
   - name: Invalid_Command_Received
     description: A command was received with invalid parameters.

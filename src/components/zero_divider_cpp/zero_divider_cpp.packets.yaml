@@ -1,5 +1,5 @@
 ---
-description: The second packet listed here is not actually produced by the Last Chance Manager component, but instead should be produced by the implementation of the Last_Chance_Handler. This packet definition exists to ensure that the packet gets reflected in the documentation and ground system definitions.
+description: The packet listed here is not actually produced by this component, but instead should be produced by the implementation of the Last_Chance_Handler. This packet definition exists to ensure that the packet gets reflected in the documentation and ground system definitions.
 packets:
   - name: Last_Chance_Handler_Packet
     type: Packed_Exception_Occurrence.T
