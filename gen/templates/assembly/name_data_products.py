@@ -5,12 +5,12 @@
 ################################################################################
 {% if data_products.items() %}
 
-
 # Data product ID constants:
 {% for id, dp in data_products.items() %}
 {{ dp.suite.component.instance_name }}_{{ dp.name }} = {{ dp.id }}
 {% endfor %}
-{% endif %}
+
+{% endif -%}
 
 # Reverse lookup: ID to name string
 data_product_id_to_name = {

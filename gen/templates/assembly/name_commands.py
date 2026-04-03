@@ -5,12 +5,12 @@
 ################################################################################
 {% if commands.items() %}
 
-
 # Command ID constants:
 {% for id, command in commands.items() %}
 {{ command.suite.component.instance_name }}_{{ command.name }} = {{ command.id }}
 {% endfor %}
-{% endif %}
+
+{% endif -%}
 
 # Reverse lookup: ID to name string
 command_id_to_name = {

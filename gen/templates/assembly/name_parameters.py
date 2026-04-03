@@ -5,12 +5,12 @@
 ################################################################################
 {% if parameters.items() %}
 
-
 # Parameter ID constants:
 {% for id, param in parameters.items() %}
 {{ param.suite.component.instance_name }}_{{ param.name }} = {{ param.id }}
 {% endfor %}
-{% endif %}
+
+{% endif -%}
 
 # Reverse lookup: ID to name string
 parameter_id_to_name = {

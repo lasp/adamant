@@ -5,12 +5,12 @@
 ################################################################################
 {% if faults.items() %}
 
-
 # Fault ID constants:
 {% for id, fault in faults.items() %}
 {{ fault.suite.component.instance_name }}_{{ fault.name }} = {{ fault.id }}
 {% endfor %}
-{% endif %}
+
+{% endif -%}
 
 # Reverse lookup: ID to name string
 fault_id_to_name = {

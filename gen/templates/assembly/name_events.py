@@ -15,11 +15,13 @@ from {{ event.type_package|lower }} import {{ event.type_package }}
 {% endif %}
 {% endfor %}
 
+
 # Event ID constants:
 {% for id, event in events.items() %}
 {{ event.suite.component.instance_name }}_{{ event.name }} = {{ event.id }}
 {% endfor %}
-{% endif %}
+
+{% endif -%}
 
 # Reverse lookup: ID to name string
 event_id_to_name = {

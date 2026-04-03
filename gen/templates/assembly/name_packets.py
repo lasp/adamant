@@ -5,12 +5,12 @@
 ################################################################################
 {% if packets.items() %}
 
-
 # Packet ID constants:
 {% for id, packet in packets.items() %}
 {{ packet.full_name|replace(".","_") }} = {{ packet.id }}
 {% endfor %}
-{% endif %}
+
+{% endif -%}
 
 # Reverse lookup: ID to name string
 packet_id_to_name = {
