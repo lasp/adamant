@@ -119,6 +119,10 @@ package body Component.Event_Limiter.Implementation is
 
       -- Initialize our flag to false which indicates if we should be sending the packet next tick
       Self.Send_Event_State_Packet.Set_Var (False);
+
+      -- Cache the event ID for Events_Limited_Since_Last_Tick so we can cheaply
+      -- compare against it on every incoming event without calling the getter.
+      Self.Events_Limited_Since_Last_Tick_Id := Self.Events.Get_Events_Limited_Since_Last_Tick_Id;
    end Init;
 
    ---------------------------------------
@@ -147,14 +151,14 @@ package body Component.Event_Limiter.Implementation is
             case Status is
                when Success =>
                   null; -- do nothing here and move on
-                  -- Save the event id into our event that indicates this id was limited (if room is available)
                when Event_Max_Limit =>
+                  -- Save the event id into our event that indicates this id was limited (if room is available)
                   if Num_Event_Limited_Event.Num_Event_Ids < Num_Event_Limited_Event.Event_Id_Limited_Array'Length then
                      Num_Event_Limited_Event.Event_Id_Limited_Array (Integer (Num_Event_Limited_Event.Num_Event_Ids)) := Dec_Event_Id;
                      Num_Event_Limited_Event.Num_Event_Ids := @ + 1;
                   end if;
-                  -- Assert on the status. We know the range so we shouldn't get an Invalid_Id error
                when Invalid_Id =>
+                  -- Assert on the status. We know the range so we shouldn't get an Invalid_Id error
                   pragma Assert (False, "Invalid_Id found when decrementing all event limiter counters which should not be possible: " & Natural'Image (Natural (Dec_Event_Id)));
             end case;
          end loop;
@@ -242,18 +246,28 @@ package body Component.Event_Limiter.Implementation is
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T) is
       Status : Two_Counter_Entry.Count_Status;
    begin
-      -- Regardless of the global state, we call the increment. The global component enable/disable state as well as each individual id state is handled in the increment for efficiency.
-      Self.Event_Array.Increment_Counter (Arg.Header.Id, Status);
-      -- Only when status is an Event_Max_Limit, then we don't do anything. Otherwise, the event gets passed on
-      case Status is
-         -- When invalid or successful, we just pass through the event (don't need to know if enabled or disabled)
-         when Success | Invalid_Id =>
-            Self.Event_Forward_T_Send_If_Connected (Arg);
+      -- Bypass limiting for our own Events_Limited_Since_Last_Tick event, which is
+      -- already naturally rate-limited to at most once per tick. If we allowed it to pass
+      -- through the limiter with persistence equal to 1, limiting this event would cause a
+      -- new Events_Limited_Since_Last_Tick to be emitted on the next tick, creating an
+      -- infinite loop. All other events go through normal limiting below.
+      if Arg.Header.Id = Self.Events_Limited_Since_Last_Tick_Id then
+         Self.Event_Forward_T_Send_If_Connected (Arg);
+      else
+         -- Regardless of the global state, we call the increment. The global component enable/
+         -- disable state as well as each individual id state is handled in the increment for
+         -- efficiency.
+         Self.Event_Array.Increment_Counter (Arg.Header.Id, Status);
+         -- Only when status is an Event_Max_Limit, then we don't do anything. Otherwise, the event gets passed on
+         case Status is
+            -- When invalid or successful, we just pass through the event (don't need to know if enabled or disabled)
+            when Success | Invalid_Id =>
+               Self.Event_Forward_T_Send_If_Connected (Arg);
             -- If we hit a max, then the package takes care of the accounting and knows it was enabled.
-         when Event_Max_Limit =>
-            null;
-      end case;
-
+            when Event_Max_Limit =>
+               null;
+         end case;
+      end if;
    end Event_T_Recv_Sync;
 
    -- This is the command receive connector.
