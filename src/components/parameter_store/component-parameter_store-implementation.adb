@@ -7,6 +7,7 @@ with Byte_Array_Pointer.Packed;
 with Packet_Types;
 with Serializer_Types;
 with Parameter_Table_Header;
+with Memory_Region;
 with Crc_16;
 
 package body Component.Parameter_Store.Implementation is
@@ -17,7 +18,7 @@ package body Component.Parameter_Store.Implementation is
    -- The component is initialized by providing the memory region it is to manage which holds the parameter table.
    --
    -- Init Parameters:
-   -- bytes : Basic_Types.Byte_Array_Access - A pointer to an allocation of bytes to be used for storing the parameter table. The size of this byte array MUST be the exact size of the parameter table to be stored, or updating or fetching the table will be rejected with a length error.
+   -- bytes : Basic_Types.Byte_Array_Access - A pointer to an allocation of bytes to be used for storing the parameter table. The size of this byte array MUST be the exact size of the parameter table to be stored for Set operations, or updating the table will be rejected with a length error. For Get operations, the provided memory region may be larger than or equal to the table size.
    -- Dump_Parameters_On_Change : Boolean - If set to True, the component will dump the current parameter values any time a memory region is received to change the parameter table. If set to False, parameters will only be dumped when requested by command.
    --
    overriding procedure Init (Self : in out Instance; Bytes : in not null Basic_Types.Byte_Array_Access; Dump_Parameters_On_Change : in Boolean := False) is
@@ -92,70 +93,87 @@ package body Component.Parameter_Store.Implementation is
       use Parameter_Enums.Parameter_Table_Update_Status;
       To_Return : Parameters_Memory_Region_Release.T := (Region => Arg.Region, Status => Success);
    begin
-      -- First make sure that the memory region is of the expected size. If it is not then we will
-      -- reject this request.
-      if Arg.Region.Length /= Self.Bytes.all'Length then
-         Self.Event_T_Send_If_Connected (Self.Events.Memory_Region_Length_Mismatch (Self.Sys_Time_T_Get, (
-            Parameters_Region => Arg,
-            Expected_Length => Self.Bytes.all'Length)
-         ));
-         To_Return := (Region => Arg.Region, Status => Length_Error);
-      else
-         declare
-            use Byte_Array_Pointer;
-            -- Extract the parameter table header:
-            Ptr : constant Byte_Array_Pointer.Instance := Byte_Array_Pointer.Packed.Unpack (Arg.Region);
-         begin
-            -- Perform the requested operation:
-            case Arg.Operation is
-               -- The memory region contains a fresh parameter table. We need to use this parameter table to
-               -- update the parameter store.
-               when Set =>
+      -- Perform operation-specific length checks and processing:
+      case Arg.Operation is
+         -- The memory region contains a fresh parameter table. We need to use this parameter table to
+         -- update the parameter store. The region must be exactly the expected size.
+         when Set =>
+            if Arg.Region.Length /= Self.Bytes.all'Length then
+               Self.Event_T_Send_If_Connected (Self.Events.Memory_Region_Length_Mismatch (Self.Sys_Time_T_Get, (
+                  Parameters_Region => Arg,
+                  Expected_Length => Self.Bytes.all'Length)
+               ));
+               To_Return := (Region => Arg.Region, Status => Length_Error);
+            else
+               declare
+                  use Byte_Array_Pointer;
+                  use Basic_Types;
+                  Ptr : constant Byte_Array_Pointer.Instance := Byte_Array_Pointer.Packed.Unpack (Arg.Region);
                   -- First check the CRC:
-                  declare
-                     use Basic_Types;
-                     Ptr_Header : constant Byte_Array_Pointer.Instance := Slice (Ptr, Start_Index => 0, End_Index => Parameter_Table_Header.Size_In_Bytes - 1);
-                     Table_Header : constant Parameter_Table_Header.T := Parameter_Table_Header.Serialization.From_Byte_Array (To_Byte_Array (Ptr_Header));
-                     -- Compute the CRC over the incoming table:
-                     Computed_Crc : constant Crc_16.Crc_16_Type := Self.Crc_Parameter_Table (To_Byte_Array (Ptr));
-                  begin
-                     -- If the CRCs match, then update the store:
-                     if Table_Header.Crc_Table = Computed_Crc then
-                        -- Update the parameter store:
-                        Self.Bytes.all := Byte_Array_Pointer.To_Byte_Array (Ptr);
-                        -- Send info event:
-                        Self.Event_T_Send_If_Connected (Self.Events.Parameter_Table_Updated (Self.Sys_Time_T_Get, Arg.Region));
-                        -- Send out the parameters packet if necessary:
-                        if Self.Dump_Parameters_On_Change then
-                           Self.Send_Parameters_Packet;
-                        end if;
-                     else
-                        -- If the CRCs do not match then throw an event and do NOT update the downstream components'
-                        -- internal parameters:
-                        Self.Event_T_Send_If_Connected (Self.Events.Memory_Region_Crc_Invalid (Self.Sys_Time_T_Get, (
-                           Parameters_Region => Arg,
-                           Header => Table_Header,
-                           Computed_Crc => Computed_Crc)
-                        ));
-                        -- Alter the return status to reflect a CRC error.
-                        To_Return := (Region => Arg.Region, Status => Crc_Error);
+                  Ptr_Header : constant Byte_Array_Pointer.Instance := Slice (Ptr, Start_Index => 0, End_Index => Parameter_Table_Header.Size_In_Bytes - 1);
+                  Table_Header : constant Parameter_Table_Header.T := Parameter_Table_Header.Serialization.From_Byte_Array (To_Byte_Array (Ptr_Header));
+                  -- Compute the CRC over the incoming table:
+                  Computed_Crc : constant Crc_16.Crc_16_Type := Self.Crc_Parameter_Table (To_Byte_Array (Ptr));
+               begin
+                  -- If the CRCs match, then update the store:
+                  if Table_Header.Crc_Table = Computed_Crc then
+                     -- Update the parameter store:
+                     Self.Bytes.all := Byte_Array_Pointer.To_Byte_Array (Ptr);
+                     -- Send info event:
+                     Self.Event_T_Send_If_Connected (Self.Events.Parameter_Table_Updated (Self.Sys_Time_T_Get, Arg.Region));
+                     -- Send out the parameters packet if necessary:
+                     if Self.Dump_Parameters_On_Change then
+                        Self.Send_Parameters_Packet;
                      end if;
-                  end;
-                  -- The memory region needs to be filled by the current values in our parameter store:
-               when Get =>
-                  -- Copy memory:
-                  Byte_Array_Pointer.Copy_To (Ptr, Self.Bytes.all);
-                  -- Send info event:
-                  Self.Event_T_Send_If_Connected (Self.Events.Parameter_Table_Fetched (Self.Sys_Time_T_Get, Arg.Region));
-               when Validate =>
-                  -- This component does not perform component-specific validation, so table validation is unsupported:
-                  -- Throw event:
-                  Self.Event_T_Send_If_Connected (Self.Events.Table_Validation_Not_Supported (Self.Sys_Time_T_Get, Arg.Region));
-                  -- Set the return status:
-                  To_Return := (Region => Arg.Region, Status => Parameter_Error);
-            end case;
-         end;
-      end if;
+                  else
+                     -- If the CRCs do not match then throw an event and do NOT update the downstream components'
+                     -- internal parameters:
+                     Self.Event_T_Send_If_Connected (Self.Events.Memory_Region_Crc_Invalid (Self.Sys_Time_T_Get, (
+                        Parameters_Region => Arg,
+                        Header => Table_Header,
+                        Computed_Crc => Computed_Crc)
+                     ));
+                     -- Alter the return status to reflect a CRC error.
+                     To_Return := (Region => Arg.Region, Status => Crc_Error);
+                  end if;
+               end;
+            end if;
+         -- The memory region needs to be filled by the current values in our parameter store.
+         -- The provided region must be at least as large as the parameter table. If it is larger,
+         -- only the table size worth of bytes are copied and the returned region length is updated
+         -- to reflect the actual number of bytes written.
+         when Get =>
+            if Arg.Region.Length < Self.Bytes.all'Length then
+               Self.Event_T_Send_If_Connected (Self.Events.Memory_Region_Length_Mismatch (Self.Sys_Time_T_Get, (
+                  Parameters_Region => Arg,
+                  Expected_Length => Self.Bytes.all'Length)
+               ));
+               To_Return := (Region => Arg.Region, Status => Length_Error);
+            else
+               declare
+                  use Byte_Array_Pointer;
+                  Ptr : constant Byte_Array_Pointer.Instance := Byte_Array_Pointer.Packed.Unpack (Arg.Region);
+                  -- Slice the pointer to the exact size of the parameter table, in case the
+                  -- provided region is larger:
+                  Dest : constant Byte_Array_Pointer.Instance := Slice (Ptr, Start_Index => 0, End_Index => Self.Bytes.all'Length - 1);
+                  -- Build the return region with the actual number of bytes copied:
+                  Returned_Region : constant Memory_Region.T := (Address => Arg.Region.Address, Length => Self.Bytes.all'Length);
+               begin
+                  -- Copy memory into the sliced destination:
+                  Byte_Array_Pointer.Copy_To (Dest, Self.Bytes.all);
+                  -- Send info event with the adjusted region length:
+                  Self.Event_T_Send_If_Connected (Self.Events.Parameter_Table_Fetched (Self.Sys_Time_T_Get, Returned_Region));
+                  -- Return the region with the updated length:
+                  To_Return := (Region => Returned_Region, Status => Success);
+               end;
+            end if;
+         when Validate =>
+            -- This component does not perform component-specific validation, so table validation is unsupported:
+            -- Throw event:
+            Self.Event_T_Send_If_Connected (Self.Events.Table_Validation_Not_Supported (Self.Sys_Time_T_Get, Arg.Region));
+            -- Set the return status:
+            To_Return := (Region => Arg.Region, Status => Parameter_Error);
+      end case;
 
       -- Return the memory pointer with the status for deallocation.
       Self.Parameters_Memory_Region_Release_T_Send_If_Connected (To_Return);

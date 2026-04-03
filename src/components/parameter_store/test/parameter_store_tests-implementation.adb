@@ -328,13 +328,13 @@ package body Parameter_Store_Tests.Implementation is
       T : Component.Parameter_Store.Implementation.Tester.Instance_Access renames Self.Tester;
       -- Create a memory region that holds the parameter table data.
       Table : aliased Basic_Types.Byte_Array := [0 .. 99 => 17];
-      Region : Memory_Region.T := (Address => Table'Address, Length => Table'Length - 1);
+      Region : constant Memory_Region.T := (Address => Table'Address, Length => Table'Length - 1);
       Before_Bytes : Basic_Types.Byte_Array (0 .. 99);
    begin
       -- Save the current memory region so we can make sure it doesn't get changed:
       Before_Bytes := Bytes;
 
-      -- Send the memory region to the component:
+      -- Send the memory region to the component with a region that is too small:
       T.Parameters_Memory_Region_T_Send ((Region => Region, Operation => Get));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
@@ -352,29 +352,48 @@ package body Parameter_Store_Tests.Implementation is
       -- Make sure the memory location was released with the proper status:
       Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 1);
       Parameters_Memory_Region_Release_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get (1), (Region, Length_Error));
+   end Test_Table_Fetch_Length_Error;
 
-      -- Change region to be too big:
-      Region := (Address => Table'Address, Length => Table'Length + 1);
+   overriding procedure Test_Table_Fetch_Oversized_Region (Self : in out Instance) is
+      use Parameter_Enums.Parameter_Table_Update_Status;
+      use Parameter_Enums.Parameter_Table_Operation_Type;
+      T : Component.Parameter_Store.Implementation.Tester.Instance_Access renames Self.Tester;
+      -- Create a memory region that is LARGER than the parameter table.
+      Memory : aliased Basic_Types.Byte_Array (0 .. 149) := [others => 55];
+      Region : constant Memory_Region.T := (Address => Memory'Address, Length => Memory'Length);
+      -- The expected returned region should have the length of the actual table, not the oversized region.
+      Expected_Returned_Region : constant Memory_Region.T := (Address => Memory'Address, Length => Bytes'Length);
+   begin
+      -- Set up Bytes with known data so we can verify the copy:
+      Bytes := [others => 17];
+      Bytes (Bytes'First .. Bytes'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => [0, 0], Version => 1.0));
 
-      -- Send the memory region to the component:
+      -- Send the oversized memory region to the component with a Get request:
       T.Parameters_Memory_Region_T_Send ((Region => Region, Operation => Get));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
-      -- Check events:
-      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
-      Natural_Assert.Eq (T.Memory_Region_Length_Mismatch_History.Get_Count, 2);
-      Invalid_Parameters_Memory_Region_Length_Assert.Eq (T.Memory_Region_Length_Mismatch_History.Get (2), (Parameters_Region => (Region => (Address => Table'Address, Length => Table'Length + 1), Operation => Get), Expected_Length => Bytes'Length));
+      -- Check events, should succeed, not a length mismatch:
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Parameter_Table_Fetched_History.Get_Count, 1);
+      -- The event should report the adjusted (actual table) length, not the original oversized length:
+      Memory_Region_Assert.Eq (T.Parameter_Table_Fetched_History.Get (1), Expected_Returned_Region);
+
+      -- No length mismatch events should have been thrown:
+      Natural_Assert.Eq (T.Memory_Region_Length_Mismatch_History.Get_Count, 0);
 
       -- A packet should not have been automatically dumped.
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
 
-      -- Check component's internal memory contents:
-      Byte_Array_Assert.Eq (Bytes, Before_Bytes);
+      -- Make sure the memory location was released with the proper status and the adjusted length:
+      Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 1);
+      Parameters_Memory_Region_Release_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get (1), (Expected_Returned_Region, Success));
 
-      -- Make sure the memory location was released with the proper status:
-      Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 2);
-      Parameters_Memory_Region_Release_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get (2), (Region, Length_Error));
-   end Test_Table_Fetch_Length_Error;
+      -- Check that the first Bytes'Length bytes of the memory region were correctly filled:
+      Byte_Array_Assert.Eq (Memory (0 .. Bytes'Length - 1), Bytes);
+
+      -- Check that the remaining bytes beyond the table size were NOT modified (still 55):
+      Byte_Array_Assert.Eq (Memory (Bytes'Length .. Memory'Last), [Bytes'Length .. 149 => 55]);
+   end Test_Table_Fetch_Oversized_Region;
 
    overriding procedure Test_No_Dump_On_Change (Self : in out Instance) is
       use Parameter_Enums.Parameter_Table_Update_Status;

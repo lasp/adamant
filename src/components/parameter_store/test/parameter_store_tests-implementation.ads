@@ -23,8 +23,10 @@ private
    overriding procedure Test_Table_Upload_Crc_Error (Self : in out Instance);
    -- This unit test tests the behavior when validation of the parameter table by memory region upload fails.
    overriding procedure Test_Table_Validate_Unimplemented (Self : in out Instance);
-   -- This unit test tests the behavior when fetching the parameter table with a memory region of invalid length.
+   -- This unit test tests the behavior when fetching the parameter table with a memory region that is too small.
    overriding procedure Test_Table_Fetch_Length_Error (Self : in out Instance);
+   -- This unit test tests that fetching the parameter table with an oversized memory region succeeds, copies only the table bytes, and returns the adjusted region length.
+   overriding procedure Test_Table_Fetch_Oversized_Region (Self : in out Instance);
    -- This unit test tests the no-dump-on-change configuration for the Init function and makes sure the component behaves as expected.
    overriding procedure Test_No_Dump_On_Change (Self : in out Instance);
    -- This unit test tests a command or memory region being dropped due to a full queue.

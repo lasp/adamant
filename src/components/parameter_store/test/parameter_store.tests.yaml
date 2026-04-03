@@ -14,7 +14,9 @@ tests:
   - name: Test_Table_Validate_Unimplemented
     description: This unit test tests the behavior when unimplemented validation of the parameter table by memory region upload is requested.
   - name: Test_Table_Fetch_Length_Error
-    description: This unit test tests the behavior when fetching the parameter table with a memory region of invalid length.
+    description: This unit test tests the behavior when fetching the parameter table with a memory region that is too small.
+  - name: Test_Table_Fetch_Oversized_Region
+    description: This unit test tests that fetching the parameter table with an oversized memory region succeeds, copies only the table bytes, and returns the adjusted region length.
   - name: Test_No_Dump_On_Change
     description: This unit test tests the no-dump-on-change configuration for the Init function and makes sure the component behaves as expected.
   - name: Test_Full_Queue
