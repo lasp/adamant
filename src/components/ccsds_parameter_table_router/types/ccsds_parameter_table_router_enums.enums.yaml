@@ -1,0 +1,27 @@
+---
+description: Enumerations for the Parameter Table Router component.
+enums:
+  - name: Table_Status
+    description: Status of the most recent parameter table operation.
+    literals:
+      - name: Receiving_Table
+        value: 0
+        description: A FirstSegment has been received and the buffer is accumulating data.
+      - name: Table_Update_Success
+        value: 1
+        description: The table was successfully distributed to all destinations.
+      - name: Table_Update_Failed
+        value: 2
+        description: A downstream component rejected the table or timed out.
+      - name: Unrecognized_Id
+        value: 3
+        description: The completed table had a Table ID not found in the routing table.
+      - name: Buffer_Overflow
+        value: 4
+        description: The staging buffer overflowed while receiving table data.
+      - name: Too_Small
+        value: 5
+        description: A FirstSegment was too small to contain a Table ID.
+      - name: Packet_Ignored
+        value: 6
+        description: A packet was ignored (continuation/last without first, or unsegmented).

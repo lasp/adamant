@@ -1,0 +1,11 @@
+---
+description: A simple component which receives parameter memory regions from the router.
+execution: passive
+connectors:
+  - description: Receives parameter memory regions from the router.
+    type: Parameters_Memory_Region.T
+    kind: recv_sync
+  - description: Receives parameter memory regions from the router on a second connector.
+    type: Parameters_Memory_Region.T
+    name: Parameters_Memory_Region_T_Recv_Sync_2
+    kind: recv_sync

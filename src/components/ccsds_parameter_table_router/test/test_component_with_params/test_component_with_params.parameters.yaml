@@ -1,0 +1,11 @@
+---
+description: Parameters for the test component.
+parameters:
+  - name: Parameter_U16
+    type: Packed_U16.T
+    default: "(Value => 15)"
+    description: This is the 16 bit parameter.
+  - name: Parameter_I32
+    type: Packed_I32.T
+    default: "(Value => -56)"
+    description: This is the 32 bit parameter.

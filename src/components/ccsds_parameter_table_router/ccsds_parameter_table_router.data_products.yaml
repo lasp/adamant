@@ -1,0 +1,18 @@
+---
+description: Data products for the Parameter Table Router component.
+data_products:
+  - name: Num_Packets_Received
+    type: Packed_U32.T
+    description: Total number of CCSDS packets received on the async connector.
+  - name: Num_Packets_Rejected
+    type: Packed_U32.T
+    description: Number of packets rejected (ignored, too small, or buffer overflow).
+  - name: Num_Tables_Updated
+    type: Packed_U32.T
+    description: Number of parameter tables successfully distributed to all destinations.
+  - name: Num_Tables_Invalid
+    type: Packed_U32.T
+    description: Number of parameter tables that failed distribution, had unrecognized IDs, or timed out.
+  - name: Last_Table_Received
+    type: Parameter_Table_Received_Info.T
+    description: Information about the last complete parameter table received.

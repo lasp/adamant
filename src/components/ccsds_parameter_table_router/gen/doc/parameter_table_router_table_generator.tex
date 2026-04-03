@@ -1,0 +1,38 @@
+\input{common_packages.tex}
+
+\begin{document}
+
+\title{\textbf{Parameter Table Router Table Generator} \\
+\large\textit{Generator User Guide}}
+\date{}
+\maketitle
+
+\section{Description}
+
+The purpose of this generator is to provide a user friendly way of creating a static parameter table routing table for use within a Parameter Table Router component. The generator takes a YAML model file as input which specifies which destination component(s) each parameter table, identified by table ID, should be routed to. A parameter table of a single table ID can be routed to one or many destination components. Each destination can optionally be marked with a \texttt{load\_from} flag indicating that this destination is the source for loading parameter tables on command (e.g. a Parameter Store component sitting in front of persistent storage). At most one destination per table entry may be marked as \texttt{load\_from}. From this information, the generator produces an Ada specification file which contains a data structure that should be passed to the Parameter Table Router component upon initialization.
+
+The \texttt{table\_id} field in each table entry can be specified as either a raw numeric integer or as a string referencing a parameter table model name. String names are resolved to their auto-assigned numeric IDs by looking up \texttt{parameter\_table} submodels in the assembly.
+
+Note the example shown in this documentation is used in the unit test of this component so that the reader of this document can see it being used in context. Please refer to the unit test code for more details on how this generator can be used.
+
+\section{Schema}
+
+The following pykwalify schema is used to validate the input YAML model. Model files must be named in the form \textit{optional\_name.assembly\_name.parameter\_table\_router\_table.yaml} where \textit{optional\_name} is the specific name of this routing table and is only necessary if there is more than one Parameter Table Router component instance in an assembly. The \textit{assembly\_name} is the assembly which this routing table will be used in, and the rest of the model file name must remain as shown. Generally this file is created in the same directory or near to the assembly model file. The schema is commented to show what each of the available YAML keys are and what they accomplish. Even without knowing the specifics of pykwalify schemas, you should be able to glean some knowledge from the file below.
+
+\yamlcodef{../schemas/parameter_table_router_table.yaml}
+
+\section{Example Input}
+
+The following is an example routing table input YAML file. Model files must be named in the form \textit{optional\_name.assembly\_name.parameter\_table\_router\_table.yaml} where \textit{optional\_name} is the specific name of this routing table and is only necessary if there is more than one Parameter Table Router component instance in an assembly. The \textit{assembly\_name} is the assembly which this routing table will be used in, and the rest of the model file name must remain as shown. Generally this file is created in the same directory or near to the assembly model file. This example adheres to the schema shown in the previous section, and is commented to give clarification.
+
+\yamlcodef{../../test/test_assembly/test_assembly.parameter_table_router_table.yaml}
+
+\section{Example Output}
+
+The example input shown in the previous section produces the following Ada output. The \texttt{Router\_Table\_Entries} variable should be passed into the Parameter Table Router component's \texttt{Init} function during assembly initialization.
+
+The main job of the generator in this case is to verify the input YAML routing table for validity, resolve any parameter table model names to their numeric IDs, translate component names into connector output indexes, and annotate each destination with its \texttt{Load\_From} flag. The Parameter Table Router then uses these indexes and flags directly.
+
+\adacodef{../../test/test_assembly/build/src/test_assembly_parameter_table_router_table.ads}
+
+\end{document}

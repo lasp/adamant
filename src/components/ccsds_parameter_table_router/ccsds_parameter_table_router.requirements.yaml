@@ -1,0 +1,12 @@
+---
+description: The requirements for the CCSDS Parameter Table Router component are specified below.
+requirements:
+  - text: The component shall receive segmented CCSDS packets, reassemble them in an internal staging buffer, and extract the parameter table ID from the first two bytes of the first segment.
+  - text: The component shall route completed parameter tables to one or more downstream destinations based on a routing table provided during initialization.
+  - text: During table distribution, the component shall send to non-load_from destinations first, followed by the load_from destination last, to avoid persisting an invalid table.
+  - text: If any downstream destination fails or times out during table distribution, the component shall abandon remaining destinations and report the failure via event.
+  - text: The component shall include a command to load a single parameter table from its load_from source and distribute it to all other destinations.
+  - text: The component shall include a command to load all parameter tables that have a load_from source configured.
+  - text: The component shall be configurable to automatically load all parameter tables from persistent storage during Set_Up.
+  - text: The component shall use a configurable tick-based timeout when waiting for responses from downstream components.
+  - text: The component shall report packet reception counts, rejection counts, table update counts, and last table received information as data products.
