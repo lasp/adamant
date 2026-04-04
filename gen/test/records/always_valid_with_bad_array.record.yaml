@@ -1,0 +1,10 @@
+---
+description: A packed record containing a bit-constrained packed array. Always_Valid should be False.
+fields:
+  - name: Count
+    description: Full-width U16
+    type: Interfaces.Unsigned_16
+    format: U16
+  - name: Data
+    description: Nested bit-constrained packed array
+    type: Simple_Array.T

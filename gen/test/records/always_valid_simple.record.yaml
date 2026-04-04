@@ -1,0 +1,15 @@
+---
+description: A packed record with all full-width unsigned fields. Always_Valid should be True.
+fields:
+  - name: A
+    description: Full-width U8
+    type: Interfaces.Unsigned_8
+    format: U8
+  - name: B
+    description: Full-width U16
+    type: Interfaces.Unsigned_16
+    format: U16
+  - name: C
+    description: Full-width U32
+    type: Interfaces.Unsigned_32
+    format: U32

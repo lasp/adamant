@@ -1,0 +1,12 @@
+---
+description: A packed record with a mix of always-valid nested record and bit-constrained scalar. Always_Valid should be False.
+preamble: |
+  subtype Small_Int is Natural range 0 .. 100;
+fields:
+  - name: Good
+    description: Nested always-valid record
+    type: Always_Valid_Simple.T
+  - name: Bad
+    description: Bit-constrained scalar
+    type: Small_Int
+    format: U8

@@ -1,0 +1,10 @@
+---
+description: A packed record nesting an always-valid record. Always_Valid should be True.
+fields:
+  - name: First
+    description: Full-width U8
+    type: Interfaces.Unsigned_8
+    format: U8
+  - name: Second
+    description: Nested always-valid record
+    type: Always_Valid_Simple.T

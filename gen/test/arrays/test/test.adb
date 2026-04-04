@@ -1,4 +1,6 @@
 with Ada.Text_IO; use Ada.Text_IO;
+with Always_Valid_Array;
+with Always_Valid_Record_Array;
 with Simple_Array.Representation;
 with Complex_Array.Representation;
 with Complex_Array_Le.Representation;
@@ -76,6 +78,31 @@ procedure Test is
    Ignore : Unsigned_32;
    Field_Number : Unsigned_32;
 begin
+   -- Always_Valid compile-time checks for arrays:
+   pragma Compile_Time_Error (not Always_Valid_Array.Always_Valid, "Expected Always_Valid = True for full-width scalar array");
+   pragma Compile_Time_Error (not Always_Valid_Record_Array.Always_Valid, "Expected Always_Valid = True for array of always-valid records");
+   -- Note: Eight_Bit_Type_Array uses an arrayed primitive element (U8x8), so
+   -- Always_Valid conservatively evaluates to False (cannot introspect component type).
+   pragma Compile_Time_Error (Eight_Bit_Type_Array.Always_Valid /= False, "Expected Always_Valid = False for arrayed primitive element");
+   pragma Compile_Time_Error (Simple_Array.Always_Valid /= False, "Expected Always_Valid = False for bit-constrained scalar array");
+   pragma Compile_Time_Error (Complex_Array.Always_Valid /= False, "Expected Always_Valid = False for array of bit-constrained records");
+   pragma Compile_Time_Error (Complex_Array_Le.Always_Valid /= False, "Expected Always_Valid = False for LE array of bit-constrained records");
+   pragma Compile_Time_Error (Float_Array.Always_Valid /= False, "Expected Always_Valid = False for float array");
+   pragma Compile_Time_Error (Enum_Array.Always_Valid /= False, "Expected Always_Valid = False for enum array");
+
+   -- Always_Valid runtime assertions for arrays:
+   Put_Line ("Testing Always_Valid compile-time constant for arrays:");
+   pragma Assert (Always_Valid_Array.Always_Valid);
+   pragma Assert (Always_Valid_Record_Array.Always_Valid);
+   pragma Assert (Eight_Bit_Type_Array.Always_Valid = False);
+   pragma Assert (Simple_Array.Always_Valid = False);
+   pragma Assert (Complex_Array.Always_Valid = False);
+   pragma Assert (Complex_Array_Le.Always_Valid = False);
+   pragma Assert (Float_Array.Always_Valid = False);
+   pragma Assert (Enum_Array.Always_Valid = False);
+   Put_Line ("passed.");
+   Put_Line ("");
+
    Put_Line ("Printing arrays: ");
    Put_Line ("Simple: ");
    Put_Line (Simple_Array.Representation.Image (Simple));

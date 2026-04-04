@@ -1,0 +1,10 @@
+---
+description: A packed record containing an always-valid packed array. Always_Valid should be True.
+fields:
+  - name: Count
+    description: Full-width U16
+    type: Interfaces.Unsigned_16
+    format: U16
+  - name: Data
+    description: Nested always-valid packed array
+    type: Always_Valid_Array.T

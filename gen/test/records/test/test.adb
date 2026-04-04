@@ -1,4 +1,11 @@
 with Ada.Text_IO; use Ada.Text_IO;
+with Always_Valid_Simple;
+with Always_Valid_Nested;
+with Always_Valid_Mixed;
+with Always_Valid_Signed;
+with Always_Valid_With_Array;
+with Always_Valid_With_Bad_Array;
+with Always_Valid_Register;
 with Aa.Representation;
 with Aa.Validation;
 with Aa.Assertion; use Aa.Assertion;
@@ -141,6 +148,39 @@ procedure Test is
    V_Size_Filled : Natural;
 begin
    Rh := (Aa.Register_T_Le (A), Aa.Register_T_Le (A));
+
+   -- Always_Valid compile-time checks:
+   pragma Compile_Time_Error (not Always_Valid_Simple.Always_Valid, "Expected Always_Valid = True for full-width record");
+   pragma Compile_Time_Error (not Always_Valid_Nested.Always_Valid, "Expected Always_Valid = True for nested always-valid record");
+   pragma Compile_Time_Error (not Always_Valid_Signed.Always_Valid, "Expected Always_Valid = True for full-width signed record");
+   pragma Compile_Time_Error (not Always_Valid_With_Array.Always_Valid, "Expected Always_Valid = True for record with always-valid array");
+   pragma Compile_Time_Error (not Always_Valid_Register.Always_Valid, "Expected Always_Valid = True for 32-bit register-sized record");
+   pragma Compile_Time_Error (Aa.Always_Valid /= False, "Expected Always_Valid = False for bit-constrained record");
+   pragma Compile_Time_Error (Bb.Always_Valid /= False, "Expected Always_Valid = False for record with Natural/U32");
+   pragma Compile_Time_Error (Cc.Always_Valid /= False, "Expected Always_Valid = False for record nesting bit-constrained records");
+   pragma Compile_Time_Error (Ee.Always_Valid /= False, "Expected Always_Valid = False for LE record nesting bit-constrained records");
+   pragma Compile_Time_Error (Ff.Always_Valid /= False, "Expected Always_Valid = False for record with floats");
+   pragma Compile_Time_Error (Gg.Always_Valid /= False, "Expected Always_Valid = False for record nesting float record");
+   pragma Compile_Time_Error (Always_Valid_Mixed.Always_Valid /= False, "Expected Always_Valid = False for mixed valid/invalid record");
+   pragma Compile_Time_Error (Always_Valid_With_Bad_Array.Always_Valid /= False, "Expected Always_Valid = False for record with bit-constrained array");
+
+   -- Always_Valid runtime assertions:
+   Put_Line ("Testing Always_Valid compile-time constant for records:");
+   pragma Assert (Always_Valid_Simple.Always_Valid);
+   pragma Assert (Always_Valid_Nested.Always_Valid);
+   pragma Assert (Always_Valid_Signed.Always_Valid);
+   pragma Assert (Always_Valid_With_Array.Always_Valid);
+   pragma Assert (Always_Valid_Register.Always_Valid);
+   pragma Assert (Aa.Always_Valid = False);
+   pragma Assert (Bb.Always_Valid = False);
+   pragma Assert (Cc.Always_Valid = False);
+   pragma Assert (Ee.Always_Valid = False);
+   pragma Assert (Ff.Always_Valid = False);
+   pragma Assert (Gg.Always_Valid = False);
+   pragma Assert (Always_Valid_Mixed.Always_Valid = False);
+   pragma Assert (Always_Valid_With_Bad_Array.Always_Valid = False);
+   Put_Line ("passed.");
+   Put_Line ("");
 
    Put_Line ("Printing records: ");
    Put_Line ("A:");
