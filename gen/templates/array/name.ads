@@ -83,6 +83,28 @@ package {{ name }} is
    Size : constant Positive := Element_Size * Length;
    Size_In_Bytes : constant Positive := (Size - 1) / 8 + 1;
 
+   -- Compile-time constant which is True if every scalar field uses the full bit
+   -- width of its storage, meaning no bit pattern can produce a Constraint_Error.
+   -- If set to True, it is safe to use the type without validating via the
+   -- Validation package first.
+   Always_Valid : constant Boolean :=
+{% if element.skip_validation %}
+      -- skip_validation declared, assumed always valid by user decree
+      True;
+{% elif element.is_packed_type %}
+      -- Element delegates to nested packed type {{ element.type_package }}
+      {{ element.type_package }}.Always_Valid;
+{% elif element.has_float %}
+      -- Float types cannot be validated statically (NaN, Inf, denormals)
+      False;
+{% elif element.format.length %}
+      -- Arrayed primitive element, component type cannot be introspected statically
+      False;
+{% else %}
+      -- {{ element.type }} in {{ element.size }} bits
+      ({{ element.type }}'Pos ({{ element.type }}'Last) - {{ element.type }}'Pos ({{ element.type }}'First) = 2 ** {{ element.size }} - 1);
+{% endif %}
+
    -- Array index type:
    subtype Unconstrained_Index_Type is Natural;
    subtype Constrained_Index_Type is Unconstrained_Index_Type range 0 .. Length - 1;
