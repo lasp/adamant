@@ -1,0 +1,7 @@
+---
+description: A register map with a bit-constrained type. This should fail to compile due to the Always_Valid check.
+items:
+  - address: 0x4000_0000
+    name: Bad_Register
+    description: A register with bit-constrained fields (One_Type is 0..19 in 8 bits).
+    type: Aa.Register_T_Le

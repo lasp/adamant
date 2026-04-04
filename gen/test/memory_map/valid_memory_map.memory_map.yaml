@@ -1,0 +1,11 @@
+---
+description: A memory map with only always-valid types. This should compile without error.
+start_address: 0x1000000
+length: 1024
+items:
+  - name: Full_Width_Record
+    description: A record with all full-width unsigned fields.
+    type: Always_Valid_Simple.T
+  - name: Full_Width_Nested
+    description: A record that nests an always-valid record.
+    type: Always_Valid_Nested.T
