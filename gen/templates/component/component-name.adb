@@ -901,13 +901,15 @@ package body Component.{{ name }} is
 {% if command.type_model %}
             Errant_Field : Unsigned_32 := 0;
             pragma Annotate (GNATSAS, Intentional, "unused assignment", "Sometimes the type can never be invalid, and in that case Errant_Field will never be needed.");
-            Args_Valid : constant Boolean := {{ command.type_package }}.Validation.Valid (Args, Errant_Field);
+            Args_Valid : constant Boolean := {{ command.type_package }}.Always_Valid
+               or else {{ command.type_package }}.Validation.Valid (Args, Errant_Field);
 {% else %}
             Errant_Field : constant Unsigned_32 := 0;
             Args_Valid : constant Boolean := Args'Valid;
 {% endif %}
          begin
             -- Make sure the deserialized argument values are valid.
+            pragma Warnings (Off, "this code can never be executed and has been deleted");
             if Args_Valid then
                -- Call up to the derived class for execution.
                declare
@@ -939,6 +941,7 @@ package body Component.{{ name }} is
                   return Command_Response_Status.Validation_Error;
                end;
             end if;
+            pragma Warnings (On, "this code can never be executed and has been deleted");
          end;
       else
 {% else %}
@@ -1092,13 +1095,15 @@ package body Component.{{ name }} is
 {% if par.type_model %}
             Errant_Field : Unsigned_32 := 0;
             pragma Annotate (GNATSAS, Intentional, "unused assignment", "Sometimes the type can never be invalid, and in that case Errant_Field will never be needed.");
-            Args_Valid : constant Boolean := {{ par.type_package }}.Validation.Valid (Par_To_Stage, Errant_Field);
+            Args_Valid : constant Boolean := {{ par.type_package }}.Always_Valid
+               or else {{ par.type_package }}.Validation.Valid (Par_To_Stage, Errant_Field);
 {% else %}
             Errant_Field : constant Unsigned_32 := 0;
             Args_Valid : constant Boolean := Par_To_Stage'Valid;
 {% endif %}
          begin
             -- Make sure the deserialized parameter values are valid.
+            pragma Warnings (Off, "this code can never be executed and has been deleted");
             if Args_Valid then
                -- Stage the parameter:
 {% if par.type_package %}
@@ -1125,6 +1130,7 @@ package body Component.{{ name }} is
                   return Parameter_Update_Status.Validation_Error;
                end;
             end if;
+            pragma Warnings (On, "this code can never be executed and has been deleted");
          end;
       else
          Self.Handle_Parameter_Length_Error (Par);
