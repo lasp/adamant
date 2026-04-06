@@ -6652,15 +6652,15 @@ redo build/tex/system_registers.tex
 \end{minted}
 \vspace{5mm} %5mm vertical space
 
-To create the generated Ada package we can run \texttt{redo build/src/system\_registers.ads} which produces the output.
+To create the generated Ada package we can run \texttt{build/obj/Linux/system_registers.o} which produces the output.
 
 \vspace{5mm} %5mm vertical space
 \inputminted{text}{../example_architecture/register_map/output.txt}
 \vspace{5mm} %5mm vertical space
 
-This is not the normal output we expect to see when generating an Ada package. However, the register map produced is special in that it is written mostly in SPARK, the formally provable subset of Ada. \texttt{GNATprove} is then automatically run to statically check the output, which is shown above. \\
+This is not the normal output we expect to see when generating an Ada package. Enforcement for bit-constrained safety is done with deterministic compile-time checks in the generated Ada itself. Specifically, each map item is guarded with \texttt{Compile\_Time\_Error (not <Type>.Always\_Valid, ...)} so unsafe types are rejected during normal compilation. \\
 
-The primary reason for this is that SPARK disallows the definition of bit-constrained types with address clauses. A bit-constrained type is a type that for some bit value can become invalid, causing a \texttt{Constraint\_Error} to be thrown at runtime. While bit-constrained types are useful for catching bugs in most Ada code, they can be troublesome when interfacing with volatile hardware interfaces, where the compiler is not in control of what might be written to these types. In such cases, a hardware interface may write an invalid bit value to a type within a register map. When this type is later read by the Ada program, a \texttt{Constraint\_Error} will be thrown. To prevent this, Adamant does not allow bit-constrained types to be defined in register maps. To enforce this it uses the SPARK programming language. If bit-constrained types are used in the register map than an error will produced and the specification will not be generated. \\
+A bit-constrained type is a type that for some bit value can become invalid, causing a \texttt{Constraint\_Error} to be thrown at runtime. While bit-constrained types are useful for catching bugs in most Ada code, they can be troublesome when interfacing with volatile hardware interfaces, where the compiler is not in control of what might be written to these types. In such cases, a hardware interface may write an invalid bit value to a type within a register map. When this type is later read by the Ada program, a \texttt{Constraint\_Error} will be thrown. Here we trigger on a \texttt{Packed\_Natural} type which contains a Natural, whose range is $0$ to $2^{31} - 1$, stored inside a 32-bit value. Due to this, we can not safely read a Natural from the register map without fear of reading something out of range that could trigger a \texttt{Constraint_Error}, i.e. \texttt{0xFFFF_FFFF}. To prevent this, Adamant does not allow such types in register maps. If a bit-constrained type is used, compilation fails with a clear compile-time error and the specification is rejected. \\
 
 The generated specification files is shown below: \\
 
@@ -6722,15 +6722,15 @@ redo build/tex/nonvolatile_store.tex
 \end{minted}
 \vspace{5mm} %5mm vertical space
 
-To create the generated Ada package we can run \texttt{redo build/src/nonvolatile\_store.ads} which produces the output.
+To create the generated Ada package we can run \texttt{redo build/obj/Linux/nonvolatile_store.o} which produces the output.
 
 \vspace{5mm} %5mm vertical space
 \inputminted{text}{../example_architecture/memory_map/output.txt}
 \vspace{5mm} %5mm vertical space
 
-This is not the normal output we expect to see when generating an Ada package. However, the memory map produced is special in that it is written mostly in SPARK, the formally provable subset of Ada. \texttt{GNATprove} is then automatically run to statically check the output, which is shown above. \\
+This is not the normal output we expect to see when generating an Ada package. Enforcement for bit-constrained safety is done with deterministic compile-time checks in the generated Ada itself. Specifically, each map item is guarded with \texttt{Compile\_Time\_Error (not <Type>.Always\_Valid, ...)} so unsafe types are rejected during normal compilation. \\
 
-The primary reason for this is that SPARK disallows the definition of bit-constrained types with address clauses. A bit-constrained type is a type that for some bit value can become invalid, causing a \texttt{Constraint\_Error} to be thrown at runtime. While bit-constrained types are useful for catching bugs in most Ada code, they can be troublesome when interfacing with volatile hardware interfaces, where the compiler is not in control of what might be written to these types. In such cases, a hardware interface may write an invalid bit value to a type within a memory map. When this type is later read by the Ada program, a \texttt{Constraint\_Error} will be thrown. To prevent this, Adamant does not allow bit-constrained types to be defined in memory maps. To enforce this it uses the SPARK programming language. If bit-constrained types are used in the register map than an error will produced and the specification will not be generated. \\
+A bit-constrained type is a type that for some bit value can become invalid, causing a \texttt{Constraint\_Error} to be thrown at runtime. While bit-constrained types are useful for catching bugs in most Ada code, they can be troublesome when interfacing with volatile hardware interfaces, where the compiler is not in control of what might be written to these types. In such cases, a hardware interface may write an invalid bit value to a type within a memory map. When this type is later read by the Ada program, a \texttt{Constraint\_Error} will be thrown. Here we trigger on a \texttt{Packed\_Natural} type which contains a Natural, whose range is $0$ to $2^{31} - 1$, stored inside a 32-bit value. Due to this, we can not safely read a Natural from the memory map without fear of reading something out of range that could trigger a \texttt{Constraint_Error}, i.e. \texttt{0xFFFF_FFFF}. To prevent this, Adamant does not allow such types in memory maps. If a bit-constrained type is used, compilation fails with a clear compile-time error and the specification is rejected. \\
 
 The generated specification files is shown below: \\
 
