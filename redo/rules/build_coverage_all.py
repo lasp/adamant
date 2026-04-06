@@ -49,14 +49,17 @@ class build_coverage_all(build_rule_base):
 
         # Find all build directories below this directory:
         tests = []
+        skip_coverage_tests = set()
         for root, dirnames, files in filesystem.recurse_through_repo(directory):
             if os.sep + "alire" + os.sep in root:
                 pass
             elif "test.do" in files or "test.adb" in files or "test.adb.do" in files:
-                if ".skip_test" in files or ".skip_coverage" in files:
+                if ".skip_test" in files:
                     sys.stderr.write("Skipping " + root + "\n")
                 else:
                     tests.append(root)
+                    if ".skip_coverage" in files:
+                        skip_coverage_tests.add(root)
 
         if not tests:
             sys.stderr.write("No tests found in or below '" + directory + "'.\n")
@@ -107,7 +110,14 @@ class build_coverage_all(build_rule_base):
             database.setup.reset()
             try:
                 coverage_log = os.path.join(log_dir, rel_test.replace(os.sep, "_") + ".log")
-                redo.redo([os.path.join(test, "coverage"), "1>&2", "2>" + coverage_log])
+                # If the test directory only has test.do (no test.adb), coverage is not
+                # possible (no test.elf for gcov). Fall back to running the test only.
+                # Also fall back to test-only if .skip_coverage is present.
+                has_ada_test = os.path.exists(os.path.join(test, "test.adb")) or os.path.exists(os.path.join(test, "test.adb.do"))
+                if has_ada_test and test not in skip_coverage_tests:
+                    redo.redo([os.path.join(test, "coverage"), "1>&2", "2>" + coverage_log])
+                else:
+                    redo.redo([os.path.join(test, "test"), "1>&2", "2>" + coverage_log])
                 self._write_to_both(" " + PASSED + "\n")
             except BaseException:
                 exit_code = 1
