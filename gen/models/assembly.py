@@ -567,7 +567,7 @@ class assembly(subassembly):
         self.data_products_by_name = {}  # map of data_product id to data product model
         self.data_dependencies = (
             {}
-        )  # map of data_dependency id to data dependency model
+        )  # map of data_dependency id to list of data dependency models
         self.commands = {}  # map of command id to command model
         self.packets = {}  # map of packet id to packet model
         self.faults = {}  # map of fault id to fault model
@@ -1208,9 +1208,18 @@ class assembly(subassembly):
         # For each data dependency suite, resolve the ids.
         for suite in self.data_dependency_suites:
             suite.resolve_data_dependency_ids(self.data_products_by_name)
-            # Add to self.data_dependencies dictionary for convenience:
+            # Add to self.data_dependencies dictionary for convenience.
+            # Multiple components can depend on the same data product, so
+            # the value is a list of data dependencies per data product id:
             for dd in suite:
-                self.data_dependencies[dd.id] = dd
+                if dd.id not in self.data_dependencies:
+                    self.data_dependencies[dd.id] = [dd]
+                else:
+                    self.data_dependencies[dd.id].append(dd)
+
+        # Store total count for templates (dict length gives unique data product count,
+        # not total data dependency count):
+        self.num_data_dependencies = sum(len(dd_list) for dd_list in self.data_dependencies.values())
 
         # Call the final function:
         self.final()

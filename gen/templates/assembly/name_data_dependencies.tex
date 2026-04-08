@@ -6,7 +6,8 @@ The table below shows the data dependencies for the \VAR{prettyname|e} assembly.
 \begin{xltabular}{\textwidth}{ | X | r | X | c | X | }
   \hline
   \textbf{Data Dependency Name} & \textbf{Data Product ID} & \textbf{Data Product Name} & \vtop{\hbox{\strut \textbf{Stale}}\hbox{\strut \textbf{Limit (us)}}} & \textbf{Type} \\ \hline
-%- for id, dd in data_dependencies.items()
+%- for id, dd_list in data_dependencies.items()
+%- for dd in dd_list
   \texttt{\url{\VAR{dd.suite.component.instance_name}.\VAR{dd.name}}} &
   \texttt{0x\VAR{"%04x" % id } (\VAR{ dd.id })} &
   \texttt{\url{\VAR{dd.data_product.suite.component.instance_name}.\VAR{dd.data_product.name}}} &
@@ -14,18 +15,21 @@ The table below shows the data dependencies for the \VAR{prettyname|e} assembly.
   \texttt{\url{\VAR{dd.type}}}
   \\ \hline
 %- endfor
+%- endfor
 \end{xltabular}}
 \vspace{5mm} %5mm vertical space
 
 Data Dependency Descriptions:
 \begin{spaceditemize}
-%- for id, dd in data_dependencies.items()
+%- for id, dd_list in data_dependencies.items()
+%- for dd in dd_list
   \item \textbf{\texttt{\url{\VAR{dd.suite.component.instance_name}.\VAR{dd.name}}}} -
 %- if dd.description
     \VAR{dd.description|e}
 %- else
     \textit{No description provided.}
 %- endif
+%- endfor
 %- endfor
 \end{spaceditemize}
 \vspace{5mm} %5mm vertical space
