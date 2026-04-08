@@ -99,7 +99,7 @@ def check_connector_types(filter_obj, assm):
 
 def get_data_dependency_types(assm):
     # Extract the type information from data dependency items and return it as a list
-    return [dd.type for id, dd in assm.data_dependencies.items()]
+    return [dd.type for id, dd_list in assm.data_dependencies.items() for dd in dd_list]
 
 
 def check_data_dependency_types(filter_obj, assm):
@@ -117,8 +117,8 @@ def check_data_dependency_types(filter_obj, assm):
 
 def get_data_dependency_names(assm):
     # Return the names of both data_dependency and data_product pseudo-connectors
-    names = [dd.suite.component.instance_name + "." + dd.name for id, dd in assm.data_dependencies.items()]
-    return names + [dd.data_product.suite.component.instance_name + "." + dd.data_product.name for id, dd in assm.data_dependencies.items()]
+    names = [dd.suite.component.instance_name + "." + dd.name for id, dd_list in assm.data_dependencies.items() for dd in dd_list]
+    return names + [dd.data_product.suite.component.instance_name + "." + dd.data_product.name for id, dd_list in assm.data_dependencies.items() for dd in dd_list]
 
 
 def check_data_dependency_names(filter_obj, assm):
@@ -466,10 +466,12 @@ def include_data_dependency_type_filter(filter_obj, assm):
 
     def f(assm_to_filter):
         data_deps = {}
-        for id, dd in assm_to_filter.data_dependencies.items():
-            if dd.type in filter_obj.item_list:
-                data_deps[id] = dd
+        for id, dd_list in assm_to_filter.data_dependencies.items():
+            filtered = [dd for dd in dd_list if dd.type in filter_obj.item_list]
+            if filtered:
+                data_deps[id] = filtered
         assm_to_filter.data_dependencies = data_deps
+        assm_to_filter.num_data_dependencies = sum(len(v) for v in data_deps.values())
         return assm_to_filter
     return f
 
@@ -479,12 +481,12 @@ def exclude_data_dependency_type_filter(filter_obj, assm):
 
     def f(assm_to_filter):
         data_deps = {}
-        for id, dd in assm_to_filter.data_dependencies.items():
-            if dd.type in filter_obj.item_list:
-                pass
-            else:
-                data_deps[id] = dd
+        for id, dd_list in assm_to_filter.data_dependencies.items():
+            filtered = [dd for dd in dd_list if dd.type not in filter_obj.item_list]
+            if filtered:
+                data_deps[id] = filtered
         assm_to_filter.data_dependencies = data_deps
+        assm_to_filter.num_data_dependencies = sum(len(v) for v in data_deps.values())
         return assm_to_filter
     return f
 
@@ -494,13 +496,15 @@ def include_data_dependency_name_filter(filter_obj, assm):
 
     def f(assm_to_filter):
         data_deps = {}
-        for id, dd in assm_to_filter.data_dependencies.items():
-            if (
+        for id, dd_list in assm_to_filter.data_dependencies.items():
+            filtered = [dd for dd in dd_list if (
                 dd.suite.component.instance_name + "." + dd.name in filter_obj.item_list
                 or dd.data_product.suite.component.instance_name + "." + dd.data_product.name in filter_obj.item_list
-            ):
-                data_deps[id] = dd
+            )]
+            if filtered:
+                data_deps[id] = filtered
         assm_to_filter.data_dependencies = data_deps
+        assm_to_filter.num_data_dependencies = sum(len(v) for v in data_deps.values())
         return assm_to_filter
     return f
 
@@ -510,15 +514,15 @@ def exclude_data_dependency_name_filter(filter_obj, assm):
 
     def f(assm_to_filter):
         data_deps = {}
-        for id, dd in assm_to_filter.data_dependencies.items():
-            if (
+        for id, dd_list in assm_to_filter.data_dependencies.items():
+            filtered = [dd for dd in dd_list if not (
                 dd.suite.component.instance_name + "." + dd.name in filter_obj.item_list
                 or dd.data_product.suite.component.instance_name + "." + dd.data_product.name in filter_obj.item_list
-            ):
-                pass
-            else:
-                data_deps[id] = dd
+            )]
+            if filtered:
+                data_deps[id] = filtered
         assm_to_filter.data_dependencies = data_deps
+        assm_to_filter.num_data_dependencies = sum(len(v) for v in data_deps.values())
         return assm_to_filter
     return f
 
@@ -572,14 +576,19 @@ def prune(assm_to_filter):
     # Cleanup 2: Remove data_dependencies for which there is no component:
     components_with_data_dependencies = []
     new_data_dependencies = {}
-    for id, dd in assm_to_filter.data_dependencies.items():
-        to_component = dd.suite.component.instance_name
-        from_component = dd.data_product.suite.component.instance_name
-        if (to_component in component_names) and (from_component in component_names):
-            components_with_data_dependencies.append(to_component)
-            components_with_data_dependencies.append(from_component)
-            new_data_dependencies[id] = dd
+    for id, dd_list in assm_to_filter.data_dependencies.items():
+        filtered = []
+        for dd in dd_list:
+            to_component = dd.suite.component.instance_name
+            from_component = dd.data_product.suite.component.instance_name
+            if (to_component in component_names) and (from_component in component_names):
+                components_with_data_dependencies.append(to_component)
+                components_with_data_dependencies.append(from_component)
+                filtered.append(dd)
+        if filtered:
+            new_data_dependencies[id] = filtered
     assm_to_filter.data_dependencies = new_data_dependencies
+    assm_to_filter.num_data_dependencies = sum(len(dd_list) for dd_list in new_data_dependencies.values())
 
     # Cleanup 3: Remove components for which there is no connectors or data dependencies (if selected):
     if assm_to_filter.show_switches["show_data_dependencies"]:
@@ -1118,6 +1127,7 @@ class view(models.base.base):
                 if c.instance_name not in component_names
             ]
             a.data_dependencies = data_dependencies
+            a.num_data_dependencies = sum(len(dd_list) for dd_list in data_dependencies.values())
             return a
 
         # We will apply changes to only the assm.data object and then we will
