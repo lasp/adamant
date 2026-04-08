@@ -640,7 +640,7 @@ def assembly_not(filter1):
             x.instance_name for x in assm_to_filter1.components.values()
         }
         connection_names1 = {x.name for x in assm_to_filter1.connections}
-        data_deps_ids1 = {id for id, dd in assm_to_filter1.data_dependencies.items()}
+        data_deps_ids1 = {id for id, dd_list in assm_to_filter1.data_dependencies.items()}
 
         # Anything in the original assembly that is not in the filtered assembly
         # we should keep:
@@ -653,14 +653,28 @@ def assembly_not(filter1):
             if connection.name not in connection_names1:
                 connections.append(connection)
         data_deps = {}
-        for id, dd in assm_to_filter1.data_dependencies.items():
+        for id, dd_list in assm_to_filter.data_dependencies.items():
             if id not in data_deps_ids1:
-                data_deps[id] = dd
+                # Entire id absent from filtered result, keep all dds:
+                data_deps[id] = dd_list
+            else:
+                # Id present in filtered result — keep only dds that were NOT in the filtered result:
+                filtered1_names = {
+                    dd.suite.component.instance_name + "." + dd.name
+                    for dd in assm_to_filter1.data_dependencies.get(id, [])
+                }
+                remaining = [
+                    dd for dd in dd_list
+                    if dd.suite.component.instance_name + "." + dd.name not in filtered1_names
+                ]
+                if remaining:
+                    data_deps[id] = remaining
 
         # Create new assembly and return it:
         assm_to_filter.components = components
         assm_to_filter.connections = connections
         assm_to_filter.data_dependencies = data_deps
+        assm_to_filter.num_data_dependencies = sum(len(v) for v in data_deps.values())
         return assm_to_filter
 
     return f
@@ -698,10 +712,6 @@ def assembly_intersection(filter1, filter2):
         connection_names2 = {x.name for x in assm_to_filter2.connections}
         connection_names_intersect = connection_names1.intersection(connection_names2)
 
-        data_deps_ids1 = {id for id, dd in assm_to_filter1.data_dependencies.items()}
-        data_deps_ids2 = {id for id, dd in assm_to_filter2.data_dependencies.items()}
-        data_deps_ids_intersect = data_deps_ids1.intersection(data_deps_ids2)
-
         # Gather all intersected component and connectors and create new assembly:
         components = OrderedDict()
         for component in assm_to_filter1.components.values():
@@ -711,15 +721,26 @@ def assembly_intersection(filter1, filter2):
         for connection in assm_to_filter1.connections:
             if connection.name in connection_names_intersect:
                 connections.append(connection)
+        # Intersect data dependencies: keep only dds present in both filters
+        # (matched by component instance name + dd name):
         data_deps = {}
-        for id, dd in assm_to_filter1.data_dependencies.items():
-            if id in data_deps_ids_intersect:
-                data_deps[id] = dd
+        for id in set(assm_to_filter1.data_dependencies.keys()) & set(assm_to_filter2.data_dependencies.keys()):
+            names2 = {
+                dd.suite.component.instance_name + "." + dd.name
+                for dd in assm_to_filter2.data_dependencies[id]
+            }
+            intersected = [
+                dd for dd in assm_to_filter1.data_dependencies[id]
+                if dd.suite.component.instance_name + "." + dd.name in names2
+            ]
+            if intersected:
+                data_deps[id] = intersected
 
         # Create new assembly and return it:
         assm_to_filter.components = components
         assm_to_filter.connections = connections
         assm_to_filter.data_dependencies = data_deps
+        assm_to_filter.num_data_dependencies = sum(len(v) for v in data_deps.values())
         return assm_to_filter
 
     return f
@@ -743,10 +764,6 @@ def assembly_union(filter1, filter2):
         connection_names2 = {x.name for x in assm_to_filter2.connections}
         connection_names_union = connection_names1.union(connection_names2)
 
-        data_deps_ids1 = {id for id, dd in assm_to_filter1.data_dependencies.items()}
-        data_deps_ids2 = {id for id, dd in assm_to_filter2.data_dependencies.items()}
-        data_deps_ids_union = data_deps_ids1.union(data_deps_ids2)
-
         # Gather all unioned component and connectors and create new assembly:
         components = OrderedDict()
         for component in list(assm_to_filter1.components.values()) + list(
@@ -760,16 +777,28 @@ def assembly_union(filter1, filter2):
             if connection.name in connection_names_union:
                 connections.append(connection)
                 connection_names_union.remove(connection.name)
+        # Merge data dependency lists from both filters. For shared ids, combine
+        # lists and deduplicate by component.instance_name + dd.name:
         data_deps = {}
-        for id, dd in (assm_to_filter1.data_dependencies | assm_to_filter2.data_dependencies).items():
-            if id in data_deps_ids_union:
-                data_deps[id] = dd
-                data_deps_ids_union.remove(id)
+        all_ids = set(assm_to_filter1.data_dependencies.keys()) | set(assm_to_filter2.data_dependencies.keys())
+        for id in all_ids:
+            list1 = assm_to_filter1.data_dependencies.get(id, [])
+            list2 = assm_to_filter2.data_dependencies.get(id, [])
+            seen = set()
+            merged = []
+            for dd in list1 + list2:
+                key = dd.suite.component.instance_name + "." + dd.name
+                if key not in seen:
+                    seen.add(key)
+                    merged.append(dd)
+            if merged:
+                data_deps[id] = merged
 
         # Create new assembly and return it:
         assm_to_filter.components = components
         assm_to_filter.connections = connections
         assm_to_filter.data_dependencies = data_deps
+        assm_to_filter.num_data_dependencies = sum(len(v) for v in data_deps.values())
         return assm_to_filter
 
     return f
