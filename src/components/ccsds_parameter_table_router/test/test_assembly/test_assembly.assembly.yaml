@@ -1,0 +1,87 @@
+---
+description: This is an assembly for testing the Parameter Table Router autocoder.
+with:
+  - Test_Assembly_Parameter_Table_Router_Table
+  - Test_Parameter_Table
+########################################
+components:
+########################################
+  - type: Test_Component
+    name: Working_Params
+    execution: passive
+  - type: Test_Component
+    name: Primary_Param_Store
+    execution: passive
+  - type: Test_Component
+    name: Another_Params
+    execution: passive
+  - type: Test_Component
+    name: Multi_Connector_Dest
+    execution: passive
+  - type: Ccsds_Parameter_Table_Router
+    execution: active
+    priority: 1
+    stack_size: 20000
+    secondary_stack_size: 5000
+    init_base:
+      - "Queue_Size => 10"
+      - "Parameters_Memory_Region_T_Send_Count => 5"
+    init:
+      - "Table => Test_Assembly_Parameter_Table_Router_Table.Router_Table_Entries"
+      - "Buffer_Size => 150_000"
+      - "Ticks_Until_Timeout => 7"
+  # Parameters component and parameter-bearing components are included
+  # to exercise the parameter table name resolution path in the autocoder.
+  - type: Parameters
+    init_base:
+      - "Queue_Size => 512"
+      - "Parameter_Update_T_Provide_Count => 2"
+    init:
+      - "Parameter_Table_Entries => Test_Parameter_Table.Parameter_Table_Entries'Access"
+      - "Table_Id => Test_Parameter_Table.Parameter_Table_Id"
+    priority: 2
+    stack_size: 5000
+    secondary_stack_size: 5000
+  - type: Test_Component_With_Params
+    name: Param_Component_A
+    execution: passive
+  - type: Test_Component_With_Params
+    name: Param_Component_B
+    execution: passive
+connections:
+  - from_component: Ccsds_Parameter_Table_Router_Instance
+    from_connector: Parameters_Memory_Region_T_Send
+    from_index: 1
+    to_component: Working_Params
+    to_connector: Parameters_Memory_Region_T_Recv_Sync
+  - from_component: Ccsds_Parameter_Table_Router_Instance
+    from_connector: Parameters_Memory_Region_T_Send
+    from_index: 2
+    to_component: Primary_Param_Store
+    to_connector: Parameters_Memory_Region_T_Recv_Sync
+  - from_component: Ccsds_Parameter_Table_Router_Instance
+    from_connector: Parameters_Memory_Region_T_Send
+    from_index: 3
+    to_component: Another_Params
+    to_connector: Parameters_Memory_Region_T_Recv_Sync
+  - from_component: Ccsds_Parameter_Table_Router_Instance
+    from_connector: Parameters_Memory_Region_T_Send
+    from_index: 4
+    to_component: Multi_Connector_Dest
+    to_connector: Parameters_Memory_Region_T_Recv_Sync
+  - from_component: Ccsds_Parameter_Table_Router_Instance
+    from_connector: Parameters_Memory_Region_T_Send
+    from_index: 5
+    to_component: Multi_Connector_Dest
+    to_connector: Parameters_Memory_Region_T_Recv_Sync_2
+  # Wire Parameters component to parameter-bearing test components:
+  - from_component: Parameters_Instance
+    from_connector: Parameter_Update_T_Provide
+    from_index: 1
+    to_component: Param_Component_A
+    to_connector: Parameter_Update_T_Modify
+  - from_component: Parameters_Instance
+    from_connector: Parameter_Update_T_Provide
+    from_index: 2
+    to_component: Param_Component_B
+    to_connector: Parameter_Update_T_Modify

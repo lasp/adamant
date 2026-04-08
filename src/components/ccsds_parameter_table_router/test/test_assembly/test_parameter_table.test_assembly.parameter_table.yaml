@@ -1,0 +1,7 @@
+---
+description: A parameter table used for testing parameter table name resolution in the router autocoder.
+parameters_instance_name: Parameters_Instance
+parameters:
+  - Param_Component_A.Parameter_I32
+  - Param_Component_A.Parameter_U16
+  - Param_Component_B

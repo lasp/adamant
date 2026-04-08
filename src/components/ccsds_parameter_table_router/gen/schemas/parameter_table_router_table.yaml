@@ -1,0 +1,57 @@
+---
+# This schema describes the yaml format for a parameter table router table.
+type: map
+mapping:
+  # The name of the Parameter Table Router component instance in the assembly
+  # that this routing table is being constructed for. This component must exist
+  # in the assembly specified by this file's name otherwise an error will be thrown.
+  parameter_table_router_instance_name:
+    type: str
+    required: True
+  # Description of the table.
+  description:
+    type: str
+    required: False
+  # List of table entries. Each entry maps a parameter table ID to a list of
+  # destination components.
+  table:
+    seq:
+      - type: map
+        mapping:
+          # The parameter table ID. This can be either:
+          #   - An integer (raw numeric table ID)
+          #   - A string (parameter table model name, resolved to a numeric ID
+          #     via the assembly model)
+          table_id:
+            type: any
+            required: True
+          # The list of destination components for this table ID. Each destination
+          # is a map with a component_name and an optional load_from flag.
+          destinations:
+            seq:
+              - type: map
+                mapping:
+                  # The name of the destination component as found in the assembly.
+                  # If the component does not exist or is not connected to the
+                  # router's arrayed output connector, an error will be thrown.
+                  # The component_name can also use dot notation to specify a
+                  # specific connector: "Component_Name.Connector_Name".
+                  component_name:
+                    type: str
+                    required: True
+                  # If True, this destination is the source for loading parameter
+                  # tables (e.g., a Parameter_Store backed by MRAM). At most one
+                  # destination per table entry may have load_from set to True.
+                  load_from:
+                    type: bool
+                    required: False
+            range:
+              min: 1
+            required: True
+          # Description of this router table entry.
+          description:
+            type: str
+            required: False
+    range:
+      min: 1
+    required: True

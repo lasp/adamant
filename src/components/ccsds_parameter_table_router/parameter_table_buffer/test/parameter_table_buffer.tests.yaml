@@ -1,0 +1,41 @@
+---
+description: Unit tests for the Parameter_Table_Buffer standalone package.
+tests:
+  - name: Test_Create_Destroy
+    description: Test buffer creation, allocation, and destruction.
+  - name: Test_Unsegmented_Complete_Table
+    description: An Unsegmented packet is treated as a combined FirstSegment and LastSegment, producing a complete table in one packet.
+  - name: Test_Unsegmented_Too_Small
+    description: An Unsegmented packet with less than 2 bytes returns Too_Small_Table.
+  - name: Test_Unsegmented_During_Receive
+    description: An Unsegmented packet received while buffering a segmented table replaces the in-progress table.
+  - name: Test_Nominal_Segmented_Flow
+    description: Test the nominal FirstSegment -> ContinuationSegment -> LastSegment flow.
+  - name: Test_First_Segment_Extracts_Table_Id
+    description: Verify Table ID is correctly deserialized from the first 2 bytes of a FirstSegment.
+  - name: Test_First_Segment_Too_Small
+    description: A FirstSegment with less than 2 bytes of data returns Too_Small_Table.
+  - name: Test_Continuation_Without_First
+    description: ContinuationSegment and LastSegment without a prior FirstSegment return Packet_Ignored.
+  - name: Test_First_Segment_Resets_Buffer
+    description: A new FirstSegment while receiving discards the previous table and starts fresh.
+  - name: Test_Buffer_Overflow_First_Segment
+    description: A FirstSegment whose data (minus Table ID) exceeds the buffer capacity returns Buffer_Overflow.
+  - name: Test_Buffer_Overflow_Continuation
+    description: A ContinuationSegment that would exceed the buffer capacity returns Buffer_Overflow.
+  - name: Test_Buffer_Overflow_Last_Segment
+    description: A LastSegment that would exceed the buffer capacity returns Buffer_Overflow.
+  - name: Test_Get_Table_Region
+    description: Verify Get_Table_Region returns a region pointing to the correct buffer data with correct length.
+  - name: Test_Multiple_Tables
+    description: Test receiving multiple complete tables in sequence to verify state is properly reset.
+  - name: Test_First_Segment_Only_Table_Id
+    description: A FirstSegment with exactly 2 bytes (only Table ID, no payload) is valid.
+  - name: Test_Buffer_Overflow_Unsegmented
+    description: An Unsegmented packet whose payload exceeds buffer capacity returns Buffer_Overflow.
+  - name: Test_Data_Integrity_Multi_Segment
+    description: Verify byte-for-byte data integrity after a FirstSegment, multiple ContinuationSegments, and LastSegment.
+  - name: Test_State_After_Errors
+    description: Verify Table ID, length, and packet count are in expected states after various error paths.
+  - name: Test_Overflow_Preserves_Existing_Data
+    description: After overflow on Continuation or LastSegment, data already in the buffer from FirstSegment is intact.
