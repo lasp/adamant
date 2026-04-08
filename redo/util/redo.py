@@ -6,6 +6,10 @@ import os
 # This module provides python bindings for the redo
 # commandline program.
 
+# Maximum number of arguments per subprocess invocation. When the argument
+# list exceeds this, it is split into chunks to avoid OS limits.
+_MAX_ARGS = 1000
+
 
 def __form_call_args(command, args):
     """Form call args."""
@@ -16,31 +20,42 @@ def __form_call_args(command, args):
     return call_str
 
 
-def __invoke_redo_subprocess(command, args=[]):
-    """Private function which invokes a redo-like command."""
-    if args:
-        # Sometimes the number of arguments to redo can exceed the OS
-        # limit. To avoid this, if there is over 1000 arguments we will
-        # chunk the redo command up into multiple commands with 1000
-        # arguments (or less) each.
-        if len(args) > 1000:
-            def divide_chunks(things, num):
-                """
-                Yield successive n-sized
-                chunks from l.
-                """
-                # looping till length l
-                for i in range(0, len(things), num):
-                    yield things[i:i + num]
+def __divide_chunks(things, num):
+    """Yield successive num-sized chunks from a list."""
+    for i in range(0, len(things), num):
+        yield things[i:i + num]
 
-            # Execute one chunk at a time:
-            for chunk in divide_chunks(args, 1000):
-                call_str = __form_call_args(command, chunk)
-                shell.run_command(call_str)
-        else:
-            # Execute in one shot:
-            call_str = __form_call_args(command, args)
+
+def __invoke_redo_subprocess(command, args=None, prefix_args=None):
+    """Private function which invokes a redo-like command.
+
+    When the argument list exceeds _MAX_ARGS, it is split into chunks and
+    each chunk is invoked separately. If prefix_args is provided, those
+    arguments are prepended to EVERY chunk (not just the first). This is
+    critical for commands like redo-done where the first argument (the
+    target) must appear in every invocation.
+    """
+    if args is None:
+        args = []
+    if isinstance(args, str):
+        args = [args]
+    if prefix_args is None:
+        prefix_args = []
+    all_args = prefix_args + args
+    if not all_args:
+        return
+    if len(all_args) > _MAX_ARGS:
+        # Chunk only the args, not the prefix. Each invocation becomes:
+        #   command <prefix_args> <chunk_of_args>
+        # This ensures prefix_args (e.g. redo-done's target) appear in
+        # every invocation, not just the first.
+        chunk_size = max(1, _MAX_ARGS - len(prefix_args))
+        for chunk in __divide_chunks(args, chunk_size):
+            call_str = __form_call_args(command, prefix_args + chunk)
             shell.run_command(call_str)
+    else:
+        call_str = __form_call_args(command, all_args)
+        shell.run_command(call_str)
 
 
 def redo(args):
@@ -64,10 +79,15 @@ def redo_always(args):
 
 
 def redo_done(target, deps=None):
-    """Call redo-done to register a pre-built target with its dependencies."""
+    """Call redo-done to register a pre-built target with its dependencies.
+
+    The target is passed as a prefix_arg so it appears as the first argument
+    in every chunk. Without this, chunking would treat a dep as the target
+    in the second chunk, corrupting its redo database.
+    """
     if deps is None:
         deps = []
-    __invoke_redo_subprocess("redo-done", [target] + deps)
+    __invoke_redo_subprocess("redo-done", deps, prefix_args=[target])
 
 
 def redo_ood(args):
