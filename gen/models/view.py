@@ -225,6 +225,26 @@ def exclude_component_execution_filter(filter_obj, assm):
     return f
 
 
+def _add_data_dependency_components(assm_to_filter, components):
+    """When show_data_dependencies is True, expand a set of component names to include
+    direct neighbors connected via data dependencies. Only adds components that are
+    one hop away (no transitive closure), matching the behavior of connection-based
+    context filters."""
+    if not assm_to_filter.show_switches.get("show_data_dependencies", False):
+        return
+    # Snapshot the original set so we only consider direct neighbors of
+    # the originally selected components, not neighbors of neighbors:
+    original = set(components)
+    for id, dd_list in assm_to_filter.data_dependencies.items():
+        for dd in dd_list:
+            to_name = dd.suite.component.instance_name
+            from_name = dd.data_product.suite.component.instance_name
+            if to_name in original and from_name not in components:
+                components.add(from_name)
+            elif from_name in original and to_name not in components:
+                components.add(to_name)
+
+
 def include_component_name_context_filter(filter_obj, assm):
     check_component_names(filter_obj, assm)
 
@@ -240,6 +260,7 @@ def include_component_name_context_filter(filter_obj, assm):
                 components.append(connection.to_component.instance_name)
                 components.append(connection.from_component.instance_name)
         components = set(components)
+        _add_data_dependency_components(assm_to_filter, components)
         assm_to_filter.connections = connections
         new_components = OrderedDict()
         for c_name, c in assm_to_filter.components.items():
@@ -268,6 +289,7 @@ def exclude_component_name_context_filter(filter_obj, assm):
                 components.append(connection.to_component.instance_name)
                 components.append(connection.from_component.instance_name)
         components = set(components)
+        _add_data_dependency_components(assm_to_filter, components)
         assm_to_filter.connections = connections
         new_components = OrderedDict()
         for c_name, c in assm_to_filter.components.items():
@@ -299,6 +321,7 @@ def include_component_type_context_filter(filter_obj, assm):
                 components.append(connection.to_component.instance_name)
                 components.append(connection.from_component.instance_name)
         components = set(components)
+        _add_data_dependency_components(assm_to_filter, components)
         assm_to_filter.connections = connections
         new_components = OrderedDict()
         for c_name, c in assm_to_filter.components.items():
@@ -332,6 +355,7 @@ def exclude_component_type_context_filter(filter_obj, assm):
                 components.append(connection.to_component.instance_name)
                 components.append(connection.from_component.instance_name)
         components = set(components)
+        _add_data_dependency_components(assm_to_filter, components)
         assm_to_filter.connections = connections
         new_components = OrderedDict()
         for c_name, c in assm_to_filter.components.items():
