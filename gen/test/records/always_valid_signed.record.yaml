@@ -1,0 +1,11 @@
+---
+description: A packed record with a full-width signed integer. Always_Valid should be True.
+fields:
+  - name: A
+    description: Full-width I16
+    type: Interfaces.Integer_16
+    format: I16
+  - name: B
+    description: Full-width U8
+    type: Interfaces.Unsigned_8
+    format: U8

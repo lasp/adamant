@@ -56,8 +56,10 @@ package body {{ name }} is
 {% else %}
          Overlay : {{ data_product.product_type }}.{{ data_product.product_endian }} with Import, Convention => Ada, Address => Dp.Buffer'Address;
 {% endif %}
-         Validation : constant Boolean := {{ data_product.product_type }}.Validation.Valid (R => Overlay, Errant_Field => Ef);
+         Validation : constant Boolean := {{ data_product.product_type }}.Always_Valid
+            or else {{ data_product.product_type }}.Validation.Valid (R => Overlay, Errant_Field => Ef);
       begin
+         pragma Warnings (Off, "this code can never be executed and has been deleted");
          case Validation is
             when True =>
                return Success;
@@ -74,6 +76,7 @@ package body {{ name }} is
                end;
                return Invalid_Data;
          end case;
+         pragma Warnings (On, "this code can never be executed and has been deleted");
       end;
    end Extract_And_Validate_{{data_product.name}};
 

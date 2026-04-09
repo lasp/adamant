@@ -1,0 +1,7 @@
+---
+description: A register map with only always-valid types. This should compile without error.
+items:
+  - address: 0x4000_0000
+    name: Valid_Register
+    description: A 32-bit register with all full-width fields.
+    type: Always_Valid_Register.Register_T

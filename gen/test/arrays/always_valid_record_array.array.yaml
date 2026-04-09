@@ -1,0 +1,4 @@
+---
+type: Always_Valid_Simple.T
+description: An array of always-valid records. Always_Valid should be True.
+length: 5

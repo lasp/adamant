@@ -100,6 +100,7 @@ is
 
 {% for item_name, item in items.items() %}
    -- 0x{{'%08X' % item.address}} - {{'%08X' % (item.address + item.size - 1)}}: {{ item.name }} Checks
+   pragma Compile_Time_Error (not {{ item.type_package }}.Always_Valid, "{{ item.name }} ({{ item.type }}) contains bit-constrained fields and is not safe for use in a register map. A corrupted read could produce an out-of-range value and raise Constraint_Error.");
    pragma Compile_Time_Error ({{ item.name }}_Offset /= 16#{{ '%08X' % item.address }}#, "Unexpected autocoder error. Item start address not as expected.");
    pragma Compile_Time_Error (({{ item.name }}_Offset mod 4) /= 0, "Unexpected autocoder error. Item start address not 4-byte aligned.");
    pragma Compile_Time_Error ({{ item.name }}_Size /= {{ item.size }}, "Unexpected autocoder error. Item size not as expected.");

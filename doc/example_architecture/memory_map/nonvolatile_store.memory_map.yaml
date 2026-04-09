@@ -10,5 +10,5 @@ items:
     description: An important counter.
     type: Packed_U32.T
   - name: Another_Counter
-    description: An equally important counter.
-    type: Packed_U16.T
+    description: BAD COUNTER TYPE! This counter demonstrates how the system will refuse to generate a memory map if any item is not full bit width (i.e. not always valid). In this case, a Natural does not use all 32 bits to represent itself, it only uses 31.
+    type: Packed_Natural.T

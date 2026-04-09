@@ -1,0 +1,5 @@
+---
+type: Interfaces.Unsigned_16
+format: U16
+description: An array of full-width Unsigned_16. Always_Valid should be True.
+length: 10

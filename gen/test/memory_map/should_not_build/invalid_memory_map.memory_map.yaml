@@ -1,0 +1,8 @@
+---
+description: A memory map with a bit-constrained type. This should fail to compile due to the Always_Valid check.
+start_address: 0x2000000
+length: 1024
+items:
+  - name: Bad_Item
+    description: A record with bit-constrained fields (One_Type is 0..19 in 8 bits).
+    type: Aa.T

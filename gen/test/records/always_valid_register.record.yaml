@@ -1,0 +1,11 @@
+---
+description: A 32-bit packed record with all full-width fields, suitable for register use. Always_Valid should be True.
+fields:
+  - name: A
+    description: Full-width U16
+    type: Interfaces.Unsigned_16
+    format: U16
+  - name: B
+    description: Full-width U16
+    type: Interfaces.Unsigned_16
+    format: U16

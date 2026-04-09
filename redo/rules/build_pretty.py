@@ -44,7 +44,7 @@ class build_pretty(build_rule_base):
             # Form gnatpp command:
             filesystem.safe_makedir(out_dir)
             gnatpp_cmd = (
-                gnatpp_cmd_prefix() + " --output-dir " + + out_dir + " "
+                gnatpp_cmd_prefix() + " --output-dir " + out_dir + " "
                 + " ".join(handwritten_source)
             )
             shell.run_command(gnatpp_cmd)

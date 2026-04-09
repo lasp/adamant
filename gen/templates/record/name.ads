@@ -80,6 +80,41 @@ package {{ name }} is
    -- packed record.
    Num_Fields : constant Positive := {{ num_fields }};
 
+   -- Compile-time constant which is True if every scalar field uses the full bit
+   -- width of its storage, meaning no bit pattern can produce a Constraint_Error.
+   -- If set to True, it is safe to use the type without validating via the
+   -- Validation package first.
+{% if not fields %}
+   Always_Valid : constant Boolean := True;
+{% else %}
+   Always_Valid : constant Boolean :=
+{% for field in fields.values() %}
+{% if field.skip_validation %}
+      -- {{ field.name }} - skip_validation declared, assumed always valid by user decree
+      True{% if loop.last %};{% else %} and then{% endif %}
+
+{% elif field.is_packed_type %}
+      -- {{ field.name }} - delegates to nested packed type {{ field.type_package }}
+      {{ field.type_package }}.Always_Valid{% if loop.last %};{% else %} and then{% endif %}
+
+{% elif field.has_float %}
+      -- {{ field.name }} - float types cannot be validated statically (NaN, Inf, denormals)
+      False{% if loop.last %};{% else %} and then{% endif %}
+
+{% elif field.format.length %}
+      -- {{ field.name }} - arrayed primitive field, component type cannot be introspected statically
+      False{% if loop.last %};{% else %} and then{% endif %}
+
+{% else %}
+      -- {{ field.name }} - {{ field.type }} in {{ field.size }} bits
+      ({{ field.type }}'Pos ({{ field.type }}'Last) - {{ field.type }}'Pos ({{ field.type }}'First) = 2 ** {{ field.size }} - 1){% if loop.last %};{% else %} and then{% endif %}
+
+{% endif %}
+{% endfor %}
+   pragma Annotate (GNATSAS, Intentional, "same logic",
+      "fields with identical types intentionally produce identical subexpressions");
+{% endif %}
+
    -- Unpacked type:
    type U is record
 {% for field in fields.values() %}

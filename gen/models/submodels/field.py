@@ -384,12 +384,14 @@ class field(variable):
         Note: The caller of this must have already loaded the outside packed type
         (packed array or record) type_ranges or the function call will fail.
         """
-        # If this field is a packed type then just call its is_always_valid method:
-        if self.is_packed_type:
-            return self.type_model.is_always_valid()
         # Type with skip_validation is assumed to be is_always_valid by user decree.
-        elif self.skip_validation:
+        # This is checked first since it is an explicit user override that should
+        # take priority over any automatic determination.
+        if self.skip_validation:
             return True
+        # If this field is a packed type then just call its is_always_valid method:
+        elif self.is_packed_type:
+            return self.type_model.is_always_valid()
         # If the type has a length in the format there is no easy way to generate the
         # array component type ranges in python. Maybe we can fix this later, but for
         # not we take the conservative assumption that it is not always valid. This
