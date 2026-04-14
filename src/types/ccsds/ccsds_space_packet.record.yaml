@@ -16,3 +16,4 @@ fields:
     format: U8x{{ ccsds_packet_buffer_size }}
     variable_length: Header.Packet_Length
     variable_length_offset: 1
+    skip_validation: True
