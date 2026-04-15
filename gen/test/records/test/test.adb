@@ -113,7 +113,7 @@ procedure Test is
    -- Record array definitions:
    A_Bytes : Aa.Serialization.Byte_Array := [0 => 255, others => 0];
    B_Bytes : Bb.Serialization.Byte_Array := [others => 0];
-   C_Bytes : Cc.Serialization.Byte_Array := [others => 0];
+   C_Bytes : Cc.Serialization.Byte_Array := [5 => 255, others => 0];
    V_Bytes : Simple_Variable.Serialization.Byte_Array := [0 => 2, others => 255];
    V_Bytes2 : Simple_Variable.Serialization.Byte_Array := [others => 0];
    V_Bytes3 : Simple_Variable.Serialization.Byte_Array := [others => 0];
@@ -258,7 +258,7 @@ begin
    pragma Assert (Bb.Validation.Get_Field (B, Field_Number) = [0, 0, 0, 0, 0, 0, 0, 0], "B's polytype field is wrong.");
    pragma Assert (not Cc.Validation.Valid (C, Field_Number), "C is valid, but should not be.");
    pragma Assert (Field_Number = 3, "C field_Number is wrong.");
-   pragma Assert (Cc.Validation.Get_Field (C, Field_Number) = [0, 0, 0, 0, 0, 0, 0, 0], "C's polytype field is wrong.");
+   pragma Assert (Cc.Validation.Get_Field (C, Field_Number) = [0, 0, 0, 0, 255, 0, 0, 0], "C's polytype field is wrong.");
    pragma Assert (not Simple_Variable.Validation.Valid (V, Field_Number), "V is valid, but should not be.");
    pragma Assert (Field_Number = 2, "V field_Number is wrong.");
    Put_Line (Poly2bytestring (Simple_Variable.Validation.Get_Field (V, Field_Number)));
@@ -266,7 +266,7 @@ begin
    pragma Assert (not Simple_Variable_Holder.Validation.Valid (Sv, Field_Number), "V is valid, but should not be.");
    pragma Assert (Field_Number = 3, "V field_Number is wrong.");
    Put_Line (Poly2bytestring (Simple_Variable_Holder.Validation.Get_Field (Sv, Field_Number)));
-   pragma Assert (Simple_Variable_Holder.Validation.Get_Field (Sv, Field_Number) = [0, 0, 0, 0, 0, 0, 0, 0], "V's polytype field is wrong.");
+   pragma Assert (Simple_Variable_Holder.Validation.Get_Field (Sv, Field_Number) = [0, 0, 0, 0, 0, 0, 0, 0], "SVH's polytype field is wrong.");
    pragma Assert (not Simple_Variable_Offset.Validation.Valid (Ov, Field_Number), "V is valid, but should not be.");
    pragma Assert (Field_Number = 2, "V field_Number is wrong.");
    Put_Line (Poly2bytestring (Simple_Variable_Offset.Validation.Get_Field (Ov, Field_Number)));
@@ -274,15 +274,25 @@ begin
    pragma Assert (not Simple_Variable_Array.Validation.Valid (Av, Field_Number), "V is valid, but should not be.");
    pragma Assert (Field_Number = 2, "V field_Number is wrong." & Interfaces.Unsigned_32'Image (Field_Number));
    Put_Line (Poly2bytestring (Simple_Variable_Array.Validation.Get_Field (Av, Field_Number)));
-   pragma Assert (Simple_Variable_Array.Validation.Get_Field (Av, Field_Number) = [0, 0, 0, 0, 0, 0, 0, 0], "V's polytype field is wrong.");
+   pragma Assert (Simple_Variable_Array.Validation.Get_Field (Av, Field_Number) = [0, 0, 0, 0, 255, 0, 0, 0], "SVA's polytype field is wrong.");
    pragma Assert (not Simple_Variable_Array_Le.Validation.Valid (Av_Le, Field_Number), "AV_LE is valid, but should not be.");
    pragma Assert (Field_Number = 2, "AV_LE field_Number is wrong." & Interfaces.Unsigned_32'Image (Field_Number));
    Put_Line (Poly2bytestring (Simple_Variable_Array_Le.Validation.Get_Field (Av_Le, Field_Number)));
-   pragma Assert (Simple_Variable_Array_Le.Validation.Get_Field (Av_Le, Field_Number) = [0, 0, 0, 0, 0, 0, 0, 0], "AV_LE's polytype field is wrong.");
+   pragma Assert (Simple_Variable_Array_Le.Validation.Get_Field (Av_Le, Field_Number) = [0, 0, 0, 0, 255, 0, 0, 0], "SVA_LE's polytype field is wrong.");
    pragma Assert (not Simple_Variable_Holder_Le.Validation.Valid (Sv_Le, Field_Number), "SV_LE is valid, but should not be.");
    pragma Assert (Field_Number = 3, "SV_LE field_Number is wrong.");
    Put_Line (Poly2bytestring (Simple_Variable_Holder_Le.Validation.Get_Field (Sv_Le, Field_Number)));
-   pragma Assert (Simple_Variable_Holder_Le.Validation.Get_Field (Sv_Le, Field_Number) = [0, 0, 0, 0, 0, 0, 0, 0], "SV_LE's polytype field is wrong.");
+   pragma Assert (Simple_Variable_Holder_Le.Validation.Get_Field (Sv_Le, Field_Number) = [0, 0, 0, 0, 0, 0, 0, 0], "SVH_LE's polytype field is wrong.");
+   Put_Line ("passed.");
+   Put_Line ("");
+
+   -- Verify that Get_Field returns the correct sub-field value for nested packed
+   -- types in Cc.
+   -- Cc field layout: C(1), A.One(2), A.Two(3), A.Three(4), B.Element(5), B.Element2(6)
+   Put_Line ("Testing Get_Field round-trip for nested packed record fields: ");
+   pragma Assert (Cc.Validation.Get_Field (C, 2) = [0, 0, 0, 0, 0, 0, 0, 0], "Get_Field  A.One value mismatch.");
+   pragma Assert (Cc.Validation.Get_Field (C, 3) = [0, 0, 0, 0, 255, 0, 0, 0], "Get_Field A.Two value mismatch.");
+   pragma Assert (Cc.Validation.Get_Field (C, 5) = [0, 0, 0, 0, 0, 0, 0, 0], "Get_Field B.Element value mismatch.");
    Put_Line ("passed.");
    Put_Line ("");
 

@@ -208,6 +208,23 @@ begin
    pragma Assert (not Enum_Array.Validation.Valid (Enum_Mut, Field_Number, Enum_Mut'Last - 2, Enum_Mut'Last), "Enum is valid, but should not be 7.");
    Put_Line ("passed.");
 
+   -- Verify that Get_Field maps field numbers to the correct array element
+   Put_Line ("Testing Get_Field round-trip for packed array element index: ");
+   declare
+      -- Complex_Array elements are Aa.T with 3 sub-fields each (One, Two, Three).
+      -- Craft bytes so element 0 has valid One/Two but invalid Three (= 3, out of range 5..2056).
+      -- This makes field 3 (element 0, sub-field 3) the first invalid field.
+      -- Field 3 is a multiple of num_fields, which exercises the element index edge case.
+      C_Bytes_Rt : constant Complex_Array.Serialization.Byte_Array := [0 => 0, 1 => 19, 2 => 0, 3 => 3, others => 0];
+      Complex_Rt : constant Complex_Array.T := Complex_Array.Serialization.From_Byte_Array (C_Bytes_Rt);
+   begin
+      pragma Assert (not Complex_Array.Validation.Valid (Complex_Rt, Field_Number), "Complex_Rt is valid, but should not be.");
+      pragma Assert (Field_Number = 3, "Complex_Rt field_Number is wrong.");
+      Put_Line (Poly2bytestring (Complex_Array.Validation.Get_Field (Complex_Rt, Field_Number)));
+      pragma Assert (Complex_Array.Validation.Get_Field (Complex_Rt, Field_Number) = [0, 0, 0, 0, 3, 0, 0, 0], "Get_Field value mismatch.");
+   end;
+   Put_Line ("passed.");
+
    Put_Line ("Testing serialization/deserialization... ");
    S_Bytes := Simple_Array.Serialization.To_Byte_Array (Simple);
    Simple2 := Simple_Array.Serialization.From_Byte_Array (S_Bytes);
