@@ -23,14 +23,14 @@ time_ms() {
 
 setup() {
     # Pick a component directory for testing
-    TEST_DIR="${ADAMANT_DIR}/src/components/oscillator"
+    TEST_DIR="${ADAMANT_DIR}/src/components/command_router"
     if [ ! -d "$TEST_DIR" ]; then
         local example_dir
         example_dir=$(dirname "$(dirname "$ADAMANT_CONFIGURATION_YAML")")
-        TEST_DIR="${example_dir}/src/components/oscillator"
+        TEST_DIR="${example_dir}/src/components/command_router"
     fi
     if [ ! -d "$TEST_DIR" ]; then
-        echo "ERROR: Cannot find oscillator component directory"
+        echo "ERROR: Cannot find command_router component directory"
         exit 1
     fi
 
@@ -89,23 +89,22 @@ else fail "second call ${ms}ms >= ${FAST_THRESHOLD}ms (expected fast)"; fi
 echo ""
 echo "Test 2: Touch existing file - still fast"
 cd "$TEST_DIR"
-touch component-oscillator-implementation.adb
+touch component-command_router-implementation.adb
 ms=$(time_ms redo what)
 if [ "$ms" -lt "$FAST_THRESHOLD" ]; then pass "after touch existing: ${ms}ms (fast)"
 else fail "after touch existing: ${ms}ms (expected fast)"; fi
 
-# Test 3: Creating new .do file — still fast (stale data OK)
+# Test 3: Creating new .do file refreshes and exposes new target
 echo ""
-echo "Test 3: Create new .do file - still fast (serves cached data)"
+echo "Test 3: Create new .do file - refreshes cache and exposes target"
 cd "$TEST_DIR"
 touch hi.do
 ms=$(time_ms redo what)
-if [ "$ms" -lt "$FAST_THRESHOLD" ]; then pass "after create .do: ${ms}ms (fast, stale OK)"
-else fail "after create .do: ${ms}ms (expected fast — stale data served)"; fi
-# hi.do should NOT appear yet (not in cache until next build)
+if [ "$ms" -ge "$SLOW_THRESHOLD" ]; then pass "after create .do: ${ms}ms (refresh)"
+else fail "after create .do: ${ms}ms (expected refresh >= ${SLOW_THRESHOLD}ms)"; fi
 targets=$(redo what 2>&1)
-if ! echo "$targets" | grep -q "^redo hi$"; then pass "hi not in output (stale cache, expected)"
-else pass "hi already in output (pre-cached)"; fi
+if echo "$targets" | grep -q "^redo hi$"; then pass "hi appears in output after refresh"
+else fail "hi missing from output after refresh"; fi
 rm -f hi.do
 
 # Test 4: Cold path (no persistent DB)
@@ -649,6 +648,102 @@ if [ "$all_match" = true ] && [ "${#COMPREPLY[@]}" -gt 0 ]; then
     pass "partial completion: ${#COMPREPLY[@]} matches for 'cl' (clean, clean_all, clear_cache)"
 else
     [ "$all_match" = true ] && fail "partial completion returned 0 results"
+fi
+
+# Test 31: Virtual target prefix no-match stays fast
+echo ""
+echo "Test 31: Virtual target prefix no-match stays fast"
+virtual_comp="$ADAMANT_DIR/src/components/command_router"
+if [ -d "$virtual_comp" ]; then
+    cd "$virtual_comp" && redo what >/dev/null 2>&1
+    start_ms=$(date +%s%3N)
+    run_completion "build/src/component-y"
+    end_ms=$(date +%s%3N)
+    elapsed=$((end_ms - start_ms))
+    if [ "$elapsed" -lt 500 ]; then
+        pass "virtual no-match fast: ${elapsed}ms, ${#COMPREPLY[@]} results"
+    else
+        fail "virtual no-match slow: ${elapsed}ms"
+    fi
+    if [ "${#COMPREPLY[@]}" -eq 0 ]; then
+        pass "virtual no-match returned 0 results"
+    else
+        fail "virtual no-match returned ${#COMPREPLY[@]} results"
+    fi
+else
+    echo "  SKIP: command_router not found"
+fi
+
+# Test 32: Deep virtual target prefix no-match stays fast
+echo ""
+echo "Test 32: Deep virtual target prefix no-match stays fast"
+if [ -d "$virtual_comp" ]; then
+    cd "$virtual_comp" && redo what >/dev/null 2>&1
+    start_ms=$(date +%s%3N)
+    run_completion "doc/build/pdf/command_router_nope"
+    end_ms=$(date +%s%3N)
+    elapsed=$((end_ms - start_ms))
+    if [ "$elapsed" -lt 500 ]; then
+        pass "deep virtual no-match fast: ${elapsed}ms, ${#COMPREPLY[@]} results"
+    else
+        fail "deep virtual no-match slow: ${elapsed}ms"
+    fi
+    if [ "${#COMPREPLY[@]}" -eq 0 ]; then
+        pass "deep virtual no-match returned 0 results"
+    else
+        fail "deep virtual no-match returned ${#COMPREPLY[@]} results"
+    fi
+fi
+
+# Test 33: Deep virtual target positive prefix stays fast and preserves prefix
+echo ""
+echo "Test 33: Deep virtual target positive prefix returns matches"
+if [ -d "$virtual_comp" ]; then
+    cd "$virtual_comp" && redo what >/dev/null 2>&1
+    start_ms=$(date +%s%3N)
+    run_completion "doc/build/pdf/command_router_"
+    end_ms=$(date +%s%3N)
+    elapsed=$((end_ms - start_ms))
+    if [ "$elapsed" -lt 500 ]; then
+        pass "deep virtual positive fast: ${elapsed}ms, ${#COMPREPLY[@]} results"
+    else
+        fail "deep virtual positive slow: ${elapsed}ms"
+    fi
+    if [ "${#COMPREPLY[@]}" -gt 0 ]; then
+        pass "deep virtual positive returned ${#COMPREPLY[@]} results"
+    else
+        fail "deep virtual positive returned 0 results"
+    fi
+    all_match=true
+    for r in "${COMPREPLY[@]}"; do
+        trimmed="${r%% }"
+        if [[ "$trimmed" != doc/build/pdf/command_router_* ]]; then
+            fail "deep virtual positive mismatch: $trimmed"
+            all_match=false
+            break
+        fi
+    done
+    if [ "$all_match" = true ]; then
+        pass "deep virtual positive preserves prefix"
+    fi
+fi
+
+# Test 34: Real filesystem directories still appear at project root
+echo ""
+echo "Test 34: Real directories still complete at project root"
+run_completion "$ADAMANT_DIR/do"
+found_doc_dir=false
+for r in "${COMPREPLY[@]}"; do
+    trimmed="${r%% }"
+    if [[ "$trimmed" == "$ADAMANT_DIR/doc/" ]]; then
+        found_doc_dir=true
+        break
+    fi
+done
+if [ "$found_doc_dir" = true ]; then
+    pass "real directory completion still includes doc/"
+else
+    fail "real directory completion missing doc/"
 fi
 
 # -------------------------------------------------------

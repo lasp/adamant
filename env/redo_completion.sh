@@ -160,6 +160,36 @@ $(compgen -d "$full_arg" | sed 's/$/\//')" | grep -v '^$')
         try_trim_leading_dir "$path" "$arg"
     }
 
+    # When we already have a cached target list for a real redo directory,
+    # treat slash-separated target prefixes as a virtual namespace and keep
+    # narrowing the cached targets instead of probing synthetic subpaths like
+    # build/what_predefined (which can be very slow to fail).
+    try_virtual_recurse () {
+        local cached_targets=$1
+        local string=$2
+        local normalized prefix suffix filtered
+
+        VIRTUAL_LEAD_DIR=
+        VIRTUAL_REST=
+        VIRTUAL_FILTERED=
+
+        echo "$string" | grep '/' >/dev/null || return 1
+
+        normalized=$(echo "$string" | sed 's/\/\/*/\//')
+        prefix=$(echo "$normalized" | cut -d '/' -f 1)
+        suffix=$(echo "$normalized" | cut -d '/' -f 2-)
+
+        [ -n "$prefix" ] || return 1
+
+        filtered=$(echo "$cached_targets" | awk -v p="$prefix/" 'index($0, p) == 1 { print substr($0, length(p) + 1) }')
+        [ -n "$filtered" ] || return 1
+
+        VIRTUAL_LEAD_DIR=$prefix
+        VIRTUAL_REST=$suffix
+        VIRTUAL_FILTERED=$filtered
+        return 0
+    }
+
     do_recurse () {
 
         # these are set by try_trim_leading_dir
@@ -189,7 +219,7 @@ $(compgen -d "$full_arg" | sed 's/$/\//')" | grep -v '^$')
 
     # the main helper function
     redo_completion_helper () {
-        local path=$1 arg=$2
+        local path=$1 arg=$2 cached_targets=$3
 
         # return value -- must reset at start of function
         RES=
@@ -206,8 +236,13 @@ $(compgen -d "$full_arg" | sed 's/$/\//')" | grep -v '^$')
         # Python subprocess (slower). A valid text cache proves this is a
         # redo directory, so we can skip what_predef_parsed entirely.
         local compgen_arg
-        if compgen_arg=$(text_cache_read "$path" 2>/dev/null); then
-            dbg '> text cache hit (fast path)'
+        if [ -n "$cached_targets" ] || compgen_arg=$(text_cache_read "$path" 2>/dev/null); then
+            if [ -n "$cached_targets" ]; then
+                compgen_arg=$cached_targets
+                dbg '> virtual target cache hit'
+            else
+                dbg '> text cache hit (fast path)'
+            fi
 
             RES=$(compgen -W "$compgen_arg" "$arg")
 
@@ -218,7 +253,20 @@ $(compgen -d "$full_arg" | sed 's/$/\//')" | grep -v '^$')
                 return 0
             fi
 
-            dbg '> text cache hit but no match for arg'
+            if [ -n "$cached_targets" ]; then
+                dbg '> virtual target cache miss for arg'
+            else
+                dbg '> text cache hit but no match for arg'
+            fi
+
+            # If the user is traversing a slash-separated target prefix inside
+            # the cached target list, recurse within that virtual namespace
+            # instead of probing synthetic redo paths like build/what_predefined.
+            if try_virtual_recurse "$compgen_arg" "$arg"; then
+                dbg "> virtual recurse: dir ($VIRTUAL_LEAD_DIR) arg ($VIRTUAL_REST)"
+                redo_completion_helper "$path/$VIRTUAL_LEAD_DIR" "$VIRTUAL_REST" "$VIRTUAL_FILTERED"
+                return $?
+            fi
 
             # no match, so check for a directory prefix
             if should_recurse; then
@@ -269,6 +317,14 @@ $(compgen -d "$full_arg" | sed 's/$/\//')" | grep -v '^$')
         fi
 
         dbg '> cache miss'
+
+        # Reuse the freshly computed target list as a virtual namespace before
+        # probing synthetic redo subpaths like build/what_predefined.
+        if try_virtual_recurse "$compgen_arg" "$arg"; then
+            dbg "> virtual recurse: dir ($VIRTUAL_LEAD_DIR) arg ($VIRTUAL_REST)"
+            redo_completion_helper "$path/$VIRTUAL_LEAD_DIR" "$VIRTUAL_REST" "$VIRTUAL_FILTERED"
+            return $?
+        fi
 
         # no match, so check for a directory prefix
         if should_recurse; then
@@ -415,7 +471,7 @@ $(compgen -d "$full_arg" | sed 's/$/\//')" | grep -v '^$')
         unset oldifs
     fi
 
-    unset -f redo_cmd_parsed what_parsed what_predef_parsed text_cache_read save_last_confirmed_dir get_last_confirmed_dir prepend try_trim_leading_dir append_compgen_dirs synchronous_work prepend_path redo_completion_helper try_cached_dir
+    unset -f redo_cmd_parsed what_parsed what_predef_parsed text_cache_read save_last_confirmed_dir get_last_confirmed_dir prepend try_trim_leading_dir try_virtual_recurse append_compgen_dirs synchronous_work prepend_path redo_completion_helper try_cached_dir
 
 }
 
