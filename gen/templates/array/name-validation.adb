@@ -227,7 +227,7 @@ package body {{ name }}.Validation is
 {% if endianness in ["either", "big"] %}
    function Get_Field (Src : in T; Field : in Interfaces.Unsigned_32) return Basic_Types.Poly_Type is
 {% if element.is_packed_type %}
-      Idx : constant Constrained_Index_Type := Constrained_Index_Type'First + Unconstrained_Index_Type (Field / {{ element.type_model.num_fields }});
+      Idx : constant Constrained_Index_Type := Constrained_Index_Type'First + Unconstrained_Index_Type ((Field - 1) / {{ element.type_model.num_fields }});
       Remainder : Unsigned_32 := 0;
       To_Return : Basic_Types.Poly_Type;
 {% else %}
@@ -272,7 +272,7 @@ package body {{ name }}.Validation is
 {% if endianness in ["either", "little"] %}
    function Get_Field (Src : in T_Le; Field : in Interfaces.Unsigned_32) return Basic_Types.Poly_Type is
 {% if element.is_packed_type %}
-      Idx : constant Constrained_Index_Type := Constrained_Index_Type'First + Unconstrained_Index_Type (Field / {{ element.type_model.num_fields }});
+      Idx : constant Constrained_Index_Type := Constrained_Index_Type'First + Unconstrained_Index_Type ((Field - 1) / {{ element.type_model.num_fields }});
       Remainder : Unsigned_32 := 0;
       To_Return : Basic_Types.Poly_Type;
 {% else %}

@@ -430,7 +430,7 @@ package body {{ name }}.Validation is
 {% for field in fields.values() %}
 {% if field.is_packed_type %}
          when {{ field.start_field_number }} .. {{ field.end_field_number }} =>
-            To_Return := {{ field.type_package }}.Validation.Get_Field (Src.{{ field.name }}, Field - {{ field.start_field_number + 1 }});
+            To_Return := {{ field.type_package }}.Validation.Get_Field (Src.{{ field.name }}, Field - {{ field.start_field_number - 1 }});
 {% else %}
          when {{ field.start_field_number }} =>
             declare
@@ -477,7 +477,7 @@ package body {{ name }}.Validation is
 {% for field in fields.values() %}
 {% if field.is_packed_type %}
          when {{ field.start_field_number }} .. {{ field.end_field_number }} =>
-            To_Return := {{ field.type_package }}.Validation.Get_Field (Src.{{ field.name }}, Field - {{ field.start_field_number + 1 }});
+            To_Return := {{ field.type_package }}.Validation.Get_Field (Src.{{ field.name }}, Field - {{ field.start_field_number - 1 }});
 {% else %}
          when {{ field.start_field_number }} =>
             declare
