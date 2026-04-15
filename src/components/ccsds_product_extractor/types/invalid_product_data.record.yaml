@@ -13,3 +13,4 @@ fields:
     description: A polymorphic type containing the bad field data.
     type: Basic_Types.Poly_Type
     format: U8x8
+    skip_validation: True
