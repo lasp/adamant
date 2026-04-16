@@ -735,14 +735,16 @@ package body Memory_Manager_Tests.Implementation is
       T : Component.Memory_Manager.Implementation.Tester.Instance_Access renames Self.Tester;
       Cmd : Command.T;
    begin
-      -- Send command to write part too big of region:
+      -- Send command with a valid sizing field but Arg_Buffer_Length too short to
+      -- hold the claimed data. This induces a Length_Error from the deserialization
+      -- consistency check (Arg_Buffer_Length < Num_Bytes_Deserialized).
       declare
-         Bytes : constant Virtual_Memory_Region_Write.Serialization.Byte_Array := [0, 0, 0, 0, 100, 100, others => 255];
-         Temp : constant Virtual_Memory_Region_Write.T := (0, 0, [others => 0]);
+         Temp : constant Virtual_Memory_Region_Write.T := (Address => 0, Length => 10, Data => [others => 255]);
       begin
          pragma Assert (T.Commands.Write_Memory_Region (Temp, Cmd) = Success);
-         -- Overwrite with invalid bytes.
-         Cmd.Arg_Buffer := Bytes;
+         -- Shorten the buffer length to be less than Min_Serialized_Length, which
+         -- triggers the outer range check.
+         Cmd.Header.Arg_Buffer_Length := Virtual_Memory_Region_Write.Min_Serialized_Length - 1;
       end;
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -752,7 +754,7 @@ package body Memory_Manager_Tests.Implementation is
       -- Make sure some events were thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
-      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Write_Memory_Region_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 6]));
+      Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Write_Memory_Region_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, Basic_Types.Byte (Virtual_Memory_Region_Write.Min_Serialized_Length - 1)]));
 
       -- Send command to write part of region:
       pragma Assert (T.Commands.Write_Memory_Region ((Address => 100, Length => 0, Data => [others => 255]), Cmd) = Success);
