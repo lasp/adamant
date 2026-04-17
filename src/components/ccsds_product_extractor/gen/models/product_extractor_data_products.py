@@ -36,7 +36,8 @@ class product_extractor_data_products(data_products):
         # loop through the model to get all the data products we need to add
         for apid, products in extraction_list_model.apids.items():
             for data_product_item in products:
-                # Check for the first time through to replace the dummy data product
+                # The product extractor's own template handles LE
+                # types correctly, so allow little-endian here.
                 self.entities[data_product_item.name] = data_product(
                     name=data_product_item.name,
                     type=data_product_item.product_type
@@ -44,6 +45,7 @@ class product_extractor_data_products(data_products):
                     + data_product_item.product_endian,
                     description=data_product_item.description,
                     id=None,
+                    little_endian_allowed=True,
                     suite=self,
                 )
                 dp = self.entities[data_product_item.name]

@@ -21,6 +21,7 @@ class ided_entity(renderable_object):
         default_value=None,
         variable_types_allowed=False,
         packed_types_required=False,
+        little_endian_allowed=False,
         suite=None,
     ):
         self.name = ada.formatType(name)
@@ -68,6 +69,19 @@ class ided_entity(renderable_object):
                 + "'. Variable length types are not (yet) supported. Consider using a static sized packed type instead."
             )
 
+        # Little-endian packed types are not supported for most ided
+        # entities. The code generation templates assume big-endian for
+        # serialization, validation, and representation of these types.
+        if type and self.is_little_endian and not little_endian_allowed:
+            raise ModelException(
+                "Entity: '"
+                + str(self.name)
+                + "' uses little-endian type '"
+                + str(self.type)
+                + "'. Little-endian types are not supported for this entity. "
+                + "Use the big-endian variant (.T) instead."
+            )
+
         # We don't allow volatile datatypes in ided entities.
         if type and self.datatype.is_volatile_type:
             raise ModelException(
@@ -111,6 +125,12 @@ class ided_entity(renderable_object):
     def has_packed_type(self):
         if self.datatype:
             return self.datatype.is_packed_type
+        return False
+
+    @property
+    def is_little_endian(self):
+        if self.datatype:
+            return self.datatype.is_little_endian
         return False
 
     @property
