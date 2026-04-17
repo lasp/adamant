@@ -21,12 +21,11 @@ package {{ name }}.Validation is
    -- range checks on all the fields of the record. If a field is invalid,
    -- False is returned and the Errant_Field parameter is filled in with a
    -- Natural specifying which field was out of range.
-   function Valid (R : in U; Errant_Field : out Interfaces.Unsigned_32) return Boolean;
 {% if endianness in ["either", "big"] %}
-   function Valid (R : in T; Errant_Field : out Interfaces.Unsigned_32) return Boolean;
+   function Valid (Bytes : in Serialization.Byte_Array; Errant_Field : out Interfaces.Unsigned_32) return Boolean;
 {% endif %}
 {% if endianness in ["either", "little"] %}
-   function Valid (R : in T_Le; Errant_Field : out Interfaces.Unsigned_32) return Boolean;
+   function Valid_Le (Bytes : in Serialization_Le.Byte_Array; Errant_Field : out Interfaces.Unsigned_32) return Boolean;
 {% endif %}
 
    -- Return a field (provided by a field number) as a polymorphic type.
@@ -36,10 +35,10 @@ package {{ name }}.Validation is
    -- with the Valid functions above to create useful error messages for an invalid
    -- type:
 {% if endianness in ["either", "big"] %}
-   function Get_Field (Src : in T; Field : in Interfaces.Unsigned_32) return Basic_Types.Poly_Type;
+   function Get_Field (Bytes : in Serialization.Byte_Array; Field : in Interfaces.Unsigned_32) return Basic_Types.Poly_Type;
 {% endif %}
 {% if endianness in ["either", "little"] %}
-   function Get_Field (Src : in T_Le; Field : in Interfaces.Unsigned_32) return Basic_Types.Poly_Type;
+   function Get_Field_Le (Bytes : in Serialization_Le.Byte_Array; Field : in Interfaces.Unsigned_32) return Basic_Types.Poly_Type;
 {% endif %}
 
 end {{ name }}.Validation;

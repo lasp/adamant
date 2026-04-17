@@ -24,23 +24,21 @@ package {{ name }}.Validation is
    -- Return True if the packed array is valid. The function performs
    -- range checks on all the fields of the array. If an element is invalid,
    -- False is returned. The Errant_Field parameter is always 0.
-   function Valid (R : in Unconstrained; Errant_Field : out Interfaces.Unsigned_32) return Boolean;
-   -- ^ "Unpacked" can be passed into this function as well because it is a subtype of Unconstrained
 {% if endianness in ["either", "big"] %}
-   -- Valid function for the T type. Optionally, a first or last index can be passed in to only check
+   -- Valid function accepting a byte array. Optionally, a first or last index can be passed in to only check
    -- a portion of the array, otherwise the entire array is checked for validity.
    function Valid (
-      R : in T;
+      Bytes : in Serialization.Byte_Array;
       Errant_Field : out Unsigned_32;
       First_Index : in Unconstrained_Index_Type := T'First;
       Last_Index : in Unconstrained_Index_Type := T'Last
    ) return Boolean;
 {% endif %}
 {% if endianness in ["either", "little"] %}
-   -- Valid function for the T_Le type. Optionally, a first or last index can be passed in to only check
+   -- Valid_Le function accepting a byte array. Optionally, a first or last index can be passed in to only check
    -- a portion of the array, otherwise the entire array is checked for validity.
-   function Valid (
-      R : in T_Le;
+   function Valid_Le (
+      Bytes : in Serialization_Le.Byte_Array;
       Errant_Field : out Unsigned_32;
       First_Index : in Unconstrained_Index_Type := T_Le'First;
       Last_Index : in Unconstrained_Index_Type := T_Le'Last
@@ -54,10 +52,10 @@ package {{ name }}.Validation is
    -- with the validation functions above to create useful error messages for an invalid
    -- type:
 {% if endianness in ["either", "big"] %}
-   function Get_Field (Src : in T; Field : in Interfaces.Unsigned_32) return Basic_Types.Poly_Type;
+   function Get_Field (Bytes : in Serialization.Byte_Array; Field : in Interfaces.Unsigned_32) return Basic_Types.Poly_Type;
 {% endif %}
 {% if endianness in ["either", "little"] %}
-   function Get_Field (Src : in T_Le; Field : in Interfaces.Unsigned_32) return Basic_Types.Poly_Type;
+   function Get_Field_Le (Bytes : in Serialization_Le.Byte_Array; Field : in Interfaces.Unsigned_32) return Basic_Types.Poly_Type;
 {% endif %}
 
 end {{ name }}.Validation;
