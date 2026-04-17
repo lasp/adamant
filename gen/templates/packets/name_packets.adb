@@ -11,9 +11,6 @@ with Serializer;
 {% if typeless_packet or variable_length_types %}
 with Byte_Array_Util;
 {% endif %}
-{% if not typeless_packet and variable_length_types %}
-with Basic_Types;
-{% endif %}
 
 package body {{ name }} is
    use Packet_Types;
@@ -127,13 +124,54 @@ package body {{ name }} is
 
       return P;
    end {{ p.name }}_Truncate;
+
+   not overriding function {{ p.name }}_Bytes (Self : in out Instance; Timestamp : in Sys_Time.T; Buf : in Basic_Types.Byte_Array; Pkt : out Packet.T) return Serialization_Status is
+   begin
+      -- Initialize the packet:
+      Pkt := (
+         Header => (
+            Id => Self.Get_{{ p.name }}_Id,
+            Time => Timestamp,
+            Sequence_Count => Self.{{ p.name }}_Sequence_Count,
+            Buffer_Length => 0
+         ),
+         Buffer => [others => 0]
+      );
+      -- Make sure the passed in buffer will fit into the packet:
+      if Buf'Length > Pkt.Buffer'Length then
+         return Failure;
+      end if;
+      -- Copy over the data and update the packet length and sequence count:
+      Pkt.Header.Buffer_Length := Buf'Length;
+      Pkt.Buffer (Packet_Buffer_Type'First .. Packet_Buffer_Type'First + Buf'Length - 1) := Buf;
+      Self.{{ p.name }}_Sequence_Count := @ + 1;
+      return Success;
+   end {{ p.name }}_Bytes;
+{% else %}
+{% if p.type_model %}
+   not overriding function {{ p.name }} (Self : in out Instance; Timestamp : in Sys_Time.T; Item : in {{ p.type }}) return Packet.T is
+   begin
+      return Self.{{ p.name }}_Bytes (Timestamp, {{ p.type_package }}.Serialization.To_Byte_Array (Item));
+   end {{ p.name }};
+
+   not overriding function {{ p.name }}_Bytes (Self : in out Instance; Timestamp : in Sys_Time.T; Buf : in {{ p.type_package }}.Serialization.Byte_Array) return Packet.T is
+      P : Packet.T := (
+         Header => (
+            Id => Self.Get_{{ p.name }}_Id,
+            Time => Timestamp,
+            Sequence_Count => Self.{{ p.name }}_Sequence_Count,
+            Buffer_Length => Buf'Length
+         ),
+         Buffer => [others => 0]
+      );
+   begin
+      P.Buffer (P.Buffer'First .. P.Buffer'First + Buf'Length - 1) := Buf;
+      Self.{{ p.name }}_Sequence_Count := @ + 1;
+      return P;
+   end {{ p.name }}_Bytes;
 {% else %}
    not overriding function {{ p.name }} (Self : in out Instance; Timestamp : in Sys_Time.T; Item : in {{ p.type }}) return Packet.T is
-{% if p.type_model %}
-      package Packet_Serializer renames {{ p.type_package }}.Serialization;
-{% else %}
       package Packet_Serializer is new Serializer ({{ p.type }});
-{% endif %}
       P : Packet.T := (
          Header => (
             Id => Self.Get_{{ p.name }}_Id,
@@ -148,6 +186,7 @@ package body {{ name }} is
       Self.{{ p.name }}_Sequence_Count := @ + 1;
       return P;
    end {{ p.name }};
+{% endif %}
 {% endif %}
 {% else %}
    not overriding function {{ p.name }} (Self : in out Instance; Timestamp : in Sys_Time.T; Buf : in Basic_Types.Byte_Array; Pkt : out Packet.T) return Serialization_Status is
