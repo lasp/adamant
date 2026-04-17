@@ -46,36 +46,44 @@ package body {{ name }} is
          when Success => null;
       end case;
 
-      -- Now make sure the data product is valid for the type that we are extracting using the validation from the packed type generation
+      -- Now make sure the data product is valid for the type that we are extracting using the validation from the packed type generation.
+      -- Validate directly on the byte buffer to avoid passing potentially-invalid typed data.
       declare
          Ef : Unsigned_32;
 {% if "T_Le" in data_product.product_endian %}
-         pragma Warnings (Off, "overlay changes scalar storage order");
-         Overlay : {{ data_product.product_type }}.{{ data_product.product_endian }} with Import, Convention => Ada, Address => Dp.Buffer'Address;
-         pragma Warnings (On, "overlay changes scalar storage order");
+         Dp_Bytes : {{ data_product.product_type }}.Serialization_Le.Byte_Array renames Dp.Buffer (
+            Dp.Buffer'First .. Dp.Buffer'First + {{ data_product.product_type }}.Serialization_Le.Byte_Array'Length - 1
+         );
 {% else %}
-         Overlay : {{ data_product.product_type }}.{{ data_product.product_endian }} with Import, Convention => Ada, Address => Dp.Buffer'Address;
+         Dp_Bytes : {{ data_product.product_type }}.Serialization.Byte_Array renames Dp.Buffer (
+            Dp.Buffer'First .. Dp.Buffer'First + {{ data_product.product_type }}.Serialization.Byte_Array'Length - 1
+         );
 {% endif %}
-         Validation : constant Boolean := {{ data_product.product_type }}.Always_Valid
-            or else {{ data_product.product_type }}.Validation.Valid (R => Overlay, Errant_Field => Ef);
       begin
          pragma Warnings (Off, "this code can never be executed and has been deleted");
-         case Validation is
-            when True =>
-               return Success;
-            when False =>
-               -- When there is a validation error, fill in a data structure with the relevant information for the component to use to send an event.
-               declare
-                  P_Type : Basic_Types.Poly_Type := [others => 0];
-               begin
-                  -- Copy extracted value into poly type
-                  Byte_Array_Util.Safe_Right_Copy (P_Type, Pkt.Data ({{data_product.offset}} .. {{data_product.offset}} + {{ data_product.product_type }}.Size_In_Bytes - 1));
-                  Invalid_Data_Product.Id := Id;
-                  Invalid_Data_Product.Errant_Field_Number := Ef;
-                  Invalid_Data_Product.Errant_Field := P_Type;
-               end;
-               return Invalid_Data;
-         end case;
+{% if "T_Le" in data_product.product_endian %}
+         if {{ data_product.product_type }}.Always_Valid or else
+            {{ data_product.product_type }}.Validation.Valid_Le (Bytes => Dp_Bytes, Errant_Field => Ef)
+         then
+{% else %}
+         if {{ data_product.product_type }}.Always_Valid or else
+            {{ data_product.product_type }}.Validation.Valid (Bytes => Dp_Bytes, Errant_Field => Ef)
+         then
+{% endif %}
+            return Success;
+         else
+            -- When there is a validation error, fill in a data structure with the relevant information for the component to use to send an event.
+            declare
+               P_Type : Basic_Types.Poly_Type := [others => 0];
+            begin
+               -- Copy extracted value into poly type
+               Byte_Array_Util.Safe_Right_Copy (P_Type, Pkt.Data ({{data_product.offset}} .. {{data_product.offset}} + {{ data_product.product_type }}.Size_In_Bytes - 1));
+               Invalid_Data_Product.Id := Id;
+               Invalid_Data_Product.Errant_Field_Number := Ef;
+               Invalid_Data_Product.Errant_Field := P_Type;
+            end;
+            return Invalid_Data;
+         end if;
          pragma Warnings (On, "this code can never be executed and has been deleted");
       end;
    end Extract_And_Validate_{{data_product.name}};
