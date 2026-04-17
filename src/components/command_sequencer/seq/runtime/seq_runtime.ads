@@ -173,13 +173,13 @@ private
    -- "get" function for that type.
    generic
       type T is private;
-      with function Valid (R : in T; Errant_Field : out Interfaces.Unsigned_32) return Boolean;
+      with function Valid (R : in Basic_Types.Byte_Array; Errant_Field : out Interfaces.Unsigned_32) return Boolean;
    function Get_Instruction (Inst : in out Instance; Instruction : out T) return Seq_Status;
 
    -- Generic function to set an internal sequence runtime variable of type T:
    generic
       type T is private;
-      with function Valid (R : in T; Errant_Field : out Interfaces.Unsigned_32) return Boolean;
+      with function Valid (R : in Basic_Types.Byte_Array; Errant_Field : out Interfaces.Unsigned_32) return Boolean;
    function Get_Internal (Inst : in out Instance; Src : in Seq_Internal.E; Dest : out T) return Seq_Status;
 
    -- Generic function to get an internal sequence runtime variable of type T:
