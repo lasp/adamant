@@ -17,10 +17,8 @@ with {{ include }};
 {% endif %}
 {% endfor %}
 {% endif %}
-{% if typeless_packet %}
-with Basic_Types;
-{% endif %}
 {% if typeless_packet or variable_length_types %}
+with Basic_Types;
 with Serializer_Types; use Serializer_Types;
 {% endif %}
 {% if description %}
@@ -82,8 +80,14 @@ package {{ name }} is
    -- Special function, which will fill the Packet.T type as much as possible, and then drop any remaining bytes found in the
    -- input item. Sometimes this is desirable over returning a Serialization_Error, like what would occur with the above function.
    not overriding function {{ p.name }}_Truncate (Self : in out Instance; Timestamp : in Sys_Time.T; Item : in {{ p.type }}) return Packet.T;
+   -- Byte array variant for when the data is already serialized:
+   not overriding function {{ p.name }}_Bytes (Self : in out Instance; Timestamp : in Sys_Time.T; Buf : in Basic_Types.Byte_Array; Pkt : out Packet.T) return Serialization_Status;
 {% else %}
    not overriding function {{ p.name }} (Self : in out Instance; Timestamp : in Sys_Time.T; Item : in {{ p.type }}) return Packet.T;
+{% if p.type_model %}
+   -- Byte array variant for when the data is already serialized:
+   not overriding function {{ p.name }}_Bytes (Self : in out Instance; Timestamp : in Sys_Time.T; Buf : in {{ p.type_package }}.Serialization.Byte_Array) return Packet.T;
+{% endif %}
 {% endif %}
 {% else %}
    not overriding function {{ p.name }} (Self : in out Instance; Timestamp : in Sys_Time.T; Buf : in Basic_Types.Byte_Array; Pkt : out Packet.T) return Serialization_Status;
