@@ -6,7 +6,10 @@ import os.path
 
 
 class data_product(ided_entity):
-    def __init__(self, name, type, description=None, id=None, suite=None):
+    def __init__(
+        self, name, type, description=None, id=None,
+        little_endian_allowed=False, suite=None
+    ):
         super(data_product, self).__init__(
             name,
             type,
@@ -14,6 +17,7 @@ class data_product(ided_entity):
             id,
             default_value=None,
             variable_types_allowed=False,
+            little_endian_allowed=little_endian_allowed,
             suite=suite,
         )
 

@@ -11,6 +11,7 @@ class datatype(object):
         self.package = None
         self.generic = False
         self.is_packed_type = False
+        self.is_little_endian = False
         self.is_volatile_type = False
         self.is_atomic_type = False
         self.is_register_type = False
@@ -33,6 +34,7 @@ class datatype(object):
             if self.name.endswith(".T") or self.name.endswith(".T_Le"):
                 self.model = model_loader.try_load_model_by_name(self.package)
                 self.is_packed_type = True
+                self.is_little_endian = self.name.endswith(".T_Le")
             elif self.name.endswith(".U"):
                 self.model = model_loader.try_load_model_by_name(self.package)
             elif self.name.endswith(".E"):
@@ -55,10 +57,12 @@ class datatype(object):
             ):
                 self.model = model_loader.try_load_model_by_name(self.package)
                 self.is_packed_type = True
+                self.is_little_endian = self.name.endswith(".Volatile_T_Le")
                 self.is_volatile_type = True
             elif self.name.endswith(".Atomic_T") or self.name.endswith(".Atomic_T_Le"):
                 self.model = model_loader.try_load_model_by_name(self.package)
                 self.is_packed_type = True
+                self.is_little_endian = self.name.endswith(".Atomic_T_Le")
                 self.is_volatile_type = True
                 self.is_atomic_type = True
             elif self.name.endswith(".Register_T") or self.name.endswith(
@@ -66,6 +70,7 @@ class datatype(object):
             ):
                 self.model = model_loader.try_load_model_by_name(self.package)
                 self.is_packed_type = True
+                self.is_little_endian = self.name.endswith(".Register_T_Le")
                 self.is_volatile_type = True
                 self.is_register_type = True
 
