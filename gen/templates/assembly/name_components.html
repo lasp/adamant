@@ -17,6 +17,8 @@
         <li><b>Number of Components with Packets:</b> {{ component_kind_dict['packets']|length }}</li>
         <li><b>Number of Components with Faults:</b> {{ component_kind_dict['faults']|length }}</li>
         <li><b>Number of Connections:</b> {{ connections|length }}</li>
+        <li><b>Number of Unconnected Connectors:</b> {{ num_unconnected_connectors }}</li>
+        <li><b>Number of Ignored Connectors:</b> {{ num_ignored_connectors }}</li>
         <li><b>Number of Events:</b> {{ events|length }}</li>
         <li><b>Number of Commands:</b> {{ commands|length }}</li>
         <li><b>Number of Data Products:</b> {{ data_products|length }}</li>
