@@ -545,6 +545,17 @@ class product_packets(assembly_submodel):
                         )
 
                     # Set the size:
+                    if dp.data_product.type_model is None:
+                        raise ModelException(
+                            'Data product "'
+                            + dp.name
+                            + '" in packet "'
+                            + pkt.name
+                            + '" has type "'
+                            + str(dp.data_product.type)
+                            + '" whose model could not be found in the build path.',
+                            lineno=pkt.lineno,
+                        )
                     dp.size = dp.data_product.type_model.size  # in bits
                 else:
                     dp.size = dp.pad_bytes * 8
