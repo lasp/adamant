@@ -153,7 +153,7 @@ package body {{ name }} is
       declare
          -- Overlay destination with entire byte array:
          pragma Warnings (Off, "overlay changes scalar storage order");
-         Overlay : constant T with Import, Convention => Ada, Address => Src'Address;
+         Overlay : constant T with Import, Convention => Ada, Address => Src'Address, Alignment => 1;
          pragma Warnings (On, "overlay changes scalar storage order");
          -- Get the serialized length of the destination:
          Stat : constant Serialization_Status := Serialized_Length (Overlay, Num_Bytes_Serialized);
@@ -229,7 +229,7 @@ package body {{ name }} is
       declare
          -- Overlay destination with entire byte array:
          pragma Warnings (Off, "overlay changes scalar storage order");
-         Overlay : constant T_Le with Import, Convention => Ada, Address => Src'Address;
+         Overlay : constant T_Le with Import, Convention => Ada, Address => Src'Address, Alignment => 1;
          pragma Warnings (On, "overlay changes scalar storage order");
          -- Get the serialized length of the destination:
          Stat : constant Serialization_Status := Serialized_Length_Le (Overlay, Num_Bytes_Serialized);

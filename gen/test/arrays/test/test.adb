@@ -161,11 +161,11 @@ begin
    Put_Line ("passed.");
 
    Put_Line ("Validating arrays: ");
-   pragma Assert (Simple_Array.Validation.Valid (Simple_Mut, Ignore), "Simple is not valid, but should be.");
-   pragma Assert (Complex_Array.Validation.Valid (Complex_Mut, Ignore), "Complex is not valid, but should be.");
-   pragma Assert (Eight_Bit_Type_Array.Validation.Valid (Eight_Mut, Ignore), "Eight is not valid, but should be.");
-   pragma Assert (Unaligned_Array.Validation.Valid (Unaligned_Mut, Ignore), "Unaligned is not valid, but should be.");
-   pragma Assert (Enum_Array.Validation.Valid (Enum_Mut, Ignore), "Enum is not valid, but should be.");
+   pragma Assert (Simple_Array.Validation.Valid (Simple_Array.Serialization.To_Byte_Array (Simple_Mut), Ignore), "Simple is not valid, but should be.");
+   pragma Assert (Complex_Array.Validation.Valid (Complex_Array.Serialization.To_Byte_Array (Complex_Mut), Ignore), "Complex is not valid, but should be.");
+   pragma Assert (Eight_Bit_Type_Array.Validation.Valid (Eight_Bit_Type_Array.Serialization.To_Byte_Array (Eight_Mut), Ignore), "Eight is not valid, but should be.");
+   pragma Assert (Unaligned_Array.Validation.Valid (Unaligned_Array.Serialization.To_Byte_Array (Unaligned_Mut), Ignore), "Unaligned is not valid, but should be.");
+   pragma Assert (Enum_Array.Validation.Valid (Enum_Array.Serialization.To_Byte_Array (Enum_Mut), Ignore), "Enum is not valid, but should be.");
    -- TODO Validation for variable
    Put_Line ("passed.");
 
@@ -178,34 +178,42 @@ begin
    Put_Line ("passed.");
 
    Put_Line ("Validating arrays (expect failure): ");
-   pragma Assert (not Simple_Array.Validation.Valid (Simple_Mut, Field_Number), "Simple is valid, but should not be.");
-   pragma Assert (Field_Number = 3, "Simple field_Number is wrong.");
-   Put_Line (Poly2bytestring (Simple_Array.Validation.Get_Field (Simple_Mut, Field_Number)));
-   pragma Assert (Simple_Array.Validation.Get_Field (Simple_Mut, Field_Number) = [0, 0, 0, 0, 0, 255, 0, 0], "Simple's polytype field is wrong."); -- represented by 32-bit number in little endian
-   pragma Assert (not Complex_Array.Validation.Valid (Complex_Mut, Field_Number), "Complex is valid, but should not be.");
-   pragma Assert (Field_Number = 5, "Complex field_Number is wrong.");
-   Put_Line (Poly2bytestring (Complex_Array.Validation.Get_Field (Complex_Mut, Field_Number)));
-   pragma Assert (Complex_Array.Validation.Get_Field (Complex_Mut, Field_Number) = [0, 0, 0, 0, 9, 0, 0, 0], "Complex's polytype field is wrong."); -- represented by 32-bit number in little endian
-   pragma Assert (Complex_Array.Validation.Valid (Complex_Mut, Field_Number, Complex_Mut'First, Complex_Mut'First), "Complex is invalid, but should not be.");
-   pragma Assert (not Eight_Bit_Type_Array.Validation.Valid (Eight_Mut, Field_Number), "Eight is valid, but should not be.");
-   pragma Assert (Field_Number = 2, "Eight field_Number is wrong.");
-   Put_Line (Poly2bytestring (Eight_Bit_Type_Array.Validation.Get_Field (Eight_Mut, Field_Number)));
-   pragma Assert (Eight_Bit_Type_Array.Validation.Get_Field (Eight_Mut, Field_Number) = [1, 1, 1, 00, 1, 1, 1, 1], "Eight's polytype field is wrong."); -- represented by 32-bit number in little endian
-   pragma Assert (not Unaligned_Array.Validation.Valid (Unaligned_Mut, Field_Number), "Unaligned is valid, but should not be.");
-   pragma Assert (Field_Number = 1, "Unaligned field_Number is wrong. ");
-   Put_Line (Poly2bytestring (Unaligned_Array.Validation.Get_Field (Unaligned_Mut, Field_Number)));
-   pragma Assert (Unaligned_Array.Validation.Get_Field (Unaligned_Mut, Field_Number) = [0, 0, 0, 00, 255, 03, 0, 0], "Unaligned's polytype field is wrong."); -- represented by 32-bit number in little endian
-   pragma Assert (not Enum_Array.Validation.Valid (Enum_Mut, Field_Number), "Enum is valid, but should not be.");
-   pragma Assert (Field_Number = 4, "Enum field_Number is wrong. " & Natural'Image (Natural (Field_Number)));
-   Put_Line (Poly2bytestring (Enum_Array.Validation.Get_Field (Enum_Mut, Field_Number)));
-   pragma Assert (Enum_Array.Validation.Get_Field (Enum_Mut, Field_Number) = [0, 0, 0, 00, 0, 0, 0, 04], "Enum's polytype field is wrong."); -- represented by 32-bit number in little endian
-   pragma Assert (Enum_Array.Validation.Valid (Enum_Mut, Field_Number, Enum_Mut'First, Enum_Mut'First + 1), "Enum is invalid, but should not be 1.");
-   pragma Assert (Enum_Array.Validation.Valid (Enum_Mut, Field_Number, Enum_Mut'First + 1, Enum_Mut'First + 2), "Enum is invalid, but should not be 2.");
-   pragma Assert (Enum_Array.Validation.Valid (Enum_Mut, Field_Number, Enum_Mut'First, Enum_Mut'Last - 3), "Enum is invalid, but should not be 3.");
-   pragma Assert (Enum_Array.Validation.Valid (Enum_Mut, Field_Number, Enum_Mut'First, Enum_Mut'Last - 2), "Enum is invalid, but should not be 4.");
-   pragma Assert (not Enum_Array.Validation.Valid (Enum_Mut, Field_Number, Enum_Mut'First, Enum_Mut'Last), "Enum is valid, but should not be 5.");
-   pragma Assert (not Enum_Array.Validation.Valid (Enum_Mut, Field_Number, Enum_Mut'First, Enum_Mut'Last), "Enum is valid, but should not be 6.");
-   pragma Assert (not Enum_Array.Validation.Valid (Enum_Mut, Field_Number, Enum_Mut'Last - 2, Enum_Mut'Last), "Enum is valid, but should not be 7.");
+   declare
+      Simple_Inv : Simple_Array.Serialization.Byte_Array with Import, Convention => Ada, Address => Simple_Mut'Address;
+      Complex_Inv : Complex_Array.Serialization.Byte_Array with Import, Convention => Ada, Address => Complex_Mut'Address;
+      Eight_Inv : Eight_Bit_Type_Array.Serialization.Byte_Array with Import, Convention => Ada, Address => Eight_Mut'Address;
+      Unaligned_Inv : Unaligned_Array.Serialization.Byte_Array with Import, Convention => Ada, Address => Unaligned_Mut'Address;
+      Enum_Inv : Enum_Array.Serialization.Byte_Array with Import, Convention => Ada, Address => Enum_Mut'Address;
+   begin
+      pragma Assert (not Simple_Array.Validation.Valid (Simple_Inv, Field_Number), "Simple is valid, but should not be.");
+      pragma Assert (Field_Number = 3, "Simple field_Number is wrong.");
+      Put_Line (Poly2bytestring (Simple_Array.Validation.Get_Field (Simple_Inv, Field_Number)));
+      pragma Assert (Simple_Array.Validation.Get_Field (Simple_Inv, Field_Number) = [0, 0, 0, 0, 0, 255, 0, 0], "Simple's polytype field is wrong."); -- represented by 32-bit number in little endian
+      pragma Assert (not Complex_Array.Validation.Valid (Complex_Inv, Field_Number), "Complex is valid, but should not be.");
+      pragma Assert (Field_Number = 5, "Complex field_Number is wrong.");
+      Put_Line (Poly2bytestring (Complex_Array.Validation.Get_Field (Complex_Inv, Field_Number)));
+      pragma Assert (Complex_Array.Validation.Get_Field (Complex_Inv, Field_Number) = [0, 0, 0, 0, 9, 0, 0, 0], "Complex's polytype field is wrong."); -- represented by 32-bit number in little endian
+      pragma Assert (Complex_Array.Validation.Valid (Complex_Inv, Ignore, Complex_Mut'First, Complex_Mut'First), "Complex is invalid, but should not be.");
+      pragma Assert (not Eight_Bit_Type_Array.Validation.Valid (Eight_Inv, Field_Number), "Eight is valid, but should not be.");
+      pragma Assert (Field_Number = 2, "Eight field_Number is wrong.");
+      Put_Line (Poly2bytestring (Eight_Bit_Type_Array.Validation.Get_Field (Eight_Inv, Field_Number)));
+      pragma Assert (Eight_Bit_Type_Array.Validation.Get_Field (Eight_Inv, Field_Number) = [1, 1, 1, 00, 1, 1, 1, 1], "Eight's polytype field is wrong."); -- represented by 32-bit number in little endian
+      pragma Assert (not Unaligned_Array.Validation.Valid (Unaligned_Inv, Field_Number), "Unaligned is valid, but should not be.");
+      pragma Assert (Field_Number = 1, "Unaligned field_Number is wrong. ");
+      Put_Line (Poly2bytestring (Unaligned_Array.Validation.Get_Field (Unaligned_Inv, Field_Number)));
+      pragma Assert (Unaligned_Array.Validation.Get_Field (Unaligned_Inv, Field_Number) = [0, 0, 0, 00, 255, 03, 0, 0], "Unaligned's polytype field is wrong."); -- represented by 32-bit number in little endian
+      pragma Assert (not Enum_Array.Validation.Valid (Enum_Inv, Field_Number), "Enum is valid, but should not be.");
+      pragma Assert (Field_Number = 4, "Enum field_Number is wrong. " & Natural'Image (Natural (Field_Number)));
+      Put_Line (Poly2bytestring (Enum_Array.Validation.Get_Field (Enum_Inv, Field_Number)));
+      pragma Assert (Enum_Array.Validation.Get_Field (Enum_Inv, Field_Number) = [0, 0, 0, 00, 0, 0, 0, 04], "Enum's polytype field is wrong."); -- represented by 32-bit number in little endian
+      pragma Assert (Enum_Array.Validation.Valid (Enum_Inv, Ignore, Enum_Mut'First, Enum_Mut'First + 1), "Enum is invalid, but should not be 1.");
+      pragma Assert (Enum_Array.Validation.Valid (Enum_Inv, Ignore, Enum_Mut'First + 1, Enum_Mut'First + 2), "Enum is invalid, but should not be 2.");
+      pragma Assert (Enum_Array.Validation.Valid (Enum_Inv, Ignore, Enum_Mut'First, Enum_Mut'Last - 3), "Enum is invalid, but should not be 3.");
+      pragma Assert (Enum_Array.Validation.Valid (Enum_Inv, Ignore, Enum_Mut'First, Enum_Mut'Last - 2), "Enum is invalid, but should not be 4.");
+      pragma Assert (not Enum_Array.Validation.Valid (Enum_Inv, Ignore, Enum_Mut'First, Enum_Mut'Last), "Enum is valid, but should not be 5.");
+      pragma Assert (not Enum_Array.Validation.Valid (Enum_Inv, Ignore, Enum_Mut'First, Enum_Mut'Last), "Enum is valid, but should not be 6.");
+      pragma Assert (not Enum_Array.Validation.Valid (Enum_Inv, Ignore, Enum_Mut'Last - 2, Enum_Mut'Last), "Enum is valid, but should not be 7.");
+   end;
    Put_Line ("passed.");
 
    -- Verify that Get_Field maps field numbers to the correct array element
@@ -217,11 +225,12 @@ begin
       -- Field 3 is a multiple of num_fields, which exercises the element index edge case.
       C_Bytes_Rt : constant Complex_Array.Serialization.Byte_Array := [0 => 0, 1 => 19, 2 => 0, 3 => 3, others => 0];
       Complex_Rt : constant Complex_Array.T := Complex_Array.Serialization.From_Byte_Array (C_Bytes_Rt);
+      Complex_Rt_Inv : Complex_Array.Serialization.Byte_Array with Import, Convention => Ada, Address => Complex_Rt'Address;
    begin
-      pragma Assert (not Complex_Array.Validation.Valid (Complex_Rt, Field_Number), "Complex_Rt is valid, but should not be.");
+      pragma Assert (not Complex_Array.Validation.Valid (Complex_Rt_Inv, Field_Number), "Complex_Rt is valid, but should not be.");
       pragma Assert (Field_Number = 3, "Complex_Rt field_Number is wrong.");
-      Put_Line (Poly2bytestring (Complex_Array.Validation.Get_Field (Complex_Rt, Field_Number)));
-      pragma Assert (Complex_Array.Validation.Get_Field (Complex_Rt, Field_Number) = [0, 0, 0, 0, 3, 0, 0, 0], "Get_Field value mismatch.");
+      Put_Line (Poly2bytestring (Complex_Array.Validation.Get_Field (Complex_Rt_Inv, Field_Number)));
+      pragma Assert (Complex_Array.Validation.Get_Field (Complex_Rt_Inv, Field_Number) = [0, 0, 0, 0, 3, 0, 0, 0], "Get_Field value mismatch.");
    end;
    Put_Line ("passed.");
 

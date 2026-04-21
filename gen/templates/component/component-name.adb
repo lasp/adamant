@@ -867,12 +867,6 @@ package body Component.{{ name }} is
 {% if command.type %}
 {% if command.type_model %}
       package Arg_Deserializer renames {{ command.type_package }}.Serialization;
-{% if command.type_model.variable_length %}
-      use Serializer_Types;
-      Stat : Serialization_Status;
-      Num_Bytes_Deserialized : Natural;
-      Args : {{ command.type }};
-{% endif %}
 {% else %}
       package Arg_Deserializer is new Serializer ({{ command.type }});
 {% endif %}
@@ -883,32 +877,121 @@ package body Component.{{ name }} is
 
 {% if command.type %}
 {% if command.type_model and command.type_model.variable_length %}
-      -- Deserialize the variable length command argument into its argument type. Make sure
-      -- that the command length includes at least as many bytes as was deserialized, otherwise
-      -- something is amiss. It is OK for the command length to include more bytes than are
-      -- actually deserialized. This "padding" is simply ignored.
-      Stat := Arg_Deserializer.From_Byte_Array (Args, Cmd.Arg_Buffer (Cmd.Arg_Buffer'First .. Cmd.Arg_Buffer'First + Cmd.Header.Arg_Buffer_Length - 1), Num_Bytes_Deserialized);
-      if Stat = Success and then Cmd.Header.Arg_Buffer_Length >= Num_Bytes_Deserialized then
-         pragma Annotate (GNATSAS, Intentional, "condition predetermined", "Sometimes the length can never be too large based on its type, and that is just fine.");
+      -- Check the variable-length command argument length is within the valid range.
+      pragma Warnings (Off, "condition can only be False if invalid values present");
+      if Cmd.Header.Arg_Buffer_Length >= {{ command.type_package }}.Min_Serialized_Length and then
+         Cmd.Header.Arg_Buffer_Length <= Arg_Deserializer.Max_Serialized_Length
+      then
+         pragma Warnings (On, "condition can only be False if invalid values present");
          declare
+            -- Prove at compile time that the max-sized byte array rename is safe.
+            pragma Compile_Time_Error (
+               Arg_Deserializer.Byte_Array'Length > Command_Types.Command_Arg_Buffer_Type'Length,
+               "Command '{{ command.name }}' has argument of type '{{ command.type }}' which has a maximum serialized length larger than the buffer size of Command.T."
+            );
+            -- Validate the command argument bytes before deserialization.
+            Arg_Bytes : Arg_Deserializer.Byte_Array renames Cmd.Arg_Buffer (
+               Cmd.Arg_Buffer'First .. Cmd.Arg_Buffer'First + Arg_Deserializer.Byte_Array'Length - 1
+            );
+            Errant_Field : Unsigned_32 := 0;
+            pragma Annotate (GNATSAS, Intentional, "unused assignment", "Sometimes the type can never be invalid, and in that case Errant_Field will never be needed.");
+         begin
+            -- Make sure the argument values are valid before deserialization.
+            pragma Warnings (Off, "this code can never be executed and has been deleted");
+            if {{ command.type_package }}.Always_Valid or else
+               {{ command.type_package }}.Validation.Valid (Arg_Bytes, Errant_Field)
+            then
+               -- Deserialize the validated variable-length command arguments:
+               declare
+                  use Serializer_Types;
+                  use Command_Execution_Status;
+                  Args : {{ command.type }};
+                  Num_Bytes_Deserialized : Natural := 0;
+                  Stat : constant Serialization_Status := Arg_Deserializer.From_Byte_Array (Args, Cmd.Arg_Buffer (
+                     Cmd.Arg_Buffer'First ..
+                     Cmd.Arg_Buffer'First + Cmd.Header.Arg_Buffer_Length - 1
+                  ), Num_Bytes_Deserialized);
+               begin
+                  pragma Annotate (GNATSAS, Intentional, "condition predetermined", "Sometimes the length can never be too large based on its type, and that is just fine.");
+                  if Stat = Success and then Cmd.Header.Arg_Buffer_Length >= Num_Bytes_Deserialized then
+                     declare
+                        Cmd_Execution_Stat : constant Command_Execution_Status.E := Base_Instance'Class (Self).{{ command.name }} (Args);
+                     begin
+                        case Cmd_Execution_Stat is
+                           when Success =>
+                              return Command_Response_Status.Success;
+                           when Failure =>
+                              return Command_Response_Status.Failure;
+                        end case;
+                     end;
+                  else
+                     -- Variable-length sizing field is inconsistent with the buffer length.
+                     Self.Handle_Command_Length_Error (Cmd);
+                     return Command_Response_Status.Length_Error;
+                  end if;
+               end;
+            else
+               -- Create a poly type with the invalid parameter and send it to the handler.
+               declare
+                  P_Type : constant Basic_Types.Poly_Type := {{ command.type_package }}.Validation.Get_Field (Arg_Bytes, Errant_Field);
+               begin
+                  -- Call up to the Command_Invalid function for handling.
+                  Base_Instance'Class (Self).Invalid_Command (Cmd, Errant_Field, P_Type);
+                  return Command_Response_Status.Validation_Error;
+               end;
+            end if;
+            pragma Warnings (On, "this code can never be executed and has been deleted");
+         end;
+{% elif command.type_model %}
+      -- Check the command argument length and make sure it is valid.
+      if Cmd.Header.Arg_Buffer_Length = Arg_Deserializer.Serialized_Length then
+         declare
+            -- Validate the command argument bytes before deserialization.
+            Arg_Bytes : Arg_Deserializer.Byte_Array renames Cmd.Arg_Buffer (
+               Cmd.Arg_Buffer'First .. Cmd.Arg_Buffer'First + Arg_Deserializer.Byte_Array'Length - 1
+            );
+            Errant_Field : Unsigned_32 := 0;
+            pragma Annotate (GNATSAS, Intentional, "unused assignment", "Sometimes the type can never be invalid, and in that case Errant_Field will never be needed.");
+         begin
+            -- Make sure the argument values are valid before deserialization.
+            pragma Warnings (Off, "this code can never be executed and has been deleted");
+            if {{ command.type_package }}.Always_Valid or else
+               {{ command.type_package }}.Validation.Valid (Arg_Bytes, Errant_Field)
+            then
+               -- Deserialize the command arguments only after validation passes:
+               declare
+                  use Command_Execution_Status;
+                  Args : constant {{ command.type }} := Arg_Deserializer.From_Byte_Array (Arg_Bytes);
+                  Cmd_Execution_Stat : constant Command_Execution_Status.E := Base_Instance'Class (Self).{{ command.name }} (Args);
+               begin
+                  case Cmd_Execution_Stat is
+                     when Success =>
+                        return Command_Response_Status.Success;
+                     when Failure =>
+                        return Command_Response_Status.Failure;
+                  end case;
+               end;
+            else
+               -- Create a poly type with the invalid parameter and send it to the handler.
+               declare
+                  P_Type : constant Basic_Types.Poly_Type := {{ command.type_package }}.Validation.Get_Field (Arg_Bytes, Errant_Field);
+               begin
+                  -- Call up to the Command_Invalid function for handling.
+                  Base_Instance'Class (Self).Invalid_Command (Cmd, Errant_Field, P_Type);
+                  return Command_Response_Status.Validation_Error;
+               end;
+            end if;
+            pragma Warnings (On, "this code can never be executed and has been deleted");
+         end;
 {% else %}
       -- Check the command argument length and make sure it is valid.
       if Cmd.Header.Arg_Buffer_Length = Arg_Deserializer.Serialized_Length then
          declare
             -- Deserialize the command arguments into their argument type:
             Args : constant {{ command.type }} := Arg_Deserializer.From_Byte_Array (Cmd.Arg_Buffer (Cmd.Arg_Buffer'First .. Cmd.Arg_Buffer'First + Arg_Deserializer.Serialized_Length - 1));
-{% endif %}
-{% if command.type_model %}
-            Errant_Field : Unsigned_32 := 0;
-            pragma Annotate (GNATSAS, Intentional, "unused assignment", "Sometimes the type can never be invalid, and in that case Errant_Field will never be needed.");
-            Args_Valid : constant Boolean := {{ command.type_package }}.Always_Valid
-               or else {{ command.type_package }}.Validation.Valid (Args, Errant_Field);
-{% else %}
             Errant_Field : constant Unsigned_32 := 0;
             Args_Valid : constant Boolean := Args'Valid;
-{% endif %}
          begin
-            -- Make sure the deserialized argument values are valid.
             pragma Warnings (Off, "this code can never be executed and has been deleted");
             if Args_Valid then
                -- Call up to the derived class for execution.
@@ -926,16 +1009,10 @@ package body Component.{{ name }} is
             else
                -- Create a poly type with the invalid parameter and send it to the handler.
                declare
-{% if command.type_model %}
-                  P_Type : constant Basic_Types.Poly_Type := {{ command.type_package }}.Validation.Get_Field (Args, Errant_Field);
-{% else %}
                   P_Type : Basic_Types.Poly_Type := [others => 0];
-{% endif %}
                begin
-{% if not command.type_model %}
                   -- Copy args into poly type:
                   Byte_Array_Util.Safe_Right_Copy (P_Type, Cmd.Arg_Buffer (Cmd.Arg_Buffer'First .. Cmd.Arg_Buffer'First + Arg_Deserializer.Serialized_Length - 1));
-{% endif %}
                   -- Call up to the Command_Invalid function for handling.
                   Base_Instance'Class (Self).Invalid_Command (Cmd, Errant_Field, P_Type);
                   return Command_Response_Status.Validation_Error;
@@ -943,6 +1020,7 @@ package body Component.{{ name }} is
             end if;
             pragma Warnings (On, "this code can never be executed and has been deleted");
          end;
+{% endif %}
       else
 {% else %}
       -- Check the command argument length and make sure it is valid.
@@ -964,6 +1042,9 @@ package body Component.{{ name }} is
          Self.Handle_Command_Length_Error (Cmd);
          return Command_Response_Status.Length_Error;
       end if;
+{% if command.type_model and command.type_model.variable_length %}
+      pragma Annotate (GNATSAS, Intentional, "condition predetermined", "Upper bound can only be False if invalid values are present in the command header.");
+{% endif %}
    end Execute_{{ command.name }};
 
 {% endfor %}
@@ -1089,20 +1170,50 @@ package body Component.{{ name }} is
 
       -- Check the parameter buffer length and make sure it is valid.
       if Par.Header.Buffer_Length = Buffer_Deserializer.Serialized_Length then
+{% if par.type_model %}
+         declare
+            -- Validate the parameter bytes before deserialization.
+            Par_Bytes : Buffer_Deserializer.Byte_Array renames Par.Buffer (
+               Par.Buffer'First .. Par.Buffer'First + Buffer_Deserializer.Byte_Array'Length - 1
+            );
+            Errant_Field : Unsigned_32 := 0;
+            pragma Annotate (GNATSAS, Intentional, "unused assignment", "Sometimes the type can never be invalid, and in that case Errant_Field will never be needed.");
+         begin
+            -- Make sure the parameter values are valid before deserialization.
+            pragma Warnings (Off, "this code can never be executed and has been deleted");
+            if {{ par.type_package }}.Always_Valid or else
+               {{ par.type_package }}.Validation.Valid (Par_Bytes, Errant_Field)
+            then
+               -- Deserialize and stage the parameter only after validation passes:
+               declare
+                  Par_To_Stage : constant {{ par.type }} := Buffer_Deserializer.From_Byte_Array (Par_Bytes);
+               begin
+{% if par.type_package %}
+                  Self.Staged_Parameters.Stage_{{ par.name }} (Table_Id, {{ par.type_package }}.Unpack (Par_To_Stage));
+{% else %}
+                  Self.Staged_Parameters.Stage_{{ par.name }} (Table_Id, Par_To_Stage);
+{% endif %}
+               end;
+               return Parameter_Update_Status.Success;
+            else
+               -- Create a poly type with the invalid parameter and send it to the handler.
+               declare
+                  P_Type : constant Basic_Types.Poly_Type := {{ par.type_package }}.Validation.Get_Field (Par_Bytes, Errant_Field);
+               begin
+                  -- Call up to the Parameter_Invalid function for handling.
+                  Base_Instance'Class (Self).Invalid_Parameter (Par, Errant_Field, P_Type);
+                  return Parameter_Update_Status.Validation_Error;
+               end;
+            end if;
+            pragma Warnings (On, "this code can never be executed and has been deleted");
+         end;
+{% else %}
          declare
             -- Deserialize the parameter buffer into the buffer type:
             Par_To_Stage : constant {{ par.type }} := Buffer_Deserializer.From_Byte_Array (Par.Buffer (Par.Buffer'First .. Par.Buffer'First + Buffer_Deserializer.Serialized_Length - 1));
-{% if par.type_model %}
-            Errant_Field : Unsigned_32 := 0;
-            pragma Annotate (GNATSAS, Intentional, "unused assignment", "Sometimes the type can never be invalid, and in that case Errant_Field will never be needed.");
-            Args_Valid : constant Boolean := {{ par.type_package }}.Always_Valid
-               or else {{ par.type_package }}.Validation.Valid (Par_To_Stage, Errant_Field);
-{% else %}
             Errant_Field : constant Unsigned_32 := 0;
             Args_Valid : constant Boolean := Par_To_Stage'Valid;
-{% endif %}
          begin
-            -- Make sure the deserialized parameter values are valid.
             pragma Warnings (Off, "this code can never be executed and has been deleted");
             if Args_Valid then
                -- Stage the parameter:
@@ -1115,16 +1226,10 @@ package body Component.{{ name }} is
             else
                -- Create a poly type with the invalid parameter and send it to the handler.
                declare
-{% if par.type_model %}
-                  P_Type : constant Basic_Types.Poly_Type := {{ par.type_package }}.Validation.Get_Field (Par_To_Stage, Errant_Field);
-{% else %}
                   P_Type : Basic_Types.Poly_Type := [others => 0];
-{% endif %}
                begin
-{% if not par.type_model %}
                   -- Copy parameter value into poly type:
                   Byte_Array_Util.Safe_Right_Copy (P_Type, Par.Buffer (Par.Buffer'First .. Par.Buffer'First + Buffer_Deserializer.Serialized_Length - 1));
-{% endif %}
                   -- Call up to the Parameter_Invalid function for handling.
                   Base_Instance'Class (Self).Invalid_Parameter (Par, Errant_Field, P_Type);
                   return Parameter_Update_Status.Validation_Error;
@@ -1132,6 +1237,7 @@ package body Component.{{ name }} is
             end if;
             pragma Warnings (On, "this code can never be executed and has been deleted");
          end;
+{% endif %}
       else
          Self.Handle_Parameter_Length_Error (Par);
          return Parameter_Update_Status.Length_Error;

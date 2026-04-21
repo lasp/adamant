@@ -18,77 +18,15 @@ with {{ include }}.Validation;
 {% endif %}
 package body {{ name }}.Validation is
 
-   function Valid (R : in Unconstrained; Errant_Field : out Unsigned_32) return Boolean is
-{% if packed_type_includes %}
-      E_Field : Interfaces.Unsigned_32;
-{% endif %}
-      Count : Interfaces.Unsigned_32 := 0;
-   begin
-      -- Sometimes the valid functions below will NEVER be false, since the type can never be out of range,
-      -- i.e. with an Unsigned_16. If this is the case Ada warns that some code can never be executed. This
-      -- is OK and we want the compiler to delete this code, so ignore the warning.
-      pragma Warnings (Off, "this code can never be executed and has been deleted");
-
-      -- Check each element:
-{% if element.skip_validation %}
-      -- Validation turned off for this element type.
-{% else %}
-      for Idx in R'Range loop
-{% if element.is_packed_type %}
-         if not {{ element.type_package }}.Validation.Valid (R (Idx), E_Field) then
-            Errant_Field := Count * {{ element.type_model.num_fields }} + E_Field;
-            return False;
-         end if;
-{% else %}
-{% if element.format.length %}
-         for Jdx in R (Idx)'Range loop
-            if not R (Idx)(Jdx)'Valid then
-               Errant_Field := Count + 1;
-               pragma Annotate (GNATSAS, Intentional, "dead code", "some array elements may not be bit-constrained and thus will always be valid");
-               return False;
-            end if;
-         end loop;
-{% else %}
-         if not R (Idx)'Valid then
-            Errant_Field := Count + 1;
-            pragma Annotate (GNATSAS, Intentional, "dead code", "some array elements may not be bit-constrained and thus will always be valid");
-            return False;
-         end if;
-{% endif %}
-{% endif %}
-         Count := @ + 1;
-      end loop;
-{% endif %}
-
-      -- Re-enable warning.
-      pragma Warnings (On, "this code can never be executed and has been deleted");
-
-      -- Everything checks out:
-      Errant_Field := 0;
-      return True;
-   exception
-      -- From: http://www.adaic.org/resources/add_content/standards/05aarm/html/AA-13-9-2.html
-      -- The Valid attribute may be used to check the result of calling an
-      -- instance of Unchecked_Conversion (or any other operation that can
-      -- return invalid values). However, an exception handler should also
-      -- be provided because implementations are permitted to raise
-      -- Constraint_Error or Program_Error if they detect the use of an
-      -- invalid representation (see 13.9.1).
-      when Constraint_Error =>
-         Errant_Field := 0;
-         return False;
-      when Program_Error =>
-         Errant_Field := 0;
-         return False;
-   end Valid;
-
 {% if endianness in ["either", "big"] %}
    function Valid (
-      R : in T;
+      Bytes : in Serialization.Byte_Array;
       Errant_Field : out Unsigned_32;
       First_Index : in Unconstrained_Index_Type := T'First;
       Last_Index : in Unconstrained_Index_Type := T'Last
    ) return Boolean is
+      -- Overlay the byte array with the packed array for element access.
+      R : T with Import, Convention => Ada, Address => Bytes'Address, Alignment => 1;
 {% if packed_type_includes %}
       E_Field : Interfaces.Unsigned_32;
 {% endif %}
@@ -102,14 +40,24 @@ package body {{ name }}.Validation is
       -- Check each element:
 {% if element.skip_validation %}
       -- Validation turned off for this element type.
+{% elif element.is_packed_type %}
+      -- Only iterate if the element type can actually be invalid.
+      if not {{ element.type_package }}.Always_Valid then
+         for Idx in First_Index .. Last_Index loop
+            declare
+               Elem_Bytes : {{ element.type_package }}.Serialization.Byte_Array
+                  with Import, Convention => Ada, Address => R (Idx)'Address;
+            begin
+               if not {{ element.type_package }}.Validation.Valid (Elem_Bytes, E_Field) then
+                  Errant_Field := Count * {{ element.type_model.num_fields }} + E_Field;
+                  return False;
+               end if;
+            end;
+            Count := @ + 1;
+         end loop;
+      end if;
 {% else %}
       for Idx in First_Index .. Last_Index loop
-{% if element.is_packed_type %}
-         if not {{ element.type_package }}.Validation.Valid (R (Idx), E_Field) then
-            Errant_Field := Count * {{ element.type_model.num_fields }} + E_Field;
-            return False;
-         end if;
-{% else %}
 {% if element.format.length %}
          for Jdx in R (Idx)'Range loop
             if not R (Idx)(Jdx)'Valid then
@@ -124,7 +72,6 @@ package body {{ name }}.Validation is
             pragma Annotate (GNATSAS, Intentional, "dead code", "some array elements may not be bit-constrained and thus will always be valid");
             return False;
          end if;
-{% endif %}
 {% endif %}
          Count := @ + 1;
       end loop;
@@ -154,12 +101,14 @@ package body {{ name }}.Validation is
 
 {% endif %}
 {% if endianness in ["either", "little"] %}
-   function Valid (
-      R : in T_Le;
+   function Valid_Le (
+      Bytes : in Serialization_Le.Byte_Array;
       Errant_Field : out Unsigned_32;
       First_Index : in Unconstrained_Index_Type := T_Le'First;
       Last_Index : in Unconstrained_Index_Type := T_Le'Last
    ) return Boolean is
+      -- Overlay the byte array with the packed array for element access.
+      R : T_Le with Import, Convention => Ada, Address => Bytes'Address, Alignment => 1;
 {% if packed_type_includes %}
       E_Field : Interfaces.Unsigned_32;
 {% endif %}
@@ -173,14 +122,24 @@ package body {{ name }}.Validation is
       -- Check each element:
 {% if element.skip_validation %}
       -- Validation turned off for this element type.
+{% elif element.is_packed_type %}
+      -- Only iterate if the element type can actually be invalid.
+      if not {{ element.type_package }}.Always_Valid then
+         for Idx in First_Index .. Last_Index loop
+            declare
+               Elem_Bytes : {{ element.type_package }}.Serialization_Le.Byte_Array
+                  with Import, Convention => Ada, Address => R (Idx)'Address;
+            begin
+               if not {{ element.type_package }}.Validation.Valid_Le (Elem_Bytes, E_Field) then
+                  Errant_Field := Count * {{ element.type_model.num_fields }} + E_Field;
+                  return False;
+               end if;
+            end;
+            Count := @ + 1;
+         end loop;
+      end if;
 {% else %}
       for Idx in First_Index .. Last_Index loop
-{% if element.is_packed_type %}
-         if not {{ element.type_package }}.Validation.Valid (R (Idx), E_Field) then
-            Errant_Field := Count * {{ element.type_model.num_fields }} + E_Field;
-            return False;
-         end if;
-{% else %}
 {% if element.format.length %}
          for Jdx in R (Idx)'Range loop
             if not R (Idx)(Jdx)'Valid then
@@ -195,7 +154,6 @@ package body {{ name }}.Validation is
             pragma Annotate (GNATSAS, Intentional, "dead code", "some array elements may not be bit-constrained and thus will always be valid");
             return False;
          end if;
-{% endif %}
 {% endif %}
          Count := @ + 1;
       end loop;
@@ -221,11 +179,13 @@ package body {{ name }}.Validation is
       when Program_Error =>
          Errant_Field := 0;
          return False;
-   end Valid;
+   end Valid_Le;
 
 {% endif %}
 {% if endianness in ["either", "big"] %}
-   function Get_Field (Src : in T; Field : in Interfaces.Unsigned_32) return Basic_Types.Poly_Type is
+   function Get_Field (Bytes : in Serialization.Byte_Array; Field : in Interfaces.Unsigned_32) return Basic_Types.Poly_Type is
+      -- Overlay the byte array with the packed array for element access.
+      Src : T with Import, Convention => Ada, Address => Bytes'Address, Alignment => 1;
 {% if element.is_packed_type %}
       Idx : constant Constrained_Index_Type := Constrained_Index_Type'First + Unconstrained_Index_Type ((Field - 1) / {{ element.type_model.num_fields }});
       Remainder : Unsigned_32 := 0;
@@ -239,7 +199,12 @@ package body {{ name }}.Validation is
       if Field > 0 then
          Remainder := ((Field - 1) mod {{ element.type_model.num_fields }}) + 1;
       end if;
-      To_Return := {{ element.type_package }}.Validation.Get_Field (Src (Idx), Remainder);
+      declare
+         Elem_Bytes : {{ element.type_package }}.Serialization.Byte_Array
+            with Import, Convention => Ada, Address => Src (Idx)'Address;
+      begin
+         To_Return := {{ element.type_package }}.Validation.Get_Field (Elem_Bytes, Remainder);
+      end;
 {% else %}
       declare
          -- Copy field over to an unpacked var so that it is byte aligned. The value here is out of range,
@@ -270,7 +235,9 @@ package body {{ name }}.Validation is
 
 {% endif %}
 {% if endianness in ["either", "little"] %}
-   function Get_Field (Src : in T_Le; Field : in Interfaces.Unsigned_32) return Basic_Types.Poly_Type is
+   function Get_Field_Le (Bytes : in Serialization_Le.Byte_Array; Field : in Interfaces.Unsigned_32) return Basic_Types.Poly_Type is
+      -- Overlay the byte array with the packed array for element access.
+      Src : T_Le with Import, Convention => Ada, Address => Bytes'Address, Alignment => 1;
 {% if element.is_packed_type %}
       Idx : constant Constrained_Index_Type := Constrained_Index_Type'First + Unconstrained_Index_Type ((Field - 1) / {{ element.type_model.num_fields }});
       Remainder : Unsigned_32 := 0;
@@ -284,7 +251,12 @@ package body {{ name }}.Validation is
       if Field > 0 then
          Remainder := ((Field - 1) mod {{ element.type_model.num_fields }}) + 1;
       end if;
-      To_Return := {{ element.type_package }}.Validation.Get_Field (Src (Idx), Remainder);
+      declare
+         Elem_Bytes : {{ element.type_package }}.Serialization_Le.Byte_Array
+            with Import, Convention => Ada, Address => Src (Idx)'Address;
+      begin
+         To_Return := {{ element.type_package }}.Validation.Get_Field_Le (Elem_Bytes, Remainder);
+      end;
 {% else %}
       declare
          -- Copy field over to an unpacked var so that it is byte aligned. The value here is out of range,
@@ -311,7 +283,7 @@ package body {{ name }}.Validation is
    exception
       when Constraint_Error =>
          return To_Return;
-   end Get_Field;
+   end Get_Field_Le;
 
 {% endif %}
 end {{ name }}.Validation;

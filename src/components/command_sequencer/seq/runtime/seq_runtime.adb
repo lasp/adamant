@@ -436,18 +436,25 @@ package body Seq_Runtime is
       end if;
    end Validate_Jump;
 
-   -- Returns an instruction as a byte array, this is a generic that requires an instruction type
+   -- Returns an instruction as a byte array, this is a generic that requires an instruction type.
+   -- Validates the raw bytes before copying into the typed record to avoid implementation-defined
+   -- parameter-passing behavior for composite types with invalid scalar representations (ARM 13.9.1(12)).
    function Get_Instruction (Inst : in out Instance; Instruction : out T) return Seq_Status is
       use System.Storage_Elements;
+      Serialized_Length : constant Natural := T'Object_Size / Basic_Types.Byte'Object_Size;
       Offset : constant Storage_Offset := Storage_Offset (Inst.Position);
-      To_Return : T with Import, Convention => Ada, Address => Inst.Sequence_Region.Address + Offset;
+      subtype Instr_Bytes is Basic_Types.Byte_Array (0 .. Serialized_Length - 1);
+      Bytes : Instr_Bytes with Import, Convention => Ada, Address => Inst.Sequence_Region.Address + Offset, Alignment => 1;
       Errant : Interfaces.Unsigned_32 := 0;
    begin
-      Instruction := To_Return;
-
-      -- Can fail if one of the fields is constrained (i.e. enum, range smaller than 0-255)
-      if Valid (Instruction, Errant) then
-         Inst.Next_Position := Seq_Position (T'Object_Size / Basic_Types.Byte'Object_Size) + Inst.Position;
+      -- Validate the bytes before copying into the typed record.
+      if Valid (Bytes, Errant) then
+         declare
+            Result : T with Import, Convention => Ada, Address => Bytes'Address, Alignment => 1;
+         begin
+            Instruction := Result;
+         end;
+         Inst.Next_Position := Seq_Position (Serialized_Length) + Inst.Position;
          return Success;
       else
          Inst.Errant_Field := Errant;
@@ -456,18 +463,26 @@ package body Seq_Runtime is
    end Get_Instruction;
 
    function Get_Internal (Inst : in out Instance; Src : in Seq_Internal.E; Dest : out T) return Seq_Status is
-      -- Overlay the internal variable with the generic variable type.
+      Serialized_Length : constant Natural := T'Object_Size / Basic_Types.Byte'Object_Size;
+      -- Overlay the internal variable with a byte array for validation.
       pragma Warnings (Off, "overlay changes scalar storage order");
-      This_Internal : T with Import, Convention => Ada, Address => Inst.Internals (Seq_Internal.E'Pos (Src))'Address;
+      subtype Internal_Bytes is Basic_Types.Byte_Array (0 .. Serialized_Length - 1);
+      Bytes : Internal_Bytes with Import, Convention => Ada, Address => Inst.Internals (Seq_Internal.E'Pos (Src))'Address, Alignment => 1;
       pragma Warnings (On, "overlay changes scalar storage order");
       Errant : Interfaces.Unsigned_32 := 0;
    begin
       -- Make sure that the object can fit into a sequence runtime variable and that it is valid.
-      -- This is invalid if we need to read into a packed record with a constrained field (i.e. enum)
+      -- Validate the bytes first, then copy to typed record only if valid.
       if T'Object_Size <= Packed_Poly_32_Type.T'Object_Size and then
-          Valid (This_Internal, Errant)
+          Valid (Bytes, Errant)
       then
-         Dest := This_Internal;
+         declare
+            pragma Warnings (Off, "overlay changes scalar storage order");
+            This_Internal : T with Import, Convention => Ada, Address => Bytes'Address, Alignment => 1;
+            pragma Warnings (On, "overlay changes scalar storage order");
+         begin
+            Dest := This_Internal;
+         end;
          return Success;
       else
          Inst.Errant_Field := Errant;

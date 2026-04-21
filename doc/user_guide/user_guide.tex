@@ -1357,7 +1357,7 @@ This generates the source files \textit{build/src/example\_record-validation.ads
 
 \adacodef{../example_architecture/build/src/example_record-validation.ads}
 
-Note that a \texttt{Valid} function which returns a \texttt{Boolean} is available to validate each version of the packed record. These functions can be called to determine if the type is within range, and thus safe to use, before using the type elsewhere in the system. The Adamant component autocoder uses the feature extensively to validate incoming commands and parameters prior to their use within user code.\\
+Note that a \texttt{Valid} function which returns a \texttt{Boolean} is available to validate the serialized byte representation of a packed record. The function accepts a \texttt{Serialization.Byte\_Array} and checks that all fields are within their valid ranges before the data is deserialized into a typed record. The Adamant component autocoder uses this feature extensively to validate incoming commands and parameters prior to their use within user code.\\
 
 Below is an example of using this package.
 
