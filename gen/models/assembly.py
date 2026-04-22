@@ -579,6 +579,8 @@ class assembly(subassembly):
         self.task_total_secondary_stack_size = (
             0  # sum of all secondary stack sizes of all tasks in assembly
         )
+        self.num_unconnected_connectors = 0
+        self.num_ignored_connectors = 0
 
         # Lists:
         self.component_kind_dict = {
@@ -773,33 +775,33 @@ class assembly(subassembly):
                         if connector.count > 1:
                             for index0 in range(connector.count):
                                 index = index0 + 1
-                                if (
-                                    not connector.connected(index)
-                                    and not connector.ignored(index)
-                                    and not self.shallow_load
-                                ):
+                                if connector.ignored(index):
+                                    self.num_ignored_connectors += 1
+                                elif not connector.connected(index):
+                                    self.num_unconnected_connectors += 1
+                                    if not self.shallow_load:
+                                        self.warn(
+                                            "component '"
+                                            + component.instance_name
+                                            + "' has unattached connector '"
+                                            + connector.name
+                                            + "["
+                                            + str(index)
+                                            + "]'."
+                                        )
+                        else:
+                            if connector.ignored():
+                                self.num_ignored_connectors += 1
+                            elif not connector.connected():
+                                self.num_unconnected_connectors += 1
+                                if not self.shallow_load:
                                     self.warn(
                                         "component '"
                                         + component.instance_name
                                         + "' has unattached connector '"
                                         + connector.name
-                                        + "["
-                                        + str(index)
-                                        + "]'."
+                                        + "'."
                                     )
-                        else:
-                            if (
-                                not connector.connected()
-                                and not connector.ignored()
-                                and not self.shallow_load
-                            ):
-                                self.warn(
-                                    "component '"
-                                    + component.instance_name
-                                    + "' has unattached connector '"
-                                    + connector.name
-                                    + "'."
-                                )
 
             # We almost always want to run the following code, however there are very special times, to avoid
             # circular dependencies, that a generator might disable the running of this code. That is why
