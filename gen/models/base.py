@@ -33,7 +33,8 @@ import textwrap
 
 # Helper functions:
 def unique(lst):
-    return list(set(lst))
+    # Use dict.fromkeys for insertion-order-preserving dedup.
+    return list(dict.fromkeys(lst))
 
 
 def printMultiLine(stringList, prefix="   ", max_line_length=79):

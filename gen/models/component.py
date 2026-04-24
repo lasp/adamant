@@ -322,7 +322,7 @@ class component(base):
                     model_loader.try_load_model_of_subclass(
                         f, parent_class=component_submodel
                     )
-                    for f in list(set(submodel_files))
+                    for f in dict.fromkeys(submodel_files)
                 ],
             )
         )
@@ -392,12 +392,9 @@ class component(base):
         for ided_suite in self.ided_suites.values():
             complex_type_models.extend(ided_suite.type_models)
         # Add connector type models:
-        complex_type_models += list(
-            set(self.connectors.type_models if self.connectors else [])
-            | set(additional_type_models)
-        )
+        complex_type_models += (self.connectors.type_models if self.connectors else []) + additional_type_models
         # Make sure we have a unique list of type models, no dupes:
-        complex_type_models = list(set(complex_type_models))
+        complex_type_models = list(dict.fromkeys(complex_type_models))
 
         # Some models depend on other models, make sure those are loaded into
         # the complex_types dict as well.
@@ -627,7 +624,7 @@ class component(base):
         self.dependencies.extend(ut_model_files)
         for m in submodels:
             self.dependencies.extend([m.full_filename] + m.get_dependencies())
-        self.dependencies = list(set(self.dependencies))
+        self.dependencies = list(dict.fromkeys(self.dependencies))
 
     def _load_unit_tests(self):
         """

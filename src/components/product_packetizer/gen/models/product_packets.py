@@ -397,7 +397,7 @@ class product_packets(assembly_submodel):
             self.includes = self.data["with"]
         for include in self.includes:
             include = ada.formatType(include)
-        self.includes = list(set(self.includes))
+        self.includes = list(dict.fromkeys(self.includes))
 
         # Load the packets:
         for packet_data in self.data["packets"]:
@@ -581,7 +581,7 @@ class product_packets(assembly_submodel):
             # Set the packet size
             pkt.size = packet_size
 
-        self.dependencies = list(set(self.dependencies))
+        self.dependencies = list(dict.fromkeys(self.dependencies))
 
     def final(self):
         """We use the final function to create the item list and resolve the data product IDS."""

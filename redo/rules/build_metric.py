@@ -196,7 +196,7 @@ class build_metric(build_rule_base):
             deps = [
                 d for d in deps.split("\n") if d.endswith(".ads") or d.endswith(".adb")
             ]
-            deps = list(set(deps))
+            deps = list(dict.fromkeys(deps))
 
             # Separate the autocoded deps from the hand coded deps:
             reg = re.compile(r".*build/src/.*\.ad[sb]$")
@@ -249,7 +249,7 @@ class build_metric(build_rule_base):
             deps = [
                 d for d in deps.split("\n") if d.endswith(".ads") or d.endswith(".adb")
             ]
-            deps = list(set(deps))
+            deps = list(dict.fromkeys(deps))
 
             # Separate the autocoded deps from the hand coded deps:
             reg = re.compile(r".*build/src/.*\.ad[sb]$")

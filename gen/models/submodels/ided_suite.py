@@ -318,7 +318,7 @@ class ided_suite(renderable_object):
         self.deps_list = [e.full_filename for e in self.type_models]
         for m in self.type_models:
             self.deps_list += [m.full_filename] + m.get_dependencies()
-        self.deps_list = list(set(self.deps_list))
+        self.deps_list = list(dict.fromkeys(self.deps_list))
 
     def __nonzero__(self):
         return bool(self.entities)

@@ -65,7 +65,7 @@ def check_connector_names(filter_obj, assm):
     # Include non-indexed names in the list too. ie. if Tick_Divider_Instance.Tick_T_Send[3]
     # is in the list also include Tick_Divider_Instance.Tick_T_Send
     connector_names_no_indexes = [re.sub(r'\[[^\]]*\]$', '', x) for x in connector_names if x.endswith(']')]
-    connector_names = list(set(connector_names + connector_names_no_indexes))
+    connector_names = list(dict.fromkeys(connector_names + connector_names_no_indexes))
     for t in filter_obj.item_list:
         if t not in connector_names:
             warn(
@@ -615,12 +615,12 @@ def prune(assm_to_filter):
     assm_to_filter.num_data_dependencies = sum(len(dd_list) for dd_list in new_data_dependencies.values())
 
     # Cleanup 3: Remove components for which there is no connectors or data dependencies (if selected):
+    # Build the allowed set, then filter in input order.
     if assm_to_filter.show_switches["show_data_dependencies"]:
-        component_names = list(
-            set(component_names).intersection(set(components_with_connections).union(set(components_with_data_dependencies)))
-        )
+        allowed = set(components_with_connections) | set(components_with_data_dependencies)
     else:
-        component_names = list(set(component_names).intersection(set(components_with_connections)))
+        allowed = set(components_with_connections)
+    component_names = [c for c in component_names if c in allowed]
 
     filtered_components = OrderedDict()
     for name, c in assm_to_filter.components.items():
@@ -724,7 +724,10 @@ def assembly_intersection(filter1, filter2):
         # Intersect data dependencies: keep only dds present in both filters
         # (matched by component instance name + dd name):
         data_deps = {}
-        for id in set(assm_to_filter1.data_dependencies.keys()) & set(assm_to_filter2.data_dependencies.keys()):
+        ids2 = set(assm_to_filter2.data_dependencies.keys())
+        for id in assm_to_filter1.data_dependencies.keys():
+            if id not in ids2:
+                continue
             names2 = {
                 dd.suite.component.instance_name + "." + dd.name
                 for dd in assm_to_filter2.data_dependencies[id]
@@ -780,7 +783,10 @@ def assembly_union(filter1, filter2):
         # Merge data dependency lists from both filters. For shared ids, combine
         # lists and deduplicate by component.instance_name + dd.name:
         data_deps = {}
-        all_ids = set(assm_to_filter1.data_dependencies.keys()) | set(assm_to_filter2.data_dependencies.keys())
+        all_ids = list(dict.fromkeys(
+            list(assm_to_filter1.data_dependencies.keys())
+            + list(assm_to_filter2.data_dependencies.keys())
+        ))
         for id in all_ids:
             list1 = assm_to_filter1.data_dependencies.get(id, [])
             list2 = assm_to_filter2.data_dependencies.get(id, [])
@@ -821,16 +827,16 @@ class Filter(object):
 
         # Format lists correctly:
         if self.type in ["component_type", "connector_type", "component_type_context", "data_dependency_type"]:
-            self.item_list = list(set(map(lambda x: ada.formatType(x), item_list)))
+            self.item_list = list(dict.fromkeys(map(lambda x: ada.formatType(x), item_list)))
         elif self.type in [
             "component_name",
             "connector_name",
             "component_name_context",
             "data_dependency_name",
         ]:
-            self.item_list = list(set(map(lambda x: ada.formatVariable(x), item_list)))
+            self.item_list = list(dict.fromkeys(map(lambda x: ada.formatVariable(x), item_list)))
         elif self.type in ["component_execution", "component_kind", "connector_kind"]:
-            self.item_list = list(set(map(lambda x: x.lower().strip(), item_list)))
+            self.item_list = list(dict.fromkeys(map(lambda x: x.lower().strip(), item_list)))
         else:
             raise ModelException(
                 'cannot process filter "'

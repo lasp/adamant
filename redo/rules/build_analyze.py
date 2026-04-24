@@ -40,7 +40,7 @@ def _get_source_files(object_files):
             obj_file
         ), "All build object file must have same build target!"
 
-    to_return = list(set(to_return))
+    to_return = list(dict.fromkeys(to_return))
     return to_return, build_target
 
 
@@ -152,7 +152,7 @@ def _analyze_ada_sources(source_files, base_dir, build_target, binary_mode=False
         deps += build_object._build_all_ada_dependencies(
             source_files, db
         )
-    deps = list(set(deps))
+    deps = list(dict.fromkeys(deps))
 
     # We behave a bit differently when analyzing a directory that can produce a binary (.elf)
     # vs. a directory that can only produce objects. In the latter case, we only analyze

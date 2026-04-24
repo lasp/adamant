@@ -72,7 +72,7 @@ def _build_all_ada_object_dependencies(
 
         # Read the dependency files for each object we just built and construct
         # a list of dependencies:
-        dep_files = list(set([of + ".deps" for of in object_files]))
+        dep_files = list(dict.fromkeys([of + ".deps" for of in object_files]))
         obj_deps = []
         for dep_file in dep_files:
             with open(dep_file, "r") as f:
@@ -81,11 +81,11 @@ def _build_all_ada_object_dependencies(
         # Filter out files that are not Ada/C/C++ source files:
         obj_deps = [d for d in obj_deps if d.endswith('.ads') or d.endswith('.adb') or
                     d.endswith('.c') or d.endswith('.h') or d.endswith('.hpp') or d.endswith('.cpp')]
-        obj_deps = list(set(obj_deps))
+        obj_deps = list(dict.fromkeys(obj_deps))
 
         # Only include dependencies that exist in the database:
         dep_objects = []
-        dep_packages = list(set([ada.file_name_to_package_name(dep) for dep in obj_deps]))
+        dep_packages = list(dict.fromkeys([ada.file_name_to_package_name(dep) for dep in obj_deps]))
         for package in dep_packages:
             objects_in_db = source_db.get_objects([package], the_target=build_target)
             if not objects_in_db:
@@ -257,7 +257,7 @@ class build_executable(build_rule_base):
         gpr_project_file = build_target_instance.gpr_project_file().strip()
         gpr_project_file_dir = os.path.dirname(gpr_project_file)
         gprbuild_flags = build_target_instance.gprbuild_flags()
-        # dep_dirs = list(set([os.path.dirname(f) for f in deps]))
+        # dep_dirs = list(dict.fromkeys([os.path.dirname(f) for f in deps]))
         gprbuild_prefix = (
             "gprbuild"
             + verbosity

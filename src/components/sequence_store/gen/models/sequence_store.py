@@ -130,7 +130,7 @@ class sequence_store(base):
             self.slots.append(new_slot)
             self.includes.extend(new_slot.includes)
             num += 1
-        self.includes = list(set(self.includes))
+        self.includes = list(dict.fromkeys(self.includes))
 
         self.summary_size = len(self.slots) * _get_slot_summary_size()
         if self.summary_size > _get_packet_buffer_size():

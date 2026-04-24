@@ -118,4 +118,4 @@ class model_database(database):
             record = self.fetch(key)
             for record_key, model_list in record.items():
                 models.extend(model_list)
-        return list(set(models))
+        return list(dict.fromkeys(models))

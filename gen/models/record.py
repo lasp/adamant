@@ -333,7 +333,7 @@ class record(packed_type):
         # Store useful lists:
 
         # Includes:
-        self.includes = list(set(self.includes))
+        self.includes = list(dict.fromkeys(self.includes))
         # Store all types that have a model associated with them:
         complex_typed_fields = list(
             OrderedDict.fromkeys([f for f in self.fields.values() if f.type_model])

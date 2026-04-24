@@ -188,7 +188,7 @@ def get_source_dependencies(source_filename):
 
         # Print the results:
         includes.extend(parents)
-        includes = list(set(includes))
+        includes = list(dict.fromkeys(includes))
         # Any include that is not a single word is probably in a "generic" statement and we
         # should filter it out:
         includes = list(filter(lambda x: x.split() != 1, includes))

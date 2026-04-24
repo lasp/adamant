@@ -74,7 +74,7 @@ def pydep(source_file, path=[], ignore_list=[]):
                 else:
                     nonexistent_deps.append(name)
 
-    return list(set(existing_deps)), nonexistent_deps
+    return list(dict.fromkeys(existing_deps)), nonexistent_deps
 
 
 def _build_pydeps(source_file, path=[]):
@@ -124,7 +124,7 @@ def _build_pydeps(source_file, path=[]):
             _inner_build_pydeps(dep)
 
     _inner_build_pydeps(source_file)
-    return list(set(deps_not_in_path)), list(set(all_existing_deps))
+    return list(dict.fromkeys(deps_not_in_path)), list(dict.fromkeys(all_existing_deps))
 
 
 class _build_python_no_update(build_rule_base):
@@ -147,7 +147,7 @@ class _build_python(build_rule_base):
         deps_not_in_path, existing_deps = _build_pydeps(redo_1)
 
         # Figure out what we need to add to the path:
-        paths_to_add = list(set([os.path.dirname(d) for d in deps_not_in_path]))
+        paths_to_add = list(dict.fromkeys([os.path.dirname(d) for d in deps_not_in_path]))
 
         # Add the paths to the path:
         sys.path.extend(paths_to_add)
@@ -166,7 +166,7 @@ class _run_python(build_rule_base):
         deps_not_in_path = _build_pydeps(redo_1)
 
         # Figure out what we need to add to the path:
-        paths_to_add = list(set([os.path.dirname(d) for d in deps_not_in_path]))
+        paths_to_add = list(dict.fromkeys([os.path.dirname(d) for d in deps_not_in_path]))
 
         # Run the python script:
         shell.run_command(

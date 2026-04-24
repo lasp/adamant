@@ -272,4 +272,4 @@ class fault_responses(assembly_submodel):
 
         # Uniquify includes:
         self.includes = list(OrderedDict.fromkeys(self.includes))
-        self.dependencies = list(set(self.dependencies))
+        self.dependencies = list(dict.fromkeys(self.dependencies))

@@ -206,7 +206,7 @@ def _get_build_roots(cwd):
         adamant_root = _get_git_root(os.path.realpath(__file__))
         # Get root of the current git repo:
         current_root = _get_git_root(cwd)
-        return list(set([adamant_root, current_root]))
+        return list(dict.fromkeys([adamant_root, current_root]))
 
 
 def _sanitize_path(path):
@@ -215,7 +215,7 @@ def _sanitize_path(path):
     strings and removing duplicates.
     """
     path = list(filter(bool, path))
-    path = list(set(path))
+    path = list(dict.fromkeys(path))
     return path
 
 
