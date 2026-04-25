@@ -523,27 +523,17 @@ class parameter_table(assembly_submodel):
                         f'Each parameter can only be managed by one Parameters component instance.'
                     )
 
-    # set parameter table id here somehow
-    # add ID to autocode output
-
     def _assign_parameter_table_ids(self):
-
-        # If this table ID has not been assigned, then none of them have for
-        # any of the Parameters components in the assembly. So assign them all.
-        if self.table_id is None:
-            # Collect all parameter_table submodels (including self)
-            parameter_tables = [
-                sub
-                for _, sub in self.assembly.submodels.items()
-                if isinstance(sub, parameter_table)
-            ]
-
-            # Sort deterministically by submodel name
-            parameter_tables.sort(key=lambda s: s.name)
-
-            # Assign unique, deterministic table IDs starting at 1
-            for idx, sub in enumerate(parameter_tables, start=1):
-                sub.table_id = idx
+        # Always re-sort and re-assign every call, but do so deterministically,
+        # even with parallel processes running this simultaneously.
+        parameter_tables = [
+            sub
+            for _, sub in self.assembly.submodels.items()
+            if isinstance(sub, parameter_table)
+        ]
+        parameter_tables.sort(key=lambda s: s.name)
+        for idx, sub in enumerate(parameter_tables, start=1):
+            sub.table_id = idx
 
         assert self.table_id is not None and self.table_id >= 1
 

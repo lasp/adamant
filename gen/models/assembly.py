@@ -761,7 +761,7 @@ class assembly(subassembly):
                     model_loader.try_load_model_of_subclass(
                         f, parent_class=assembly_submodel
                     )
-                    for f in list(set(self.submodel_files))
+                    for f in dict.fromkeys(self.submodel_files)
                 ],
             )
         )
