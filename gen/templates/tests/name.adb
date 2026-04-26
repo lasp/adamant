@@ -8,6 +8,9 @@
 with Ada.Calendar; use Ada.Calendar;
 with String_Util;
 with Test_Clock;
+{% if component and not component.generic %}
+with Tester_Allocator;
+{% endif %}
 
 package body {{ name }} is
 {% if component and not component.generic %}
