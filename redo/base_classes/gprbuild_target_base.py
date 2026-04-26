@@ -49,6 +49,18 @@ class gprbuild_target_base(metaclass=abc.ABCMeta):
         """Additional flags to pass to gprbuild should be listed here."""
         return None
 
+    def is_cross(self):
+        """
+        Returns True if this target produces a binary that cannot be executed
+        natively on the build host (e.g. a cross-compiled embedded ELF).
+
+        The default implementation returns False (host-targeting). Cross
+        bareboard target base classes override this. Used by the build_test
+        rule to decide whether to host-execute the produced test.elf or
+        stop after producing the artifact.
+        """
+        return False
+
     def _get_gnat_install_dir(self):
         """Helper to get gnat install directory for the current target."""
         gnatls_ret = which("gnatls")

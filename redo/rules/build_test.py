@@ -1,4 +1,5 @@
 from database.redo_target_database import redo_target_database
+from database.build_target_database import build_target_database
 import os.path
 import sys
 from util import redo
@@ -8,6 +9,16 @@ from util import shell
 from util import filesystem
 from base_classes.build_rule_base import build_rule_base
 import re
+
+
+def _is_cross_target(target_name):
+    """Return True if the named build target reports is_cross()."""
+    try:
+        with build_target_database() as db:
+            instance, _ = db.get_build_target_instance(target_name)
+    except KeyError:
+        return False
+    return getattr(instance, "is_cross", lambda: False)()
 
 
 def escape_ansi(line):
@@ -47,6 +58,20 @@ class build_test(build_rule_base):
 
         # Build files:
         redo.redo_ifchange(binary)
+
+        # If this is a cross-compiled target the produced ELF cannot be
+        # executed on the build host. Stop after producing the binary
+        # and surface a hint about how to run it.
+        build_target_name = redo_arg.get_target(binary)
+        if _is_cross_target(build_target_name):
+            sys.stderr.write(
+                "\n"
+                + build_target_name
+                + ": build complete. " + os.path.basename(binary)
+                + " is a cross-compiled binary; cannot exec on host.\n"
+                + "    Run with:  redo test_renode\n\n"
+            )
+            return
 
         # Make the log directory:
         log_dir = redo_arg.get_src_dir(binary) + os.sep + "build" + os.sep + "log"

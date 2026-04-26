@@ -20,3 +20,7 @@ class riscv_bare_board(gprbuild_target_base):
         # gnat metric flags
         flags = ""
         return prefix, flags
+
+    def is_cross(self):
+        """RISC-V bareboard ELFs cannot be executed on an x86_64 Linux host."""
+        return True
