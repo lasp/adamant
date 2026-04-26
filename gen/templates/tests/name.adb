@@ -5,15 +5,19 @@
 --------------------------------------------------------------------------------
 
 -- Includes:
-with Ada.Command_Line;
-with Ada.Directories; use Ada.Directories;
-with Ada.Calendar.Formatting;
+with Ada.Calendar; use Ada.Calendar;
 with String_Util;
-{% if component and not component.generic %}
-with Safe_Deallocator;
-{% endif %}
+with Test_Clock;
 
 package body {{ name }} is
+{% if component and not component.generic %}
+
+   -- Instantiate tester allocator, uses heap for Linux but not for
+   -- bareboard runtimes.
+   package Tester_Alloc is new Tester_Allocator
+     (Tester_Inst   => Component.{{ component.name }}.Implementation.Tester.Instance,
+      Tester_Access => Component.{{ component.name }}.Implementation.Tester.Instance_Access);
+{% endif %}
 
    ---------------------------------------
    -- Test Logging:
@@ -25,26 +29,28 @@ package body {{ name }} is
       Self.Logger.Log (String_Util.Trim_Both (String_To_Log));
    end Log;
 
-   -- Initialize the logging for the log file ensuring the correct directory is available
+   -- Initialize the logging for the log file ensuring the correct directory is available.
+   -- File_Name on the host File_Logger body resolves it to a real on-disk path, while
+   -- the bareboard variant routes Log to UART and ignores File_Name's path role.
    procedure Init_Logging (Self : in out Base_Instance; File_Name : in String) is
-      use Ada.Calendar.Formatting;
-      -- The path returned by the Command_Name is the path to the test.elf, so back out to the build directory
-      Log_Dir : constant String := Containing_Directory (Containing_Directory (Containing_Directory (Ada.Command_Line.Command_Name))) & "/log/" & File_Name & ".log";
    begin
       -- Save the time to calculate the duration of the test later on
       Self.Start_Test_Time := Clock;
       -- Create the log file for the test
-      Self.Logger.Open (Log_Dir);
-      Self.Log ("    Beginning log for " & File_Name & " at " & String_Util.Trim_Both (Image (Clock)));
+      Self.Logger.Open (File_Name);
+      Self.Log ("    Beginning log for " & File_Name & Test_Clock.Now_Image);
    end Init_Logging;
 
    procedure End_Logging (Self : in out Base_Instance; File_Name : in String) is
-      use Ada.Calendar.Formatting;
       -- Now calculate the duration
-      Test_Duration : constant Duration := (Clock - Self.Start_Test_Time);
+      Test_Duration : constant Duration := Clock - Self.Start_Test_Time;
    begin
       -- Close the log that was used during this test.
-      Self.Log ("    Ending log for " & File_Name & " at " & String_Util.Trim_Both (Image (Clock)) & " and took " & String_Util.Trim_Both (Duration'Image (Test_Duration)) & " seconds to run.");
+      Self.Log ("    Ending log for " & File_Name
+                & Test_Clock.Now_Image
+                & " and took "
+                & Test_Clock.Image_Duration (Test_Duration)
+                & " seconds to run.");
       Self.Logger.Close;
    end End_Logging;
 
@@ -60,8 +66,9 @@ package body {{ name }} is
       -- Log that we are starting to setup
       Self.Log ("    Starting Set_Up for test " & Test_String);
 {% if component and not component.generic %}
-      -- Dynamically allocate the component tester:
-      Self.Tester := new Component.{{ component.name }}.Implementation.Tester.Instance;
+      -- Acquire a Tester via the target-aware allocator (heap on Linux,
+      -- static on bareboard) and wire its logger to ours.
+      Self.Tester := Tester_Alloc.Allocate;
       -- Link the log access type to the logger in the reciprocal
       Self.Tester.Set_Logger (Self.Logger'Unchecked_Access);
 {% endif %}
@@ -71,12 +78,6 @@ package body {{ name }} is
    end Set_Up;
 
    overriding procedure Tear_Down (Self : in out Base_Instance) is
-{% if component and not component.generic %}
-      procedure Free_Tester is new Safe_Deallocator.Deallocate_If_Testing (
-         Object => Component.{{ component.name }}.Implementation.Tester.Instance,
-         Name => Component.{{ component.name }}.Implementation.Tester.Instance_Access
-      );
-{% endif %}
       Closing_Test : constant String := To_String (Test_Name_List (Self.Test_Name_Index));
    begin
       -- Log the tear down
@@ -89,8 +90,8 @@ package body {{ name }} is
       -- Increment counter for the next test name in the list and pass the log to close back up to the tear down (or component unit test)
       Self.Test_Name_Index := @ + 1;
 {% if component and not component.generic %}
-      -- Delete tester:
-      Free_Tester (Self.Tester);
+      -- Release the tester (heap free on Linux, no-op on bareboard).
+      Tester_Alloc.Free (Self.Tester);
 {% endif %}
    end Tear_Down;
 end {{ name }};

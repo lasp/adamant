@@ -1,11 +1,27 @@
 with Ada.Task_Termination; use Ada.Task_Termination;
+with Ada.Task_Identification;
+with Ada.Exceptions;
 with Ada.Text_IO; use Ada.Text_IO;
 
 package body Unit_Test_Termination_Handler is
 
-   -- Print out task termination information to the user:
+   -- Print task-termination diagnostics. Declared body-local so the
+   -- parent spec can stay target-agnostic (the bareboard runtime does
+   -- not expose Ada.Task_Termination.Cause_Of_Termination).
+   protected Task_Termination is
+      procedure Handler (
+         Cause : Ada.Task_Termination.Cause_Of_Termination;
+         T     : Ada.Task_Identification.Task_Id;
+         X     : Ada.Exceptions.Exception_Occurrence
+      );
+   end Task_Termination;
+
    protected body Task_Termination is
-      procedure Handler (Cause : Ada.Task_Termination.Cause_Of_Termination; T : Ada.Task_Identification.Task_Id; X : Ada.Exceptions.Exception_Occurrence) is
+      procedure Handler (
+         Cause : Ada.Task_Termination.Cause_Of_Termination;
+         T     : Ada.Task_Identification.Task_Id;
+         X     : Ada.Exceptions.Exception_Occurrence
+      ) is
          use Ada.Task_Identification;
          use Ada.Exceptions;
       begin

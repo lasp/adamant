@@ -1,7 +1,7 @@
 with AUnit.Assertions;
 with Ada.Assertions;
 with String_Util;
-with Ada.Text_IO;
+with Smart_Assert_Error_Io;
 
 package body Smart_Assert is
 
@@ -16,7 +16,11 @@ package body Smart_Assert is
          pragma Annotate (GNATSAS, Intentional, "subp always fails", "intentional assertion failure in test framework");
       begin
          if Message'Length > 0 then
-            Ada.Text_IO.Put_Line (Ada.Text_IO.Standard_Error, Message);
+            -- Route the failure message to the test target's error
+            -- output: Standard_Error on Linux, single-arg Put_Line on
+            -- bareboard. Linux fidelity matters here because `redo`
+            -- swallows stdout; assertion messages on stderr survive.
+            Smart_Assert_Error_Io.Put_Line (Message);
          end if;
          raise Ada.Assertions.Assertion_Error with " at " & Filename & ":" & String_Util.Trim_Both (Natural'Image (Line));
          pragma Annotate (GNATSAS, Intentional, "raise exception", "intentional assertion failure in test framework");
