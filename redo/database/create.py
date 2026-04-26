@@ -585,7 +585,7 @@ def create(build_path):
     # Utility database load:
     #######################################
     # Form the source build path and the object build path:
-    source_build_path = list(set(source_build_path))
+    source_build_path = list(dict.fromkeys(source_build_path))
     build_target = target.get_default_target()
     object_build_path = [
         os.path.join(path, "build" + os.sep + "obj" + os.sep + build_target)

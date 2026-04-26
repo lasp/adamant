@@ -344,4 +344,4 @@ class parameter_table_router_table(assembly_submodel):
                     )
 
         # Remove duplicate dependencies:
-        self.dependencies = list(set(self.dependencies))
+        self.dependencies = list(dict.fromkeys(self.dependencies))

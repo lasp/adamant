@@ -67,7 +67,7 @@ def _prove_ada_sources(source_files, base_dir):
 
     # Form the gnatprove command:
     gpr_project_file = build_target_instance.gpr_project_file().strip()
-    dep_dirs = list(set([os.path.dirname(f) for f in deps]))
+    dep_dirs = list(dict.fromkeys([os.path.dirname(f) for f in deps]))
     output_file = build_dir + os.sep + "prove.txt"
     direct = " >&2"
 

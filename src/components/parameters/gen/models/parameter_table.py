@@ -473,7 +473,7 @@ class parameter_table(assembly_submodel):
                 param.component_id = self.destinations[param.component.instance_name][0]
 
         # Remove duplicate dependencies
-        self.dependencies = list(set(self.dependencies))
+        self.dependencies = list(dict.fromkeys(self.dependencies))
 
     def _check_duplicate_parameters_across_tables(self):
         """

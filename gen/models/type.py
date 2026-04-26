@@ -56,7 +56,7 @@ class type(packed_type):
         # Store useful lists:
 
         # Includes:
-        self.includes = list(set(self.includes))
+        self.includes = list(dict.fromkeys(self.includes))
         # Store all types that have a model associated with them:
         self.complex_types = [self.element.type] if self.element.is_packed_type else []
 

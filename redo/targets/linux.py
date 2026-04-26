@@ -11,7 +11,7 @@ import os.path
 
 class Linux_Base(gprbuild_target_base):
     def path_files(self):
-        return list(set(super(Linux_Base, self).path_files() + ["64bit", "Linux"]))
+        return list(dict.fromkeys(super(Linux_Base, self).path_files() + ["64bit", "Linux"]))
 
 
 #
@@ -59,7 +59,7 @@ class Linux_Coverage(Linux_Base):
                 "via gcov.")
 
     def path_files(self):
-        return list(set(super(Linux_Coverage, self).path_files() + ["Linux_Test"]))
+        return list(dict.fromkeys(super(Linux_Coverage, self).path_files() + ["Linux_Test"]))
 
     def gpr_project_file(self):
         return os.path.join(

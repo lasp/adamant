@@ -82,7 +82,7 @@ def _generate(output_filename):
     if dependencies:
         if isinstance(dependencies, str):
             dependencies = [dependencies]
-        redo.redo_ifchange(list(set(dependencies)))
+        redo.redo_ifchange(list(dict.fromkeys(dependencies)))
 
     # Make sure the output directory for the file exists. If it doesn't, create it:
     dirname = os.path.dirname(output_filename)

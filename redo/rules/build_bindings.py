@@ -22,7 +22,7 @@ def _generate_bindings(redo_1, redo_2, redo_3, source_file, c_source_db):
     build_target = redo_arg.get_target(redo_2)
     build_target_instance, _ = _get_build_target_instance(build_target)
     deps = _build_all_c_dependencies([source_file], c_source_db, build_target_instance=build_target_instance)
-    dep_dirs = list(set([os.path.dirname(dep) for dep in deps]))
+    dep_dirs = list(dict.fromkeys([os.path.dirname(dep) for dep in deps]))
     include_str = ""
     if dep_dirs:
         include_str = " -I" + " -I".join(dep_dirs)

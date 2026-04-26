@@ -24,7 +24,7 @@ def update_env_var(variable_name, paths, overwrite=False):
         all_paths = filter(None, current_paths + paths)
 
     # Ensure paths are unique
-    unique_paths = list(set(all_paths))
+    unique_paths = list(dict.fromkeys(all_paths))
 
     # Set the environment variable with paths joined by os.pathsep
     os.environ[variable_name] = os.pathsep.join(unique_paths)

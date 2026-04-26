@@ -86,7 +86,7 @@ def _build_all_ada_dependencies(ada_source_files, source_db, dry_run=False):
             if source_file.endswith(".ads") or source_file.endswith(".adb"):
                 dependency_packages.extend(ada.get_source_dependencies(source_file))
         dependency_packages = filter(bool, dependency_packages)
-        dependency_packages = list(set(dependency_packages))
+        dependency_packages = list(dict.fromkeys(dependency_packages))
 
         # Get all the source files that correspond to these packages:
         sources = source_db.try_get_sources(dependency_packages)
@@ -254,7 +254,7 @@ def _build_all_c_dependencies(
             # Get dependencies for this source file. Ignore assembly files.
             if not source_file.endswith(".S") and not source_file.endswith(".s"):
                 all_deps.extend(get_c_source_dependencies(source_file, build_target_instance, c_source_db))
-        return list(set(all_deps))
+        return list(dict.fromkeys(all_deps))
 
     def _get_all_dependencies(source_files):
         sources = _get_immediate_dependencies(source_files)
@@ -280,7 +280,7 @@ def _run_gprbuild_command(build_target_instance, sources_to_compile, source_depe
     gpr_project_file = build_target_instance.gpr_project_file().strip()
     gpr_project_file_dir = os.path.dirname(gpr_project_file)
     gprbuild_flags = build_target_instance.gprbuild_flags()
-    dep_dirs = list(set([os.path.dirname(f) for f in source_dependencies]))
+    dep_dirs = list(dict.fromkeys([os.path.dirname(f) for f in source_dependencies]))
 
     # Set the verbosity level to low if debug is on:
     verbosity = ""
@@ -432,7 +432,7 @@ def _build_all_ada_and_c_dependencies_for_object(object_files, dry_run=False):
             )
 
     # Uniquify the dependency list for this object and return them.
-    sources_to_depend = list(set(sources_to_depend))
+    sources_to_depend = list(dict.fromkeys(sources_to_depend))
     return sources_to_compile, [build_target_file, __file__] + sources_to_depend, build_target_instance
 
 
@@ -652,7 +652,7 @@ def _compile_ada_object(redo_1, redo_2, redo_3, source_files, db):
     deps += _build_all_ada_dependencies(
         source_files, db
     )
-    deps = list(set(deps))
+    deps = list(dict.fromkeys(deps))
 
     # Compile:
     _compile_single_object(redo_1, redo_2, redo_3, build_target_instance, source_to_compile, deps)
@@ -690,7 +690,7 @@ def _compile_c_object(redo_1, redo_2, redo_3, source_files, db):
     deps += _build_all_c_dependencies(
         source_files, db, build_target_instance
     )
-    deps = list(set(deps))
+    deps = list(dict.fromkeys(deps))
 
     # Compile:
     _compile_single_object(redo_1, redo_2, redo_3, build_target_instance, source_to_compile, deps)

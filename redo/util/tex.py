@@ -16,7 +16,7 @@ def _depend_on_tex_links(tex, base_dir=None):
     # Ignore comments:
     tex = re.sub(r"%.*\n", "\n", tex)
     # Search output for tex dependencies and depend on them:
-    links = list(set(re.findall(r"\\input{(.*)}", tex, re.IGNORECASE)))
+    links = list(dict.fromkeys(re.findall(r"\\input{(.*)}", tex, re.IGNORECASE)))
     # Resolve paths:
     if base_dir:
         links = [link if os.path.isabs(link) else os.path.join(base_dir, link) for link in links]
@@ -36,7 +36,7 @@ def _depend_on_tex_graphics(tex, base_dir=None):
     # Ignore comments:
     tex = re.sub(r"%.*\n", "\n", tex)
     # Search output for tex dependencies and depend on them:
-    links = list(set(re.findall(r"\\includegraphics.*{(.*)}", tex, re.IGNORECASE)))
+    links = list(dict.fromkeys(re.findall(r"\\includegraphics.*{(.*)}", tex, re.IGNORECASE)))
     # Resolve paths:
     if base_dir:
         links = [link if os.path.isabs(link) else os.path.join(base_dir, link) for link in links]
@@ -54,10 +54,10 @@ def _depend_on_tex_lstinputlistings(tex, base_dir=None):
     # Ignore comments:
     tex = re.sub(r"%.*\n", "\n", tex)
     # Search output for tex dependencies and depend on them:
-    links = list(set(re.findall(r"\\lstinputlisting.*{(.*)}", tex, re.IGNORECASE)))
-    links += list(set(re.findall(r"\\yamlcodef.*{(.*)}", tex, re.IGNORECASE)))
-    links += list(set(re.findall(r"\\adacodef.*{(.*)}", tex, re.IGNORECASE)))
-    links += list(set(re.findall(r"\\pythoncodef.*{(.*)}", tex, re.IGNORECASE)))
+    links = list(dict.fromkeys(re.findall(r"\\lstinputlisting.*{(.*)}", tex, re.IGNORECASE)))
+    links += list(dict.fromkeys(re.findall(r"\\yamlcodef.*{(.*)}", tex, re.IGNORECASE)))
+    links += list(dict.fromkeys(re.findall(r"\\adacodef.*{(.*)}", tex, re.IGNORECASE)))
+    links += list(dict.fromkeys(re.findall(r"\\pythoncodef.*{(.*)}", tex, re.IGNORECASE)))
     # Resolve paths:
     if base_dir:
         links = [link if os.path.isabs(link) else os.path.join(base_dir, link) for link in links]

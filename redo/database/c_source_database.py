@@ -194,7 +194,7 @@ class c_source_database(database):
         all_objects = [
             redo_arg.src_file_to_obj_file(source, target) for source in flat_source_list
         ]
-        return list(set(all_objects))
+        return list(dict.fromkeys(all_objects))
 
     def get_all_source_dirs(self):
         # Return all directories where source code can be located?
@@ -202,4 +202,4 @@ class c_source_database(database):
         all_source = [a[0] for a in self.values()]
         flat_source_list = [item for sublist in all_source for item in sublist]
         all_dir_list = [os.path.dirname(source) for source in flat_source_list]
-        return list(set(all_dir_list))
+        return list(dict.fromkeys(all_dir_list))

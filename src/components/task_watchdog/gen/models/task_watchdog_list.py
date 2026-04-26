@@ -206,7 +206,7 @@ class task_watchdog_list(assembly_submodel):
         )
 
         # Remove duplicate dependencies
-        self.dependencies = list(set(self.dependencies))
+        self.dependencies = list(dict.fromkeys(self.dependencies))
 
     @throw_exception_with_filename
     def set_assembly(self, assembly):

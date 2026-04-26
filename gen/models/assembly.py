@@ -997,7 +997,7 @@ class assembly(subassembly):
                 self.dependencies += [c.full_filename] + c.get_dependencies()
             for m in submodels:
                 self.dependencies.extend([m.full_filename] + m.get_dependencies())
-            self.dependencies = list(set(self.dependencies))
+            self.dependencies = list(dict.fromkeys(self.dependencies))
 
             # FOR DEBUG ONLY
             # Print a histogram of connection types in the assembly:

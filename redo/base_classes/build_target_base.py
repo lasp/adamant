@@ -285,13 +285,13 @@ class build_target(object):
         )
 
     def ada_linker_depends_on(self):
-        return list(set(self.btb.ada_linker_depends_on()))
+        return list(dict.fromkeys(self.btb.ada_linker_depends_on()))
 
     def c_compiler_depends_on(self):
-        return list(set(self.btb.c_compiler_depends_on()))
+        return list(dict.fromkeys(self.btb.c_compiler_depends_on()))
 
     def cpp_compiler_depends_on(self):
-        return list(set(self.btb.cpp_compiler_depends_on()))
+        return list(dict.fromkeys(self.btb.cpp_compiler_depends_on()))
 
     def ada_compiler_flags(self):
         flags = self.__flag_constructor(self.btb.ada_compiler_flags())
