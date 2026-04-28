@@ -1,4 +1,13 @@
-abstract project a_bareboard_base extends all "a_adamant.gpr" is
+-- Bareboard scaffold for cross-compiled unit test targets running under
+-- the Jorvik profile. Mirrors a_bareboard_base.gpr but swaps in
+-- jorvik_test.adc (which permits Ada.Calendar and Unchecked_Deallocation
+-- for AUnit setup/teardown) and bumps the secondary stack and env-task
+-- stack sizes. The production defaults (10k / 5000 bytes) starve
+-- AUnit-driven tests.
+--
+-- Concrete debug/development variants can extend this project the same way
+-- a_bareboard_debug.gpr extends a_bareboard_base.gpr.
+abstract project a_bareboard_jorvik_test_base extends all "a_adamant.gpr" is
 
    -- Common compiler switches:
    package Compiler is
@@ -13,8 +22,9 @@ abstract project a_bareboard_base extends all "a_adamant.gpr" is
          -- Remove unused code and unused data:
          -- See: https://docs.adacore.com/gnat_ugx-docs/html/gnat_ugx/gnat_ugx/bareboard_topics.html
          ("-ffunction-sections", "-fdata-sections") &
-         -- Ravenscar is enforced for Adamant on bareboard by default:
-         ("-gnatec=" & a_adamant.ADAMANT_DIR & "/redo/targets/configuration_pragmas/ravenscar.adc") &
+         -- Jorvik profile (relaxation of Ravenscar that allows Ada.Calendar
+         -- and Unchecked_Deallocation under the testing/ Safe_Deallocator):
+         ("-gnatec=" & a_adamant.ADAMANT_DIR & "/redo/targets/configuration_pragmas/jorvik_test.adc") &
          ("-gnatec=" & a_adamant.ADAMANT_DIR & "/redo/targets/configuration_pragmas/sequential_elaboration.adc");
 
       for Switches ("C") use a_adamant.Compiler'Switches ("C") &
@@ -33,9 +43,9 @@ abstract project a_bareboard_base extends all "a_adamant.gpr" is
    -- Common binder switches:
    package Binder is
       for Switches ("Ada") use a_adamant.Binder'Switches ("Ada") &
-         -- Set default size of secondary stacks to 10k. This will
-         -- be overridden by and Adamant component tasks.
-         ("-D10k");
+         -- Default secondary stack. The framework default of 10k is
+         -- enough for production assemblies but starves tests.
+         ("-D64k");
    end Binder;
 
    -- Common linker switches:
@@ -43,12 +53,15 @@ abstract project a_bareboard_base extends all "a_adamant.gpr" is
       for Switches ("Ada") use a_adamant.Linker'Switches ("Ada") &
          -- Remove unused code and unused data, and report usage:
          -- See: https://docs.adacore.com/gnat_ugx-docs/html/gnat_ugx/gnat_ugx/bareboard_topics.html
-         ("-Wl,--gc-sections", "-Wl,--print-memory-usage") & -- use "--print-gc-sections" if you want a list of removed sections
-         -- Set stack size of environment task to 5000 bytes:
-         ("-Wl,--defsym=__stack_size=5000");
+         ("-Wl,--gc-sections", "-Wl,--print-memory-usage") &
+         -- Env-task stack. The framework default of 5000 bytes is
+         -- sufficient for production assemblies where component tasks
+         -- carry their own stacks, but unit tests run AUnit's runner,
+         -- need more.
+         ("-Wl,--defsym=__stack_size=262144");
    end Linker;
 
    -- Source files declared empty for abstract project
    for Source_Files use ();
 
-end a_bareboard_base;
+end a_bareboard_jorvik_test_base;

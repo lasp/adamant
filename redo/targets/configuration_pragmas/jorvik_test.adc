@@ -1,0 +1,11 @@
+-- Jorvik profile for cross-compiled unit test targets. Jorvik is a
+-- relaxation of Ravenscar that permits Ada.Calendar and other facilities
+-- AUnit and the generated test scaffold reach for. Paired with the testing/
+-- Safe_Deallocator body so AUnit setup/teardown can free heap-allocated
+-- test fixtures.
+--
+-- Intentionally asymmetric with ravenscar.adc. This file does NOT add
+-- pragma Restrictions (No_Unchecked_Deallocation). Production-discipline
+-- Jorvik builds (if/when they exist) should pass an additional .adc that
+-- layers the restriction back on rather than amending this file.
+pragma Profile (Jorvik);
