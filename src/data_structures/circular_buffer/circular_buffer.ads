@@ -131,6 +131,8 @@ package Circular_Buffer is
       with Inline => True;
    -- Clear the buffer:
    overriding procedure Clear (Self : in out Queue_Base);
+   -- Destroy the buffer (also resets Item_Count and Item_Max_Count):
+   overriding procedure Destroy (Self : in out Queue_Base);
 
    -- The queue type:
    -- This is an unprotected byte array queue data structure which allows the

@@ -3,6 +3,8 @@ with Interfaces;
 
 package body Circular_Buffer is
 
+   use type Basic_Types.Byte_Array_Access;
+
    --
    -- Subprograms for Base
    --
@@ -26,8 +28,14 @@ package body Circular_Buffer is
    begin
       if Self.Allocated then
          Free_If_Testing (Self.Bytes);
+         -- Reset Self.Allocated if bytes was actually deallocated.
+         if Self.Bytes = null then
+            Self.Allocated := False;
+         end if;
       end if;
       Self.Clear;
+      -- Reset state:
+      Self.Max_Count := 0;
    end Destroy;
 
    procedure Clear (Self : in out Base) is
@@ -497,6 +505,14 @@ package body Circular_Buffer is
       -- Clear the item count:
       Self.Item_Count := 0;
    end Clear;
+
+   overriding procedure Destroy (Self : in out Queue_Base) is
+   begin
+      Base (Self).Destroy;
+      -- Reset state:
+      Self.Item_Count := 0;
+      Self.Item_Max_Count := 0;
+   end Destroy;
 
    --
    -- Subprograms for Queue

@@ -11,6 +11,10 @@ package body Fifo is
       procedure Free_If_Testing is new Safe_Deallocator.Deallocate_If_Testing (Object => Fifo_Items, Name => Fifo_Items_Access);
    begin
       Free_If_Testing (Self.Items);
+      -- Reset state:
+      Self.Head := Natural'First;
+      Self.Count := Natural'First;
+      Self.Max_Count := Natural'First;
    end Destroy;
 
    procedure Clear (Self : in out Instance) is
