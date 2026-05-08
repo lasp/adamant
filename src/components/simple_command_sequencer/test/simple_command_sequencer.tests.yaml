@@ -1,0 +1,22 @@
+---
+description: This is a unit test suite for the Simple Command Sequencer component
+tests:
+  - name: Test_Start_Sequence
+  - name: Test_Dynamic_Sequence
+  - name: Test_Invalid_Sequence_Id
+  - name: Test_No_Frame_Available
+  - name: Test_Command_Failure_Aborts_Sequence
+  - name: Test_Command_Failure_Continues_Sequence
+  - name: Test_Concurrent_Sequences
+  - name: Test_Spurious_Command_Response
+  - name: Test_Tick_Does_Not_Wake_Waiting_For_Resp
+  - name: Test_Dropped_Command
+  - name: Test_Dropped_Command_Response
+  - name: Test_Dropped_Tick
+  - name: Test_Invalid_Command
+  - name: Test_No_Wait_Sequence
+  - name: Test_Frame_Reuse_After_Completion
+  - name: Test_Out_Of_Range_Sleep
+  - name: Test_Timeout
+  - name: Test_Out_Of_Range_Timeout
+  - name: Test_Extra_Sequence_Id
