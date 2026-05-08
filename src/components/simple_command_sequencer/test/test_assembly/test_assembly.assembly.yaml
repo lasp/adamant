@@ -1,0 +1,19 @@
+---
+description: This is an assembly for testing the Command Sequencer component.
+########################################
+components:
+########################################
+# Include some components so our assembly as commands.
+  - type: Test_Component
+    name: Component_A
+  - type: Test_Component
+    name: Component_B
+  - type: Test_Component
+    name: Component_C
+connections:
+  # Dummy connection. We need one to make schema happy, but it doesn't
+  # affect testing.
+  - from_component: ignore
+    from_connector: ignore
+    to_component: Component_A
+    to_connector: Command_T_Recv_Sync
