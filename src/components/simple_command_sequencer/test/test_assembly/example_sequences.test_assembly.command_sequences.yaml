@@ -1,0 +1,51 @@
+# Command Sequences Definition
+# This file defines composite commands that execute sequences of sub-commands
+
+name: Flight_Sequences
+description: Common flight software command sequences
+
+sequences:
+  # Simple sequence with no arguments
+  - name: Sequence_A
+    description: Execute commands on component A
+    wait_for_command_completion: true
+    continue_on_failure: true
+    
+    sequence:
+      - command: Component_A.Command_1
+      - command: Component_A.Command_2
+        arg: (Seconds => 3, Subseconds => 14)
+      - command: Sleep
+        arg: (Seconds => 3, Milliseconds => 0)
+      - command: Component_A.Command_3
+        arg: (Value => 3)
+
+  - name: Sequence_B
+    description: Perform generic arguments with component A and B
+    wait_for_command_completion: true
+    continue_on_failure: false
+    arg_type: Sequence_B_Arg.T
+
+    sequence:
+      - command: Component_A.Command_3
+        arg: Arg.Component_A_Arg
+      - command: Component_B.Command_3
+        arg: Arg.Component_B_Arg
+
+  - name: Sequence_C
+    description: No-wait sequence for direct-dispatch testing
+    wait_for_command_completion: false
+    continue_on_failure: false
+
+    sequence:
+      - command: Component_A.Command_1
+      - command: Component_A.Command_1
+  
+  - name: Sequence_D
+    description: Sequence with a large sleep value to test an overflow sleep
+    wait_for_command_completion: true
+    continue_on_failure: false
+
+    sequence:
+      - command: Sleep 
+        arg: (Seconds => 30000, Milliseconds => 0)
