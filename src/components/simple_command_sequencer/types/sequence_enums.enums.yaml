@@ -1,0 +1,8 @@
+---
+enums:
+  - name: Sequence_State
+    literals:
+      - name: Not_Running
+      - name: Waiting_For_Cmd_Resp
+      - name: Waiting_For_Time
+      - name: Running

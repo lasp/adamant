@@ -1,0 +1,6 @@
+---
+description: These are the commands for the Register Stuffer component.
+commands:
+  - name: Run_Sequence
+    description: Run a Command Sequence
+    arg_type: Run_Sequence_Arg.T
