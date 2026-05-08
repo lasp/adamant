@@ -1,0 +1,118 @@
+# Schema for command_sequences YAML files
+# This defines the structure and validation rules
+
+type: map
+mapping:
+  name:
+    required: true
+    type: str
+    desc: |
+      The name of the command sequences package. This will be used as the
+      Ada package name, so it must follow Ada naming conventions.
+  
+  description:
+    required: false
+    type: str
+    desc: |
+      Description of this command sequences package. This will appear in
+      the generated Ada code comments.
+  
+  preamble:
+    required: false
+    type: str
+    desc: |
+      Custom preamble text to include in the generated Ada package.
+  
+  sequences:
+    required: true
+    type: seq
+    desc: |
+      List of command sequence definitions. Each sequence defines a named
+      command that executes a series of sub-commands.
+    sequence:
+      - type: map
+        mapping:
+          name:
+            required: true
+            type: str
+            desc: |
+              Name of this sequence. This will become a command that can be
+              executed. Must follow Ada naming conventions.
+          
+          description:
+            required: false
+            type: str
+            desc: |
+              Description of what this sequence does. Will appear in generated
+              code and documentation.
+          
+          arg_type:
+            required: false
+            type: str
+            desc: |
+              The Ada type for this sequence's argument. If not specified,
+              the sequence takes no arguments. Must be a valid Ada type name,
+              possibly qualified (e.g., "Power_Mode.T" or "Packed_U16.T").
+          
+          wait_for_command_completion:
+            required: false
+            type: bool
+            default: true
+            desc: |
+              Default setting for whether to wait for each sub-command to
+              complete before executing the next one. Individual steps can
+              override this.
+          
+          continue_on_failure:
+            required: false
+            type: bool
+            default: false
+            desc: |
+              If true, the sequence will continue executing even if a sub-command
+              fails. If false, the sequence will abort on the first failure.
+
+          sequence:
+            required: true
+            type: seq
+            desc: |
+              The ordered list of sub-commands to execute. Each step defines
+              a command to send and optionally an argument expression.
+            sequence:
+              - type: map
+                mapping:
+                  command:
+                    required: true
+                    type: str
+                    desc: |
+                      The command to execute in the format "Component.Command_Name".
+                      The component must be a valid component instance name in your
+                      assembly, and the command must exist on that component.
+                  
+                  arg:
+                    required: false
+                    type: str
+                    desc: |
+                      An Ada expression that evaluates to the argument for this
+                      command. You can reference the parent sequence's argument
+                      using "Arg.field_name" syntax. If the command takes no
+                      argument, omit this field.
+                      
+                      Examples:
+                        - "Arg" - pass through the entire sequence argument
+                        - "Arg.Power_Mode" - pass a field from the sequence argument
+                        - "(Mode => Arg.Mode, Enable => True)" - construct a record
+                        - "42" - a literal value
+                  
+                  wait_for_completion:
+                    required: false
+                    type: bool
+                    desc: |
+                      Whether to wait for this specific command to complete before
+                      proceeding. If not specified, uses the parent sequence's
+                      wait_for_command_completion setting.
+
+# Additional validation rules (enforced in the model Python code):
+# - Command format must be "Component.Command" with valid identifiers
+# - Referenced types in arg_type must exist in the system
+# - Argument expressions must be valid Ada syntax
+# - Component and command names must match instances in the assembly
