@@ -1,0 +1,13 @@
+---
+description: A duration specified as whole seconds and milliseconds, used to specify a timeout offset from the current system time.
+fields:
+  - name: Seconds
+    description: The number of whole seconds in the duration.
+    type: Interfaces.Unsigned_16
+    format: U16
+    default: '0'
+  - name: Milliseconds
+    description: The number of additional milliseconds in the duration.
+    type: Interfaces.Unsigned_16
+    format: U16
+    default: '0'

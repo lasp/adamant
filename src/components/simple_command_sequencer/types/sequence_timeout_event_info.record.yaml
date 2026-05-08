@@ -1,0 +1,15 @@
+---
+description: Sequence sleep event information
+fields:
+  - name: Sequence_Id
+    description: The ID of the sequence
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Frame_Id
+    description: The frame the sequence is executing on
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Milliseconds
+    description: The number of milliseconds to sleep
+    type: Interfaces.Unsigned_32
+    format: U32

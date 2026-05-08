@@ -1,0 +1,56 @@
+---
+description: Events for the Simple Command Sequencer component
+events:
+  - name: Sequence_Started
+    description: A sequence has begun execution on a frame
+    param_type: Sequence_Event_Info.T
+
+  - name: Sequence_Completed
+    description: A sequence has completed all steps successfully
+    param_type: Sequence_Event_Info.T
+
+  - name: Sequence_Aborted
+    description: A sequence was aborted due to a command failure
+    param_type: Sequence_Step_Event_Info.T
+
+  - name: Sequence_Timeout
+    description: A sequence timed out while waiting for a command response
+    param_type: Sequence_Step_Event_Info.T
+
+  - name: Sequence_Out_Of_Range_Sleep
+    description: A sequence has entered sleep state with either overflow or underflow.
+    param_type: Sequence_Sleep_Event_Info.T
+
+  - name: Sequence_Out_Of_Range_Timeout
+    description: A sequence timeout duration is out of range either underflow or overflow.
+    param_type: Sequence_Timeout_Event_Info.T
+
+  - name: Command_Failure
+    description: A command sent by a sequence received a failure response
+    param_type: Sequence_Step_Command_Event_Info.T
+
+  - name: Invalid_Sequence_Id
+    description: A Run_Sequence command was received with an out of range sequence ID
+    param_type: Packed_U32.T
+
+  - name: Extra_Sequence_Id
+    description: Too many sequence IDs were passed to the Simple Command Sequencer
+
+  - name: No_Frame_Available
+    description: A Run_Sequence command was received but all frames are in use
+
+  - name: Dropped_Command
+    description: A command was dropped due to a full queue
+    param_type: Command_Header.T
+
+  - name: Dropped_Command_Response
+    description: A command response was dropped due to a full queue
+    param_type: Command_Response.T
+
+  - name: Dropped_Tick
+    description: A tick was dropped due to a full queue
+    param_type: Tick.T
+
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T
