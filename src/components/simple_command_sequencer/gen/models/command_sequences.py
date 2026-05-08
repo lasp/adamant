@@ -84,7 +84,6 @@ class sequence_step(object):
         else:
             self.wait_for_completion = self._wait_for_completion
 
-
     def validate(self):
         if self.is_sleep() and not self.arg:
             raise ModelException(f"Sleep step {self.index} requires an arg expression")

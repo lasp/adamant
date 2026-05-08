@@ -1,0 +1,36 @@
+---
+description: Stores relevant data for a command sequence execution.
+fields:
+  - name: Sequence_Id
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Frame_Id
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Step
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Wait_Until
+    type: Sys_Time.T
+  - name: Status
+    type: Sequence_Enums.Sequence_State.E
+    format: U8
+  - name: Source_Id
+    type: Command_Types.Command_Source_Id
+    format: U16
+  - name: Flags
+    type: Sequence_Frame_Flags.T
+  - name: Timeout_Millis
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Last_Command_Send
+    type: Sys_Time.T
+  - name: Arg_Length
+    description: Length of the buffer argument in bytes
+    type: Simple_Sequencer_Types.Run_Sequence_Arg_Buffer_Length_Type
+    format: U16
+  - name: Dynamic_Arg
+    description: Passthrough Argument for Commands in Sequence
+    type: Simple_Sequencer_Types.Run_Sequence_Buffer_Type
+    format: U8x{{ command_buffer_size - 10 }}
+    variable_length: Arg_Length
