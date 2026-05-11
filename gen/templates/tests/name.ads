@@ -8,7 +8,7 @@
 with AUnit;
 with AUnit.Test_Fixtures;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
-with Ada.Calendar; use Ada.Calendar;
+with Ada.Calendar;
 with File_Logger;
 {% if component and not component.generic %}
 -- Component Tester Include:
@@ -70,7 +70,7 @@ private
       -- File for logging
       Logger : aliased File_Logger.Instance;
       -- Time for when the test starts to track the duration of the test
-      Start_Test_Time : Time;
+      Start_Test_Time : Ada.Calendar.Time;
 {% if component and not component.generic %}
       -- The tester component:
       Tester : Component.{{ component.name }}.Implementation.Tester.Instance_Access;

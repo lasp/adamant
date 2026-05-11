@@ -12,6 +12,8 @@ package body History is
       procedure Free_If_Testing is new Safe_Deallocator.Deallocate_If_Testing (Object => History_Buffer, Name => History_Buffer_Access);
    begin
       Free_If_Testing (Self.Buffer);
+      -- Reset state:
+      Self.Count := 0;
    end Destroy;
 
    procedure Push (Self : in out Instance; Value : in T) is
