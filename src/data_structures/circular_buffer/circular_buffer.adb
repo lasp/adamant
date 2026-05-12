@@ -3,8 +3,6 @@ with Interfaces;
 
 package body Circular_Buffer is
 
-   use type Basic_Types.Byte_Array_Access;
-
    --
    -- Subprograms for Base
    --
@@ -28,10 +26,7 @@ package body Circular_Buffer is
    begin
       if Self.Allocated then
          Free_If_Testing (Self.Bytes);
-         -- Reset Self.Allocated if bytes was actually deallocated.
-         if Self.Bytes = null then
-            Self.Allocated := False;
-         end if;
+         Self.Allocated := False;
       end if;
       Self.Clear;
       -- Reset state:
