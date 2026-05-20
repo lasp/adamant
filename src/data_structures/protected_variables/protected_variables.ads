@@ -1,6 +1,7 @@
 -- This package contains many common, simple, protected variable patterns used in
 -- components. Each protected variable pattern is contained within a generic
 -- package that can be adapted for the particular type needed.
+
 package Protected_Variables is
 
    -- A generic variable that can be set/fetched in a thread safe way.
@@ -59,6 +60,36 @@ package Protected_Variables is
          Count : T := 0;
       end Counter;
    end Generic_Protected_Counter_Decrement;
+
+   -- A generic staging area for handing a value from one task to another in a
+   -- thread-safe way. The writer calls Stage to deposit a new value and mark
+   -- it pending. The owner calls Is_Staged to check (cheaply) whether a value
+   -- is waiting and Copy_From_Staged to atomically read it out and clear the
+   -- pending flag. Useful when a component receives a configuration on one
+   -- task but applies it on another, at the appropriate time.
+   generic
+      -- Any nonlimited definite type.
+      type T is private;
+   package Generic_Staged_Variable is
+      protected type Staged_Variable is
+         -- Writer side. Replace the staged value and mark it pending. Repeated
+         -- Stage calls before the next Copy_From_Staged keep only the most
+         -- recent value.
+         procedure Stage (Value : in T);
+         -- Cheap poll: returns whether a value has been staged. Lets the caller
+         -- check without paying the stack cost of a T-sized out parameter.
+         function Is_Staged return Boolean;
+         -- Atomic read-and-clear. Copies the staged value into Out_Value and
+         -- clears the pending flag. Intended to be called only after Is_Staged
+         -- has returned True. If called when no value is staged, Out_Value
+         -- receives the protected object's default-initialized Staged_Value --
+         -- callers should always guard with Is_Staged for performance.
+         procedure Copy_From_Staged (Out_Value : out T);
+      private
+         Staged_Value : T;
+         Has_Staged : Boolean := False;
+      end Staged_Variable;
+   end Generic_Staged_Variable;
 
    -- A generic counter whose members are set/fetched/incremented in a thread safe way.
    -- The counter contains an incrementing counter and a period. This is usually used
