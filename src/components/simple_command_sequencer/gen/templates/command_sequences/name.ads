@@ -54,7 +54,7 @@ package {{ name }} is
                            Sleep_Arg  => {{ step.get_arg_expression() }}){% if not loop.last %},{% endif %}
 
 {% elif step.is_dynamic() %}
-      {{ loop.index0 }} => (Kind       => Dynamic_Command_Step,
+      {{ loop.index0 }} => (Kind       => Runtime_Argument_Command_Step,
                            Id         => {{ step.component_name }}_{{ step.command_name }},
                            Arg_Length => {{ step.dynamic_arg_type_package }}.Serialization.Serialized_Length,
                            Resolver => Scs_Arg_Resolver.T_Access'({{ step.resolver_instance_name }}'Access)){% if not loop.last %},{% endif %}
@@ -82,9 +82,10 @@ package {{ name }} is
      [
 {% for seq in sequences.values() %}
       {{ loop.index0 }} => (
-         Wait_For_Cmd_Resp   => {{ "True" if seq.wait_for_command_completion else "False" }},
-         Abort_On_Failed_Cmd => {{ "False" if seq.continue_on_failure else "True" }},
-         Steps               => {{ seq.name }}_Steps'Access){% if not loop.last %},{% endif %}
+         Wait_For_Cmd_Resp      => {{ "True" if seq.wait_for_command_completion else "False" }},
+         Abort_On_Failed_Cmd    => {{ "False" if seq.continue_on_failure else "True" }},
+         Command_Timeout_Millis => {{ seq.command_timeout_millis }},
+         Steps                  => {{ seq.name }}_Steps'Access){% if not loop.last %},{% endif %}
 
 {% endfor %}
      ];
