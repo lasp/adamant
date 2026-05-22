@@ -5,6 +5,7 @@
 with Basic_Assertions; use Basic_Assertions;
 with Serializer_Types; use Serializer_Types;
 with Simple_Sequencer_Types; use Simple_Sequencer_Types;
+with Sequence_Enums; use Sequence_Enums.Sequence_Response_Behavior;
 with Sequence_Event_Info.Assertion; use Sequence_Event_Info.Assertion;
 with Sequence_Step_Event_Info.Assertion; use Sequence_Step_Event_Info.Assertion;
 with Sequence_Sleep_Event_Info.Assertion; use Sequence_Sleep_Event_Info.Assertion;
@@ -84,8 +85,9 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
 
-      -- Set the timeout to 1 to prevent it from timing out, we only increment system time for sleep.
-      Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Timeout_Millis => 1, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      -- We rely on the sequence's default Command_Timeout_Millis to be well above
+      -- any time advance in this test, so no timeout fires.
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
 
       T.Command_T_Send (Cmd);
@@ -178,7 +180,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       BArray (BArray'First .. BArray'First + Sequence_B_Arg.Serialization.Serialized_Length - 1) :=
          Sequence_B_Arg.Serialization.To_Byte_Array (Argument);
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 1, Timeout_Millis => 1000,
+         (Sequence_Id => 1, Response_Behavior => Send_After_Sequence_Start,
           Arg_Length => Sequence_B_Arg.Serialization.Serialized_Length, Buffer_Arg => BArray), Cmd);
       pragma Assert (Status = Success);
 
@@ -233,7 +235,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
    begin
       -- 99 is well out of range for our three-sequence table
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 99, Timeout_Millis => 1000, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 99, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
 
       T.Command_T_Send (Cmd);
@@ -256,7 +258,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
    begin
       -- Occupy Frame 0
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 0, Timeout_Millis => 1000, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -264,7 +266,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       -- Occupy Frame 1
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 0, Timeout_Millis => 1000, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -272,7 +274,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       -- Both frames now in Running state; attempt a third sequence
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 0, Timeout_Millis => 1000, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -300,7 +302,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       BArray (BArray'First .. BArray'First + Packed_U32.Serialization.Serialized_Length - 1) :=
          Packed_U32.Serialization.To_Byte_Array (Argument);
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 1, Timeout_Millis => 1000,
+         (Sequence_Id => 1, Response_Behavior => Send_After_Sequence_Start,
           Arg_Length => Packed_U32.Serialization.Serialized_Length, Buffer_Arg => BArray), Cmd);
       pragma Assert (Status = Success);
 
@@ -349,7 +351,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       T.System_Time := (Seconds => 0, Subseconds => 0);
 
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 0, Timeout_Millis => 1000, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
 
       T.Command_T_Send (Cmd);
@@ -398,7 +400,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       -- Start Sequence_A on Frame 0
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 0, Timeout_Millis => 1000, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -407,7 +409,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       -- Start Sequence_A on Frame 1
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 0, Timeout_Millis => 1000, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -447,8 +449,9 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 0);
    end Test_Concurrent_Sequences;
 
-   --  A command response arriving when no frame is waiting for it is silently dropped.
-   --  No events must be emitted for either an unknown Source_Id or a non-waiting frame.
+   --  A command response with an unknown Source_Id emits Unexpected_Command_Response.
+   --  A response whose Source_Id matches a frame that is not in Waiting_For_Cmd_Resp is silently
+   --  ignored (no event, no command dispatched).
    overriding procedure Test_Spurious_Command_Response (Self : in out Instance) is
       T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
    begin
@@ -456,20 +459,23 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       T.Command_Response_T_Send ((Source_Id => 99, Registration_Id => 0,
          Command_Id => 0, Status => Success));
       Natural_Assert.Eq (T.Dispatch_All, 1);
-      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Unexpected_Command_Response_History.Get_Count, 1);
 
-      -- Frame 0 (Source_Id 0) is Not_Running; response has no matching Waiting_For_Cmd_Resp frame
+      -- Frame 0 (Source_Id 0) is Not_Running; response has matching Source_Id but no Waiting_For_Cmd_Resp state
       T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0,
          Command_Id => 0, Status => Success));
       Natural_Assert.Eq (T.Dispatch_All, 1);
-      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
+      -- Still just the one Unexpected_Command_Response event from before
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
 
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 0);
    end Test_Spurious_Command_Response;
 
    --  While a frame is in Waiting_For_Cmd_Resp, ticks must not advance execution.
-   --  Only the timeout path is active; with Timeout_Millis > 0 the implementation's
-   --  "Time >= Time + Millis" check is always false, so no timeout fires either.
+   --  Only the timeout path is active; with the sequence's Command_Timeout_Millis
+   --  set well above the tick interval, "Time >= Last_Send + Timeout" is always
+   --  false, so no timeout fires either.
    overriding procedure Test_Tick_Does_Not_Wake_Waiting_For_Resp (Self : in out Instance) is
       T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
       Component_A_Commands : Test_Component_Commands.Instance;
@@ -482,7 +488,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       T.System_Time := (Seconds => 0, Subseconds => 0);
 
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 0, Timeout_Millis => 1000, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
 
       T.Command_T_Send (Cmd);
@@ -503,7 +509,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 1);
 
-      -- No timeout event fired (Timeout_Millis > 0 makes Time >= Time+Millis false)
+      -- No timeout event fired (default sequence timeout is well above the tick interval)
       Natural_Assert.Eq (T.Sequence_Timeout_History.Get_Count, 0);
 
       -- Confirm the response still wakes the frame correctly
@@ -526,7 +532,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Status : Serialization_Status;
    begin
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 0, Timeout_Millis => 1000, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
 
       -- Simulate a queue-full drop by calling the drop handler directly
@@ -554,7 +560,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       -- Start a sequence and get to Waiting_For_Cmd_Resp
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 0, Timeout_Millis => 1000, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -623,7 +629,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       T.System_Time := (Seconds => 0, Subseconds => 0);
 
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 2, Timeout_Millis => 1000, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 2, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
 
       T.Command_T_Send (Cmd);
@@ -660,7 +666,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       -- Run Sequence_C (no-wait, completes in one tick) on Frame 0
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 2, Timeout_Millis => 1000, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 2, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -673,7 +679,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       -- Frame 0 is now Not_Running; start a second sequence and confirm it reuses Frame 0
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 2, Timeout_Millis => 1000, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 2, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -696,7 +702,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
 
-      Status := T.Commands.Run_Sequence ((Sequence_Id => 3, Timeout_Millis => 1, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 3, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
 
       T.Command_T_Send (Cmd);
@@ -711,7 +717,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
       Natural_Assert.Eq (T.Sequence_Out_Of_Range_Sleep_History.Get_Count, 1);
-      Sequence_Sleep_Event_Info_Assert.Eq (T.Sequence_Out_Of_Range_Sleep_History.Get (1), (Sequence_Id => 3, Frame_Id => 0, Seconds => 30000, Milliseconds => 0));
+      Sequence_Sleep_Event_Info_Assert.Eq (T.Sequence_Out_Of_Range_Sleep_History.Get (1), (Sequence_Id => 3, Frame_Id => 0, Milliseconds => Interfaces.Unsigned_32'Last));
    end Test_Out_Of_Range_Sleep;
 
    overriding procedure Test_Timeout (Self : in out Instance) is
@@ -727,7 +733,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
 
-      Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Timeout_Millis => 50, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
 
       T.Command_T_Send (Cmd);
@@ -766,7 +772,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
 
-      Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Timeout_Millis => 5000000, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
 
       T.Command_T_Send (Cmd);
@@ -787,7 +793,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
       Natural_Assert.Eq (T.Sequence_Out_Of_Range_Timeout_History.Get_Count, 1);
-      Sequence_Timeout_Event_Info_Assert.Eq (T.Sequence_Out_Of_Range_Timeout_History.Get (1), (Sequence_Id => 0, Frame_Id => 0, Milliseconds => 5000000));
+      Sequence_Timeout_Event_Info_Assert.Eq (T.Sequence_Out_Of_Range_Timeout_History.Get (1), (Sequence_Id => 0, Frame_Id => 0, Milliseconds => 10_000));
    end Test_Out_Of_Range_Timeout;
 
    overriding procedure Test_Extra_Sequence_Id (Self : in out Instance) is

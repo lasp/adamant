@@ -2,7 +2,7 @@
 -- Simple_Command_Sequencer Component Implementation Body
 --------------------------------------------------------------------------------
 with Sequence_Enums; use Sequence_Enums.Sequence_State;
-with Sequence_Sleep_Arg;
+with Packed_U32;
 with Ada.Real_Time;
 with Sys_Time.Arithmetic;
 with Command_Types; use Command_Types;
@@ -25,27 +25,23 @@ package body Component.Simple_Command_Sequencer.Implementation is
       Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
    begin
       Self.Sequence_Frames := new Sequence_Frame_Array (0 .. Num_Concurrent_Sequences - 1);
-
-      for Id in Self.Sequence_Frames.all'Range loop
-         Self.Sequence_Frames.all (Id) := (
-            Sequence_Id => 0,
-            Frame_Id => Id,
-            Step => 0,
-            Wait_Until => Time,
-            Status => Not_Running,
-            Source_Id => 0,
-            Flags => (
-               Has_Source_Id => False,
-               Last_Command_Success => False,
-               Wait_For_Cmd_Resp => True,
-               Abort_On_Failed_Cmd => True
-            ),
-            Timeout_Millis => 0,
-            Last_Command_Send => Time,
-            Arg_Length => 0,
-            Dynamic_Arg => [others => 0]
-         );
-      end loop;
+      Self.Sequence_Frames.all := [for Id in Self.Sequence_Frames.all'Range =>
+         (Sequence_Id => 0,
+          Frame_Id => Id,
+          Step => 0,
+          Wait_Until => Time,
+          Status => Not_Running,
+          Source_Id => 0,
+          Flags => (
+             Has_Source_Id => False,
+             Last_Command_Success => False,
+             Wait_For_Cmd_Resp => True,
+             Abort_On_Failed_Cmd => True
+          ),
+          Response_Behavior => Sequence_Enums.Sequence_Response_Behavior.Send_After_Sequence_Start,
+          Last_Command_Send => Time,
+          Arg_Length => 0,
+          Dynamic_Arg => [others => 0])];
       Self.Sequences := Sequences;
    end Init;
 
@@ -83,28 +79,27 @@ package body Component.Simple_Command_Sequencer.Implementation is
       return False;
    end Find_Sequence_Frame_Id_From_Source_Id;
 
-   -- Sleep the Command Sequencer (only useful inside sequences)
-   function Sequence_Sleep (Self : in out Instance; Frame : in out Sequence_Frame.T; Arg : in Sequence_Sleep_Arg.T) return Boolean is
+   -- Attempts to put `Frame` into the Waiting_For_Time state with a wake time
+   -- equal to now + `Arg` milliseconds. Returns False (and leaves Frame.Wait_Until
+   -- unchanged) if the Sys_Time arithmetic overflows; the caller should treat that
+   -- as an out-of-range sleep duration and emit the appropriate event.
+   function Try_Schedule_Sleep (Self : in out Instance; Frame : in out Sequence_Frame.T; Arg : in Packed_U32.T) return Boolean is
       use Ada.Real_Time;
       use Sys_Time.Arithmetic;
 
       Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
       Status : Sys_Time_Status;
-
-      function To_Time_Span (Arg : Sequence_Sleep_Arg.T) return Time_Span is
-      begin
-         return Seconds (Integer (Arg.Seconds))
-            + Milliseconds (Integer (Arg.Milliseconds));
-      end To_Time_Span;
    begin
       Frame.Status := Waiting_For_Time;
-      Status := Add (Time, To_Time_Span (Arg), Frame.Wait_Until);
-      if Status = Success then
-         return True;
-      else
+      -- Arg.Value is an unsigned 32-bit millisecond count (up to ~50 days). Ada.Real_Time.Milliseconds
+      -- takes an Integer, so a value above Integer'Last cannot be expressed as a Time_Span on this
+      -- platform - treat it as an out-of-range sleep.
+      if Arg.Value > Interfaces.Unsigned_32 (Integer'Last) then
          return False;
       end if;
-   end Sequence_Sleep;
+      Status := Add (Time, Milliseconds (Integer (Arg.Value)), Frame.Wait_Until);
+      return Status = Success;
+   end Try_Schedule_Sleep;
 
    procedure Execute_Sequence (Self : in out Instance; Frame : in out Sequence_Frame.T) is
       use Simple_Sequencer_Types;
@@ -129,31 +124,30 @@ package body Component.Simple_Command_Sequencer.Implementation is
                         end if;
                         Frame.Last_Command_Send := Self.Sys_Time_T_Get;
                      end;
-               when Dynamic_Command_Step =>
-                  declare
-                     Resolved : constant Command_Types.Command_Arg_Buffer_Type :=
-                        Step_Obj.Resolver.Resolve (Frame.Dynamic_Arg'Address);
-                     Cmd : constant Command.T := (
-                        Header     => (
-                           Source_Id         => Frame.Source_Id,
-                           Id                => Step_Obj.Id,
-                           Arg_Buffer_Length => Step_Obj.Arg_Length),
-                        Arg_Buffer => Resolved);
-                  begin
-                     Self.Command_T_Send (Cmd);
-                     if Frame.Flags.Wait_For_Cmd_Resp then
-                        Frame.Status := Waiting_For_Cmd_Resp;
-                     end if;
-                     Frame.Last_Command_Send := Self.Sys_Time_T_Get;
-                  end;
+                  when Runtime_Argument_Command_Step =>
+                     declare
+                        Resolved : constant Command_Types.Command_Arg_Buffer_Type :=
+                           Step_Obj.Resolver.Resolve (Frame.Dynamic_Arg'Address);
+                        Cmd : constant Command.T := (
+                           Header     => (
+                              Source_Id         => Frame.Source_Id,
+                              Id                => Step_Obj.Id,
+                              Arg_Buffer_Length => Step_Obj.Arg_Length),
+                           Arg_Buffer => Resolved);
+                     begin
+                        Self.Command_T_Send (Cmd);
+                        if Frame.Flags.Wait_For_Cmd_Resp then
+                           Frame.Status := Waiting_For_Cmd_Resp;
+                        end if;
+                        Frame.Last_Command_Send := Self.Sys_Time_T_Get;
+                     end;
                   when Sleep =>
-                     if not Self.Sequence_Sleep (Frame, Step_Obj.Sleep_Arg) then
-                        -- Likely emit an event saying invalid time given for sleep? (over vs underflow?)
-                        Self.Event_T_Send_If_Connected (Self.Events.Sequence_Out_Of_Range_Sleep (Self.Sys_Time_T_Get, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Seconds => Step_Obj.Sleep_Arg.Seconds, Milliseconds => Step_Obj.Sleep_Arg.Milliseconds)));
+                     if not Self.Try_Schedule_Sleep (Frame, Step_Obj.Sleep_Arg) then
+                        Self.Event_T_Send_If_Connected (Self.Events.Sequence_Out_Of_Range_Sleep (Self.Sys_Time_T_Get, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Milliseconds => Step_Obj.Sleep_Arg.Value)));
                      end if;
                end case;
                if Frame.Step <= Self.Sequences.all (Frame.Sequence_Id).Steps.all'Last then
-                  Frame.Step := Frame.Step + 1; -- <- Is there a more idiomatic way to do this?
+                  Frame.Step := Frame.Step + 1;
                end if;
             end;
          end if;
@@ -172,27 +166,25 @@ package body Component.Simple_Command_Sequencer.Implementation is
       Self.Command_Response_T_Send_If_Connected ((Source_Id => Arg.Header.Source_Id, Registration_Id => Self.Command_Reg_Id, Command_Id => Arg.Header.Id, Status => Stat));
    end Command_T_Recv_Async;
 
-   -- Responses to sub-commands are received here
+   -- Responses to sub-commands are received here. Two cases:
+   --   1) Register_Source: the command router is allocating us a source ID for
+   --      one of our frames. We claim the first frame that doesn't yet have one.
+   --   2) Anything else: a downstream command we issued has returned a result.
+   --      Look up the owning frame by source ID, advance or abort it.
    overriding procedure Command_Response_T_Recv_Async (Self : in out Instance; Arg : in Command_Response.T) is
       use Command_Response_Status;
    begin
-      -- If the status of the command response is a Register_Source status, then we need to set our command
-      -- source id. Otherwise we should perform the action associated with receiving a command response.
       if Arg.Status = Command_Response_Status.Register_Source then
          declare
             Source_Id_Set : Boolean := False;
          begin
-            for Id in Self.Sequence_Frames.all'Range loop
-               declare
-                  Frame : Sequence_Frame.T renames Self.Sequence_Frames.all (Id);
-               begin
-                  if Frame.Flags.Has_Source_Id = False then
-                     Frame.Source_Id := Arg.Source_Id;
-                     Frame.Flags.Has_Source_Id := True;
-                     Source_Id_Set := True;
-                     exit;
-                  end if;
-               end;
+            for Frame of Self.Sequence_Frames.all loop
+               if Frame.Flags.Has_Source_Id = False then
+                  Frame.Source_Id := Arg.Source_Id;
+                  Frame.Flags.Has_Source_Id := True;
+                  Source_Id_Set := True;
+                  exit;
+               end if;
             end loop;
 
             if not Source_Id_Set then
@@ -225,6 +217,11 @@ package body Component.Simple_Command_Sequencer.Implementation is
                      end if;
                   end if;
                end;
+            else
+               -- A command response came back tagged with a source ID we don't recognise.
+               -- This is unexpected (usually a routing or registration bug); surface it
+               -- so it isn't silently dropped.
+               Self.Event_T_Send_If_Connected (Self.Events.Unexpected_Command_Response (Self.Sys_Time_T_Get, Arg));
             end if;
          end;
       end if;
@@ -249,9 +246,12 @@ package body Component.Simple_Command_Sequencer.Implementation is
                      Self.Execute_Sequence (Frame);
                   end if;
                when Waiting_For_Cmd_Resp =>
-                  -- Check timeout here, if too long, set Frame to Not_Running and Emit event
+                  -- Check timeout. The per-sequence timeout lives in the autocoded
+                  -- sequence table (Command_Timeout_Millis), not in the frame.
                   declare
                      use Ada.Real_Time;
+                     Timeout_Millis : constant Interfaces.Unsigned_32 :=
+                        Self.Sequences.all (Frame.Sequence_Id).Command_Timeout_Millis;
                      Timeout : Sys_Time.T;
                      Status : Sys_Time_Status;
                      function To_Time_Span (Millis : Interfaces.Unsigned_32) return Time_Span is
@@ -259,12 +259,10 @@ package body Component.Simple_Command_Sequencer.Implementation is
                         return Milliseconds (Integer (Millis));
                      end To_Time_Span;
                   begin
-                     Status := Add (Frame.Last_Command_Send, To_Time_Span (Frame.Timeout_Millis), Timeout);
+                     Status := Add (Frame.Last_Command_Send, To_Time_Span (Timeout_Millis), Timeout);
                      if Status /= Success then
-                        Self.Event_T_Send_If_Connected (Self.Events.Sequence_Out_Of_Range_Timeout (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Id, Milliseconds => Frame.Timeout_Millis)));
-                     end if;
-
-                     if Time >= Timeout then
+                        Self.Event_T_Send_If_Connected (Self.Events.Sequence_Out_Of_Range_Timeout (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Id, Milliseconds => Timeout_Millis)));
+                     elsif Time >= Timeout then
                         Self.Event_T_Send_If_Connected (Self.Events.Sequence_Timeout (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Id, Step => Frame.Step)));
                         Frame.Status := Not_Running;
                      end if;
@@ -305,31 +303,31 @@ package body Component.Simple_Command_Sequencer.Implementation is
    -----------------------------------------------
    -- Command handler primitives:
    -----------------------------------------------
-   -- Description:
-   --    These are the commands for the Register Stuffer component.
-   -- Run a Command Sequence
+   -- Run a Command Sequence. Allocates a free frame, copies the caller's
+   -- buffer arg into the frame's Dynamic_Arg slot (for later Resolver
+   -- traversal), and seeds frame state from the autocoded sequence table.
    overriding function Run_Sequence (Self : in out Instance; Arg : in Run_Sequence_Arg.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
       Available_Id : Interfaces.Unsigned_32;
    begin
+      if Interfaces.Unsigned_32 (Arg.Sequence_Id) not in Self.Sequences.all'Range then
+         Self.Event_T_Send_If_Connected (Self.Events.Invalid_Sequence_Id (Self.Sys_Time_T_Get, (Value => Interfaces.Unsigned_32 (Arg.Sequence_Id))));
+         return Failure;
+      end if;
       if Self.Find_Available_Sequence_Frame (Available_Id) then
-         if Arg.Sequence_Id not in Self.Sequences.all'Range then
-            Self.Event_T_Send_If_Connected (Self.Events.Invalid_Sequence_Id (Self.Sys_Time_T_Get, (Value => Arg.Sequence_Id)));
-            return Failure;
-         end if;
          declare
             Frame : Sequence_Frame.T renames Self.Sequence_Frames.all (Available_Id);
-            Sequence : Simple_Sequencer_Types.Sequence_Type renames Self.Sequences.all (Arg.Sequence_Id);
+            Sequence : Simple_Sequencer_Types.Sequence_Type renames Self.Sequences.all (Interfaces.Unsigned_32 (Arg.Sequence_Id));
          begin
             Frame.Dynamic_Arg := Arg.Buffer_Arg;
             Frame.Arg_Length := Arg.Arg_Length;
-            Frame.Sequence_Id := Arg.Sequence_Id;
-            Frame.Timeout_Millis := Arg.Timeout_Millis;
+            Frame.Sequence_Id := Interfaces.Unsigned_32 (Arg.Sequence_Id);
+            Frame.Response_Behavior := Arg.Response_Behavior;
             Frame.Step := 0;
             Frame.Status := Running; -- Claim The Executor Frame
             Frame.Flags.Wait_For_Cmd_Resp := Sequence.Wait_For_Cmd_Resp;
             Frame.Flags.Abort_On_Failed_Cmd := Sequence.Abort_On_Failed_Cmd;
-            Self.Event_T_Send_If_Connected (Self.Events.Sequence_Started (Self.Sys_Time_T_Get, (Sequence_Id => Arg.Sequence_Id, Frame_Id => Available_Id)));
+            Self.Event_T_Send_If_Connected (Self.Events.Sequence_Started (Self.Sys_Time_T_Get, (Sequence_Id => Interfaces.Unsigned_32 (Arg.Sequence_Id), Frame_Id => Available_Id)));
             return Success;
          end;
       end if;
