@@ -8,6 +8,8 @@ import re
 
 PSEUDO_COMMANDS = {"Sleep"}
 
+DEFAULT_COMMAND_TIMEOUT_SECONDS = 30
+
 
 class sequence_step(object):
     """
@@ -194,6 +196,7 @@ class command_sequence(object):
         arg_type=None,
         wait_for_command_completion=True,
         continue_on_failure=False,
+        command_timeout_seconds=None,
         suite=None,
     ):
         self.name = name
@@ -201,6 +204,7 @@ class command_sequence(object):
         self.arg_type = arg_type
         self.wait_for_command_completion = wait_for_command_completion
         self.continue_on_failure = continue_on_failure
+        self._command_timeout_seconds = command_timeout_seconds
         self.suite = suite
         self.steps = sequence_steps
 
@@ -242,6 +246,15 @@ class command_sequence(object):
     def has_dynamic_steps(self):
         return any(step.is_dynamic() for step in self.steps)
 
+    @property
+    def command_timeout_millis(self):
+        seconds = self._command_timeout_seconds
+        if seconds is None and self.suite is not None:
+            seconds = getattr(self.suite, "command_timeout_seconds", None)
+        if seconds is None:
+            seconds = DEFAULT_COMMAND_TIMEOUT_SECONDS
+        return seconds * 1000
+
     @classmethod
     @throw_exception_with_lineno
     def from_sequence_data(cls, seq_data, suite=None):
@@ -250,6 +263,7 @@ class command_sequence(object):
         arg_type = seq_data.get("arg_type", None)
         wait_for_command_completion = seq_data.get("wait_for_command_completion", True)
         continue_on_failure = seq_data.get("continue_on_failure", False)
+        command_timeout_seconds = seq_data.get("command_timeout_seconds", None)
 
         sequence_steps = []
         if "sequence" not in seq_data or not seq_data["sequence"]:
@@ -265,6 +279,7 @@ class command_sequence(object):
             arg_type=arg_type,
             wait_for_command_completion=wait_for_command_completion,
             continue_on_failure=continue_on_failure,
+            command_timeout_seconds=command_timeout_seconds,
             suite=suite,
         )
 
@@ -285,6 +300,7 @@ class command_sequences(assembly_submodel):
         self.name = None
         self.description = None
         self.preamble = None
+        self.command_timeout_seconds = None
         self.includes = []
         self.sequences = OrderedDict()
         self.sequence_names = []
@@ -304,6 +320,9 @@ class command_sequences(assembly_submodel):
 
         if "preamble" in self.data:
             self.preamble = self.data["preamble"]
+
+        if "command_timeout_seconds" in self.data:
+            self.command_timeout_seconds = self.data["command_timeout_seconds"]
 
         if "with" in self.data:
             self.includes = self.data["with"]

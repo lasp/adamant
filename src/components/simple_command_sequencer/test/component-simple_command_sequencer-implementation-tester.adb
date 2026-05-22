@@ -35,6 +35,8 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Dropped_Command_Response_History.Init (Depth => 100);
       Self.Dropped_Tick_History.Init (Depth => 100);
       Self.Invalid_Command_Received_History.Init (Depth => 100);
+      Self.Unexpected_Command_Response_History.Init (Depth => 100);
+      Self.Killed_All_Sequences_History.Init (Depth => 100);
    end Init_Base;
 
    procedure Final_Base (Self : in out Instance) is
@@ -59,6 +61,8 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Dropped_Command_Response_History.Destroy;
       Self.Dropped_Tick_History.Destroy;
       Self.Invalid_Command_Received_History.Destroy;
+      Self.Unexpected_Command_Response_History.Destroy;
+      Self.Killed_All_Sequences_History.Destroy;
 
       -- Destroy component heap:
       Self.Component_Instance.Final_Base;
@@ -249,6 +253,19 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       -- Push the argument onto the test history for looking at later:
       Self.Invalid_Command_Received_History.Push (Arg);
    end Invalid_Command_Received;
+
+   -- A command response was received with an unrecognized source ID.
+   overriding procedure Unexpected_Command_Response (Self : in out Instance; Arg : in Command_Response.T) is
+   begin
+      Self.Unexpected_Command_Response_History.Push (Arg);
+   end Unexpected_Command_Response;
+
+   -- A Kill_All_Sequences command was executed and all running sequences were halted.
+   overriding procedure Killed_All_Sequences (Self : in out Instance) is
+      Arg : constant Natural := 0;
+   begin
+      Self.Killed_All_Sequences_History.Push (Arg);
+   end Killed_All_Sequences;
 
    -----------------------------------------------
    -- Special primitives for activating component

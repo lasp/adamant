@@ -20,9 +20,10 @@ fields:
     format: U16
   - name: Flags
     type: Sequence_Frame_Flags.T
-  - name: Timeout_Millis
-    type: Interfaces.Unsigned_32
-    format: U32
+  - name: Response_Behavior
+    description: Whether to respond to the originating Run_Sequence command on start or on completion.
+    type: Sequence_Enums.Sequence_Response_Behavior.E
+    format: U8
   - name: Last_Command_Send
     type: Sys_Time.T
   - name: Arg_Length
@@ -32,5 +33,5 @@ fields:
   - name: Dynamic_Arg
     description: Passthrough Argument for Commands in Sequence
     type: Simple_Sequencer_Types.Run_Sequence_Buffer_Type
-    format: U8x{{ command_buffer_size - 10 }}
+    format: U8x{{ command_buffer_size - 5 }}
     variable_length: Arg_Length
