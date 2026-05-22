@@ -4,19 +4,21 @@
 name: Flight_Sequences
 description: Common flight software command sequences
 
+command_timeout_seconds: 10  # default wait for sub-command responses
+
 sequences:
   # Simple sequence with no arguments
   - name: Sequence_A
     description: Execute commands on component A
     wait_for_command_completion: true
     continue_on_failure: true
-    
+
     sequence:
       - command: Component_A.Command_1
       - command: Component_A.Command_2
         arg: (Seconds => 3, Subseconds => 14)
       - command: Sleep
-        arg: (Seconds => 3, Milliseconds => 0)
+        arg: (Value => 3000)
       - command: Component_A.Command_3
         arg: (Value => 3)
 
@@ -40,12 +42,12 @@ sequences:
     sequence:
       - command: Component_A.Command_1
       - command: Component_A.Command_1
-  
+
   - name: Sequence_D
     description: Sequence with a large sleep value to test an overflow sleep
     wait_for_command_completion: true
     continue_on_failure: false
 
     sequence:
-      - command: Sleep 
-        arg: (Seconds => 30000, Milliseconds => 0)
+      - command: Sleep
+        arg: (Value => 4_294_967_295)

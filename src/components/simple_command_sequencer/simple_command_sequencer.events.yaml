@@ -54,3 +54,10 @@ events:
   - name: Invalid_Command_Received
     description: A command was received with invalid parameters.
     param_type: Invalid_Command_Info.T
+
+  - name: Unexpected_Command_Response
+    description: A command response was received with a source ID that does not belong to any active sequence frame.
+    param_type: Command_Response.T
+
+  - name: Killed_All_Sequences
+    description: A Kill_All_Sequences command was executed and all running sequences were halted.

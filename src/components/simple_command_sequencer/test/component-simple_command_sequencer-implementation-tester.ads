@@ -47,6 +47,8 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    package Dropped_Command_Response_History_Package is new Printable_History (Command_Response.T, Command_Response.Representation.Image);
    package Dropped_Tick_History_Package is new Printable_History (Tick.T, Tick.Representation.Image);
    package Invalid_Command_Received_History_Package is new Printable_History (Invalid_Command_Info.T, Invalid_Command_Info.Representation.Image);
+   package Unexpected_Command_Response_History_Package is new Printable_History (Command_Response.T, Command_Response.Representation.Image);
+   package Killed_All_Sequences_History_Package is new Printable_History (Natural, Natural'Image);
 
    -- Component class instance:
    type Instance is new Component.Simple_Command_Sequencer_Reciprocal.Base_Instance with record
@@ -71,6 +73,8 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
       Dropped_Command_Response_History : Dropped_Command_Response_History_Package.Instance;
       Dropped_Tick_History : Dropped_Tick_History_Package.Instance;
       Invalid_Command_Received_History : Invalid_Command_Received_History_Package.Instance;
+      Unexpected_Command_Response_History : Unexpected_Command_Response_History_Package.Instance;
+      Killed_All_Sequences_History : Killed_All_Sequences_History_Package.Instance;
       -- Booleans to control assertion if message is dropped on async queue:
       Expect_Command_T_Send_Dropped : Boolean := False;
       Command_T_Send_Dropped_Count : Natural := 0;
@@ -147,6 +151,10 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    overriding procedure Dropped_Tick (Self : in out Instance; Arg : in Tick.T);
    -- A command was received with invalid parameters.
    overriding procedure Invalid_Command_Received (Self : in out Instance; Arg : in Invalid_Command_Info.T);
+   -- A command response was received with an unrecognized source ID.
+   overriding procedure Unexpected_Command_Response (Self : in out Instance; Arg : in Command_Response.T);
+   -- A Kill_All_Sequences command was executed and all running sequences were halted.
+   overriding procedure Killed_All_Sequences (Self : in out Instance);
 
    -----------------------------------------------
    -- Special primitives for activating component
