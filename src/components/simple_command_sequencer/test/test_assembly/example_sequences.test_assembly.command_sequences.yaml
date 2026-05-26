@@ -17,8 +17,7 @@ sequences:
       - command: Component_A.Command_1
       - command: Component_A.Command_2
         arg: (Seconds => 3, Subseconds => 14)
-      - command: Sleep
-        arg: (Value => 3000)
+      - sleep: (Value => 3000)
       - command: Component_A.Command_3
         arg: (Value => 3)
 
@@ -49,5 +48,4 @@ sequences:
     continue_on_failure: false
 
     sequence:
-      - command: Sleep
-        arg: (Value => 4_294_967_295)
+      - sleep: (Value => 4_294_967_295)
