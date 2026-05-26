@@ -7,6 +7,7 @@ with Byte_Array_Pointer.Packed;
 with Packet_Types;
 with Serializer_Types;
 with Parameter_Table_Header;
+with Parameter_Table_Util;
 with Memory_Region;
 with Crc_16;
 
@@ -29,24 +30,6 @@ package body Component.Parameter_Store.Implementation is
       Self.Dump_Parameters_On_Change := Dump_Parameters_On_Change;
    end Init;
 
-   ---------------------------------------
-   -- Helper functions:
-   ---------------------------------------
-   -- Crc the parameter table bytes. The table bytes passed in MUST be the exact size as the parameter table:
-   function Crc_Parameter_Table (Self : in Instance; Table_Bytes : in Basic_Types.Byte_Array) return Crc_16.Crc_16_Type is
-   begin
-      -- This function assumes that the provided data is the exact length of the parameter table. Length
-      -- checks should be performed before calling this function:
-      pragma Assert (Table_Bytes'Length = Self.Bytes.all'Length);
-
-      -- Some checks to make sure parameter table header constants make sense. This will fail if the
-      -- header packed record and constants are malformed.
-      pragma Assert (Parameter_Table_Header.Crc_Section_Length + Parameter_Table_Header.Version_Length = Parameter_Table_Header.Size_In_Bytes);
-
-      -- Calculate the CRC over the version and data:
-      return Crc_16.Compute_Crc_16 (Table_Bytes (Table_Bytes'First + Parameter_Table_Header.Crc_Section_Length .. Table_Bytes'Last));
-   end Crc_Parameter_Table;
-
    -- Helper function to construct and send a parameters packet filled with the parameter
    -- table data.
    procedure Send_Parameters_Packet (Self : in out Instance) is
@@ -60,7 +43,9 @@ package body Component.Parameter_Store.Implementation is
             use Serializer_Types;
             use Basic_Types;
             -- Compute the CRC over the table:
-            Computed_Crc : constant Crc_16.Crc_16_Type := Self.Crc_Parameter_Table (Self.Bytes.all);
+            Computed_Crc : constant Crc_16.Crc_16_Type :=
+               Parameter_Table_Util.Compute_Table_Crc (
+                  Byte_Array_Pointer.From_Address (Self.Bytes.all'Address, Self.Bytes.all'Length));
             -- Create the packet with the CRC calc inserted:
             Pkt : Packet.T;
             Stat : constant Serialization_Status := Self.Packets.Stored_Parameters (Self.Sys_Time_T_Get, Computed_Crc & Self.Bytes.all, Pkt);
@@ -108,12 +93,13 @@ package body Component.Parameter_Store.Implementation is
                declare
                   use Byte_Array_Pointer;
                   use Basic_Types;
-                  Ptr : constant Byte_Array_Pointer.Instance := Byte_Array_Pointer.Packed.Unpack (Arg.Region);
-                  -- First check the CRC:
-                  Ptr_Header : constant Byte_Array_Pointer.Instance := Slice (Ptr, Start_Index => 0, End_Index => Parameter_Table_Header.Size_In_Bytes - 1);
-                  Table_Header : constant Parameter_Table_Header.T := Parameter_Table_Header.Serialization.From_Byte_Array (To_Byte_Array (Ptr_Header));
-                  -- Compute the CRC over the incoming table:
-                  Computed_Crc : constant Crc_16.Crc_16_Type := Self.Crc_Parameter_Table (To_Byte_Array (Ptr));
+                  Table_Header : Parameter_Table_Header.T;
+                  Ptr : constant Byte_Array_Pointer.Instance := Parameter_Table_Util.Get_Ptr_And_Header_From_Region (Arg.Region, Table_Header);
+                  -- Compute the CRC over the incoming table. Arg.Region.Length was
+                  -- checked equal to Self.Bytes.all'Length above, so the Ptr spans
+                  -- exactly the managed table length.
+                  pragma Assert (Length (Ptr) = Self.Bytes.all'Length);
+                  Computed_Crc : constant Crc_16.Crc_16_Type := Parameter_Table_Util.Compute_Table_Crc (Ptr);
                begin
                   -- If the CRCs match, then update the store:
                   if Table_Header.Crc_Table = Computed_Crc then
