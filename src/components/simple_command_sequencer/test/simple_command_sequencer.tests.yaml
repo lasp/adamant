@@ -22,3 +22,4 @@ tests:
   - name: Test_Extra_Sequence_Id
   - name: Test_Kill_All_Sequences
   - name: Test_Set_Summary_Packet_Period
+  - name: Test_Synthesized_Sequence_Command
