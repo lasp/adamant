@@ -335,6 +335,33 @@ package body Component.Simple_Command_Sequencer.Implementation is
       return Failure;
    end Run_Sequence;
 
+   -- Halt every running sequence and return each frame to a Not_Running idle state.
+   -- The Source_Id assignment (made when the command router registers each frame at
+   -- startup) is preserved so frames remain claimable by future Run_Sequence calls.
+   overriding function Kill_All_Sequences (Self : in out Instance) return Command_Execution_Status.E is
+      use Command_Execution_Status;
+   begin
+      for Frame of Self.Sequence_Frames.all loop
+         if Frame.Status /= Not_Running then
+            Frame.Status := Not_Running;
+            Frame.Sequence_Id := 0;
+            Frame.Step := 0;
+            Frame.Arg_Length := 0;
+         end if;
+      end loop;
+      Self.Event_T_Send_If_Connected (Self.Events.Killed_All_Sequences (Self.Sys_Time_T_Get));
+      return Success;
+   end Kill_All_Sequences;
+
+   -- Set the summary packet period. The packet itself is wired in Phase 4; for
+   -- now we just store the value so the command surface exists.
+   overriding function Set_Summary_Packet_Period (Self : in out Instance; Arg : in Packed_U16.T) return Command_Execution_Status.E is
+      use Command_Execution_Status;
+   begin
+      Self.Summary_Packet_Period := Arg.Value;
+      return Success;
+   end Set_Summary_Packet_Period;
+
    -- Invalid command handler. This procedure is called when a command's arguments are found to be invalid:
    overriding procedure Invalid_Command (Self : in out Instance; Cmd : in Command.T; Errant_Field_Number : in Unsigned_32; Errant_Field : in Basic_Types.Poly_Type) is
    begin
