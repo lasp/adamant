@@ -131,6 +131,13 @@ package body Byte_Array_Pointer is
       Safe_Byte_Array := Bytes;
    end Copy_To;
 
+   procedure Copy_From (Self : in Instance; Bytes : out Basic_Types.Byte_Array) is
+      subtype Safe_Byte_Array_Type is Byte_Array (0 .. Self.Length - 1);
+      Safe_Byte_Array : constant Safe_Byte_Array_Type with Import, Convention => Ada, Address => Self.Address;
+   begin
+      Bytes := Safe_Byte_Array;
+   end Copy_From;
+
    procedure Copy (Destination : in Instance; Source : in Instance) is
       subtype Safe_Byte_Array_Type is Byte_Array (0 .. Destination.Length - 1);
       Safe_Destination_Byte_Array : Safe_Byte_Array_Type with Import, Convention => Ada, Address => Destination.Address;

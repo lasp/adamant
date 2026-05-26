@@ -4,6 +4,7 @@
 
 -- Includes:
 with Command;
+with Memory_Packetizer_Types;
 with Parameters_Memory_Region;
 
 -- The Parameters Component is responsible for storing and managing access to a memory region holding a parameter table. The managed memory region is usually located in nonvolatile storage and can serve as the backup or the default parameter values to use at startup for the system.
@@ -36,14 +37,13 @@ private
    ---------------------------------------
    -- Set Up Procedure
    ---------------------------------------
-   -- Null method which can be implemented to provide some component
-   -- set up code. This method is generally called by the assembly
-   -- main.adb after all component initialization and tasks have been started.
-   -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, i.e. command registration, initial
-   -- data product updates. This procedure should be implemented to do these things
-   -- if necessary.
-   overriding procedure Set_Up (Self : in out Instance) is null;
+   -- Validates connector wiring: exactly one of Packet_T_Send /
+   -- Memory_Dump_Send must be connected. When Packet_T_Send is the
+   -- chosen dump path, also asserts that the managed bytes + CRC prefix
+   -- fit within Packet_Buffer_Type'Length. (Memory_Dump_Send chunks via
+   -- a downstream Memory_Packetizer, so the size constraint does not
+   -- apply on that path.)
+   overriding procedure Set_Up (Self : in out Instance);
 
    ---------------------------------------
    -- Invokee connector primitives:
@@ -66,6 +66,8 @@ private
    overriding procedure Parameters_Memory_Region_Release_T_Send_Dropped (Self : in out Instance; Arg : in Parameters_Memory_Region_Release.T) is null;
    -- This procedure is called when a Packet_T_Send message is dropped due to a full queue.
    overriding procedure Packet_T_Send_Dropped (Self : in out Instance; Arg : in Packet.T) is null;
+   -- This procedure is called when a Memory_Dump_Send message is dropped due to a full queue.
+   overriding procedure Memory_Dump_Send_Dropped (Self : in out Instance; Arg : in Memory_Packetizer_Types.Memory_Dump) is null;
    -- This procedure is called when a Event_T_Send message is dropped due to a full queue.
    overriding procedure Event_T_Send_Dropped (Self : in out Instance; Arg : in Event.T) is null;
 

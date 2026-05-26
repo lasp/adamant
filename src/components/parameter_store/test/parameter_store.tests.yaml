@@ -25,3 +25,7 @@ tests:
     description: This unit test tests a command or memory region being dropped due to a full queue.
   - name: Test_Invalid_Command
     description: This unit test exercises that an invalid command throws the appropriate event.
+  - name: Test_Memory_Dump_Path
+    description: This unit test wires the Memory_Dump_Send dump pathway and verifies that the Dump command emits a Memory_Dump record (with the Stored_Parameters APID and a pointer/length matching the managed bytes), with no Packet.T emitted on this pathway.
+  - name: Test_Memory_Dump_Path_Auto_Dump_On_Change
+    description: This unit test wires the Memory_Dump_Send dump pathway and verifies that an auto-dump-on-change after a parameter table upload fires through the Memory_Dump connector.

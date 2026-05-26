@@ -26,8 +26,22 @@ connectors:
   - description: After a memory region is received on the Memory_Region_T_Recv_Async connector and then processed, it is released via a call to this connector. A status is also returned, so the downstream component can determine if the parameter table update was successful or not.
     type: Parameters_Memory_Region_Release.T
     kind: send
-  - description: The parameter packet connector. A copy of the managed parameter table is dumped via this connector.
+  - description: |
+      Dump path 1 of 2: emit the active parameter table as a single Packet.T.
+      Requires Bytes.all'Length + Crc_16.Crc_16_Type'Length <= Packet_Buffer_Type'Length
+      (asserted at Init when this connector is the chosen dump path).
+      Only one of Packet_T_Send / Memory_Dump_Send can be connected.
     type: Packet.T
+    kind: send
+  - description: |
+      Dump path 2 of 2: emit the active parameter table as a Memory_Dump
+      record (pointer + Stored_Parameters packet ID) on a downstream
+      Memory_Packetizer (or similar), which chunks it into multiple Packet.T's
+      sharing the same APID. Use this path for tables that exceed
+      Packet_Buffer_Type'Length. Only one of Packet_T_Send /
+      Memory_Dump_Send can be connected.
+    name: Memory_Dump_Send
+    type: Memory_Packetizer_Types.Memory_Dump
     kind: send
   - description: Events are sent out of this connector.
     type: Event.T
