@@ -1,0 +1,13 @@
+---
+description: Unit tests for the generic protected variable patterns in Protected_Variables.
+tests:
+  - name: Test_Variable
+    description: Generic_Variable Set/Get round trip and overwrite semantics.
+  - name: Test_Protected_Counter
+    description: Generic_Protected_Counter set, increment (default and by N), reset, return-previous, and modular wrap.
+  - name: Test_Protected_Counter_Decrement
+    description: Generic_Protected_Counter_Decrement set, decrement (default and by N), reset, and return-previous behavior over a signed range.
+  - name: Test_Protected_Periodic_Counter
+    description: Generic_Protected_Periodic_Counter period set/get, count increment with modular wrap by period, Is_Count_At_Period boundary cases including period of zero.
+  - name: Test_Staged_Variable
+    description: Generic_Staged_Variable default-not-staged, Stage then Is_Staged, Copy_From_Staged returns value and clears, restage after copy, multiple Stage keeps only latest.
