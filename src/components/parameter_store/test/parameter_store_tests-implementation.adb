@@ -19,6 +19,8 @@ with Invalid_Parameters_Memory_Region_Length.Assertion; use Invalid_Parameters_M
 with Invalid_Parameters_Memory_Region_Crc.Assertion; use Invalid_Parameters_Memory_Region_Crc.Assertion;
 with Parameter_Table_Header;
 with Crc_16;
+with Byte_Array_Pointer;
+with Memory_Packetizer_Types;
 with System;
 
 package body Parameter_Store_Tests.Implementation is
@@ -38,9 +40,6 @@ package body Parameter_Store_Tests.Implementation is
       -- Allocate heap memory to component:
       Self.Tester.Init_Base (Queue_Size => Self.Tester.Component_Instance.Get_Max_Queue_Element_Size * 3);
 
-      -- Make necessary connections between tester and component:
-      Self.Tester.Connect;
-
       -- Call component init here.
       Bytes := [others => 0];
       Bytes (1) := 1;
@@ -50,8 +49,12 @@ package body Parameter_Store_Tests.Implementation is
       Bytes (5) := 5;
       Self.Tester.Component_Instance.Init (Bytes => Bytes'Access, Dump_Parameters_On_Change => True);
 
-      -- Call the component set up method that the assembly would normally call.
-      Self.Tester.Component_Instance.Set_Up;
+      -- NOTE: Connect + Component_Instance.Set_Up are intentionally NOT called
+      -- here because Set_Up asserts exactly-one-of Packet_T_Send /
+      -- Memory_Dump_Send is connected. Each test selects its dump pathway by
+      -- calling either Self.Tester.Connect (Packet.T path)
+      -- or Self.Tester.Connect_Memory_Dump_Path (Memory_Dump path), then
+      -- Self.Tester.Component_Instance.Set_Up.
    end Set_Up_Test;
 
    overriding procedure Tear_Down_Test (Self : in out Instance) is
@@ -68,6 +71,10 @@ package body Parameter_Store_Tests.Implementation is
       T : Component.Parameter_Store.Implementation.Tester.Instance_Access renames Self.Tester;
       Pkt : Packet.T;
    begin
+      -- Wire the Packet.T dump pathway and run Set_Up:
+      T.Connect;
+      T.Component_Instance.Set_Up;
+
       -- Make sure no packets thrown on startup:
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
 
@@ -128,6 +135,10 @@ package body Parameter_Store_Tests.Implementation is
       Pkt : Packet.T;
       Expected_Packet_Data : Basic_Types.Byte_Array (0 .. 99) := Table;
    begin
+      -- Wire the Packet.T dump pathway and run Set_Up:
+      T.Connect;
+      T.Component_Instance.Set_Up;
+
       -- Set the version:
       Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => [0, 0], Version => 1.0));
       Expected_Packet_Data (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => [0, 0], Version => 1.0));
@@ -177,6 +188,10 @@ package body Parameter_Store_Tests.Implementation is
       Region : constant Memory_Region.T := (Address => Memory'Address, Length => Memory'Length);
       Crc : Crc_16.Crc_16_Type;
    begin
+      -- Wire the Packet.T dump pathway and run Set_Up:
+      T.Connect;
+      T.Component_Instance.Set_Up;
+
       -- Set the version:
       Bytes := [others => 17];
       Bytes (Bytes'First .. Bytes'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => [0, 0], Version => 1.0));
@@ -214,6 +229,10 @@ package body Parameter_Store_Tests.Implementation is
       Empty_Region : constant Memory_Region.T := (Address => System.Null_Address, Length => 0);
       Released : Parameters_Memory_Region_Release.T;
    begin
+      -- Wire the Packet.T dump pathway and run Set_Up:
+      T.Connect;
+      T.Component_Instance.Set_Up;
+
       -- Plant a known pattern in the parameter store's managed bytes:
       Bytes := [others => 17];
 
@@ -260,6 +279,10 @@ package body Parameter_Store_Tests.Implementation is
       Region : Memory_Region.T := (Address => Table'Address, Length => Table'Length - 1);
       Before_Bytes : Basic_Types.Byte_Array (0 .. 99);
    begin
+      -- Wire the Packet.T dump pathway and run Set_Up:
+      T.Connect;
+      T.Component_Instance.Set_Up;
+
       -- Save the current memory region so we can make sure it doesn't get changed:
       Before_Bytes := Bytes;
 
@@ -315,6 +338,10 @@ package body Parameter_Store_Tests.Implementation is
       Region : constant Memory_Region.T := (Address => Table'Address, Length => Table'Length);
       Before_Bytes : Basic_Types.Byte_Array (0 .. 99);
    begin
+      -- Wire the Packet.T dump pathway and run Set_Up:
+      T.Connect;
+      T.Component_Instance.Set_Up;
+
       -- Save the current memory region so we can make sure it doesn't get changed:
       Before_Bytes := Bytes;
 
@@ -355,6 +382,10 @@ package body Parameter_Store_Tests.Implementation is
       Table : aliased Basic_Types.Byte_Array := [0 .. 99 => 17];
       Region : constant Memory_Region.T := (Address => Table'Address, Length => Table'Length);
    begin
+      -- Wire the Packet.T dump pathway and run Set_Up:
+      T.Connect;
+      T.Component_Instance.Set_Up;
+
       -- Send the memory region to the component:
       T.Parameters_Memory_Region_T_Send ((Region => Region, Operation => Validate));
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -378,6 +409,10 @@ package body Parameter_Store_Tests.Implementation is
       Region : constant Memory_Region.T := (Address => Table'Address, Length => Table'Length - 1);
       Before_Bytes : Basic_Types.Byte_Array (0 .. 99);
    begin
+      -- Wire the Packet.T dump pathway and run Set_Up:
+      T.Connect;
+      T.Component_Instance.Set_Up;
+
       -- Save the current memory region so we can make sure it doesn't get changed:
       Before_Bytes := Bytes;
 
@@ -411,6 +446,10 @@ package body Parameter_Store_Tests.Implementation is
       -- The expected returned region should have the length of the actual table, not the oversized region.
       Expected_Returned_Region : constant Memory_Region.T := (Address => Memory'Address, Length => Bytes'Length);
    begin
+      -- Wire the Packet.T dump pathway and run Set_Up:
+      T.Connect;
+      T.Component_Instance.Set_Up;
+
       -- Set up Bytes with known data so we can verify the copy:
       Bytes := [others => 17];
       Bytes (Bytes'First .. Bytes'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => [0, 0], Version => 1.0));
@@ -455,6 +494,10 @@ package body Parameter_Store_Tests.Implementation is
       -- Reinitialize the component with dump parameters on change set to false:
       Self.Tester.Component_Instance.Init (Bytes => Bytes'Access, Dump_Parameters_On_Change => False);
 
+      -- Wire the Packet.T dump pathway and run Set_Up:
+      T.Connect;
+      T.Component_Instance.Set_Up;
+
       -- Set the version:
       Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => [0, 0], Version => 1.0));
       Expected_Packet_Data (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => [0, 0], Version => 1.0));
@@ -493,6 +536,10 @@ package body Parameter_Store_Tests.Implementation is
       Memory : aliased Basic_Types.Byte_Array (0 .. 99) := [others => 0];
       Region : constant Memory_Region.T := (Address => Memory'Address, Length => Memory'Length);
    begin
+      -- Wire the Packet.T dump pathway and run Set_Up:
+      T.Connect;
+      T.Component_Instance.Set_Up;
+
       -- Send 3 commands to fill up queue.
       Cmd.Header.Arg_Buffer_Length := Cmd.Arg_Buffer'Length;
       T.Command_T_Send (Cmd);
@@ -527,6 +574,10 @@ package body Parameter_Store_Tests.Implementation is
       T : Component.Parameter_Store.Implementation.Tester.Instance_Access renames Self.Tester;
       Cmd : Command.T := T.Commands.Dump_Parameter_Store;
    begin
+      -- Wire the Packet.T dump pathway and run Set_Up:
+      T.Connect;
+      T.Component_Instance.Set_Up;
+
       -- Make the command invalid by modifying its length.
       Cmd.Header.Arg_Buffer_Length := 22;
 
@@ -541,5 +592,99 @@ package body Parameter_Store_Tests.Implementation is
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
       Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Dump_Parameter_Store_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 22]));
    end Test_Invalid_Command;
+
+   overriding procedure Test_Memory_Dump_Path (Self : in out Instance) is
+      T : Component.Parameter_Store.Implementation.Tester.Instance_Access renames Self.Tester;
+      Dump : Memory_Packetizer_Types.Memory_Dump;
+   begin
+      -- Wire the Memory_Dump dump pathway (no Packet_T_Send) and run Set_Up:
+      T.Connect_Memory_Dump_Path;
+      T.Component_Instance.Set_Up;
+
+      -- No traffic on either pathway yet:
+      Natural_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get_Count, 0);
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
+
+      -- Issue the dump command:
+      T.Command_T_Send (T.Commands.Dump_Parameter_Store);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
+      Command_Response_Assert.Eq (
+         T.Command_Response_T_Recv_Sync_History.Get (1),
+         (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Dump_Parameter_Store_Id, Status => Success));
+
+      -- Exactly one Memory_Dump emitted; no Packet.T on this path:
+      Natural_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
+
+      Dump := T.Memory_Dump_Recv_Sync_History.Get (1);
+
+      -- Stored_Parameters APID == 0 (only packet defined for this component).
+      Natural_Assert.Eq (Natural (Dump.Id), 0);
+      -- The Memory_Dump points at the full parameter table buffer (zero-copy):
+      Natural_Assert.Eq (Byte_Array_Pointer.Length (Dump.Memory_Pointer), Bytes'Length);
+      Byte_Array_Assert.Eq (Byte_Array_Pointer.To_Byte_Array (Dump.Memory_Pointer), Bytes);
+
+      -- Dumped_Parameters event fired once:
+      Natural_Assert.Eq (T.Dumped_Parameters_History.Get_Count, 1);
+
+      -- A second dump command bumps everything by one:
+      T.Command_T_Send (T.Commands.Dump_Parameter_Store);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
+      Natural_Assert.Eq (T.Dumped_Parameters_History.Get_Count, 2);
+   end Test_Memory_Dump_Path;
+
+   overriding procedure Test_Memory_Dump_Path_Auto_Dump_On_Change (Self : in out Instance) is
+      use Parameter_Enums.Parameter_Table_Update_Status;
+      use Parameter_Enums.Parameter_Table_Operation_Type;
+      T : Component.Parameter_Store.Implementation.Tester.Instance_Access renames Self.Tester;
+      -- Build a valid (CRC-correct) parameter table:
+      Table : aliased Basic_Types.Byte_Array := [0 .. 99 => 17];
+      Crc : Crc_16.Crc_16_Type;
+      Region : constant Memory_Region.T := (Address => Table'Address, Length => Table'Length);
+      Expected_Table_Bytes : Basic_Types.Byte_Array (0 .. 99) := Table;
+      Dump : Memory_Packetizer_Types.Memory_Dump;
+   begin
+      -- Wire the Memory_Dump dump pathway (no Packet_T_Send) and run Set_Up:
+      T.Connect_Memory_Dump_Path;
+      T.Component_Instance.Set_Up;
+
+      -- Stamp version + CRC into both the staging table and the comparison
+      -- copy so the component's bytes match Expected_Table_Bytes after the Set:
+      Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) :=
+         Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => [0, 0], Version => 1.0));
+      Crc := Crc_16.Compute_Crc_16 (Table (Table'First + Parameter_Table_Header.Crc_Section_Length .. Table'Last));
+      Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) :=
+         Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => Crc, Version => 1.0));
+      Expected_Table_Bytes (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) :=
+         Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => Crc, Version => 1.0));
+
+      -- Send the memory region (Set) -- fixture has Dump_Parameters_On_Change => True,
+      -- so this should auto-dump through the Memory_Dump pathway:
+      T.Parameters_Memory_Region_T_Send ((Region => Region, Operation => Set));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      -- Component's bytes were updated:
+      Byte_Array_Assert.Eq (Bytes, Expected_Table_Bytes);
+
+      -- Exactly one Memory_Dump fired automatically; nothing on the Packet path:
+      Natural_Assert.Eq (T.Memory_Dump_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
+
+      Dump := T.Memory_Dump_Recv_Sync_History.Get (1);
+      Natural_Assert.Eq (Natural (Dump.Id), 0);
+      Natural_Assert.Eq (Byte_Array_Pointer.Length (Dump.Memory_Pointer), Bytes'Length);
+      Byte_Array_Assert.Eq (Byte_Array_Pointer.To_Byte_Array (Dump.Memory_Pointer), Expected_Table_Bytes);
+
+      -- Release/event bookkeeping:
+      Natural_Assert.Eq (T.Parameter_Table_Updated_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Dumped_Parameters_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 1);
+      Parameters_Memory_Region_Release_Assert.Eq (
+         T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get (1),
+         (Region, Success));
+   end Test_Memory_Dump_Path_Auto_Dump_On_Change;
 
 end Parameter_Store_Tests.Implementation;

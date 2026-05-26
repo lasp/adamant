@@ -78,6 +78,12 @@ package Byte_Array_Pointer is
    -- necessary to restrict the bounds of the pointer.
    procedure Copy_To (Self : in Instance; Bytes : in Basic_Types.Byte_Array);
 
+   -- Copy bytes out of the byte array pointer into the caller's Byte_Array.
+   -- Symmetric counterpart to Copy_To. This can be used in place of "X := To_Byte_
+   -- Array (Ptr)" to avoid using the secondary stack, which can become
+   -- problematic for very large tables.
+   procedure Copy_From (Self : in Instance; Bytes : out Basic_Types.Byte_Array);
+
    -- Copy data from one byte array pointer to another. Note that the lengths
    -- of the pointers must match. Use the "Slice" function above if necessary to
    -- restrict the bounds of the pointer.

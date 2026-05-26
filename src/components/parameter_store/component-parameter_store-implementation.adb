@@ -24,38 +24,70 @@ package body Component.Parameter_Store.Implementation is
    --
    overriding procedure Init (Self : in out Instance; Bytes : in not null Basic_Types.Byte_Array_Access; Dump_Parameters_On_Change : in Boolean := False) is
    begin
-      -- The implementation of this component assumes that the parameter store fits cleanly in a maximum sized packet.
-      pragma Assert (Bytes.all'Length + Crc_16.Crc_16_Type'Length <= Packet_Types.Packet_Buffer_Type'Length, "The parameter table must not be larger than the maximum size packet!");
       Self.Bytes := Bytes;
       Self.Dump_Parameters_On_Change := Dump_Parameters_On_Change;
    end Init;
 
-   -- Helper function to construct and send a parameters packet filled with the parameter
-   -- table data.
+   --------------------------------------------------
+   -- Set_Up: validate dump-pathway wiring.
+   --------------------------------------------------
+   overriding procedure Set_Up (Self : in out Instance) is
+      Packet_Wired : constant Boolean := Self.Is_Packet_T_Send_Connected;
+      Memory_Wired : constant Boolean := Self.Is_Memory_Dump_Send_Connected;
+   begin
+      -- At most one dump path may be wired. Both connected is a config
+      -- error (ambiguous). Neither connected silences the Dump command.
+      pragma Assert (not (Packet_Wired and then Memory_Wired));
+      -- The Packet.T path is constrained such that table + CRC prefix must
+      -- fit in one Packet.T. The Memory_Dump path has no such constraint (the
+      -- downstream packetizer chunks the table which can be larger than a
+      -- single packet).
+      if Packet_Wired then
+         pragma Assert (Self.Bytes.all'Length + Crc_16.Crc_16_Type'Length <= Packet_Types.Packet_Buffer_Type'Length);
+      end if;
+   end Set_Up;
+
+   -- Helper function to construct and send a parameters packet filled with
+   -- the parameter table data. Branches on the wired dump pathway:
+   --   * Packet.T path: build a single Stored_Parameters packet (Computed_Crc
+   --     prefix + bytes) and send it. Set_Up already asserted the size fits.
+   --   * Memory_Dump path: emit a single Memory_Dump record with the table
+   --     bytes pointer; a downstream Memory_Packetizer or similar component
+   --     chunks the region into Packet.T's.
    procedure Send_Parameters_Packet (Self : in out Instance) is
    begin
-      -- Only execute this logic if the packet connector is connected.
       if Self.Is_Packet_T_Send_Connected then
-         -- First calculate the CRC of the parameter store, and overwrite the calculated_CRC field in the header.
-         -- We do this every time we dump the packet, to make sure the calculated_CRC is always up to date. This
-         -- lets the ground see if a bit flip occurred.
+         -- First calculate the CRC of the parameter store, and prepend it to
+         -- the packet payload. We do this every time we dump the packet, to
+         -- make sure the calculated CRC is always up to date. This lets the
+         -- ground see if a bit flip occurred in the managed bytes.
          declare
             use Serializer_Types;
             use Basic_Types;
-            -- Compute the CRC over the table:
+            -- Compute the CRC over the parameter table bytes:
             Computed_Crc : constant Crc_16.Crc_16_Type :=
                Parameter_Table_Util.Compute_Table_Crc (
                   Byte_Array_Pointer.From_Address (Self.Bytes.all'Address, Self.Bytes.all'Length));
-            -- Create the packet with the CRC calc inserted:
+            -- Create the packet with the CRC prefix inserted:
             Pkt : Packet.T;
-            Stat : constant Serialization_Status := Self.Packets.Stored_Parameters (Self.Sys_Time_T_Get, Computed_Crc & Self.Bytes.all, Pkt);
+            Stat : constant Serialization_Status :=
+               Self.Packets.Stored_Parameters (Self.Sys_Time_T_Get, Computed_Crc & Self.Bytes.all, Pkt);
          begin
+            -- This should never fail since Set_Up asserted that self.bytes.all
+            -- could fit cleanly within a Packet.T type along with the CRC.
+            pragma Assert (Stat = Success);
             -- Send the packet:
-            pragma Assert (Stat = Success, "This should never fail since we checked at Init that self.bytes.all could fit cleanly within a Packet.T type.");
             Self.Packet_T_Send (Pkt);
          end;
-
-         -- Send event:
+         Self.Event_T_Send_If_Connected (Self.Events.Dumped_Parameters (Self.Sys_Time_T_Get));
+      elsif Self.Is_Memory_Dump_Send_Connected then
+         Self.Memory_Dump_Send ((
+            Id => Self.Packets.Get_Stored_Parameters_Id,
+            Memory_Pointer => Byte_Array_Pointer.Packed.Unpack ((
+               Address => Self.Bytes.all'Address,
+               Length => Self.Bytes.all'Length
+            ))
+         ));
          Self.Event_T_Send_If_Connected (Self.Events.Dumped_Parameters (Self.Sys_Time_T_Get));
       end if;
    end Send_Parameters_Packet;
@@ -103,8 +135,14 @@ package body Component.Parameter_Store.Implementation is
                begin
                   -- If the CRCs match, then update the store:
                   if Table_Header.Crc_Table = Computed_Crc then
-                     -- Update the parameter store:
-                     Self.Bytes.all := Byte_Array_Pointer.To_Byte_Array (Ptr);
+                     -- Update the parameter store. Use the procedural Copy_From
+                     -- rather than the function-form To_Byte_Array; the latter
+                     -- returns an unconstrained Byte_Array on the secondary
+                     -- stack, which overflows for tables larger than the task's
+                     -- secondary-stack budget (e.g. ~10 KB OE tables blow a
+                     -- 3 KB secondary stack). Copy_From writes in place with
+                     -- no temporary.
+                     Byte_Array_Pointer.Copy_From (Ptr, Self.Bytes.all);
                      -- Send info event:
                      Self.Event_T_Send_If_Connected (Self.Events.Parameter_Table_Updated (Self.Sys_Time_T_Get, Arg.Region));
                      -- Send out the parameters packet if necessary:
