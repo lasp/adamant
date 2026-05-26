@@ -818,7 +818,7 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
       declare
          use Parameter_Enums.Parameter_Table_Operation_Type;
       begin
-         Boolean_Assert.Eq (T.Parameters_Memory_Region_T_Recv_Sync_History.Get (1).Operation = Get, True);
+         Boolean_Assert.Eq (T.Parameters_Memory_Region_T_Recv_Sync_History.Get (1).Operation = Get_Copy, True);
          Boolean_Assert.Eq (T.Parameters_Memory_Region_T_Recv_Sync_History.Get (2).Operation = Set, True);
       end;
 

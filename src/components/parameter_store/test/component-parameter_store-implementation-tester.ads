@@ -36,6 +36,7 @@ package Component.Parameter_Store.Implementation.Tester is
    package Dumped_Parameters_History_Package is new Printable_History (Natural, Natural'Image);
    package Parameter_Table_Updated_History_Package is new Printable_History (Memory_Region.T, Memory_Region.Representation.Image);
    package Parameter_Table_Fetched_History_Package is new Printable_History (Memory_Region.T, Memory_Region.Representation.Image);
+   package Parameter_Table_Pointer_Fetched_History_Package is new Printable_History (Memory_Region.T, Memory_Region.Representation.Image);
    package Invalid_Command_Received_History_Package is new Printable_History (Invalid_Command_Info.T, Invalid_Command_Info.Representation.Image);
    package Command_Dropped_History_Package is new Printable_History (Command_Header.T, Command_Header.Representation.Image);
    package Memory_Region_Dropped_History_Package is new Printable_History (Parameters_Memory_Region.T, Parameters_Memory_Region.Representation.Image);
@@ -60,6 +61,7 @@ package Component.Parameter_Store.Implementation.Tester is
       Dumped_Parameters_History : Dumped_Parameters_History_Package.Instance;
       Parameter_Table_Updated_History : Parameter_Table_Updated_History_Package.Instance;
       Parameter_Table_Fetched_History : Parameter_Table_Fetched_History_Package.Instance;
+      Parameter_Table_Pointer_Fetched_History : Parameter_Table_Pointer_Fetched_History_Package.Instance;
       Invalid_Command_Received_History : Invalid_Command_Received_History_Package.Instance;
       Command_Dropped_History : Command_Dropped_History_Package.Instance;
       Memory_Region_Dropped_History : Memory_Region_Dropped_History_Package.Instance;
@@ -123,6 +125,8 @@ package Component.Parameter_Store.Implementation.Tester is
    overriding procedure Parameter_Table_Updated (Self : in out Instance; Arg : in Memory_Region.T);
    -- Starting parameter fetch into the received memory region.
    overriding procedure Parameter_Table_Fetched (Self : in out Instance; Arg : in Memory_Region.T);
+   -- Returned a zero-copy pointer to the parameter store's own byte buffer.
+   overriding procedure Parameter_Table_Pointer_Fetched (Self : in out Instance; Arg : in Memory_Region.T);
    -- A command was received with invalid parameters.
    overriding procedure Invalid_Command_Received (Self : in out Instance; Arg : in Invalid_Command_Info.T);
    -- A command was dropped due to a full queue.

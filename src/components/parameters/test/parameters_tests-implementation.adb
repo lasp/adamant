@@ -516,7 +516,7 @@ package body Parameters_Tests.Implementation is
       Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => [0, 0], Version => 0.0));
 
       -- Send the memory region to the component with a get request:
-      T.Parameters_Memory_Region_T_Send ((Region => Region, Operation => Get));
+      T.Parameters_Memory_Region_T_Send ((Region => Region, Operation => Get_Copy));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       -- Check events:
@@ -936,7 +936,7 @@ package body Parameters_Tests.Implementation is
       --
       -- Send the memory region to the component with a get request:
       --
-      T.Parameters_Memory_Region_T_Send ((Region => Region, Operation => Get));
+      T.Parameters_Memory_Region_T_Send ((Region => Region, Operation => Get_Copy));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       -- Check events:
@@ -966,7 +966,7 @@ package body Parameters_Tests.Implementation is
       T.Component_A.Override_Parameter_Return (Status => Success, Length => 0);
 
       -- Send the memory region to the component with a get request:
-      T.Parameters_Memory_Region_T_Send ((Region => Region, Operation => Get));
+      T.Parameters_Memory_Region_T_Send ((Region => Region, Operation => Get_Copy));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       -- Check events:
@@ -999,13 +999,13 @@ package body Parameters_Tests.Implementation is
       --
       -- Send the memory region to the component with a get request, but with the wrong length:
       --
-      T.Parameters_Memory_Region_T_Send ((Region => (Address => Memory'Address, Length => Memory'Length + 1), Operation => Get));
+      T.Parameters_Memory_Region_T_Send ((Region => (Address => Memory'Address, Length => Memory'Length + 1), Operation => Get_Copy));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       -- Check events:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 9);
       Natural_Assert.Eq (T.Memory_Region_Length_Mismatch_History.Get_Count, 1);
-      Invalid_Parameters_Memory_Region_Length_Assert.Eq (T.Memory_Region_Length_Mismatch_History.Get (1), (Parameters_Region => (Region => (Address => Memory'Address, Length => Memory'Length + 1), Operation => Get), Expected_Length => Memory'Length));
+      Invalid_Parameters_Memory_Region_Length_Assert.Eq (T.Memory_Region_Length_Mismatch_History.Get (1), (Parameters_Region => (Region => (Address => Memory'Address, Length => Memory'Length + 1), Operation => Get_Copy), Expected_Length => Memory'Length));
 
       -- A packet should not have been automatically dumped.
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
@@ -1017,6 +1017,41 @@ package body Parameters_Tests.Implementation is
       -- Check the memory region contents and make sure it is correct:
       Byte_Array_Assert.Neq (Memory, Table);
    end Test_Table_Fetch_Error;
+
+   overriding procedure Test_Table_Fetch_Pointer_Unsupported (Self : in out Instance) is
+      use Parameter_Enums.Parameter_Table_Update_Status;
+      use Parameter_Enums.Parameter_Table_Operation_Type;
+      T : Component.Parameters.Implementation.Tester.Instance_Access renames Self.Tester;
+      -- Get_Pointer ignores the caller-provided region; pass an empty region
+      -- to make that contract explicit at the test boundary.
+      Empty_Region : constant Memory_Region.T := (Address => System.Null_Address, Length => 0);
+      Events_Before : constant Natural := T.Event_T_Recv_Sync_History.Get_Count;
+   begin
+      -- Issue Get_Pointer to the Parameters component:
+      T.Parameters_Memory_Region_T_Send ((Region => Empty_Region, Operation => Get_Pointer));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      -- Component must release with Parameter_Error (the parameters
+      -- component has no contiguous serialized snapshot buffer to point at):
+      Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 1);
+      Parameters_Memory_Region_Release_Assert.Eq (
+         T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get (1),
+         (Empty_Region, Parameter_Error)
+      );
+
+      -- Exactly one Get_Pointer_Not_Supported event fired with the rejected region:
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, Events_Before + 1);
+      Natural_Assert.Eq (T.Get_Pointer_Not_Supported_History.Get_Count, 1);
+      Memory_Region_Assert.Eq (T.Get_Pointer_Not_Supported_History.Get (1), Empty_Region);
+
+      -- No fetch happened on the downstream side, so no fetch-related events
+      -- should have fired:
+      Natural_Assert.Eq (T.Starting_Parameter_Table_Fetch_History.Get_Count, 0);
+      Natural_Assert.Eq (T.Finished_Parameter_Table_Fetch_History.Get_Count, 0);
+
+      -- No packet dumped either:
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
+   end Test_Table_Fetch_Pointer_Unsupported;
 
    overriding procedure Test_No_Dump_On_Change (Self : in out Instance) is
       use Parameter_Enums.Parameter_Table_Operation_Type;
@@ -1103,12 +1138,12 @@ package body Parameters_Tests.Implementation is
       -- Send the memory region to the component with a get request, should
       -- overflow queue.
       T.Expect_Parameters_Memory_Region_T_Send_Dropped := True;
-      T.Parameters_Memory_Region_T_Send ((Region => Region, Operation => Get));
+      T.Parameters_Memory_Region_T_Send ((Region => Region, Operation => Get_Copy));
 
       -- Make sure event thrown:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
       Natural_Assert.Eq (T.Memory_Region_Dropped_History.Get_Count, 1);
-      Parameters_Memory_Region_Assert.Eq (T.Memory_Region_Dropped_History.Get (1), (Region => Region, Operation => Get));
+      Parameters_Memory_Region_Assert.Eq (T.Memory_Region_Dropped_History.Get (1), (Region => Region, Operation => Get_Copy));
 
       -- Make sure the memory location was released with the proper status:
       Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 1);

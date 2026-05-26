@@ -27,6 +27,7 @@ package body Component.Parameter_Store.Implementation.Tester is
       Self.Dumped_Parameters_History.Init (Depth => 10);
       Self.Parameter_Table_Updated_History.Init (Depth => 10);
       Self.Parameter_Table_Fetched_History.Init (Depth => 10);
+      Self.Parameter_Table_Pointer_Fetched_History.Init (Depth => 10);
       Self.Invalid_Command_Received_History.Init (Depth => 10);
       Self.Command_Dropped_History.Init (Depth => 10);
       Self.Memory_Region_Dropped_History.Init (Depth => 10);
@@ -50,6 +51,7 @@ package body Component.Parameter_Store.Implementation.Tester is
       Self.Dumped_Parameters_History.Destroy;
       Self.Parameter_Table_Updated_History.Destroy;
       Self.Parameter_Table_Fetched_History.Destroy;
+      Self.Parameter_Table_Pointer_Fetched_History.Destroy;
       Self.Invalid_Command_Received_History.Destroy;
       Self.Command_Dropped_History.Destroy;
       Self.Memory_Region_Dropped_History.Destroy;
@@ -188,6 +190,13 @@ package body Component.Parameter_Store.Implementation.Tester is
       -- Push the argument onto the test history for looking at later:
       Self.Parameter_Table_Fetched_History.Push (Arg);
    end Parameter_Table_Fetched;
+
+   -- Returned a zero-copy pointer to the parameter store's own byte buffer.
+   overriding procedure Parameter_Table_Pointer_Fetched (Self : in out Instance; Arg : in Memory_Region.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Parameter_Table_Pointer_Fetched_History.Push (Arg);
+   end Parameter_Table_Pointer_Fetched;
 
    -- A command was received with invalid parameters.
    overriding procedure Invalid_Command_Received (Self : in out Instance; Arg : in Invalid_Command_Info.T) is

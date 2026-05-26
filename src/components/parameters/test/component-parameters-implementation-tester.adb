@@ -44,6 +44,7 @@ package body Component.Parameters.Implementation.Tester is
       Self.Finished_Parameter_Table_Validate_History.Init (Depth => 100);
       Self.Starting_Parameter_Table_Fetch_History.Init (Depth => 100);
       Self.Finished_Parameter_Table_Fetch_History.Init (Depth => 100);
+      Self.Get_Pointer_Not_Supported_History.Init (Depth => 100);
       Self.Invalid_Command_Received_History.Init (Depth => 100);
       Self.Command_Dropped_History.Init (Depth => 100);
       Self.Memory_Region_Dropped_History.Init (Depth => 100);
@@ -88,6 +89,7 @@ package body Component.Parameters.Implementation.Tester is
       Self.Finished_Parameter_Table_Validate_History.Destroy;
       Self.Starting_Parameter_Table_Fetch_History.Destroy;
       Self.Finished_Parameter_Table_Fetch_History.Destroy;
+      Self.Get_Pointer_Not_Supported_History.Destroy;
       Self.Invalid_Command_Received_History.Destroy;
       Self.Command_Dropped_History.Destroy;
       Self.Memory_Region_Dropped_History.Destroy;
@@ -361,6 +363,12 @@ package body Component.Parameters.Implementation.Tester is
       -- Push the argument onto the test history for looking at later:
       Self.Finished_Parameter_Table_Fetch_History.Push (Arg);
    end Finished_Parameter_Table_Fetch;
+
+   -- The Get_Pointer operation is not supported by the parameters component.
+   overriding procedure Get_Pointer_Not_Supported (Self : in out Instance; Arg : in Memory_Region.T) is
+   begin
+      Self.Get_Pointer_Not_Supported_History.Push (Arg);
+   end Get_Pointer_Not_Supported;
 
    -- A command was received with invalid parameters.
    overriding procedure Invalid_Command_Received (Self : in out Instance; Arg : in Invalid_Command_Info.T) is

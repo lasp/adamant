@@ -7,6 +7,8 @@ tests:
     description: This unit test tests the nominal updating of the parameter table by memory region upload.
   - name: Test_Nominal_Table_Fetch
     description: This unit test tests the nominal fetching of the parameter table into a provided memory region.
+  - name: Test_Table_Fetch_Pointer
+    description: This unit test tests fetching a zero-copy pointer to the parameter store's internal byte buffer via the Get_Pointer operation.
   - name: Test_Table_Upload_Length_Error
     description: This unit test tests the behavior when updating the parameter table with a memory region of invalid length.
   - name: Test_Table_Upload_Crc_Error
