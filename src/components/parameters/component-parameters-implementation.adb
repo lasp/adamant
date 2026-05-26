@@ -8,6 +8,7 @@ with Byte_Array_Pointer.Packed;
 with Basic_Types;
 with Memory_Region;
 with Parameter_Table_Header;
+with Parameter_Table_Util;
 with Serializer_Types;
 with Parameter;
 
@@ -253,24 +254,6 @@ package body Component.Parameters.Implementation is
       return To_Return;
    end Fetch_Parameters;
 
-   -- Crc the parameter table bytes. The table bytes passed in MUST be the exact size as the parameter table:
-   function Crc_Parameter_Table (Self : in Instance; Table_Bytes : in Basic_Types.Byte_Array) return Crc_16.Crc_16_Type is
-   begin
-      -- This function assumes that the provided data is the exact length of the parameter table. Length
-      -- checks should be performed before calling this function:
-      pragma Assert (Table_Bytes'Length = Self.Parameter_Table_Length);
-
-      -- Some checks to make sure parameter table header constants make sense. This will fail if the
-      -- header packed record and constants are malformed.
-      pragma Assert (Parameter_Table_Header.Crc_Section_Length + Parameter_Table_Header.Version_Length = Parameter_Table_Header.Size_In_Bytes);
-
-      -- Calculate the CRC over the version and data:
-      return Crc_16.Compute_Crc_16 (Table_Bytes (
-         Table_Bytes'First + Parameter_Table_Header.Crc_Section_Length ..
-         Table_Bytes'First + Parameter_Table_Header.Crc_Section_Length + Parameter_Table_Header.Version_Length + Self.Parameter_Table_Data_Length - 1
-      ));
-   end Crc_Parameter_Table;
-
    -- Fetch parameters from all downstream components and form the parameter table data structure complete with the
    -- table header and computed CRC. The table is returned via the Table_Bytes parameter, which MUST be the exact
    -- size as the parameter table.
@@ -319,7 +302,9 @@ package body Component.Parameters.Implementation is
                use Serializer_Types;
                use Basic_Types;
                -- Calculate the crc of the table:
-               Calculated_Crc : constant Crc_16.Crc_16_Type := Self.Crc_Parameter_Table (Table_Bytes);
+               Calculated_Crc : constant Crc_16.Crc_16_Type :=
+                  Parameter_Table_Util.Compute_Table_Crc (
+                     Byte_Array_Pointer.From_Address (Table_Bytes'Address, Table_Bytes'Length));
                Pkt : Packet.T;
                -- Create the packet:
                Stat : constant Serialization_Status := Self.Packets.Active_Parameters (Self.Sys_Time_T_Get, Calculated_Crc & Table_Bytes, Pkt);
@@ -537,18 +522,6 @@ package body Component.Parameters.Implementation is
       return (Region => Region, Status => Status_To_Return);
    end Validate_Parameter_Table;
 
-   function Get_Table_Ptr_From_Region (Region : in Memory_Region.T; Table_Header : out Parameter_Table_Header.T) return Byte_Array_Pointer.Instance is
-      use Byte_Array_Pointer;
-      use Byte_Array_Pointer.Packed;
-
-      Ptr : constant Byte_Array_Pointer.Instance := Unpack (Region);
-      Ptr_Header : constant Byte_Array_Pointer.Instance := Slice (Ptr, Start_Index => 0, End_Index => Parameter_Table_Header.Size_In_Bytes - 1);
-      Header : constant Parameter_Table_Header.T := Parameter_Table_Header.Serialization.From_Byte_Array (To_Byte_Array (Ptr_Header));
-   begin
-      Table_Header := Header;
-      return Ptr;
-   end Get_Table_Ptr_From_Region;
-
    -- Helper function to update all connected component's parameter tables from data within a provided memory region.
    function Update_Parameter_Table (Self : in out Instance; Region : in Memory_Region.T) return Parameters_Memory_Region_Release.T is
       use Parameter_Enums.Parameter_Update_Status;
@@ -586,7 +559,7 @@ package body Component.Parameters.Implementation is
          -- below, to ensure the dumped table reflects this new meta data.
          declare
             Table_Header : Parameter_Table_Header.T;
-            Ignore : constant Byte_Array_Pointer.Instance := Get_Table_Ptr_From_Region (Region, Table_Header);
+            Ignore : constant Byte_Array_Pointer.Instance := Parameter_Table_Util.Get_Ptr_And_Header_From_Region (Region, Table_Header);
          begin
             Self.Table_Version := Table_Header.Version;
             Self.Stored_Crc := Table_Header.Crc_Table;
@@ -646,9 +619,12 @@ package body Component.Parameters.Implementation is
                   use Basic_Types;
                   -- Extract the parameter table header:
                   Table_Header : Parameter_Table_Header.T;
-                  Ptr : constant Byte_Array_Pointer.Instance := Get_Table_Ptr_From_Region (Arg.Region, Table_Header);
-                  -- Compute the CRC over the incoming table:
-                  Computed_Crc : constant Crc_16.Crc_16_Type := Self.Crc_Parameter_Table (To_Byte_Array (Ptr));
+                  Ptr : constant Byte_Array_Pointer.Instance := Parameter_Table_Util.Get_Ptr_And_Header_From_Region (Arg.Region, Table_Header);
+                  -- Compute the CRC over the incoming table. Arg.Region.Length
+                  -- was checked equal to Self.Parameter_Table_Length above, so
+                  -- the Ptr spans the full table.
+                  pragma Assert (Length (Ptr) = Self.Parameter_Table_Length);
+                  Computed_Crc : constant Crc_16.Crc_16_Type := Parameter_Table_Util.Compute_Table_Crc (Ptr);
                begin
                   -- If the CRCs match, then continue updating or validating the downstream components'
                   -- internal parameters:
