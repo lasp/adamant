@@ -226,6 +226,57 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Sequence_Event_Info_Assert.Eq (T.Sequence_Completed_History.Get (1), (Sequence_Id => 1, Frame_Id => 0));
    end Test_Dynamic_Sequence;
 
+   --  Exercises an autocoded per-sequence wrapper command end-to-end. Sending
+   --  Sequence_B (the synthesized command for the second declared sequence) must
+   --  behave exactly like the manual Run_Sequence form in Test_Dynamic_Sequence:
+   --  the wrapper packs its typed User_Args into the Run_Sequence buffer and
+   --  dispatches to Sequences-table slot 1, so the same sub-commands are emitted
+   --  with the same unpacked arguments.
+   overriding procedure Test_Synthesized_Sequence_Command (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Component_A_Commands : Test_Component_Commands.Instance;
+      Component_B_Commands : Test_Component_Commands.Instance;
+      Argument : constant Sequence_B_Arg.T := (Component_A_Arg => (Value => 12), Component_B_Arg => (Value => 13));
+      Cmd : Command.T;
+   begin
+      Component_A_Commands.Set_Id_Base (1);
+      Component_A_Commands.Set_Source_Id (0);
+      Component_B_Commands.Set_Id_Base (7);
+      Component_B_Commands.Set_Source_Id (0);
+
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
+
+      -- Build and send the synthesized Sequence_B command. No manual Sequence_Id
+      -- or buffer packing -- that is the wrapper's job. Sequence_B_Run_Arg is a
+      -- fixed-length type, so the suite generates the direct Command.T form.
+      Cmd := T.Commands.Sequence_B ((User_Args => Argument, Response_Behavior => Send_After_Sequence_Start));
+
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      -- The wrapper dispatched to slot 1 (Sequence_B).
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 1);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (1), (Sequence_Id => 1, Frame_Id => 0));
+
+      -- First tick: step 0 dispatches Component_A.Command_3 with the unpacked Component_A_Arg.
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 1);
+      Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (1), Component_A_Commands.Command_3 (Argument.Component_A_Arg));
+
+      T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0,
+         Command_Id => Component_A_Commands.Get_Command_3_Id, Status => Success));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      -- Second tick: step 1 dispatches Component_B.Command_3 with the unpacked Component_B_Arg.
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 2);
+      Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (2), Component_B_Commands.Command_3 (Argument.Component_B_Arg));
+   end Test_Synthesized_Sequence_Command;
+
    --  A Run_Sequence command with a Sequence_Id outside the sequences array range
    --  must fire Invalid_Sequence_Id and return Failure.
    overriding procedure Test_Invalid_Sequence_Id (Self : in out Instance) is
