@@ -8,7 +8,7 @@ with {{ assembly_name }}_Commands; use {{ assembly_name }}_Commands;
 with Scs_Arg_Resolver;
 with Command_Types;
 with System;
-{% if sequences.values() | selectattr('steps') | map(attribute='steps') | sum(start=[]) | selectattr('has_arg') | list %}
+{% if needs_sequence_arg_utils %}
 with Sequence_Arg_Utils; use Sequence_Arg_Utils;
 {% endif %}
 {% for include in includes %}
@@ -18,7 +18,7 @@ package {{ name }} is
 {% if preamble %}
    {{ preamble }}
 {% endif %}
-{% if sequences.values() | selectattr('has_dynamic_steps') | list %}
+{% if suite_has_dynamic_steps %}
    ---------------------------------------------------------------------------
    -- Resolver types – one per dynamic step, each encodes a traversal path.
    ---------------------------------------------------------------------------
@@ -51,7 +51,7 @@ package {{ name }} is
       {{ loop.index0 }} => (Kind       => Sleep,
                            Id         => 0,
                            Arg_Length => 0,
-                           Sleep_Arg  => {{ step.get_arg_expression() }}){% if not loop.last %},{% endif %}
+                           Sleep_Arg  => {{ step.get_sleep_expression() }}){% if not loop.last %},{% endif %}
 
 {% elif step.is_dynamic() %}
       {{ loop.index0 }} => (Kind       => Runtime_Argument_Command_Step,

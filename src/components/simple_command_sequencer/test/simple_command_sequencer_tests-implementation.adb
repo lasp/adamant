@@ -810,4 +810,54 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Extra_Sequence_Id_History.Get_Count, 1);
    end Test_Extra_Sequence_Id;
+
+   --  Kill_All_Sequences halts running sequences. Frames previously assigned a Source_Id
+   --  remain claimable for the next Run_Sequence call.
+   overriding procedure Test_Kill_All_Sequences (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Cmd : Command.T;
+      Status : Serialization_Status;
+   begin
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      -- Start a sequence so a frame is in Running state
+      Status := T.Commands.Run_Sequence (
+         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start,
+          Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 1);
+
+      -- Fire the kill command
+      Cmd := T.Commands.Kill_All_Sequences;
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      Natural_Assert.Eq (T.Killed_All_Sequences_History.Get_Count, 1);
+
+      -- A subsequent Run_Sequence must succeed - the frame is claimable again
+      Status := T.Commands.Run_Sequence (
+         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start,
+          Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 2);
+      Natural_Assert.Eq (T.No_Frame_Available_History.Get_Count, 0);
+   end Test_Kill_All_Sequences;
+
+   --  Set_Summary_Packet_Period accepts a Packed_U16 and returns Success. The packet
+   --  itself is wired in Phase 4; this just exercises the command surface.
+   overriding procedure Test_Set_Summary_Packet_Period (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Cmd : Command.T;
+   begin
+      Cmd := T.Commands.Set_Summary_Packet_Period ((Value => 42));
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      -- No events on the happy path
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
+   end Test_Set_Summary_Packet_Period;
 end Simple_Command_Sequencer_Tests.Implementation;
