@@ -8,7 +8,7 @@ fields:
   - name: Response_Behavior
     description: When the sequencer should reply to this Run_Sequence command - immediately on start or after the sequence completes.
     type: Sequence_Enums.Sequence_Response_Behavior.E
-    format: U8
+    format: E8
   - name: Arg_Length
     description: Length of the buffer argument in bytes
     type: Simple_Sequencer_Types.Run_Sequence_Arg_Buffer_Length_Type

@@ -20,3 +20,5 @@ tests:
   - name: Test_Timeout
   - name: Test_Out_Of_Range_Timeout
   - name: Test_Extra_Sequence_Id
+  - name: Test_Kill_All_Sequences
+  - name: Test_Set_Summary_Packet_Period

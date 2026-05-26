@@ -8,6 +8,7 @@ with Command_Response;
 with Tick;
 with Sequence_Frame;
 with Run_Sequence_Arg;
+with Packed_U16;
 
 -- The Command Sequencer component executes predefined sequences of commands.
 -- It receives high-level sequence commands and breaks them down into individual
@@ -40,6 +41,7 @@ private
    type Instance is new Simple_Command_Sequencer.Base_Instance with record
       Sequence_Frames : Sequence_Frame_Array_Access := null;
       Sequences : Simple_Sequencer_Types.Sequences_Access := null;
+      Summary_Packet_Period : Interfaces.Unsigned_16 := 0;
    end record;
 
    ---------------------------------------
@@ -85,6 +87,13 @@ private
    --    These are the commands for the Register Stuffer component.
    -- Run a Command Sequence
    overriding function Run_Sequence (Self : in out Instance; Arg : in Run_Sequence_Arg.T) return Command_Execution_Status.E;
+
+   -- Halt all running sequences and reset their frames.
+   overriding function Kill_All_Sequences (Self : in out Instance) return Command_Execution_Status.E;
+
+   -- Set the period of the sequencer summary packet. Wiring of the packet itself
+   -- comes in Phase 4; for now this stores the value as a placeholder.
+   overriding function Set_Summary_Packet_Period (Self : in out Instance; Arg : in Packed_U16.T) return Command_Execution_Status.E;
 
    -- Invalid command handler. This procedure is called when a command's arguments are found to be invalid:
    overriding procedure Invalid_Command (Self : in out Instance; Cmd : in Command.T; Errant_Field_Number : in Unsigned_32; Errant_Field : in Basic_Types.Poly_Type);

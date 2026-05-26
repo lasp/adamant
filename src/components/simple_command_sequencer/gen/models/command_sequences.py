@@ -6,8 +6,6 @@ from models.assembly import assembly_submodel
 from util import model_loader
 import re
 
-PSEUDO_COMMANDS = {"Sleep"}
-
 DEFAULT_COMMAND_TIMEOUT_SECONDS = 30
 
 
@@ -23,13 +21,21 @@ class sequence_step(object):
 
     def __init__(
         self,
-        command,
+        command=None,
         arg=None,
         wait_for_completion=None,
+        sleep=None,
     ):
-        self.is_pseudo = False
+        # A step is either a command dispatch or a sleep, never both. The
+        # parser/validator enforces this so downstream code can branch on
+        # is_sleep() / is_command().
         self.command = command
-        self.parse_command()
+        self.sleep_expr = sleep
+        if command is not None:
+            self.parse_command()
+        else:
+            self.component_name = None
+            self.command_name = None
         # If arg matches the dynamic pattern (e.g. "Arg.A.B.C") it is stored
         # in dynamic_arg and arg is cleared; otherwise it stays in arg.
         if arg is not None and self._DYNAMIC_ARG_RE.match(arg):
@@ -62,12 +68,6 @@ class sequence_step(object):
         self.resolver_instance_name = None
 
     def parse_command(self):
-        if self.command in PSEUDO_COMMANDS:
-            self.component_name = None
-            self.command_name = self.command
-            self.is_pseudo = True
-            return
-        self.is_pseudo = False
         if not re.match(
             r'^[A-Za-z][A-Za-z0-9_]*\.[A-Za-z][A-Za-z0-9_]*$',
             self.command
@@ -87,10 +87,32 @@ class sequence_step(object):
             self.wait_for_completion = self._wait_for_completion
 
     def validate(self):
-        if self.is_sleep() and not self.arg:
-            raise ModelException(f"Sleep step {self.index} requires an arg expression")
-
-        if not self.is_sleep() and self.arg:
+        # Mutual exclusivity: exactly one of command/sleep_expr.
+        if self.command is None and self.sleep_expr is None:
+            raise ModelException(
+                f"Step {self.index} must specify either 'command' or 'sleep'"
+            )
+        if self.command is not None and self.sleep_expr is not None:
+            raise ModelException(
+                f"Step {self.index} cannot specify both 'command' and 'sleep'"
+            )
+        # Sleep-form: no arg/wait_for_completion fields allowed.
+        if self.is_sleep():
+            if self.arg is not None or self.dynamic_arg is not None:
+                raise ModelException(
+                    f"Step {self.index} has 'sleep' and cannot also have 'arg'"
+                )
+            if self._wait_for_completion is not None:
+                raise ModelException(
+                    f"Step {self.index} has 'sleep' and cannot also have 'wait_for_completion'"
+                )
+            if self.sleep_expr.count("(") != self.sleep_expr.count(")"):
+                raise ModelException(
+                    f"Mismatched parentheses in sleep expression for step {self.index}: {self.sleep_expr}"
+                )
+            return
+        # Command-form parenthesis sanity.
+        if self.arg:
             if self.arg.count("(") != self.arg.count(")"):
                 raise ModelException(
                     f"Mismatched parentheses in arg expression for step {self.index}: {self.arg}"
@@ -156,10 +178,16 @@ class sequence_step(object):
         )
 
     def get_arg_expression(self):
-        """Replace bare 'Arg' references with 'Sequence_Arg'."""
+        """Replace bare 'Arg' references with 'Sequence_Arg' in the command arg expression."""
         if not self.arg:
             return None
         return re.sub(r'\bArg\b', 'Sequence_Arg', self.arg)
+
+    def get_sleep_expression(self):
+        """Replace bare 'Arg' references with 'Sequence_Arg' in the sleep expression."""
+        if not self.sleep_expr:
+            return None
+        return re.sub(r'\bArg\b', 'Sequence_Arg', self.sleep_expr)
 
     def has_arg(self):
         return self.arg is not None
@@ -168,18 +196,20 @@ class sequence_step(object):
         return self.dynamic_arg is not None
 
     def is_sleep(self):
-        return self.command_name == "Sleep"
+        return self.sleep_expr is not None
 
     @classmethod
     @throw_exception_with_lineno
     def from_step_data(cls, step_data):
-        command = step_data["command"]
+        command = step_data.get("command", None)
         arg = step_data.get("arg", None)
         wait_for_completion = step_data.get("wait_for_completion", None)
+        sleep = step_data.get("sleep", None)
         return cls(
             command=command,
             arg=arg,
             wait_for_completion=wait_for_completion,
+            sleep=sleep,
         )
 
 
@@ -346,17 +376,42 @@ class command_sequences(assembly_submodel):
                     lineno=seq.lineno,
                 )
 
+        # All sequences are now in place; populate template-context flags.
+        self._compute_template_flags()
+
     def has_dynamic_steps(self):
         """True if any sequence in this suite has at least one dynamic step."""
         return any(seq.has_dynamic_steps() for seq in self.sequences.values())
 
+    def _compute_template_flags(self):
+        """Compute boolean flags used by name.ads as plain instance attributes
+        so the Jinja template can reference them directly via the model's
+        __dict__ render context. Call after self.sequences is populated."""
+        # True if any sequence in this suite has at least one dynamic step
+        # (drives Resolver type emission in name.ads).
+        self.suite_has_dynamic_steps = self.has_dynamic_steps()
+        # True if any step in any sequence has a static command arg expression
+        # (drives `with Sequence_Arg_Utils;` in name.ads).
+        self.needs_sequence_arg_utils = any(
+            step.has_arg()
+            for seq in self.sequences.values()
+            for step in seq.steps
+        )
+
     def set_assembly(self, assembly):
-        self.assembly = assembly
+        # Call the base assembly_submodel.set_assembly so this submodel is
+        # registered in assembly.submodels and the standard hooks fire. The
+        # original code skipped super() and set self.assembly directly,
+        # which left assembly.submodels empty -- breaking any downstream
+        # generator that wants to discover this suite via assembly state.
+        super(command_sequences, self).set_assembly(assembly)
         self.assembly_name = assembly.name
 
         for seq in self.sequences.values():
             for step in seq.steps:
-                if step.is_pseudo:
+                # Sleep steps don't reference any assembly component or
+                # command, so skip assembly-level resolution for them.
+                if step.is_sleep():
                     continue
 
                 comp = assembly.get_component_with_name(step.component_name)

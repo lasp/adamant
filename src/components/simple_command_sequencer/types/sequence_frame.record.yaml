@@ -14,7 +14,7 @@ fields:
     type: Sys_Time.T
   - name: Status
     type: Sequence_Enums.Sequence_State.E
-    format: U8
+    format: E8
   - name: Source_Id
     type: Command_Types.Command_Source_Id
     format: U16
@@ -23,7 +23,7 @@ fields:
   - name: Response_Behavior
     description: Whether to respond to the originating Run_Sequence command on start or on completion.
     type: Sequence_Enums.Sequence_Response_Behavior.E
-    format: U8
+    format: E8
   - name: Last_Command_Send
     type: Sys_Time.T
   - name: Arg_Length

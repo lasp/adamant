@@ -33,6 +33,8 @@ private
    overriding procedure Test_Timeout (Self : in out Instance);
    overriding procedure Test_Out_Of_Range_Timeout (Self : in out Instance);
    overriding procedure Test_Extra_Sequence_Id (Self : in out Instance);
+   overriding procedure Test_Kill_All_Sequences (Self : in out Instance);
+   overriding procedure Test_Set_Summary_Packet_Period (Self : in out Instance);
 
    -- Test data and state:
    type Instance is new Simple_Command_Sequencer_Tests.Base_Instance with record
