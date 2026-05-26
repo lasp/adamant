@@ -17,6 +17,8 @@ private
    overriding procedure Test_Nominal_Table_Upload (Self : in out Instance);
    -- This unit test tests the nominal fetching of the parameter table into a provided memory region.
    overriding procedure Test_Nominal_Table_Fetch (Self : in out Instance);
+   -- This unit test tests fetching a zero-copy pointer to the parameter store's internal byte buffer via the Get_Pointer operation.
+   overriding procedure Test_Table_Fetch_Pointer (Self : in out Instance);
    -- This unit test tests the behavior when updating the parameter table with a memory region of invalid length.
    overriding procedure Test_Table_Upload_Length_Error (Self : in out Instance);
    -- This unit test tests the behavior when updating the parameter table with a memory region that contains an invalid CRC.

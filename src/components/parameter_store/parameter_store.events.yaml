@@ -15,6 +15,9 @@ events:
   - name: Parameter_Table_Fetched
     description: Starting parameter fetch into the received memory region.
     param_type: Memory_Region.T
+  - name: Parameter_Table_Pointer_Fetched
+    description: Returned a zero-copy pointer to the parameter store's own byte buffer in response to a Get_Pointer request. The included memory region addresses the parameter store's internal buffer; it is read-valid only until the next Set overwrites the buffer.
+    param_type: Memory_Region.T
   - name: Invalid_Command_Received
     description: A command was received with invalid parameters.
     param_type: Invalid_Command_Info.T

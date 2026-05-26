@@ -603,8 +603,9 @@ package body Component.Parameters.Implementation is
       Send_Data_Product : Boolean := False;
    begin
       -- First make sure that the memory region is of the expected size. If it is not then we will
-      -- reject this request.
-      if Arg.Region.Length /= Self.Parameter_Table_Length then
+      -- reject this request. Get_Pointer is exempt from this check because by contract it ignores
+      -- the caller-provided region.
+      if Arg.Operation /= Get_Pointer and then Arg.Region.Length /= Self.Parameter_Table_Length then
          Self.Event_T_Send_If_Connected (Self.Events.Memory_Region_Length_Mismatch (Self.Sys_Time_T_Get, (Parameters_Region => Arg, Expected_Length => Self.Parameter_Table_Length)));
          To_Return := (Region => Arg.Region, Status => Length_Error);
       else
@@ -649,8 +650,15 @@ package body Component.Parameters.Implementation is
                   -- Mark that we should send a data product:
                   Send_Data_Product := True;
                end;
-            when Get =>
+            when Get_Copy =>
                To_Return := Self.Copy_Parameter_Table_To_Region (Arg.Region);
+            when Get_Pointer =>
+               -- Parameters has no contiguous serialized snapshot buffer to
+               -- point at (it assembles bytes from distributed
+               -- Parameter_Update_T_Provide subscribers on demand). Reject
+               -- Get_Pointer; the caller should use Get_Copy instead.
+               Self.Event_T_Send_If_Connected (Self.Events.Get_Pointer_Not_Supported (Self.Sys_Time_T_Get, Arg.Region));
+               To_Return := (Region => Arg.Region, Status => Parameter_Error);
          end case;
       end if;
 

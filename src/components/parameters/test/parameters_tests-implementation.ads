@@ -33,6 +33,8 @@ private
    overriding procedure Test_Table_Validate_Error (Self : in out Instance);
    -- This unit test tests the behavior when fetching of the parameter table into a memory region fails.
    overriding procedure Test_Table_Fetch_Error (Self : in out Instance);
+   -- This unit test tests that the Get_Pointer operation is rejected with Parameter_Error since the parameters component has no contiguous serialized snapshot buffer to point at.
+   overriding procedure Test_Table_Fetch_Pointer_Unsupported (Self : in out Instance);
    -- This unit test tests the no-dump-on-change configuration for the Init function and makes sure the component behaves as expected.
    overriding procedure Test_No_Dump_On_Change (Self : in out Instance);
    -- This unit test tests a command or memory region being dropped due to a full queue.

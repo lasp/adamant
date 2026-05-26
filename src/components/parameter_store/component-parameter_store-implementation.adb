@@ -128,7 +128,7 @@ package body Component.Parameter_Store.Implementation is
          -- The provided region must be at least as large as the parameter table. If it is larger,
          -- only the table size worth of bytes are copied and the returned region length is updated
          -- to reflect the actual number of bytes written.
-         when Get =>
+         when Get_Copy =>
             if Arg.Region.Length < Self.Bytes.all'Length then
                Self.Event_T_Send_If_Connected (Self.Events.Memory_Region_Length_Mismatch (Self.Sys_Time_T_Get, (
                   Parameters_Region => Arg,
@@ -153,6 +153,19 @@ package body Component.Parameter_Store.Implementation is
                   To_Return := (Region => Returned_Region, Status => Success);
                end;
             end if;
+         -- Return a memory region pointing at the parameter store's own
+         -- byte buffer (zero-copy). The caller-provided region in Arg is
+         -- ignored. The returned region is read-valid only until the next
+         -- Set arrives that overwrites the buffer; the caller is
+         -- responsible for consuming it before issuing more writes.
+         when Get_Pointer =>
+            declare
+               Returned_Region : constant Memory_Region.T :=
+                  (Address => Self.Bytes.all'Address, Length => Self.Bytes.all'Length);
+            begin
+               Self.Event_T_Send_If_Connected (Self.Events.Parameter_Table_Pointer_Fetched (Self.Sys_Time_T_Get, Returned_Region));
+               To_Return := (Region => Returned_Region, Status => Success);
+            end;
          when Validate =>
             -- This component does not perform component-specific validation, so table validation is unsupported:
             -- Throw event:

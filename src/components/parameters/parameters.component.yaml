@@ -27,7 +27,7 @@ connectors:
   - description: This connector is used to send command responses.
     type: Command_Response.T
     kind: send
-  - description: When a memory region is received on this connector it can either be a parameter table that is used to stage and update the parameters of all connected components, or it can be a memory region that is used to store the current value of the parameters stored within the component. The operation field determines which logic is run. For either operation, the memory region length MUST match the length of the managed parameter table, otherwise the update will not be processed.
+  - description: When a memory region is received on this connector it can either be a parameter table that is used to stage and update the parameters of all connected components, or it can be a memory region that is used to store the current value of the parameters stored within the component. The operation field determines which logic is run. For either operation, the memory region length MUST match the length of the managed parameter table, otherwise the update will not be processed. The Get_Pointer operation is NOT supported by this component (its parameters are scattered across per-component Parameter_Update_T_Provide subscribers and there is no contiguous serialized buffer to point at); Get_Pointer requests are rejected with Parameter_Error. Callers must use Get_Copy instead.
     type: Parameters_Memory_Region.T
     kind: recv_async
   - description: After a memory region is received on the Memory_Region_T_Recv_Async connector and then processed, it is released via a call to this connector. A status is also returned, so the downstream component can determine if the parameter update was successful or not.

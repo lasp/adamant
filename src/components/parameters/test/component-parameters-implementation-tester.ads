@@ -71,6 +71,7 @@ package Component.Parameters.Implementation.Tester is
    package Finished_Parameter_Table_Validate_History_Package is new Printable_History (Parameters_Memory_Region_Release.T, Parameters_Memory_Region_Release.Representation.Image);
    package Starting_Parameter_Table_Fetch_History_Package is new Printable_History (Memory_Region.T, Memory_Region.Representation.Image);
    package Finished_Parameter_Table_Fetch_History_Package is new Printable_History (Parameters_Memory_Region_Release.T, Parameters_Memory_Region_Release.Representation.Image);
+   package Get_Pointer_Not_Supported_History_Package is new Printable_History (Memory_Region.T, Memory_Region.Representation.Image);
    package Invalid_Command_Received_History_Package is new Printable_History (Invalid_Command_Info.T, Invalid_Command_Info.Representation.Image);
    package Command_Dropped_History_Package is new Printable_History (Command_Header.T, Command_Header.Representation.Image);
    package Memory_Region_Dropped_History_Package is new Printable_History (Parameters_Memory_Region.T, Parameters_Memory_Region.Representation.Image);
@@ -113,6 +114,7 @@ package Component.Parameters.Implementation.Tester is
       Finished_Parameter_Table_Validate_History : Finished_Parameter_Table_Validate_History_Package.Instance;
       Starting_Parameter_Table_Fetch_History : Starting_Parameter_Table_Fetch_History_Package.Instance;
       Finished_Parameter_Table_Fetch_History : Finished_Parameter_Table_Fetch_History_Package.Instance;
+      Get_Pointer_Not_Supported_History : Get_Pointer_Not_Supported_History_Package.Instance;
       Invalid_Command_Received_History : Invalid_Command_Received_History_Package.Instance;
       Command_Dropped_History : Command_Dropped_History_Package.Instance;
       Memory_Region_Dropped_History : Memory_Region_Dropped_History_Package.Instance;
@@ -230,6 +232,8 @@ package Component.Parameters.Implementation.Tester is
    -- Done updating the parameters from a received memory region with following
    -- status.
    overriding procedure Finished_Parameter_Table_Fetch (Self : in out Instance; Arg : in Parameters_Memory_Region_Release.T);
+   -- The Get_Pointer operation is not supported by the parameters component.
+   overriding procedure Get_Pointer_Not_Supported (Self : in out Instance; Arg : in Memory_Region.T);
    -- A command was received with invalid parameters.
    overriding procedure Invalid_Command_Received (Self : in out Instance; Arg : in Invalid_Command_Info.T);
    -- A command was dropped due to a full queue.
