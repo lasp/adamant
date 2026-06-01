@@ -7,33 +7,38 @@ from util import model_loader
 from generators.basic import basic_generator
 
 
-class parameter_table_router_table_ads(basic_generator, generator_base):
-    def __init__(self):
+class _parameter_table_router_table_base(basic_generator):
+    """
+    Shared output_filename / generate behavior for the router_table
+    generators below.
+
+    Intentionally NOT a generator_base subclass: redo's generator auto-
+    discovery (redo/database/create.py) iterates every generator_base
+    subclass and instantiates each with no args. This template-less
+    base requires a template_filename and would explode there. The
+    concrete subclasses below inherit from generator_base directly and
+    pass the hardcoded template_filename through super().__init__().
+    """
+    def __init__(self, template_filename):
         this_file_dir = os.path.dirname(os.path.realpath(__file__))
         template_dir = os.path.join(this_file_dir, ".." + os.sep + "templates")
         basic_generator.__init__(
             self,
             model_class=parameter_table_router_table.parameter_table_router_table,
-            template_filename="name.ads",
+            template_filename=template_filename,
             template_dir=template_dir,
         )
 
     def output_filename(self, input_filename):
-        # Get info from input filename:
         dirname, specific_name, component_name, *ignore = (
             self._split_input_filename(input_filename)
         )
-
         if not specific_name:
             build_dir = self._get_default_build_dir()
-
-            # Construct the filename:
             a = self.template_basename.rsplit("name", maxsplit=1)
             output_filename = (
                 component_name + "_parameter_table_router_table"
             ).join(a)
-
-            # Return the suggested output filename:
             return dirname + os.sep + build_dir + os.sep + output_filename
         return basic_generator.output_filename(self, input_filename)
 
@@ -57,3 +62,13 @@ class parameter_table_router_table_ads(basic_generator, generator_base):
         )
         r.resolve_router_destinations(a)
         print(r.render(self.template, template_path=self.template_dir))
+
+
+class parameter_table_router_table_ads(_parameter_table_router_table_base, generator_base):
+    def __init__(self):
+        super().__init__(template_filename="name.ads")
+
+
+class parameter_table_router_table_py(_parameter_table_router_table_base, generator_base):
+    def __init__(self):
+        super().__init__(template_filename="name.py")
