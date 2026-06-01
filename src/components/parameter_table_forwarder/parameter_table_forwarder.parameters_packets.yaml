@@ -1,0 +1,8 @@
+---
+description: Packets for the Parameter Table Forwarder component.
+packets:
+  - name: Active_Parameters
+    description: |
+      Snapshot of the current parameter table fetched from the downstream
+      component at the time of dump, prefixed with a freshly computed CRC for
+      bit-rot detection.

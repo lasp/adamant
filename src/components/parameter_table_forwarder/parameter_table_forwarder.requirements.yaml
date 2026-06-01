@@ -1,0 +1,13 @@
+---
+description: The requirements for the Parameter Table Forwarder component are specified below.
+requirements:
+  - text: The component shall forward Set parameter table operations from an upstream source to a downstream component after validating length and CRC.
+  - text: The component shall forward Validate parameter table operations from an upstream source to a downstream component after validating length and CRC.
+  - text: The component shall forward Get parameter table operations from an upstream source to a downstream component after validating length.
+  - text: The component shall release the incoming memory region back to the upstream source with a status reflecting the downstream component's response or the forwarder's own validation failure.
+  - text: The component shall produce an active parameters packet on command, sourced from the downstream component via an internal Get operation.
+  - text: The component shall produce an active parameters packet automatically after a successful Set when Dump_Parameters_On_Change is True.
+  - text: The component shall reject Set operations whose memory region length does not equal the configured table size.
+  - text: The component shall reject Set operations whose stored CRC does not match the computed CRC.
+  - text: The component shall reject Get operations whose memory region length is less than the configured table size.
+  - text: The component shall produce a Table_Status data product reflecting the latest table operation, including version, CRC, timestamp, and operation status.

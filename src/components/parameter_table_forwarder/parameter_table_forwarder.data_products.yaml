@@ -1,0 +1,11 @@
+---
+description: Data products for the Parameter Table Forwarder component.
+data_products:
+  - name: Table_Status
+    description: |
+      Version/CRC/timestamp/last-operation status of the active table as known
+      to the forwarder. Emitted on every Set and Validate operation
+      (regardless of outcome). Get_Copy, Get_Pointer, and the Dump command
+      do not advance the active-table bookkeeping and therefore do not emit
+      this data product (mirrors the Parameters component).
+    type: Packed_Table_Operation_Status.T
