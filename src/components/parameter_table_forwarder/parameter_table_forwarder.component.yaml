@@ -1,0 +1,76 @@
+---
+description: |
+  Sits between an upstream parameter table source (Ccsds_Parameter_Table_Router
+  or an upstream Parameter_Store) and a single downstream component that owns
+  its own parameter table layout. Validates incoming memory regions (length and
+  CRC), forwards all parameter table operations (Set, Validate, Get) to the
+  downstream component, and provides standard boilerplate (dump command, active
+  parameters packet, table status data product, common events) so the
+  downstream component only has to deserialize and apply its own packed record.
+
+  The forwarder owns no parameter table bytes -- it is pure middleware. The
+  downstream component is the authoritative source of the table contents and is
+  queried via the Get operation when a dump is requested.
+execution: active
+init:
+  description: |
+    The forwarder is initialized with the expected size of the downstream
+    component's parameter table and a dump-on-change flag.
+  parameters:
+    - name: Table_Size
+      type: Natural
+      description: |
+        The expected size in bytes of the parameter table managed by the
+        downstream component. Set/Validate operations require the incoming
+        memory region length to equal Table_Size exactly. Get operations
+        require the incoming memory region length to be at least Table_Size.
+    - name: Dump_Parameters_On_Change
+      type: Boolean
+      default: "False"
+      description: |
+        If True, automatically dump the current table (by forwarding a Get to
+        the downstream component) after every Set that returns Success.
+connectors:
+  - description: Command receive.
+    type: Command.T
+    kind: recv_async
+  - description: Command response.
+    type: Command_Response.T
+    kind: send
+  - description: |
+      Inbound parameter table memory region from the router (or an upstream
+      Parameter_Store). The operation (Set, Validate, Get) is in the region.
+    type: Parameters_Memory_Region.T
+    kind: recv_async
+  - description: Release back to the upstream sender with the operation status.
+    type: Parameters_Memory_Region_Release.T
+    kind: send
+  - description: |
+      Outbound validated memory region forwarded to the downstream component;
+      the downstream returns its operation release status synchronously.
+      For Set/Validate, the region points at the upstream caller's buffer with
+      the validated header and data. For Get, the region points at the upstream
+      caller's buffer to be filled by the downstream component. For internal
+      Dump operations, the region points at the outgoing packet's buffer.
+    name: Parameters_Memory_Region_T_Forwarded
+    type: Parameters_Memory_Region.T
+    return_type: Parameters_Memory_Region_Release.T
+    kind: request
+  - description: |
+      Memory dump send connector. The forwarder emits the active parameter
+      table as two Memory_Dump records (header + payload) under the same
+      Active_Parameters packet ID. A downstream Memory_Packetizer chunks
+      each region into Packet.T's that fit Configuration.Packet_Buffer_Size,
+      so the table is not bounded by a single Packet.T's capacity.
+    name: Memory_Dump_Send
+    type: Memory_Packetizer_Types.Memory_Dump
+    kind: send
+  - description: Events out.
+    type: Event.T
+    kind: send
+  - description: Data products out.
+    type: Data_Product.T
+    kind: send
+  - description: System time.
+    return_type: Sys_Time.T
+    kind: get
