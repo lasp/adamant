@@ -22,10 +22,14 @@ package body {{ name }} is
 {% if step.is_dynamic() %}
    overriding function Resolve (
       Resolver : {{ step.resolver_type_name }};
-      Data     : System.Address
+      Data     : Basic_Types.Byte_Array
    ) return Command_Types.Command_Arg_Buffer_Type is
-      Input : {{ step.input_type_package }}.T
-         with Import, Address => Data;
+      -- Deserialize the sequence's per-call arg buffer through the input
+      -- type's safe deserializer instead of reinterpreting raw bytes via
+      -- 'Address. The slice is sized to the input type's serialized length.
+      Input : constant {{ step.input_type_package }}.T :=
+         {{ step.input_type_package }}.Serialization.From_Byte_Array (
+            Data (Data'First .. Data'First + {{ step.input_type_package }}.Serialization.Serialized_Length - 1));
    begin
       return To_Arg (
          {{ step.dynamic_arg_type_package }}.Serialization.To_Byte_Array (
