@@ -1,0 +1,58 @@
+\input{common_packages.tex}
+
+\begin{document}
+
+\title{\textbf{Simple Command Sequencer Generator} \\
+\large\textit{Autocoder User Guide}}
+\date{}
+\maketitle
+
+\section{Description}
+
+The purpose of this generator is to provide a user-friendly way of defining named command sequences for the Simple Command Sequencer component. The generator takes a YAML model file as input which declares a set of sequences -- each a named, ordered list of sub-commands (and optional sleeps) -- and autocodes both the Ada specification of the sequence step tables consumed by the sequencer's \texttt{Init} routine \emph{and} a set of first-class per-sequence wrapper commands so that each sequence appears on the sequencer instance as its own typed, operator-callable command.
+
+Note the example shown in this documentation is used in the unit test of this component so that the reader of this document can see it being used in context. Please refer to the unit test code for more details on how this generator can be used.
+
+\section{Schema}
+
+The following pykwalify schema is used to validate the input YAML model. Model files must be named in the form \textit{optional\_name.assembly\_name.command\_sequences.yaml}, where \textit{optional\_name} is the specific name of this set of sequences (only needed if more than one suite is defined in the assembly) and \textit{assembly\_name} is the assembly the sequences will be used in. Generally this file is created in the same directory or near to the assembly model file. The schema is commented to show each available YAML key and what it accomplishes; even without knowing the specifics of pykwalify schemas, you should be able to glean the available structure from the file below.
+
+\yamlcodef{../schemas/command_sequences.yaml}
+
+\section{Example Input}
+
+The following is an example command sequences input YAML file. It defines four sequences exercising the main features: an arg-less sequence with both statically-armed commands and a sleep, a sequence with a typed argument record whose fields are dispatched as dynamic arguments to two sub-commands, a no-wait sequence used for direct-dispatch testing, and a sequence with a single large sleep that exercises the out-of-range protection. This example adheres to the schema shown in the previous section, and is commented to give clarification.
+
+\yamlcodef{../../test/test_assembly/example_sequences.test_assembly.command_sequences.yaml}
+
+\section{Example Output}
+
+The example input above produces the following Ada outputs. The package spec declares the per-dynamic-step Resolver types, a step array constant per sequence, and the \texttt{Sequences\_Table} constant (plus a stable \texttt{Sequences} access pointer). The package body implements the Resolver \texttt{Resolve} functions, which deserialize the sequence's per-call argument buffer through the input type's \texttt{Serialization.From\_Byte\_Array} and re-serialize the addressed field as the sub-command's argument buffer. The body is only emitted when the suite contains at least one dynamic step -- a suite of purely static or sleep-only sequences declares no Resolve subprograms and so needs no body package.
+
+The \texttt{Sequences} access should be passed into the Simple Command Sequencer's \texttt{Init} procedure during assembly initialization, e.g.\ in the assembly YAML:
+
+\begin{verbatim}
+- type: Simple_Command_Sequencer
+  name: My_Sequencer
+  init:
+    - "Num_Concurrent_Sequences => 4"
+    - "Sequences => Test_Assembly_Command_Sequences_Example_Sequences.Sequences"
+\end{verbatim}
+
+\adacodef{../../test/test_assembly/build/src/test_assembly_command_sequences_example_sequences.ads}
+
+\adacodef{../../test/test_assembly/build/src/test_assembly_command_sequences_example_sequences.adb}
+
+\section{Per-Sequence First-Class Commands}
+
+In addition to the sequence tables above, this same model drives the autocoded synthesis of one first-class wrapper command per declared sequence on the Simple Command Sequencer instance. Discovery is build-path-driven: the sequencer's commands model queries the model database for every \texttt{*.command\_sequences.yaml} in scope, so a naked component build (no assembly) sees no sequences and produces only the three static commands (\texttt{Run\_Sequence}, \texttt{Kill\_All\_Sequences}, \texttt{Set\_Summary\_Packet\_Period}), while an assembly build whose path includes a sequences suite adds one wrapper command per sequence. Each wrapper command (e.g.\ \texttt{Sequence\_B}) takes the sequence's wrapped argument record (the sequence's native arg type plus a trailing \texttt{Response\_Behavior} flag) and, at run time, packs that typed argument into a generic \texttt{Run\_Sequence\_Arg.T} and dispatches through the existing \texttt{Run\_Sequence} backbone using the sequence's runtime slot index. The wrapped argument records are produced from this same model by the companion \texttt{wrapped\_run\_args} generator, and the handler bodies for the synthesized commands live in a generated intermediate that the component's implementation derives from -- no per-sequence Ada needs to be hand-written.
+
+\section{Dynamic Arguments}
+
+A sequence step may forward a field of the parent sequence's argument to the sub-command it dispatches, using the \texttt{Arg.field.subfield} syntax in the step's \texttt{arg:}. Each such reference produces a typed Resolver in the generated package: at run time the sequencer dispatches that Resolver, which deserializes the per-call argument buffer through the input type's safe \texttt{Serialization.From\_Byte\_Array}, navigates to the addressed field, and serializes it as the sub-command's argument buffer. The resolver's signature accepts only a \texttt{Basic\_Types.Byte\_Array} -- there is no \texttt{'Address} reinterpretation -- so the dynamic-argument machinery is type-safe by construction; a resolver cannot overlay an arbitrary record onto raw memory, only deserialize a byte array through the input type's generated deserializer.
+
+\section{Sleep Steps}
+
+A sequence step may be a sleep instead of a command: \texttt{sleep: (Value => 3000)} pauses the executing frame for 3 seconds without issuing any bus traffic. Sleep is not a bus command; it is interpreted intrinsically by the sequencer frame state machine. The sleep expression is a \texttt{Packed\_U32.T} aggregate in milliseconds and may itself be dynamic, e.g.\ \texttt{sleep: (Value => Arg.Pause\_Millis)}, in which case the duration is taken from the sequence's per-call argument. Out-of-range sleep durations (those that cannot be represented as a \texttt{Time\_Span} on the platform, or that would overflow \texttt{Sys\_Time} arithmetic when added to the current time) are rejected at run time with a \texttt{Sequence\_Out\_Of\_Range\_Sleep} event so the operator can see that the step was skipped.
+
+\end{document}

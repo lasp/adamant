@@ -68,9 +68,15 @@ package body Component.Simple_Command_Sequencer.Implementation.Logic is
    end Find_Sequence_Frame_Id_From_Source_Id;
 
    -- Attempts to put `Frame` into the Waiting_For_Time state with a wake time
-   -- equal to now + `Arg` milliseconds. Returns False (and leaves Frame.Wait_Until
-   -- unchanged) if the Sys_Time arithmetic overflows; the caller should treat that
-   -- as an out-of-range sleep duration and emit the appropriate event.
+   -- of now + `Arg` milliseconds.
+   --
+   -- Returns True if the sleep was scheduled successfully -- the duration is in
+   -- range and Frame.Wait_Until has been updated. Returns False if the duration
+   -- is out of range, either because Arg.Value exceeds Integer'Last milliseconds
+   -- (cannot be expressed as a Time_Span on this platform) or Sys_Time arithmetic
+   -- overflows adding it to the current time. On False, Frame.Wait_Until is left
+   -- unchanged and the caller is expected to emit Sequence_Out_Of_Range_Sleep so
+   -- the operator can see the step was skipped rather than silently lost.
    function Try_Schedule_Sleep (Self : in out Instance; Frame : in out Sequence_Frame.T; Arg : in Packed_U32.T) return Boolean is
       use Ada.Real_Time;
       use Sys_Time.Arithmetic;
@@ -113,9 +119,15 @@ package body Component.Simple_Command_Sequencer.Implementation.Logic is
                         Frame.Last_Command_Send := Self.Sys_Time_T_Get;
                      end;
                   when Runtime_Argument_Command_Step =>
+                     -- Dynamic-arg step: dispatch the per-step Resolver to
+                     -- deserialize the sequence's per-call argument buffer and
+                     -- extract this sub-command's typed argument. The resolver
+                     -- (one type per dynamic step) encodes the traversal path
+                     -- through the caller's arg record and returns the serialized
+                     -- leaf, ready to use as the sub-command's Arg_Buffer.
                      declare
                         Resolved : constant Command_Types.Command_Arg_Buffer_Type :=
-                           Step_Obj.Resolver.Resolve (Frame.Dynamic_Arg'Address);
+                           Step_Obj.Resolver.Resolve (Frame.Dynamic_Arg);
                         Cmd : constant Command.T := (
                            Header     => (
                               Source_Id         => Frame.Source_Id,
@@ -130,6 +142,9 @@ package body Component.Simple_Command_Sequencer.Implementation.Logic is
                         Frame.Last_Command_Send := Self.Sys_Time_T_Get;
                      end;
                   when Sleep =>
+                     -- Try_Schedule_Sleep returns False only when the sleep
+                     -- duration is out of range -- surface it as an event so
+                     -- the step isn't silently skipped.
                      if not Try_Schedule_Sleep (Self, Frame, Step_Obj.Sleep_Arg) then
                         Self.Event_T_Send_If_Connected (Self.Events.Sequence_Out_Of_Range_Sleep (Self.Sys_Time_T_Get, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Milliseconds => Step_Obj.Sleep_Arg.Value)));
                      end if;
