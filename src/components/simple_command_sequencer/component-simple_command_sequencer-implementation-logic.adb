@@ -27,6 +27,8 @@ package body Component.Simple_Command_Sequencer.Implementation.Logic is
              Abort_On_Failed_Cmd => True
           ),
           Response_Behavior => Sequence_Enums.Sequence_Response_Behavior.Send_After_Sequence_Start,
+          Operator_Source_Id => 0,
+          Operator_Command_Id => 0,
           Last_Command_Send => Time,
           Arg_Length => 0,
           Dynamic_Arg => [others => 0])];
@@ -95,6 +97,28 @@ package body Component.Simple_Command_Sequencer.Implementation.Logic is
       return Status = Success;
    end Try_Schedule_Sleep;
 
+   -- Emit a deferred Command_Response for `Frame`, but only if the frame was
+   -- claimed with Send_After_Sequence_Completion (otherwise the immediate reply
+   -- has already been sent from Command_T_Recv_Async and we do nothing). Called
+   -- from every code path that ends a sequence: natural completion (Success),
+   -- abort on sub-command failure / timeout / kill / out-of-range sleep or
+   -- timeout (Failure). The reply uses the operator context captured on the
+   -- frame at claim time and the sequencer's own registration id.
+   procedure Send_Deferred_Response_If_Pending
+     (Self  : in out Instance;
+      Frame : in Sequence_Frame.T;
+      Stat  : in Command_Response_Status.E) is
+      use Sequence_Enums.Sequence_Response_Behavior;
+   begin
+      if Frame.Response_Behavior = Send_After_Sequence_Completion then
+         Self.Command_Response_T_Send_If_Connected
+           ((Source_Id       => Frame.Operator_Source_Id,
+             Registration_Id => Self.Command_Reg_Id,
+             Command_Id      => Frame.Operator_Command_Id,
+             Status          => Stat));
+      end if;
+   end Send_Deferred_Response_If_Pending;
+
    procedure Execute_Sequence (Self : in out Instance; Frame : in out Sequence_Frame.T) is
       use Simple_Sequencer_Types;
    begin
@@ -103,6 +127,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Logic is
             -- Sequence end event
             Self.Event_T_Send_If_Connected (Self.Events.Sequence_Completed (Self.Sys_Time_T_Get, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id)));
             Frame.Status := Not_Running;
+            Send_Deferred_Response_If_Pending (Self, Frame, Command_Response_Status.Success);
          else
             declare
                Step_Obj : Step renames Self.Sequences.all (Frame.Sequence_Id).Steps.all (Frame.Step);
@@ -143,10 +168,15 @@ package body Component.Simple_Command_Sequencer.Implementation.Logic is
                      end;
                   when Sleep =>
                      -- Try_Schedule_Sleep returns False only when the sleep
-                     -- duration is out of range -- surface it as an event so
-                     -- the step isn't silently skipped.
+                     -- duration is out of range. End the sequence cleanly --
+                     -- letting it continue would leave the frame stuck in
+                     -- Waiting_For_Time with a stale Wait_Until (undefined
+                     -- wake-up behaviour) -- and emit Failure to any pending
+                     -- Send_After_Sequence_Completion reply.
                      if not Try_Schedule_Sleep (Self, Frame, Step_Obj.Sleep_Arg) then
                         Self.Event_T_Send_If_Connected (Self.Events.Sequence_Out_Of_Range_Sleep (Self.Sys_Time_T_Get, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Milliseconds => Step_Obj.Sleep_Arg.Value)));
+                        Frame.Status := Not_Running;
+                        Send_Deferred_Response_If_Pending (Self, Frame, Command_Response_Status.Failure);
                      end if;
                end case;
                if Frame.Step <= Self.Sequences.all (Frame.Sequence_Id).Steps.all'Last then
@@ -159,11 +189,29 @@ package body Component.Simple_Command_Sequencer.Implementation.Logic is
 
    -- Sequence commands are received on this connector
    procedure Command_T_Recv_Async (Self : in out Instance; Arg : in Command.T) is
-      -- Execute the command:
-      Stat : constant Command_Response_Status.E := Self.Execute_Command (Arg);
    begin
-      -- Send the return status:
-      Self.Command_Response_T_Send_If_Connected ((Source_Id => Arg.Header.Source_Id, Registration_Id => Self.Command_Reg_Id, Command_Id => Arg.Header.Id, Status => Stat));
+      -- Stash the operator's response context before dispatch so Run_Sequence
+      -- can copy it into the frame it claims. The active component's serial
+      -- queue guarantees one dispatch in flight at a time, so this scratch
+      -- can't be clobbered mid-flight. Pending_Defer is reset here so a prior
+      -- command's defer flag can't leak into this one.
+      Self.Pending_Operator_Source_Id := Arg.Header.Source_Id;
+      Self.Pending_Operator_Command_Id := Arg.Header.Id;
+      Self.Pending_Defer := False;
+
+      declare
+         -- Execute the command:
+         Stat : constant Command_Response_Status.E := Self.Execute_Command (Arg);
+      begin
+         -- For Send_After_Sequence_Completion, Run_Sequence will have set
+         -- Pending_Defer and stashed the operator context in the claimed frame;
+         -- we suppress the immediate reply and the sequence-end paths emit it.
+         -- All other cases (default Send_After_Sequence_Start, claim failure,
+         -- non-sequence commands like Kill_All_Sequences) reply now.
+         if not Self.Pending_Defer then
+            Self.Command_Response_T_Send_If_Connected ((Source_Id => Arg.Header.Source_Id, Registration_Id => Self.Command_Reg_Id, Command_Id => Arg.Header.Id, Status => Stat));
+         end if;
+      end;
    end Command_T_Recv_Async;
 
    -- Responses to sub-commands are received here. Two cases:
@@ -213,6 +261,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Logic is
                               (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame_To_Wake_Id,
                                Step => Frame.Step)));
                            Frame.Status := Not_Running;
+                           Send_Deferred_Response_If_Pending (Self, Frame, Command_Response_Status.Failure);
                         end if;
                      end if;
                   end if;
@@ -261,10 +310,17 @@ package body Component.Simple_Command_Sequencer.Implementation.Logic is
                   begin
                      Status := Add (Frame.Last_Command_Send, To_Time_Span (Timeout_Millis), Timeout);
                      if Status /= Success then
+                        -- Sys_Time arithmetic overflow on the deadline -- the
+                        -- frame would otherwise stay in Waiting_For_Cmd_Resp
+                        -- forever. End the sequence cleanly and emit Failure
+                        -- to any pending Send_After_Sequence_Completion reply.
                         Self.Event_T_Send_If_Connected (Self.Events.Sequence_Out_Of_Range_Timeout (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Id, Milliseconds => Timeout_Millis)));
+                        Frame.Status := Not_Running;
+                        Send_Deferred_Response_If_Pending (Self, Frame, Command_Response_Status.Failure);
                      elsif Time >= Timeout then
                         Self.Event_T_Send_If_Connected (Self.Events.Sequence_Timeout (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Id, Step => Frame.Step)));
                         Frame.Status := Not_Running;
+                        Send_Deferred_Response_If_Pending (Self, Frame, Command_Response_Status.Failure);
                      end if;
                   end;
                when Not_Running =>
@@ -305,6 +361,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Logic is
    -- traversal), and seeds frame state from the autocoded sequence table.
    function Run_Sequence (Self : in out Instance; Arg : in Run_Sequence_Arg.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
+      use Sequence_Enums.Sequence_Response_Behavior;
       Available_Id : Interfaces.Unsigned_32;
    begin
       if Interfaces.Unsigned_32 (Arg.Sequence_Id) not in Self.Sequences.all'Range then
@@ -320,6 +377,18 @@ package body Component.Simple_Command_Sequencer.Implementation.Logic is
             Frame.Arg_Length := Arg.Arg_Length;
             Frame.Sequence_Id := Interfaces.Unsigned_32 (Arg.Sequence_Id);
             Frame.Response_Behavior := Arg.Response_Behavior;
+            -- Snapshot the operator response context from the outer Command.T
+            -- header (captured by Command_T_Recv_Async into Self.Pending_*).
+            -- Always stored, but only read on the Send_After_Sequence_Completion
+            -- emission paths; for the default Send_After_Sequence_Start the
+            -- immediate reply is built from the Command.T header directly.
+            Frame.Operator_Source_Id := Self.Pending_Operator_Source_Id;
+            Frame.Operator_Command_Id := Self.Pending_Operator_Command_Id;
+            if Arg.Response_Behavior = Sequence_Enums.Sequence_Response_Behavior.Send_After_Sequence_Completion then
+               -- Signal Command_T_Recv_Async to suppress the immediate reply --
+               -- this frame will emit it on completion (or abort / timeout / kill).
+               Self.Pending_Defer := True;
+            end if;
             Frame.Step := 0;
             Frame.Status := Running; -- Claim The Executor Frame
             Frame.Flags.Wait_For_Cmd_Resp := Sequence.Wait_For_Cmd_Resp;
@@ -341,6 +410,10 @@ package body Component.Simple_Command_Sequencer.Implementation.Logic is
       for Frame of Self.Sequence_Frames.all loop
          if Frame.Status /= Not_Running then
             Frame.Status := Not_Running;
+            -- If the operator was waiting via Send_After_Sequence_Completion,
+            -- emit Failure now -- the sequence is being killed before it could
+            -- complete and the originating command would otherwise hang.
+            Send_Deferred_Response_If_Pending (Self, Frame, Command_Response_Status.Failure);
             Frame.Sequence_Id := 0;
             Frame.Step := 0;
             Frame.Arg_Length := 0;
