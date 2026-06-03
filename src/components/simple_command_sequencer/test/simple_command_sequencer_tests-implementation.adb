@@ -911,4 +911,247 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       -- No events on the happy path
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
    end Test_Set_Summary_Packet_Period;
+
+   --  ---------- Send_After_Sequence_Completion (deferred Command_Response) ---
+   --
+   --  These five tests cover the deferred-reply path. The tester attaches the
+   --  sequencer's outgoing Command_Response_T_Send to its own
+   --  Command_Response_T_Recv_Sync, which records every reply in
+   --  Command_Response_T_Recv_Sync_History. Delivery is synchronous, so by the
+   --  time a Dispatch_All returns, any reply emitted during that dispatch is
+   --  already in the history. That lets us assert both the timing of the reply
+   --  (before/after completion) and its Source_Id/Status.
+
+   --  Happy path: the operator gets a Success reply only after the sequence
+   --  has actually completed, not at dispatch time.
+   overriding procedure Test_Deferred_Response_On_Completion (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Cmd : Command.T;
+      Status : Serialization_Status;
+   begin
+      T.Commands.Set_Source_Id (100);
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      --  Sequence_C is no-wait, so a single tick runs it to completion.
+      Status := T.Commands.Run_Sequence
+        ((Sequence_Id => 2, Response_Behavior => Send_After_Sequence_Completion,
+          Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      pragma Assert (Status = Success);
+
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      --  Sequence_Started fired but no reply yet — it is being held.
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 0);
+
+      --  Single tick runs Sequence_C to completion. The deferred Command_Response
+      --  is sent from inside Tick processing and delivered synchronously to the
+      --  tester's Command_Response_T_Recv_Sync history.
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
+
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
+      declare
+         CR : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (1);
+      begin
+         Natural_Assert.Eq (Natural (CR.Source_Id), 100);
+         pragma Assert (CR.Status = Success);
+      end;
+   end Test_Deferred_Response_On_Completion;
+
+   --  Sub-command failure on a wait_for_completion sequence (Sequence_B) with
+   --  Abort_On_Failed_Cmd should fire Sequence_Aborted and emit a deferred
+   --  Failure to the operator.
+   overriding procedure Test_Deferred_Response_On_Abort (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Component_A_Commands : Test_Component_Commands.Instance;
+      Argument : Sequence_B_Arg.T;
+      BArray : Simple_Sequencer_Types.Run_Sequence_Buffer_Type;
+      Cmd : Command.T;
+      Status : Serialization_Status;
+   begin
+      Component_A_Commands.Set_Id_Base (1);
+      Component_A_Commands.Set_Source_Id (0);
+      T.Commands.Set_Source_Id (100);
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      Argument := (Component_A_Arg => (Value => 7), Component_B_Arg => (Value => 8));
+      BArray := [others => 0];
+      BArray (BArray'First .. BArray'First + Sequence_B_Arg.Serialization.Serialized_Length - 1) :=
+         Sequence_B_Arg.Serialization.To_Byte_Array (Argument);
+      Status := T.Commands.Run_Sequence
+        ((Sequence_Id => 1, Response_Behavior => Send_After_Sequence_Completion,
+          Arg_Length => Sequence_B_Arg.Serialization.Serialized_Length,
+          Buffer_Arg => BArray), Cmd);
+      pragma Assert (Status = Success);
+
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 0);
+
+      --  Tick dispatches step 0; frame goes to Waiting_For_Cmd_Resp.
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 0);
+
+      --  Feed Failure for the sub-command -- sequence aborts and the deferred
+      --  Failure is delivered synchronously inside the response handler.
+      T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0,
+         Command_Id => Component_A_Commands.Get_Command_3_Id, Status => Failure));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      Natural_Assert.Eq (T.Sequence_Aborted_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
+      declare
+         CR : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (1);
+      begin
+         Natural_Assert.Eq (Natural (CR.Source_Id), 100);
+         pragma Assert (CR.Status = Failure);
+      end;
+   end Test_Deferred_Response_On_Abort;
+
+   --  Sub-command timeout on a deferred sequence emits Sequence_Timeout and
+   --  a deferred Failure to the operator.
+   overriding procedure Test_Deferred_Response_On_Timeout (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Component_A_Commands : Test_Component_Commands.Instance;
+      Cmd : Command.T;
+      Status : Serialization_Status;
+   begin
+      Component_A_Commands.Set_Id_Base (1);
+      Component_A_Commands.Set_Source_Id (0);
+      T.Commands.Set_Source_Id (100);
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      Status := T.Commands.Run_Sequence
+        ((Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Completion,
+          Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 0);
+
+      --  Tick: dispatch step 0; frame parks awaiting sub-command response.
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      --  Advance well past the 10-second command_timeout without responding.
+      --  Timeout fires and the deferred Failure is delivered synchronously.
+      T.System_Time := (Seconds => 10000, Subseconds => 0);
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      Natural_Assert.Eq (T.Sequence_Timeout_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
+      declare
+         CR : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (1);
+      begin
+         Natural_Assert.Eq (Natural (CR.Source_Id), 100);
+         pragma Assert (CR.Status = Failure);
+      end;
+   end Test_Deferred_Response_On_Timeout;
+
+   --  Kill_All_Sequences kills a deferred-waiting frame -> deferred Failure
+   --  to the operator. We use two distinct operator Source_Ids so we can
+   --  disambiguate Kill_All's own immediate reply (Source_Id=101) from the
+   --  killed frame's deferred Failure (Source_Id=100).
+   overriding procedure Test_Deferred_Response_On_Kill_All (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Component_A_Commands : Test_Component_Commands.Instance;
+      Run_Cmd : Command.T;
+      Kill_Cmd : Command.T;
+      Status : Serialization_Status;
+   begin
+      Component_A_Commands.Set_Id_Base (1);
+      Component_A_Commands.Set_Source_Id (0);
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      T.Commands.Set_Source_Id (100);
+      Status := T.Commands.Run_Sequence
+        ((Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Completion,
+          Arg_Length => 0, Buffer_Arg => [others => 0]), Run_Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Run_Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 0);
+
+      T.Commands.Set_Source_Id (101);
+      Kill_Cmd := T.Commands.Kill_All_Sequences;
+      T.Command_T_Send (Kill_Cmd);
+      --  Kill_All's body emits the deferred Failure for the killed frame and
+      --  Command_T_Recv_Async then sends the immediate Success reply for
+      --  Kill_All itself. Both are delivered synchronously to the tester's
+      --  Command_Response_T_Recv_Sync history within this dispatch.
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      Natural_Assert.Eq (T.Killed_All_Sequences_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 2);
+      declare
+         CR1 : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (1);
+         CR2 : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (2);
+      begin
+         --  Deferred Failure for the killed frame comes first (emitted inside
+         --  Kill_All's per-frame loop); then Kill_All's own immediate Success.
+         Natural_Assert.Eq (Natural (CR1.Source_Id), 100);
+         pragma Assert (CR1.Status = Failure);
+         Natural_Assert.Eq (Natural (CR2.Source_Id), 101);
+         pragma Assert (CR2.Status = Success);
+      end;
+   end Test_Deferred_Response_On_Kill_All;
+
+   --  Two deferred sequences in flight at the same time get their own per-
+   --  frame operator context: each Success reply goes back to the right
+   --  Source_Id, no cross-talk.
+   overriding procedure Test_Concurrent_Deferred_Responses (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Cmd : Command.T;
+      Status : Serialization_Status;
+   begin
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      --  Operator A starts a deferred Sequence_C in Frame[0].
+      T.Commands.Set_Source_Id (100);
+      Status := T.Commands.Run_Sequence
+        ((Sequence_Id => 2, Response_Behavior => Send_After_Sequence_Completion,
+          Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+
+      --  Operator B starts a deferred Sequence_C in Frame[1].
+      T.Commands.Set_Source_Id (101);
+      Status := T.Commands.Run_Sequence
+        ((Sequence_Id => 2, Response_Behavior => Send_After_Sequence_Completion,
+          Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+
+      Natural_Assert.Eq (T.Dispatch_All, 2);
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 0);
+
+      --  One tick completes both no-wait Sequence_C runs in their respective
+      --  frames (Execute_Sequence runs per-frame inside the Tick handler).
+      --  Both deferred Success replies are delivered synchronously inside the
+      --  Tick processing -- by the time Dispatch_All returns, both are in
+      --  Command_Response_T_Recv_Sync_History.
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 2);
+      declare
+         CR1 : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (1);
+         CR2 : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (2);
+      begin
+         --  Frame[0] (operator A) completes first since it's iterated first.
+         Natural_Assert.Eq (Natural (CR1.Source_Id), 100);
+         pragma Assert (CR1.Status = Success);
+         Natural_Assert.Eq (Natural (CR2.Source_Id), 101);
+         pragma Assert (CR2.Status = Success);
+      end;
+   end Test_Concurrent_Deferred_Responses;
+
 end Simple_Command_Sequencer_Tests.Implementation;

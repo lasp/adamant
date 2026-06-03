@@ -24,6 +24,10 @@ connectors:
     type: Command.T
     kind: send
     description: Sub-commands are sent out this connector
+  - name: Command_Response_T_Send
+    type: Command_Response.T
+    kind: send
+    description: Sends the response to a Run_Sequence (or per-sequence wrapper) command back to the command router. The Send_After_Sequence_Completion path emits its deferred reply here on completion / abort / timeout / kill; the default Send_After_Sequence_Start path emits its reply here immediately at dispatch time.
   - name: Command_Response_T_Recv_Async
     type: Command_Response.T
     kind: recv_async

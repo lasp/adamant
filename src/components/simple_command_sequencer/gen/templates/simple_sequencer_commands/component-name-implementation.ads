@@ -9,6 +9,7 @@
 -- Includes:
 with Command;
 with Command_Response;
+with Command_Types;
 with Tick;
 with Sequence_Frame;
 with Run_Sequence_Arg;
@@ -40,6 +41,18 @@ private
       Sequence_Frames : Sequence_Frame_Array_Access := null;
       Sequences : Simple_Sequencer_Types.Sequences_Access := null;
       Summary_Packet_Period : Interfaces.Unsigned_16 := 0;
+      -- Per-call response-context scratch set by Command_T_Recv_Async and
+      -- consumed by the Run_Sequence handler. The active component's serial
+      -- queue makes a side-channel through Self safe: only one inbound command
+      -- is in dispatch at a time, so Pending_Operator_* is set on entry and
+      -- read once before the next message is processed.
+      --
+      -- Pending_Defer is set by Run_Sequence when it claims a frame with
+      -- Send_After_Sequence_Completion; Command_T_Recv_Async then suppresses
+      -- the immediate reply and the sequence-completion paths emit it later.
+      Pending_Operator_Source_Id : Command_Types.Command_Source_Id := 0;
+      Pending_Operator_Command_Id : Command_Types.Command_Id := 0;
+      Pending_Defer : Boolean := False;
    end record;
 
    ---------------------------------------
@@ -61,6 +74,7 @@ private
    -- Invoker connector primitives:
    ---------------------------------------
    overriding procedure Command_T_Send_Dropped (Self : in out Instance; Arg : in Command.T) is null;
+   overriding procedure Command_Response_T_Send_Dropped (Self : in out Instance; Arg : in Command_Response.T) is null;
    overriding procedure Event_T_Send_Dropped (Self : in out Instance; Arg : in Event.T) is null;
 
    -----------------------------------------------
