@@ -7,7 +7,7 @@ with Simple_Sequencer_Types; use Simple_Sequencer_Types;
 with {{ assembly_name }}_Commands; use {{ assembly_name }}_Commands;
 with Scs_Arg_Resolver;
 with Command_Types;
-with System;
+with Basic_Types;
 {% if needs_sequence_arg_utils %}
 with Sequence_Arg_Utils; use Sequence_Arg_Utils;
 {% endif %}
@@ -30,7 +30,7 @@ package {{ name }} is
 
    overriding function Resolve (
       Resolver : {{ step.resolver_type_name }};
-      Data     : System.Address
+      Data     : Basic_Types.Byte_Array
    ) return Command_Types.Command_Arg_Buffer_Type;
 
    {{ step.resolver_instance_name }} : aliased constant
