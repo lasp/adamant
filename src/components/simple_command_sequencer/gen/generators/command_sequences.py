@@ -65,13 +65,24 @@ class command_sequences_ads(command_sequences_gen, generator_base):
 
 class command_sequences_adb(command_sequences_gen, generator_base):
     """
-    Generates <model_name>.ads – a package spec that declares a fully
-    initialised Sequences_Type constant (and a stable Sequences_Access
-    pointer) using Simple_Sequencer_Types.
+    Generates <model_name>.adb – the body that implements the per-dynamic-step
+    Resolver functions. It is only emitted when the suite has at least one
+    dynamic step; with no dynamic steps the spec declares no subprograms, so a
+    body package would be empty and illegal (a body is not allowed for a spec
+    that does not require one).
     """
 
     def __init__(self):
         command_sequences_gen.__init__(self, template_filename="name.adb")
+
+    def output_filename(self, input_filename):
+        # Suppress the body unless there is a dynamic step. Dynamic steps are
+        # detected at load time (from the YAML "Arg.*" pattern), so no assembly
+        # resolution is needed here.
+        cs = command_sequences(input_filename)
+        if not cs.has_dynamic_steps():
+            return ""
+        return command_sequences_gen.output_filename(self, input_filename)
 
 
 def add_generators_to_module(module):
