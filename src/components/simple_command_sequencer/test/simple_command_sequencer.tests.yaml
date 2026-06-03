@@ -23,3 +23,8 @@ tests:
   - name: Test_Kill_All_Sequences
   - name: Test_Set_Summary_Packet_Period
   - name: Test_Synthesized_Sequence_Command
+  - name: Test_Deferred_Response_On_Completion
+  - name: Test_Deferred_Response_On_Abort
+  - name: Test_Deferred_Response_On_Timeout
+  - name: Test_Deferred_Response_On_Kill_All
+  - name: Test_Concurrent_Deferred_Responses

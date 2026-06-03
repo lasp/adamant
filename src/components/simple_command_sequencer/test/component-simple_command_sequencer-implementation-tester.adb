@@ -18,6 +18,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       -- Initialize tester heap:
       -- Connector histories:
       Self.Command_T_Recv_Sync_History.Init (Depth => 100);
+      Self.Command_Response_T_Recv_Sync_History.Init (Depth => 100);
       Self.Event_T_Recv_Sync_History.Init (Depth => 100);
       Self.Sys_Time_T_Return_History.Init (Depth => 100);
       -- Event histories:
@@ -44,6 +45,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       -- Destroy tester heap:
       -- Connector histories:
       Self.Command_T_Recv_Sync_History.Destroy;
+      Self.Command_Response_T_Recv_Sync_History.Destroy;
       Self.Event_T_Recv_Sync_History.Destroy;
       Self.Sys_Time_T_Return_History.Destroy;
       -- Event histories:
@@ -74,6 +76,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
    procedure Connect (Self : in out Instance) is
    begin
       Self.Component_Instance.Attach_Command_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Command_T_Recv_Sync_Access);
+      Self.Component_Instance.Attach_Command_Response_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Command_Response_T_Recv_Sync_Access);
       Self.Component_Instance.Attach_Event_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Event_T_Recv_Sync_Access);
       Self.Component_Instance.Attach_Sys_Time_T_Get (To_Component => Self'Unchecked_Access, Hook => Self.Sys_Time_T_Return_Access);
       Self.Attach_Command_T_Send (To_Component => Self.Component_Instance'Unchecked_Access, Hook => Self.Component_Instance.Command_T_Recv_Async_Access);
@@ -90,6 +93,13 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       -- Push the argument onto the test history for looking at later:
       Self.Command_T_Recv_Sync_History.Push (Arg);
    end Command_T_Recv_Sync;
+
+   -- Command responses (immediate and deferred operator replies) are sent out this connector
+   overriding procedure Command_Response_T_Recv_Sync (Self : in out Instance; Arg : in Command_Response.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Command_Response_T_Recv_Sync_History.Push (Arg);
+   end Command_Response_T_Recv_Sync;
 
    -- Events are sent out of this connector
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T) is
