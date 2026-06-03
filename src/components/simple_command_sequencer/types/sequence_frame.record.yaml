@@ -24,6 +24,14 @@ fields:
     description: Whether to respond to the originating Run_Sequence command on start or on completion.
     type: Sequence_Enums.Sequence_Response_Behavior.E
     format: E8
+  - name: Operator_Source_Id
+    description: Source id of the operator (or upstream sender) that issued the originating Run_Sequence / Sequence_X command. Used only when Response_Behavior is Send_After_Sequence_Completion -- the sequencer captures this at command-receive time and emits the deferred Command_Response back to it when the sequence ends.
+    type: Command_Types.Command_Source_Id
+    format: U16
+  - name: Operator_Command_Id
+    description: Command id of the originating Run_Sequence / Sequence_X command, echoed back in the deferred Command_Response. Meaningful only when Response_Behavior is Send_After_Sequence_Completion.
+    type: Command_Types.Command_Id
+    format: U16
   - name: Last_Command_Send
     type: Sys_Time.T
   - name: Arg_Length

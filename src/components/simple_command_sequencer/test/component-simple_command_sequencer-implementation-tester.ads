@@ -29,6 +29,7 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    use Component.Simple_Command_Sequencer_Reciprocal;
    -- Invoker connector history packages:
    package Command_T_Recv_Sync_History_Package is new Printable_History (Command.T, Command.Representation.Image);
+   package Command_Response_T_Recv_Sync_History_Package is new Printable_History (Command_Response.T, Command_Response.Representation.Image);
    package Event_T_Recv_Sync_History_Package is new Printable_History (Event.T, Event.Representation.Image);
    package Sys_Time_T_Return_History_Package is new Printable_History (Sys_Time.T, Sys_Time.Representation.Image);
 
@@ -56,6 +57,7 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
       Component_Instance : aliased Component.Simple_Command_Sequencer.Implementation.Instance;
       -- Connector histories:
       Command_T_Recv_Sync_History : Command_T_Recv_Sync_History_Package.Instance;
+      Command_Response_T_Recv_Sync_History : Command_Response_T_Recv_Sync_History_Package.Instance;
       Event_T_Recv_Sync_History : Event_T_Recv_Sync_History_Package.Instance;
       Sys_Time_T_Return_History : Sys_Time_T_Return_History_Package.Instance;
       -- Event histories:
@@ -101,6 +103,8 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    ---------------------------------------
    -- Sub-commands are sent out this connector
    overriding procedure Command_T_Recv_Sync (Self : in out Instance; Arg : in Command.T);
+   -- Command responses (immediate and deferred operator replies) are sent out this connector
+   overriding procedure Command_Response_T_Recv_Sync (Self : in out Instance; Arg : in Command_Response.T);
    -- Events are sent out of this connector
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T);
    -- The system time is retrieved via this connector.
