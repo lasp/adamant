@@ -10,6 +10,18 @@ components:
     name: Component_B
   - type: Test_Component
     name: Component_C
+# The sequencer itself, so sequences can call other sequences as commands.
+# Declared last so Component_A/B/C keep their command id bases stable.
+  - type: Simple_Command_Sequencer
+    name: Sequencer
+    priority: 1
+    stack_size: 2000
+    secondary_stack_size: 1
+    init_base:
+      - "Queue_Size => Sequencer.Get_Max_Queue_Element_Size * 10"
+    init:
+      - "Num_Concurrent_Sequences => 2"
+      - "Sequences => Test_Assembly_Command_Sequences_Example_Sequences.Sequences"
 connections:
   # Dummy connection. We need one to make schema happy, but it doesn't
   # affect testing.

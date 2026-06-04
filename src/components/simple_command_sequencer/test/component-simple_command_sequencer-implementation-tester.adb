@@ -19,6 +19,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       -- Connector histories:
       Self.Command_T_Recv_Sync_History.Init (Depth => 100);
       Self.Command_Response_T_Recv_Sync_History.Init (Depth => 100);
+      Self.Packet_T_Recv_Sync_History.Init (Depth => 100);
       Self.Event_T_Recv_Sync_History.Init (Depth => 100);
       Self.Sys_Time_T_Return_History.Init (Depth => 100);
       -- Event histories:
@@ -38,6 +39,8 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Invalid_Command_Received_History.Init (Depth => 100);
       Self.Unexpected_Command_Response_History.Init (Depth => 100);
       Self.Killed_All_Sequences_History.Init (Depth => 100);
+      -- Packet histories:
+      Self.Summary_Packet_History.Init (Depth => 100);
    end Init_Base;
 
    procedure Final_Base (Self : in out Instance) is
@@ -46,6 +49,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       -- Connector histories:
       Self.Command_T_Recv_Sync_History.Destroy;
       Self.Command_Response_T_Recv_Sync_History.Destroy;
+      Self.Packet_T_Recv_Sync_History.Destroy;
       Self.Event_T_Recv_Sync_History.Destroy;
       Self.Sys_Time_T_Return_History.Destroy;
       -- Event histories:
@@ -65,6 +69,8 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Invalid_Command_Received_History.Destroy;
       Self.Unexpected_Command_Response_History.Destroy;
       Self.Killed_All_Sequences_History.Destroy;
+      -- Packet histories:
+      Self.Summary_Packet_History.Destroy;
 
       -- Destroy component heap:
       Self.Component_Instance.Final_Base;
@@ -77,6 +83,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
    begin
       Self.Component_Instance.Attach_Command_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Command_T_Recv_Sync_Access);
       Self.Component_Instance.Attach_Command_Response_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Command_Response_T_Recv_Sync_Access);
+      Self.Component_Instance.Attach_Packet_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Packet_T_Recv_Sync_Access);
       Self.Component_Instance.Attach_Event_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Event_T_Recv_Sync_Access);
       Self.Component_Instance.Attach_Sys_Time_T_Get (To_Component => Self'Unchecked_Access, Hook => Self.Sys_Time_T_Return_Access);
       Self.Attach_Command_T_Send (To_Component => Self.Component_Instance'Unchecked_Access, Hook => Self.Component_Instance.Command_T_Recv_Async_Access);
@@ -100,6 +107,25 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       -- Push the argument onto the test history for looking at later:
       Self.Command_Response_T_Recv_Sync_History.Push (Arg);
    end Command_Response_T_Recv_Sync;
+
+   -- The periodic sequencer summary packet is sent out this connector
+   overriding procedure Packet_T_Recv_Sync (Self : in out Instance; Arg : in Packet.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Packet_T_Recv_Sync_History.Push (Arg);
+      -- Dispatch the packet to the correct handler:
+      Self.Dispatch_Packet (Arg);
+   end Packet_T_Recv_Sync;
+
+   -----------------------------------------------
+   -- Packet handler primitive:
+   -----------------------------------------------
+   -- Periodic summary of all sequence frames.
+   overriding procedure Summary_Packet (Self : in out Instance; Arg : in Packet.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Summary_Packet_History.Push (Arg);
+   end Summary_Packet;
 
    -- Events are sent out of this connector
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T) is
