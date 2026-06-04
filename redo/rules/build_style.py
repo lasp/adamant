@@ -64,9 +64,14 @@ class build_style(build_rule_base):
             + ["2>&1", "|",  "tee", style_log_file_temp, ">&2"]
         )
 
-        # Filter output log to only include warnings:
+        # Filter to real diagnostics (file:line:...) only, and drop the benign
+        # gcc note that large generated functions can trigger:
+        #   "note: variable tracking size limit exceeded ... retrying without"
+        # gcc retries without it and compiles fine, so it is informational, not
+        # a style issue. Requiring a line number (:[0-9]+:) also excludes gcc's
+        # "<file>: In function 'X':" context preambles, which carry no finding.
         if os.path.isfile(style_log_file_temp):
-            shell.run_command("cat " + style_log_file_temp + r" | grep '^.*\.ad[b,s]:[0-9]*' > " + style_log_file + " | true")
+            shell.run_command("cat " + style_log_file_temp + r" | grep -E '^.*\.ad[b,s]:[0-9]+:' | grep -vF 'note: variable tracking size limit exceeded' > " + style_log_file + " | true")
             os.remove(style_log_file_temp)
 
         # Now we need to check any python that we find:
