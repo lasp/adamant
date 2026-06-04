@@ -32,6 +32,9 @@ connectors:
     type: Command_Response.T
     kind: recv_async
     description: Responses to sub-commands are received here
+  - description: The packet send connector, used for sending the periodic sequencer summary packet.
+    type: Packet.T
+    kind: send
   - name: Tick_T_Recv_Async
     type: Tick.T
     kind: recv_async

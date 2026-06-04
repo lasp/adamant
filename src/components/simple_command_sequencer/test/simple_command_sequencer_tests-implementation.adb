@@ -19,6 +19,9 @@ with Packed_U32;
 with Sequence_B_Arg;
 with Tick;
 with Interfaces;
+with Test_Assembly_Commands;
+with Packet;
+with Sequence_Frame_Summary.Assertion; use Sequence_Frame_Summary.Assertion;
 
 package body Simple_Command_Sequencer_Tests.Implementation is
 
@@ -1153,5 +1156,170 @@ package body Simple_Command_Sequencer_Tests.Implementation is
          pragma Assert (CR2.Status = Success);
       end;
    end Test_Concurrent_Deferred_Responses;
+
+   --  Sequences calling sequences: each sequence is a first-class command on
+   --  the sequencer, so Sequence_E's first step is the sequencer's own
+   --  synthesized Sequence_C command. The test plays the role of the command
+   --  router, routing the emitted sub-command (and its response) back into the
+   --  sequencer. Depth is naturally capped by Num_Concurrent_Sequences.
+   --
+   --  Sequence_E's step table bakes in the assembly-assigned command id
+   --  (Test_Assembly_Commands.Sequencer_Sequence_C). The unit-test component
+   --  instance runs at the default command id base, so the test asserts the
+   --  emitted id matches the assembly's and then translates it to the local
+   --  base when routing it back -- the id-consistency between step table and
+   --  component is the assembly's job, not this component's.
+   overriding procedure Test_Sub_Sequence_Call (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Component_A_Commands : Test_Component_Commands.Instance;
+      Sub_Cmd : Command.T;
+   begin
+      Component_A_Commands.Set_Id_Base (1);
+      Component_A_Commands.Set_Source_Id (0);
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      T.Commands.Set_Source_Id (100);
+
+      --  Operator starts Sequence_E (slot 4) on frame 0.
+      T.Command_T_Send (T.Commands.Sequence_E ((Response_Behavior => Send_After_Sequence_Start)));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 1);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (1), (Sequence_Id => 4, Frame_Id => 0));
+      --  Immediate reply for Sequence_E goes straight to the operator.
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (Natural (T.Command_Response_T_Recv_Sync_History.Get (1).Source_Id), 100);
+
+      --  Tick: frame 0 dispatches step 0 -- the sequencer's own Sequence_C
+      --  command, tagged with frame 0's source id -- then parks waiting for
+      --  its response.
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 1);
+      Sub_Cmd := T.Command_T_Recv_Sync_History.Get (1);
+      Natural_Assert.Eq (Natural (Sub_Cmd.Header.Id), Natural (Test_Assembly_Commands.Sequencer_Sequence_C));
+      Natural_Assert.Eq (Natural (Sub_Cmd.Header.Source_Id), 0);
+
+      --  Route the sub-command back into the sequencer, as the command router
+      --  would in a real assembly. The step table bakes in the assembly's id
+      --  for Sequencer.Sequence_C (asserted above), but this unit-test
+      --  component instance still runs at the default command id base, so
+      --  translate the id into that base before forwarding.
+      Sub_Cmd.Header.Id := T.Commands.Get_Sequence_C_Id;
+      T.Command_T_Send (Sub_Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      --  Sequence_C started on frame 1. Its immediate Success reply targets
+      --  frame 0's source id -- that reply IS the sub-command response that
+      --  frame 0 is waiting on.
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 2);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (2), (Sequence_Id => 2, Frame_Id => 1));
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 2);
+      declare
+         CR : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (2);
+      begin
+         Natural_Assert.Eq (Natural (CR.Source_Id), 0);
+         pragma Assert (CR.Status = Success);
+      end;
+
+      --  Route the reply back: frame 0 wakes.
+      T.Command_Response_T_Send (T.Command_Response_T_Recv_Sync_History.Get (2));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      --  Tick: frame 0 advances to step 1 (Component_A.Command_1, waits) and
+      --  frame 1 runs the no-wait Sequence_C to completion.
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 4);
+      Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (2), Component_A_Commands.Command_1);
+      Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Completed_History.Get (1), (Sequence_Id => 2, Frame_Id => 1));
+
+      --  Complete frame 0's final step; next tick finishes Sequence_E.
+      T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0,
+         Command_Id => Component_A_Commands.Get_Command_1_Id, Status => Success));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 2);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Completed_History.Get (2), (Sequence_Id => 4, Frame_Id => 0));
+
+      --  No failures anywhere in the chain.
+      Natural_Assert.Eq (T.Command_Failure_History.Get_Count, 0);
+      Natural_Assert.Eq (T.Sequence_Aborted_History.Get_Count, 0);
+   end Test_Sub_Sequence_Call;
+
+   --  Summary packet: disabled by default, emitted every Summary_Packet_Period
+   --  ticks once enabled, reflects per-frame state at end of tick, and the
+   --  period command resets the phase. Content is one Sequence_Frame_Summary
+   --  per frame, in frame order.
+   overriding procedure Test_Summary_Packet (Self : in out Instance) is
+      use Sequence_Enums.Sequence_State;
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Entry_Length : constant Natural := Sequence_Frame_Summary.Serialization.Serialized_Length;
+
+      function Get_Entry (Pkt : in Packet.T; Index : in Natural) return Sequence_Frame_Summary.T is
+         First : constant Natural := Pkt.Buffer'First + Index * Entry_Length;
+      begin
+         return Sequence_Frame_Summary.Serialization.From_Byte_Array (Pkt.Buffer (First .. First + Entry_Length - 1));
+      end Get_Entry;
+   begin
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      --  Period defaults to zero: no packets, no matter how many ticks.
+      T.Tick_T_Send (((0, 0), 0));
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 2);
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
+
+      --  Period 1: a packet on every tick. Both frames are idle, so both
+      --  entries hold init defaults.
+      T.Command_T_Send (T.Commands.Set_Summary_Packet_Period ((Value => 1)));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Summary_Packet_History.Get_Count, 1);
+      declare
+         Pkt : constant Packet.T := T.Summary_Packet_History.Get (1);
+      begin
+         Natural_Assert.Eq (Natural (Pkt.Header.Buffer_Length), 2 * Entry_Length);
+         Sequence_Frame_Summary_Assert.Eq (Get_Entry (Pkt, 0),
+            (Sequence_Id => 0, Step => 0, Status => Not_Running, Response_Behavior => Send_After_Sequence_Start, Operator_Source_Id => 0));
+         Sequence_Frame_Summary_Assert.Eq (Get_Entry (Pkt, 1),
+            (Sequence_Id => 0, Step => 0, Status => Not_Running, Response_Behavior => Send_After_Sequence_Start, Operator_Source_Id => 0));
+      end;
+
+      --  Start Sequence_E deferred (operator 100). The next tick dispatches
+      --  its first step and parks the frame; the same tick's packet reflects
+      --  that end-of-tick state.
+      T.Commands.Set_Source_Id (100);
+      T.Command_T_Send (T.Commands.Sequence_E ((Response_Behavior => Send_After_Sequence_Completion)));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Summary_Packet_History.Get_Count, 2);
+      Sequence_Frame_Summary_Assert.Eq (Get_Entry (T.Summary_Packet_History.Get (2), 0),
+         (Sequence_Id => 4, Step => 1, Status => Waiting_For_Cmd_Resp, Response_Behavior => Send_After_Sequence_Completion, Operator_Source_Id => 100));
+      Sequence_Frame_Summary_Assert.Eq (Get_Entry (T.Summary_Packet_History.Get (2), 1),
+         (Sequence_Id => 0, Step => 0, Status => Not_Running, Response_Behavior => Send_After_Sequence_Start, Operator_Source_Id => 0));
+
+      --  Changing the period resets the phase: with period 3, the packet
+      --  arrives only on the third tick after the command.
+      T.Command_T_Send (T.Commands.Set_Summary_Packet_Period ((Value => 3)));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      T.Tick_T_Send (((0, 0), 0));
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 2);
+      Natural_Assert.Eq (T.Summary_Packet_History.Get_Count, 2);
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Summary_Packet_History.Get_Count, 3);
+
+      --  Zero disables emission again.
+      T.Command_T_Send (T.Commands.Set_Summary_Packet_Period ((Value => 0)));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Summary_Packet_History.Get_Count, 3);
+   end Test_Summary_Packet;
 
 end Simple_Command_Sequencer_Tests.Implementation;

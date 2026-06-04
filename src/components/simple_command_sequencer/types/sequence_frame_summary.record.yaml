@@ -1,0 +1,23 @@
+---
+description: Per-frame entry in the sequencer summary packet. One of these is produced for each sequence frame (Num_Concurrent_Sequences total) every time the summary packet is emitted.
+fields:
+  - name: Sequence_Id
+    description: Id of the sequence running (or last run) on this frame. Only meaningful once a sequence has been started on the frame; check Status to disambiguate.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Step
+    description: Current (or last executed) step of the sequence on this frame.
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Status
+    description: Execution state of this frame.
+    type: Sequence_Enums.Sequence_State.E
+    format: E8
+  - name: Response_Behavior
+    description: Response behavior of the sequence on this frame. Send_After_Sequence_Completion means an operator is still waiting on a deferred Command_Response.
+    type: Sequence_Enums.Sequence_Response_Behavior.E
+    format: E8
+  - name: Operator_Source_Id
+    description: Source id of the operator that started the sequence on this frame. Meaningful only when Response_Behavior is Send_After_Sequence_Completion.
+    type: Command_Types.Command_Source_Id
+    format: U16

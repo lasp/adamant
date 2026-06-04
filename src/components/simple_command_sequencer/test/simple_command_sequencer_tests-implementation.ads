@@ -41,6 +41,8 @@ private
    overriding procedure Test_Deferred_Response_On_Timeout (Self : in out Instance);
    overriding procedure Test_Deferred_Response_On_Kill_All (Self : in out Instance);
    overriding procedure Test_Concurrent_Deferred_Responses (Self : in out Instance);
+   overriding procedure Test_Sub_Sequence_Call (Self : in out Instance);
+   overriding procedure Test_Summary_Packet (Self : in out Instance);
 
    -- Test data and state:
    type Instance is new Simple_Command_Sequencer_Tests.Base_Instance with record

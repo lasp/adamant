@@ -28,3 +28,5 @@ tests:
   - name: Test_Deferred_Response_On_Timeout
   - name: Test_Deferred_Response_On_Kill_All
   - name: Test_Concurrent_Deferred_Responses
+  - name: Test_Sub_Sequence_Call
+  - name: Test_Summary_Packet

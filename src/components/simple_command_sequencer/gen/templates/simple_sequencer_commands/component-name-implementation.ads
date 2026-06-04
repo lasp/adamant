@@ -10,6 +10,7 @@
 with Command;
 with Command_Response;
 with Command_Types;
+with Packet;
 with Tick;
 with Sequence_Frame;
 with Run_Sequence_Arg;
@@ -41,6 +42,10 @@ private
       Sequence_Frames : Sequence_Frame_Array_Access := null;
       Sequences : Simple_Sequencer_Types.Sequences_Access := null;
       Summary_Packet_Period : Interfaces.Unsigned_16 := 0;
+      -- Ticks elapsed since the last summary packet emission. Reset on
+      -- emission and by Set_Summary_Packet_Period (so a new period starts a
+      -- fresh phase).
+      Summary_Packet_Tick_Count : Interfaces.Unsigned_16 := 0;
       -- Per-call response-context scratch set by Command_T_Recv_Async and
       -- consumed by the Run_Sequence handler. The active component's serial
       -- queue makes a side-channel through Self safe: only one inbound command
@@ -75,6 +80,7 @@ private
    ---------------------------------------
    overriding procedure Command_T_Send_Dropped (Self : in out Instance; Arg : in Command.T) is null;
    overriding procedure Command_Response_T_Send_Dropped (Self : in out Instance; Arg : in Command_Response.T) is null;
+   overriding procedure Packet_T_Send_Dropped (Self : in out Instance; Arg : in Packet.T) is null;
    overriding procedure Event_T_Send_Dropped (Self : in out Instance; Arg : in Event.T) is null;
 
    -----------------------------------------------
