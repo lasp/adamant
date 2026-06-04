@@ -6,6 +6,10 @@ description: Common flight software command sequences
 
 command_timeout_seconds: 10  # default wait for sub-command responses
 
+# Extra packages needed by step arg expressions below.
+with:
+  - Sequence_Enums
+
 sequences:
   # Simple sequence with no arguments
   - name: Sequence_A
@@ -49,3 +53,16 @@ sequences:
 
     sequence:
       - sleep: (Value => 4_294_967_295)
+
+  # A sequence that calls another sequence. Each sequence is a first-class
+  # command on the sequencer, so a sub-sequence step is just a command step
+  # targeting the sequencer's own synthesized command.
+  - name: Sequence_E
+    description: Call Sequence_C as a sub-sequence, then run a regular command
+    wait_for_command_completion: true
+    continue_on_failure: false
+
+    sequence:
+      - command: Sequencer.Sequence_C
+        arg: (Response_Behavior => Sequence_Enums.Sequence_Response_Behavior.Send_After_Sequence_Start)
+      - command: Component_A.Command_1

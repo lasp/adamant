@@ -6,6 +6,10 @@ with Packed_U32;
 with Ada.Real_Time;
 with Sys_Time.Arithmetic;
 with Command_Types; use Command_Types;
+with Packet;
+with Sequence_Frame_Summary;
+with Basic_Types;
+with Serializer_Types; use Serializer_Types;
 
 package body Component.Simple_Command_Sequencer.Implementation.Logic is
 
@@ -276,6 +280,47 @@ package body Component.Simple_Command_Sequencer.Implementation.Logic is
       end if;
    end Command_Response_T_Recv_Async;
 
+   -- Emit the summary packet if a period is set and enough ticks have elapsed.
+   -- Called once per tick, after the frames have been advanced, so the packet
+   -- reflects this tick's end state.
+   procedure Send_Summary_Packet_If_Due (Self : in out Instance) is
+      Entry_Length : constant Natural := Sequence_Frame_Summary.Serialization.Serialized_Length;
+   begin
+      if Self.Summary_Packet_Period = 0 then
+         return;
+      end if;
+
+      Self.Summary_Packet_Tick_Count := @ + 1;
+      if Self.Summary_Packet_Tick_Count < Self.Summary_Packet_Period then
+         return;
+      end if;
+      Self.Summary_Packet_Tick_Count := 0;
+
+      declare
+         Summary_Bytes : Basic_Types.Byte_Array (0 .. Natural (Self.Sequence_Frames.all'Length) * Entry_Length - 1);
+         Offset : Natural := Summary_Bytes'First;
+         Pkt : Packet.T;
+         Stat : Serialization_Status;
+      begin
+         for Frame of Self.Sequence_Frames.all loop
+            Summary_Bytes (Offset .. Offset + Entry_Length - 1) :=
+               Sequence_Frame_Summary.Serialization.To_Byte_Array ((
+                  Sequence_Id => Frame.Sequence_Id,
+                  Step => Frame.Step,
+                  Status => Frame.Status,
+                  Response_Behavior => Frame.Response_Behavior,
+                  Operator_Source_Id => Frame.Operator_Source_Id));
+            Offset := @ + Entry_Length;
+         end loop;
+
+         Stat := Self.Packets.Summary_Packet (Self.Sys_Time_T_Get, Summary_Bytes, Pkt);
+         -- Frame count is a static init-time configuration; a count too large
+         -- for one packet is a misconfiguration that should fail loudly.
+         pragma Assert (Stat = Success, "Too many sequence frames to fit the summary packet!");
+         Self.Packet_T_Send_If_Connected (Pkt);
+      end;
+   end Send_Summary_Packet_If_Due;
+
    -- Tick for managing timeouts and delays
    procedure Tick_T_Recv_Async (Self : in out Instance; Arg : in Tick.T) is
       use Sys_Time.Arithmetic;
@@ -328,6 +373,8 @@ package body Component.Simple_Command_Sequencer.Implementation.Logic is
             end case;
          end;
       end loop;
+
+      Send_Summary_Packet_If_Due (Self);
    end Tick_T_Recv_Async;
 
    -- This procedure is called when a Command_T_Recv_Async message is dropped due to a full queue.
@@ -423,12 +470,13 @@ package body Component.Simple_Command_Sequencer.Implementation.Logic is
       return Success;
    end Kill_All_Sequences;
 
-   -- Set the summary packet period. The packet itself is wired in Phase 4; for
-   -- now we just store the value so the command surface exists.
+   -- Set the summary packet period, in ticks. Zero disables emission. The
+   -- tick counter is reset so the new period starts a fresh phase.
    function Set_Summary_Packet_Period (Self : in out Instance; Arg : in Packed_U16.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
    begin
       Self.Summary_Packet_Period := Arg.Value;
+      Self.Summary_Packet_Tick_Count := 0;
       return Success;
    end Set_Summary_Packet_Period;
 
