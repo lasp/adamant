@@ -33,6 +33,17 @@ mapping:
       for any sequence in this suite that does not specify its own
       command_timeout_seconds.
 
+  with:
+    required: false
+    type: seq
+    desc: |
+      List of additional Ada packages to "with" in the generated sequences
+      package. Use this when a step's arg expression references a package
+      that is not pulled in automatically, e.g. an enum package for a
+      qualified enumeration literal.
+    sequence:
+      - type: str
+
   sequences:
     required: true
     type: seq

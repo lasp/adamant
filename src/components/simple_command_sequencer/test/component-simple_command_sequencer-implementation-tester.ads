@@ -17,6 +17,7 @@ with Sequence_Step_Command_Event_Info.Representation;
 with Packed_U32.Representation;
 with Command_Header.Representation;
 with Command_Response.Representation;
+with Packet.Representation;
 with Tick.Representation;
 with Invalid_Command_Info.Representation;
 
@@ -30,6 +31,7 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    -- Invoker connector history packages:
    package Command_T_Recv_Sync_History_Package is new Printable_History (Command.T, Command.Representation.Image);
    package Command_Response_T_Recv_Sync_History_Package is new Printable_History (Command_Response.T, Command_Response.Representation.Image);
+   package Packet_T_Recv_Sync_History_Package is new Printable_History (Packet.T, Packet.Representation.Image);
    package Event_T_Recv_Sync_History_Package is new Printable_History (Event.T, Event.Representation.Image);
    package Sys_Time_T_Return_History_Package is new Printable_History (Sys_Time.T, Sys_Time.Representation.Image);
 
@@ -51,6 +53,9 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    package Unexpected_Command_Response_History_Package is new Printable_History (Command_Response.T, Command_Response.Representation.Image);
    package Killed_All_Sequences_History_Package is new Printable_History (Natural, Natural'Image);
 
+   -- Packet history packages:
+   package Summary_Packet_History_Package is new Printable_History (Packet.T, Packet.Representation.Image);
+
    -- Component class instance:
    type Instance is new Component.Simple_Command_Sequencer_Reciprocal.Base_Instance with record
       -- The component instance under test:
@@ -58,6 +63,7 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
       -- Connector histories:
       Command_T_Recv_Sync_History : Command_T_Recv_Sync_History_Package.Instance;
       Command_Response_T_Recv_Sync_History : Command_Response_T_Recv_Sync_History_Package.Instance;
+      Packet_T_Recv_Sync_History : Packet_T_Recv_Sync_History_Package.Instance;
       Event_T_Recv_Sync_History : Event_T_Recv_Sync_History_Package.Instance;
       Sys_Time_T_Return_History : Sys_Time_T_Return_History_Package.Instance;
       -- Event histories:
@@ -77,6 +83,8 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
       Invalid_Command_Received_History : Invalid_Command_Received_History_Package.Instance;
       Unexpected_Command_Response_History : Unexpected_Command_Response_History_Package.Instance;
       Killed_All_Sequences_History : Killed_All_Sequences_History_Package.Instance;
+      -- Packet histories:
+      Summary_Packet_History : Summary_Packet_History_Package.Instance;
       -- Booleans to control assertion if message is dropped on async queue:
       Expect_Command_T_Send_Dropped : Boolean := False;
       Command_T_Send_Dropped_Count : Natural := 0;
@@ -105,6 +113,8 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    overriding procedure Command_T_Recv_Sync (Self : in out Instance; Arg : in Command.T);
    -- Command responses (immediate and deferred operator replies) are sent out this connector
    overriding procedure Command_Response_T_Recv_Sync (Self : in out Instance; Arg : in Command_Response.T);
+   -- The periodic sequencer summary packet is sent out this connector
+   overriding procedure Packet_T_Recv_Sync (Self : in out Instance; Arg : in Packet.T);
    -- Events are sent out of this connector
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T);
    -- The system time is retrieved via this connector.
@@ -159,6 +169,12 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    overriding procedure Unexpected_Command_Response (Self : in out Instance; Arg : in Command_Response.T);
    -- A Kill_All_Sequences command was executed and all running sequences were halted.
    overriding procedure Killed_All_Sequences (Self : in out Instance);
+
+   -----------------------------------------------
+   -- Packet handler primitive:
+   -----------------------------------------------
+   -- Periodic summary of all sequence frames.
+   overriding procedure Summary_Packet (Self : in out Instance; Arg : in Packet.T);
 
    -----------------------------------------------
    -- Special primitives for activating component
