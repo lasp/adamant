@@ -90,4 +90,23 @@ package body {{ name }} is
 
 {% endfor %}
 {% endfor %}
+{% for data_product in set_up_default_products %}
+{% set serializer = data_product.product_type ~ ".Serialization_Le" if data_product.product_endian == "T_Le" else data_product.product_type ~ ".Serialization" %}
+   -- Build the default ("seed") value for {{ data_product.name }}. The default
+   -- value string from the model is validated against the product type by the
+   -- compiler.
+   function Make_Default_{{ data_product.name }} (Id_Base : in Data_Product_Types.Data_Product_Id; Timestamp : in Sys_Time.T) return Data_Product.T is
+      Local_Id : constant Data_Product_Types.Data_Product_Id := {{ data_product.local_id }};
+      Id : constant Data_Product_Types.Data_Product_Id := Id_Base + Local_Id;
+      Dp : Data_Product.T := (
+         Header => (Time => Timestamp, Id => Id, Buffer_Length => {{ serializer }}.Serialized_Length),
+         Buffer => [others => 0]
+      );
+   begin
+      Dp.Buffer (Dp.Buffer'First .. Dp.Buffer'First + {{ serializer }}.Serialized_Length - 1) :=
+         {{ serializer }}.To_Byte_Array ({{ data_product.default_at_set_up }});
+      return Dp;
+   end Make_Default_{{ data_product.name }};
+
+{% endfor %}
 end {{ name }};

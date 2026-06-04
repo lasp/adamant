@@ -9,9 +9,23 @@ package Product_Extractor_Types is
 
    type Product_Status is (Success, Invalid_Data, Length_Error);
 
-   -- Extraction function list for each product to extract in a single packet
+   -- Extraction function for a single product to extract from a packet:
    type Extract_And_Validate is not null access function (Pkt : in Ccsds_Space_Packet.T; Id_Base : in Data_Product_Types.Data_Product_Id; Timestamp : in Sys_Time.T; Dp : out Data_Product.T; Invalid_Data_Product : out Invalid_Product_Data.T) return Product_Status;
-   type Extractor_List is array (Natural range <>) of Extract_And_Validate;
+
+   -- Optional builder for a product's default ("seed") value. The component
+   -- invokes this during Set_Up to publish an initial value for any product that
+   -- declared a "default_at_set_up" in its model, ensuring the data product
+   -- exists in the database before the first packet is processed. Null means the
+   -- product is not seeded.
+   type Make_Default_Product is access function (Id_Base : in Data_Product_Types.Data_Product_Id; Timestamp : in Sys_Time.T) return Data_Product.T;
+
+   -- A single product entry: how to extract it from a packet, plus its optional
+   -- set-up default builder.
+   type Extractor_Entry is record
+      Extract : Extract_And_Validate;
+      Make_Default : Make_Default_Product := null;
+   end record;
+   type Extractor_List is array (Natural range <>) of Extractor_Entry;
    type Extractor_List_Access is access all Extractor_List;
 
    -- List of ids that associate to each data product. This has to be filled in at init
