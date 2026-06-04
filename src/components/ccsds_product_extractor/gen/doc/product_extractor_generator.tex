@@ -9,7 +9,7 @@
 
 \section{Description}
 
-The purpose of this generator is to provide a user the ability to extract data from packet and create data products out of them. The generator takes a YAML model file as an input which is used by the component to determine which packets to extract data products from as well as the offset and type in the packet the component needs to extract. This is performed through an Ada specification and implementation that is autocoded to perform the extraction and verification of the data product. In the case that extracting a data product is invalid for the specified type, then an invalid data structure is returned with the value of the invalid product. 
+The purpose of this generator is to provide a user the ability to extract data from packet and create data products out of them. The generator takes a YAML model file as an input which is used by the component to determine which packets to extract data products from as well as the offset and type in the packet the component needs to extract. This is performed through an Ada specification and implementation that is autocoded to perform the extraction and verification of the data product. In the case that extracting a data product is invalid for the specified type, then an invalid data structure is returned with the value of the invalid product.
 
 Note the example shown in this documentation is used in the unit test of this component so that the reader of this document can see it being used in context. Please refer to the unit test code for more details on how this generator can be used.
 
@@ -25,7 +25,13 @@ The following is an example extracted product input yaml file. Model files must 
 
 \yamlcodef{../../test/test_assembly/test_products.extracted_products.yaml}
 
-The specified data products consist of everything that the user would normally be required to include when defining a data product for a component, with the addition of the offset in the packet and corresponding APID. The type is also required which must be in the form of a packed type. The last required field is the time type which is either the current time of extraction from the packet or the time contained in the packet. 
+The specified data products consist of everything that the user would normally be required to include when defining a data product for a component, with the addition of the offset in the packet and corresponding APID. The type is also required which must be in the form of a packed type. The last required field is the time type which is either the current time of extraction from the packet or the time contained in the packet.
+
+\section{Seeding Default Values at Set Up}
+
+Because the component only produces a data product when a matching packet is received, a product is not published until its first packet arrives. In a common setup the component's data products are stored in a data product database and read by other components as data dependencies; such a consumer would receive a \texttt{Not\_Available} status at start up for any product that has not yet been published. To close this gap, a product may optionally specify a \texttt{default\_at\_set\_up} value in its model entry. This is an Ada aggregate string for the product's packed type (for example \texttt{"(Value => 0)"} for a \texttt{Packed\_U32.T}). The string is dropped verbatim into the generated code and is therefore validated against the product type by the Ada compiler.
+
+When a product declares a \texttt{default\_at\_set\_up}, the generator emits a builder function for it and attaches that builder to the product's entry in the extraction list. During the component's \texttt{Set\_Up} procedure the component publishes one data product per declared default, stamped with the current system time, so a value is available for every seeded product before the first packet is processed. Products that do not declare a default are not seeded.
 
 \section{Example Output}
 
