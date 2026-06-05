@@ -8,7 +8,6 @@ with Sys_Time.Arithmetic;
 with Command_Types; use Command_Types;
 with Packet;
 with Sequence_Frame_Summary;
-with Basic_Types;
 with Serializer_Types; use Serializer_Types;
 
 package body Component.Simple_Command_Sequencer.Implementation.Logic is
@@ -323,6 +322,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Logic is
 
    -- Tick for managing timeouts and delays
    procedure Tick_T_Recv_Async (Self : in out Instance; Arg : in Tick.T) is
+      Ignore : Tick.T renames Arg;
       use Sys_Time.Arithmetic;
       Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
    begin
