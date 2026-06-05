@@ -189,7 +189,7 @@ package body Component.Ccsds_Parameter_Table_Router.Implementation is
       declare
          Get_Region : constant Parameters_Memory_Region.T := (
             Region => Self.Staging_Buffer.Get_Full_Buffer_Region,
-            Operation => Parameter_Enums.Parameter_Table_Operation_Type.Get
+            Operation => Parameter_Enums.Parameter_Table_Operation_Type.Get_Copy
          );
       begin
          if not Self.Send_And_Wait (Load_From_Idx, Get_Region, Table_Ent.Table_Id, Is_Load => True) then

@@ -19,6 +19,7 @@ package body Component.Parameter_Store.Implementation.Tester is
       Self.Command_Response_T_Recv_Sync_History.Init (Depth => 10);
       Self.Parameters_Memory_Region_Release_T_Recv_Sync_History.Init (Depth => 10);
       Self.Packet_T_Recv_Sync_History.Init (Depth => 10);
+      Self.Memory_Dump_Recv_Sync_History.Init (Depth => 10);
       Self.Event_T_Recv_Sync_History.Init (Depth => 10);
       Self.Sys_Time_T_Return_History.Init (Depth => 10);
       -- Event histories:
@@ -27,6 +28,7 @@ package body Component.Parameter_Store.Implementation.Tester is
       Self.Dumped_Parameters_History.Init (Depth => 10);
       Self.Parameter_Table_Updated_History.Init (Depth => 10);
       Self.Parameter_Table_Fetched_History.Init (Depth => 10);
+      Self.Parameter_Table_Pointer_Fetched_History.Init (Depth => 10);
       Self.Invalid_Command_Received_History.Init (Depth => 10);
       Self.Command_Dropped_History.Init (Depth => 10);
       Self.Memory_Region_Dropped_History.Init (Depth => 10);
@@ -42,6 +44,7 @@ package body Component.Parameter_Store.Implementation.Tester is
       Self.Command_Response_T_Recv_Sync_History.Destroy;
       Self.Parameters_Memory_Region_Release_T_Recv_Sync_History.Destroy;
       Self.Packet_T_Recv_Sync_History.Destroy;
+      Self.Memory_Dump_Recv_Sync_History.Destroy;
       Self.Event_T_Recv_Sync_History.Destroy;
       Self.Sys_Time_T_Return_History.Destroy;
       -- Event histories:
@@ -50,6 +53,7 @@ package body Component.Parameter_Store.Implementation.Tester is
       Self.Dumped_Parameters_History.Destroy;
       Self.Parameter_Table_Updated_History.Destroy;
       Self.Parameter_Table_Fetched_History.Destroy;
+      Self.Parameter_Table_Pointer_Fetched_History.Destroy;
       Self.Invalid_Command_Received_History.Destroy;
       Self.Command_Dropped_History.Destroy;
       Self.Memory_Region_Dropped_History.Destroy;
@@ -74,6 +78,17 @@ package body Component.Parameter_Store.Implementation.Tester is
       Self.Attach_Command_T_Send (To_Component => Self.Component_Instance'Unchecked_Access, Hook => Self.Component_Instance.Command_T_Recv_Async_Access);
       Self.Attach_Parameters_Memory_Region_T_Send (To_Component => Self.Component_Instance'Unchecked_Access, Hook => Self.Component_Instance.Parameters_Memory_Region_T_Recv_Async_Access);
    end Connect;
+
+   procedure Connect_Memory_Dump_Path (Self : in out Instance) is
+   begin
+      Self.Component_Instance.Attach_Command_Response_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Command_Response_T_Recv_Sync_Access);
+      Self.Component_Instance.Attach_Parameters_Memory_Region_Release_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Parameters_Memory_Region_Release_T_Recv_Sync_Access);
+      Self.Component_Instance.Attach_Memory_Dump_Send (To_Component => Self'Unchecked_Access, Hook => Self.Memory_Dump_Recv_Sync_Access);
+      Self.Component_Instance.Attach_Event_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Event_T_Recv_Sync_Access);
+      Self.Component_Instance.Attach_Sys_Time_T_Get (To_Component => Self'Unchecked_Access, Hook => Self.Sys_Time_T_Return_Access);
+      Self.Attach_Command_T_Send (To_Component => Self.Component_Instance'Unchecked_Access, Hook => Self.Component_Instance.Command_T_Recv_Async_Access);
+      Self.Attach_Parameters_Memory_Region_T_Send (To_Component => Self.Component_Instance'Unchecked_Access, Hook => Self.Component_Instance.Parameters_Memory_Region_T_Recv_Async_Access);
+   end Connect_Memory_Dump_Path;
 
    ---------------------------------------
    -- Invokee connector primitives:
@@ -100,6 +115,13 @@ package body Component.Parameter_Store.Implementation.Tester is
       -- Dispatch the packet to the correct handler:
       Self.Dispatch_Packet (Arg);
    end Packet_T_Recv_Sync;
+
+   -- The memory dump connector. The active parameter table is dumped through this
+   -- connector as a Memory_Dump record when the Memory_Dump_Send path is connected.
+   overriding procedure Memory_Dump_Recv_Sync (Self : in out Instance; Arg : in Memory_Packetizer_Types.Memory_Dump) is
+   begin
+      Self.Memory_Dump_Recv_Sync_History.Push (Arg);
+   end Memory_Dump_Recv_Sync;
 
    -- Events are sent out of this connector.
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T) is
@@ -188,6 +210,13 @@ package body Component.Parameter_Store.Implementation.Tester is
       -- Push the argument onto the test history for looking at later:
       Self.Parameter_Table_Fetched_History.Push (Arg);
    end Parameter_Table_Fetched;
+
+   -- Returned a zero-copy pointer to the parameter store's own byte buffer.
+   overriding procedure Parameter_Table_Pointer_Fetched (Self : in out Instance; Arg : in Memory_Region.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Parameter_Table_Pointer_Fetched_History.Push (Arg);
+   end Parameter_Table_Pointer_Fetched;
 
    -- A command was received with invalid parameters.
    overriding procedure Invalid_Command_Received (Self : in out Instance; Arg : in Invalid_Command_Info.T) is

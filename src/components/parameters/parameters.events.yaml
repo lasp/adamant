@@ -55,6 +55,9 @@ events:
   - name: Finished_Parameter_Table_Fetch
     description: Done updating the parameters from a received memory region with following status.
     param_type: Parameters_Memory_Region_Release.T
+  - name: Get_Pointer_Not_Supported
+    description: The Get_Pointer operation is not supported by the Parameters component because it has no contiguous serialized snapshot buffer to point at. Callers must use Get_Copy instead.
+    param_type: Memory_Region.T
   - name: Invalid_Command_Received
     description: A command was received with invalid parameters.
     param_type: Invalid_Command_Info.T

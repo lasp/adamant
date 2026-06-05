@@ -18,6 +18,7 @@ with Memory_Region.Representation;
 with Invalid_Command_Info.Representation;
 with Command_Header.Representation;
 with Parameters_Memory_Region.Representation;
+with Memory_Packetizer_Types;
 
 -- The Parameters Component is responsible for storing and managing access to a memory region holding a parameter table. The managed memory region is usually located in nonvolatile storage and can serve as the backup or the default parameter values to use at startup for the system.
 package Component.Parameter_Store.Implementation.Tester is
@@ -27,6 +28,7 @@ package Component.Parameter_Store.Implementation.Tester is
    package Command_Response_T_Recv_Sync_History_Package is new Printable_History (Command_Response.T, Command_Response.Representation.Image);
    package Parameters_Memory_Region_Release_T_Recv_Sync_History_Package is new Printable_History (Parameters_Memory_Region_Release.T, Parameters_Memory_Region_Release.Representation.Image);
    package Packet_T_Recv_Sync_History_Package is new Printable_History (Packet.T, Packet.Representation.Image);
+   package Memory_Dump_Recv_Sync_History_Package is new Printable_History (Memory_Packetizer_Types.Memory_Dump, Memory_Packetizer_Types.Memory_Dump'Image);
    package Event_T_Recv_Sync_History_Package is new Printable_History (Event.T, Event.Representation.Image);
    package Sys_Time_T_Return_History_Package is new Printable_History (Sys_Time.T, Sys_Time.Representation.Image);
 
@@ -36,6 +38,7 @@ package Component.Parameter_Store.Implementation.Tester is
    package Dumped_Parameters_History_Package is new Printable_History (Natural, Natural'Image);
    package Parameter_Table_Updated_History_Package is new Printable_History (Memory_Region.T, Memory_Region.Representation.Image);
    package Parameter_Table_Fetched_History_Package is new Printable_History (Memory_Region.T, Memory_Region.Representation.Image);
+   package Parameter_Table_Pointer_Fetched_History_Package is new Printable_History (Memory_Region.T, Memory_Region.Representation.Image);
    package Invalid_Command_Received_History_Package is new Printable_History (Invalid_Command_Info.T, Invalid_Command_Info.Representation.Image);
    package Command_Dropped_History_Package is new Printable_History (Command_Header.T, Command_Header.Representation.Image);
    package Memory_Region_Dropped_History_Package is new Printable_History (Parameters_Memory_Region.T, Parameters_Memory_Region.Representation.Image);
@@ -52,6 +55,7 @@ package Component.Parameter_Store.Implementation.Tester is
       Command_Response_T_Recv_Sync_History : Command_Response_T_Recv_Sync_History_Package.Instance;
       Parameters_Memory_Region_Release_T_Recv_Sync_History : Parameters_Memory_Region_Release_T_Recv_Sync_History_Package.Instance;
       Packet_T_Recv_Sync_History : Packet_T_Recv_Sync_History_Package.Instance;
+      Memory_Dump_Recv_Sync_History : Memory_Dump_Recv_Sync_History_Package.Instance;
       Event_T_Recv_Sync_History : Event_T_Recv_Sync_History_Package.Instance;
       Sys_Time_T_Return_History : Sys_Time_T_Return_History_Package.Instance;
       -- Event histories:
@@ -60,6 +64,7 @@ package Component.Parameter_Store.Implementation.Tester is
       Dumped_Parameters_History : Dumped_Parameters_History_Package.Instance;
       Parameter_Table_Updated_History : Parameter_Table_Updated_History_Package.Instance;
       Parameter_Table_Fetched_History : Parameter_Table_Fetched_History_Package.Instance;
+      Parameter_Table_Pointer_Fetched_History : Parameter_Table_Pointer_Fetched_History_Package.Instance;
       Invalid_Command_Received_History : Invalid_Command_Received_History_Package.Instance;
       Command_Dropped_History : Command_Dropped_History_Package.Instance;
       Memory_Region_Dropped_History : Memory_Region_Dropped_History_Package.Instance;
@@ -83,7 +88,13 @@ package Component.Parameter_Store.Implementation.Tester is
    ---------------------------------------
    -- Test initialization functions:
    ---------------------------------------
+   -- Connect using the Packet.T dump pathway (legacy / default).
    procedure Connect (Self : in out Instance);
+   -- Connect using the Memory_Dump dump pathway (for large tables that exceed
+   -- Packet_Buffer_Type'Length). Wires every connector except Packet_T_Send,
+   -- which intentionally remains disconnected so the component routes dumps
+   -- through Memory_Dump_Send.
+   procedure Connect_Memory_Dump_Path (Self : in out Instance);
 
    ---------------------------------------
    -- Invokee connector primitives:
@@ -94,6 +105,10 @@ package Component.Parameter_Store.Implementation.Tester is
    overriding procedure Parameters_Memory_Region_Release_T_Recv_Sync (Self : in out Instance; Arg : in Parameters_Memory_Region_Release.T);
    -- The parameter packet connector. A copy of the managed parameter table is dumped via this connector.
    overriding procedure Packet_T_Recv_Sync (Self : in out Instance; Arg : in Packet.T);
+   -- The memory dump connector. The active parameter table is dumped through this
+   -- connector as a Memory_Dump record (pointer + Stored_Parameters packet ID) when
+   -- the Memory_Dump_Send path is connected instead of Packet_T_Send.
+   overriding procedure Memory_Dump_Recv_Sync (Self : in out Instance; Arg : in Memory_Packetizer_Types.Memory_Dump);
    -- Events are sent out of this connector.
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T);
    -- The system time is retrieved via this connector.
@@ -123,6 +138,8 @@ package Component.Parameter_Store.Implementation.Tester is
    overriding procedure Parameter_Table_Updated (Self : in out Instance; Arg : in Memory_Region.T);
    -- Starting parameter fetch into the received memory region.
    overriding procedure Parameter_Table_Fetched (Self : in out Instance; Arg : in Memory_Region.T);
+   -- Returned a zero-copy pointer to the parameter store's own byte buffer.
+   overriding procedure Parameter_Table_Pointer_Fetched (Self : in out Instance; Arg : in Memory_Region.T);
    -- A command was received with invalid parameters.
    overriding procedure Invalid_Command_Received (Self : in out Instance; Arg : in Invalid_Command_Info.T);
    -- A command was dropped due to a full queue.

@@ -34,14 +34,17 @@ enums:
   - name: Parameter_Table_Operation_Type
     description: This enumeration lists the different parameter table operations that can be performed.
     literals:
-      - name: Get
+      - name: Get_Copy
         value: 0
-        description: Retrieve the current values of the parameters.
-      - name: Set
+        description: Retrieve the current values of the parameters by copying them into a caller-provided memory region.
+      - name: Get_Pointer
         value: 1
+        description: Retrieve the current values of the parameters by returning a memory region pointing at the owner's buffer (zero-copy). The caller-provided region in the request is ignored. The responder fills the returned release with a region pointing at its own bytes.
+      - name: Set
+        value: 2
         description: Set the current values of the parameters.
       - name: Validate
-        value: 2
+        value: 3
         description: Validate the current values of the parameters.
   - name: Parameter_Table_Update_Status
     description: This status enumeration provides information on the success/failure of a parameter table update.

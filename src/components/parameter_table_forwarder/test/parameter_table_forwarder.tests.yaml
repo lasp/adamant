@@ -1,0 +1,43 @@
+---
+description: This is a unit test suite for the Parameter Table Forwarder component.
+tests:
+  - name: Test_Set_Success
+    description: A valid Set memory region is forwarded to the downstream which acks Success. Bookkeeping updates, Parameter_Table_Updated event fires.
+  - name: Test_Set_Length_Error
+    description: Set with wrong region length is rejected without contacting the downstream.
+  - name: Test_Set_Crc_Error
+    description: Set with mismatched CRC is rejected without contacting the downstream.
+  - name: Test_Set_Downstream_Rejects
+    description: Downstream returns Parameter_Error on Set. Forwarder propagates and does not update Stored_Crc.
+  - name: Test_Validate_Success
+    description: Validate forwarded; downstream acks Success. Stored_Crc is NOT updated.
+  - name: Test_Validate_Downstream_Rejects
+    description: Validate forwarded; downstream returns Parameter_Error.
+  - name: Test_Validate_Length_Crc_Errors
+    description: Validate rejected for length/CRC mismatches without contacting the downstream.
+  - name: Test_Get_Success
+    description: Get forwarded; downstream writes bytes and acks. Forwarder propagates release upstream.
+  - name: Test_Get_Length_Error
+    description: Get region smaller than Table_Size is rejected without contacting the downstream.
+  - name: Test_Get_Downstream_Rejects
+    description: Downstream returns Parameter_Error on Get.
+  - name: Test_Get_Pointer_Rejected
+    description: An external Get_Pointer request is rejected by the forwarder without contacting the downstream; emits Get_Pointer_Not_Supported event and returns Parameter_Error.
+  - name: Test_Dump_Command_Success
+    description: Dump command issues internal Get; downstream writes bytes; Active_Parameters packet emitted with CRC prefix.
+  - name: Test_Dump_Command_Failure
+    description: Downstream rejects internal Get during Dump; Dump_Failed event fires and command response is Failure.
+  - name: Test_Dump_Command_No_Dump_Connector
+    description: Dump command with no Memory_Dump_Send connector wired; Dump_Failed event fires with a zero-length sentinel region and the command response is Failure, without contacting the downstream.
+  - name: Test_Dump_On_Change
+    description: After a successful Set with Dump_On_Change=True, an Active_Parameters packet is auto-emitted.
+  - name: Test_Dump_On_Change_Failure
+    description: After a successful Set with Dump_On_Change=True, the auto-dump's internal Get_Pointer is rejected; Dump_Failed event fires and the Set's upstream release reports Parameter_Error.
+  - name: Test_Command_Dropped
+    description: Command queue full triggers Command_Dropped event.
+  - name: Test_Memory_Region_Dropped
+    description: Memory region queue full triggers Memory_Region_Dropped event and a Dropped release upstream.
+  - name: Test_Initial_Table_Status
+    description: Before any operation the Table_Status DP reports Uninitialized.
+  - name: Test_Invalid_Command
+    description: A command with bad length triggers an Invalid_Command_Received event.

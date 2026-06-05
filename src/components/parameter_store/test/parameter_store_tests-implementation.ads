@@ -17,6 +17,8 @@ private
    overriding procedure Test_Nominal_Table_Upload (Self : in out Instance);
    -- This unit test tests the nominal fetching of the parameter table into a provided memory region.
    overriding procedure Test_Nominal_Table_Fetch (Self : in out Instance);
+   -- This unit test tests fetching a zero-copy pointer to the parameter store's internal byte buffer via the Get_Pointer operation.
+   overriding procedure Test_Table_Fetch_Pointer (Self : in out Instance);
    -- This unit test tests the behavior when updating the parameter table with a memory region of invalid length.
    overriding procedure Test_Table_Upload_Length_Error (Self : in out Instance);
    -- This unit test tests the behavior when updating the parameter table with a memory region that contains an invalid CRC.
@@ -33,6 +35,13 @@ private
    overriding procedure Test_Full_Queue (Self : in out Instance);
    -- This unit test exercises that an invalid command throws the appropriate event.
    overriding procedure Test_Invalid_Command (Self : in out Instance);
+   -- Wires the Memory_Dump_Send dump pathway and verifies that the Dump command emits a single
+   -- Memory_Dump record (correct Stored_Parameters APID, pointer/length matching the managed bytes),
+   -- and that no Packet.T is emitted on this pathway.
+   overriding procedure Test_Memory_Dump_Path (Self : in out Instance);
+   -- Wires the Memory_Dump_Send dump pathway and uploads a fresh table with Dump_Parameters_On_Change=True;
+   -- verifies the auto-dump fires through the Memory_Dump connector.
+   overriding procedure Test_Memory_Dump_Path_Auto_Dump_On_Change (Self : in out Instance);
 
    -- Test data and state:
    type Instance is new Parameter_Store_Tests.Base_Instance with record

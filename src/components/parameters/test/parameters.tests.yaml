@@ -23,6 +23,8 @@ tests:
     description: This unit test tests the behavior when validation of the parameter table by memory region upload fails.
   - name: Test_Table_Fetch_Error
     description: This unit test tests the behavior when fetching of the parameter table into a memory region fails.
+  - name: Test_Table_Fetch_Pointer_Unsupported
+    description: This unit test tests that the Get_Pointer operation is rejected with Parameter_Error since the parameters component has no contiguous serialized snapshot buffer to point at.
   - name: Test_No_Dump_On_Change
     description: This unit test tests the no-dump-on-change configuration for the Init function and makes sure the component behaves as expected.
   - name: Test_Full_Queue

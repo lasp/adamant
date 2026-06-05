@@ -1,0 +1,51 @@
+---
+description: Events for the Parameter Table Forwarder component.
+events:
+  - name: Memory_Region_Length_Mismatch
+    description: An incoming memory region length did not match the configured Table_Size.
+    param_type: Invalid_Parameters_Memory_Region_Length.T
+  - name: Memory_Region_Crc_Invalid
+    description: An incoming memory region's stored CRC did not match the computed CRC over its contents.
+    param_type: Invalid_Parameters_Memory_Region_Crc.T
+  - name: Parameter_Table_Updated
+    description: A new parameter table was successfully applied by the downstream component.
+    param_type: Memory_Region.T
+  - name: Parameter_Table_Validated
+    description: A parameter table was successfully validated by the downstream component.
+    param_type: Memory_Region.T
+  - name: Parameter_Table_Fetched
+    description: The current parameter table was written into the requester's memory region by the downstream component.
+    param_type: Memory_Region.T
+  - name: Downstream_Component_Rejected_Update
+    description: The downstream component rejected a Set operation.
+    param_type: Parameters_Memory_Region_Release.T
+  - name: Downstream_Component_Rejected_Validation
+    description: The downstream component rejected a Validate operation.
+    param_type: Parameters_Memory_Region_Release.T
+  - name: Downstream_Component_Rejected_Fetch
+    description: The downstream component rejected a Get operation.
+    param_type: Parameters_Memory_Region_Release.T
+  - name: Get_Pointer_Not_Supported
+    description: A Get_Pointer request was received from an external caller. The forwarder owns the table header and strips it on every inbound Set/Validate; it could not insert the header into a caller-visible region returned by the downstream. Callers wanting a full table must use Get_Copy.
+    param_type: Memory_Region.T
+  - name: Dumped_Parameters
+    description: An Active_Parameters packet was emitted.
+  - name: Dump_Failed
+    description: |
+      A dump pathway operation failed. Emitted in three cases: (1) the
+      Dump_Parameter_Table command was issued while the Memory_Dump_Send
+      connector was unwired (release region uses a 0xDEAD_BEEF sentinel
+      address with Length 0); (2) the downstream component rejected the
+      internal Get_Pointer during the Dump_Parameter_Table command; (3) the
+      auto-dump triggered after a successful Set when Dump_Parameters_On_Change
+      is True could not complete.
+    param_type: Parameters_Memory_Region_Release.T
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T
+  - name: Command_Dropped
+    description: A command was dropped due to a full queue.
+    param_type: Command_Header.T
+  - name: Memory_Region_Dropped
+    description: A parameter memory region was dropped due to a full queue.
+    param_type: Parameters_Memory_Region.T

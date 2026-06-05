@@ -247,7 +247,7 @@ package body Parameters_Grouped_Tests.Implementation is
       Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => [0, 0], Version => 0.0));
 
       -- Send the memory region to the component with a get request:
-      T.Parameters_Memory_Region_T_Send ((Region => Region, Operation => Get));
+      T.Parameters_Memory_Region_T_Send ((Region => Region, Operation => Get_Copy));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       -- Check events:

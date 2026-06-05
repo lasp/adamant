@@ -1,0 +1,7 @@
+---
+description: These are the commands for the Parameter Table Forwarder component.
+commands:
+  - name: Dump_Parameter_Table
+    description: |
+      Fetch the current parameter table from the downstream component by
+      issuing an internal Get and emit it as an Active_Parameters packet.

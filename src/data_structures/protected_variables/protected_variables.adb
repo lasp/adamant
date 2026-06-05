@@ -115,4 +115,25 @@ package body Protected_Variables is
       end Counter;
    end Generic_Protected_Periodic_Counter;
 
+   package body Generic_Staged_Variable is
+      protected body Staged_Variable is
+         procedure Stage (Value : in T) is
+         begin
+            Staged_Value := Value;
+            Has_Staged := True;
+         end Stage;
+
+         function Is_Staged return Boolean is
+         begin
+            return Has_Staged;
+         end Is_Staged;
+
+         procedure Copy_From_Staged (Out_Value : out T) is
+         begin
+            Out_Value := Staged_Value;
+            Has_Staged := False;
+         end Copy_From_Staged;
+      end Staged_Variable;
+   end Generic_Staged_Variable;
+
 end Protected_Variables;
