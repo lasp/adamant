@@ -36,6 +36,15 @@ mapping:
             type: str
             enum: ['current_time', 'packet_time']
             required: True
+          # Optional default value for the product, supplied as an Ada aggregate
+          # string for the product's packed type (e.g. "(Value => 0)"). When
+          # present, the product extractor seeds this value into the data product
+          # database during Set_Up, guaranteeing the product exists before an
+          # assembly fully starts executing. The string is validated against the
+          # product type by the Ada compiler. When omitted, no default is seeded.
+          default_at_set_up:
+            type: str
+            required: False
     # A data product extractor must have at least one product to extract.
     range:
       min: 1

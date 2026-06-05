@@ -15,6 +15,9 @@ private
    -- This unit test is used to test the logic of receiving a packet that contains a data product that needs to be extracted
    overriding procedure Test_Received_Data_Product_Packet (Self : in out Instance);
 
+   -- This unit test verifies that products which declare a "default_at_set_up" in the model are seeded into the data product database during Set_Up with their default value and a fresh timestamp.
+   overriding procedure Test_Set_Up_Default_Seeding (Self : in out Instance);
+
    -- Test data and state:
    type Instance is new Ccsds_Product_Extractor_Tests.Base_Instance with record
       null;

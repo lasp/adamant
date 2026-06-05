@@ -44,6 +44,13 @@ class data_product_entry(object):
         if "description" in product_data:
             self.description = product_data["description"]
 
+        # Optional default value, supplied as an Ada aggregate string for the
+        # product's packed type. When present, the product is seeded into the
+        # data product database during the component's Set_Up.
+        self.default_at_set_up = None
+        if "default_at_set_up" in product_data:
+            self.default_at_set_up = product_data["default_at_set_up"]
+
 
 class extracted_products(base):
     """
@@ -108,9 +115,14 @@ class extracted_products(base):
             else:
                 self.apids[the_products.apid] = [the_products]
 
-        # Set the local IDs for all the data products in order:
+        # Set the local IDs for all the data products in order, and collect the
+        # flat, ordered list of products that requested a set-up default so the
+        # generator can emit the seed list:
+        self.set_up_default_products = []
         the_id = 0
         for apid, products in self.apids.items():
             for data_product_item in products:
                 data_product_item.local_id = the_id
                 the_id += 1
+                if data_product_item.default_at_set_up is not None:
+                    self.set_up_default_products.append(data_product_item)

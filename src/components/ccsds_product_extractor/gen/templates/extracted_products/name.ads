@@ -19,10 +19,22 @@ package {{ name }} is
    function Extract_And_Validate_{{data_product.name}} (Pkt : in Ccsds_Space_Packet.T; Id_Base : in Data_Product_Types.Data_Product_Id; Timestamp : in Sys_Time.T; Dp : out Data_Product.T; Invalid_Data_Product : out Invalid_Product_Data.T) return Product_Status;
 {% endfor %}
 {% endfor %}
+{% for data_product in set_up_default_products %}
+{% if loop.first %}
+
+   -- Builders for the default ("seed") values of products that requested a
+   -- "default_at_set_up" in the model. The component publishes these during
+   -- Set_Up so the products exist in the data product database before the first
+   -- packet is processed.
+{% endif %}
+   function Make_Default_{{ data_product.name }} (Id_Base : in Data_Product_Types.Data_Product_Id; Timestamp : in Sys_Time.T) return Data_Product.T;
+{% endfor %}
+
+   -- The list of products to extract from each apid, paired with their optional set-up default builder:
 {% for apid, products in apids.items() %}
    Extract_Products_{{apid}} : aliased Extractor_List := [
 {% for data_product in products %}
-      {{ loop.index0 }} => Extract_And_Validate_{{data_product.name}}'Access{{ "," if not loop.last }}
+      {{ loop.index0 }} => (Extract => Extract_And_Validate_{{data_product.name}}'Access, Make_Default => {% if data_product.default_at_set_up %}Make_Default_{{data_product.name}}'Access{% else %}null{% endif %}){{ "," if not loop.last }}
 {% endfor %}
    ];
 {% endfor %}

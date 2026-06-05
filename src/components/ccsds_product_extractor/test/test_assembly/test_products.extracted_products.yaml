@@ -15,6 +15,7 @@ data_products:
     apid: 200
     offset: 8
     time: current_time
+    default_at_set_up: "(Value => 42)"
   - name: Test_Product_4
     type: Packed_Natural.T
     apid: 200
@@ -26,3 +27,4 @@ data_products:
     apid: 300
     offset: 15
     time: packet_time
+    default_at_set_up: "(Value => 7)"

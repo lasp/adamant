@@ -32,9 +32,6 @@ package body Ccsds_Product_Extractor_Tests.Implementation is
 
       -- Call component init here.
       Self.Tester.Component_Instance.Init (Data_Product_Extraction_List => Test_Products.Data_Product_Extraction_List'Access);
-
-      -- Call the component set up method that the assembly would normally call.
-      Self.Tester.Component_Instance.Set_Up;
    end Set_Up_Test;
 
    overriding procedure Tear_Down_Test (Self : in out Instance) is
@@ -229,5 +226,30 @@ package body Ccsds_Product_Extractor_Tests.Implementation is
       Data_Product_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get (14), Test_Dp_Received_U16 (0, 25, (50, 100)));
 
    end Test_Received_Data_Product_Packet;
+
+   overriding procedure Test_Set_Up_Default_Seeding (Self : in out Instance) is
+      T : Component.Ccsds_Product_Extractor.Implementation.Tester.Instance_Access renames Self.Tester;
+   begin
+      Put_Line ("");
+      Put_Line ("----------------------------------");
+      Put_Line ("Testing Set_Up Default Seeding:");
+      Put_Line ("----------------------------------");
+
+      -- Run set up. Because Test_Product_3 and Test_Product_5 declare a
+      -- "default_at_set_up" in the model, Set_Up publishes a default for each of
+      -- them, in local-id order (Test_Product_3 then Test_Product_5), and nothing
+      -- else.
+      T.Component_Instance.Set_Up;
+
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
+
+      -- Each seed carries the model-defined default value, the correct data
+      -- product id, and the fresh timestamp grabbed from the system time
+      -- connector at Set_Up (which the tester returns as T.System_Time).
+      Data_Product_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get (1), Test_Dp_Received_U32 (2, 42, T.System_Time));
+      Data_Product_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get (2), Test_Dp_Received_Natural_Le (4, 7, T.System_Time));
+
+   end Test_Set_Up_Default_Seeding;
 
 end Ccsds_Product_Extractor_Tests.Implementation;

@@ -44,7 +44,33 @@ package body Component.Ccsds_Product_Extractor.Implementation is
          Add_Status := Self.Extracted_Products_Tree.Add (Packet_Products);
          pragma Assert (Add_Status, "Product Extractor tree can not hold all APIDs and associated data in the input list.");
       end loop;
+
+      -- Retain the extraction list so Set_Up can walk it and seed any products
+      -- that declared a default value.
+      Self.Extraction_List := Data_Product_Extraction_List;
    end Init;
+
+   ---------------------------------------
+   -- Set up procedure:
+   ---------------------------------------
+   -- Seed default values for any data products that declared a "default_at_set_up"
+   -- in the model. Publishing here guarantees a valid value exists in
+   -- the data product database for downstream consumers to fetch before assembly
+   -- startup is complete. Products without a default builder are skipped, so a model
+   -- that declares no defaults makes this a no-op.
+   overriding procedure Set_Up (Self : in out Instance) is
+      -- Grab a single fresh timestamp for all seeded products:
+      Timestamp : constant Sys_Time.T := Self.Sys_Time_T_Get;
+      Id_Base : constant Data_Product_Types.Data_Product_Id := Self.Data_Products.Get_Id_Base;
+   begin
+      for Apid_Entry of Self.Extraction_List.all loop
+         for Product_Entry of Apid_Entry.Extract_List.all loop
+            if Product_Entry.Make_Default /= null then
+               Self.Data_Product_T_Send_If_Connected (Product_Entry.Make_Default (Id_Base, Timestamp));
+            end if;
+         end loop;
+      end loop;
+   end Set_Up;
 
    ---------------------------------------
    -- Invokee connector primitives:
@@ -68,8 +94,8 @@ package body Component.Ccsds_Product_Extractor.Implementation is
                declare
                   Extracted_Product : Data_Product.T;
                   Invalid_Data_Product : Invalid_Product_Data.T;
-                  Product_Entry_List_Item : constant Extract_And_Validate := Fetched_Entry.Extract_List.all (Idx);
-                  Product_Extracted_Status : constant Product_Status := Product_Entry_List_Item.all (Arg, Self.Data_Products.Get_Id_Base, Timestamp, Extracted_Product, Invalid_Data_Product);
+                  Product_Entry_List_Item : constant Extractor_Entry := Fetched_Entry.Extract_List.all (Idx);
+                  Product_Extracted_Status : constant Product_Status := Product_Entry_List_Item.Extract.all (Arg, Self.Data_Products.Get_Id_Base, Timestamp, Extracted_Product, Invalid_Data_Product);
                begin
                   case Product_Extracted_Status is
                      -- If there was a problem with the length of the data product and the length of the incoming packet, then send an event.
