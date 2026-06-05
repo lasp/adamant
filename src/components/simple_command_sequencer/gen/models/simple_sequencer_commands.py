@@ -70,6 +70,18 @@ class simple_sequencer_commands(commands):
         # Load the static commands from the YAML.
         super(simple_sequencer_commands, self).load()
 
+        # Never cache this model. The synthesized command set depends on which
+        # command_sequences yamls are visible in the *current* build context,
+        # but the model cache is keyed only by filename + mtime -- so a copy
+        # loaded in one context (e.g. the generator doc build, which pulls the
+        # unit-test assembly into scope) gets served to a different context
+        # (e.g. the component doc build, which runs naked) and leaks that
+        # context's commands into outputs whose type documentation cannot be
+        # built there. This is what broke `redo publish` from the repo root.
+        # Synthesis is cheap; always reload. (Set before the early return below
+        # so the naked-context load is not cached either.)
+        self.do_save_to_cache = False
+
         # Descriptors for the generated intermediate base type. Empty unless the
         # build path includes an assembly's command_sequences suite.
         self.sequence_wrappers = []
