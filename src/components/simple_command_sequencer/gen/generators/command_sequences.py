@@ -19,6 +19,11 @@ def load_command_sequences_model(input_filename):
     )
     if assembly:
         cs.set_assembly(assembly)
+        # Step resolution, includes, and assembly_name are populated in final()
+        # (set_assembly only attaches the assembly). The assembly load path gets
+        # final() called for it automatically, but this standalone generator
+        # must drive it itself so name.ads/adb render fully resolved.
+        cs.final()
     return cs
 
 
@@ -85,5 +90,30 @@ class command_sequences_adb(command_sequences_gen, generator_base):
         return command_sequences_gen.output_filename(self, input_filename)
 
 
+class command_sequences_command_builders_ads(command_sequences_gen, generator_base):
+    """
+    Generates <model_name>_command_builders.ads -- an instantiable helper that
+    reconstructs the operator-side builder surface (per-sequence command id
+    getters + Command.T constructors) for the per-sequence "ghost" commands,
+    which have no generated handler on the component itself. Used by unit tests
+    and sub-sequence callers.
+    """
+
+    def __init__(self):
+        command_sequences_gen.__init__(self, template_filename="name_command_builders.ads")
+
+
+class command_sequences_command_builders_adb(command_sequences_gen, generator_base):
+    """Body for the per-sequence command builder helper."""
+
+    def __init__(self):
+        command_sequences_gen.__init__(self, template_filename="name_command_builders.adb")
+
+
 def add_generators_to_module(module):
-    add_basic_generators_to_module(module, [command_sequences_ads, command_sequences_adb])
+    add_basic_generators_to_module(module, [
+        command_sequences_ads,
+        command_sequences_adb,
+        command_sequences_command_builders_ads,
+        command_sequences_command_builders_adb,
+    ])
