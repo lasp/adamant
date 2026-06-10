@@ -1,6 +1,7 @@
 --------------------------------------------------------------------------------
--- Simple_Command_Sequencer Implementation Logic Body
+-- Simple_Command_Sequencer Component Implementation Body
 --------------------------------------------------------------------------------
+
 with Sequence_Enums; use Sequence_Enums.Sequence_State;
 with Packed_U32;
 with Ada.Real_Time;
@@ -9,9 +10,14 @@ with Command_Types; use Command_Types;
 with Packet;
 with Sequence_Frame_Summary;
 with Serializer_Types; use Serializer_Types;
+with Configuration;
+with Sleep;
 
-package body Component.Simple_Command_Sequencer.Implementation.Logic is
+package body Component.Simple_Command_Sequencer.Implementation is
 
+   -- The OS 'Sleep' package collides with the 'Sleep' Step_Kind enum literal.
+   -- Alias it so we never reference the bare name as a package prefix.
+   package Os_Sleep renames Sleep;
    procedure Init (Self : in out Instance; Num_Concurrent_Sequences : in Interfaces.Unsigned_32; Sequences : in Simple_Sequencer_Types.Sequences_Access) is
       Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
    begin
@@ -154,8 +160,8 @@ package body Component.Simple_Command_Sequencer.Implementation.Logic is
                      -- through the caller's arg record and returns the serialized
                      -- leaf, ready to use as the sub-command's Arg_Buffer.
                      declare
-                        Resolved : constant Command_Types.Command_Arg_Buffer_Type :=
-                           Step_Obj.Resolver.Resolve (Frame.Dynamic_Arg);
+                        Resolved : Command_Types.Command_Arg_Buffer_Type;
+                        Valid : constant Boolean := Step_Obj.Resolver (Frame.Dynamic_Arg, Resolved);
                         Cmd : constant Command.T := (
                            Header     => (
                               Source_Id         => Frame.Source_Id,
@@ -163,13 +169,14 @@ package body Component.Simple_Command_Sequencer.Implementation.Logic is
                               Arg_Buffer_Length => Step_Obj.Arg_Length),
                            Arg_Buffer => Resolved);
                      begin
+                        -- Check Valid Boolean here:
                         Self.Command_T_Send (Cmd);
                         if Frame.Flags.Wait_For_Cmd_Resp then
                            Frame.Status := Waiting_For_Cmd_Resp;
                         end if;
                         Frame.Last_Command_Send := Self.Sys_Time_T_Get;
                      end;
-                  when Sleep =>
+                  when Simple_Sequencer_Types.Sleep =>
                      -- Try_Schedule_Sleep returns False only when the sleep
                      -- duration is out of range. End the sequence cleanly --
                      -- letting it continue would leave the frame stuck in
@@ -192,6 +199,15 @@ package body Component.Simple_Command_Sequencer.Implementation.Logic is
 
    -- Sequence commands are received on this connector
    procedure Command_T_Recv_Async (Self : in out Instance; Arg : in Command.T) is
+      -- The per-sequence "ghost" commands occupy the command-ID block
+      -- immediately after the three modeled commands. They are first-class in
+      -- the assembly/COSMOS dictionary but absent from this component's static
+      -- command model, so Execute_Command's range check would reject them.
+      -- Intercept that block here and translate it to a Run_Sequence call.
+      First_Ghost_Id : constant Command_Types.Command_Id :=
+         Self.Command_Id_Base + Command_Types.Command_Id (Simple_Command_Sequencer_Commands.Num_Commands);
+      Num_Ghosts : constant Command_Types.Command_Id :=
+         Command_Types.Command_Id (Self.Sequences.all'Length);
    begin
       -- Stash the operator's response context before dispatch so Run_Sequence
       -- can copy it into the frame it claims. The active component's serial
@@ -202,19 +218,59 @@ package body Component.Simple_Command_Sequencer.Implementation.Logic is
       Self.Pending_Operator_Command_Id := Arg.Header.Id;
       Self.Pending_Defer := False;
 
-      declare
-         -- Execute the command:
-         Stat : constant Command_Response_Status.E := Self.Execute_Command (Arg);
-      begin
-         -- For Send_After_Sequence_Completion, Run_Sequence will have set
-         -- Pending_Defer and stashed the operator context in the claimed frame;
-         -- we suppress the immediate reply and the sequence-end paths emit it.
-         -- All other cases (default Send_After_Sequence_Start, claim failure,
-         -- non-sequence commands like Kill_All_Sequences) reply now.
-         if not Self.Pending_Defer then
-            Self.Command_Response_T_Send_If_Connected ((Source_Id => Arg.Header.Source_Id, Registration_Id => Self.Command_Reg_Id, Command_Id => Arg.Header.Id, Status => Stat));
-         end if;
-      end;
+      if Arg.Header.Id >= First_Ghost_Id and then Arg.Header.Id < First_Ghost_Id + Num_Ghosts then
+         -- Ghost (per-sequence) command: translate the wrapped argument record
+         -- into a Run_Sequence_Arg.T and dispatch through the Run_Sequence
+         -- backbone. The wrapped record serializes as
+         -- [User_Args (native, variable)] [Response_Behavior : E8 = 1 byte], so
+         -- the trailing byte is the response behavior and everything before it
+         -- is the native pass-through arg the sequence's steps/resolvers consume.
+         declare
+            Seq_Index : constant Interfaces.Unsigned_16 :=
+               Interfaces.Unsigned_16 (Arg.Header.Id - First_Ghost_Id); -- 0-based = Sequence_Id
+            Native_Len : constant Natural := Natural (Arg.Header.Arg_Buffer_Length) - 1;
+            Behavior : constant Sequence_Enums.Sequence_Response_Behavior.E :=
+               Sequence_Enums.Sequence_Response_Behavior.E'Enum_Val
+                  (Integer (Arg.Arg_Buffer (Arg.Arg_Buffer'First + Native_Len)));
+            Run_Arg : Run_Sequence_Arg.T :=
+               (Sequence_Id => Seq_Index,
+                Response_Behavior => Behavior,
+                Arg_Length => Simple_Sequencer_Types.Run_Sequence_Arg_Buffer_Length_Type (Native_Len),
+                Buffer_Arg => [others => 0]);
+            Stat : Command_Response_Status.E;
+         begin
+            if Native_Len > 0 then
+               Run_Arg.Buffer_Arg (Run_Arg.Buffer_Arg'First .. Run_Arg.Buffer_Arg'First + Native_Len - 1) :=
+                  Arg.Arg_Buffer (Arg.Arg_Buffer'First .. Arg.Arg_Buffer'First + Native_Len - 1);
+            end if;
+
+            -- Run_Sequence returns Command_Execution_Status; map it to the
+            -- Command_Response_Status the immediate reply expects (the work
+            -- Execute_Run_Sequence does for the modeled commands).
+            case Self.Run_Sequence (Run_Arg) is
+               when Command_Execution_Status.Success => Stat := Command_Response_Status.Success;
+               when Command_Execution_Status.Failure => Stat := Command_Response_Status.Failure;
+            end case;
+
+            if not Self.Pending_Defer then
+               Self.Command_Response_T_Send_If_Connected ((Source_Id => Arg.Header.Source_Id, Registration_Id => Self.Command_Reg_Id, Command_Id => Arg.Header.Id, Status => Stat));
+            end if;
+         end;
+      else
+         declare
+            -- Execute the command:
+            Stat : constant Command_Response_Status.E := Self.Execute_Command (Arg);
+         begin
+            -- For Send_After_Sequence_Completion, Run_Sequence will have set
+            -- Pending_Defer and stashed the operator context in the claimed frame;
+            -- we suppress the immediate reply and the sequence-end paths emit it.
+            -- All other cases (default Send_After_Sequence_Start, claim failure,
+            -- non-sequence commands like Kill_All_Sequences) reply now.
+            if not Self.Pending_Defer then
+               Self.Command_Response_T_Send_If_Connected ((Source_Id => Arg.Header.Source_Id, Registration_Id => Self.Command_Reg_Id, Command_Id => Arg.Header.Id, Status => Stat));
+            end if;
+         end;
+      end if;
    end Command_T_Recv_Async;
 
    -- Responses to sub-commands are received here. Two cases:
@@ -489,4 +545,27 @@ package body Component.Simple_Command_Sequencer.Implementation.Logic is
       ));
    end Invalid_Command;
 
-end Component.Simple_Command_Sequencer.Implementation.Logic;
+   procedure Register_Commands (Self : in out Instance; Arg : in Command_Registration_Request.T) is
+   begin
+      -- Register the 3 statically-modeled commands. The inherited version also
+      -- stashes Self.Command_Reg_Id := Arg.Registration_Id for us.
+      Component.Simple_Command_Sequencer.Base_Instance (Self).Register_Commands (Arg);
+
+      -- Register one "ghost" command per defined sequence. These aren't in the
+      -- model; their IDs continue right after the modeled block
+      -- (Command_Id_Base + Num_Commands + I) and line up with the IDs the
+      -- assembly reserved for the per-sequence commands (e.g. 22..26).
+      for I in 0 .. Self.Sequences.all'Length - 1 loop
+         Self.Command_Response_T_Send_If_Connected
+         ((Source_Id       => 0,
+            Registration_Id => Self.Command_Reg_Id,
+            Command_Id      => Self.Command_Id_Base
+                              + Command_Types.Command_Id (Simple_Command_Sequencer_Commands.Num_Commands)
+                              + Command_Types.Command_Id (I),
+            Status          => Command_Response_Status.Register),
+            Full_Queue_Behavior => Connector_Types.Drop);
+         Os_Sleep.Sleep_Us (Configuration.Command_Registration_Delay);
+      end loop;
+   end Register_Commands;
+
+end Component.Simple_Command_Sequencer.Implementation;
