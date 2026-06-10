@@ -5,7 +5,6 @@
 {% endif %}
 with Simple_Sequencer_Types; use Simple_Sequencer_Types;
 with {{ assembly_name }}_Commands; use {{ assembly_name }}_Commands;
-with Scs_Arg_Resolver;
 with Command_Types;
 with Basic_Types;
 {% if needs_sequence_arg_utils %}
@@ -25,17 +24,7 @@ package {{ name }} is
 {% for seq in sequences.values() %}
 {% for step in seq.steps %}
 {% if step.is_dynamic() %}
-
-   type {{ step.resolver_type_name }} is new Scs_Arg_Resolver.T with null record;
-
-   overriding function Resolve (
-      Resolver : {{ step.resolver_type_name }};
-      Data     : Basic_Types.Byte_Array
-   ) return Command_Types.Command_Arg_Buffer_Type;
-
-   {{ step.resolver_instance_name }} : aliased constant
-      {{ step.resolver_type_name }} := (null record);
-
+   function {{ step.resolver_type_name }} (Bytes : Basic_Types.Byte_Array; Args : out Command_Types.Command_Arg_Buffer_Type) return Boolean;
 {% endif %}
 {% endfor %}
 {% endfor %}
@@ -57,7 +46,7 @@ package {{ name }} is
       {{ loop.index0 }} => (Kind       => Runtime_Argument_Command_Step,
                            Id         => {{ step.component_name }}_{{ step.command_name }},
                            Arg_Length => {{ step.dynamic_arg_type_package }}.Serialization.Serialized_Length,
-                           Resolver => Scs_Arg_Resolver.T_Access'({{ step.resolver_instance_name }}'Access)){% if not loop.last %},{% endif %}
+                           Resolver => {{ step.resolver_type_name }}'Access){% if not loop.last %},{% endif %}
 
 {% elif step.has_arg() %}
       {{ loop.index0 }} => (Kind       => Command_Step,
