@@ -13,6 +13,7 @@ with Sequence_Timeout_Event_Info.Assertion; use Sequence_Timeout_Event_Info.Asse
 with Command_Response; use Command_Response;
 with Command_Enums; use Command_Enums.Command_Response_Status;
 with Test_Assembly_Command_Sequences_Example_Sequences;
+with Test_Assembly_Command_Sequences_Example_Sequences_Command_Builders;
 with Test_Component_Commands;
 with Command.Assertion; use Command.Assertion;
 with Packed_U32;
@@ -239,6 +240,11 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
       Component_A_Commands : Test_Component_Commands.Instance;
       Component_B_Commands : Test_Component_Commands.Instance;
+      -- Per-sequence "ghost" commands have no handler on the component, so build
+      -- them with the generated builder. Its Id_Base must match the sequencer's
+      -- command id base (default 1 in this test) so the constructed command id
+      -- lands in the ghost block the component translates to Run_Sequence.
+      Seq_Commands : Test_Assembly_Command_Sequences_Example_Sequences_Command_Builders.Instance;
       Argument : constant Sequence_B_Arg.T := (Component_A_Arg => (Value => 12), Component_B_Arg => (Value => 13));
       Cmd : Command.T;
    begin
@@ -246,6 +252,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Component_A_Commands.Set_Source_Id (0);
       Component_B_Commands.Set_Id_Base (7);
       Component_B_Commands.Set_Source_Id (0);
+      Seq_Commands.Set_Id_Base (1);
 
       T.System_Time := (Seconds => 0, Subseconds => 0);
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
@@ -253,7 +260,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       -- Build and send the synthesized Sequence_B command. No manual Sequence_Id
       -- or buffer packing -- that is the wrapper's job. Sequence_B_Run_Arg is a
       -- fixed-length type, so the suite generates the direct Command.T form.
-      Cmd := T.Commands.Sequence_B ((User_Args => Argument, Response_Behavior => Send_After_Sequence_Start));
+      Cmd := Seq_Commands.Sequence_B (User_Args => Argument, Response_Behavior => Send_After_Sequence_Start);
 
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -1172,16 +1179,19 @@ package body Simple_Command_Sequencer_Tests.Implementation is
    overriding procedure Test_Sub_Sequence_Call (Self : in out Instance) is
       T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
       Component_A_Commands : Test_Component_Commands.Instance;
+      Seq_Commands : Test_Assembly_Command_Sequences_Example_Sequences_Command_Builders.Instance;
       Sub_Cmd : Command.T;
    begin
       Component_A_Commands.Set_Id_Base (1);
       Component_A_Commands.Set_Source_Id (0);
+      Seq_Commands.Set_Id_Base (1);
+      Seq_Commands.Set_Source_Id (100);
       T.System_Time := (Seconds => 0, Subseconds => 0);
 
       T.Commands.Set_Source_Id (100);
 
       --  Operator starts Sequence_E (slot 4) on frame 0.
-      T.Command_T_Send (T.Commands.Sequence_E ((Response_Behavior => Send_After_Sequence_Start)));
+      T.Command_T_Send (Seq_Commands.Sequence_E (Response_Behavior => Send_After_Sequence_Start));
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 1);
       Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (1), (Sequence_Id => 4, Frame_Id => 0));
@@ -1204,7 +1214,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       --  for Sequencer.Sequence_C (asserted above), but this unit-test
       --  component instance still runs at the default command id base, so
       --  translate the id into that base before forwarding.
-      Sub_Cmd.Header.Id := T.Commands.Get_Sequence_C_Id;
+      Sub_Cmd.Header.Id := Seq_Commands.Get_Sequence_C_Id;
       T.Command_T_Send (Sub_Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
@@ -1256,6 +1266,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       use Sequence_Enums.Sequence_State;
       T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
       Entry_Length : constant Natural := Sequence_Frame_Summary.Serialization.Serialized_Length;
+      Seq_Commands : Test_Assembly_Command_Sequences_Example_Sequences_Command_Builders.Instance;
 
       function Get_Entry (Pkt : in Packet.T; Index : in Natural) return Sequence_Frame_Summary.T is
          First : constant Natural := Pkt.Buffer'First + Index * Entry_Length;
@@ -1263,6 +1274,8 @@ package body Simple_Command_Sequencer_Tests.Implementation is
          return Sequence_Frame_Summary.Serialization.From_Byte_Array (Pkt.Buffer (First .. First + Entry_Length - 1));
       end Get_Entry;
    begin
+      Seq_Commands.Set_Id_Base (1);
+      Seq_Commands.Set_Source_Id (100);
       T.System_Time := (Seconds => 0, Subseconds => 0);
 
       --  Period defaults to zero: no packets, no matter how many ticks.
@@ -1292,7 +1305,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       --  its first step and parks the frame; the same tick's packet reflects
       --  that end-of-tick state.
       T.Commands.Set_Source_Id (100);
-      T.Command_T_Send (T.Commands.Sequence_E ((Response_Behavior => Send_After_Sequence_Completion)));
+      T.Command_T_Send (Seq_Commands.Sequence_E (Response_Behavior => Send_After_Sequence_Completion));
       Natural_Assert.Eq (T.Dispatch_All, 1);
       T.Tick_T_Send (((0, 0), 0));
       Natural_Assert.Eq (T.Dispatch_All, 1);

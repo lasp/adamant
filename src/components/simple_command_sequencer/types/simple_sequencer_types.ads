@@ -1,6 +1,5 @@
 -- simple_sequencer_types.ads
 with Command_Types;
-with Scs_Arg_Resolver;
 with Packed_U32;
 with Interfaces;
 with Configuration;
@@ -22,6 +21,7 @@ package Simple_Sequencer_Types is
    --                                  milliseconds.
    ---------------------------------------------------------------------------
    type Step_Kind is (Command_Step, Runtime_Argument_Command_Step, Sleep);
+   type Resolver_Access is access function (Bytes : Basic_Types.Byte_Array; Args : out Command_Types.Command_Arg_Buffer_Type) return Boolean;
 
    type Step (Kind : Step_Kind := Command_Step) is record
       Id         : Command_Types.Command_Id         := 0;
@@ -30,7 +30,7 @@ package Simple_Sequencer_Types is
          when Command_Step =>
             Arg       : Command_Types.Command_Arg_Buffer_Type := [others => 0];
          when Runtime_Argument_Command_Step =>
-            Resolver  : Scs_Arg_Resolver.T_Access := null;
+            Resolver  : Resolver_Access := null;
          when Sleep =>
             Sleep_Arg : Packed_U32.T;
       end case;
