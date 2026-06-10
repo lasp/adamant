@@ -964,10 +964,10 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
       declare
-         CR : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (1);
+         Cr : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (1);
       begin
-         Natural_Assert.Eq (Natural (CR.Source_Id), 100);
-         pragma Assert (CR.Status = Success);
+         Natural_Assert.Eq (Natural (Cr.Source_Id), 100);
+         pragma Assert (Cr.Status = Success);
       end;
    end Test_Deferred_Response_On_Completion;
 
@@ -1016,10 +1016,10 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Sequence_Aborted_History.Get_Count, 1);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
       declare
-         CR : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (1);
+         Cr : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (1);
       begin
-         Natural_Assert.Eq (Natural (CR.Source_Id), 100);
-         pragma Assert (CR.Status = Failure);
+         Natural_Assert.Eq (Natural (Cr.Source_Id), 100);
+         pragma Assert (Cr.Status = Failure);
       end;
    end Test_Deferred_Response_On_Abort;
 
@@ -1027,12 +1027,9 @@ package body Simple_Command_Sequencer_Tests.Implementation is
    --  a deferred Failure to the operator.
    overriding procedure Test_Deferred_Response_On_Timeout (Self : in out Instance) is
       T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
-      Component_A_Commands : Test_Component_Commands.Instance;
       Cmd : Command.T;
       Status : Serialization_Status;
    begin
-      Component_A_Commands.Set_Id_Base (1);
-      Component_A_Commands.Set_Source_Id (0);
       T.Commands.Set_Source_Id (100);
       T.System_Time := (Seconds => 0, Subseconds => 0);
 
@@ -1057,10 +1054,10 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Sequence_Timeout_History.Get_Count, 1);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
       declare
-         CR : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (1);
+         Cr : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (1);
       begin
-         Natural_Assert.Eq (Natural (CR.Source_Id), 100);
-         pragma Assert (CR.Status = Failure);
+         Natural_Assert.Eq (Natural (Cr.Source_Id), 100);
+         pragma Assert (Cr.Status = Failure);
       end;
    end Test_Deferred_Response_On_Timeout;
 
@@ -1070,13 +1067,10 @@ package body Simple_Command_Sequencer_Tests.Implementation is
    --  killed frame's deferred Failure (Source_Id=100).
    overriding procedure Test_Deferred_Response_On_Kill_All (Self : in out Instance) is
       T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
-      Component_A_Commands : Test_Component_Commands.Instance;
       Run_Cmd : Command.T;
       Kill_Cmd : Command.T;
       Status : Serialization_Status;
    begin
-      Component_A_Commands.Set_Id_Base (1);
-      Component_A_Commands.Set_Source_Id (0);
       T.System_Time := (Seconds => 0, Subseconds => 0);
 
       T.Commands.Set_Source_Id (100);
@@ -1100,15 +1094,15 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Killed_All_Sequences_History.Get_Count, 1);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 2);
       declare
-         CR1 : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (1);
-         CR2 : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (2);
+         Cr1 : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (1);
+         Cr2 : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (2);
       begin
          --  Deferred Failure for the killed frame comes first (emitted inside
          --  Kill_All's per-frame loop); then Kill_All's own immediate Success.
-         Natural_Assert.Eq (Natural (CR1.Source_Id), 100);
-         pragma Assert (CR1.Status = Failure);
-         Natural_Assert.Eq (Natural (CR2.Source_Id), 101);
-         pragma Assert (CR2.Status = Success);
+         Natural_Assert.Eq (Natural (Cr1.Source_Id), 100);
+         pragma Assert (Cr1.Status = Failure);
+         Natural_Assert.Eq (Natural (Cr2.Source_Id), 101);
+         pragma Assert (Cr2.Status = Success);
       end;
    end Test_Deferred_Response_On_Kill_All;
 
@@ -1153,14 +1147,14 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 2);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 2);
       declare
-         CR1 : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (1);
-         CR2 : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (2);
+         Cr1 : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (1);
+         Cr2 : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (2);
       begin
          --  Frame[0] (operator A) completes first since it's iterated first.
-         Natural_Assert.Eq (Natural (CR1.Source_Id), 100);
-         pragma Assert (CR1.Status = Success);
-         Natural_Assert.Eq (Natural (CR2.Source_Id), 101);
-         pragma Assert (CR2.Status = Success);
+         Natural_Assert.Eq (Natural (Cr1.Source_Id), 100);
+         pragma Assert (Cr1.Status = Success);
+         Natural_Assert.Eq (Natural (Cr2.Source_Id), 101);
+         pragma Assert (Cr2.Status = Success);
       end;
    end Test_Concurrent_Deferred_Responses;
 
@@ -1225,10 +1219,10 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (2), (Sequence_Id => 2, Frame_Id => 1));
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 2);
       declare
-         CR : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (2);
+         Cr : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (2);
       begin
-         Natural_Assert.Eq (Natural (CR.Source_Id), 0);
-         pragma Assert (CR.Status = Success);
+         Natural_Assert.Eq (Natural (Cr.Source_Id), 0);
+         pragma Assert (Cr.Status = Success);
       end;
 
       --  Route the reply back: frame 0 wakes.

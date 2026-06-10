@@ -132,7 +132,6 @@ class sequence_step(object):
         arg_type = getattr(command_obj, "datatype", None)
         self.arg_type_package = arg_type.package
 
-
     def resolve_dynamic_arg_type(self, command_obj, parent_sequence):
         """
         For dynamic steps, resolve:
@@ -260,7 +259,7 @@ class command_sequence(command):
                 self.arg_type_name = parts[1]
             else:
                 self.arg_type_name = self.arg_type
-        
+
         for idx, step in enumerate(self.steps):
             step.index = idx
             step.set_defaults(self)
@@ -279,7 +278,6 @@ class command_sequence(command):
         super(command_sequence, self).__init__(
             name, type=(self.name + "_Run_Arg.T"), description=description, id=id, suite=suite
         )
-
 
     def get_command_name(self):
         return self.name
@@ -470,10 +468,7 @@ class command_sequences(assembly_submodel):
                     if step.dynamic_arg_type_package and step.dynamic_arg_type_package not in self.includes:
                         self.includes.append(step.dynamic_arg_type_package)
                 else:
-                    try:
-                        step.resolve_arg_type(step.command_obj)
-                    except:
-                        raise ModelException (f"{step.component_name}.{step.command_name}")
+                    step.resolve_arg_type(step.command_obj)
                     if step.arg_type_package and step.arg_type_package not in self.includes:
                         self.includes.append(step.arg_type_package)
 
