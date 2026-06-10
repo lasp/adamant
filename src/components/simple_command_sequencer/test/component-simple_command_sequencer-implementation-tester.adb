@@ -39,6 +39,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Invalid_Command_Received_History.Init (Depth => 100);
       Self.Unexpected_Command_Response_History.Init (Depth => 100);
       Self.Killed_All_Sequences_History.Init (Depth => 100);
+      Self.Invalid_Dynamic_Command_Argument_History.Init (Depth => 100);
       -- Packet histories:
       Self.Summary_Packet_History.Init (Depth => 100);
    end Init_Base;
@@ -69,6 +70,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Invalid_Command_Received_History.Destroy;
       Self.Unexpected_Command_Response_History.Destroy;
       Self.Killed_All_Sequences_History.Destroy;
+      Self.Invalid_Dynamic_Command_Argument_History.Destroy;
       -- Packet histories:
       Self.Summary_Packet_History.Destroy;
 
@@ -101,14 +103,19 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Command_T_Recv_Sync_History.Push (Arg);
    end Command_T_Recv_Sync;
 
-   -- Command responses (immediate and deferred operator replies) are sent out this connector
+   -- Sends the response to a Run_Sequence (or per-sequence wrapper) command back to
+   -- the command router. The Send_After_Sequence_Completion path emits its deferred
+   -- reply here on completion / abort / timeout / kill; the default
+   -- Send_After_Sequence_Start path emits its reply here immediately at dispatch
+   -- time.
    overriding procedure Command_Response_T_Recv_Sync (Self : in out Instance; Arg : in Command_Response.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Command_Response_T_Recv_Sync_History.Push (Arg);
    end Command_Response_T_Recv_Sync;
 
-   -- The periodic sequencer summary packet is sent out this connector
+   -- The packet send connector, used for sending the periodic sequencer summary
+   -- packet.
    overriding procedure Packet_T_Recv_Sync (Self : in out Instance; Arg : in Packet.T) is
    begin
       -- Push the argument onto the test history for looking at later:
@@ -116,16 +123,6 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       -- Dispatch the packet to the correct handler:
       Self.Dispatch_Packet (Arg);
    end Packet_T_Recv_Sync;
-
-   -----------------------------------------------
-   -- Packet handler primitive:
-   -----------------------------------------------
-   -- Periodic summary of all sequence frames.
-   overriding procedure Summary_Packet (Self : in out Instance; Arg : in Packet.T) is
-   begin
-      -- Push the argument onto the test history for looking at later:
-      Self.Summary_Packet_History.Push (Arg);
-   end Summary_Packet;
 
    -- Events are sent out of this connector
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T) is
@@ -290,18 +287,47 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Invalid_Command_Received_History.Push (Arg);
    end Invalid_Command_Received;
 
-   -- A command response was received with an unrecognized source ID.
+   -- A command response was received with a source ID that does not belong to any
+   -- active sequence frame.
    overriding procedure Unexpected_Command_Response (Self : in out Instance; Arg : in Command_Response.T) is
    begin
+      -- Push the argument onto the test history for looking at later:
       Self.Unexpected_Command_Response_History.Push (Arg);
    end Unexpected_Command_Response;
 
-   -- A Kill_All_Sequences command was executed and all running sequences were halted.
+   -- A Kill_All_Sequences command was executed and all running sequences were
+   -- halted.
    overriding procedure Killed_All_Sequences (Self : in out Instance) is
       Arg : constant Natural := 0;
    begin
+      -- Push the argument onto the test history for looking at later:
       Self.Killed_All_Sequences_History.Push (Arg);
    end Killed_All_Sequences;
+
+   -- A Command with a Dynamic Argument cannot be executed as the Argument is Invalid
+   overriding procedure Invalid_Dynamic_Command_Argument (Self : in out Instance; Arg : in Sequence_Step_Command_Event_Info.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Invalid_Dynamic_Command_Argument_History.Push (Arg);
+   end Invalid_Dynamic_Command_Argument;
+
+   -----------------------------------------------
+   -- Packet handler primitive:
+   -----------------------------------------------
+   -- Description:
+   --    Packets for the Simple Command Sequencer component.
+   -- Periodic summary of all sequence frames. Contains one Sequence_Frame_Summary
+   -- record per frame (Num_Concurrent_Sequences total, in frame order), reporting
+   -- which sequence is running on each frame, its current step, its execution state,
+   -- and whether an operator is still waiting on a deferred command response.
+   -- Emitted every Summary_Packet_Period ticks; a period of zero (the default)
+   -- disables emission. The period is set with the Set_Summary_Packet_Period
+   -- command.
+   overriding procedure Summary_Packet (Self : in out Instance; Arg : in Packet.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Summary_Packet_History.Push (Arg);
+   end Summary_Packet;
 
    -----------------------------------------------
    -- Special primitives for activating component

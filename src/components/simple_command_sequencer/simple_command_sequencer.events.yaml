@@ -61,3 +61,7 @@ events:
 
   - name: Killed_All_Sequences
     description: A Kill_All_Sequences command was executed and all running sequences were halted.
+
+  - name: Invalid_Dynamic_Command_Argument
+    description: A Command with a Dynamic Argument cannot be executed as the Argument is Invalid
+    param_type: Sequence_Step_Command_Event_Info.T

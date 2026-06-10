@@ -6,6 +6,8 @@
 with Component.Simple_Command_Sequencer_Reciprocal;
 with Printable_History;
 with Command.Representation;
+with Command_Response.Representation;
+with Packet.Representation;
 with Event.Representation;
 with Sys_Time.Representation;
 with Event;
@@ -16,8 +18,6 @@ with Sequence_Timeout_Event_Info.Representation;
 with Sequence_Step_Command_Event_Info.Representation;
 with Packed_U32.Representation;
 with Command_Header.Representation;
-with Command_Response.Representation;
-with Packet.Representation;
 with Tick.Representation;
 with Invalid_Command_Info.Representation;
 
@@ -52,6 +52,7 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    package Invalid_Command_Received_History_Package is new Printable_History (Invalid_Command_Info.T, Invalid_Command_Info.Representation.Image);
    package Unexpected_Command_Response_History_Package is new Printable_History (Command_Response.T, Command_Response.Representation.Image);
    package Killed_All_Sequences_History_Package is new Printable_History (Natural, Natural'Image);
+   package Invalid_Dynamic_Command_Argument_History_Package is new Printable_History (Sequence_Step_Command_Event_Info.T, Sequence_Step_Command_Event_Info.Representation.Image);
 
    -- Packet history packages:
    package Summary_Packet_History_Package is new Printable_History (Packet.T, Packet.Representation.Image);
@@ -83,6 +84,7 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
       Invalid_Command_Received_History : Invalid_Command_Received_History_Package.Instance;
       Unexpected_Command_Response_History : Unexpected_Command_Response_History_Package.Instance;
       Killed_All_Sequences_History : Killed_All_Sequences_History_Package.Instance;
+      Invalid_Dynamic_Command_Argument_History : Invalid_Dynamic_Command_Argument_History_Package.Instance;
       -- Packet histories:
       Summary_Packet_History : Summary_Packet_History_Package.Instance;
       -- Booleans to control assertion if message is dropped on async queue:
@@ -111,9 +113,14 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    ---------------------------------------
    -- Sub-commands are sent out this connector
    overriding procedure Command_T_Recv_Sync (Self : in out Instance; Arg : in Command.T);
-   -- Command responses (immediate and deferred operator replies) are sent out this connector
+   -- Sends the response to a Run_Sequence (or per-sequence wrapper) command back to
+   -- the command router. The Send_After_Sequence_Completion path emits its deferred
+   -- reply here on completion / abort / timeout / kill; the default
+   -- Send_After_Sequence_Start path emits its reply here immediately at dispatch
+   -- time.
    overriding procedure Command_Response_T_Recv_Sync (Self : in out Instance; Arg : in Command_Response.T);
-   -- The periodic sequencer summary packet is sent out this connector
+   -- The packet send connector, used for sending the periodic sequencer summary
+   -- packet.
    overriding procedure Packet_T_Recv_Sync (Self : in out Instance; Arg : in Packet.T);
    -- Events are sent out of this connector
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T);
@@ -165,15 +172,27 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    overriding procedure Dropped_Tick (Self : in out Instance; Arg : in Tick.T);
    -- A command was received with invalid parameters.
    overriding procedure Invalid_Command_Received (Self : in out Instance; Arg : in Invalid_Command_Info.T);
-   -- A command response was received with an unrecognized source ID.
+   -- A command response was received with a source ID that does not belong to any
+   -- active sequence frame.
    overriding procedure Unexpected_Command_Response (Self : in out Instance; Arg : in Command_Response.T);
-   -- A Kill_All_Sequences command was executed and all running sequences were halted.
+   -- A Kill_All_Sequences command was executed and all running sequences were
+   -- halted.
    overriding procedure Killed_All_Sequences (Self : in out Instance);
+   -- A Command with a Dynamic Argument cannot be executed as the Argument is Invalid
+   overriding procedure Invalid_Dynamic_Command_Argument (Self : in out Instance; Arg : in Sequence_Step_Command_Event_Info.T);
 
    -----------------------------------------------
-   -- Packet handler primitive:
+   -- Packet handler primitives:
    -----------------------------------------------
-   -- Periodic summary of all sequence frames.
+   -- Description:
+   --    Packets for the Simple Command Sequencer component.
+   -- Periodic summary of all sequence frames. Contains one Sequence_Frame_Summary
+   -- record per frame (Num_Concurrent_Sequences total, in frame order), reporting
+   -- which sequence is running on each frame, its current step, its execution state,
+   -- and whether an operator is still waiting on a deferred command response.
+   -- Emitted every Summary_Packet_Period ticks; a period of zero (the default)
+   -- disables emission. The period is set with the Set_Summary_Packet_Period
+   -- command.
    overriding procedure Summary_Packet (Self : in out Instance; Arg : in Packet.T);
 
    -----------------------------------------------

@@ -18,7 +18,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
    -- The OS 'Sleep' package collides with the 'Sleep' Step_Kind enum literal.
    -- Alias it so we never reference the bare name as a package prefix.
    package Os_Sleep renames Sleep;
-   procedure Init (Self : in out Instance; Num_Concurrent_Sequences : in Interfaces.Unsigned_32; Sequences : in Simple_Sequencer_Types.Sequences_Access) is
+   overriding procedure Init (Self : in out Instance; Num_Concurrent_Sequences : in Interfaces.Unsigned_32; Sequences : in Simple_Sequencer_Types.Sequences_Access) is
       Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
    begin
       Self.Sequence_Frames := new Sequence_Frame_Array (0 .. Num_Concurrent_Sequences - 1);
@@ -170,11 +170,17 @@ package body Component.Simple_Command_Sequencer.Implementation is
                            Arg_Buffer => Resolved);
                      begin
                         -- Check Valid Boolean here:
-                        Self.Command_T_Send (Cmd);
-                        if Frame.Flags.Wait_For_Cmd_Resp then
-                           Frame.Status := Waiting_For_Cmd_Resp;
+                        if Valid then
+                           Self.Command_T_Send (Cmd);
+                           if Frame.Flags.Wait_For_Cmd_Resp then
+                              Frame.Status := Waiting_For_Cmd_Resp;
+                           end if;
+                           Frame.Last_Command_Send := Self.Sys_Time_T_Get;
+                        else
+                           Self.Event_T_Send_If_Connected (Self.Events.Invalid_Dynamic_Command_Argument (Self.Sys_Time_T_Get, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Step => Frame.Step, Command_Id => Step_Obj.Id)));
+                           Frame.Status := Not_Running;
+                           Send_Deferred_Response_If_Pending (Self, Frame, Command_Response_Status.Failure);
                         end if;
-                        Frame.Last_Command_Send := Self.Sys_Time_T_Get;
                      end;
                   when Simple_Sequencer_Types.Sleep =>
                      -- Try_Schedule_Sleep returns False only when the sleep
@@ -198,7 +204,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
    end Execute_Sequence;
 
    -- Sequence commands are received on this connector
-   procedure Command_T_Recv_Async (Self : in out Instance; Arg : in Command.T) is
+   overriding procedure Command_T_Recv_Async (Self : in out Instance; Arg : in Command.T) is
       -- The per-sequence "ghost" commands occupy the command-ID block
       -- immediately after the three modeled commands. They are first-class in
       -- the assembly/COSMOS dictionary but absent from this component's static
@@ -278,7 +284,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
    --      one of our frames. We claim the first frame that doesn't yet have one.
    --   2) Anything else: a downstream command we issued has returned a result.
    --      Look up the owning frame by source ID, advance or abort it.
-   procedure Command_Response_T_Recv_Async (Self : in out Instance; Arg : in Command_Response.T) is
+   overriding procedure Command_Response_T_Recv_Async (Self : in out Instance; Arg : in Command_Response.T) is
       use Command_Response_Status;
    begin
       if Arg.Status = Command_Response_Status.Register_Source then
@@ -377,7 +383,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
    end Send_Summary_Packet_If_Due;
 
    -- Tick for managing timeouts and delays
-   procedure Tick_T_Recv_Async (Self : in out Instance; Arg : in Tick.T) is
+   overriding procedure Tick_T_Recv_Async (Self : in out Instance; Arg : in Tick.T) is
       Ignore : Tick.T renames Arg;
       use Sys_Time.Arithmetic;
       Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
@@ -434,7 +440,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
    end Tick_T_Recv_Async;
 
    -- This procedure is called when a Command_T_Recv_Async message is dropped due to a full queue.
-   procedure Command_T_Recv_Async_Dropped (Self : in out Instance; Arg : in Command.T) is
+   overriding procedure Command_T_Recv_Async_Dropped (Self : in out Instance; Arg : in Command.T) is
    begin
       Self.Event_T_Send_If_Connected (Self.Events.Dropped_Command (
         Self.Sys_Time_T_Get, Arg.Header
@@ -442,7 +448,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
    end Command_T_Recv_Async_Dropped;
 
    -- This procedure is called when a Command_Response_T_Recv_Async message is dropped due to a full queue.
-   procedure Command_Response_T_Recv_Async_Dropped (Self : in out Instance; Arg : in Command_Response.T) is
+   overriding procedure Command_Response_T_Recv_Async_Dropped (Self : in out Instance; Arg : in Command_Response.T) is
    begin
       -- Should this abort the sequence? Likely because it will never be re-sent.
       -- So we just lose an executor
@@ -452,7 +458,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
    end Command_Response_T_Recv_Async_Dropped;
 
    -- This procedure is called when a Tick_T_Recv_Async message is dropped due to a full queue.
-   procedure Tick_T_Recv_Async_Dropped (Self : in out Instance; Arg : in Tick.T) is
+   overriding procedure Tick_T_Recv_Async_Dropped (Self : in out Instance; Arg : in Tick.T) is
    begin
       Self.Event_T_Send_If_Connected (Self.Events.Dropped_Tick (
         Self.Sys_Time_T_Get, Arg
@@ -462,7 +468,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
    -- Run a Command Sequence. Allocates a free frame, copies the caller's
    -- buffer arg into the frame's Dynamic_Arg slot (for later Resolver
    -- traversal), and seeds frame state from the autocoded sequence table.
-   function Run_Sequence (Self : in out Instance; Arg : in Run_Sequence_Arg.T) return Command_Execution_Status.E is
+   overriding function Run_Sequence (Self : in out Instance; Arg : in Run_Sequence_Arg.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
       use Sequence_Enums.Sequence_Response_Behavior;
       Available_Id : Interfaces.Unsigned_32;
@@ -507,7 +513,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
    -- Halt every running sequence and return each frame to a Not_Running idle state.
    -- The Source_Id assignment (made when the command router registers each frame at
    -- startup) is preserved so frames remain claimable by future Run_Sequence calls.
-   function Kill_All_Sequences (Self : in out Instance) return Command_Execution_Status.E is
+   overriding function Kill_All_Sequences (Self : in out Instance) return Command_Execution_Status.E is
       use Command_Execution_Status;
    begin
       for Frame of Self.Sequence_Frames.all loop
@@ -528,7 +534,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
 
    -- Set the summary packet period, in ticks. Zero disables emission. The
    -- tick counter is reset so the new period starts a fresh phase.
-   function Set_Summary_Packet_Period (Self : in out Instance; Arg : in Packed_U16.T) return Command_Execution_Status.E is
+   overriding function Set_Summary_Packet_Period (Self : in out Instance; Arg : in Packed_U16.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
    begin
       Self.Summary_Packet_Period := Arg.Value;
@@ -537,7 +543,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
    end Set_Summary_Packet_Period;
 
    -- Invalid command handler. This procedure is called when a command's arguments are found to be invalid:
-   procedure Invalid_Command (Self : in out Instance; Cmd : in Command.T; Errant_Field_Number : in Interfaces.Unsigned_32; Errant_Field : in Basic_Types.Poly_Type) is
+   overriding procedure Invalid_Command (Self : in out Instance; Cmd : in Command.T; Errant_Field_Number : in Interfaces.Unsigned_32; Errant_Field : in Basic_Types.Poly_Type) is
    begin
       Self.Event_T_Send_If_Connected (Self.Events.Invalid_Command_Received (
         Self.Sys_Time_T_Get,
@@ -545,7 +551,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
       ));
    end Invalid_Command;
 
-   procedure Register_Commands (Self : in out Instance; Arg : in Command_Registration_Request.T) is
+   overriding procedure Register_Commands (Self : in out Instance; Arg : in Command_Registration_Request.T) is
    begin
       -- Register the 3 statically-modeled commands. The inherited version also
       -- stashes Self.Command_Reg_Id := Arg.Registration_Id for us.
