@@ -5,3 +5,5 @@ tests:
     description: This unit test invokes the async connector and makes sure the arguments are passed through asynchronously, as expected.
   - name: Test_Full_Queue
     description: This unit test fills the queue and makes sure that dropped messages are reported.
+  - name: Test_Dropped_Message_Count
+    description: This unit test overflows the queue multiple times and makes sure that the dropped message count data product accumulates and is reported on each drop.

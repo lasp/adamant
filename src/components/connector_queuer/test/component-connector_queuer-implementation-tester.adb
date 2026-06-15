@@ -2,6 +2,7 @@
 -- Connector_Queuer Component Tester Body
 --------------------------------------------------------------------------------
 
+-- Includes:
 with String_Util;
 
 package body Component.Connector_Queuer.Implementation.Tester is
@@ -18,9 +19,12 @@ package body Component.Connector_Queuer.Implementation.Tester is
       -- Connector histories:
       Self.T_Recv_Sync_History.Init (Depth => 100);
       Self.Sys_Time_T_Return_History.Init (Depth => 100);
+      Self.Data_Product_T_Recv_Sync_History.Init (Depth => 100);
       Self.Event_T_Recv_Sync_History.Init (Depth => 100);
       -- Event histories:
       Self.Dropped_Message_History.Init (Depth => 100);
+      -- Data product histories:
+      Self.Dropped_Message_Count_History.Init (Depth => 100);
    end Init_Base;
 
    procedure Final_Base (Self : in out Instance) is
@@ -29,9 +33,12 @@ package body Component.Connector_Queuer.Implementation.Tester is
       -- Connector histories:
       Self.T_Recv_Sync_History.Destroy;
       Self.Sys_Time_T_Return_History.Destroy;
+      Self.Data_Product_T_Recv_Sync_History.Destroy;
       Self.Event_T_Recv_Sync_History.Destroy;
       -- Event histories:
       Self.Dropped_Message_History.Destroy;
+      -- Data product histories:
+      Self.Dropped_Message_Count_History.Destroy;
 
       -- Destroy component heap:
       Self.Component_Instance.Final_Base;
@@ -44,6 +51,7 @@ package body Component.Connector_Queuer.Implementation.Tester is
    begin
       Self.Component_Instance.Attach_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.T_Recv_Sync_Access);
       Self.Component_Instance.Attach_Sys_Time_T_Get (To_Component => Self'Unchecked_Access, Hook => Self.Sys_Time_T_Return_Access);
+      Self.Component_Instance.Attach_Data_Product_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Data_Product_T_Recv_Sync_Access);
       Self.Component_Instance.Attach_Event_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Event_T_Recv_Sync_Access);
       Self.Attach_T_Send (To_Component => Self.Component_Instance'Unchecked_Access, Hook => Self.Component_Instance.T_Recv_Async_Access);
    end Connect;
@@ -51,7 +59,9 @@ package body Component.Connector_Queuer.Implementation.Tester is
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- The generic invoker connector. Calls originating from this connector are serviced from the component's queue and thus will be executed in FIFO order in a thread-safe, atomic manner.
+   -- The generic invoker connector. Calls originating from this connector are
+   -- serviced from the component's queue and thus will be executed in FIFO order in
+   -- a thread-safe, atomic manner.
    overriding procedure T_Recv_Sync (Self : in out Instance; Arg : in T) is
    begin
       -- Push the argument onto the test history for looking at later:
@@ -60,14 +70,22 @@ package body Component.Connector_Queuer.Implementation.Tester is
 
    -- The system time is retrieved via this connector.
    overriding function Sys_Time_T_Return (Self : in out Instance) return Sys_Time.T is
-      To_Return : Sys_Time.T;
-   begin
       -- Return the system time:
-      To_Return := Self.System_Time;
+      To_Return : constant Sys_Time.T := Self.System_Time;
+   begin
       -- Push the argument onto the test history for looking at later:
       Self.Sys_Time_T_Return_History.Push (To_Return);
       return To_Return;
    end Sys_Time_T_Return;
+
+   -- The dropped message count is sent out of this connector.
+   overriding procedure Data_Product_T_Recv_Sync (Self : in out Instance; Arg : in Data_Product.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Data_Product_T_Recv_Sync_History.Push (Arg);
+      -- Dispatch the data product to the correct handler:
+      Self.Dispatch_Data_Product (Arg);
+   end Data_Product_T_Recv_Sync;
 
    -- Events are sent out of this connector.
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T) is
@@ -103,6 +121,19 @@ package body Component.Connector_Queuer.Implementation.Tester is
       -- Push the argument onto the test history for looking at later:
       Self.Dropped_Message_History.Push (Arg);
    end Dropped_Message;
+
+   -----------------------------------------------
+   -- Data product handler primitive:
+   -----------------------------------------------
+   -- Description:
+   --    Data products for the connector queuer component.
+   -- The number of messages dropped due to queue overflow. The count rolls over at
+   -- 65535 and is 2 bytes wide.
+   overriding procedure Dropped_Message_Count (Self : in out Instance; Arg : in Packed_U16.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Dropped_Message_Count_History.Push (Arg);
+   end Dropped_Message_Count;
 
    -----------------------------------------------
    -- Special primitives for activating component
