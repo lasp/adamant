@@ -1,0 +1,6 @@
+---
+description: Data products for the connector queuer component.
+data_products:
+  - name: Dropped_Message_Count
+    description: The number of messages dropped due to queue overflow. The count rolls over at 65535 and is 2 bytes wide.
+    type: Packed_U16.T
