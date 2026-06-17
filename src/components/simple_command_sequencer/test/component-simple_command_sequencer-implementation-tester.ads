@@ -20,6 +20,7 @@ with Packed_U32.Representation;
 with Command_Header.Representation;
 with Tick.Representation;
 with Invalid_Command_Info.Representation;
+with Sequence_Summary_Packet.Representation;
 
 -- The Command Sequencer component executes predefined sequences of commands.
 -- It receives high-level sequence commands and breaks them down into individual
@@ -55,7 +56,7 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    package Invalid_Dynamic_Command_Argument_History_Package is new Printable_History (Sequence_Step_Command_Event_Info.T, Sequence_Step_Command_Event_Info.Representation.Image);
 
    -- Packet history packages:
-   package Summary_Packet_History_Package is new Printable_History (Packet.T, Packet.Representation.Image);
+   package Summary_Packet_History_Package is new Printable_History (Sequence_Summary_Packet.T, Sequence_Summary_Packet.Representation.Image);
 
    -- Component class instance:
    type Instance is new Component.Simple_Command_Sequencer_Reciprocal.Base_Instance with record
@@ -193,7 +194,7 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    -- Emitted every Summary_Packet_Period ticks; a period of zero (the default)
    -- disables emission. The period is set with the Set_Summary_Packet_Period
    -- command.
-   overriding procedure Summary_Packet (Self : in out Instance; Arg : in Packet.T);
+   overriding procedure Summary_Packet (Self : in out Instance; Arg : in Sequence_Summary_Packet.T);
 
    -----------------------------------------------
    -- Special primitives for activating component
