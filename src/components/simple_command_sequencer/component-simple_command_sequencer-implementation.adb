@@ -8,7 +8,7 @@ with Ada.Real_Time;
 with Sys_Time.Arithmetic;
 with Command_Types; use Command_Types;
 with Packet;
-with Sequence_Frame_Summary;
+with Sequence_Frame_Summary_Array;
 with Serializer_Types; use Serializer_Types;
 with Configuration;
 with Sleep;
@@ -345,7 +345,6 @@ package body Component.Simple_Command_Sequencer.Implementation is
    -- Called once per tick, after the frames have been advanced, so the packet
    -- reflects this tick's end state.
    procedure Send_Summary_Packet_If_Due (Self : in out Instance) is
-      Entry_Length : constant Natural := Sequence_Frame_Summary.Serialization.Serialized_Length;
    begin
       if Self.Summary_Packet_Period = 0 then
          return;
@@ -357,24 +356,34 @@ package body Component.Simple_Command_Sequencer.Implementation is
       end if;
       Self.Summary_Packet_Tick_Count := 0;
 
+      -- Build the typed summary packet: one Sequence_Frame_Summary per frame,
+      -- in frame order, with Num_Frames giving the live count. The packet's
+      -- record type makes the per-frame fields visible field-by-field in the
+      -- ground system; the array is variable length, so only Num_Frames entries
+      -- are serialized onto the wire.
       declare
-         Summary_Bytes : Basic_Types.Byte_Array (0 .. Natural (Self.Sequence_Frames.all'Length) * Entry_Length - 1);
-         Offset : Natural := Summary_Bytes'First;
+         Frames : Sequence_Frame_Summary_Array.T :=
+            [others => (Sequence_Id => 0, Step => 0, Status => Not_Running,
+                        Response_Behavior => Sequence_Enums.Sequence_Response_Behavior.Send_After_Sequence_Start,
+                        Operator_Source_Id => 0)];
+         Num_Frames : constant Interfaces.Unsigned_16 := Interfaces.Unsigned_16 (Self.Sequence_Frames.all'Length);
          Pkt : Packet.T;
          Stat : Serialization_Status;
       begin
-         for Frame of Self.Sequence_Frames.all loop
-            Summary_Bytes (Offset .. Offset + Entry_Length - 1) :=
-               Sequence_Frame_Summary.Serialization.To_Byte_Array ((
-                  Sequence_Id => Frame.Sequence_Id,
-                  Step => Frame.Step,
-                  Status => Frame.Status,
-                  Response_Behavior => Frame.Response_Behavior,
-                  Operator_Source_Id => Frame.Operator_Source_Id));
-            Offset := @ + Entry_Length;
+         for Id in Self.Sequence_Frames.all'Range loop
+            declare
+               Frame : Sequence_Frame.T renames Self.Sequence_Frames.all (Id);
+            begin
+               Frames (Natural (Id)) :=
+                  (Sequence_Id => Frame.Sequence_Id,
+                   Step => Frame.Step,
+                   Status => Frame.Status,
+                   Response_Behavior => Frame.Response_Behavior,
+                   Operator_Source_Id => Frame.Operator_Source_Id);
+            end;
          end loop;
 
-         Stat := Self.Packets.Summary_Packet (Self.Sys_Time_T_Get, Summary_Bytes, Pkt);
+         Stat := Self.Packets.Summary_Packet (Self.Sys_Time_T_Get, (Num_Frames => Num_Frames, Frames => Frames), Pkt);
          -- Frame count is a static init-time configuration; a count too large
          -- for one packet is a misconfiguration that should fail loudly.
          pragma Assert (Stat = Success, "Too many sequence frames to fit the summary packet!");
