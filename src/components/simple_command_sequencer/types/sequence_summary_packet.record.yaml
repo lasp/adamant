@@ -1,0 +1,11 @@
+---
+description: Periodic summary of all sequence frames. Carries one Sequence_Frame_Summary per active frame (Num_Frames total, in frame order). Typed so the per-frame fields are visible field-by-field in the ground system rather than an opaque blob; the array is variable length so only the live frames are serialized onto the wire.
+fields:
+  - name: Num_Frames
+    description: Number of valid Sequence_Frame_Summary entries in Frames (equals the sequencer's Num_Concurrent_Sequences).
+    type: Interfaces.Unsigned_16
+    format: U16
+  - name: Frames
+    description: One summary entry per sequence frame, in frame order. Only the first Num_Frames entries are serialized.
+    type: Sequence_Frame_Summary_Array.T
+    variable_length: Num_Frames

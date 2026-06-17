@@ -323,7 +323,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
    -- Emitted every Summary_Packet_Period ticks; a period of zero (the default)
    -- disables emission. The period is set with the Set_Summary_Packet_Period
    -- command.
-   overriding procedure Summary_Packet (Self : in out Instance; Arg : in Packet.T) is
+   overriding procedure Summary_Packet (Self : in out Instance; Arg : in Sequence_Summary_Packet.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Summary_Packet_History.Push (Arg);

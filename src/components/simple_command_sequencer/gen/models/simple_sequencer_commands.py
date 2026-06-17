@@ -10,6 +10,14 @@ class simple_sequencer_commands(commands):
         # suite so all the usual command codegen hooks fire.
         return "commands"
 
+    def load(self):
+        super(simple_sequencer_commands, self).load()
+        # The per-sequence commands are injected per-assembly in set_assembly, so
+        # this suite is context-dependent. Never serve it from the (filename+mtime-
+        # keyed, session-shared) model cache, or a standalone 3-command load gets
+        # reused for an assembly's command dictionary. (Framework precedent: assembly.py:550.)
+        self.do_save_to_cache = False
+
     def set_assembly(
         self, assembly
     ):  # Make sure an assembly is set by the base class implementation.

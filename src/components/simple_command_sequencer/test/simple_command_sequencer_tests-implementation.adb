@@ -23,6 +23,7 @@ with Interfaces;
 with Test_Assembly_Commands;
 with Packet;
 with Sequence_Frame_Summary.Assertion; use Sequence_Frame_Summary.Assertion;
+with Sequence_Summary_Packet;
 
 package body Simple_Command_Sequencer_Tests.Implementation is
 
@@ -1261,12 +1262,6 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
       Entry_Length : constant Natural := Sequence_Frame_Summary.Serialization.Serialized_Length;
       Seq_Commands : Test_Assembly_Command_Sequences_Example_Sequences_Command_Builders.Instance;
-
-      function Get_Entry (Pkt : in Packet.T; Index : in Natural) return Sequence_Frame_Summary.T is
-         First : constant Natural := Pkt.Buffer'First + Index * Entry_Length;
-      begin
-         return Sequence_Frame_Summary.Serialization.From_Byte_Array (Pkt.Buffer (First .. First + Entry_Length - 1));
-      end Get_Entry;
    begin
       Seq_Commands.Set_Id_Base (1);
       Seq_Commands.Set_Source_Id (100);
@@ -1286,12 +1281,17 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Summary_Packet_History.Get_Count, 1);
       declare
-         Pkt : constant Packet.T := T.Summary_Packet_History.Get (1);
+         --  The raw history holds the wire packet (for the byte-length check);
+         --  the typed history holds the deserialized record (for field checks).
+         Pkt : constant Packet.T := T.Packet_T_Recv_Sync_History.Get (1);
+         Summary : constant Sequence_Summary_Packet.T := T.Summary_Packet_History.Get (1);
       begin
-         Natural_Assert.Eq (Natural (Pkt.Header.Buffer_Length), 2 * Entry_Length);
-         Sequence_Frame_Summary_Assert.Eq (Get_Entry (Pkt, 0),
+         --  Wire layout: 2-byte Num_Frames + Num_Frames * per-frame entry.
+         Natural_Assert.Eq (Natural (Pkt.Header.Buffer_Length), 2 + 2 * Entry_Length);
+         Natural_Assert.Eq (Natural (Summary.Num_Frames), 2);
+         Sequence_Frame_Summary_Assert.Eq (Summary.Frames (0),
             (Sequence_Id => 0, Step => 0, Status => Not_Running, Response_Behavior => Send_After_Sequence_Start, Operator_Source_Id => 0));
-         Sequence_Frame_Summary_Assert.Eq (Get_Entry (Pkt, 1),
+         Sequence_Frame_Summary_Assert.Eq (Summary.Frames (1),
             (Sequence_Id => 0, Step => 0, Status => Not_Running, Response_Behavior => Send_After_Sequence_Start, Operator_Source_Id => 0));
       end;
 
@@ -1304,10 +1304,14 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       T.Tick_T_Send (((0, 0), 0));
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Summary_Packet_History.Get_Count, 2);
-      Sequence_Frame_Summary_Assert.Eq (Get_Entry (T.Summary_Packet_History.Get (2), 0),
-         (Sequence_Id => 4, Step => 1, Status => Waiting_For_Cmd_Resp, Response_Behavior => Send_After_Sequence_Completion, Operator_Source_Id => 100));
-      Sequence_Frame_Summary_Assert.Eq (Get_Entry (T.Summary_Packet_History.Get (2), 1),
-         (Sequence_Id => 0, Step => 0, Status => Not_Running, Response_Behavior => Send_After_Sequence_Start, Operator_Source_Id => 0));
+      declare
+         Summary : constant Sequence_Summary_Packet.T := T.Summary_Packet_History.Get (2);
+      begin
+         Sequence_Frame_Summary_Assert.Eq (Summary.Frames (0),
+            (Sequence_Id => 4, Step => 1, Status => Waiting_For_Cmd_Resp, Response_Behavior => Send_After_Sequence_Completion, Operator_Source_Id => 100));
+         Sequence_Frame_Summary_Assert.Eq (Summary.Frames (1),
+            (Sequence_Id => 0, Step => 0, Status => Not_Running, Response_Behavior => Send_After_Sequence_Start, Operator_Source_Id => 0));
+      end;
 
       --  Changing the period resets the phase: with period 3, the packet
       --  arrives only on the third tick after the command.
