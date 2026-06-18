@@ -77,7 +77,36 @@ class simple_sequencer_commands(commands):
 
         # Set the component packets to the product packet model packets.
         self.entities.update(self.command_sequences_model.sequences)
+        # If an explicit Command_Id_Base was supplied, set_id_base() already ran
+        # during component-instance setup -- before the per-sequence commands were
+        # injected above -- so it only stamped ids onto the built-in commands and
+        # the injected sequence commands are still id-less. Re-stamp the whole suite
+        # from the base now that its full membership is known, so the sequence
+        # commands get contiguous ids (otherwise _generate_component_ids drops the
+        # id-less entities, since it skips the assign-and-add path for suites that
+        # already have an id_base).
+        if self.id_base is not None:
+            for entity in self.entities.values():
+                entity.id = None
+            self._set_ids(self.id_base)
         self.ids = [e.id for e in self.entities.values() if e.id]
+
+        # The injected per-sequence commands carry the generated <Name>_Run_Arg
+        # record as their arg type. The component's complex_types dict (and hence
+        # the assembly's) was built at component-load time, BEFORE this injection,
+        # so those record types are absent from it. Assembly-level consumers that
+        # look up the type by package in complex_types -- e.g. the Hydra command
+        # config (complex_types[command.type_package].hydra_field_strings) --
+        # then fail with KeyError/UndefinedError. Register each injected command's
+        # resolved type_model (and its embedded types) into the component's
+        # complex_types now. This is a plain dict update of already-resolved
+        # models: no model loads, no redo-ifchange, no dependency changes.
+        for cmd in self.command_sequences_model.sequences.values():
+            type_model = cmd.type_model
+            if type_model is not None:
+                self.component.complex_types[type_model.name] = type_model
+                for embedded in type_model.get_all_type_models_recursive():
+                    self.component.complex_types[embedded.name] = embedded
 
         # Call the base class version:
         super(simple_sequencer_commands, self).set_component(self.component)

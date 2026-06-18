@@ -1,8 +1,42 @@
 import os.path
+import re
+import yaml as _yaml
 from models.command_sequences import command_sequences
 from base_classes.generator_base import generator_base
 from generators.basic import basic_generator, add_basic_generators_to_module
 from util import redo_arg
+from util import ada
+
+
+# Matches a dynamic step arg ("Arg" or "Arg.A.B..."), mirroring
+# sequence_step._DYNAMIC_ARG_RE in the command_sequences model.
+_DYNAMIC_ARG_RE = re.compile(r'^Arg(\.[A-Za-z][A-Za-z0-9_]*)*$')
+
+
+def _has_dynamic_steps_raw(input_filename):
+    """
+    True if any step in any sequence uses a dynamic 'Arg[.x]' value, read
+    straight from the raw YAML -- WITHOUT constructing the command_sequences
+    model. Constructing the model during redo's DB-setup pass (when
+    output_filename runs) eagerly resolves each per-sequence command's
+    <Name>_Run_Arg datatype against a model DB that hasn't yet registered those
+    generated records, resolving them to None and caching that for the whole
+    session -- which makes the COSMOS command generator emit argument-less
+    commands. So output_filename derives name/dynamic-step info from the raw
+    file instead.
+    """
+    with open(input_filename) as f:
+        data = _yaml.safe_load(f)
+    if not isinstance(data, dict) or not data.get("sequences"):
+        return False
+    for seq in data["sequences"]:
+        for step in (seq.get("sequence") or []):
+            if not isinstance(step, dict):
+                continue
+            arg = step.get("arg")
+            if arg is not None and _DYNAMIC_ARG_RE.match(str(arg)):
+                return True
+    return False
 
 
 def load_command_sequences_model(input_filename):
@@ -49,8 +83,14 @@ class command_sequences_gen(basic_generator):
             input_filename
         )
         build_dir = self._get_default_build_dir()
-        cs = command_sequences(input_filename)
-        base_name = cs.name.lower()
+        # Compute the package base name directly from the filename parts rather
+        # than constructing the command_sequences model. This formula mirrors
+        # command_sequences.load()'s self.name; building the model here would
+        # poison the session model cache (see _has_dynamic_steps_raw above).
+        base_name = ada.formatType(model_name) + "_Command_Sequences"
+        if specific_name:
+            base_name = base_name + "_" + ada.formatVariable(specific_name)
+        base_name = base_name.lower()
         # Substitute "name" in the template basename with the actual model name
         a = self.template_basename.rsplit("name", maxsplit=1)
         output_fname = base_name.join(a)
@@ -81,11 +121,10 @@ class command_sequences_adb(command_sequences_gen, generator_base):
         command_sequences_gen.__init__(self, template_filename="name.adb")
 
     def output_filename(self, input_filename):
-        # Suppress the body unless there is a dynamic step. Dynamic steps are
-        # detected at load time (from the YAML "Arg.*" pattern), so no assembly
-        # resolution is needed here.
-        cs = command_sequences(input_filename)
-        if not cs.has_dynamic_steps():
+        # Suppress the body unless there is a dynamic step. Detect dynamic steps
+        # from the raw YAML ("Arg.*" pattern) rather than constructing the model
+        # (see _has_dynamic_steps_raw for why the model must not be built here).
+        if not _has_dynamic_steps_raw(input_filename):
             return ""
         return command_sequences_gen.output_filename(self, input_filename)
 

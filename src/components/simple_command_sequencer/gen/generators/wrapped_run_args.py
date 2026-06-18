@@ -142,6 +142,16 @@ class _wrapped_run_arg_record_yaml_base(basic_generator, generator_base):
             # output-dir defaults work out (".yaml" -> build/yaml).
             template_filename="name_run_arg.record.yaml",
             template_dir=template_dir,
+            # CRITICAL: do not let the build rule load the command_sequences
+            # model to compute this target's dependencies. This record is
+            # derived purely from the raw command_sequences.yaml (see
+            # _raw_sequences_in), which build_via_generator already depends on
+            # directly. If we loaded the model here, that model's load() would
+            # redo-ifchange these very records (so the assembly resolves them),
+            # which would re-enter this build -> infinite recursion. Keeping
+            # has_dependencies=False makes depends_on() return [] without a
+            # model load, breaking that cycle.
+            has_dependencies=False,
         )
 
     def output_filename(self, input_filename):

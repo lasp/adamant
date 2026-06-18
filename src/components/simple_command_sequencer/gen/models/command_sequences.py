@@ -7,6 +7,8 @@ from models.commands import (
     command
 )
 from util import model_loader
+from util import redo
+from util import redo_arg
 import re
 
 DEFAULT_COMMAND_TIMEOUT_SECONDS = 30
@@ -382,6 +384,35 @@ class command_sequences(assembly_submodel):
 
         if "sequences" not in self.data or not self.data["sequences"]:
             raise ModelException("At least one sequence must be defined")
+
+        # Each per-sequence command's wire type is the generated <Name>_Run_Arg
+        # record (produced by the wrapped_run_args generator). Build any that are
+        # not yet on disk so that constructing the command_sequence objects below
+        # -- which eagerly resolve "<Name>_Run_Arg.T" via the model loader -- can
+        # load them. Mirrors how packed_type builds its generated .type_ranges.yaml
+        # during load. Two things make this safe (no recursion / no DB-setup
+        # breakage):
+        #   * output_filename no longer constructs this model, so it is only
+        #     loaded during real generation, never during redo's DB-setup pass.
+        #   * the wrapped_run_args generator sets has_dependencies=False, so
+        #     building a run_arg record never loads this model back -- otherwise
+        #     this redo_ifchange would re-enter and recurse.
+        # Gating on existence keeps this from spawning a redo-ifchange child on
+        # every one of the many model loads in a build; incremental staleness is
+        # handled by the normal dependency graph (the suite's deps_list carries
+        # each resolved record as a dependency of the assembly).
+        src_dir = redo_arg.get_src_dir(self.full_filename)
+        run_arg_records = [
+            os.path.join(
+                src_dir, "build", "yaml",
+                str(seq_data["name"]).lower() + "_run_arg.record.yaml",
+            )
+            for seq_data in self.data["sequences"]
+            if isinstance(seq_data, dict) and "name" in seq_data
+        ]
+        missing = [p for p in run_arg_records if not os.path.isfile(p)]
+        if missing:
+            redo.redo_ifchange(missing)
 
         for seq_data in self.data["sequences"]:
             seq = command_sequence.from_sequence_data(seq_data, suite=self)
