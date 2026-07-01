@@ -75,20 +75,12 @@ class simple_sequencer_commands(commands):
         # Provide the assembly to the product packetizer model
         self.command_sequences_model.set_assembly(assembly)
 
-        # Set the component packets to the product packet model packets.
+        # Inject the per-sequence commands. Their ids are NOT assigned here:
+        # entity-id assignment for id-based suites is deferred to the
+        # assembly-wide id pass (assembly._generate_component_ids), which now
+        # runs after this injection, so the injected commands are stamped along
+        # with the built-in ones from the component's Command_Id_Base.
         self.entities.update(self.command_sequences_model.sequences)
-        # If an explicit Command_Id_Base was supplied, set_id_base() already ran
-        # during component-instance setup -- before the per-sequence commands were
-        # injected above -- so it only stamped ids onto the built-in commands and
-        # the injected sequence commands are still id-less. Re-stamp the whole suite
-        # from the base now that its full membership is known, so the sequence
-        # commands get contiguous ids (otherwise _generate_component_ids drops the
-        # id-less entities, since it skips the assign-and-add path for suites that
-        # already have an id_base).
-        if self.id_base is not None:
-            for entity in self.entities.values():
-                entity.id = None
-            self._set_ids(self.id_base)
         self.ids = [e.id for e in self.entities.values() if e.id]
 
         # The injected per-sequence commands carry the generated <Name>_Run_Arg
