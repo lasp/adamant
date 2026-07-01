@@ -1,0 +1,20 @@
+---
+description: Argument Type for Run Sequence Command
+fields:
+  - name: Sequence_Id
+    description: Id of a Command Sequence Registered with the Simple Command Sequencer
+    type: Interfaces.Unsigned_16
+    format: U16
+  - name: Response_Behavior
+    description: When the sequencer should reply to this Run_Sequence command - immediately on start or after the sequence completes.
+    type: Sequence_Enums.Sequence_Response_Behavior.E
+    format: E8
+  - name: Arg_Length
+    description: Length of the buffer argument in bytes
+    type: Simple_Sequencer_Types.Run_Sequence_Arg_Buffer_Length_Type
+    format: U16
+  - name: Buffer_Arg
+    description: Passthrough Argument for Commands in Sequence
+    type: Simple_Sequencer_Types.Run_Sequence_Buffer_Type
+    format: U8x{{ command_buffer_size - 5 }}
+    variable_length: Arg_Length

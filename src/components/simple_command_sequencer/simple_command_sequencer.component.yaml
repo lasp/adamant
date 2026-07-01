@@ -1,0 +1,49 @@
+---
+description: |
+  The Command Sequencer component executes predefined sequences of commands.
+  It receives high-level sequence commands and breaks them down into individual
+  sub-commands that are sent to the command router. The sequencer handles
+  command response tracking, timeouts, and failure modes.
+
+execution: active
+init:
+  parameters:
+    - name: Num_Concurrent_Sequences
+      type: Interfaces.Unsigned_32
+      description: Denotes the Number of Sequences that can be running at the same time. Any Run_Sequence commands
+        that are sent that would increase the number of concurrent sequences beyond this number will be rejected.
+    - name: Sequences
+      type: Simple_Sequencer_Types.Sequences_Access
+      description: Access to statically defined sequence list.
+connectors:
+  - name: Command_T_Recv_Async
+    type: Command.T
+    kind: recv_async
+    description: Sequence commands are received on this connector
+  - name: Command_T_Send
+    type: Command.T
+    kind: send
+    description: Sub-commands are sent out this connector
+  - name: Command_Response_T_Send
+    type: Command_Response.T
+    kind: send
+    description: Sends the response to a Run_Sequence (or per-sequence wrapper) command back to the command router. The Send_After_Sequence_Completion path emits its deferred reply here on completion / abort / timeout / kill; the default Send_After_Sequence_Start path emits its reply here immediately at dispatch time.
+  - name: Command_Response_T_Recv_Async
+    type: Command_Response.T
+    kind: recv_async
+    description: Responses to sub-commands are received here
+  - description: The packet send connector, used for sending the periodic sequencer summary packet.
+    type: Packet.T
+    kind: send
+  - name: Tick_T_Recv_Async
+    type: Tick.T
+    kind: recv_async
+    description: Tick for managing timeouts and delays
+  - name: Event_T_Send
+    type: Event.T
+    kind: send
+    description: Events are sent out of this connector
+  - name: Sys_Time_T_Get
+    description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get
