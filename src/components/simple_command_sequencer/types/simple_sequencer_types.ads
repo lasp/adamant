@@ -4,6 +4,8 @@ with Packed_U32;
 with Interfaces;
 with Configuration;
 with Basic_Types;
+with Packet_Types;
+with Sequence_Frame_Summary;
 
 package Simple_Sequencer_Types is
 
@@ -52,4 +54,11 @@ package Simple_Sequencer_Types is
    subtype Run_Sequence_Arg_Buffer_Length_Type is Command_Types.Command_Arg_Buffer_Length_Type range 0 .. (Configuration.Command_Buffer_Size - 5);
    subtype Run_Sequence_Arg_Buffer_Index_Type is Run_Sequence_Arg_Buffer_Length_Type range 0 .. Run_Sequence_Arg_Buffer_Length_Type'Last - 1;
    subtype Run_Sequence_Buffer_Type is Basic_Types.Byte_Array (Run_Sequence_Arg_Buffer_Index_Type);
+
+   -- The number of sequence frames (concurrently running sequences) a sequencer
+   -- instance may be configured with. The upper bound is the most frames whose
+   -- Sequence_Frame_Summary entries fit in one summary packet, so a
+   -- configuration whose summaries cannot be downlinked is rejected by the type
+   -- system at Init.
+   subtype Num_Concurrent_Sequences_Type is Interfaces.Unsigned_32 range 1 .. Interfaces.Unsigned_32 (Packet_Types.Packet_Buffer_Type'Length / Sequence_Frame_Summary.Size_In_Bytes);
 end Simple_Sequencer_Types;

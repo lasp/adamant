@@ -1,0 +1,14 @@
+---
+description: This is an autocoded summary packet type for a Simple Command Sequencer component. It contains one Sequence_Frame_Summary record per sequence frame (Num_Concurrent_Sequences total, in frame order).
+fields:
+{% if num_simple_command_sequencer_frames > 0 %}
+{% for frame in range(0, num_simple_command_sequencer_frames) %}
+  - name: Frame_{{ frame }}_Summary
+    description: "A summary of the state of sequence frame {{ frame }}."
+    type: Sequence_Frame_Summary.T
+{% endfor %}
+{% else %}
+  - name: Dummy_Frame_Summary
+    description: "Placeholder field."
+    type: Sequence_Frame_Summary.T
+{% endif %}
