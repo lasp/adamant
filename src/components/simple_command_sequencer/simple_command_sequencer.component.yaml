@@ -9,9 +9,10 @@ execution: active
 init:
   parameters:
     - name: Num_Concurrent_Sequences
-      type: Interfaces.Unsigned_32
+      type: Simple_Sequencer_Types.Num_Concurrent_Sequences_Type
       description: Denotes the Number of Sequences that can be running at the same time. Any Run_Sequence commands
         that are sent that would increase the number of concurrent sequences beyond this number will be rejected.
+        The type bounds this to the number of frames whose summaries fit in one summary packet.
     - name: Sequences
       type: Simple_Sequencer_Types.Sequences_Access
       description: Access to statically defined sequence list.
