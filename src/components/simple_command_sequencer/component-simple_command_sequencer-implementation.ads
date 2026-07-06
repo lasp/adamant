@@ -27,14 +27,15 @@ package Component.Simple_Command_Sequencer.Implementation is
    --------------------------------------------------
    --
    -- Init Parameters:
-   -- Num_Concurrent_Sequences : Interfaces.Unsigned_32 - Denotes the Number of
+   -- Num_Concurrent_Sequences : Simple_Sequencer_Types.Num_Concurrent_Sequences_Type - Denotes the Number of
    -- Sequences that can be running at the same time. Any Run_Sequence commands that
    -- are sent that would increase the number of concurrent sequences beyond this
-   -- number will be rejected.
+   -- number will be rejected. The type bounds this to the number of frames whose
+   -- summaries fit in one summary packet.
    -- Sequences : Simple_Sequencer_Types.Sequences_Access - Access to statically
    -- defined sequence list.
    --
-   overriding procedure Init (Self : in out Instance; Num_Concurrent_Sequences : in Interfaces.Unsigned_32; Sequences : in Simple_Sequencer_Types.Sequences_Access);
+   overriding procedure Init (Self : in out Instance; Num_Concurrent_Sequences : in Simple_Sequencer_Types.Num_Concurrent_Sequences_Type; Sequences : in Simple_Sequencer_Types.Sequences_Access);
 
 private
    type Sequence_Frame_Array is array (Interfaces.Unsigned_32 range <>) of Sequence_Frame.T;

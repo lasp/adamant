@@ -1,4 +1,0 @@
----
-type: Sequence_Frame_Summary.T
-description: Array of per-frame summary entries, one per sequence frame, used as the (variable-length) payload of the sequencer summary packet. The length here is the compile-time maximum -- the most frames whose summaries fit in one packet buffer (2 bytes reserved for the Num_Frames count, 12 bytes per Sequence_Frame_Summary). The runtime count is carried by the wrapping record's Num_Frames field.
-length: {{ ((packet_buffer_size - 2) / 12) | int }}
