@@ -1,0 +1,24 @@
+---
+description: Events for the Product Store component.
+events:
+  - name: Products_Saved
+    description: The data products were saved to the store by command.
+  - name: Products_Restored
+    description: The data products held in the store were restored into the data product database.
+  - name: Store_Dumped
+    description: Produced a packet with the contents of the store.
+  - name: Data_Product_Missing_On_Save
+    description: A data product was not available from the database when fetched for saving. The previous store contents for this data product were preserved if the store CRC was valid, otherwise the slot was zeroed.
+    param_type: Data_Product_Id.T
+  - name: Data_Product_Length_Mismatch
+    description: A data product was fetched for saving but contained an unexpected length, so it was not saved.
+    param_type: Invalid_Data_Product_Length.T
+  - name: Store_Crc_Invalid
+    description: The store CRC did not validate prior to a restore, so the restore was not performed. This is expected on the first boot before the store has ever been written.
+    param_type: Store_Crc_Error.T
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T
+  - name: Dropped_Command
+    description: A command was dropped due to a full queue.
+    param_type: Command_Header.T

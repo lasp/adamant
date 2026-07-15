@@ -1,0 +1,9 @@
+---
+description: This is a unit test suite for the Product Store component with a store configured without a save time.
+tests:
+  - name: Test_Save_No_Time
+    description: This unit test tests saving the data products to a store configured without a save time upon receipt of a tick.
+  - name: Test_Restore_No_Time
+    description: This unit test tests restoring the data products from a store configured without a save time.
+  - name: Test_Save_Command_No_Time
+    description: This unit test tests saving the data products to a store configured without a save time by command.

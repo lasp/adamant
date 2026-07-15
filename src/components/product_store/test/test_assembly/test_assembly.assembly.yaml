@@ -1,0 +1,18 @@
+---
+description: This is an assembly for testing the product store component.
+with:
+  - Test_Assembly_Stored_Products
+  - Test_Store_Memory
+########################################
+components:
+########################################
+  - type: Test_Component_1
+    execution: passive
+  - type: Product_Store
+    execution: passive
+    init_base:
+      - "Queue_Size => 512"
+    discriminant:
+      - "Store_Description => Test_Assembly_Stored_Products.Store_Description'Access"
+    init:
+      - "Bytes => Test_Store_Memory.Store_Bytes'Access"

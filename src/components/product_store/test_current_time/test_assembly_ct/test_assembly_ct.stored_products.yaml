@@ -1,0 +1,7 @@
+---
+description: This is a data product store configured to save the current time, used for testing the product store component.
+save_time: Current_Time
+data_products:
+  - name: Test_Component_1_Instance.Data_Product_A
+    description: A data product stored without its timestamp and restored with the save time.
+    restore_time: Use_Save_Time
