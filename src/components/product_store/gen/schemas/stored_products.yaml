@@ -1,0 +1,59 @@
+---
+# This schema describes the yaml format for a data product store.
+type: map
+mapping:
+  # Description of the data product store.
+  description:
+    type: str
+    required: False
+  # The source of the save time written to the store header on each save.
+  # This field can be set to:
+  #   Current_Time - The current time, fetched from the time connector, is written on each save.
+  #   Tick_Time - The time found on the incoming Tick.T is written on each save. If a save is
+  #               commanded, the current time is used instead.
+  #   No_Time - No save time is written to the store. The store header contains only the CRC.
+  # By default, if not specified, this value is set to Current_Time.
+  save_time:
+    type: str
+    enum: ['Current_Time', 'Tick_Time', 'No_Time']
+    required: False
+  # List of data products to include in the store.
+  data_products:
+    seq:
+      - type: map
+        mapping:
+          # The name of the data product. The name should be in the format
+          # Component_Name.Data_Product_Name.
+          name:
+            type: str
+            required: True
+          # Description of the entry.
+          description:
+            type: str
+            required: False
+          # Include this data product's timestamp just before its value in the store.
+          # By default this value is false.
+          store_timestamp:
+            type: bool
+            required: False
+          # The timestamp to apply to this data product when it is restored from the store
+          # into the data product database. This field can be set to:
+          #   Use_Zeros - Restore with a timestamp of zero.
+          #   Use_Save_Time - Restore with the save time held in the store header. Only
+          #                   valid if save_time is not No_Time.
+          #   Use_Stored_Dp_Time - Restore with the data product's own timestamp held in
+          #                        the store. Only valid if store_timestamp is True.
+          # By default, if not specified, this value is set to Use_Zeros.
+          restore_time:
+            type: str
+            enum: ['Use_Zeros', 'Use_Save_Time', 'Use_Stored_Dp_Time']
+            required: False
+          # Produce an event if the data product is ever not available when fetched for
+          # saving. By default this is true.
+          event_on_missing:
+            type: bool
+            required: False
+    # A store must contain at least one data product.
+    range:
+      min: 1
+    required: True

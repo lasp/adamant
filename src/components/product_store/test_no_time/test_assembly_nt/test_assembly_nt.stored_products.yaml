@@ -1,0 +1,12 @@
+---
+description: This is a data product store configured without a save time, used for testing the product store component.
+save_time: No_Time
+data_products:
+  - name: Test_Component_1_Instance.Data_Product_A
+    description: A data product stored with its timestamp and restored with that timestamp.
+    store_timestamp: True
+    restore_time: Use_Stored_Dp_Time
+  - name: Test_Component_1_Instance.Data_Product_C
+    description: A data product stored without its timestamp and restored with a timestamp of zero.
+    restore_time: Use_Zeros
+    event_on_missing: False

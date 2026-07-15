@@ -1,0 +1,9 @@
+---
+description: These are the commands for the Product Store component.
+commands:
+  - name: Save_Products
+    description: Save the configured data products from the database into the store. This performs the same operation as the receipt of a tick. If the store's save time is configured as Tick_Time, the current time is used instead, since no tick is available.
+  - name: Restore_Products
+    description: Restore the data product values held in the store back into the data product database. The store CRC is checked prior to the restore, and the command fails if the CRC does not validate.
+  - name: Dump_Store
+    description: Dump the current contents of the store into a packet. The store contents are dumped as-is, without validating the CRC, so that corrupted store contents can be inspected on the ground.
