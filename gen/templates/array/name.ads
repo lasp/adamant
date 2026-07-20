@@ -643,8 +643,7 @@ package {{ name }} is
 {% else %}
    -- Packed type definition for array element:
    subtype Element_Packed is {{ element.type }}
-      with Object_Size => Element_Size_In_Bytes * 8,
-           Value_Size => Element_Size_In_Bytes * 8;
+      with Object_Size => Element_Size_In_Bytes * 8;
 
    -- Serializing functions for an element of the array:
    package Element_Serialization is new Serializer (Element_Packed);

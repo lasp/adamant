@@ -352,7 +352,6 @@ private
    end record
       with Size => 24,
              Object_Size => 24,
-             Value_Size => 24,
              Alignment => 1,
              Volatile => False;
 
@@ -369,7 +368,6 @@ private
    end record
       with Size => 8,
            Object_Size => 8,
-           Value_Size => 8,
            Alignment => 1,
            Volatile => False;
 

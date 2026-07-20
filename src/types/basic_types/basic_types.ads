@@ -10,8 +10,7 @@ package Basic_Types is
 
    -- Define a byte as an 8-bit mod type:
    subtype Byte is Interfaces.Unsigned_8
-   with Object_Size => 8,
-        Value_Size => 8;
+   with Object_Size => 8;
 
    -- Define a collection of bytes indexed by a subtype of Natural.
    --
