@@ -23,7 +23,6 @@ procedure Test is
       Scalar_Storage_Order => System.High_Order_First,
       Size => Size,
       Object_Size => Size,
-      Value_Size => Size,
       Alignment => 1;
 
       -- Packed type layout:

@@ -193,7 +193,6 @@ package {{ name }} is
            Scalar_Storage_Order => System.High_Order_First,
            Size => Size,
            Object_Size => Size,
-           Value_Size => Size,
            Alignment => 1,
            Volatile => False;
 
@@ -230,7 +229,6 @@ package {{ name }} is
            Scalar_Storage_Order => System.Low_Order_First,
            Size => Size,
            Object_Size => Size,
-           Value_Size => Size,
            Alignment => 1,
            Volatile => False;
 
@@ -267,7 +265,6 @@ package {{ name }} is
            Scalar_Storage_Order => System.High_Order_First,
            Size => Size,
            Object_Size => Size,
-           Value_Size => Size,
            Alignment => 4, -- Cannot be aligned at 1, must be aligned at word boundary
            Volatile => True;
 
@@ -299,7 +296,6 @@ package {{ name }} is
            Scalar_Storage_Order => System.Low_Order_First,
            Size => Size,
            Object_Size => Size,
-           Value_Size => Size,
            Alignment => 4, -- Cannot be aligned at 1, must be aligned at word boundary
            Volatile => True;
 
@@ -332,7 +328,6 @@ package {{ name }} is
            Scalar_Storage_Order => System.High_Order_First,
            Size => Size,
            Object_Size => Size,
-           Value_Size => Size,
            Alignment => 1,
            Volatile => True;
 
@@ -354,7 +349,6 @@ package {{ name }} is
            Scalar_Storage_Order => System.Low_Order_First,
            Size => Size,
            Object_Size => Size,
-           Value_Size => Size,
            Alignment => 1,
            Volatile => True;
 
@@ -382,7 +376,6 @@ package {{ name }} is
            Scalar_Storage_Order => System.High_Order_First,
            Size => Size,
            Object_Size => Size,
-           Value_Size => Size,
            Volatile => True,
            Atomic => True;
 
@@ -405,7 +398,6 @@ package {{ name }} is
            Scalar_Storage_Order => System.Low_Order_First,
            Size => Size,
            Object_Size => Size,
-           Value_Size => Size,
            Volatile => True,
            Atomic => True;
 
@@ -428,7 +420,6 @@ package {{ name }} is
            Scalar_Storage_Order => System.High_Order_First,
            Size => Size,
            Object_Size => Size,
-           Value_Size => Size,
            Volatile => True,
            Volatile_Full_Access => True;
 
@@ -451,7 +442,6 @@ package {{ name }} is
            Scalar_Storage_Order => System.Low_Order_First,
            Size => Size,
            Object_Size => Size,
-           Value_Size => Size,
            Volatile => True,
            Volatile_Full_Access => True;
 

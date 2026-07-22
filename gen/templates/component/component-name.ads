@@ -351,10 +351,9 @@ private
       Index : Connector_Index_Type;
    end record
       with Size => 24,
-             Object_Size => 24,
-             Value_Size => 24,
-             Alignment => 1,
-             Volatile => False;
+           Object_Size => 24,
+           Alignment => 1,
+           Volatile => False;
 
    -- Define the size of the record to be compact to save space on
    -- the queue (24 bits).
@@ -369,7 +368,6 @@ private
    end record
       with Size => 8,
            Object_Size => 8,
-           Value_Size => 8,
            Alignment => 1,
            Volatile => False;
 

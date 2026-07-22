@@ -113,8 +113,6 @@ procedure Test is
       New_Line;
       Put (Natural'Object_Size);
       New_Line;
-      Put (Natural'Value_Size);
-      New_Line;
       Put ("Byte Size: ");
       Put (Byte'Size);
       New_Line;
