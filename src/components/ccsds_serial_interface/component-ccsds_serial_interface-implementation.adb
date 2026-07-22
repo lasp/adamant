@@ -125,7 +125,13 @@ package body Component.Ccsds_Serial_Interface.Implementation is
          -- First read the header:
          Diagnostic_Uart.Get (Header_Bytes);
 
-         if (Packet.Header.Packet_Length + 1) > Packet.Data'Length then
+         -- Check that the length of the packet is valid:
+         -- Packet.Header.Packet_Length is an unsigned 16-bit mod type. If Packet.Header.Packet_Length
+         -- is 0xFFFF, when incremented the result will be 0, constituting a false negative. Therefore
+         -- we convert Packet.Header.Packet_Length to a natural type so that the increment is performed
+         -- in signed arithmetic and cannot wrap, thus ensuring a valid comparison to Packet.Data'Length
+         -- is made.
+         if (Natural (Packet.Header.Packet_Length) + 1) > Packet.Data'Length then
             Self.Event_T_Send_If_Connected (Self.Events.Packet_Recv_Failed (Self.Sys_Time_T_Get, Packet.Header));
          else
             -- Now read the data:
