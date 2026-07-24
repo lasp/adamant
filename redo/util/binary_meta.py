@@ -30,13 +30,9 @@ def _get_build_target_instance(target_name):
 
 
 def _get_git_root(path):
-    import git
+    from util import filesystem
 
-    try:
-        git_repo = git.Repo(path, search_parent_directories=True)
-        return git_repo.git.rev_parse("--show-toplevel")
-    except BaseException:
-        return None
+    return filesystem.get_git_root(path)
 
 
 def _get_git_info(path):
