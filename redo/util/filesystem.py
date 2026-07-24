@@ -35,6 +35,20 @@ def safe_symlink(filename, link_filename, overwrite=False):
             do_link()
 
 
+def get_git_root(path):
+    """
+    Return the root directory of the git repository containing path, or
+    None if path is not inside a git repository.
+    """
+    import git
+
+    try:
+        git_repo = git.Repo(path, search_parent_directories=True)
+        return git_repo.git.rev_parse("--show-toplevel")
+    except BaseException:
+        return None
+
+
 def recurse_through_repo(directory, ignore=["build", "alire"]):
     """
     This generator is a modified version of os.walk, except that it

@@ -2,19 +2,7 @@ import os.path
 from util import redo
 from base_classes.build_rule_base import build_rule_base
 from util import error
-import git
-
-
-def _get_git_root(path):
-    """Get the root directory of the adamant repository."""
-    try:
-        git_repo = git.Repo(path, search_parent_directories=True)
-        git_root = git_repo.git.rev_parse("--show-toplevel")
-    except BaseException:
-        error.error_abort(
-            "No valid git repository was found containing the directory: " + str(path)
-        )
-    return git_root
+from util import filesystem
 
 
 class build_clean_all(build_rule_base):
@@ -32,7 +20,12 @@ class build_clean_all(build_rule_base):
     def build(self, redo_1, redo_2, redo_3):
         # Figure out build directory location
         directory = os.path.abspath(os.path.dirname(redo_1))
-        git_root = _get_git_root(directory)
+        git_root = filesystem.get_git_root(directory)
+        if git_root is None:
+            error.error_abort(
+                "No valid git repository was found containing the directory: "
+                + str(directory)
+            )
 
         # Run redo clean from git root.
         redo.redo(os.path.join(git_root, "clean"))

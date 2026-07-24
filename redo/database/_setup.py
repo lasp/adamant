@@ -1,5 +1,4 @@
 import os.path
-import git
 import random
 from util import error
 from util import redo_arg
@@ -111,10 +110,8 @@ class _build_path(OrderedDict):
 
 def _get_git_root(path):
     """Get the root directory of the adamant repository."""
-    try:
-        git_repo = git.Repo(path, search_parent_directories=True)
-        git_root = git_repo.git.rev_parse("--show-toplevel")
-    except BaseException:
+    git_root = filesystem.get_git_root(path)
+    if git_root is None:
         error.error_abort(
             "No valid git repository was found containing the directory: " + str(path)
         )
