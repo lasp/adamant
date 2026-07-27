@@ -169,7 +169,15 @@ class product_packet_item(packet_item):
 
     @property
     def flattened_description(self):
-        super_desc = super(product_packet_item, self).flattened_description
+        # The base class opens the description with the containing entity's name
+        # and description. Replace that level with one that also identifies the
+        # source data product by id.
+        #
+        # This is composed directly rather than by editing the base class string.
+        # A data product with no description of its own produces no containing
+        # level at all, so there is nothing there to replace, and editing the
+        # string would consume the first level of the flattened field chain
+        # instead.
         prefix = (
             self.packet.name
             + "."
@@ -178,7 +186,9 @@ class product_packet_item(packet_item):
             + str(self.dp.data_product.id)
             + (" (0x%04x)" % self.dp.data_product.id)
         )
-        return prefix + " -" + "-".join(super_desc.split("-")[1:])
+        if self.dp.data_product.description:
+            prefix += " - " + self.dp.data_product.description
+        return prefix + "\n." + self.flat_desc
 
     @property
     def full_name(self):
