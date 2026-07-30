@@ -107,6 +107,22 @@ def isTypePrimitive(adaType):
     return os.path.splitext(_rawType(adaType))[1] == ""
 
 
+def _source_statements(content):
+    """
+    Split Ada source text into statements, with comments removed.
+
+    Comments are stripped line by line, then the remaining text is broken on
+    semicolons and each statement is collapsed onto a single line. Splitting on
+    semicolons rather than on newlines matters: a clause naming several units
+    ("with Foo,\\n Bar;") or a declaration carrying an aspect specification
+    ("package P\\n with SPARK_Mode => On\\nis") is one statement, and treating
+    each of its lines separately either loses part of it or turns a fragment
+    into something it is not.
+    """
+    lines = [line.split("--")[0] for line in content.splitlines()]
+    return [" ".join(s.split()) for s in "\n".join(lines).split(";")]
+
+
 def get_source_dependencies(source_filename):
     """
     Simple function which reads the "with" dependencies from
@@ -130,8 +146,7 @@ def get_source_dependencies(source_filename):
         content = f.read()
 
         # Split the file into statements and remove comments:
-        statements = re.split("[\n/;]", content)
-        statements = [x.strip().split("--")[0] for x in statements]
+        statements = _source_statements(content)
 
         # Find all with statements
         r = re.compile(r"^\s*with\s+.*$", re.IGNORECASE)
@@ -174,11 +189,14 @@ def get_source_dependencies(source_filename):
         # trailing "is" on the same line -- an aspect specification (e.g.
         # "with SPARK_Mode => On") or a line break can separate the name from its
         # "is", and private child packages carry a leading "private" keyword.
+        # Matching statements rather than raw text keeps a declaration that
+        # follows another on the same line (after a semicolon) in scope, and
+        # keeps commented-out text out of it.
         r = re.compile(
             r"^\s*(?:private\s+)?package\s+(?:body\s+)?([A-Za-z][\w.]*)",
-            re.IGNORECASE | re.MULTILINE,
+            re.IGNORECASE,
         )
-        packages = r.findall(content)
+        packages = [match.group(1) for match in map(r.match, statements) if match]
         parents = []
         for package in packages:
             split_package = package.split(".")
@@ -189,8 +207,9 @@ def get_source_dependencies(source_filename):
         includes.extend(parents)
         includes = list(dict.fromkeys(includes))
         # Any include that is not a single word is probably in a "generic" statement and we
-        # should filter it out:
-        includes = list(filter(lambda x: x.split() != 1, includes))
+        # should filter it out. This also drops the empty strings left behind by trailing
+        # separators.
+        includes = [x for x in includes if len(x.split()) == 1]
         return includes
 
 
@@ -254,19 +273,24 @@ def should_depend_on_adb(spec_file):
         content = f.read()
 
         # Split the file into statements and remove comments:
-        statements = re.split("[\n/;]", content)
-        statements = [x.strip().split("--")[0] for x in statements]
+        statements = _source_statements(content)
 
-        # See if there is any lines that only contain the word 'generic' on it:
-        r = re.compile(r"^\s*generic\s*$", re.IGNORECASE)
-        lines_with_only_generic = list(filter(r.match, statements))
-        if lines_with_only_generic:
+        # See if any statement begins a generic unit. The keyword can stand alone
+        # ahead of the formal part, or introduce the unit directly when there are
+        # no formals ("generic package G is ...").
+        r = re.compile(r"^\s*generic\b", re.IGNORECASE)
+        statements_with_generic = list(filter(r.match, statements))
+        if statements_with_generic:
             return True
 
-        # See if there is any lines that specify inlining:
-        r = re.compile(r"^.*with\s+inline\s+=>\s+true.*$", re.IGNORECASE)
-        lines_with_inline_aspect = list(filter(r.match, statements))
-        if lines_with_inline_aspect:
+        # See if any statement specifies inlining. The aspect may be given without
+        # an argument ("with Inline", equivalent to "=> True"), with one and any
+        # spacing ("with Inline=>True"), or alongside other aspects. Matching the
+        # aspect name loosely errs toward depending on the body, which is the safe
+        # direction: a missed dependency means a stale object under -gnatn.
+        r = re.compile(r"^.*\bwith\b.*\binline.*$", re.IGNORECASE)
+        statements_with_inline_aspect = list(filter(r.match, statements))
+        if statements_with_inline_aspect:
             return True
 
         r = re.compile(r"^.*pragma\s+inline.*$", re.IGNORECASE)
