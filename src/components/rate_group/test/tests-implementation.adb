@@ -5,7 +5,7 @@
 with Connector_Types;
 with Basic_Assertions; use Basic_Assertions;
 with Tick.Assertion; use Tick.Assertion;
---with Time_Exceeded.Assertion; use Time_Exceeded.Assertion;
+with Time_Exceeded.Assertion; use Time_Exceeded.Assertion;
 with Cycle_Slip_Param.Assertion; use Cycle_Slip_Param.Assertion;
 with Full_Queue_Param.Assertion; use Full_Queue_Param.Assertion;
 
@@ -143,9 +143,13 @@ package body Tests.Implementation is
       -- Check events:
       Natural_Assert.Eq (T.Cycle_Slip_History.Get_Count, 0);
       Natural_Assert.Eq (T.Max_Cycle_Time_Exceeded_History.Get_Count, 1);
-      --Time_Exceeded_Assert.eq(t.Max_Cycle_Time_Exceeded_History.get(1), (Time_Delta => (2, 0), Count => 1));
+      -- The wall (cycle) time measurement is deterministic in test: it spans
+      -- the tick's timestamp to the tester-provided system time, which the
+      -- tester increments by Seconds_Delta on each invoked connector. The
+      -- execution time measurement uses the real CPU clock and can only be
+      -- checked by count.
+      Time_Exceeded_Assert.Eq (T.Max_Cycle_Time_Exceeded_History.Get (1), (Time_Delta => (2, 0), Count => 1));
       Natural_Assert.Eq (T.Max_Execution_Time_Exceeded_History.Get_Count, 1);
-      --Time_Exceeded_Assert.eq(t.Max_Execution_Time_Exceeded_History.get(1), (Time_Delta => (2, 0), Count => 1));
 
       -- Check data products:
       Natural_Assert.Eq (T.Timing_Report_History.Get_Count, 1);
@@ -154,8 +158,11 @@ package body Tests.Implementation is
       Natural_Assert.Eq (T.Pet_T_Recv_Sync_History.Get_Count, 1);
 
       --
-      -- We can no longer test the following since we are using Ada.Real_Time and Ada.Execution_Time
-      -- instead of Sys_Time arithmetic in the component.
+      -- The following cases are not run because they assert on execution
+      -- time values, which come from the real CPU clock
+      -- (Ada.Execution_Time) and are not deterministic in a unit test. The
+      -- wall (cycle) time is deterministic (see above) and is asserted by
+      -- value where possible.
       --
       --   --------------------------------------------------
       --   -- Send another of the same tick, we expect

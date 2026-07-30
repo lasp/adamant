@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 
 -- Standard Includes:
-with Ada.Real_Time; use Ada.Real_Time;
+with Stopwatch.Reporter;
 
 -- The Rate Group component is a queued component which invokes Tick connectors attached to it whenever it receives a Tick in. The tick in is intended to be periodic, allowing the component to control the execution of other components at a periodic rate. All components attached to the invoker connector of this component are said to be in a rate group, since they all execute at the same rate. Components are executed in the order they are attached to the components invoker connector. The execution of all attached connectors is expected to complete before another incoming Tick is put on the Rate Group component's queue. If the execution runs long, a cycle slip event is reported.
 --
@@ -29,13 +29,11 @@ private
 
    -- The component class instance record:
    type Instance is new Rate_Group.Base_Instance with record
-      -- Time spans for keeping track of maximum
-      -- execution data:
+      -- Timer for keeping track of maximum execution data. The wall timer
+      -- measures the cycle time, starting at the time stamp of the incoming
+      -- tick:
+      Timer : Stopwatch.Reporter.Instance;
       Issue_Time_Exceeded_Events : Boolean := False;
-      Max_Cycle_Time : Time_Span := Microseconds (0);
-      Max_Execution_Time : Time_Span := Microseconds (0);
-      Recent_Max_Cycle_Time : Time_Span := Microseconds (0);
-      Recent_Max_Execution_Time : Time_Span := Microseconds (0);
       -- Timing report data:
       Ticks_Per_Timing_Report : Unsigned_16 := 1;
       Timing_Report_Delay_Ticks : Unsigned_16 := 1;
