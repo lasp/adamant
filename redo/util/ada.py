@@ -119,11 +119,6 @@ def get_source_dependencies(source_filename):
             return text[len(prefix):]
         return text
 
-    def remove_postfix(text, prefix):
-        if text.endswith(prefix):
-            return text[:-len(prefix)]
-        return text
-
     # Make sure the file is Ada source code:
     assert source_filename.endswith(".ads") or source_filename.endswith(".adb"), (
         "Cannot get dependencies for '"
@@ -174,12 +169,16 @@ def get_source_dependencies(source_filename):
         includes = list(chain.from_iterable([x.split(",") for x in includes]))
         includes = [x.strip() for x in includes]
 
-        # If package has a parent package, that is an implicit include:
-        r = re.compile(r"package .* is\s*$", re.IGNORECASE)
-        packages = list(filter(r.match, statements))
-        packages = [remove_prefix(x.strip(), "package").strip() for x in packages]
-        packages = [remove_prefix(x.strip(), "body").strip() for x in packages]
-        packages = [remove_postfix(x.strip(), "is").strip() for x in packages]
+        # If package has a parent package, that is an implicit include. Match the
+        # package name right after the "package" keyword instead of requiring the
+        # trailing "is" on the same line -- an aspect specification (e.g.
+        # "with SPARK_Mode => On") or a line break can separate the name from its
+        # "is", and private child packages carry a leading "private" keyword.
+        r = re.compile(
+            r"^\s*(?:private\s+)?package\s+(?:body\s+)?([A-Za-z][\w.]*)",
+            re.IGNORECASE | re.MULTILINE,
+        )
+        packages = r.findall(content)
         parents = []
         for package in packages:
             split_package = package.split(".")
