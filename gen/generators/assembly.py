@@ -305,6 +305,13 @@ class assembly_flattened_packet_html(assembly_generator, generator_base):
                 return out_dir_temp + os.sep + self.packet_name.lower().replace(".", "_") + ".html"
 
             def _generate_output(self, input_filename, packet_model):
+                # The template titles the page with the packet's full name, but
+                # render() builds its jinja context from the model's instance
+                # dictionary, which does not include properties like full_name.
+                # Add it to the instance dictionary explicitly. This does not
+                # shadow the class property for normal attribute access, since
+                # properties are data descriptors.
+                packet_model.__dict__["full_name"] = self.packet_name
                 output = packet_model.render(self.template, self.template_dir)
 
                 # Search output for html dependencies and depend on them:
