@@ -4,8 +4,6 @@
 
 with Sys_Time.Arithmetic;
 with Delta_Time.Arithmetic;
-with Stopwatch;
-with Task_Timing_Report;
 
 package body Component.Rate_Group.Implementation is
 
@@ -35,16 +33,15 @@ package body Component.Rate_Group.Implementation is
       use Delta_Time.Arithmetic;
 
       -- Local vars:
-      Cycle_Time : Time_Span;
-      Execution_Time : Time_Span;
       Stop_Wall_Time : Sys_Time.T;
       Event_Time : Delta_Time.T;
       Ignore : Sys_Time_Status;
-      Sw : Stopwatch.Wall_Timer_Instance;
-      Sw_Cpu : Stopwatch.Cpu_Timer_Instance;
    begin
-      -- Start execution timer:
-      Sw_Cpu.Start;
+      -- Start the timers. The wall clock timer measures the time starting at
+      -- the time stamp of the incoming Tick.T, ending at the end of the
+      -- execution of this rate group. The execution timer only measures the
+      -- time this task was actually executing on the CPU during this cycle.
+      Self.Timer.Start (Wall_Start_Time => To_Time (Arg.Time));
 
       -- Invoke all members of this rate group:
       for Index in Self.Connector_Tick_T_Send'Range loop
@@ -58,48 +55,29 @@ package body Component.Rate_Group.Implementation is
       -- Pet the watchdog to indicate this subprogram is executing.
       Self.Pet_T_Send_If_Connected ((Count => Arg.Count));
 
-      -- Stop execution timer:
-      Sw_Cpu.Stop;
+      -- Stop the timers. The CPU timer is stopped first so that fetching the
+      -- wall clock stop time from the time source is not included in the CPU
+      -- measurement:
+      Self.Timer.Stop_Cpu_Timer;
       Stop_Wall_Time := Self.Sys_Time_T_Get;
+      Self.Timer.Stop_Wall_Timer (Wall_Stop_Time => To_Time (Stop_Wall_Time));
 
       if Self.Ticks_Since_Startup >= Self.Timing_Report_Delay_Ticks then
-         -- Compute time differences for execution timer
-         -- and wall clock timer.
-         --
-         -- The wall clock timer measures
-         -- the time starting at the time stamp of the incoming
-         -- Tick.T, ending at the end of the execution of this
-         -- rate group.
-         --
-         -- The execution timer only measures the time this task
-         -- was actually executing on the CPU during this cycle.
-         --
-         Sw.Start_Time := To_Time (Arg.Time);
-         Sw.Stop_Time := To_Time (Stop_Wall_Time);
-         Cycle_Time := Sw.Result;
-         Execution_Time := Sw_Cpu.Result;
-
          -- Store max times and report any update:
-         if Cycle_Time > Self.Recent_Max_Cycle_Time then
-            Self.Recent_Max_Cycle_Time := Cycle_Time;
-         end if;
-         if Execution_Time > Self.Recent_Max_Execution_Time then
-            Self.Recent_Max_Execution_Time := Execution_Time;
-         end if;
-         if Cycle_Time > Self.Max_Cycle_Time then
-            Self.Max_Cycle_Time := Cycle_Time;
-            if Self.Issue_Time_Exceeded_Events then
-               Ignore := To_Delta_Time (Self.Max_Cycle_Time, Event_Time);
+         declare
+            Max_Cycle_Time_Updated : Boolean;
+            Max_Execution_Time_Updated : Boolean;
+         begin
+            Self.Timer.Accumulate (Max_Wall_Time_Updated => Max_Cycle_Time_Updated, Max_Execution_Time_Updated => Max_Execution_Time_Updated);
+            if Max_Cycle_Time_Updated and then Self.Issue_Time_Exceeded_Events then
+               Ignore := To_Delta_Time (Self.Timer.Max_Wall_Time, Event_Time);
                Self.Event_T_Send_If_Connected (Self.Events.Max_Cycle_Time_Exceeded (Stop_Wall_Time, (Time_Delta => Event_Time, Count => Arg.Count)));
             end if;
-         end if;
-         if Execution_Time > Self.Max_Execution_Time then
-            Self.Max_Execution_Time := Execution_Time;
-            if Self.Issue_Time_Exceeded_Events then
-               Ignore := To_Delta_Time (Self.Max_Execution_Time, Event_Time);
+            if Max_Execution_Time_Updated and then Self.Issue_Time_Exceeded_Events then
+               Ignore := To_Delta_Time (Self.Timer.Max_Execution_Time, Event_Time);
                Self.Event_T_Send_If_Connected (Self.Events.Max_Execution_Time_Exceeded (Stop_Wall_Time, (Time_Delta => Event_Time, Count => Arg.Count)));
             end if;
-         end if;
+         end;
 
          -- If the Ticks_Per_Timing_Report is greater than zero, then we need to send out a
          -- data product periodically.
@@ -109,25 +87,14 @@ package body Component.Rate_Group.Implementation is
 
             -- If we are at the period then send out the data product:
             if Self.Num_Ticks >= Self.Ticks_Per_Timing_Report then
-               declare
-                  Timing_Report : Task_Timing_Report.T;
-               begin
-                  -- Convert Time_Spans to the Delta_Time.T's stored in the data product type:
-                  Ignore := To_Delta_Time (Self.Max_Cycle_Time, Timing_Report.Max.Wall_Time);
-                  Ignore := To_Delta_Time (Self.Max_Execution_Time, Timing_Report.Max.Execution_Time);
-                  Ignore := To_Delta_Time (Self.Recent_Max_Cycle_Time, Timing_Report.Recent_Max.Wall_Time);
-                  Ignore := To_Delta_Time (Self.Recent_Max_Execution_Time, Timing_Report.Recent_Max.Execution_Time);
+               -- Send the data product:
+               Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Timing_Report (Stop_Wall_Time, Self.Timer.Report));
 
-                  -- Send the data product:
-                  Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Timing_Report (Stop_Wall_Time, Timing_Report));
+               -- Reset the recent cycle and execution times:
+               Self.Timer.Reset_Recent_Max;
 
-                  -- Reset the recent cycle and execution times:
-                  Self.Recent_Max_Cycle_Time := Microseconds (0);
-                  Self.Recent_Max_Execution_Time := Microseconds (0);
-
-                  -- Reset the number of ticks:
-                  Self.Num_Ticks := 0;
-               end;
+               -- Reset the number of ticks:
+               Self.Num_Ticks := 0;
             end if;
          end if;
       else
