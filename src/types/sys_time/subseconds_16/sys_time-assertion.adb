@@ -1,5 +1,4 @@
 with Sys_Time.Arithmetic;
-with Delta_Time.Arithmetic;
 
 -- Smart assert for comparing system times
 -- Useful when you need to use the >, >=, <, and <= operators.
@@ -24,26 +23,33 @@ package body Sys_Time.Assertion is
       end if;
    end Sys_Time_Equal;
 
+   -- Diagnostic text for a failed comparison. The difference and tolerance
+   -- are rendered in seconds via To_Duration.
+   function Failure_Message (T1 : in Sys_Time.T; T2 : in Sys_Time.T; Eps : in Time_Span; Message : in String) return String is
+      ("Difference (s): " & Duration'Image (To_Duration (T1 - T2)) & ASCII.LF &
+          "Eps (s): " & Duration'Image (To_Duration (Eps)) & ASCII.LF & Message);
+
    package body Sys_Time_Assert is
-      procedure Eq (T1 : in Sys_Time.T; T2 : in Sys_Time.T; Eps : in Ada.Real_Time.Time_Span := Ada.Real_Time.Nanoseconds (300); Message : in String := ""; Filename : in String := Sinfo.File; Line : in Natural := Sinfo.Line) is
-         use Delta_Time.Arithmetic;
-         Td : Delta_Time.T;
-         Ignore : Sys_Time_Status := To_Delta_Time (Eps, Td);
-         Message_Text : constant String :=
-            "Difference (nsec): " & Integer'Image ((T1 - T2) / Nanoseconds (1)) & ASCII.LF & "eps: (Subseconds: " & Td.Subseconds'Image & " Nanoseconds: " & Integer'Image (Eps / Nanoseconds (1)) & ") " & ASCII.LF & Message;
+      procedure Eq (T1 : in Sys_Time.T; T2 : in Sys_Time.T; Eps : in Ada.Real_Time.Time_Span := Default_Eps; Message : in String := ""; Filename : in String := Sinfo.File; Line : in Natural := Sinfo.Line) is
       begin
-         -- Check equality using Sys_Time_Equal
-         Sys_Time_Call_Assert (Sys_Time_Equal (T1, T2, Eps), T1, T2, "=", Message_Text, Filename, Line);
+         -- Only construct the diagnostic text when the assertion fails: it is
+         -- not needed on success, and building it eagerly would run the time
+         -- arithmetic on every call.
+         if Sys_Time_Equal (T1, T2, Eps) then
+            Sys_Time_Call_Assert (True, T1, T2, "=", Message, Filename, Line);
+         else
+            Sys_Time_Call_Assert (False, T1, T2, "=", Failure_Message (T1, T2, Eps, Message), Filename, Line);
+         end if;
       end Eq;
-      procedure Neq (T1 : in Sys_Time.T; T2 : in Sys_Time.T; Eps : in Ada.Real_Time.Time_Span := Ada.Real_Time.Nanoseconds (300); Message : in String := ""; Filename : in String := Sinfo.File; Line : in Natural := Sinfo.Line) is
-         use Delta_Time.Arithmetic;
-         Td : Delta_Time.T;
-         Ignore : Sys_Time_Status := To_Delta_Time (Eps, Td);
-         Message_Text : constant String :=
-            "Difference (nsec): " & Integer'Image ((T1 - T2) / Nanoseconds (1)) & ASCII.LF & "eps: (Subseconds: " & Td.Subseconds'Image & " Nanoseconds: " & Integer'Image (Eps / Nanoseconds (1)) & ") " & ASCII.LF & Message;
+      procedure Neq (T1 : in Sys_Time.T; T2 : in Sys_Time.T; Eps : in Ada.Real_Time.Time_Span := Default_Eps; Message : in String := ""; Filename : in String := Sinfo.File; Line : in Natural := Sinfo.Line) is
       begin
-         -- Check equality using Sys_Time_Equal
-         Sys_Time_Call_Assert (not Sys_Time_Equal (T1, T2, Eps), T1, T2, "/=", Message_Text, Filename, Line);
+         -- Only construct the diagnostic text when the assertion fails, as in
+         -- Eq above.
+         if Sys_Time_Equal (T1, T2, Eps) then
+            Sys_Time_Call_Assert (False, T1, T2, "/=", Failure_Message (T1, T2, Eps, Message), Filename, Line);
+         else
+            Sys_Time_Call_Assert (True, T1, T2, "/=", Message, Filename, Line);
+         end if;
       end Neq;
       procedure Gt (T1 : in Sys_Time.T; T2 : in Sys_Time.T; Message : in String := ""; Filename : in String := Sinfo.File; Line : in Natural := Sinfo.Line) is
       begin
