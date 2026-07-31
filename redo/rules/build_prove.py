@@ -122,7 +122,13 @@ def _prove_ada_sources(source_files, base_dir):
         + " -XSOURCE_DIRS="
         + ",".join(dep_dirs)
         + " "
-        + " ".join(source_files)
+        # GNATprove (as of 15.1.0) fails to resolve child-package sources, ie.
+        # "parent-child.ads", when passed as absolute paths, reporting that
+        # they are "not a file or compilation unit of any project". Passing
+        # base names avoids this. The directory of every source file is
+        # already included in SOURCE_DIRS above, so base names resolve
+        # unambiguously.
+        + " ".join([os.path.basename(f) for f in source_files])
         + direct
     )
 
