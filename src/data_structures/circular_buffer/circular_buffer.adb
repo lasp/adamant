@@ -353,11 +353,15 @@ package body Circular_Buffer is
 
    overriding function Pop (Self : in out Circular; Bytes : in out Basic_Types.Byte_Array; Num_Bytes_Returned : out Natural) return Pop_Status is
    begin
+      -- Initialize the number of bytes returned to zero:
+      Num_Bytes_Returned := 0;
       return Base (Self).Pop (Bytes, Num_Bytes_Returned);
    end Pop;
 
    overriding function Peek (Self : in Circular; Bytes : in out Basic_Types.Byte_Array; Num_Bytes_Returned : out Natural; Offset : in Natural := 0) return Pop_Status is
    begin
+      -- Initialize the number of bytes returned to zero:
+      Num_Bytes_Returned := 0;
       return Base (Self).Peek (Bytes, Num_Bytes_Returned, Offset);
    end Peek;
 
@@ -556,6 +560,8 @@ package body Circular_Buffer is
    overriding function Peek (Self : in Queue; Bytes : in out Basic_Types.Byte_Array; Length : out Natural; Offset : in Natural := 0) return Pop_Status is
       Ignore : Natural;
    begin
+      -- Initialize the length to zero:
+      Length := 0;
       return Self.Do_Peek (Bytes, Length, Ignore, Offset);
    end Peek;
 
