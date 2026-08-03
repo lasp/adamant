@@ -1,0 +1,9 @@
+---
+description: These are the events for the CCSDS command forwarder component.
+events:
+  - name: Packet_Forwarded
+    description: A CCSDS packet was received by command and forwarded out of the CCSDS space packet send connector. The event parameter contains the primary header of the forwarded packet.
+    param_type: Ccsds_Primary_Header.T
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T
