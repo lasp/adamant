@@ -1,0 +1,12 @@
+---
+description: Data products for the Product Store component.
+data_products:
+  - name: Save_Count
+    description: The number of times the data products have been saved to the store, either by tick or by command. This counter rolls over.
+    type: Packed_U16.T
+  - name: Restore_Count
+    description: The number of times the store contents have been successfully restored into the data product database. This counter rolls over.
+    type: Packed_U16.T
+  - name: Crc_Invalid_Count
+    description: The number of times a restore was refused because the store CRC did not validate. This counter rolls over.
+    type: Packed_U16.T

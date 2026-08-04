@@ -24,35 +24,35 @@ package body Component.Product_Store.Implementation is
    -- Init Parameters:
    -- Bytes : Basic_Types.Byte_Array_Access - A pointer to an allocation of bytes to
    -- be used for storing the data products. The size of this byte array MUST be at
-   -- least Store_Description.Store_Size bytes in length. Only the first
-   -- Store_Description.Store_Size bytes will be used by this component.
+   -- least Store_Description.Store_Size bytes in length (which includes the CRC and
+   -- save time header). Only the first Store_Description.Store_Size bytes will be
+   -- used by this component.
    -- Restore_On_Set_Up : Boolean - If set to True, the component will attempt to
    -- restore the stored data products into the data product database during Set_Up,
    -- seeding the database with the values saved before the last reboot. If the store
    -- CRC does not validate (i.e. the store was never written or was corrupted) the
    -- restore is skipped and an error event is produced.
+   -- Ticks_Per_Save : Positive - The number of ticks that must be received before
+   -- the data products are saved to the store. This allows the component to be
+   -- connected to a rate group running at a speed appropriate for command
+   -- responsiveness (i.e. 1 Hz), while saving to the store at a slower rate (i.e.
+   -- every 600 ticks for a 10 minute save cadence).
    -- Commands_Dispatched_Per_Tick : Positive - The number of commands executed per
    -- tick, if any are in the queue.
    --
-   overriding procedure Init (Self : in out Instance; Bytes : in not null Basic_Types.Byte_Array_Access; Restore_On_Set_Up : in Boolean := False; Commands_Dispatched_Per_Tick : in Positive := 3) is
-      Expected_Size : Natural := Crc_Length;
+   overriding procedure Init (Self : in out Instance; Bytes : in not null Basic_Types.Byte_Array_Access; Restore_On_Set_Up : in Boolean := False; Ticks_Per_Save : in Positive := 1; Commands_Dispatched_Per_Tick : in Positive := 3) is
+      Expected_Size : Natural := Crc_Length + Time_Length;
    begin
       -- Compute the expected size of the store from the description, and check the
       -- configuration of each entry:
-      if Self.Store_Description.Save_Time /= No_Time then
-         Expected_Size := @ + Time_Length;
-      end if;
       for Item of Self.Store_Description.Entries.all loop
          Expected_Size := @ + Item.Size;
          if Item.Store_Timestamp then
             Expected_Size := @ + Time_Length;
          end if;
-         -- An entry may only be restored with the stored data product time if that
-         -- time is actually stored:
-         pragma Assert (Item.Restore_Time /= Use_Stored_Dp_Time or else Item.Store_Timestamp);
-         -- An entry may only be restored with the save time if a save time is
-         -- actually stored:
-         pragma Assert (Item.Restore_Time /= Use_Save_Time or else Self.Store_Description.Save_Time /= No_Time);
+         -- An entry stores its data product's timestamp if and only if that
+         -- timestamp is what the entry is restored with:
+         pragma Assert (Item.Store_Timestamp = (Item.Restore_Time = Use_Stored_Dp_Time));
       end loop;
       -- The store size found in the description must match the size computed from
       -- the entries:
@@ -63,6 +63,7 @@ package body Component.Product_Store.Implementation is
       -- Store the configuration:
       Self.Bytes := Bytes;
       Self.Restore_On_Set_Up := Restore_On_Set_Up;
+      Self.Ticks_Per_Save := Ticks_Per_Save;
       Self.Commands_Dispatched_Per_Tick := Commands_Dispatched_Per_Tick;
    end Init;
 
@@ -73,37 +74,35 @@ package body Component.Product_Store.Implementation is
    -- Return the index of the first byte of the store data region, which is the
    -- region covered by the CRC:
    function Data_First (Self : in Instance) return Natural is
-      (Self.Bytes.all'First + Crc_Length);
+      (Self.Bytes.all'First + Crc_Length)
+      with Inline => True;
 
    -- Return the index of the last byte of the store:
    function Store_Last (Self : in Instance) return Natural is
-      (Self.Bytes.all'First + Self.Store_Description.Store_Size - 1);
+      (Self.Bytes.all'First + Self.Store_Description.Store_Size - 1)
+      with Inline => True;
 
    -- Compute the CRC over the store data region:
    function Compute_Store_Crc (Self : in Instance) return Crc_16.Crc_16_Type is
-      (Crc_16.Compute_Crc_16 (Self.Bytes.all (Self.Data_First .. Self.Store_Last)));
+      (Crc_16.Compute_Crc_16 (Self.Bytes.all (Self.Data_First .. Self.Store_Last)))
+      with Inline => True;
 
    -- Read the CRC currently held in the store header:
    function Read_Stored_Crc (Self : in Instance) return Crc_16.Crc_16_Type is
-      (Self.Bytes.all (Self.Bytes.all'First .. Self.Bytes.all'First + Crc_Length - 1));
+      (Self.Bytes.all (Self.Bytes.all'First .. Self.Bytes.all'First + Crc_Length - 1))
+      with Inline => True;
 
    -- Save the data products into the store, stamping the store with the provided
-   -- save time:
+   -- save time. The slot of any data product that cannot be fetched (or that is
+   -- returned with an unexpected length) is zeroed, so that stale or corrupted
+   -- memory contents can never be presented as valid data by a later restore:
    procedure Do_Save (Self : in out Instance; Save_Time : in Sys_Time.T) is
-      use Basic_Types;
       use Data_Product_Enums.Fetch_Status;
-      -- If the store currently holds valid contents, then slots for data products
-      -- that cannot be fetched are left untouched, preserving the last saved
-      -- values. Otherwise the slots are zeroed, so that stale memory contents can
-      -- never be presented as valid data.
-      Store_Was_Valid : constant Boolean := Self.Compute_Store_Crc = Self.Read_Stored_Crc;
       Idx : Natural := Self.Data_First;
    begin
-      -- Write the save time if configured:
-      if Self.Store_Description.Save_Time /= No_Time then
-         Self.Bytes.all (Idx .. Idx + Time_Length - 1) := Sys_Time.Serialization.To_Byte_Array (Save_Time);
-         Idx := @ + Time_Length;
-      end if;
+      -- Write the save time:
+      Self.Bytes.all (Idx .. Idx + Time_Length - 1) := Sys_Time.Serialization.To_Byte_Array (Save_Time);
+      Idx := @ + Time_Length;
 
       -- Save each data product entry:
       for Item of Self.Store_Description.Entries.all loop
@@ -125,13 +124,19 @@ package body Component.Product_Store.Implementation is
                   else
                      Save_Slot := True;
                   end if;
-               when Not_Available | Id_Out_Of_Range =>
+               when Not_Available =>
                   -- Throw event if configured to do so:
                   if Item.Event_On_Missing then
                      Self.Event_T_Send_If_Connected (Self.Events.Data_Product_Missing_On_Save (Self.Sys_Time_T_Get, (
                         Id => Item.Data_Product_Id)
                      ));
                   end if;
+               when Id_Out_Of_Range =>
+                  -- This indicates a misconfiguration between the stored products
+                  -- model and the database, so the event is not maskable:
+                  Self.Event_T_Send_If_Connected (Self.Events.Data_Product_Id_Out_Of_Range (Self.Sys_Time_T_Get, (
+                     Id => Item.Data_Product_Id)
+                  ));
             end case;
 
             if Save_Slot then
@@ -146,9 +151,8 @@ package body Component.Product_Store.Implementation is
                   Self.Bytes.all (Write_Idx .. Write_Idx + Item.Size - 1) :=
                      Fetch_Return.The_Data_Product.Buffer (Fetch_Return.The_Data_Product.Buffer'First .. Fetch_Return.The_Data_Product.Buffer'First + Item.Size - 1);
                end;
-            elsif not Store_Was_Valid then
-               -- The data product could not be saved and the existing slot contents
-               -- are not trustworthy, so zero the slot:
+            else
+               -- The data product could not be saved, so zero the slot:
                Self.Bytes.all (Idx .. Idx + Slot_Length - 1) := [others => 0];
             end if;
 
@@ -159,35 +163,38 @@ package body Component.Product_Store.Implementation is
 
       -- Compute the CRC over the store contents and write it to the header:
       Self.Bytes.all (Self.Bytes.all'First .. Self.Bytes.all'First + Crc_Length - 1) := Self.Compute_Store_Crc;
+
+      -- Update the save counter data product:
+      Self.Save_Count := @ + 1;
+      Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Save_Count (Self.Sys_Time_T_Get, (Value => Self.Save_Count)));
    end Do_Save;
 
    -- Restore the data products held in the store into the data product database.
-   -- Status is set to True if the restore was performed, or False if the store CRC
-   -- did not validate.
-   procedure Do_Restore (Self : in out Instance; Status : out Boolean) is
+   -- Returns True if the restore was performed, or False if the store CRC did not
+   -- validate.
+   function Do_Restore (Self : in out Instance) return Boolean is
       use Basic_Types;
       Computed_Crc : constant Crc_16.Crc_16_Type := Self.Compute_Store_Crc;
       Store_Crc : constant Crc_16.Crc_16_Type := Self.Read_Stored_Crc;
       Idx : Natural := Self.Data_First;
-      Save_Time_Stamp : Sys_Time.T := Sys_Time.Arithmetic.Sys_Time_Zero;
+      Save_Time_Stamp : Sys_Time.T;
    begin
-      Status := False;
-
       -- Check the CRC prior to restoring. This protects against restoring the
       -- contents of memory that was never written or has been corrupted:
       if Computed_Crc /= Store_Crc then
          Self.Event_T_Send_If_Connected (Self.Events.Store_Crc_Invalid (Self.Sys_Time_T_Get, (
             Computed_Crc => Computed_Crc,
-            Stored_Crc => Store_Crc)
+            Expected_Crc => Store_Crc)
          ));
-         return;
+         -- Update the CRC invalid counter data product:
+         Self.Crc_Invalid_Count := @ + 1;
+         Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Crc_Invalid_Count (Self.Sys_Time_T_Get, (Value => Self.Crc_Invalid_Count)));
+         return False;
       end if;
 
-      -- Read the save time if configured:
-      if Self.Store_Description.Save_Time /= No_Time then
-         Save_Time_Stamp := Sys_Time.Serialization.From_Byte_Array (Self.Bytes.all (Idx .. Idx + Time_Length - 1));
-         Idx := @ + Time_Length;
-      end if;
+      -- Read the save time:
+      Save_Time_Stamp := Sys_Time.Serialization.From_Byte_Array (Self.Bytes.all (Idx .. Idx + Time_Length - 1));
+      Idx := @ + Time_Length;
 
       -- Restore each data product entry:
       for Item of Self.Store_Description.Entries.all loop
@@ -223,7 +230,11 @@ package body Component.Product_Store.Implementation is
 
       -- Send info event:
       Self.Event_T_Send_If_Connected (Self.Events.Products_Restored (Self.Sys_Time_T_Get));
-      Status := True;
+
+      -- Update the restore counter data product:
+      Self.Restore_Count := @ + 1;
+      Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Restore_Count (Self.Sys_Time_T_Get, (Value => Self.Restore_Count)));
+      return True;
    end Do_Restore;
 
    -- Build and send a packet containing the contents of the store:
@@ -232,8 +243,8 @@ package body Component.Product_Store.Implementation is
       Pkt : Packet.T;
       Stat : constant Serialization_Status := Self.Packets.Stored_Products (Self.Sys_Time_T_Get, Self.Bytes.all (Self.Bytes.all'First .. Self.Store_Last), Pkt);
    begin
-      -- This should never fail since both the autocoder and an assertion at Init
-      -- guarantee that the store fits within a single packet:
+      -- This should never fail since the autocoder and the Store_Size_Type
+      -- constraint guarantee that the store fits within a single packet:
       pragma Assert (Stat = Success);
       -- Send the packet:
       Self.Packet_T_Send_If_Connected (Pkt);
@@ -244,40 +255,57 @@ package body Component.Product_Store.Implementation is
    ---------------------------------------
    -- Set Up Procedure
    ---------------------------------------
-   -- If the component is configured with Restore_On_Set_Up, then the store
-   -- contents are restored into the data product database here, seeding the
-   -- database with the values saved before the last reboot. If the store CRC
-   -- does not validate, the restore is skipped and an error event is produced.
+   -- The counter data products are seeded with zero here. Then, if the component
+   -- is configured with Restore_On_Set_Up, the store contents are restored into
+   -- the data product database, seeding the database with the values saved before
+   -- the last reboot. If the store CRC does not validate, the restore is skipped
+   -- and an error event is produced.
    overriding procedure Set_Up (Self : in out Instance) is
-      Ignore : Boolean;
+      Timestamp : constant Sys_Time.T := Self.Sys_Time_T_Get;
    begin
+      -- Seed the counter data products:
+      Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Save_Count (Timestamp, (Value => Self.Save_Count)));
+      Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Restore_Count (Timestamp, (Value => Self.Restore_Count)));
+      Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Crc_Invalid_Count (Timestamp, (Value => Self.Crc_Invalid_Count)));
+
+      -- Restore the store contents if configured to do so. The restore status is
+      -- not needed here - a CRC failure is reported by event and counter, and is
+      -- expected on the first boot before the store has ever been written:
       if Self.Restore_On_Set_Up then
-         Self.Do_Restore (Ignore);
+         declare
+            Ignore : constant Boolean := Self.Do_Restore;
+            pragma Unreferenced (Ignore);
+         begin
+            null;
+         end;
       end if;
    end Set_Up;
 
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- This is the base tick for the component. Each tick received saves the data
-   -- products to the store.
+   -- This is the base tick for the component. Commands are dispatched from the
+   -- queue on every tick, and the data products are saved to the store every
+   -- Ticks_Per_Save ticks (when saving on tick is enabled).
    overriding procedure Tick_T_Recv_Sync (Self : in out Instance; Arg : in Tick.T) is
       Messages_Dispatched : Natural;
    begin
-      -- Handle any commands in the queue. Service up to N commands per tick:
+      -- Save the data products to the store if saving on tick is enabled and the
+      -- tick divider has elapsed:
+      if Self.Save_On_Tick and then Self.Tick_Count = 0 then
+         Self.Do_Save (Save_Time =>
+            (case Self.Store_Description.Save_Time is
+               when Tick_Time => Arg.Time,
+               when Current_Time => Self.Sys_Time_T_Get));
+      end if;
+
+      -- Increment the tick counter, rolling over at Ticks_Per_Save:
+      Self.Tick_Count := (@ + 1) mod Self.Ticks_Per_Save;
+
+      -- Handle any commands in the queue after the business logic is complete.
+      -- Service up to N commands per tick:
       Messages_Dispatched := Self.Dispatch_N (Self.Commands_Dispatched_Per_Tick);
       pragma Assert (Messages_Dispatched <= Self.Commands_Dispatched_Per_Tick);
-
-      -- Save the data products to the store, stamping the store with the
-      -- configured save time:
-      case Self.Store_Description.Save_Time is
-         when Tick_Time =>
-            Self.Do_Save (Save_Time => Arg.Time);
-         when Current_Time =>
-            Self.Do_Save (Save_Time => Self.Sys_Time_T_Get);
-         when No_Time =>
-            Self.Do_Save (Save_Time => Sys_Time.Arithmetic.Sys_Time_Zero);
-      end case;
    end Tick_T_Recv_Sync;
 
    -- This is the command receive connector.
@@ -302,21 +330,13 @@ package body Component.Product_Store.Implementation is
    -- Description:
    --    These are the commands for the Product Store component.
    -- Save the configured data products from the database into the store. This
-   -- performs the same operation as the receipt of a tick. If the store's save time
-   -- is configured as Tick_Time, the current time is used instead, since no tick is
-   -- available.
+   -- works regardless of whether saving on tick is enabled or disabled. The
+   -- current time is used as the save time, even if the store is configured for
+   -- Tick_Time, since no tick is available.
    overriding function Save_Products (Self : in out Instance) return Command_Execution_Status.E is
       use Command_Execution_Status;
    begin
-      -- Save using the current time as the save time. Note that if the store is
-      -- configured for Tick_Time, the current time is used for a commanded save,
-      -- since no tick is available:
-      case Self.Store_Description.Save_Time is
-         when Tick_Time | Current_Time =>
-            Self.Do_Save (Save_Time => Self.Sys_Time_T_Get);
-         when No_Time =>
-            Self.Do_Save (Save_Time => Sys_Time.Arithmetic.Sys_Time_Zero);
-      end case;
+      Self.Do_Save (Save_Time => Self.Sys_Time_T_Get);
       -- Send info event:
       Self.Event_T_Send_If_Connected (Self.Events.Products_Saved (Self.Sys_Time_T_Get));
       return Success;
@@ -327,10 +347,8 @@ package body Component.Product_Store.Implementation is
    -- if the CRC does not validate.
    overriding function Restore_Products (Self : in out Instance) return Command_Execution_Status.E is
       use Command_Execution_Status;
-      Restore_Ok : Boolean;
    begin
-      Self.Do_Restore (Restore_Ok);
-      if Restore_Ok then
+      if Self.Do_Restore then
          return Success;
       else
          return Failure;
@@ -346,6 +364,26 @@ package body Component.Product_Store.Implementation is
       Self.Do_Dump;
       return Success;
    end Dump_Store;
+
+   -- Enable the automatic saving of the data products to the store upon receipt of
+   -- a tick.
+   overriding function Enable_Save_On_Tick (Self : in out Instance) return Command_Execution_Status.E is
+      use Command_Execution_Status;
+   begin
+      Self.Save_On_Tick := True;
+      Self.Event_T_Send_If_Connected (Self.Events.Save_On_Tick_Enabled (Self.Sys_Time_T_Get));
+      return Success;
+   end Enable_Save_On_Tick;
+
+   -- Disable the automatic saving of the data products to the store upon receipt of
+   -- a tick.
+   overriding function Disable_Save_On_Tick (Self : in out Instance) return Command_Execution_Status.E is
+      use Command_Execution_Status;
+   begin
+      Self.Save_On_Tick := False;
+      Self.Event_T_Send_If_Connected (Self.Events.Save_On_Tick_Disabled (Self.Sys_Time_T_Get));
+      return Success;
+   end Disable_Save_On_Tick;
 
    -- Invalid command handler. This procedure is called when a command's arguments are found to be invalid:
    overriding procedure Invalid_Command (Self : in out Instance; Cmd : in Command.T; Errant_Field_Number : in Unsigned_32; Errant_Field : in Basic_Types.Poly_Type) is

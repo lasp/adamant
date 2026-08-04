@@ -1,16 +1,14 @@
 ---
-description: This is an example data product store used for testing the product store component.
+description: This is an example data product store used for testing the product store component. This model uses a specific name (backup) to demonstrate that multiple product stores can be instantiated within a single assembly.
 save_time: Tick_Time
 data_products:
   - name: Test_Component_1_Instance.Data_Product_A
     description: A data product stored with its timestamp and restored with that timestamp.
     store_timestamp: True
     restore_time: Use_Stored_Dp_Time
-    event_on_missing: True
   - name: Test_Component_1_Instance.Data_Product_B
-    description: A data product stored without its timestamp and restored with the save time.
-    store_timestamp: False
-    restore_time: Use_Save_Time
+    description: A data product stored without its timestamp and restored with the save time (the default).
     event_on_missing: False
   - name: Test_Component_1_Instance.Data_Product_C
     description: A data product stored without its timestamp and restored with a timestamp of zero.
+    restore_time: Use_Zeros

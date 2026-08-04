@@ -8,8 +8,6 @@ package Product_Store_Types is
 
    -- The source of the save time written to the store header on each save:
    type Save_Time_Type is (
-      -- No save time is written to the store. The store header contains only the CRC.
-      No_Time,
       -- The current time, fetched from the system time connector, is written on each save.
       Current_Time,
       -- The time found on the incoming Tick.T is written on each save. If a save is
@@ -22,11 +20,11 @@ package Product_Store_Types is
    type Restore_Time_Type is (
       -- Restore with a timestamp of zero.
       Use_Zeros,
-      -- Restore with the save time held in the store header. Only valid if the
-      -- store is configured with a save time other than No_Time.
+      -- Restore with the save time held in the store header.
       Use_Save_Time,
-      -- Restore with the data product's own timestamp held in the store. Only
-      -- valid if the entry is configured with Store_Timestamp set to True.
+      -- Restore with the data product's own timestamp held in the store. This is
+      -- required (and only valid) if the entry is configured with Store_Timestamp
+      -- set to True.
       Use_Stored_Dp_Time
    );
 
@@ -37,7 +35,7 @@ package Product_Store_Types is
       -- Should the data product's timestamp be saved to the store just before its value?
       Store_Timestamp : Boolean := False;
       -- The timestamp to apply to this data product when it is restored:
-      Restore_Time : Restore_Time_Type := Use_Zeros;
+      Restore_Time : Restore_Time_Type := Use_Save_Time;
       -- Should an event be issued if the data product is missing from the database on save?
       Event_On_Missing : Boolean := True;
       -- Size of the data product (not including any timestamp) in bytes:
@@ -55,7 +53,7 @@ package Product_Store_Types is
    -- A record describing the entire data product store:
    type Store_Description_Type is record
       -- The source of the save time written to the store header:
-      Save_Time : Save_Time_Type := No_Time;
+      Save_Time : Save_Time_Type := Current_Time;
       -- The data product entries that make up the store:
       Entries : not null Store_Entry_List_Access_Type;
       -- The total size of the store in bytes, including the CRC and save time header:

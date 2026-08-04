@@ -14,6 +14,9 @@ private
    overriding procedure Set_Up_Test (Self : in out Instance);
    overriding procedure Tear_Down_Test (Self : in out Instance);
 
+   -- This unit test tests that the counter data products are seeded with zero at
+   -- Set_Up.
+   overriding procedure Test_Set_Up_Seeding (Self : in out Instance);
    -- This unit test tests saving the data products to the store upon receipt of a
    -- tick.
    overriding procedure Test_Nominal_Save (Self : in out Instance);
@@ -28,10 +31,18 @@ private
    overriding procedure Test_Crc_Invalid_On_Restore (Self : in out Instance);
    -- This unit test tests saving the data products to the store by command.
    overriding procedure Test_Save_Command (Self : in out Instance);
+   -- This unit test tests disabling and enabling the automatic saving of data
+   -- products on tick by command.
+   overriding procedure Test_Save_On_Tick_Enable_Disable (Self : in out Instance);
+   -- This unit test tests the tick divider, which saves the data products only every
+   -- Ticks_Per_Save ticks.
+   overriding procedure Test_Ticks_Per_Save (Self : in out Instance);
    -- This unit test tests the component's response to a data product that is missing
-   -- from the database on save, both when the existing store contents are valid and
-   -- when they are not.
+   -- from the database on save, verifying that missing slots are zeroed.
    overriding procedure Test_Missing_Data_Product (Self : in out Instance);
+   -- This unit test tests the component's response to a data product id reported as
+   -- out of range by the database on save, which produces an unmaskable event.
+   overriding procedure Test_Id_Out_Of_Range (Self : in out Instance);
    -- This unit test tests the component's response to a fetched data product with an
    -- unexpected length.
    overriding procedure Test_Length_Mismatch (Self : in out Instance);

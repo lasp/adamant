@@ -8,6 +8,8 @@ components:
 ########################################
   - type: Test_Component_1
     execution: passive
+    set_id_bases:
+      - "Data_Product_Id_Base => 100"
   - type: Product_Store
     execution: passive
     init_base:

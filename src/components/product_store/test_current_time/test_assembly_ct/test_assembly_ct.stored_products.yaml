@@ -5,3 +5,4 @@ data_products:
   - name: Test_Component_1_Instance.Data_Product_A
     description: A data product stored without its timestamp and restored with the save time.
     restore_time: Use_Save_Time
+    event_on_missing: True

@@ -62,7 +62,7 @@ class store_entry(object):
         name,
         description=None,
         store_timestamp=False,
-        restore_time="Use_Zeros",
+        restore_time=None,
         event_on_missing=True,
     ):
         if not name:
@@ -83,17 +83,35 @@ class store_entry(object):
 
         self.description = description
         self.store_timestamp = store_timestamp
-        self.restore_time = restore_time
         self.event_on_missing = event_on_missing
 
+        # Default the restore_time based on the store_timestamp configuration. A
+        # stored timestamp is stored precisely so that it can be restored, so it
+        # is the default (and required, below) in that case. Otherwise the save
+        # time is always available and is the most truthful default:
+        if restore_time is None:
+            restore_time = (
+                "Use_Stored_Dp_Time" if store_timestamp else "Use_Save_Time"
+            )
+        self.restore_time = restore_time
+
         # Make sure the restore_time configuration is compatible with the
-        # store_timestamp configuration:
+        # store_timestamp configuration, in both directions:
         if self.restore_time == "Use_Stored_Dp_Time" and not self.store_timestamp:
             raise ModelException(
                 'Store entry "'
                 + self.name
                 + '" specifies a restore_time of "Use_Stored_Dp_Time" but does not specify '
                 + '"store_timestamp: True". The stored data product time can only be used if it is stored.'
+            )
+        if self.store_timestamp and self.restore_time != "Use_Stored_Dp_Time":
+            raise ModelException(
+                'Store entry "'
+                + self.name
+                + '" specifies "store_timestamp: True" but a restore_time of "'
+                + self.restore_time
+                + '". A stored timestamp must be restored with "Use_Stored_Dp_Time", '
+                + 'otherwise the stored timestamp would be silently ignored on restore.'
             )
 
         # Variables to be set during resolving of ids.
@@ -115,8 +133,9 @@ class store_entry(object):
         if "store_timestamp" in entry_data and entry_data["store_timestamp"]:
             store_timestamp = True
 
-        # Set restore_time, default Use_Zeros:
-        restore_time = "Use_Zeros"
+        # Set restore_time. The default depends on store_timestamp and is
+        # resolved in the constructor:
+        restore_time = None
         if "restore_time" in entry_data:
             restore_time = entry_data["restore_time"]
 
@@ -169,13 +188,12 @@ class store_packet(packet):
         crc_item.full_name = self.name + ".Store_Crc"
         self.items.update({crc_item.full_name: crc_item})
 
-        # Next comes the save time, if configured:
-        if self.store_model.save_time != "No_Time":
-            items, ignore = _items_from_record(_get_time_obj())
-            new_names = [
-                (self.name + ".Save_Time." + name) for name in items.keys()
-            ]
-            self.items.update(OrderedDict(zip(new_names, items.values())))
+        # Next comes the save time:
+        items, ignore = _items_from_record(_get_time_obj())
+        new_names = [
+            (self.name + ".Save_Time." + name) for name in items.keys()
+        ]
+        self.items.update(OrderedDict(zip(new_names, items.values())))
 
         # Next each data product entry, preceded by its timestamp if configured:
         for entry in self.store_model.entries:
@@ -249,17 +267,6 @@ class stored_products(assembly_submodel):
             entry = store_entry.from_entry_data(entry_data)
             entry.lineno = entry_data.lc.line
 
-            # Make sure the entry is compatible with the store's save time
-            # configuration:
-            if entry.restore_time == "Use_Save_Time" and self.save_time == "No_Time":
-                raise ModelException(
-                    'Store entry "'
-                    + entry.name
-                    + '" specifies a restore_time of "Use_Save_Time" but the store specifies a '
-                    + 'save_time of "No_Time". The save time can only be used if it is stored.',
-                    lineno=entry.lineno,
-                )
-
             # Make sure the entry is not a duplicate:
             if entry.name in entry_names:
                 raise ModelException(
@@ -271,10 +278,9 @@ class stored_products(assembly_submodel):
 
     def _resolve_data_products(self, assembly):
         # The assembly should be loaded first. For each entry, resolve the
-        # data product model and size, and compute the total store size:
-        store_size = _get_crc_size()  # in bits
-        if self.save_time != "No_Time":
-            store_size += _get_time_obj().size
+        # data product model and size, and compute the total store size. The
+        # store header always holds the CRC followed by the save time:
+        store_size = _get_crc_size() + _get_time_obj().size  # in bits
 
         for entry in self.entries:
             # Make sure the component for the data product exists:
@@ -336,6 +342,26 @@ class stored_products(assembly_submodel):
                     lineno=entry.lineno,
                 )
             entry.size = entry.data_product.type_model.size  # in bits
+
+            # Make sure the data product type is "always valid", meaning that no
+            # bit representation of the type can fail validation. The store zeroes
+            # the slots of data products that cannot be fetched on save, and MRAM
+            # contents could theoretically be corrupted without violating the CRC
+            # (i.e. a matching recomputation). Requiring always valid types
+            # guarantees a restore can never inject a data product whose use
+            # downstream raises a constraint error:
+            if not entry.data_product.type_model.is_always_valid():
+                raise ModelException(
+                    'Data product "'
+                    + entry.name
+                    + '" in store has type "'
+                    + str(entry.data_product.type)
+                    + '" which is not "always valid", meaning some bit representations '
+                    + 'of the type fail validation. Only always valid types may be '
+                    + 'included in a product store, since restored values must never '
+                    + 'be able to cause a constraint error.',
+                    lineno=entry.lineno,
+                )
 
             # Calculate the total store size:
             store_size += entry.size
