@@ -9,6 +9,7 @@ with Sys_Time;
 with Interfaces;
 with Data_Product_Types;
 with Packed_U32;
+with Packed_U16.Assertion; use Packed_U16.Assertion;
 with Data_Product.Assertion; use Data_Product.Assertion;
 with Command_Response.Assertion; use Command_Response.Assertion;
 with Command_Enums; use Command_Enums.Command_Response_Status;
@@ -35,8 +36,16 @@ package body Product_Store_Tests.Implementation is
       -- Initialize the component:
       Self.Tester.Component_Instance.Init (Bytes => Test_Store_Memory_Ct.Store_Bytes'Access);
 
-      -- Call the component set up method that the assembly would normally call:
+      -- Call the component set up method that the assembly would normally call.
+      -- This seeds the counter data products:
       Self.Tester.Component_Instance.Set_Up;
+
+      -- Clear the histories populated by the Set_Up seeding so that each test
+      -- starts from a clean slate:
+      Self.Tester.Data_Product_T_Recv_Sync_History.Clear;
+      Self.Tester.Save_Count_History.Clear;
+      Self.Tester.Restore_Count_History.Clear;
+      Self.Tester.Crc_Invalid_Count_History.Clear;
 
       -- Set the desired time for the tests:
       Self.Tester.System_Time := (3, 17);
@@ -101,6 +110,11 @@ package body Product_Store_Tests.Implementation is
       Byte_Array_Assert.Eq (Test_Store_Memory_Ct.Store_Bytes, Expected_Store (
          Save_Time => (3, 17), A_Value => 23));
 
+      -- The save counter data product should have been updated:
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Save_Count_History.Get_Count, 1);
+      Packed_U16_Assert.Eq (T.Save_Count_History.Get (1), (Value => 1));
+
       -- No events should have been produced:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
 
@@ -110,9 +124,14 @@ package body Product_Store_Tests.Implementation is
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (
          Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Restore_Products_Id, Status => Success));
-      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
-      Data_Product_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get (1), Expected_Data_Product (
-         Id => 1, Timestamp => (3, 17), Value => Packed_U32.Serialization.To_Byte_Array ((Value => 23))));
+
+      -- The data product history holds the Save_Count, the restored product, and
+      -- the Restore_Count:
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 3);
+      Data_Product_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get (2), Expected_Data_Product (
+         Id => 100, Timestamp => (3, 17), Value => Packed_U32.Serialization.To_Byte_Array ((Value => 23))));
+      Natural_Assert.Eq (T.Restore_Count_History.Get_Count, 1);
+      Packed_U16_Assert.Eq (T.Restore_Count_History.Get (1), (Value => 1));
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Products_Restored_History.Get_Count, 1);
    end Test_Save_Current_Time;

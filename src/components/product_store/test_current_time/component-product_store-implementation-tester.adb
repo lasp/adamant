@@ -28,11 +28,18 @@ package body Component.Product_Store.Implementation.Tester is
       Self.Products_Saved_History.Init (Depth => 100);
       Self.Products_Restored_History.Init (Depth => 100);
       Self.Store_Dumped_History.Init (Depth => 100);
+      Self.Save_On_Tick_Enabled_History.Init (Depth => 100);
+      Self.Save_On_Tick_Disabled_History.Init (Depth => 100);
       Self.Data_Product_Missing_On_Save_History.Init (Depth => 100);
+      Self.Data_Product_Id_Out_Of_Range_History.Init (Depth => 100);
       Self.Data_Product_Length_Mismatch_History.Init (Depth => 100);
       Self.Store_Crc_Invalid_History.Init (Depth => 100);
       Self.Invalid_Command_Received_History.Init (Depth => 100);
       Self.Dropped_Command_History.Init (Depth => 100);
+      -- Data product histories:
+      Self.Save_Count_History.Init (Depth => 100);
+      Self.Restore_Count_History.Init (Depth => 100);
+      Self.Crc_Invalid_Count_History.Init (Depth => 100);
       -- Packet histories:
       Self.Stored_Products_History.Init (Depth => 100);
    end Init_Base;
@@ -51,11 +58,18 @@ package body Component.Product_Store.Implementation.Tester is
       Self.Products_Saved_History.Destroy;
       Self.Products_Restored_History.Destroy;
       Self.Store_Dumped_History.Destroy;
+      Self.Save_On_Tick_Enabled_History.Destroy;
+      Self.Save_On_Tick_Disabled_History.Destroy;
       Self.Data_Product_Missing_On_Save_History.Destroy;
+      Self.Data_Product_Id_Out_Of_Range_History.Destroy;
       Self.Data_Product_Length_Mismatch_History.Destroy;
       Self.Store_Crc_Invalid_History.Destroy;
       Self.Invalid_Command_Received_History.Destroy;
       Self.Dropped_Command_History.Destroy;
+      -- Data product histories:
+      Self.Save_Count_History.Destroy;
+      Self.Restore_Count_History.Destroy;
+      Self.Crc_Invalid_Count_History.Destroy;
       -- Packet histories:
       Self.Stored_Products_History.Destroy;
 
@@ -89,12 +103,14 @@ package body Component.Product_Store.Implementation.Tester is
       -- Push the argument onto the test history for looking at later:
       Self.Data_Product_Fetch_T_Service_History.Push (Arg);
 
-      -- We need to simulate the return of an actual data product here:
+      -- We need to simulate the return of an actual data product here. The id
+      -- matches the assembly-assigned id of Test_Component_1, which is given a
+      -- data product id base of 100 in the test assembly:
       Dp.Header.Time := Self.Dp_Time;
       case Arg.Id is
          -- A, U32
-         when 1 =>
-            Dp.Header.Id := 1;
+         when 100 =>
+            Dp.Header.Id := 100;
             Dp.Header.Buffer_Length := Packed_U32.Serialization.Byte_Array'Length;
             Dp.Buffer (Dp.Buffer'First .. Dp.Buffer'First + Dp.Header.Buffer_Length - 1) := Packed_U32.Serialization.To_Byte_Array ((Value => 23));
          when others =>
@@ -111,12 +127,20 @@ package body Component.Product_Store.Implementation.Tester is
       return To_Return;
    end Data_Product_Fetch_T_Service;
 
-   -- Data products are sent out of this connector upon restore, usually to the data
-   -- product database.
+   -- Data products are sent out of this connector, both when restoring the store
+   -- contents into the data product database and when reporting this component's own
+   -- counter data products.
    overriding procedure Data_Product_T_Recv_Sync (Self : in out Instance; Arg : in Data_Product.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Data_Product_T_Recv_Sync_History.Push (Arg);
+      -- Dispatch the data product to the correct handler. Only the component's
+      -- own counter data products can be dispatched to the typed histories.
+      -- Restored data products belong to Test_Component_1 (id base 100 in the
+      -- test assembly) and would fail the local id lookup:
+      if Arg.Header.Id < 100 then
+         Self.Dispatch_Data_Product (Arg);
+      end if;
    end Data_Product_T_Recv_Sync;
 
    -- Send a packet holding the contents of the store when a dump is commanded.
@@ -199,17 +223,44 @@ package body Component.Product_Store.Implementation.Tester is
       Self.Store_Dumped_History.Push (Arg);
    end Store_Dumped;
 
-   -- A data product was not available from the database when fetched for saving. The
-   -- previous store contents for this data product were preserved if the store CRC
-   -- was valid, otherwise the slot was zeroed.
+   -- The automatic saving of data products to the store upon receipt of a tick was
+   -- enabled by command.
+   overriding procedure Save_On_Tick_Enabled (Self : in out Instance) is
+      Arg : constant Natural := 0;
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Save_On_Tick_Enabled_History.Push (Arg);
+   end Save_On_Tick_Enabled;
+
+   -- The automatic saving of data products to the store upon receipt of a tick was
+   -- disabled by command.
+   overriding procedure Save_On_Tick_Disabled (Self : in out Instance) is
+      Arg : constant Natural := 0;
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Save_On_Tick_Disabled_History.Push (Arg);
+   end Save_On_Tick_Disabled;
+
+   -- A data product was not available from the database when fetched for saving, so
+   -- its slot in the store was zeroed. This event can be disabled per data product
+   -- in the stored products model.
    overriding procedure Data_Product_Missing_On_Save (Self : in out Instance; Arg : in Data_Product_Id.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Data_Product_Missing_On_Save_History.Push (Arg);
    end Data_Product_Missing_On_Save;
 
-   -- A data product was fetched for saving but contained an unexpected length, so it
-   -- was not saved.
+   -- A data product id was reported as out of range by the database when fetched for
+   -- saving, so its slot in the store was zeroed. This indicates a misconfiguration
+   -- between the stored products model and the data product database.
+   overriding procedure Data_Product_Id_Out_Of_Range (Self : in out Instance; Arg : in Data_Product_Id.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Data_Product_Id_Out_Of_Range_History.Push (Arg);
+   end Data_Product_Id_Out_Of_Range;
+
+   -- A data product was fetched for saving but contained an unexpected length, so
+   -- its slot in the store was zeroed.
    overriding procedure Data_Product_Length_Mismatch (Self : in out Instance; Arg : in Invalid_Data_Product_Length.T) is
    begin
       -- Push the argument onto the test history for looking at later:
@@ -219,7 +270,7 @@ package body Component.Product_Store.Implementation.Tester is
    -- The store CRC did not validate prior to a restore, so the restore was not
    -- performed. This is expected on the first boot before the store has ever been
    -- written.
-   overriding procedure Store_Crc_Invalid (Self : in out Instance; Arg : in Store_Crc_Error.T) is
+   overriding procedure Store_Crc_Invalid (Self : in out Instance; Arg : in Crc_Mismatch_Info.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Store_Crc_Invalid_History.Push (Arg);
@@ -238,6 +289,35 @@ package body Component.Product_Store.Implementation.Tester is
       -- Push the argument onto the test history for looking at later:
       Self.Dropped_Command_History.Push (Arg);
    end Dropped_Command;
+
+   -----------------------------------------------
+   -- Data product handler primitive:
+   -----------------------------------------------
+   -- Description:
+   --    Data products for the Product Store component.
+   -- The number of times the data products have been saved to the store, either by
+   -- tick or by command. This counter rolls over.
+   overriding procedure Save_Count (Self : in out Instance; Arg : in Packed_U16.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Save_Count_History.Push (Arg);
+   end Save_Count;
+
+   -- The number of times the store contents have been successfully restored into the
+   -- data product database. This counter rolls over.
+   overriding procedure Restore_Count (Self : in out Instance; Arg : in Packed_U16.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Restore_Count_History.Push (Arg);
+   end Restore_Count;
+
+   -- The number of times a restore was refused because the store CRC did not
+   -- validate. This counter rolls over.
+   overriding procedure Crc_Invalid_Count (Self : in out Instance; Arg : in Packed_U16.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Crc_Invalid_Count_History.Push (Arg);
+   end Crc_Invalid_Count;
 
    -----------------------------------------------
    -- Packet handler primitive:

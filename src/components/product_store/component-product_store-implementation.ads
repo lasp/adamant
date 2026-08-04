@@ -50,7 +50,7 @@ package Component.Product_Store.Implementation is
    -- Commands_Dispatched_Per_Tick : Positive - The number of commands executed per
    -- tick, if any are in the queue.
    --
-   overriding procedure Init (Self : in out Instance; Bytes : in not null Basic_Types.Byte_Array_Access; Restore_On_Set_Up : in Boolean := False; Commands_Dispatched_Per_Tick : in Positive := 3);
+   overriding procedure Init (Self : in out Instance; Bytes : in not null Basic_Types.Byte_Array_Access; Restore_On_Set_Up : in Boolean := False; Ticks_Per_Save : in Positive := 1; Commands_Dispatched_Per_Tick : in Positive := 3);
 
 private
 
@@ -68,17 +68,28 @@ private
       Bytes : Basic_Types.Byte_Array_Access := null;
       -- Should the store be restored into the data product database at Set_Up?
       Restore_On_Set_Up : Boolean := False;
+      -- The number of ticks that must be received before a save is performed:
+      Ticks_Per_Save : Positive := 1;
+      -- Counts received ticks, rolling over at Ticks_Per_Save:
+      Tick_Count : Natural := 0;
       -- The number of commands dispatched from the queue per tick:
       Commands_Dispatched_Per_Tick : Positive := 3;
+      -- Is the automatic saving of data products on tick currently enabled?
+      Save_On_Tick : Boolean := True;
+      -- Rolling counters reported as data products:
+      Save_Count : Interfaces.Unsigned_16 := 0;
+      Restore_Count : Interfaces.Unsigned_16 := 0;
+      Crc_Invalid_Count : Interfaces.Unsigned_16 := 0;
    end record;
 
    ---------------------------------------
    -- Set Up Procedure
    ---------------------------------------
-   -- If the component is configured with Restore_On_Set_Up, then the store
-   -- contents are restored into the data product database here, seeding the
-   -- database with the values saved before the last reboot. If the store CRC
-   -- does not validate, the restore is skipped and an error event is produced.
+   -- The counter data products are seeded with zero here. Then, if the component
+   -- is configured with Restore_On_Set_Up, the store contents are restored into
+   -- the data product database, seeding the database with the values saved before
+   -- the last reboot. If the store CRC does not validate, the restore is skipped
+   -- and an error event is produced.
    overriding procedure Set_Up (Self : in out Instance);
 
    ---------------------------------------
@@ -122,6 +133,12 @@ private
    -- dumped as-is, without validating the CRC, so that corrupted store contents can
    -- be inspected on the ground.
    overriding function Dump_Store (Self : in out Instance) return Command_Execution_Status.E;
+   -- Enable the automatic saving of the data products to the store upon receipt of
+   -- a tick.
+   overriding function Enable_Save_On_Tick (Self : in out Instance) return Command_Execution_Status.E;
+   -- Disable the automatic saving of the data products to the store upon receipt of
+   -- a tick.
+   overriding function Disable_Save_On_Tick (Self : in out Instance) return Command_Execution_Status.E;
 
    -- Invalid command handler. This procedure is called when a command's arguments are found to be invalid:
    overriding procedure Invalid_Command (Self : in out Instance; Cmd : in Command.T; Errant_Field_Number : in Unsigned_32; Errant_Field : in Basic_Types.Poly_Type);
