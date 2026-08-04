@@ -11,6 +11,8 @@ package body {{ name }} is
    begin
 {% if element.is_packed_type %}
       return [for J in Src'Range => {{ element.type_package }}.Pack (Src (J))];
+      pragma Annotate (GNATSAS, False_Positive, "precondition",
+         "The element pack/unpack preconditions require each source component to be initialized. Callers initialize the source before this call, often across serialization, foreign-function, or memory-overlay boundaries that the analyzer cannot trace.");
 {% else %}
       return T (Src);
 {% endif %}
@@ -22,6 +24,8 @@ package body {{ name }} is
    begin
 {% if element.is_packed_type %}
       return [for J in Src'Range => {{ element.type_package }}.Pack (Src (J))];
+      pragma Annotate (GNATSAS, False_Positive, "precondition",
+         "The element pack/unpack preconditions require each source component to be initialized. Callers initialize the source before this call, often across serialization, foreign-function, or memory-overlay boundaries that the analyzer cannot trace.");
 {% else %}
       return T_Le (Src);
 {% endif %}
@@ -33,6 +37,8 @@ package body {{ name }} is
    begin
 {% if element.is_packed_type %}
       return [for J in Src'Range => {{ element.type_package }}.Unpack (Src (J))];
+      pragma Annotate (GNATSAS, False_Positive, "precondition",
+         "The element pack/unpack preconditions require each source component to be initialized. Callers initialize the source before this call, often across serialization, foreign-function, or memory-overlay boundaries that the analyzer cannot trace.");
 {% else %}
       return U (Src);
 {% endif %}
@@ -44,6 +50,8 @@ package body {{ name }} is
    begin
 {% if element.is_packed_type %}
       return [for J in Src'Range => {{ element.type_package }}.Unpack (Src (J))];
+      pragma Annotate (GNATSAS, False_Positive, "precondition",
+         "The element pack/unpack preconditions require each source component to be initialized. Callers initialize the source before this call, often across serialization, foreign-function, or memory-overlay boundaries that the analyzer cannot trace.");
 {% else %}
       return U (Src);
 {% endif %}
@@ -70,6 +78,8 @@ package body {{ name }} is
    begin
 {% if element.is_packed_type %}
       return [for J in Src'Range => {{ element.type_package }}.Pack (Src (J))];
+      pragma Annotate (GNATSAS, False_Positive, "precondition",
+         "The element pack/unpack preconditions require each source component to be initialized. Callers initialize the source before this call, often across serialization, foreign-function, or memory-overlay boundaries that the analyzer cannot trace.");
 {% else %}
       return T_Unconstrained (Src);
 {% endif %}
@@ -81,6 +91,8 @@ package body {{ name }} is
    begin
 {% if element.is_packed_type %}
       return [for J in Src'Range => {{ element.type_package }}.Pack (Src (J))];
+      pragma Annotate (GNATSAS, False_Positive, "precondition",
+         "The element pack/unpack preconditions require each source component to be initialized. Callers initialize the source before this call, often across serialization, foreign-function, or memory-overlay boundaries that the analyzer cannot trace.");
 {% else %}
       return T_Le_Unconstrained (Src);
 {% endif %}
@@ -92,6 +104,8 @@ package body {{ name }} is
    begin
 {% if element.is_packed_type %}
       return [for J in Src'Range => {{ element.type_package }}.Unpack (Src (J))];
+      pragma Annotate (GNATSAS, False_Positive, "precondition",
+         "The element pack/unpack preconditions require each source component to be initialized. Callers initialize the source before this call, often across serialization, foreign-function, or memory-overlay boundaries that the analyzer cannot trace.");
 {% else %}
       return Unconstrained (Src);
 {% endif %}
@@ -103,6 +117,8 @@ package body {{ name }} is
    begin
 {% if element.is_packed_type %}
       return [for J in Src'Range => {{ element.type_package }}.Unpack (Src (J))];
+      pragma Annotate (GNATSAS, False_Positive, "precondition",
+         "The element pack/unpack preconditions require each source component to be initialized. Callers initialize the source before this call, often across serialization, foreign-function, or memory-overlay boundaries that the analyzer cannot trace.");
 {% else %}
       return Unconstrained (Src);
 {% endif %}
