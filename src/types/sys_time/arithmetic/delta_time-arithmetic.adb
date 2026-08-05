@@ -18,6 +18,11 @@ package body Delta_Time.Arithmetic is
       -- Convert from time to Sys_Time
       Status : Sys_Time_Status;
    begin
+      -- Give the output a defined zero value up front so that it is fully
+      -- assigned on every path, including the Constraint_Error handler
+      -- below:
+      Arg_Out := Zero_Delta_Time;
+
       if Arg_In = Time_Span_First then
          -- Special case for Time_Span_First, which would overflow abs if made positive. In this
          -- case we round to the nearest positive time span value.
@@ -31,14 +36,20 @@ package body Delta_Time.Arithmetic is
       -- Convert from time to Sys_Time
       Status := To_Sys_Time (The_Time, Out_Time);
 
-      if Status = Success then
-         -- Convert to Delta_Time and return status
-         Arg_Out := Sys_Time_To_Delta_Time (Out_Time);
-      end if;
+      -- To_Sys_Time always assigns its output, saturating at the minimum
+      -- and maximum representable times on underflow and overflow, so the
+      -- (possibly saturated) value is copied out unconditionally alongside
+      -- the status:
+      Arg_Out := Sys_Time_To_Delta_Time (Out_Time);
 
       return Status;
    exception
       when Constraint_Error => return Overflow;
+   end To_Delta_Time;
+
+   procedure To_Delta_Time (Arg_In : in Time_Span; Arg_Out : out Delta_Time.T; Status : out Sys_Time.Arithmetic.Sys_Time_Status) is
+   begin
+      Status := To_Delta_Time (Arg_In, Arg_Out);
    end To_Delta_Time;
 
    -- Convert a Delta_Time to an Ada.Real_Time.Time_Span
