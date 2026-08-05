@@ -183,7 +183,6 @@ package body Component.Event_Filter.Implementation is
       use Command_Execution_Status;
       use Event_Filter_Enums;
       Status : Event_Filter_Entry.Event_Entry_Status;
-      Ret : Command_Execution_Status.E := Success;
    begin
       Self.Event_Entries.Set_Filter_State (Arg.Event_To_Update.Id, Event_Filter_State.Filtered, Status);
       case Status is
@@ -197,12 +196,12 @@ package body Component.Event_Filter.Implementation is
       -- Now check if ground wants to dump the state packet
       case Arg.Issue_State_Packet is
          when Issue_Packet_Type.Issue =>
-            Ret := Self.Dump_Event_States;
+            -- Return the dump status so a dump failure fails the command:
+            return Self.Dump_Event_States;
          when Issue_Packet_Type.No_Issue =>
-            null; -- Don't send a packet so nothing to do
+            -- Don't send a packet so nothing to do:
+            return Success;
       end case;
-
-      return Ret;
    end Filter_Event;
 
    -- Disable the event filter for a specific event ID.
@@ -210,7 +209,6 @@ package body Component.Event_Filter.Implementation is
       use Command_Execution_Status;
       use Event_Filter_Enums;
       Status : Event_Filter_Entry.Event_Entry_Status;
-      Ret : Command_Execution_Status.E := Success;
    begin
       Self.Event_Entries.Set_Filter_State (Arg.Event_To_Update.Id, Event_Filter_State.Unfiltered, Status);
       case Status is
@@ -224,12 +222,12 @@ package body Component.Event_Filter.Implementation is
       -- Now check if ground wants to dump the state packet
       case Arg.Issue_State_Packet is
          when Issue_Packet_Type.Issue =>
-            Ret := Self.Dump_Event_States;
+            -- Return the dump status so a dump failure fails the command:
+            return Self.Dump_Event_States;
          when Issue_Packet_Type.No_Issue =>
-            null; -- Don't send a packet so nothing to do
+            -- Don't send a packet so nothing to do:
+            return Success;
       end case;
-
-      return Ret;
    end Unfilter_Event;
 
    -- Enable the event filter for a specific range of event IDs.
@@ -237,7 +235,6 @@ package body Component.Event_Filter.Implementation is
       use Command_Execution_Status;
       use Event_Filter_Enums;
       Status : Event_Filter_Entry.Event_Entry_Status;
-      Ret : Command_Execution_Status.E := Success;
       Id_Stop : Event_Types.Event_Id;
       Id_Start : constant Event_Types.Event_Id := Self.Event_Entries.Get_Event_Start_Stop_Range (Id_Stop);
    begin
@@ -261,12 +258,12 @@ package body Component.Event_Filter.Implementation is
       -- Now check if ground wants to dump the state packet
       case Arg.Issue_State_Packet is
          when Issue_Packet_Type.Issue =>
-            Ret := Self.Dump_Event_States;
+            -- Return the dump status so a dump failure fails the command:
+            return Self.Dump_Event_States;
          when Issue_Packet_Type.No_Issue =>
-            null; -- Don't send a packet so nothing to do
+            -- Don't send a packet so nothing to do:
+            return Success;
       end case;
-
-      return Ret;
    end Filter_Event_Range;
 
    -- Disable the event filter for a specific range of event IDs.
@@ -274,7 +271,6 @@ package body Component.Event_Filter.Implementation is
       use Command_Execution_Status;
       use Event_Filter_Enums;
       Status : Event_Filter_Entry.Event_Entry_Status;
-      Ret : Command_Execution_Status.E := Success;
       Id_Stop : Event_Types.Event_Id;
       Id_Start : constant Event_Types.Event_Id := Self.Event_Entries.Get_Event_Start_Stop_Range (Id_Stop);
    begin
@@ -298,12 +294,12 @@ package body Component.Event_Filter.Implementation is
       -- Now check if ground wants to dump the state packet
       case Arg.Issue_State_Packet is
          when Issue_Packet_Type.Issue =>
-            Ret := Self.Dump_Event_States;
+            -- Return the dump status so a dump failure fails the command:
+            return Self.Dump_Event_States;
          when Issue_Packet_Type.No_Issue =>
-            null; -- Don't send a packet so nothing to do
+            -- Don't send a packet so nothing to do:
+            return Success;
       end case;
-
-      return Ret;
    end Unfilter_Event_Range;
 
    -- Enable the component to filter events that have been set to be filtered.
