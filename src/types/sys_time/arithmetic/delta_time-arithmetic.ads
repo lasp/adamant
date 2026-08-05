@@ -11,6 +11,12 @@ package Delta_Time.Arithmetic is
    -- Convert an Ada.Real_Time.Time_Span to a Delta_Time
    function To_Delta_Time (Arg_In : in Time_Span; Arg_Out : out Delta_Time.T) return Sys_Time.Arithmetic.Sys_Time_Status;
 
+   -- Procedure form of the above. A function with an out parameter is not
+   -- callable from SPARK code (it is a function with side effects), so SPARK
+   -- callers use this form instead:
+   procedure To_Delta_Time (Arg_In : in Time_Span; Arg_Out : out Delta_Time.T; Status : out Sys_Time.Arithmetic.Sys_Time_Status)
+      with Global => null, Always_Terminates => True;
+
    -- Convert a Delta_Time to an Ada.Real_Time.Time_Span
    function To_Time_Span (Arg : in Delta_Time.T) return Time_Span;
 

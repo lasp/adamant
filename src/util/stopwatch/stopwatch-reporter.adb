@@ -1,11 +1,16 @@
 with Delta_Time.Arithmetic;
 with Sys_Time.Arithmetic;
 
-package body Stopwatch.Reporter is
+package body Stopwatch.Reporter with SPARK_Mode => On is
 
    procedure Start (Self : in out Instance) is
+      -- SPARK requires a volatile function like Clock to be read into an
+      -- object directly rather than passed as an actual. The wall time is
+      -- sampled before the CPU timer starts, preserving the wall-first
+      -- ordering:
+      Now : constant Ada.Real_Time.Time := Ada.Real_Time.Clock;
    begin
-      Self.Start (Wall_Start_Time => Ada.Real_Time.Clock);
+      Self.Start (Wall_Start_Time => Now);
    end Start;
 
    procedure Start (Self : in out Instance; Wall_Start_Time : in Ada.Real_Time.Time) is
@@ -17,9 +22,15 @@ package body Stopwatch.Reporter is
    procedure Stop (Self : in out Instance) is
    begin
       -- Stop the CPU timer first so the wall clock read below is excluded
-      -- from the CPU measurement:
+      -- from the CPU measurement. SPARK requires a volatile function like
+      -- Clock to be read into an object directly rather than passed as an
+      -- actual, so the read gets a declare block after the CPU stop:
       Self.Stop_Cpu_Timer;
-      Self.Stop_Wall_Timer (Wall_Stop_Time => Ada.Real_Time.Clock);
+      declare
+         Now : constant Ada.Real_Time.Time := Ada.Real_Time.Clock;
+      begin
+         Self.Stop_Wall_Timer (Wall_Stop_Time => Now);
+      end;
    end Stop;
 
    procedure Stop (Self : in out Instance; Wall_Stop_Time : in Ada.Real_Time.Time) is
@@ -51,7 +62,12 @@ package body Stopwatch.Reporter is
 
       -- Fold a measured value into a recent-maximum and maximum pair,
       -- reporting whether the maximum was updated:
-      procedure Update_Maximums (Value : in Time_Span; Recent_Max : in out Time_Span; Max : in out Time_Span; Updated : out Boolean) is
+      procedure Update_Maximums (Value : in Time_Span; Recent_Max : in out Time_Span; Max : in out Time_Span; Updated : out Boolean)
+         with Global => null,
+              Post => Recent_Max = (if Value > Recent_Max'Old then Value else Recent_Max'Old) and then
+                      Max = (if Value > Max'Old then Value else Max'Old) and then
+                      Updated = (Value > Max'Old)
+      is
       begin
          Updated := False;
          if Value > Recent_Max then
@@ -72,12 +88,14 @@ package body Stopwatch.Reporter is
    function To_Report (Max_Wall_Time : in Ada.Real_Time.Time_Span; Max_Execution_Time : in Ada.Real_Time.Time_Span; Recent_Wall_Time : in Ada.Real_Time.Time_Span; Recent_Execution_Time : in Ada.Real_Time.Time_Span) return Task_Timing_Report.T is
       use Delta_Time.Arithmetic;
       To_Return : Task_Timing_Report.T;
+      -- The conversion saturates on overflow; the status is intentionally
+      -- not consulted:
       Ignore : Sys_Time.Arithmetic.Sys_Time_Status;
    begin
-      Ignore := To_Delta_Time (Max_Wall_Time, To_Return.Max.Wall_Time);
-      Ignore := To_Delta_Time (Max_Execution_Time, To_Return.Max.Execution_Time);
-      Ignore := To_Delta_Time (Recent_Wall_Time, To_Return.Recent_Max.Wall_Time);
-      Ignore := To_Delta_Time (Recent_Execution_Time, To_Return.Recent_Max.Execution_Time);
+      To_Delta_Time (Max_Wall_Time, To_Return.Max.Wall_Time, Ignore);
+      To_Delta_Time (Max_Execution_Time, To_Return.Max.Execution_Time, Ignore);
+      To_Delta_Time (Recent_Wall_Time, To_Return.Recent_Max.Wall_Time, Ignore);
+      To_Delta_Time (Recent_Execution_Time, To_Return.Recent_Max.Execution_Time, Ignore);
       return To_Return;
    end To_Report;
 
@@ -94,7 +112,7 @@ package body Stopwatch.Reporter is
       Self.Recent_Max_Execution_Time := Time_Span_Zero;
    end Reset_Recent_Max;
 
-   procedure Reset (Self : in out Instance) is
+   procedure Reset (Self : out Instance) is
    begin
       Self := (others => <>);
    end Reset;
