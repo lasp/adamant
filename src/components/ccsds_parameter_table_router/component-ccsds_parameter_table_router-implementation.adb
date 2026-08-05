@@ -38,9 +38,9 @@ package body Component.Ccsds_Parameter_Table_Router.Implementation is
       -- null here which would fail the Init assertion, but the binary tree
       -- comparison only uses Table_Id so this is safe for searching:
       Search_Key : constant Router_Table_Entry := (Table_Id => Table_Id, Destinations => null);
-      Found_Index : Positive;
+      Ignore : Positive;
    begin
-      if Self.Table.Search (Search_Key, Found, Found_Index) then
+      if Self.Table.Search (Search_Key, Found, Ignore) then
          return True;
       else
          Self.Event_T_Send_If_Connected (Self.Events.Unrecognized_Table_Id (
