@@ -62,7 +62,12 @@ package body Stopwatch.Reporter with SPARK_Mode => On is
 
       -- Fold a measured value into a recent-maximum and maximum pair,
       -- reporting whether the maximum was updated:
-      procedure Update_Maximums (Value : in Time_Span; Recent_Max : in out Time_Span; Max : in out Time_Span; Updated : out Boolean) is
+      procedure Update_Maximums (Value : in Time_Span; Recent_Max : in out Time_Span; Max : in out Time_Span; Updated : out Boolean)
+         with Global => null,
+              Post => Recent_Max = (if Value > Recent_Max'Old then Value else Recent_Max'Old) and then
+                      Max = (if Value > Max'Old then Value else Max'Old) and then
+                      Updated = (Value > Max'Old)
+      is
       begin
          Updated := False;
          if Value > Recent_Max then
