@@ -289,7 +289,6 @@ package body Component.Event_Limiter.Implementation is
       use Command_Execution_Status;
       use Event_Limiter_Enums;
       Status : Two_Counter_Entry.Enable_State_Status;
-      Ret : Command_Execution_Status.E := Success;
    begin
       Self.Event_Array.Set_Enable_State (Arg.Event_To_Update.Id, Event_State_Type.Enabled, Status);
       case Status is
@@ -303,12 +302,12 @@ package body Component.Event_Limiter.Implementation is
       -- Now check if ground wants to dump the state packet
       case Arg.Issue_State_Packet is
          when Issue_Packet_Type.Issue =>
-            Ret := Self.Dump_Event_States;
+            -- Return the dump status so a dump failure fails the command:
+            return Self.Dump_Event_States;
          when Issue_Packet_Type.No_Issue =>
-            null; -- Don't send a packet so nothing to do
+            -- Don't send a packet so nothing to do:
+            return Success;
       end case;
-
-      return Ret;
    end Enable_Event_Limit;
 
    -- Disable the event limiter for a specific event ID.
@@ -316,7 +315,6 @@ package body Component.Event_Limiter.Implementation is
       use Command_Execution_Status;
       use Event_Limiter_Enums;
       Status : Two_Counter_Entry.Enable_State_Status;
-      Ret : Command_Execution_Status.E := Success;
    begin
       Self.Event_Array.Set_Enable_State (Arg.Event_To_Update.Id, Event_State_Type.Disabled, Status);
       case Status is
@@ -330,12 +328,12 @@ package body Component.Event_Limiter.Implementation is
       -- Now check if ground wants to dump the state packet
       case Arg.Issue_State_Packet is
          when Issue_Packet_Type.Issue =>
-            Ret := Self.Dump_Event_States;
+            -- Return the dump status so a dump failure fails the command:
+            return Self.Dump_Event_States;
          when Issue_Packet_Type.No_Issue =>
-            null; -- Don't send a packet so nothing to do
+            -- Don't send a packet so nothing to do:
+            return Success;
       end case;
-
-      return Ret;
    end Disable_Event_Limit;
 
    -- Enable the event limiter for a specific range of event ID.
@@ -343,7 +341,6 @@ package body Component.Event_Limiter.Implementation is
       use Command_Execution_Status;
       use Event_Limiter_Enums;
       Status : Two_Counter_Entry.Enable_State_Status;
-      Ret : Command_Execution_Status.E := Success;
       Id_Stop : Event_Types.Event_Id;
       Id_Start : constant Event_Types.Event_Id := Self.Event_Array.Get_Event_Start_Stop_Range (Id_Stop);
    begin
@@ -367,12 +364,12 @@ package body Component.Event_Limiter.Implementation is
       -- Now check if ground wants to dump the state packet
       case Arg.Issue_State_Packet is
          when Issue_Packet_Type.Issue =>
-            Ret := Self.Dump_Event_States;
+            -- Return the dump status so a dump failure fails the command:
+            return Self.Dump_Event_States;
          when Issue_Packet_Type.No_Issue =>
-            null; -- Don't send a packet so nothing to do
+            -- Don't send a packet so nothing to do:
+            return Success;
       end case;
-
-      return Ret;
    end Enable_Event_Limit_Range;
 
    -- Disable the event limiter for a specific range of event ID.
@@ -380,7 +377,6 @@ package body Component.Event_Limiter.Implementation is
       use Command_Execution_Status;
       use Event_Limiter_Enums;
       Status : Two_Counter_Entry.Enable_State_Status;
-      Ret : Command_Execution_Status.E := Success;
       Id_Stop : Event_Types.Event_Id;
       Id_Start : constant Event_Types.Event_Id := Self.Event_Array.Get_Event_Start_Stop_Range (Id_Stop);
    begin
@@ -404,12 +400,12 @@ package body Component.Event_Limiter.Implementation is
       -- Now check if ground wants to dump the state packet
       case Arg.Issue_State_Packet is
          when Issue_Packet_Type.Issue =>
-            Ret := Self.Dump_Event_States;
+            -- Return the dump status so a dump failure fails the command:
+            return Self.Dump_Event_States;
          when Issue_Packet_Type.No_Issue =>
-            null; -- Don't send a packet so nothing to do
+            -- Don't send a packet so nothing to do:
+            return Success;
       end case;
-
-      return Ret;
    end Disable_Event_Limit_Range;
 
    -- Enable the event limiters for all event IDs.
