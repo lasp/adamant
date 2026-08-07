@@ -1,0 +1,31 @@
+---
+description: Events for the Product Store component.
+events:
+  - name: Products_Saved
+    description: The data products were saved to the store by command.
+  - name: Products_Restored
+    description: The data products held in the store were restored into the data product database.
+  - name: Store_Dumped
+    description: Produced a packet with the contents of the store.
+  - name: Save_On_Tick_Enabled
+    description: The automatic saving of data products to the store upon receipt of a tick was enabled by command.
+  - name: Save_On_Tick_Disabled
+    description: The automatic saving of data products to the store upon receipt of a tick was disabled by command.
+  - name: Data_Product_Missing_On_Save
+    description: A data product was not available from the database when fetched for saving, so its slot in the store was zeroed. This event can be disabled per data product in the stored products model.
+    param_type: Data_Product_Id.T
+  - name: Data_Product_Id_Out_Of_Range
+    description: A data product id was reported as out of range by the database when fetched for saving, so its slot in the store was zeroed. This indicates a misconfiguration between the stored products model and the data product database.
+    param_type: Data_Product_Id.T
+  - name: Data_Product_Length_Mismatch
+    description: A data product was fetched for saving but contained an unexpected length, so its slot in the store was zeroed.
+    param_type: Invalid_Data_Product_Length.T
+  - name: Store_Crc_Invalid
+    description: The store CRC did not validate prior to a restore, so the restore was not performed. This is expected on the first boot before the store has ever been written.
+    param_type: Crc_Mismatch_Info.T
+  - name: Invalid_Command_Received
+    description: A command was received with invalid parameters.
+    param_type: Invalid_Command_Info.T
+  - name: Dropped_Command
+    description: A command was dropped due to a full queue.
+    param_type: Command_Header.T

@@ -1,0 +1,56 @@
+---
+description: |
+  The product store saves a predefined set of data products from the database to a byte array (memory region) provided at initialization, usually located in nonvolatile storage (i.e. MRAM). The set of data products to save is configured via an autocoded table provided at instantiation, produced from a stored_products.yaml model file named <assembly_name>.stored_products.yaml, or <specific_name>.<assembly_name>.stored_products.yaml when more than one product store is instantiated within the same assembly. Data products are saved upon receipt of a tick (which can be divided down and enabled/disabled by command) or by command, and can be restored back into the data product database by command or at Set_Up. The store is protected by a CRC which is written on every save and checked prior to every restore, protecting against the restoration of corrupted or never-initialized memory contents. A command is provided to dump the current contents of the store into a packet. The autocoder limits the total size of the store to fit within a single Packet.T, and requires every stored data product to have an always valid type, so a restore can never produce a value that fails validation.
+execution: passive
+discriminant:
+  description: This component requires a description of the data products it is responsible for saving and restoring. This description should be provided as an autocoded output from a stored_products.yaml model file.
+  parameters:
+    - name: Store_Description
+      type: Product_Store_Types.Store_Description_Access_Type
+      description: The description of the data product store to manage.
+      not_null: true
+init:
+  description: The component is initialized by providing the memory region it is to manage, which holds the data product store.
+  parameters:
+    - name: Bytes
+      type: Basic_Types.Byte_Array_Access
+      not_null: true
+      description: A pointer to an allocation of bytes to be used for storing the data products. The size of this byte array MUST be at least Store_Description.Store_Size bytes in length (which includes the CRC and save time header). Only the first Store_Description.Store_Size bytes will be used by this component.
+    - name: Restore_On_Set_Up
+      type: Boolean
+      default: "False"
+      description: If set to True, the component will attempt to restore the stored data products into the data product database during Set_Up, seeding the database with the values saved before the last reboot. If the store CRC does not validate (i.e. the store was never written or was corrupted) the restore is skipped and an error event is produced.
+    - name: Ticks_Per_Save
+      type: Positive
+      default: "1"
+      description: The number of ticks that must be received before the data products are saved to the store. This allows the component to be connected to a rate group running at a speed appropriate for command responsiveness (i.e. 1 Hz), while saving to the store at a slower rate (i.e. every 600 ticks for a 10 minute save cadence).
+    - name: Commands_Dispatched_Per_Tick
+      type: Positive
+      default: "3"
+      description: The number of commands executed per tick, if any are in the queue.
+connectors:
+  - description: This is the base tick for the component. Commands are dispatched from the queue on every tick, and the data products are saved to the store every Ticks_Per_Save ticks (when saving on tick is enabled).
+    type: Tick.T
+    kind: recv_sync
+  - description: Fetch a data product item from the database for saving.
+    type: Data_Product_Fetch.T
+    return_type: Data_Product_Return.T
+    kind: request
+  - description: Data products are sent out of this connector, both when restoring the store contents into the data product database and when reporting this component's own counter data products.
+    type: Data_Product.T
+    kind: send
+  - description: Send a packet holding the contents of the store when a dump is commanded.
+    type: Packet.T
+    kind: send
+  - description: This is the command receive connector.
+    type: Command.T
+    kind: recv_async
+  - description: This connector is used to register and respond to the component's commands.
+    type: Command_Response.T
+    kind: send
+  - description: Events are sent out of this connector.
+    type: Event.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get
