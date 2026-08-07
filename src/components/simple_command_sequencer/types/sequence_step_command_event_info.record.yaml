@@ -1,0 +1,19 @@
+---
+description: Sequence, frame, step, and command identification for events
+fields:
+  - name: Sequence_Id
+    description: The ID of the sequence
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Frame_Id
+    description: The frame the sequence is executing on
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Step
+    description: The step index
+    type: Interfaces.Unsigned_32
+    format: U32
+  - name: Command_Id
+    description: The ID of the command
+    type: Command_Types.Command_Id
+    format: U16

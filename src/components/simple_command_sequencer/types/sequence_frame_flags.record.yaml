@@ -1,0 +1,15 @@
+---
+description: Stores flags for a Sequence Frame
+fields:
+  - name: Has_Source_Id
+    type: Boolean
+    format: U2
+  - name: Last_Command_Success
+    type: Boolean
+    format: U2
+  - name: Wait_For_Cmd_Resp
+    type: Boolean
+    format: U2
+  - name: Abort_On_Failed_Cmd
+    type: Boolean
+    format: U2

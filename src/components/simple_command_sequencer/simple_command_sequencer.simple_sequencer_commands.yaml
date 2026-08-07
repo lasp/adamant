@@ -1,0 +1,16 @@
+---
+description: |
+  Static commands for the Simple Command Sequencer component. Per-sequence
+  wrapper commands (one per declared sequence) are synthesised at assembly
+  load time by gen/models/simple_sequencer_commands.py.
+commands:
+  - name: Run_Sequence
+    description: Run a command sequence by ID. Per-sequence wrapper commands are the operator-friendly form; this is the underlying backbone they all dispatch through.
+    arg_type: Run_Sequence_Arg.T
+
+  - name: Kill_All_Sequences
+    description: Halt every running sequence and return all frames to their initial state. Does not affect frames that were not running.
+
+  - name: Set_Summary_Packet_Period
+    description: Set the period of the sequencer summary packet, in ticks. A period of zero disables the packet.
+    arg_type: Packed_U16.T
