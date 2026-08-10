@@ -63,7 +63,8 @@ package body Product_Store_Tests.Implementation is
 
    -- Build the expected contents of the store given the values that should have
    -- been saved. The layout matches the test assembly stored products model:
-   -- CRC [0 .. 1], save time [2 .. 9], data product A [10 .. 13].
+   -- CRC [0 .. 1], save time [2 .. 9], data product A stored length [10],
+   -- data product A value [11 .. 14].
    function Expected_Store (
       Save_Time : in Sys_Time.T;
       A_Value : in Interfaces.Unsigned_32
@@ -71,7 +72,8 @@ package body Product_Store_Tests.Implementation is
       Bytes : Basic_Types.Byte_Array (0 .. Test_Assembly_Ct_Stored_Products.Store_Size_In_Bytes - 1) := [others => 0];
    begin
       Bytes (2 .. 9) := Sys_Time.Serialization.To_Byte_Array (Save_Time);
-      Bytes (10 .. 13) := Packed_U32.Serialization.To_Byte_Array ((Value => A_Value));
+      Bytes (10) := Packed_U32.Serialization.Byte_Array'Length;
+      Bytes (11 .. 14) := Packed_U32.Serialization.To_Byte_Array ((Value => A_Value));
       Bytes (0 .. 1) := Crc_16.Compute_Crc_16 (Bytes (2 .. Bytes'Last));
       return Bytes;
    end Expected_Store;

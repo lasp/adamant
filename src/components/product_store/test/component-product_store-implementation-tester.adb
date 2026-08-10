@@ -33,6 +33,7 @@ package body Component.Product_Store.Implementation.Tester is
       Self.Data_Product_Missing_On_Save_History.Init (Depth => 100);
       Self.Data_Product_Id_Out_Of_Range_History.Init (Depth => 100);
       Self.Data_Product_Length_Mismatch_History.Init (Depth => 100);
+      Self.Stored_Length_Mismatch_History.Init (Depth => 100);
       Self.Store_Crc_Invalid_History.Init (Depth => 100);
       Self.Invalid_Command_Received_History.Init (Depth => 100);
       Self.Dropped_Command_History.Init (Depth => 100);
@@ -63,6 +64,7 @@ package body Component.Product_Store.Implementation.Tester is
       Self.Data_Product_Missing_On_Save_History.Destroy;
       Self.Data_Product_Id_Out_Of_Range_History.Destroy;
       Self.Data_Product_Length_Mismatch_History.Destroy;
+      Self.Stored_Length_Mismatch_History.Destroy;
       Self.Store_Crc_Invalid_History.Destroy;
       Self.Invalid_Command_Received_History.Destroy;
       Self.Dropped_Command_History.Destroy;
@@ -132,7 +134,13 @@ package body Component.Product_Store.Implementation.Tester is
          Dp.Header.Buffer_Length := Self.Data_Product_Length_Override;
       end if;
 
-      To_Return.The_Status := Self.Data_Product_Fetch_Return_Status;
+      -- Return the configured status, or Not_Available if this id is configured
+      -- to fail:
+      if Self.Fetch_Fail_Id /= 0 and then Arg.Id = Self.Fetch_Fail_Id then
+         To_Return.The_Status := Fetch_Status.Not_Available;
+      else
+         To_Return.The_Status := Self.Data_Product_Fetch_Return_Status;
+      end if;
       To_Return.The_Data_Product := Dp;
       return To_Return;
    end Data_Product_Fetch_T_Service;
@@ -252,8 +260,9 @@ package body Component.Product_Store.Implementation.Tester is
    end Save_On_Tick_Disabled;
 
    -- A data product was not available from the database when fetched for saving, so
-   -- its slot in the store was zeroed. This event can be disabled per data product
-   -- in the stored products model.
+   -- its slot in the store was left unchanged, preserving the last saved value (or
+   -- the never-saved marker if no value was ever saved). This event can be disabled
+   -- per data product in the stored products model.
    overriding procedure Data_Product_Missing_On_Save (Self : in out Instance; Arg : in Data_Product_Id.T) is
    begin
       -- Push the argument onto the test history for looking at later:
@@ -261,8 +270,9 @@ package body Component.Product_Store.Implementation.Tester is
    end Data_Product_Missing_On_Save;
 
    -- A data product id was reported as out of range by the database when fetched for
-   -- saving, so its slot in the store was zeroed. This indicates a misconfiguration
-   -- between the stored products model and the data product database.
+   -- saving, so its slot in the store was left unchanged. This indicates a
+   -- misconfiguration between the stored products model and the data product
+   -- database.
    overriding procedure Data_Product_Id_Out_Of_Range (Self : in out Instance; Arg : in Data_Product_Id.T) is
    begin
       -- Push the argument onto the test history for looking at later:
@@ -270,12 +280,22 @@ package body Component.Product_Store.Implementation.Tester is
    end Data_Product_Id_Out_Of_Range;
 
    -- A data product was fetched for saving but contained an unexpected length, so
-   -- its slot in the store was zeroed.
+   -- its slot in the store was left unchanged.
    overriding procedure Data_Product_Length_Mismatch (Self : in out Instance; Arg : in Invalid_Data_Product_Length.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Data_Product_Length_Mismatch_History.Push (Arg);
    end Data_Product_Length_Mismatch;
+
+   -- A store entry held a stored length that is neither zero (never saved) nor the
+   -- expected length for the data product, so the entry was not restored. This
+   -- indicates that the stored products model has changed since the store was last
+   -- written.
+   overriding procedure Stored_Length_Mismatch (Self : in out Instance; Arg : in Invalid_Stored_Length.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Stored_Length_Mismatch_History.Push (Arg);
+   end Stored_Length_Mismatch;
 
    -- The store CRC did not validate prior to a restore, so the restore was not
    -- performed. This is expected on the first boot before the store has ever been

@@ -38,7 +38,7 @@ private
    -- Ticks_Per_Save ticks.
    overriding procedure Test_Ticks_Per_Save (Self : in out Instance);
    -- This unit test tests the component's response to a data product that is missing
-   -- from the database on save, verifying that missing slots are zeroed.
+   -- from the database on save, verifying that slots keep their previous contents.
    overriding procedure Test_Missing_Data_Product (Self : in out Instance);
    -- This unit test tests the component's response to a data product id reported as
    -- out of range by the database on save, which produces an unmaskable event.
@@ -53,6 +53,13 @@ private
    overriding procedure Test_Invalid_Command (Self : in out Instance);
    -- This unit test tests a command being dropped due to a full queue.
    overriding procedure Test_Full_Queue (Self : in out Instance);
+   -- This unit test tests that a restore silently skips store entries that have
+   -- never been saved, leaving those data products unavailable in the database.
+   overriding procedure Test_Restore_Skips_Unwritten (Self : in out Instance);
+   -- This unit test tests that a restore refuses a store entry whose stored length
+   -- does not match the expected length, which indicates the stored products model
+   -- has changed since the store was written.
+   overriding procedure Test_Stored_Length_Mismatch (Self : in out Instance);
 
    -- Test data and state:
    type Instance is new Product_Store_Tests.Base_Instance with record

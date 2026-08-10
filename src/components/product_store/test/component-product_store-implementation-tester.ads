@@ -15,6 +15,7 @@ with Sys_Time.Representation;
 with Event;
 with Data_Product_Id.Representation;
 with Invalid_Data_Product_Length.Representation;
+with Invalid_Stored_Length.Representation;
 with Crc_Mismatch_Info.Representation;
 with Invalid_Command_Info.Representation;
 with Command_Header.Representation;
@@ -37,11 +38,16 @@ with Packed_U16.Representation;
 -- or by command, and can be restored back into the data product database by
 -- command or at Set_Up. The store is protected by a CRC which is written on every
 -- save and checked prior to every restore, protecting against the restoration of
--- corrupted or never-initialized memory contents. A command is provided to dump
--- the current contents of the store into a packet. The autocoder limits the total
--- size of the store to fit within a single Packet.T, and requires every stored
--- data product to have an always valid type, so a restore can never produce a
--- value that fails validation.
+-- corrupted or never-initialized memory contents. Each store entry also holds the
+-- stored length of its data product, where a length of zero marks an entry that
+-- has never been saved. Entries whose data product cannot be fetched during a
+-- save keep their previous contents, and entries that have never been saved are
+-- silently skipped on restore, leaving those data products unavailable in the
+-- database rather than restoring meaningless values. A command is provided to
+-- dump the current contents of the store into a packet. The autocoder limits the
+-- total size of the store to fit within a single Packet.T, and requires every
+-- stored data product to have an always valid type, so a restore can never
+-- produce a value that fails validation.
 package Component.Product_Store.Implementation.Tester is
 
    use Component.Product_Store_Reciprocal;
@@ -63,6 +69,7 @@ package Component.Product_Store.Implementation.Tester is
    package Data_Product_Missing_On_Save_History_Package is new Printable_History (Data_Product_Id.T, Data_Product_Id.Representation.Image);
    package Data_Product_Id_Out_Of_Range_History_Package is new Printable_History (Data_Product_Id.T, Data_Product_Id.Representation.Image);
    package Data_Product_Length_Mismatch_History_Package is new Printable_History (Invalid_Data_Product_Length.T, Invalid_Data_Product_Length.Representation.Image);
+   package Stored_Length_Mismatch_History_Package is new Printable_History (Invalid_Stored_Length.T, Invalid_Stored_Length.Representation.Image);
    package Store_Crc_Invalid_History_Package is new Printable_History (Crc_Mismatch_Info.T, Crc_Mismatch_Info.Representation.Image);
    package Invalid_Command_Received_History_Package is new Printable_History (Invalid_Command_Info.T, Invalid_Command_Info.Representation.Image);
    package Dropped_Command_History_Package is new Printable_History (Command_Header.T, Command_Header.Representation.Image);
@@ -95,6 +102,7 @@ package Component.Product_Store.Implementation.Tester is
       Data_Product_Missing_On_Save_History : Data_Product_Missing_On_Save_History_Package.Instance;
       Data_Product_Id_Out_Of_Range_History : Data_Product_Id_Out_Of_Range_History_Package.Instance;
       Data_Product_Length_Mismatch_History : Data_Product_Length_Mismatch_History_Package.Instance;
+      Stored_Length_Mismatch_History : Stored_Length_Mismatch_History_Package.Instance;
       Store_Crc_Invalid_History : Store_Crc_Invalid_History_Package.Instance;
       Invalid_Command_Received_History : Invalid_Command_Received_History_Package.Instance;
       Dropped_Command_History : Dropped_Command_History_Package.Instance;
@@ -109,6 +117,9 @@ package Component.Product_Store.Implementation.Tester is
       Command_T_Send_Dropped_Count : Natural := 0;
       -- Status for data product return:
       Data_Product_Fetch_Return_Status : Fetch_Status.E := Fetch_Status.Success;
+      -- If set to a nonzero id, fetches of that id alone return Not_Available. This
+      -- can be used to simulate a single data product missing from the database:
+      Fetch_Fail_Id : Data_Product_Types.Data_Product_Id := 0;
       -- This variable is used to override the data product return length, which can be used to
       -- induce a length mismatch error during testing. A value of zero does NOT override, any
       -- other value does.
@@ -172,16 +183,23 @@ package Component.Product_Store.Implementation.Tester is
    -- disabled by command.
    overriding procedure Save_On_Tick_Disabled (Self : in out Instance);
    -- A data product was not available from the database when fetched for saving, so
-   -- its slot in the store was zeroed. This event can be disabled per data product
-   -- in the stored products model.
+   -- its slot in the store was left unchanged, preserving the last saved value (or
+   -- the never-saved marker if no value was ever saved). This event can be disabled
+   -- per data product in the stored products model.
    overriding procedure Data_Product_Missing_On_Save (Self : in out Instance; Arg : in Data_Product_Id.T);
    -- A data product id was reported as out of range by the database when fetched for
-   -- saving, so its slot in the store was zeroed. This indicates a misconfiguration
-   -- between the stored products model and the data product database.
+   -- saving, so its slot in the store was left unchanged. This indicates a
+   -- misconfiguration between the stored products model and the data product
+   -- database.
    overriding procedure Data_Product_Id_Out_Of_Range (Self : in out Instance; Arg : in Data_Product_Id.T);
    -- A data product was fetched for saving but contained an unexpected length, so
-   -- its slot in the store was zeroed.
+   -- its slot in the store was left unchanged.
    overriding procedure Data_Product_Length_Mismatch (Self : in out Instance; Arg : in Invalid_Data_Product_Length.T);
+   -- A store entry held a stored length that is neither zero (never saved) nor the
+   -- expected length for the data product, so the entry was not restored. This
+   -- indicates that the stored products model has changed since the store was last
+   -- written.
+   overriding procedure Stored_Length_Mismatch (Self : in out Instance; Arg : in Invalid_Stored_Length.T);
    -- The store CRC did not validate prior to a restore, so the restore was not
    -- performed. This is expected on the first boot before the store has ever been
    -- written.

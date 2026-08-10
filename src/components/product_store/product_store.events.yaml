@@ -12,14 +12,17 @@ events:
   - name: Save_On_Tick_Disabled
     description: The automatic saving of data products to the store upon receipt of a tick was disabled by command.
   - name: Data_Product_Missing_On_Save
-    description: A data product was not available from the database when fetched for saving, so its slot in the store was zeroed. This event can be disabled per data product in the stored products model.
+    description: A data product was not available from the database when fetched for saving, so its slot in the store was left unchanged, preserving the last saved value (or the never-saved marker if no value was ever saved). This event can be disabled per data product in the stored products model.
     param_type: Data_Product_Id.T
   - name: Data_Product_Id_Out_Of_Range
-    description: A data product id was reported as out of range by the database when fetched for saving, so its slot in the store was zeroed. This indicates a misconfiguration between the stored products model and the data product database.
+    description: A data product id was reported as out of range by the database when fetched for saving, so its slot in the store was left unchanged. This indicates a misconfiguration between the stored products model and the data product database.
     param_type: Data_Product_Id.T
   - name: Data_Product_Length_Mismatch
-    description: A data product was fetched for saving but contained an unexpected length, so its slot in the store was zeroed.
+    description: A data product was fetched for saving but contained an unexpected length, so its slot in the store was left unchanged.
     param_type: Invalid_Data_Product_Length.T
+  - name: Stored_Length_Mismatch
+    description: A store entry held a stored length that is neither zero (never saved) nor the expected length for the data product, so the entry was not restored. This indicates that the stored products model has changed since the store was last written.
+    param_type: Invalid_Stored_Length.T
   - name: Store_Crc_Invalid
     description: The store CRC did not validate prior to a restore, so the restore was not performed. This is expected on the first boot before the store has ever been written.
     param_type: Crc_Mismatch_Info.T

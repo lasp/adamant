@@ -2,8 +2,10 @@
 -- Product_Store Component Implementation Body
 --------------------------------------------------------------------------------
 
+with Basic_Types;
 with Crc_16;
 with Data_Product_Enums;
+with Packet_Types;
 with Serializer_Types;
 with Sys_Time.Arithmetic;
 
@@ -11,9 +13,13 @@ package body Component.Product_Store.Implementation is
 
    use Product_Store_Types;
 
-   -- Constants describing the layout of the store header:
+   -- Constants describing the layout of the store. The store holds a header of
+   -- the CRC followed by the save time. Each entry then holds a one byte stored
+   -- length (zero means the entry has never been saved), followed by the data
+   -- product's timestamp (if configured), followed by the data product's value:
    Crc_Length : constant Natural := Crc_16.Crc_16_Type'Length;
    Time_Length : constant Natural := Sys_Time.Serialization.Serialized_Length;
+   Stored_Length_Length : constant Natural := 1;
 
    --------------------------------------------------
    -- Subprogram for implementation init method:
@@ -46,7 +52,7 @@ package body Component.Product_Store.Implementation is
       -- Compute the expected size of the store from the description, and check the
       -- configuration of each entry:
       for Item of Self.Store_Description.Entries.all loop
-         Expected_Size := @ + Item.Size;
+         Expected_Size := @ + Stored_Length_Length + Item.Size;
          if Item.Store_Timestamp then
             Expected_Size := @ + Time_Length;
          end if;
@@ -59,6 +65,10 @@ package body Component.Product_Store.Implementation is
       pragma Assert (Expected_Size = Self.Store_Description.Store_Size);
       -- The provided byte array must be large enough to hold the store:
       pragma Assert (Bytes.all'Length >= Self.Store_Description.Store_Size);
+      -- The store always fits within a single packet, so that it can be dumped.
+      -- This is guaranteed by the Store_Size_Type subtype (see
+      -- product_store_types.ads), and is restated here for auditability:
+      pragma Assert (Self.Store_Description.Store_Size <= Packet_Types.Packet_Buffer_Type'Length);
 
       -- Store the configuration:
       Self.Bytes := Bytes;
@@ -94,12 +104,23 @@ package body Component.Product_Store.Implementation is
 
    -- Save the data products into the store, stamping the store with the provided
    -- save time. The slot of any data product that cannot be fetched (or that is
-   -- returned with an unexpected length) is zeroed, so that stale or corrupted
-   -- memory contents can never be presented as valid data by a later restore:
+   -- returned with an unexpected length) is left unchanged, preserving the last
+   -- saved value, or the never-saved marker (a stored length of zero) if no value
+   -- was ever saved:
    procedure Do_Save (Self : in out Instance; Save_Time : in Sys_Time.T) is
+      use Basic_Types;
       use Data_Product_Enums.Fetch_Status;
       Idx : Natural := Self.Data_First;
    begin
+      -- If the current store contents do not pass the CRC check, then the store
+      -- holds memory that was never written (or was corrupted), and no byte of it
+      -- can be trusted. Zero the entire data region once, so that stale garbage
+      -- can never carry a nonzero stored length and later be mistaken for a saved
+      -- value by a restore:
+      if Self.Compute_Store_Crc /= Self.Read_Stored_Crc then
+         Self.Bytes.all (Self.Data_First .. Self.Store_Last) := [others => 0];
+      end if;
+
       -- Write the save time:
       Self.Bytes.all (Idx .. Idx + Time_Length - 1) := Sys_Time.Serialization.To_Byte_Array (Save_Time);
       Idx := @ + Time_Length;
@@ -107,7 +128,7 @@ package body Component.Product_Store.Implementation is
       -- Save each data product entry:
       for Item of Self.Store_Description.Entries.all loop
          declare
-            Slot_Length : constant Natural := Item.Size + (if Item.Store_Timestamp then Time_Length else 0);
+            Slot_Length : constant Natural := Stored_Length_Length + Item.Size + (if Item.Store_Timestamp then Time_Length else 0);
             -- Request the data product from the database:
             Fetch_Return : constant Data_Product_Return.T := Self.Data_Product_Fetch_T_Request ((Id => Item.Data_Product_Id));
             Save_Slot : Boolean := False;
@@ -140,10 +161,13 @@ package body Component.Product_Store.Implementation is
             end case;
 
             if Save_Slot then
-               -- Write the data product (and its timestamp, if configured) into the slot:
+               -- Write the stored length, then the data product (and its timestamp,
+               -- if configured) into the slot:
                declare
                   Write_Idx : Natural := Idx;
                begin
+                  Self.Bytes.all (Write_Idx) := Basic_Types.Byte (Item.Size);
+                  Write_Idx := @ + Stored_Length_Length;
                   if Item.Store_Timestamp then
                      Self.Bytes.all (Write_Idx .. Write_Idx + Time_Length - 1) := Sys_Time.Serialization.To_Byte_Array (Fetch_Return.The_Data_Product.Header.Time);
                      Write_Idx := @ + Time_Length;
@@ -151,10 +175,11 @@ package body Component.Product_Store.Implementation is
                   Self.Bytes.all (Write_Idx .. Write_Idx + Item.Size - 1) :=
                      Fetch_Return.The_Data_Product.Buffer (Fetch_Return.The_Data_Product.Buffer'First .. Fetch_Return.The_Data_Product.Buffer'First + Item.Size - 1);
                end;
-            else
-               -- The data product could not be saved, so zero the slot:
-               Self.Bytes.all (Idx .. Idx + Slot_Length - 1) := [others => 0];
             end if;
+            -- If the data product could not be saved, the slot is left unchanged.
+            -- This preserves the last saved value (and its stored length), or the
+            -- never-saved marker left by the zeroing above if no save ever
+            -- succeeded.
 
             -- Increment the index by the size of the slot:
             Idx := @ + Slot_Length;
@@ -199,32 +224,52 @@ package body Component.Product_Store.Implementation is
       -- Restore each data product entry:
       for Item of Self.Store_Description.Entries.all loop
          declare
+            Slot_Length : constant Natural := Stored_Length_Length + Item.Size + (if Item.Store_Timestamp then Time_Length else 0);
+            Stored_Length : constant Basic_Types.Byte := Self.Bytes.all (Idx);
+            Slot_Idx : Natural := Idx + Stored_Length_Length;
             Stored_Dp_Time : Sys_Time.T := Sys_Time.Arithmetic.Sys_Time_Zero;
          begin
-            -- Read the stored data product timestamp if configured:
-            if Item.Store_Timestamp then
-               Stored_Dp_Time := Sys_Time.Serialization.From_Byte_Array (Self.Bytes.all (Idx .. Idx + Time_Length - 1));
-               Idx := @ + Time_Length;
-            end if;
+            if Natural (Stored_Length) = Item.Size then
+               -- Read the stored data product timestamp if configured:
+               if Item.Store_Timestamp then
+                  Stored_Dp_Time := Sys_Time.Serialization.From_Byte_Array (Self.Bytes.all (Slot_Idx .. Slot_Idx + Time_Length - 1));
+                  Slot_Idx := @ + Time_Length;
+               end if;
 
-            declare
-               -- Select the timestamp to restore the data product with:
-               Restore_Stamp : constant Sys_Time.T :=
-                  (case Item.Restore_Time is
-                     when Use_Zeros => Sys_Time.Arithmetic.Sys_Time_Zero,
-                     when Use_Save_Time => Save_Time_Stamp,
-                     when Use_Stored_Dp_Time => Stored_Dp_Time);
-               The_Data_Product : Data_Product.T := (
-                  Header => (Time => Restore_Stamp, Id => Item.Data_Product_Id, Buffer_Length => Item.Size),
-                  Buffer => [others => 0]
-               );
-            begin
-               -- Copy the stored value into the data product and send it:
-               The_Data_Product.Buffer (The_Data_Product.Buffer'First .. The_Data_Product.Buffer'First + Item.Size - 1) :=
-                  Self.Bytes.all (Idx .. Idx + Item.Size - 1);
-               Self.Data_Product_T_Send_If_Connected (The_Data_Product);
-               Idx := @ + Item.Size;
-            end;
+               declare
+                  -- Select the timestamp to restore the data product with:
+                  Restore_Stamp : constant Sys_Time.T :=
+                     (case Item.Restore_Time is
+                        when Use_Zeros => Sys_Time.Arithmetic.Sys_Time_Zero,
+                        when Use_Save_Time => Save_Time_Stamp,
+                        when Use_Stored_Dp_Time => Stored_Dp_Time);
+                  The_Data_Product : Data_Product.T := (
+                     Header => (Time => Restore_Stamp, Id => Item.Data_Product_Id, Buffer_Length => Item.Size),
+                     Buffer => [others => 0]
+                  );
+               begin
+                  -- Copy the stored value into the data product and send it:
+                  The_Data_Product.Buffer (The_Data_Product.Buffer'First .. The_Data_Product.Buffer'First + Item.Size - 1) :=
+                     Self.Bytes.all (Slot_Idx .. Slot_Idx + Item.Size - 1);
+                  Self.Data_Product_T_Send_If_Connected (The_Data_Product);
+               end;
+            elsif Natural (Stored_Length) /= 0 then
+               -- The stored length is neither the expected size nor zero. Since the
+               -- CRC over the store validated, this is not corruption - it means the
+               -- stored products model has changed since the store was written. Do
+               -- not restore this entry, and alert:
+               Self.Event_T_Send_If_Connected (Self.Events.Stored_Length_Mismatch (Self.Sys_Time_T_Get, (
+                  Id => Item.Data_Product_Id,
+                  Stored_Length => Stored_Length,
+                  Expected_Length => Item.Size)
+               ));
+            end if;
+            -- A stored length of zero means this entry has never been saved. It is
+            -- skipped silently, leaving the data product unavailable in the
+            -- database rather than restoring a meaningless value.
+
+            -- Advance to the next slot:
+            Idx := @ + Slot_Length;
          end;
       end loop;
 
@@ -291,16 +336,19 @@ package body Component.Product_Store.Implementation is
       Messages_Dispatched : Natural;
    begin
       -- Save the data products to the store if saving on tick is enabled and the
-      -- tick divider has elapsed:
-      if Self.Save_On_Tick and then Self.Tick_Count = 0 then
-         Self.Do_Save (Save_Time =>
-            (case Self.Store_Description.Save_Time is
-               when Tick_Time => Arg.Time,
-               when Current_Time => Self.Sys_Time_T_Get));
-      end if;
+      -- tick divider has elapsed. The divider only advances while saving on tick
+      -- is enabled - it is frozen while disabled and reset upon re-enable:
+      if Self.Save_On_Tick then
+         if Self.Tick_Count = 0 then
+            Self.Do_Save (Save_Time =>
+               (case Self.Store_Description.Save_Time is
+                  when Tick_Time => Arg.Time,
+                  when Current_Time => Self.Sys_Time_T_Get));
+         end if;
 
-      -- Increment the tick counter, rolling over at Ticks_Per_Save:
-      Self.Tick_Count := (@ + 1) mod Self.Ticks_Per_Save;
+         -- Increment the tick counter, rolling over at Ticks_Per_Save:
+         Self.Tick_Count := (@ + 1) mod Self.Ticks_Per_Save;
+      end if;
 
       -- Handle any commands in the queue after the business logic is complete.
       -- Service up to N commands per tick:
@@ -371,6 +419,9 @@ package body Component.Product_Store.Implementation is
       use Command_Execution_Status;
    begin
       Self.Save_On_Tick := True;
+      -- Reset the tick divider so that a save deterministically occurs on the
+      -- next tick after enabling:
+      Self.Tick_Count := 0;
       Self.Event_T_Send_If_Connected (Self.Events.Save_On_Tick_Enabled (Self.Sys_Time_T_Get));
       return Success;
    end Enable_Save_On_Tick;

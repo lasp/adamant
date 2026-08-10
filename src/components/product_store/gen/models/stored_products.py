@@ -195,8 +195,23 @@ class store_packet(packet):
         ]
         self.items.update(OrderedDict(zip(new_names, items.values())))
 
-        # Next each data product entry, preceded by its timestamp if configured:
+        # Next each data product entry: its stored length byte, then its timestamp
+        # (if configured), then its value:
         for entry in self.store_model.entries:
+            length_item = field(
+                name="Length",
+                type="Data_Product_Types.Data_Product_Buffer_Length_Type",
+                start_bit=0,
+                start_field_number=0,
+                format_string="U8",
+                description="The stored length of the data product. A length of zero means the data product has never been saved.",
+            )
+            length_item.flattened_description = (
+                self.name + "." + entry.name
+                + ".Length - The stored length of the data product (zero means never saved)."
+            )
+            length_item.full_name = self.name + "." + entry.name + ".Length"
+            self.items.update({length_item.full_name: length_item})
             if entry.store_timestamp:
                 items, ignore = _items_from_record(_get_time_obj())
                 new_names = [
@@ -279,8 +294,11 @@ class stored_products(assembly_submodel):
     def _resolve_data_products(self, assembly):
         # The assembly should be loaded first. For each entry, resolve the
         # data product model and size, and compute the total store size. The
-        # store header always holds the CRC followed by the save time:
+        # store header always holds the CRC followed by the save time. Each
+        # entry then holds a one byte stored length (zero means never saved),
+        # followed by the timestamp (if configured), followed by the value:
         store_size = _get_crc_size() + _get_time_obj().size  # in bits
+        self.type_packages = []
 
         for entry in self.entries:
             # Make sure the component for the data product exists:
@@ -363,8 +381,13 @@ class stored_products(assembly_submodel):
                     lineno=entry.lineno,
                 )
 
-            # Calculate the total store size:
-            store_size += entry.size
+            # Save the type package name for the template, which emits a compile
+            # time check that each type is always valid:
+            if entry.data_product.type_package not in self.type_packages:
+                self.type_packages.append(entry.data_product.type_package)
+
+            # Calculate the total store size, including the entry's length byte:
+            store_size += 8 + entry.size
             if entry.store_timestamp:
                 store_size += _get_time_obj().size
 

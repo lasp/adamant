@@ -1,12 +1,25 @@
 -- Standard includes:
 with Product_Store_Types; use Product_Store_Types;
+{% for pkg in type_packages %}
+with {{ pkg }};
+{% endfor %}
 
 {% if description %}
 {{ printMultiLine(description, '-- ') }}
 {% endif %}
 package {{ name }} is
 
-   -- Total store size in bytes, including the CRC and save time header:
+{% for pkg in type_packages %}
+   -- Every data product type in the store must be "always valid", meaning no bit
+   -- representation of the type can fail validation. This guarantees a restore
+   -- can never inject a data product whose use downstream raises a constraint
+   -- error. The model checks this at generation time; this check catches a type
+   -- that somehow sneaks by (i.e. the type definition changed after generation):
+   pragma Compile_Time_Error (not {{ pkg }}.Always_Valid, "Data product type {{ pkg }} must be always valid to be included in a product store.");
+{% endfor %}
+
+   -- Total store size in bytes, including the CRC and save time header and the
+   -- per-entry stored length bytes:
    Store_Size_In_Bytes : constant Natural := {{ store_size }};
 
    -- Store data product entries:
