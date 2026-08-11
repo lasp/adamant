@@ -10,6 +10,8 @@ package body {{ name }}.C is
    begin
 {% if element.is_packed_type %}
       return [for J in Src'Range => {{ element.type_package }}.C.To_Ada (Src (J))];
+      pragma Annotate (GNATSAS, False_Positive, "precondition",
+         "The element conversion preconditions require each source component to be initialized. Callers initialize the source before this call, typically on the other side of the foreign-function boundary, which the analyzer cannot trace.");
 {% else %}
       return [for J in Src'Range => Src (J)];
 {% endif %}
@@ -19,6 +21,8 @@ package body {{ name }}.C is
    begin
 {% if element.is_packed_type %}
       return [for J in Src'Range => {{ element.type_package }}.C.To_C (Src (J))];
+      pragma Annotate (GNATSAS, False_Positive, "precondition",
+         "The element conversion preconditions require each source component to be initialized. Callers initialize the source before this call, typically on the other side of the foreign-function boundary, which the analyzer cannot trace.");
 {% else %}
       return [for J in Src'Range => Src (J)];
 {% endif %}
@@ -29,6 +33,8 @@ package body {{ name }}.C is
    begin
 {% if element.is_packed_type %}
       return [for J in Src'Range => {{ element.type_package }}.C.Pack (Src (J))];
+      pragma Annotate (GNATSAS, False_Positive, "precondition",
+         "The element conversion preconditions require each source component to be initialized. Callers initialize the source before this call, typically on the other side of the foreign-function boundary, which the analyzer cannot trace.");
 {% else %}
       return {{ name }}.Pack (To_Ada (Src));
 {% endif %}
@@ -40,6 +46,8 @@ package body {{ name }}.C is
    begin
 {% if element.is_packed_type %}
       return [for J in Src'Range => {{ element.type_package }}.C.Pack (Src (J))];
+      pragma Annotate (GNATSAS, False_Positive, "precondition",
+         "The element conversion preconditions require each source component to be initialized. Callers initialize the source before this call, typically on the other side of the foreign-function boundary, which the analyzer cannot trace.");
 {% else %}
       return {{ name }}.Pack (To_Ada (Src));
 {% endif %}
@@ -51,6 +59,8 @@ package body {{ name }}.C is
    begin
 {% if element.is_packed_type %}
       return [for J in Src'Range => {{ element.type_package }}.C.Unpack (Src (J))];
+      pragma Annotate (GNATSAS, False_Positive, "precondition",
+         "The element conversion preconditions require each source component to be initialized. Callers initialize the source before this call, typically on the other side of the foreign-function boundary, which the analyzer cannot trace.");
 {% else %}
       return To_C ({{ name }}.Unpack (Src));
 {% endif %}
@@ -62,6 +72,8 @@ package body {{ name }}.C is
    begin
 {% if element.is_packed_type %}
       return [for J in Src'Range => {{ element.type_package }}.C.Unpack (Src (J))];
+      pragma Annotate (GNATSAS, False_Positive, "precondition",
+         "The element conversion preconditions require each source component to be initialized. Callers initialize the source before this call, typically on the other side of the foreign-function boundary, which the analyzer cannot trace.");
 {% else %}
       return To_C ({{ name }}.Unpack (Src));
 {% endif %}
