@@ -118,8 +118,8 @@ package body Component.Zero_Divider_Cpp.Implementation.Tester is
       Self.Int_Dividing_By_Zero_In_Cpp_History.Push (Arg);
    end Int_Dividing_By_Zero_In_Cpp;
 
-   -- The integer divide-by-zero in C++ did not raise an exception and returned a
-   -- value. This indicates the target does not trap on integer division by zero. The
+   -- The integer divide by zero in C++ returned to Ada without raising an exception.
+   -- This is one of the outcomes the command exists to discover, not an anomaly. The
    -- parameter is the raw result returned by C++.
    overriding procedure Int_Divide_By_Zero_No_Exception (Self : in out Instance; Arg : in Packed_I32.T) is
    begin
@@ -128,7 +128,7 @@ package body Component.Zero_Divider_Cpp.Implementation.Tester is
    end Int_Divide_By_Zero_No_Exception;
 
    -- An Fp_Divide_By_Zero_In_Cpp command was received and the magic number was
-   -- correct. The floating-point division will occur in N milliseconds, where N is
+   -- correct. The floating point division will occur in N milliseconds, where N is
    -- provided as the event parameter.
    overriding procedure Fp_Dividing_By_Zero_In_Cpp (Self : in out Instance; Arg : in Packed_U32.T) is
    begin
@@ -136,10 +136,9 @@ package body Component.Zero_Divider_Cpp.Implementation.Tester is
       Self.Fp_Dividing_By_Zero_In_Cpp_History.Push (Arg);
    end Fp_Dividing_By_Zero_In_Cpp;
 
-   -- The floating-point divide-by-zero in C++ returned a value that did not trigger
-   -- a Constraint_Error. This event should never fire under normal operation and
-   -- indicates the target does not conform to the C++ reference for IEEE floating-
-   -- point division by zero. The parameter is the raw result returned by C++.
+   -- The floating point divide by zero in C++ returned to Ada without raising an
+   -- exception. This is one of the outcomes the command exists to discover, not an
+   -- anomaly. The parameter is the raw result returned by C++.
    overriding procedure Fp_Divide_By_Zero_No_Exception (Self : in out Instance; Arg : in Packed_F32.T) is
    begin
       -- Push the argument onto the test history for looking at later:

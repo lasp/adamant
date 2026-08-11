@@ -43,8 +43,11 @@ package body Component.Zero_Divider_Cpp.Implementation is
    -----------------------------------------------
    -- Description:
    --    Commands for the Zero Divider Cpp component.
-   -- Performs an integer division by zero in C++. The behavior is target-dependent,
-   -- some platforms trap and others return a value. You must provide the correct
+   -- Performs an integer division by zero in C++ and reports the outcome. Integer
+   -- division by zero is undefined behavior in C++, so what happens depends on the
+   -- target and the flags the project is built with. A target may trap, or may
+   -- return a value that is reported in an event. This command is informational, run
+   -- it to establish what a given configuration does. You must provide the correct
    -- value for the magic number and an integer dividend for this command to execute.
    overriding function Int_Divide_By_Zero_In_Cpp (Self : in out Instance; Arg : in Int_Divide_By_Zero_In_Cpp_Arg.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
@@ -62,12 +65,9 @@ package body Component.Zero_Divider_Cpp.Implementation is
 
          -- Do the dirty, call the cpp:
          declare
-            -- Integer divide-by-zero is undefined behavior in C++. The result
-            -- is target-dependent: some platforms raise a hardware trap (mapped
-            -- to Constraint_Error in Ada), while others silently return a value.
             Result : constant Interfaces.Integer_32 := Zerodividercpp_Intdividebyzero (Self.Zero_Divider_Cpp, Arg.Dividend);
          begin
-            -- If we reach here, the target did not trap. Report the returned value:
+            -- Report the value the cpp returned:
             Self.Event_T_Send_If_Connected (Self.Events.Int_Divide_By_Zero_No_Exception (Self.Sys_Time_T_Get, (Value => Result)));
          end;
       end if;
@@ -75,10 +75,13 @@ package body Component.Zero_Divider_Cpp.Implementation is
       return Success;
    end Int_Divide_By_Zero_In_Cpp;
 
-   -- Performs a floating-point division by zero in C++. Per IEEE 754, dividing a
-   -- floating-point value by zero produces +infinity or -infinity rather than
-   -- trapping. You must provide the correct value for the magic number and a
-   -- floating-point dividend for this command to execute.
+   -- Performs a floating point division by zero in C++ and reports the outcome. A
+   -- target that implements IEEE 754 typically produces a signed infinity for a non-
+   -- zero dividend and a NaN for a zero dividend, but whether such a value reaches
+   -- Ada or raises an exception on the way depends on the target and the flags the
+   -- project is built with. This command is informational, run it to establish what
+   -- a given configuration does. You must provide the correct value for the magic
+   -- number and a floating point dividend for this command to execute.
    overriding function Fp_Divide_By_Zero_In_Cpp (Self : in out Instance; Arg : in Fp_Divide_By_Zero_In_Cpp_Arg.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
    begin
@@ -95,18 +98,9 @@ package body Component.Zero_Divider_Cpp.Implementation is
 
          -- Do the dirty, call the cpp:
          declare
-            -- Per the C++ reference, if both operands have a floating-point type
-            -- and the type supports IEEE floating-point arithmetic (std::numeric_limits::is_iec559):
-            --   - If one operand is NaN, the result is NaN.
-            --   - Dividing a non-zero number by +/-0.0 gives the correctly-signed
-            --     infinity and FE_DIVBYZERO is raised.
-            --   - Dividing 0.0 by 0.0 gives NaN and FE_INVALID is raised.
-            -- To detect these conditions, we assign the C++ result to an Ada constrained
-            -- float subtype that excludes infinities and NaN, triggering a
-            -- Constraint_Error routed to the Last Chance Handler.
             Result : constant Short_Float := Zerodividercpp_Fpdividebyzero (Self.Zero_Divider_Cpp, Arg.Dividend);
          begin
-            -- We should never reach here:
+            -- Report the value the cpp returned:
             Self.Event_T_Send_If_Connected (Self.Events.Fp_Divide_By_Zero_No_Exception (Self.Sys_Time_T_Get, (Value => Result)));
          end;
       end if;
