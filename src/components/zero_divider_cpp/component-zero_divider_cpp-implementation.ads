@@ -104,7 +104,7 @@ private
    overriding function Fp_Divide_By_Zero_In_Cpp (Self : in out Instance; Arg : in Fp_Divide_By_Zero_In_Cpp_Arg.T) return Command_Execution_Status.E;
    -- Raises a standard exception in C++. You must provide the correct value for the
    -- magic number argument of this command for it to be executed.
-   overriding function Raise_Exception_In_Cpp (Self : in out Instance; Arg : in Packed_U32.T) return Command_Execution_Status.E;
+   overriding function Raise_Exception_In_Cpp (Self : in out Instance; Arg : in Packed_Magic_Number.T) return Command_Execution_Status.E;
 
    -- Invalid command handler. This procedure is called when a command's arguments are found to be invalid:
    overriding procedure Invalid_Command (Self : in out Instance; Cmd : in Command.T; Errant_Field_Number : in Unsigned_32; Errant_Field : in Basic_Types.Poly_Type);

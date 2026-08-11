@@ -53,8 +53,8 @@ package body Component.Zero_Divider_Cpp.Implementation is
       use Command_Execution_Status;
    begin
       -- See if the provided argument matches the magic number. If it doesn't then don't execute the command.
-      if Zerodividercpp_Checkmagicnumber (Self.Zero_Divider_Cpp, Arg.Magic_Number) = False then
-         Self.Event_T_Send_If_Connected (Self.Events.Invalid_Magic_Number (Self.Sys_Time_T_Get, (Value => Arg.Magic_Number)));
+      if Zerodividercpp_Checkmagicnumber (Self.Zero_Divider_Cpp, Arg.Magic_Number.Magic_Number) = False then
+         Self.Event_T_Send_If_Connected (Self.Events.Invalid_Magic_Number (Self.Sys_Time_T_Get, Arg.Magic_Number));
          return Failure;
       else
          -- Send info event:
@@ -86,8 +86,8 @@ package body Component.Zero_Divider_Cpp.Implementation is
       use Command_Execution_Status;
    begin
       -- See if the provided argument matches the magic number. If it doesn't then don't execute the command.
-      if Zerodividercpp_Checkmagicnumber (Self.Zero_Divider_Cpp, Arg.Magic_Number) = False then
-         Self.Event_T_Send_If_Connected (Self.Events.Invalid_Magic_Number (Self.Sys_Time_T_Get, (Value => Arg.Magic_Number)));
+      if Zerodividercpp_Checkmagicnumber (Self.Zero_Divider_Cpp, Arg.Magic_Number.Magic_Number) = False then
+         Self.Event_T_Send_If_Connected (Self.Events.Invalid_Magic_Number (Self.Sys_Time_T_Get, Arg.Magic_Number));
          return Failure;
       else
          -- Send info event:
@@ -110,11 +110,11 @@ package body Component.Zero_Divider_Cpp.Implementation is
 
    -- Raises a standard exception in C++. You must provide the correct value for the
    -- magic number argument of this command for it to be executed.
-   overriding function Raise_Exception_In_Cpp (Self : in out Instance; Arg : in Packed_U32.T) return Command_Execution_Status.E is
+   overriding function Raise_Exception_In_Cpp (Self : in out Instance; Arg : in Packed_Magic_Number.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
    begin
       -- See if the provided argument matches the magic number. If it doesn't then don't execute the command.
-      if Zerodividercpp_Checkmagicnumber (Self.Zero_Divider_Cpp, Arg.Value) = False then
+      if Zerodividercpp_Checkmagicnumber (Self.Zero_Divider_Cpp, Arg.Magic_Number) = False then
          Self.Event_T_Send_If_Connected (Self.Events.Invalid_Magic_Number (Self.Sys_Time_T_Get, Arg));
          return Failure;
       else

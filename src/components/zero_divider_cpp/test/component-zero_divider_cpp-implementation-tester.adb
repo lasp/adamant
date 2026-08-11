@@ -145,8 +145,10 @@ package body Component.Zero_Divider_Cpp.Implementation.Tester is
       Self.Fp_Divide_By_Zero_No_Exception_History.Push (Arg);
    end Fp_Divide_By_Zero_No_Exception;
 
-   -- A command was received, but the magic number was incorrect.
-   overriding procedure Invalid_Magic_Number (Self : in out Instance; Arg : in Packed_U32.T) is
+   -- A command was received, but the magic number was incorrect. A magic number
+   -- outside the range the type permits never reaches this event, it is rejected by
+   -- command validation and reported as an invalid command instead.
+   overriding procedure Invalid_Magic_Number (Self : in out Instance; Arg : in Packed_Magic_Number.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Invalid_Magic_Number_History.Push (Arg);

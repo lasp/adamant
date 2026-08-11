@@ -1,0 +1,12 @@
+---
+description: Argument type for the Fp_Divide_By_Zero_In_Cpp command carrying both the magic number and the floating point dividend.
+with:
+  - Packed_Magic_Number
+fields:
+  - name: Magic_Number
+    description: The magic number that must match for the command to execute.
+    type: Packed_Magic_Number.T
+  - name: Dividend
+    description: The floating point value to be divided by zero.
+    type: Short_Float
+    format: F32
