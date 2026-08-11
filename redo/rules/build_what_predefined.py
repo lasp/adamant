@@ -16,6 +16,7 @@ def get_predefined_targets() -> list:
         "publish",
         "targets",
         "prove",
+        "prove_all",
         "analyze",
         "style",
         "pretty",

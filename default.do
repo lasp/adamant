@@ -48,6 +48,8 @@ if __name__ == "__main__":
         from rules.build_what_predefined import build_what_predefined as rule_cls
     elif base == "prove":
         from rules.build_prove import build_prove as rule_cls
+    elif base == "prove_all":
+        from rules.build_prove_all import build_prove_all as rule_cls
     elif base == "analyze":
         from rules.build_analyze import build_analyze as rule_cls
     elif base == "analyze_all":
