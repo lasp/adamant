@@ -9,4 +9,4 @@ commands:
     arg_type: Fp_Divide_By_Zero_In_Cpp_Arg.T
   - name: Raise_Exception_In_Cpp
     description: Raises a standard exception in C++. You must provide the correct value for the magic number argument of this command for it to be executed.
-    arg_type: Packed_U32.T
+    arg_type: Packed_Magic_Number.T

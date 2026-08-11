@@ -22,8 +22,8 @@ events:
     param_type: Packed_F32.T
   # General Events
   - name: Invalid_Magic_Number
-    description: A command was received, but the magic number was incorrect.
-    param_type: Packed_U32.T
+    description: A command was received, but the magic number was incorrect. A magic number outside the range the type permits never reaches this event, it is rejected by command validation and reported as an invalid command instead.
+    param_type: Packed_Magic_Number.T
   - name: Invalid_Command_Received
     description: A command was received with invalid parameters.
     param_type: Invalid_Command_Info.T

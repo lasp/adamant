@@ -12,6 +12,7 @@ with Event;
 with Packed_U32.Representation;
 with Packed_I32.Representation;
 with Packed_F32.Representation;
+with Packed_Magic_Number.Representation;
 with Invalid_Command_Info.Representation;
 with Packed_Exception_Occurrence.Representation;
 
@@ -49,7 +50,7 @@ package Component.Zero_Divider_Cpp.Implementation.Tester is
    package Int_Divide_By_Zero_No_Exception_History_Package is new Printable_History (Packed_I32.T, Packed_I32.Representation.Image);
    package Fp_Dividing_By_Zero_In_Cpp_History_Package is new Printable_History (Packed_U32.T, Packed_U32.Representation.Image);
    package Fp_Divide_By_Zero_No_Exception_History_Package is new Printable_History (Packed_F32.T, Packed_F32.Representation.Image);
-   package Invalid_Magic_Number_History_Package is new Printable_History (Packed_U32.T, Packed_U32.Representation.Image);
+   package Invalid_Magic_Number_History_Package is new Printable_History (Packed_Magic_Number.T, Packed_Magic_Number.Representation.Image);
    package Invalid_Command_Received_History_Package is new Printable_History (Invalid_Command_Info.T, Invalid_Command_Info.Representation.Image);
 
    -- Packet history packages:
@@ -125,8 +126,10 @@ package Component.Zero_Divider_Cpp.Implementation.Tester is
    -- exception. This is one of the outcomes the command exists to discover, not an
    -- anomaly. The parameter is the raw result returned by C++.
    overriding procedure Fp_Divide_By_Zero_No_Exception (Self : in out Instance; Arg : in Packed_F32.T);
-   -- A command was received, but the magic number was incorrect.
-   overriding procedure Invalid_Magic_Number (Self : in out Instance; Arg : in Packed_U32.T);
+   -- A command was received, but the magic number was incorrect. A magic number
+   -- outside the range the type permits never reaches this event, it is rejected by
+   -- command validation and reported as an invalid command instead.
+   overriding procedure Invalid_Magic_Number (Self : in out Instance; Arg : in Packed_Magic_Number.T);
    -- A command was received with invalid parameters.
    overriding procedure Invalid_Command_Received (Self : in out Instance; Arg : in Invalid_Command_Info.T);
 

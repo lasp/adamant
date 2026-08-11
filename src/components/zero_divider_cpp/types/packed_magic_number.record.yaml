@@ -1,0 +1,11 @@
+---
+description: A packed record which holds the magic number that guards this component's commands. The value range excludes 0 and 1 so that a command carrying either is rejected by command validation rather than reaching a command handler.
+preamble: |
+  subtype Magic_Number_Type is Interfaces.Unsigned_32 range 2 .. Interfaces.Unsigned_32'Last;
+with:
+  - Interfaces
+fields:
+  - name: Magic_Number
+    description: The magic number.
+    type: Magic_Number_Type
+    format: U32
