@@ -284,6 +284,11 @@
       String_To_Match="component-*.adb">
     </String_Specifier>
     <String_Specifier
+      Name_Of_String_Attribute="File"
+      String_To_Match="component-*-implementation.adb"
+      Complemented="YES">
+    </String_Specifier>
+    <String_Specifier
       Name_Of_String_Attribute="Text"
       String_To_Match="*Cmd_Execution_Stat = 0*">
     </String_Specifier>
@@ -299,6 +304,11 @@
     <String_Specifier
       Name_Of_String_Attribute="File"
       String_To_Match="component-*.adb">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="File"
+      String_To_Match="component-*-implementation.adb"
+      Complemented="YES">
     </String_Specifier>
     <String_Specifier
       Name_Of_String_Attribute="Text"
@@ -319,6 +329,11 @@
       String_To_Match="component-*.adb">
     </String_Specifier>
     <String_Specifier
+      Name_Of_String_Attribute="File"
+      String_To_Match="component-*-implementation.adb"
+      Complemented="YES">
+    </String_Specifier>
+    <String_Specifier
       Name_Of_String_Attribute="Text"
       String_To_Match="*Push_Stat = 0*">
     </String_Specifier>
@@ -335,6 +350,11 @@
     <String_Specifier
       Name_Of_String_Attribute="File"
       String_To_Match="component-*.adb">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="File"
+      String_To_Match="component-*-implementation.adb"
+      Complemented="YES">
     </String_Specifier>
     <String_Specifier
       Name_Of_String_Attribute="Text"
@@ -354,6 +374,11 @@
       String_To_Match="component-*.adb">
     </String_Specifier>
     <String_Specifier
+      Name_Of_String_Attribute="File"
+      String_To_Match="component-*-implementation.adb"
+      Complemented="YES">
+    </String_Specifier>
+    <String_Specifier
       Name_Of_String_Attribute="Text"
       String_To_Match="*Push_Stat* = Success*">
     </String_Specifier>
@@ -369,6 +394,11 @@
     <String_Specifier
       Name_Of_String_Attribute="File"
       String_To_Match="component-*.adb">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="File"
+      String_To_Match="component-*-implementation.adb"
+      Complemented="YES">
     </String_Specifier>
     <String_Specifier
       Name_Of_String_Attribute="Text"
@@ -590,6 +620,11 @@
       String_To_Match="component-*.adb">
     </String_Specifier>
     <String_Specifier
+      Name_Of_String_Attribute="File"
+      String_To_Match="component-*-implementation.adb"
+      Complemented="YES">
+    </String_Specifier>
+    <String_Specifier
       Name_Of_String_Attribute="Text"
       String_To_Match="*Integer_Param_Id*Local_Parameter_Id_Type'Enum_Rep*">
     </String_Specifier>
@@ -609,6 +644,11 @@
       String_To_Match="component-*.adb">
     </String_Specifier>
     <String_Specifier
+      Name_Of_String_Attribute="File"
+      String_To_Match="component-*-implementation.adb"
+      Complemented="YES">
+    </String_Specifier>
+    <String_Specifier
       Name_Of_String_Attribute="Text"
       String_To_Match="*Integer_Param_Id*Local_Parameter_Id_Type'Enum_Rep*">
     </String_Specifier>
@@ -625,6 +665,11 @@
     <String_Specifier
       Name_Of_String_Attribute="File"
       String_To_Match="component-*.adb">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="File"
+      String_To_Match="component-*-implementation.adb"
+      Complemented="YES">
     </String_Specifier>
     <String_Specifier
       Name_Of_String_Attribute="Text"
@@ -646,6 +691,11 @@
       String_To_Match="component-*.adb">
     </String_Specifier>
     <String_Specifier
+      Name_Of_String_Attribute="File"
+      String_To_Match="component-*-implementation.adb"
+      Complemented="YES">
+    </String_Specifier>
+    <String_Specifier
       Name_Of_String_Attribute="Text"
       String_To_Match="*Integer_Param_Id*Local_Parameter_Id_Type'Enum_Rep*">
     </String_Specifier>
@@ -663,6 +713,11 @@
     <String_Specifier
       Name_Of_String_Attribute="File"
       String_To_Match="component-*.adb">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="File"
+      String_To_Match="component-*-implementation.adb"
+      Complemented="YES">
     </String_Specifier>
     <String_Specifier
       Name_Of_String_Attribute="Text"
