@@ -74,8 +74,14 @@ package body Zero_Divider_Cpp_Tests.Implementation is
       Packed_U32_Assert.Eq (T.Invalid_Magic_Number_History.Get (3), (Value => 1_000));
    end Test_Bad_Magic_Number;
 
-   -- This test makes sure a division by zero occurs, the result is returned to Ada
-   -- and a constraint error is thrown.
+   -- This test records how the integer division by zero behaves in the configuration
+   -- the unit tests are built and run in, which is the Linux_Test target on x86-64
+   -- with GNAT numeric overflow checking (-gnato), assertions (-gnata) and full
+   -- validity checking (-gnatVa) enabled. In that configuration the processor traps
+   -- on the division and the GNAT Linux runtime signal manager raises a
+   -- Constraint_Error, so the command never returns to report a value. The assertion
+   -- below characterizes that configuration only. Another target or flag set may
+   -- return a value instead, which the command reports in an event.
    overriding procedure Test_Int_Divide_By_Zero_In_Cpp (Self : in out Instance) is
       T : Component.Zero_Divider_Cpp.Implementation.Tester.Instance_Access renames Self.Tester;
    begin
@@ -98,8 +104,15 @@ package body Zero_Divider_Cpp_Tests.Implementation is
          Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
    end Test_Int_Divide_By_Zero_In_Cpp;
 
-   -- This test makes sure a floating-point division by zero occurs in C++, the
-   -- result (infinity) is returned to Ada and a constraint error is thrown.
+   -- This test records how the floating point division by zero behaves in the
+   -- configuration the unit tests are built and run in, which is the Linux_Test
+   -- target on x86-64 with GNAT numeric overflow checking (-gnato), assertions
+   -- (-gnata) and full validity checking (-gnatVa) enabled. In that configuration
+   -- C++ returns an infinity and the validity check on the Ada Short_Float result
+   -- rejects it as invalid data, raising a Constraint_Error, so the command never
+   -- returns to report a value. The assertion below characterizes that configuration
+   -- only. Another target or flag set may deliver the infinity to Ada intact, which
+   -- the command reports in an event.
    overriding procedure Test_Fp_Divide_By_Zero_In_Cpp (Self : in out Instance) is
       T : Component.Zero_Divider_Cpp.Implementation.Tester.Instance_Access renames Self.Tester;
    begin
@@ -108,8 +121,7 @@ package body Zero_Divider_Cpp_Tests.Implementation is
       pragma Assert (False, "Should never get here...");
    exception
       when E : others =>
-         -- Verify that we caught a CONSTRAINT_ERROR (from assigning infinity to
-         -- the constrained Fp_Divide_By_Zero_In_Cpp_Return_Type)
+         -- Verify that we caught a CONSTRAINT_ERROR:
          pragma Assert (Exception_Name (E) = "CONSTRAINT_ERROR",
             "Expected Constraint_Error but got " & Exception_Information (E));
          Put_Line ("Expected exception " & Exception_Information (E));
