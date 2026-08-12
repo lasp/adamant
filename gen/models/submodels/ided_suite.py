@@ -370,9 +370,18 @@ class ided_suite(renderable_object):
                     + "."
                 )
 
-    def set_id_base(self, start_id):
+    def set_id_base(self, start_id, assign_entity_ids=True):
+        """
+        Store the suite's id base and, by default, immediately stamp ids onto
+        the suite's entities. Pass assign_entity_ids=False to store the base
+        (and sync the component's set_id_bases parameter) without stamping --
+        used when entities may still be injected into the suite later in the
+        assembly load. The deferred assembly-wide id pass then stamps them via
+        assign_entity_ids().
+        """
         self.id_base = start_id
-        self._set_ids(self.id_base)
+        if assign_entity_ids:
+            self._set_ids(self.id_base)
 
         # Set the parameter value in the component subprogram:
         if self.component:
@@ -386,6 +395,18 @@ class ided_suite(renderable_object):
                 self.component.set_id_bases.set_parameter_value(
                     self.id_base_parameter_name(), str(self.id_base)
                 )
+
+    def assign_entity_ids(self):
+        """
+        Stamp entity ids from the previously stored id base. This is the public
+        counterpart to the deferred form of set_id_base(...,
+        assign_entity_ids=False), called from the assembly-wide id pass once
+        all injected entities are in place.
+        """
+        assert self.id_base is not None, (
+            "assign_entity_ids requires an id base to have been stored via set_id_base."
+        )
+        self._set_ids(self.id_base)
 
     def get_with_name(self, entity_name):
         try:

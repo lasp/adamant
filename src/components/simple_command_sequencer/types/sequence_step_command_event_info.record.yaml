@@ -11,8 +11,8 @@ fields:
     format: U32
   - name: Step
     description: The step index
-    type: Interfaces.Unsigned_32
-    format: U32
+    type: Interfaces.Unsigned_16
+    format: U16
   - name: Command_Id
     description: The ID of the command
     type: Command_Types.Command_Id

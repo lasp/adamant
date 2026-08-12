@@ -119,9 +119,9 @@ mapping:
             desc: |
               The ordered list of steps to execute. Each step is either a
               command dispatch (`command:` + optional `arg:`) or an in-sequence
-              sleep (`sleep:` + Packed_U32 milliseconds expression). The two
-              forms are mutually exclusive; exactly one must be present per
-              step. Validation is enforced in the model loader.
+              sleep (`sleep_ms:` + integer milliseconds). The two forms are
+              mutually exclusive; exactly one must be present per step.
+              Validation is enforced in the model loader.
             sequence:
               - type: map
                 mapping:
@@ -158,19 +158,18 @@ mapping:
                       wait_for_command_completion setting. Only valid alongside
                       `command:`.
 
-                  sleep:
+                  sleep_ms:
                     required: false
-                    type: str
+                    type: int
+                    range: { min: 0, max: 4294967295 }
                     desc: |
-                      An Ada expression that evaluates to a Packed_U32.T value
-                      representing milliseconds to pause the sequence. Not
+                      Number of milliseconds to pause the sequence. Not
                       bus-routed; the sequencer frame parks itself for the
                       duration without issuing any command. Mutually exclusive
                       with `command:`/`arg:`/`wait_for_completion:`.
 
-                      Examples:
-                        - "(Value => 3000)" - sleep 3 seconds
-                        - "(Value => Arg.Pause_Millis)" - sleep duration from sequence arg
+                      Example:
+                        - sleep_ms: 3000  # sleep 3 seconds
 
 # Additional validation rules (enforced in the model Python code):
 # - Command format must be "Component.Command" with valid identifiers, or

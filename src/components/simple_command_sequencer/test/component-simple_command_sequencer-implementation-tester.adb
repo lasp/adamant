@@ -21,6 +21,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Command_Response_T_Recv_Sync_History.Init (Depth => 100);
       Self.Packet_T_Recv_Sync_History.Init (Depth => 100);
       Self.Event_T_Recv_Sync_History.Init (Depth => 100);
+      Self.Data_Product_T_Recv_Sync_History.Init (Depth => 200);
       Self.Sys_Time_T_Return_History.Init (Depth => 100);
       -- Event histories:
       Self.Sequence_Started_History.Init (Depth => 100);
@@ -39,7 +40,19 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Invalid_Command_Received_History.Init (Depth => 100);
       Self.Unexpected_Command_Response_History.Init (Depth => 100);
       Self.Killed_All_Sequences_History.Init (Depth => 100);
+      Self.Killed_Frame_History.Init (Depth => 100);
+      Self.Invalid_Frame_Id_History.Init (Depth => 100);
       Self.Invalid_Dynamic_Command_Argument_History.Init (Depth => 100);
+      -- Data product histories:
+      Self.Frame_Running_Count_History.Init (Depth => 100);
+      Self.Frame_Running_High_Water_Mark_History.Init (Depth => 100);
+      Self.Sequences_Started_Count_History.Init (Depth => 100);
+      Self.Sequences_Finished_Count_History.Init (Depth => 100);
+      Self.Sequences_Failed_Count_History.Init (Depth => 100);
+      Self.Commands_Sent_Count_History.Init (Depth => 100);
+      Self.Last_Sequence_Started_History.Init (Depth => 100);
+      Self.Last_Sequence_Finished_History.Init (Depth => 100);
+      Self.Last_Sequence_Failed_History.Init (Depth => 100);
       -- Packet histories:
       Self.Summary_Packet_History.Init (Depth => 100);
    end Init_Base;
@@ -52,6 +65,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Command_Response_T_Recv_Sync_History.Destroy;
       Self.Packet_T_Recv_Sync_History.Destroy;
       Self.Event_T_Recv_Sync_History.Destroy;
+      Self.Data_Product_T_Recv_Sync_History.Destroy;
       Self.Sys_Time_T_Return_History.Destroy;
       -- Event histories:
       Self.Sequence_Started_History.Destroy;
@@ -70,7 +84,19 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Invalid_Command_Received_History.Destroy;
       Self.Unexpected_Command_Response_History.Destroy;
       Self.Killed_All_Sequences_History.Destroy;
+      Self.Killed_Frame_History.Destroy;
+      Self.Invalid_Frame_Id_History.Destroy;
       Self.Invalid_Dynamic_Command_Argument_History.Destroy;
+      -- Data product histories:
+      Self.Frame_Running_Count_History.Destroy;
+      Self.Frame_Running_High_Water_Mark_History.Destroy;
+      Self.Sequences_Started_Count_History.Destroy;
+      Self.Sequences_Finished_Count_History.Destroy;
+      Self.Sequences_Failed_Count_History.Destroy;
+      Self.Commands_Sent_Count_History.Destroy;
+      Self.Last_Sequence_Started_History.Destroy;
+      Self.Last_Sequence_Finished_History.Destroy;
+      Self.Last_Sequence_Failed_History.Destroy;
       -- Packet histories:
       Self.Summary_Packet_History.Destroy;
 
@@ -86,6 +112,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Component_Instance.Attach_Command_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Command_T_Recv_Sync_Access);
       Self.Component_Instance.Attach_Command_Response_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Command_Response_T_Recv_Sync_Access);
       Self.Component_Instance.Attach_Packet_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Packet_T_Recv_Sync_Access);
+      Self.Component_Instance.Attach_Data_Product_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Data_Product_T_Recv_Sync_Access);
       Self.Component_Instance.Attach_Event_T_Send (To_Component => Self'Unchecked_Access, Hook => Self.Event_T_Recv_Sync_Access);
       Self.Component_Instance.Attach_Sys_Time_T_Get (To_Component => Self'Unchecked_Access, Hook => Self.Sys_Time_T_Return_Access);
       Self.Attach_Command_T_Send (To_Component => Self.Component_Instance'Unchecked_Access, Hook => Self.Component_Instance.Command_T_Recv_Async_Access);
@@ -103,9 +130,9 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Command_T_Recv_Sync_History.Push (Arg);
    end Command_T_Recv_Sync;
 
-   -- Sends the response to a Run_Sequence (or per-sequence wrapper) command back to
-   -- the command router. The Send_After_Sequence_Completion path emits its deferred
-   -- reply here on completion / abort / timeout / kill; the default
+   -- Sends the response to a Run_Sequence (or synthesised per-sequence) command
+   -- back to the command router. The Send_After_Sequence_Completion path emits its
+   -- deferred reply here on completion / abort / timeout / kill; the default
    -- Send_After_Sequence_Start path emits its reply here immediately at dispatch
    -- time.
    overriding procedure Command_Response_T_Recv_Sync (Self : in out Instance; Arg : in Command_Response.T) is
@@ -132,6 +159,15 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       -- Dispatch the event to the correct handler:
       Self.Dispatch_Event (Arg);
    end Event_T_Recv_Sync;
+
+   -- Data products are sent out of this connector.
+   overriding procedure Data_Product_T_Recv_Sync (Self : in out Instance; Arg : in Data_Product.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Data_Product_T_Recv_Sync_History.Push (Arg);
+      -- Dispatch the data product to the correct handler:
+      Self.Dispatch_Data_Product (Arg);
+   end Data_Product_T_Recv_Sync;
 
    -- The system time is retrieved via this connector.
    overriding function Sys_Time_T_Return (Self : in out Instance) return Sys_Time.T is
@@ -304,12 +340,98 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Killed_All_Sequences_History.Push (Arg);
    end Killed_All_Sequences;
 
+   -- A Kill_Frame command was executed and the running sequence on the frame was
+   -- halted.
+   overriding procedure Killed_Frame (Self : in out Instance; Arg : in Sequence_Event_Info.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Killed_Frame_History.Push (Arg);
+   end Killed_Frame;
+
+   -- A Kill_Frame command was received with an out of range frame ID, or the frame
+   -- was not running.
+   overriding procedure Invalid_Frame_Id (Self : in out Instance; Arg : in Packed_U32.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Invalid_Frame_Id_History.Push (Arg);
+   end Invalid_Frame_Id;
+
    -- A Command with a Dynamic Argument cannot be executed as the Argument is Invalid
    overriding procedure Invalid_Dynamic_Command_Argument (Self : in out Instance; Arg : in Sequence_Step_Command_Event_Info.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Invalid_Dynamic_Command_Argument_History.Push (Arg);
    end Invalid_Dynamic_Command_Argument;
+
+   -----------------------------------------------
+   -- Data product handler primitives:
+   -----------------------------------------------
+   -- Description:
+   --    Data products for the Simple Command Sequencer component.
+   -- The number of sequence frames currently running (not idle).
+   overriding procedure Frame_Running_Count (Self : in out Instance; Arg : in Packed_U16.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Frame_Running_Count_History.Push (Arg);
+   end Frame_Running_Count;
+
+   -- The maximum number of concurrently running sequence frames observed since
+   -- startup.
+   overriding procedure Frame_Running_High_Water_Mark (Self : in out Instance; Arg : in Packed_U16.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Frame_Running_High_Water_Mark_History.Push (Arg);
+   end Frame_Running_High_Water_Mark;
+
+   -- The total number of sequences started since startup.
+   overriding procedure Sequences_Started_Count (Self : in out Instance; Arg : in Packed_U32.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Sequences_Started_Count_History.Push (Arg);
+   end Sequences_Started_Count;
+
+   -- The total number of sequences that ran to completion successfully since
+   -- startup.
+   overriding procedure Sequences_Finished_Count (Self : in out Instance; Arg : in Packed_U32.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Sequences_Finished_Count_History.Push (Arg);
+   end Sequences_Finished_Count;
+
+   -- The total number of sequences that ended in failure since startup.
+   overriding procedure Sequences_Failed_Count (Self : in out Instance; Arg : in Packed_U32.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Sequences_Failed_Count_History.Push (Arg);
+   end Sequences_Failed_Count;
+
+   -- The total number of sub-commands the sequencer has dispatched since startup.
+   overriding procedure Commands_Sent_Count (Self : in out Instance; Arg : in Packed_U32.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Commands_Sent_Count_History.Push (Arg);
+   end Commands_Sent_Count;
+
+   -- The sequence id of the most recently started sequence.
+   overriding procedure Last_Sequence_Started (Self : in out Instance; Arg : in Packed_U16.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Last_Sequence_Started_History.Push (Arg);
+   end Last_Sequence_Started;
+
+   -- The sequence id of the most recent sequence to run to completion successfully.
+   overriding procedure Last_Sequence_Finished (Self : in out Instance; Arg : in Packed_U16.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Last_Sequence_Finished_History.Push (Arg);
+   end Last_Sequence_Finished;
+
+   -- The sequence id of the most recent sequence to end in failure.
+   overriding procedure Last_Sequence_Failed (Self : in out Instance; Arg : in Packed_U16.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Last_Sequence_Failed_History.Push (Arg);
+   end Last_Sequence_Failed;
 
    -----------------------------------------------
    -- Packet handler primitive:

@@ -7,8 +7,8 @@ fields:
     format: U32
   - name: Step
     description: Current (or last executed) step of the sequence on this frame.
-    type: Interfaces.Unsigned_32
-    format: U32
+    type: Interfaces.Unsigned_16
+    format: U16
   - name: Status
     description: Execution state of this frame.
     type: Sequence_Enums.Sequence_State.E

@@ -31,3 +31,5 @@ tests:
   - name: Test_Sub_Sequence_Call
   - name: Test_Summary_Packet
   - name: Test_Static_Deferred_Response
+  - name: Test_Kill_Frame
+  - name: Test_Data_Products

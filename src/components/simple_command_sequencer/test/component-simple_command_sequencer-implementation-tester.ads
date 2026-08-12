@@ -17,9 +17,12 @@ with Sequence_Sleep_Event_Info.Representation;
 with Sequence_Timeout_Event_Info.Representation;
 with Sequence_Step_Command_Event_Info.Representation;
 with Packed_U32.Representation;
+with Packed_U16.Representation;
 with Command_Header.Representation;
 with Tick.Representation;
 with Invalid_Command_Info.Representation;
+with Data_Product;
+with Data_Product.Representation;
 
 -- The Command Sequencer component executes predefined sequences of commands.
 -- It receives high-level sequence commands and breaks them down into individual
@@ -33,6 +36,7 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    package Command_Response_T_Recv_Sync_History_Package is new Printable_History (Command_Response.T, Command_Response.Representation.Image);
    package Packet_T_Recv_Sync_History_Package is new Printable_History (Packet.T, Packet.Representation.Image);
    package Event_T_Recv_Sync_History_Package is new Printable_History (Event.T, Event.Representation.Image);
+   package Data_Product_T_Recv_Sync_History_Package is new Printable_History (Data_Product.T, Data_Product.Representation.Image);
    package Sys_Time_T_Return_History_Package is new Printable_History (Sys_Time.T, Sys_Time.Representation.Image);
 
    -- Event history packages:
@@ -52,7 +56,20 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    package Invalid_Command_Received_History_Package is new Printable_History (Invalid_Command_Info.T, Invalid_Command_Info.Representation.Image);
    package Unexpected_Command_Response_History_Package is new Printable_History (Command_Response.T, Command_Response.Representation.Image);
    package Killed_All_Sequences_History_Package is new Printable_History (Natural, Natural'Image);
+   package Killed_Frame_History_Package is new Printable_History (Sequence_Event_Info.T, Sequence_Event_Info.Representation.Image);
+   package Invalid_Frame_Id_History_Package is new Printable_History (Packed_U32.T, Packed_U32.Representation.Image);
    package Invalid_Dynamic_Command_Argument_History_Package is new Printable_History (Sequence_Step_Command_Event_Info.T, Sequence_Step_Command_Event_Info.Representation.Image);
+
+   -- Data product history packages:
+   package Frame_Running_Count_History_Package is new Printable_History (Packed_U16.T, Packed_U16.Representation.Image);
+   package Frame_Running_High_Water_Mark_History_Package is new Printable_History (Packed_U16.T, Packed_U16.Representation.Image);
+   package Sequences_Started_Count_History_Package is new Printable_History (Packed_U32.T, Packed_U32.Representation.Image);
+   package Sequences_Finished_Count_History_Package is new Printable_History (Packed_U32.T, Packed_U32.Representation.Image);
+   package Sequences_Failed_Count_History_Package is new Printable_History (Packed_U32.T, Packed_U32.Representation.Image);
+   package Commands_Sent_Count_History_Package is new Printable_History (Packed_U32.T, Packed_U32.Representation.Image);
+   package Last_Sequence_Started_History_Package is new Printable_History (Packed_U16.T, Packed_U16.Representation.Image);
+   package Last_Sequence_Finished_History_Package is new Printable_History (Packed_U16.T, Packed_U16.Representation.Image);
+   package Last_Sequence_Failed_History_Package is new Printable_History (Packed_U16.T, Packed_U16.Representation.Image);
 
    -- Packet history packages:
    package Summary_Packet_History_Package is new Printable_History (Packet.T, Packet.Representation.Image);
@@ -66,6 +83,7 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
       Command_Response_T_Recv_Sync_History : Command_Response_T_Recv_Sync_History_Package.Instance;
       Packet_T_Recv_Sync_History : Packet_T_Recv_Sync_History_Package.Instance;
       Event_T_Recv_Sync_History : Event_T_Recv_Sync_History_Package.Instance;
+      Data_Product_T_Recv_Sync_History : Data_Product_T_Recv_Sync_History_Package.Instance;
       Sys_Time_T_Return_History : Sys_Time_T_Return_History_Package.Instance;
       -- Event histories:
       Sequence_Started_History : Sequence_Started_History_Package.Instance;
@@ -84,7 +102,19 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
       Invalid_Command_Received_History : Invalid_Command_Received_History_Package.Instance;
       Unexpected_Command_Response_History : Unexpected_Command_Response_History_Package.Instance;
       Killed_All_Sequences_History : Killed_All_Sequences_History_Package.Instance;
+      Killed_Frame_History : Killed_Frame_History_Package.Instance;
+      Invalid_Frame_Id_History : Invalid_Frame_Id_History_Package.Instance;
       Invalid_Dynamic_Command_Argument_History : Invalid_Dynamic_Command_Argument_History_Package.Instance;
+      -- Data product histories:
+      Frame_Running_Count_History : Frame_Running_Count_History_Package.Instance;
+      Frame_Running_High_Water_Mark_History : Frame_Running_High_Water_Mark_History_Package.Instance;
+      Sequences_Started_Count_History : Sequences_Started_Count_History_Package.Instance;
+      Sequences_Finished_Count_History : Sequences_Finished_Count_History_Package.Instance;
+      Sequences_Failed_Count_History : Sequences_Failed_Count_History_Package.Instance;
+      Commands_Sent_Count_History : Commands_Sent_Count_History_Package.Instance;
+      Last_Sequence_Started_History : Last_Sequence_Started_History_Package.Instance;
+      Last_Sequence_Finished_History : Last_Sequence_Finished_History_Package.Instance;
+      Last_Sequence_Failed_History : Last_Sequence_Failed_History_Package.Instance;
       -- Packet histories:
       Summary_Packet_History : Summary_Packet_History_Package.Instance;
       -- Booleans to control assertion if message is dropped on async queue:
@@ -113,9 +143,9 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    ---------------------------------------
    -- Sub-commands are sent out this connector
    overriding procedure Command_T_Recv_Sync (Self : in out Instance; Arg : in Command.T);
-   -- Sends the response to a Run_Sequence (or per-sequence wrapper) command back to
-   -- the command router. The Send_After_Sequence_Completion path emits its deferred
-   -- reply here on completion / abort / timeout / kill; the default
+   -- Sends the response to a Run_Sequence (or synthesised per-sequence) command
+   -- back to the command router. The Send_After_Sequence_Completion path emits its
+   -- deferred reply here on completion / abort / timeout / kill; the default
    -- Send_After_Sequence_Start path emits its reply here immediately at dispatch
    -- time.
    overriding procedure Command_Response_T_Recv_Sync (Self : in out Instance; Arg : in Command_Response.T);
@@ -124,6 +154,8 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    overriding procedure Packet_T_Recv_Sync (Self : in out Instance; Arg : in Packet.T);
    -- Events are sent out of this connector
    overriding procedure Event_T_Recv_Sync (Self : in out Instance; Arg : in Event.T);
+   -- Data products are sent out of this connector.
+   overriding procedure Data_Product_T_Recv_Sync (Self : in out Instance; Arg : in Data_Product.T);
    -- The system time is retrieved via this connector.
    overriding function Sys_Time_T_Return (Self : in out Instance) return Sys_Time.T;
 
@@ -178,8 +210,40 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    -- A Kill_All_Sequences command was executed and all running sequences were
    -- halted.
    overriding procedure Killed_All_Sequences (Self : in out Instance);
+   -- A Kill_Frame command was executed and the running sequence on the frame was
+   -- halted.
+   overriding procedure Killed_Frame (Self : in out Instance; Arg : in Sequence_Event_Info.T);
+   -- A Kill_Frame command was received with an out of range frame ID, or the frame
+   -- was not running.
+   overriding procedure Invalid_Frame_Id (Self : in out Instance; Arg : in Packed_U32.T);
    -- A Command with a Dynamic Argument cannot be executed as the Argument is Invalid
    overriding procedure Invalid_Dynamic_Command_Argument (Self : in out Instance; Arg : in Sequence_Step_Command_Event_Info.T);
+
+   -----------------------------------------------
+   -- Data product handler primitives:
+   -----------------------------------------------
+   -- Description:
+   --    Data products for the Simple Command Sequencer component.
+   -- The number of sequence frames currently running (not idle).
+   overriding procedure Frame_Running_Count (Self : in out Instance; Arg : in Packed_U16.T);
+   -- The maximum number of concurrently running sequence frames observed since
+   -- startup.
+   overriding procedure Frame_Running_High_Water_Mark (Self : in out Instance; Arg : in Packed_U16.T);
+   -- The total number of sequences started since startup.
+   overriding procedure Sequences_Started_Count (Self : in out Instance; Arg : in Packed_U32.T);
+   -- The total number of sequences that ran to completion successfully since
+   -- startup.
+   overriding procedure Sequences_Finished_Count (Self : in out Instance; Arg : in Packed_U32.T);
+   -- The total number of sequences that ended in failure since startup.
+   overriding procedure Sequences_Failed_Count (Self : in out Instance; Arg : in Packed_U32.T);
+   -- The total number of sub-commands the sequencer has dispatched since startup.
+   overriding procedure Commands_Sent_Count (Self : in out Instance; Arg : in Packed_U32.T);
+   -- The sequence id of the most recently started sequence.
+   overriding procedure Last_Sequence_Started (Self : in out Instance; Arg : in Packed_U16.T);
+   -- The sequence id of the most recent sequence to run to completion successfully.
+   overriding procedure Last_Sequence_Finished (Self : in out Instance; Arg : in Packed_U16.T);
+   -- The sequence id of the most recent sequence to end in failure.
+   overriding procedure Last_Sequence_Failed (Self : in out Instance; Arg : in Packed_U16.T);
 
    -----------------------------------------------
    -- Packet handler primitives:

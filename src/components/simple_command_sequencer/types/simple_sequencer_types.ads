@@ -39,7 +39,10 @@ package Simple_Sequencer_Types is
       end case;
    end record;
 
-   type Step_Array is array (Interfaces.Unsigned_32 range <>) of Step;
+   -- Step tables are indexed by a 16-bit type -- 65535 steps is far beyond any
+   -- realistic sequence and keeps the step counters compact on the wire (the
+   -- model rejects longer sequences at build time).
+   type Step_Array is array (Interfaces.Unsigned_16 range <>) of Step;
    type Step_Array_Access is access constant Step_Array;
 
    type Sequence_Type is record

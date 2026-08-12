@@ -1,31 +1,36 @@
 from models.commands import commands
-from models.exceptions import ModelException
+from models.exceptions import ModelException, throw_exception_with_filename
 from util import model_loader
 import os
 
 
-class simple_sequencer_commands(commands):
+class simple_command_sequencer_commands(commands):
     def submodel_name(self):
         # Tell the framework to treat this as the component's `commands`
         # suite so all the usual command codegen hooks fire.
         return "commands"
 
     def load(self):
-        super(simple_sequencer_commands, self).load()
+        super(simple_command_sequencer_commands, self).load()
         # The per-sequence commands are injected per-assembly in set_assembly, so
         # this suite is context-dependent. Never serve it from the (filename+mtime-
-        # keyed, session-shared) model cache, or a standalone 3-command load gets
-        # reused for an assembly's command dictionary. (Framework precedent: assembly.py:550.)
+        # keyed, session-shared) model cache, or a standalone statically-modeled
+        # load gets reused for an assembly's command dictionary. (Framework
+        # precedent: assembly.py:550.)
         self.do_save_to_cache = False
 
+    # Errors raised here happen outside the base class's load path, so attach
+    # the yaml filename to them explicitly for context.
+    @throw_exception_with_filename
     def set_assembly(
         self, assembly
     ):  # Make sure an assembly is set by the base class implementation.
         # Set assembly:
         self.assembly = assembly
 
-        # Get the model for the product packetizer so that we can create the packet list. First
-        # get the package name:
+        # Find the command_sequences model this instance was initialized with.
+        # First get the package name from the instance's Sequences init
+        # parameter:
         configs = self.component.init.get_parameter_value("Sequences")
         command_sequences_package = configs.split(".")[0]
         # Based on the package name figure out the model name:
@@ -41,7 +46,7 @@ class simple_sequencer_commands(commands):
         )
         if not model_paths:
             raise ModelException(
-                "Could not model for command_sequences model: "
+                "Could not find a model file for command_sequences model: "
                 + command_sequences_model_name
             )
 
@@ -102,9 +107,11 @@ class simple_sequencer_commands(commands):
                     self.component.complex_types[embedded.name] = embedded
 
         # Call the base class version:
-        super(simple_sequencer_commands, self).set_component(self.component)
-        super(simple_sequencer_commands, self).set_assembly(assembly)
+        super(simple_command_sequencer_commands, self).set_component(self.component)
+        super(simple_command_sequencer_commands, self).set_assembly(assembly)
 
+    @throw_exception_with_filename
     def final(self):
-        # Call final on the product packetizer to finalize the packets.
+        # Call final on the command sequences model to resolve its steps
+        # against the assembly.
         self.command_sequences_model.final()

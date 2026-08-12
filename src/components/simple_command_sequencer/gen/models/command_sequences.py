@@ -1,7 +1,11 @@
 from util import ada
 import os.path
 from collections import OrderedDict
-from models.exceptions import ModelException, throw_exception_with_lineno
+from models.exceptions import (
+    ModelException,
+    throw_exception_with_lineno,
+    throw_exception_with_filename,
+)
 from models.assembly import assembly_submodel
 from models.commands import (
     command
@@ -27,13 +31,13 @@ class sequence_step(object):
         command=None,
         arg=None,
         wait_for_completion=None,
-        sleep=None,
+        sleep_ms=None,
     ):
         # A step is either a command dispatch or a sleep, never both. The
         # parser/validator enforces this so downstream code can branch on
         # is_sleep() / is_command().
         self.command = command
-        self.sleep_expr = sleep
+        self.sleep_ms = sleep_ms
         if command is not None:
             self.parse_command()
         else:
@@ -90,28 +94,24 @@ class sequence_step(object):
             self.wait_for_completion = self._wait_for_completion
 
     def validate(self):
-        # Mutual exclusivity: exactly one of command/sleep_expr.
-        if self.command is None and self.sleep_expr is None:
+        # Mutual exclusivity: exactly one of command/sleep_ms.
+        if self.command is None and self.sleep_ms is None:
             raise ModelException(
-                f"Step {self.index} must specify either 'command' or 'sleep'"
+                f"Step {self.index} must specify either 'command' or 'sleep_ms'"
             )
-        if self.command is not None and self.sleep_expr is not None:
+        if self.command is not None and self.sleep_ms is not None:
             raise ModelException(
-                f"Step {self.index} cannot specify both 'command' and 'sleep'"
+                f"Step {self.index} cannot specify both 'command' and 'sleep_ms'"
             )
         # Sleep-form: no arg/wait_for_completion fields allowed.
         if self.is_sleep():
             if self.arg is not None or self.dynamic_arg is not None:
                 raise ModelException(
-                    f"Step {self.index} has 'sleep' and cannot also have 'arg'"
+                    f"Step {self.index} has 'sleep_ms' and cannot also have 'arg'"
                 )
             if self._wait_for_completion is not None:
                 raise ModelException(
-                    f"Step {self.index} has 'sleep' and cannot also have 'wait_for_completion'"
-                )
-            if self.sleep_expr.count("(") != self.sleep_expr.count(")"):
-                raise ModelException(
-                    f"Mismatched parentheses in sleep expression for step {self.index}: {self.sleep_expr}"
+                    f"Step {self.index} has 'sleep_ms' and cannot also have 'wait_for_completion'"
                 )
             return
         # Command-form parenthesis sanity.
@@ -187,10 +187,10 @@ class sequence_step(object):
         return re.sub(r'\bArg\b', 'Sequence_Arg', self.arg)
 
     def get_sleep_expression(self):
-        """Replace bare 'Arg' references with 'Sequence_Arg' in the sleep expression."""
-        if not self.sleep_expr:
+        """Render the sleep duration as a Packed_U32.T aggregate for the step table."""
+        if self.sleep_ms is None:
             return None
-        return re.sub(r'\bArg\b', 'Sequence_Arg', self.sleep_expr)
+        return f"(Value => {self.sleep_ms})"
 
     def has_arg(self):
         return self.arg is not None
@@ -199,7 +199,7 @@ class sequence_step(object):
         return self.dynamic_arg is not None
 
     def is_sleep(self):
-        return self.sleep_expr is not None
+        return self.sleep_ms is not None
 
     @classmethod
     @throw_exception_with_lineno
@@ -207,12 +207,12 @@ class sequence_step(object):
         command = step_data.get("command", None)
         arg = step_data.get("arg", None)
         wait_for_completion = step_data.get("wait_for_completion", None)
-        sleep = step_data.get("sleep", None)
+        sleep_ms = step_data.get("sleep_ms", None)
         return cls(
             command=command,
             arg=arg,
             wait_for_completion=wait_for_completion,
-            sleep=sleep,
+            sleep_ms=sleep_ms,
         )
 
 
@@ -286,6 +286,14 @@ class command_sequence(command):
             parts = self.arg_type.rsplit(".", 1)
             self.arg_type_package = parts[0]
             self.arg_type_name = parts[1]
+
+        # The generated step tables are indexed by Interfaces.Unsigned_16 and
+        # the step counter must be able to advance one past the last index.
+        if len(self.steps) > 65535:
+            raise ModelException(
+                f"Sequence '{self.name}' has {len(self.steps)} steps; at most "
+                "65535 are supported"
+            )
 
         for idx, step in enumerate(self.steps):
             step.index = idx
@@ -446,6 +454,11 @@ class command_sequences(assembly_submodel):
             for step in seq.steps
         )
 
+    # Resolution errors raised here (unknown component, unknown command, bad
+    # dynamic arg) happen outside the base class's load path, so attach the
+    # yaml filename to them explicitly -- load-time errors get it from the
+    # base class already.
+    @throw_exception_with_filename
     def final(self):
         # Used by name.ads to `with` the assembly's command-id package
         # (<Assembly>_Commands). self.assembly is set by the base set_assembly,
