@@ -903,17 +903,14 @@ class component(base):
                 if par.value is not None:
                     for suite in self.ided_suites.values():
                         if suite.id_base_parameter_name() == par.name:
-                            # Store the explicit id base now, but DEFER stamping
+                            # Store the explicit id base now, but defer stamping
                             # ids onto the entities until the assembly-wide id
                             # pass (assembly._generate_component_ids). Stamping
                             # here would freeze ids before set_assembly() can
                             # inject additional entities into the suite (e.g. the
                             # simple_command_sequencer's per-sequence commands),
                             # leaving those injected entities id-less and dropped.
-                            # The id_bases parameter already holds this value, so
-                            # the parameter-sync that set_id_base() also performs
-                            # is a no-op here.
-                            suite.id_base = int(par.value)
+                            suite.set_id_base(int(par.value), assign_entity_ids=False)
                             # Conflicts will be checked at the assembly level.
 
     def set_assembly(self, assembly):

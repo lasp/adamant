@@ -22,8 +22,12 @@ class assembly_simple_command_sequencer_summary_yaml(assembly_generator, generat
     def generate(self, input_filename):
         assem = assembly.assembly(filename=input_filename, shallow_load=True)
         assem.num_simple_command_sequencer_frames = 0
-        # Go through assembly to find the sequencer component. When we find it
-        # extract its init parameters which are needed in the template:
+        # Go through the assembly and collect the frame count of every
+        # sequencer instance. The summary packet type is generated once per
+        # assembly, so every instance must agree on Num_Concurrent_Sequences --
+        # otherwise the shared type would mis-describe one instance's packet on
+        # the ground. Reject mixed configurations at build time.
+        frame_counts = {}
         for component in assem.components.values():
             if component.name == "Simple_Command_Sequencer":
                 value = component.init.get_parameter_value("Num_Concurrent_Sequences")
@@ -37,8 +41,19 @@ class assembly_simple_command_sequencer_summary_yaml(assembly_generator, generat
                         + "Num_Concurrent_Sequences to generate its summary "
                         + "packet type, found: '" + str(value) + "'."
                     )
-                # Save num_frames into the assembly so it can be referenced in template:
-                assem.num_simple_command_sequencer_frames = num_frames
+                frame_counts[component.instance_name] = num_frames
+        if frame_counts:
+            if len(set(frame_counts.values())) > 1:
+                raise ModelException(
+                    "All Simple_Command_Sequencer instances in an assembly must "
+                    "be initialized with the same Num_Concurrent_Sequences, "
+                    "since they share one generated summary packet type. Found: "
+                    + ", ".join(
+                        f"{name}={count}" for name, count in sorted(frame_counts.items())
+                    )
+                )
+            # Save num_frames into the assembly so it can be referenced in template:
+            assem.num_simple_command_sequencer_frames = next(iter(frame_counts.values()))
         print(assem.render(self.template, self.template_dir))
 
     def depends_on(self, input_filename):

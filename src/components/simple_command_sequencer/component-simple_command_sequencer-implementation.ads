@@ -62,19 +62,21 @@ private
       Pending_Operator_Source_Id : Command_Types.Command_Source_Id := 0;
       Pending_Operator_Command_Id : Command_Types.Command_Id := 0;
       Pending_Defer : Boolean := False;
+      -- Data product counters. The high water mark tracks the peak number of
+      -- concurrently running frames; the rest are monotonic totals since
+      -- startup.
+      Frame_Running_Hwm : Interfaces.Unsigned_16 := 0;
+      Sequences_Started_Count : Interfaces.Unsigned_32 := 0;
+      Sequences_Finished_Count : Interfaces.Unsigned_32 := 0;
+      Sequences_Failed_Count : Interfaces.Unsigned_32 := 0;
+      Commands_Sent_Count : Interfaces.Unsigned_32 := 0;
    end record;
 
    ---------------------------------------
    -- Set Up Procedure
    ---------------------------------------
-   -- Null method which can be implemented to provide some component
-   -- set up code. This method is generally called by the assembly
-   -- main.adb after all component initialization and tasks have been started.
-   -- Some activities need to only be run once at startup, but cannot be run
-   -- safely until everything is up and running, i.e. command registration, initial
-   -- data product updates. This procedure should be implemented to do these things
-   -- if necessary.
-   overriding procedure Set_Up (Self : in out Instance) is null;
+   -- Sends out the initial (zeroed) values of all data products.
+   overriding procedure Set_Up (Self : in out Instance);
 
    ---------------------------------------
    -- Invokee connector primitives:
@@ -101,6 +103,8 @@ private
    overriding procedure Command_Response_T_Send_Dropped (Self : in out Instance; Arg : in Command_Response.T) is null;
    -- This procedure is called when a Packet_T_Send message is dropped due to a full queue.
    overriding procedure Packet_T_Send_Dropped (Self : in out Instance; Arg : in Packet.T) is null;
+   -- This procedure is called when a Data_Product_T_Send message is dropped due to a full queue.
+   overriding procedure Data_Product_T_Send_Dropped (Self : in out Instance; Arg : in Data_Product.T) is null;
    -- This procedure is called when a Event_T_Send message is dropped due to a full queue.
    overriding procedure Event_T_Send_Dropped (Self : in out Instance; Arg : in Event.T) is null;
 
@@ -109,14 +113,19 @@ private
    -----------------------------------------------
    -- Description:
    --    Static commands for the Simple Command Sequencer component. Per-sequence
-   --    wrapper commands (one per declared sequence) are synthesised at assembly
-   --    load time by gen/models/simple_sequencer_commands.py.
-   -- Run a command sequence by ID. Per-sequence wrapper commands are the operator-
-   -- friendly form; this is the underlying backbone they all dispatch through.
+   --    commands (one per declared sequence) are synthesised at assembly
+   --    load time by gen/models/simple_command_sequencer_commands.py.
+   -- Run a command sequence by ID. The synthesised per-sequence commands are the
+   -- operator-friendly form; this is the underlying backbone they all dispatch
+   -- through, and the only form that carries a per-call Response_Behavior.
    overriding function Run_Sequence (Self : in out Instance; Arg : in Run_Sequence_Arg.T) return Command_Execution_Status.E;
    -- Halt every running sequence and return all frames to their initial state. Does
    -- not affect frames that were not running.
    overriding function Kill_All_Sequences (Self : in out Instance) return Command_Execution_Status.E;
+   -- Halt the sequence running on a single frame and return that frame to its
+   -- initial state. Fails if the frame ID is out of range or the frame is not
+   -- running.
+   overriding function Kill_Frame (Self : in out Instance; Arg : in Packed_U16.T) return Command_Execution_Status.E;
    -- Set the period of the sequencer summary packet, in ticks. A period of zero
    -- disables the packet.
    overriding function Set_Summary_Packet_Period (Self : in out Instance; Arg : in Packed_U16.T) return Command_Execution_Status.E;

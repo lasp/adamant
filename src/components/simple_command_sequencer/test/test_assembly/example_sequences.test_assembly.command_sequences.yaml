@@ -17,7 +17,7 @@ sequences:
       - command: Component_A.Command_1
       - command: Component_A.Command_2
         arg: (Seconds => 3, Subseconds => 14)
-      - sleep: (Value => 3000)
+      - sleep_ms: 3000
       - command: Component_A.Command_3
         arg: (Value => 3)
 
@@ -48,7 +48,7 @@ sequences:
     continue_on_failure: false
 
     sequence:
-      - sleep: (Value => 4_294_967_295)
+      - sleep_ms: 4294967295
 
   # A sequence that calls another sequence. Each sequence is a first-class
   # command on the sequencer, so a sub-sequence step is just a command step
