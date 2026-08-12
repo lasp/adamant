@@ -225,41 +225,51 @@ package body Component.Simple_Command_Sequencer.Implementation is
       Self.Pending_Defer := False;
 
       if Arg.Header.Id >= First_Ghost_Id and then Arg.Header.Id < First_Ghost_Id + Num_Ghosts then
-         -- Ghost (per-sequence) command: translate the wrapped argument record
-         -- into a Run_Sequence_Arg.T and dispatch through the Run_Sequence
-         -- backbone. The wrapped record serializes as
-         -- [User_Args (native, variable)] [Response_Behavior : E8 = 1 byte], so
-         -- the trailing byte is the response behavior and everything before it
-         -- is the native pass-through arg the sequence's steps/resolvers consume.
+         -- Ghost (per-sequence) command: the argument buffer carries the
+         -- sequence's native argument verbatim (empty for argless sequences).
+         -- Translate to a Run_Sequence_Arg.T and dispatch through the
+         -- Run_Sequence backbone. Response behavior is the sequence's static
+         -- configuration from the autocoded sequence table.
          declare
             Seq_Index : constant Interfaces.Unsigned_16 :=
                Interfaces.Unsigned_16 (Arg.Header.Id - First_Ghost_Id); -- 0-based = Sequence_Id
-            Native_Len : constant Natural := Natural (Arg.Header.Arg_Buffer_Length) - 1;
-            Behavior : constant Sequence_Enums.Sequence_Response_Behavior.E :=
-               Sequence_Enums.Sequence_Response_Behavior.E'Enum_Val
-                  (Integer (Arg.Arg_Buffer (Arg.Arg_Buffer'First + Native_Len)));
-            Run_Arg : Run_Sequence_Arg.T :=
-               (Sequence_Id => Seq_Index,
-                Response_Behavior => Behavior,
-                Arg_Length => Simple_Sequencer_Types.Run_Sequence_Arg_Buffer_Length_Type (Native_Len),
-                Buffer_Arg => [others => 0]);
-            Stat : Command_Response_Status.E;
+            Native_Len : constant Natural := Natural (Arg.Header.Arg_Buffer_Length);
          begin
-            if Native_Len > 0 then
-               Run_Arg.Buffer_Arg (Run_Arg.Buffer_Arg'First .. Run_Arg.Buffer_Arg'First + Native_Len - 1) :=
-                  Arg.Arg_Buffer (Arg.Arg_Buffer'First .. Arg.Arg_Buffer'First + Native_Len - 1);
-            end if;
+            if Native_Len > Natural (Simple_Sequencer_Types.Run_Sequence_Arg_Buffer_Length_Type'Last) then
+               -- The argument cannot fit the Run_Sequence passthrough buffer.
+               -- No modeled sequence argument type can exceed it, so this is a
+               -- malformed command -- reject it as invalid rather than
+               -- truncating the argument.
+               Self.Event_T_Send_If_Connected (Self.Events.Invalid_Command_Received (
+                  Self.Sys_Time_T_Get,
+                  (Id => Arg.Header.Id, Errant_Field_Number => 0, Errant_Field => [others => 0])));
+               Self.Command_Response_T_Send_If_Connected ((Source_Id => Arg.Header.Source_Id, Registration_Id => Self.Command_Reg_Id, Command_Id => Arg.Header.Id, Status => Command_Response_Status.Failure));
+            else
+               declare
+                  Run_Arg : Run_Sequence_Arg.T :=
+                     (Sequence_Id => Seq_Index,
+                      Response_Behavior => Self.Sequences.all (Interfaces.Unsigned_32 (Seq_Index)).Response_Behavior,
+                      Arg_Length => Simple_Sequencer_Types.Run_Sequence_Arg_Buffer_Length_Type (Native_Len),
+                      Buffer_Arg => [others => 0]);
+                  Stat : Command_Response_Status.E;
+               begin
+                  if Native_Len > 0 then
+                     Run_Arg.Buffer_Arg (Run_Arg.Buffer_Arg'First .. Run_Arg.Buffer_Arg'First + Native_Len - 1) :=
+                        Arg.Arg_Buffer (Arg.Arg_Buffer'First .. Arg.Arg_Buffer'First + Native_Len - 1);
+                  end if;
 
-            -- Run_Sequence returns Command_Execution_Status; map it to the
-            -- Command_Response_Status the immediate reply expects (the work
-            -- Execute_Run_Sequence does for the modeled commands).
-            case Self.Run_Sequence (Run_Arg) is
-               when Command_Execution_Status.Success => Stat := Command_Response_Status.Success;
-               when Command_Execution_Status.Failure => Stat := Command_Response_Status.Failure;
-            end case;
+                  -- Run_Sequence returns Command_Execution_Status; map it to the
+                  -- Command_Response_Status the immediate reply expects (the work
+                  -- Execute_Run_Sequence does for the modeled commands).
+                  case Self.Run_Sequence (Run_Arg) is
+                     when Command_Execution_Status.Success => Stat := Command_Response_Status.Success;
+                     when Command_Execution_Status.Failure => Stat := Command_Response_Status.Failure;
+                  end case;
 
-            if not Self.Pending_Defer then
-               Self.Command_Response_T_Send_If_Connected ((Source_Id => Arg.Header.Source_Id, Registration_Id => Self.Command_Reg_Id, Command_Id => Arg.Header.Id, Status => Stat));
+                  if not Self.Pending_Defer then
+                     Self.Command_Response_T_Send_If_Connected ((Source_Id => Arg.Header.Source_Id, Registration_Id => Self.Command_Reg_Id, Command_Id => Arg.Header.Id, Status => Stat));
+                  end if;
+               end;
             end if;
          end;
       else

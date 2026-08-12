@@ -83,10 +83,11 @@ class simple_sequencer_commands(commands):
         self.entities.update(self.command_sequences_model.sequences)
         self.ids = [e.id for e in self.entities.values() if e.id]
 
-        # The injected per-sequence commands carry the generated <Name>_Run_Arg
-        # record as their arg type. The component's complex_types dict (and hence
-        # the assembly's) was built at component-load time, BEFORE this injection,
-        # so those record types are absent from it. Assembly-level consumers that
+        # The injected per-sequence commands carry the sequence's native arg
+        # type -- a user-written, assembly-level type the component itself never
+        # references. The component's complex_types dict (and hence the
+        # assembly's) was built at component-load time, BEFORE this injection,
+        # so those types are absent from it. Assembly-level consumers that
         # look up the type by package in complex_types -- e.g. the Hydra command
         # config (complex_types[command.type_package].hydra_field_strings) --
         # then fail with KeyError/UndefinedError. Register each injected command's

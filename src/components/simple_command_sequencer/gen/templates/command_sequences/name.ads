@@ -5,8 +5,10 @@
 {% endif %}
 with Simple_Sequencer_Types; use Simple_Sequencer_Types;
 with {{ assembly_name }}_Commands; use {{ assembly_name }}_Commands;
+with Command;
 with Command_Types;
 with Basic_Types;
+with Sequence_Enums;
 {% if needs_sequence_arg_utils %}
 with Sequence_Arg_Utils; use Sequence_Arg_Utils;
 {% endif %}
@@ -74,6 +76,7 @@ package {{ name }} is
          Wait_For_Cmd_Resp      => {{ "True" if seq.wait_for_command_completion else "False" }},
          Abort_On_Failed_Cmd    => {{ "False" if seq.continue_on_failure else "True" }},
          Command_Timeout_Millis => {{ seq.command_timeout_millis }},
+         Response_Behavior      => Sequence_Enums.Sequence_Response_Behavior.{{ seq.response_behavior }},
          Steps                  => {{ seq.name }}_Steps'Access){% if not loop.last %},{% endif %}
 
 {% endfor %}
@@ -81,4 +84,36 @@ package {{ name }} is
 
    Sequences : constant Sequences_Access := Sequences_Table'Access;
 
+   ---------------------------------------------------------------------------
+   -- Command builders for the per-sequence ("ghost") commands. These commands
+   -- are first-class in the assembly command dictionary but have no generated
+   -- Ada handler on the component, so this surface reconstructs the
+   -- operator-side builders (id getters + Command.T constructors) for unit
+   -- tests and other on-board callers.
+   --
+   -- Set Id_Base to the sequencer instance's command id base (the value passed
+   -- to Set_Id_Bases). Each sequence command id is then
+   -- Id_Base + Simple_Command_Sequencer_Commands.Num_Commands + declaration
+   -- index.
+   ---------------------------------------------------------------------------
+   type Instance is tagged private;
+
+   -- Set the sequencer instance's command id base so constructed commands carry
+   -- ids that match what the component registered at runtime.
+   procedure Set_Id_Base (Self : in out Instance; Id_Base : in Command_Types.Command_Id);
+
+   -- Set the operator source id stamped into the header of constructed commands
+   -- (defaults to 0). Mirrors the command suite's Set_Source_Id.
+   procedure Set_Source_Id (Self : in out Instance; Source_Id : in Command_Types.Command_Source_Id);
+
+{% for seq in sequences.values() %}
+   function Get_{{ seq.name }}_Id (Self : in Instance) return Command_Types.Command_Id;
+   function {{ seq.name }} (Self : in Instance{% if seq.has_arg() %}; Arg : in {{ seq.arg_type }}{% endif %}) return Command.T;
+{% endfor %}
+
+private
+   type Instance is tagged record
+      Id_Base : Command_Types.Command_Id := 0;
+      Source_Id : Command_Types.Command_Source_Id := 0;
+   end record;
 end {{ name }};
