@@ -187,6 +187,11 @@ package body Tests.Implementation is
       Expected.Buffer (Idx .. End_Idx) := [0 .. 3 - 1 => 0];
       Idx := End_Idx + 1;
 
+      -- Next serialize 1 pad byte:
+      End_Idx := Idx + 1 - 1;
+      Expected.Buffer (Idx .. End_Idx) := [0 .. 1 - 1 => 0];
+      Idx := End_Idx + 1;
+
       -- Calculate packet length:
       Expected.Header.Buffer_Length := Idx - Expected.Buffer'First;
 

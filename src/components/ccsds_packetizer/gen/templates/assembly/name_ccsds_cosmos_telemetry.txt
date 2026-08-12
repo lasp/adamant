@@ -16,7 +16,8 @@ Telemetry {{ name }} {{ packet.name }} Big_Endian "{{ packet.description }}"
 {# The packet definitions. #}
 {% if packet.items %}
 {% for item_name, item in packet.items.items() %}
-  {% if 'x' in (item.format|string)[2] %}Append_Array_Item {% if item.type_model.name %}{{ item.type_model.name }}.{% endif %}{{ item.name }} {{ (item.format|string)[1] }} {{ plugin_format_dictionary[item.format.type[0]] }} {{ (item.format|string)[1]|int * (item.format|string)[3:]|int }} "{{ item.description|replace('\n','->') }}"
+  {% if item.format.length %}Append_Array_Item {% if item.type_model.name %}{{ item.type_model.name }}.{% endif %}{{ item.name }} {{ item.format.unit_size }} {{ plugin_format_dictionary[item.format.type[0]] }} {{ item.format.total_size_in_bits() }} "{{ item.description|replace('\n','->') }}"
+{% elif item.entity is not defined %}Append_Item {{ item.name }} {{ item.size }} {{ plugin_format_dictionary[item.format.type[0]] }} "{{ item.description|replace('\n','->') }}"
 {% else %}Append_Item {{ item.entity.full_name }}{% if item.flat_name %}.{{ item.flat_name }}{% endif %} {{ item.size }} {{ plugin_format_dictionary[item.format.type[0]] }} "{{ item.flat_desc|replace('\n','->') }}"
 {% if item.is_enum %}
 {% for literal in item.literals %}

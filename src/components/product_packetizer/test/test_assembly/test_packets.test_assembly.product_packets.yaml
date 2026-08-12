@@ -53,6 +53,7 @@ packets:
         include_timestamp: False
         event_on_missing: False
       - pad_bytes: 3
+      - pad_bytes: 1
     period: "1" # create every tick
     offset: "0"
     enabled: False
