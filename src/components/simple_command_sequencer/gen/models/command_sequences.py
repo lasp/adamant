@@ -7,8 +7,6 @@ from models.commands import (
     command
 )
 from util import model_loader
-from util import redo
-from util import redo_arg
 import re
 
 DEFAULT_COMMAND_TIMEOUT_SECONDS = 30
@@ -223,6 +221,10 @@ class command_sequence(command):
     Represents a single command sequence definition.
     """
 
+    # Allowed values for the per-sequence response_behavior field, as Ada
+    # enumeration literals of Sequence_Enums.Sequence_Response_Behavior.E.
+    RESPONSE_BEHAVIORS = ("Send_After_Sequence_Start", "Send_After_Sequence_Completion")
+
     def __init__(
         self,
         name,
@@ -233,6 +235,7 @@ class command_sequence(command):
         wait_for_command_completion=True,
         continue_on_failure=False,
         command_timeout_seconds=None,
+        response_behavior=None,
         suite=None,
     ):
         self.name = name
@@ -243,6 +246,23 @@ class command_sequence(command):
         self._command_timeout_seconds = command_timeout_seconds
         self.suite = suite
         self.steps = sequence_steps
+
+        # When the sequencer replies to this sequence's own command: immediately
+        # on start (the default) or deferred until the sequence completes,
+        # carrying its final success/failure. Static per-sequence configuration,
+        # baked into the generated Sequences_Table. Invocations via the generic
+        # Run_Sequence command choose their behavior per-call instead.
+        if response_behavior is None:
+            self.response_behavior = "Send_After_Sequence_Start"
+        else:
+            formatted = ada.formatType(str(response_behavior))
+            if formatted not in self.RESPONSE_BEHAVIORS:
+                raise ModelException(
+                    f"Sequence '{name}' has invalid response_behavior "
+                    f"'{response_behavior}'. Must be one of: "
+                    + ", ".join(b.lower() for b in self.RESPONSE_BEHAVIORS)
+                )
+            self.response_behavior = formatted
 
         if not re.match(r'^[A-Za-z][A-Za-z0-9_]*$', self.name):
             raise ModelException(
@@ -255,12 +275,17 @@ class command_sequence(command):
         self.arg_type_name = None
 
         if self.arg_type:
-            if "." in self.arg_type:
-                parts = self.arg_type.rsplit(".", 1)
-                self.arg_type_package = parts[0]
-                self.arg_type_name = parts[1]
-            else:
-                self.arg_type_name = self.arg_type
+            # The generated builders and resolvers reference the arg type's
+            # package children (Serialization, Validation), so the type must be
+            # package-qualified.
+            if "." not in self.arg_type:
+                raise ModelException(
+                    f"Sequence '{self.name}' arg_type '{self.arg_type}' must be "
+                    "a package-qualified type name (e.g. 'My_Args.T')"
+                )
+            parts = self.arg_type.rsplit(".", 1)
+            self.arg_type_package = parts[0]
+            self.arg_type_name = parts[1]
 
         for idx, step in enumerate(self.steps):
             step.index = idx
@@ -272,13 +297,13 @@ class command_sequence(command):
                     f"Step {idx} references 'Arg' but sequence '{self.name}' "
                     "has no arg_type defined"
                 )
-        # The COMMAND's wire/arg type is always the generated wrapped record
-        # (<Name>_Run_Arg.T = native user args + a trailing Response_Behavior).
-        # self.arg_type stays the NATIVE arg type (or None) so dynamic-step
-        # resolution (resolve_dynamic_arg_type -> arg_type_package) traverses the
-        # user's own record, not the wrapper.
+        # The command's wire/arg type is the sequence's own arg_type (or none
+        # for an argless sequence) -- a user-written, normally-registered type.
+        # Response behavior is static per-sequence configuration in the
+        # generated Sequences_Table, so nothing is appended to the wire type
+        # and no record generation is involved.
         super(command_sequence, self).__init__(
-            name, type=(self.name + "_Run_Arg.T"), description=description, id=id, suite=suite
+            name, type=self.arg_type, description=description, id=id, suite=suite
         )
 
     def get_command_name(self):
@@ -307,15 +332,8 @@ class command_sequence(command):
         wait_for_command_completion = seq_data.get("wait_for_command_completion", True)
         continue_on_failure = seq_data.get("continue_on_failure", False)
         command_timeout_seconds = seq_data.get("command_timeout_seconds", None)
-
-        # arg_type here is the sequence's NATIVE user-arg type (the optional
-        # `arg_type:` in the YAML), used for dynamic-step resolution. The
-        # command's wire type (the wrapped <Name>_Run_Arg.T) is derived in
-        # command_sequence.__init__ -- we must NOT require that generated record
-        # to exist at model-construction time, since this model is built during
-        # redo's global rule-computation pass (before any file is generated) and
-        # the wrapped record is itself a generated file (circular dependency).
-        native_arg_type = seq_data.get("arg_type", None)
+        response_behavior = seq_data.get("response_behavior", None)
+        arg_type = seq_data.get("arg_type", None)
 
         sequence_steps = []
         if "sequence" not in seq_data or not seq_data["sequence"]:
@@ -328,10 +346,11 @@ class command_sequence(command):
             name=name,
             sequence_steps=sequence_steps,
             description=description,
-            arg_type=native_arg_type,
+            arg_type=arg_type,
             wait_for_command_completion=wait_for_command_completion,
             continue_on_failure=continue_on_failure,
             command_timeout_seconds=command_timeout_seconds,
+            response_behavior=response_behavior,
             suite=suite,
         )
 
@@ -381,38 +400,14 @@ class command_sequences(assembly_submodel):
             for include in self.includes:
                 include = ada.formatType(include)
             self.includes = list(set(self.includes))
+            # The generated spec always carries "with Sequence_Enums;" (the
+            # per-sequence Response_Behavior configuration in the
+            # Sequences_Table), so drop it from user includes to avoid a
+            # duplicate with clause.
+            self.includes = [inc for inc in self.includes if inc != "Sequence_Enums"]
 
         if "sequences" not in self.data or not self.data["sequences"]:
             raise ModelException("At least one sequence must be defined")
-
-        # Each per-sequence command's wire type is the generated <Name>_Run_Arg
-        # record (produced by the wrapped_run_args generator). Build any that are
-        # not yet on disk so that constructing the command_sequence objects below
-        # -- which eagerly resolve "<Name>_Run_Arg.T" via the model loader -- can
-        # load them. Mirrors how packed_type builds its generated .type_ranges.yaml
-        # during load. Two things make this safe (no recursion / no DB-setup
-        # breakage):
-        #   * output_filename no longer constructs this model, so it is only
-        #     loaded during real generation, never during redo's DB-setup pass.
-        #   * the wrapped_run_args generator sets has_dependencies=False, so
-        #     building a run_arg record never loads this model back -- otherwise
-        #     this redo_ifchange would re-enter and recurse.
-        # Gating on existence keeps this from spawning a redo-ifchange child on
-        # every one of the many model loads in a build; incremental staleness is
-        # handled by the normal dependency graph (the suite's deps_list carries
-        # each resolved record as a dependency of the assembly).
-        src_dir = redo_arg.get_src_dir(self.full_filename)
-        run_arg_records = [
-            os.path.join(
-                src_dir, "build", "yaml",
-                str(seq_data["name"]).lower() + "_run_arg.record.yaml",
-            )
-            for seq_data in self.data["sequences"]
-            if isinstance(seq_data, dict) and "name" in seq_data
-        ]
-        missing = [p for p in run_arg_records if not os.path.isfile(p)]
-        if missing:
-            redo.redo_ifchange(missing)
 
         for seq_data in self.data["sequences"]:
             seq = command_sequence.from_sequence_data(seq_data, suite=self)
@@ -441,10 +436,12 @@ class command_sequences(assembly_submodel):
         # True if any sequence in this suite has at least one dynamic step
         # (drives Resolver type emission in name.ads).
         self.suite_has_dynamic_steps = self.has_dynamic_steps()
-        # True if any step in any sequence has a static command arg expression
-        # (drives `with Sequence_Arg_Utils;` in name.ads).
+        # True if any step in any sequence needs the To_Arg helper: static
+        # command arg expressions use it in the spec's step arrays, and dynamic
+        # steps use it in the body's Resolver functions (drives
+        # `with Sequence_Arg_Utils;` in name.ads).
         self.needs_sequence_arg_utils = any(
-            step.has_arg()
+            step.has_arg() or step.is_dynamic()
             for seq in self.sequences.values()
             for step in seq.steps
         )
@@ -456,6 +453,11 @@ class command_sequences(assembly_submodel):
         self.assembly_name = self.assembly.name
 
         for seq in self.sequences.values():
+            # The generated builder surface takes each sequence's native arg
+            # type directly in the spec, so its package always needs a with
+            # clause, whether or not any step traverses it dynamically.
+            if seq.arg_type_package and seq.arg_type_package not in self.includes:
+                self.includes.append(seq.arg_type_package)
             for step in seq.steps:
                 # Sleep steps don't reference any assembly component or
                 # command, so skip assembly-level resolution for them.
@@ -492,10 +494,9 @@ class command_sequences(assembly_submodel):
                 # Resolve arg type — static and dynamic are mutually exclusive
                 if step.is_dynamic():
                     step.resolve_dynamic_arg_type(step.command_obj, seq)
-                    # Auto-populate includes for both the input type and the
-                    # leaf arg type so the .adb gets the correct "with" clauses
-                    if seq.arg_type_package and seq.arg_type_package not in self.includes:
-                        self.includes.append(seq.arg_type_package)
+                    # Auto-populate includes for the leaf arg type so the
+                    # generated code gets the correct "with" clauses (the
+                    # sequence-level input type is already included above).
                     if step.dynamic_arg_type_package and step.dynamic_arg_type_package not in self.includes:
                         self.includes.append(step.dynamic_arg_type_package)
                 else:

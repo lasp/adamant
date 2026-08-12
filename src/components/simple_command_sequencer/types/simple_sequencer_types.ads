@@ -5,6 +5,7 @@ with Interfaces;
 with Configuration;
 with Basic_Types;
 with Packet_Types;
+with Sequence_Enums;
 with Sequence_Frame_Summary;
 
 package Simple_Sequencer_Types is
@@ -45,6 +46,11 @@ package Simple_Sequencer_Types is
       Wait_For_Cmd_Resp     : Boolean;
       Abort_On_Failed_Cmd   : Boolean;
       Command_Timeout_Millis : Interfaces.Unsigned_32;
+      -- When the sequencer replies to this sequence's own per-sequence command:
+      -- immediately on start or deferred until the sequence completes. Static
+      -- per-sequence configuration; the generic Run_Sequence command carries
+      -- its own per-call behavior in its argument instead.
+      Response_Behavior     : Sequence_Enums.Sequence_Response_Behavior.E;
       Steps                 : Step_Array_Access;
    end record;
 

@@ -92,6 +92,19 @@ mapping:
               If true, the sequence will continue executing even if a sub-command
               fails. If false, the sequence will abort on the first failure.
 
+          response_behavior:
+            required: false
+            type: str
+            enum: ['send_after_sequence_start', 'send_after_sequence_completion']
+            desc: |
+              When the sequencer replies to this sequence's own command:
+              send_after_sequence_start (the default) acknowledges as soon as
+              the sequence is started; send_after_sequence_completion defers
+              the reply until the sequence finishes, carrying its final
+              success or failure. This is static per-sequence configuration.
+              Invocations through the generic Run_Sequence command choose
+              their behavior per-call in the command argument instead.
+
           command_timeout_seconds:
             required: false
             type: int
