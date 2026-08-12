@@ -48,15 +48,11 @@ package body Component.Simple_Command_Sequencer.Implementation is
    begin
       Frame_Id := 0;
 
-      for Id in Self.Sequence_Frames.all'Range loop
-         declare
-            Frame : Sequence_Frame.T renames Self.Sequence_Frames.all (Id);
-         begin
-            if Frame.Status = Not_Running and then Frame.Flags.Has_Source_Id then
-               Frame_Id := Id;
-               return True;
-            end if;
-         end;
+      for Frame of Self.Sequence_Frames.all loop
+         if Frame.Status = Not_Running and then Frame.Flags.Has_Source_Id then
+            Frame_Id := Frame.Frame_Id;
+            return True;
+         end if;
       end loop;
       return False;
    end Find_Available_Sequence_Frame;
@@ -65,15 +61,11 @@ package body Component.Simple_Command_Sequencer.Implementation is
    begin
       Frame_Id := 0;
 
-      for Id in Self.Sequence_Frames.all'Range loop
-         declare
-            Frame : Sequence_Frame.T renames Self.Sequence_Frames.all (Id);
-         begin
-            if Frame.Source_Id = Source_Id then
-               Frame_Id := Id;
-               return True;
-            end if;
-         end;
+      for Frame of Self.Sequence_Frames.all loop
+         if Frame.Source_Id = Source_Id then
+            Frame_Id := Frame.Frame_Id;
+            return True;
+         end if;
       end loop;
       return False;
    end Find_Sequence_Frame_Id_From_Source_Id;
@@ -128,6 +120,58 @@ package body Component.Simple_Command_Sequencer.Implementation is
       end if;
    end Send_Deferred_Response_If_Pending;
 
+   -- Recount the running frames and update the frame-count data products,
+   -- raising the high water mark when exceeded. Called whenever a frame is
+   -- claimed or returns to idle.
+   procedure Send_Frame_Count_Data_Products (Self : in out Instance) is
+      Count : Interfaces.Unsigned_16 := 0;
+      Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
+   begin
+      for Frame of Self.Sequence_Frames.all loop
+         if Frame.Status /= Not_Running then
+            Count := @ + 1;
+         end if;
+      end loop;
+      if Count > Self.Frame_Running_Hwm then
+         Self.Frame_Running_Hwm := Count;
+      end if;
+      Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Frame_Running_Count (Time, (Value => Count)));
+      Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Frame_Running_High_Water_Mark (Time, (Value => Self.Frame_Running_Hwm)));
+   end Send_Frame_Count_Data_Products;
+
+   -- Bookkeeping shared by every path that ends a sequence: update the
+   -- finished/failed counters and last-sequence data products, refresh the
+   -- frame-count products, and emit the deferred operator reply when the frame
+   -- was claimed with Send_After_Sequence_Completion. Called after the frame's
+   -- Status has been set to Not_Running, while the frame still holds the
+   -- ending sequence's context.
+   procedure Finish_Sequence
+     (Self  : in out Instance;
+      Frame : in Sequence_Frame.T;
+      Stat  : in Command_Response_Status.E) is
+      use Command_Response_Status;
+      Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
+   begin
+      if Stat = Success then
+         Self.Sequences_Finished_Count := @ + 1;
+         Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Sequences_Finished_Count (Time, (Value => Self.Sequences_Finished_Count)));
+         Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Last_Sequence_Finished (Time, (Value => Interfaces.Unsigned_16 (Frame.Sequence_Id))));
+      else
+         Self.Sequences_Failed_Count := @ + 1;
+         Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Sequences_Failed_Count (Time, (Value => Self.Sequences_Failed_Count)));
+         Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Last_Sequence_Failed (Time, (Value => Interfaces.Unsigned_16 (Frame.Sequence_Id))));
+      end if;
+      Send_Frame_Count_Data_Products (Self);
+      Send_Deferred_Response_If_Pending (Self, Frame, Stat);
+   end Finish_Sequence;
+
+   -- Count a dispatched sub-command and update its data product.
+   procedure Note_Command_Sent (Self : in out Instance) is
+   begin
+      Self.Commands_Sent_Count := @ + 1;
+      Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Commands_Sent_Count (Self.Sys_Time_T_Get, (Value => Self.Commands_Sent_Count)));
+   end Note_Command_Sent;
+
    procedure Execute_Sequence (Self : in out Instance; Frame : in out Sequence_Frame.T) is
       use Simple_Sequencer_Types;
    begin
@@ -136,7 +180,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
             -- Sequence end event
             Self.Event_T_Send_If_Connected (Self.Events.Sequence_Completed (Self.Sys_Time_T_Get, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id)));
             Frame.Status := Not_Running;
-            Send_Deferred_Response_If_Pending (Self, Frame, Command_Response_Status.Success);
+            Finish_Sequence (Self, Frame, Command_Response_Status.Success);
          else
             declare
                Step_Obj : Step renames Self.Sequences.all (Frame.Sequence_Id).Steps.all (Frame.Step);
@@ -147,6 +191,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
                         Cmd : constant Command.T :=  (Header => (Source_Id => Frame.Source_Id, Id => Step_Obj.Id, Arg_Buffer_Length => Step_Obj.Arg_Length), Arg_Buffer => Step_Obj.Arg);
                      begin
                         Self.Command_T_Send (Cmd);
+                        Note_Command_Sent (Self);
                         if Frame.Flags.Wait_For_Cmd_Resp then
                            Frame.Status := Waiting_For_Cmd_Resp;
                         end if;
@@ -172,6 +217,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
                         -- Check Valid Boolean here:
                         if Valid then
                            Self.Command_T_Send (Cmd);
+                           Note_Command_Sent (Self);
                            if Frame.Flags.Wait_For_Cmd_Resp then
                               Frame.Status := Waiting_For_Cmd_Resp;
                            end if;
@@ -179,7 +225,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
                         else
                            Self.Event_T_Send_If_Connected (Self.Events.Invalid_Dynamic_Command_Argument (Self.Sys_Time_T_Get, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Step => Frame.Step, Command_Id => Step_Obj.Id)));
                            Frame.Status := Not_Running;
-                           Send_Deferred_Response_If_Pending (Self, Frame, Command_Response_Status.Failure);
+                           Finish_Sequence (Self, Frame, Command_Response_Status.Failure);
                         end if;
                      end;
                   when Simple_Sequencer_Types.Sleep =>
@@ -192,7 +238,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
                      if not Try_Schedule_Sleep (Self, Frame, Step_Obj.Sleep_Arg) then
                         Self.Event_T_Send_If_Connected (Self.Events.Sequence_Out_Of_Range_Sleep (Self.Sys_Time_T_Get, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Milliseconds => Step_Obj.Sleep_Arg.Value)));
                         Frame.Status := Not_Running;
-                        Send_Deferred_Response_If_Pending (Self, Frame, Command_Response_Status.Failure);
+                        Finish_Sequence (Self, Frame, Command_Response_Status.Failure);
                      end if;
                end case;
                if Frame.Step <= Self.Sequences.all (Frame.Sequence_Id).Steps.all'Last then
@@ -322,7 +368,16 @@ package body Component.Simple_Command_Sequencer.Implementation is
                declare
                   Frame : Sequence_Frame.T renames Self.Sequence_Frames.all (Frame_To_Wake_Id);
                begin
+                  -- Only a frame parked in Waiting_For_Cmd_Resp is advanced by a
+                  -- response. In any other state the response is late or stale --
+                  -- e.g. the frame already timed out, was killed, or was even
+                  -- reused for a new sequence that hasn't issued a command yet --
+                  -- and is deliberately ignored: acting on it would advance the
+                  -- wrong step.
                   if Frame.Status = Waiting_For_Cmd_Resp then
+                     -- Wake the frame. Execution does not resume here -- the next
+                     -- Tick finds the frame Running and calls Execute_Sequence,
+                     -- which keeps all step dispatch on the tick cadence.
                      Frame.Status := Running;
                      Frame.Flags.Last_Command_Success := Arg.Status = Command_Response_Status.Success;
 
@@ -336,7 +391,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
                               (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame_To_Wake_Id,
                                Step => Frame.Step)));
                            Frame.Status := Not_Running;
-                           Send_Deferred_Response_If_Pending (Self, Frame, Command_Response_Status.Failure);
+                           Finish_Sequence (Self, Frame, Command_Response_Status.Failure);
                         end if;
                      end if;
                   end if;
@@ -399,51 +454,47 @@ package body Component.Simple_Command_Sequencer.Implementation is
       Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
    begin
       -- Check if we can re-begin executing our Sequences and execute them until they wait again or finish.
-      for Id in Self.Sequence_Frames.all'Range loop
-         declare
-            Frame : Sequence_Frame.T renames Self.Sequence_Frames.all (Id);
-         begin
-            case Frame.Status is
-               when Running =>
+      for Frame of Self.Sequence_Frames.all loop
+         case Frame.Status is
+            when Running =>
+               Execute_Sequence (Self, Frame);
+            when Waiting_For_Time =>
+               if Time >= Frame.Wait_Until then
+                  Frame.Status := Running;
                   Execute_Sequence (Self, Frame);
-               when Waiting_For_Time =>
-                  if Time >= Frame.Wait_Until then
-                     Frame.Status := Running;
-                     Execute_Sequence (Self, Frame);
-                  end if;
-               when Waiting_For_Cmd_Resp =>
-                  -- Check timeout. The per-sequence timeout lives in the autocoded
-                  -- sequence table (Command_Timeout_Millis), not in the frame.
-                  declare
-                     use Ada.Real_Time;
-                     Timeout_Millis : constant Interfaces.Unsigned_32 :=
-                        Self.Sequences.all (Frame.Sequence_Id).Command_Timeout_Millis;
-                     Timeout : Sys_Time.T;
-                     Status : Sys_Time_Status;
-                     function To_Time_Span (Millis : Interfaces.Unsigned_32) return Time_Span is
-                     begin
-                        return Milliseconds (Integer (Millis));
-                     end To_Time_Span;
+               end if;
+            when Waiting_For_Cmd_Resp =>
+               -- Check timeout. The per-sequence timeout lives in the autocoded
+               -- sequence table (Command_Timeout_Millis), not in the frame.
+               declare
+                  use Ada.Real_Time;
+                  Timeout_Millis : constant Interfaces.Unsigned_32 :=
+                     Self.Sequences.all (Frame.Sequence_Id).Command_Timeout_Millis;
+                  Timeout : Sys_Time.T;
+                  Status : Sys_Time_Status;
+                  function To_Time_Span (Millis : Interfaces.Unsigned_32) return Time_Span is
                   begin
-                     Status := Add (Frame.Last_Command_Send, To_Time_Span (Timeout_Millis), Timeout);
-                     if Status /= Success then
-                        -- Sys_Time arithmetic overflow on the deadline -- the
-                        -- frame would otherwise stay in Waiting_For_Cmd_Resp
-                        -- forever. End the sequence cleanly and emit Failure
-                        -- to any pending Send_After_Sequence_Completion reply.
-                        Self.Event_T_Send_If_Connected (Self.Events.Sequence_Out_Of_Range_Timeout (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Id, Milliseconds => Timeout_Millis)));
-                        Frame.Status := Not_Running;
-                        Send_Deferred_Response_If_Pending (Self, Frame, Command_Response_Status.Failure);
-                     elsif Time >= Timeout then
-                        Self.Event_T_Send_If_Connected (Self.Events.Sequence_Timeout (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Id, Step => Frame.Step)));
-                        Frame.Status := Not_Running;
-                        Send_Deferred_Response_If_Pending (Self, Frame, Command_Response_Status.Failure);
-                     end if;
-                  end;
-               when Not_Running =>
-                  null;
-            end case;
-         end;
+                     return Milliseconds (Integer (Millis));
+                  end To_Time_Span;
+               begin
+                  Status := Add (Frame.Last_Command_Send, To_Time_Span (Timeout_Millis), Timeout);
+                  if Status /= Success then
+                     -- Sys_Time arithmetic overflow on the deadline -- the
+                     -- frame would otherwise stay in Waiting_For_Cmd_Resp
+                     -- forever. End the sequence cleanly and emit Failure
+                     -- to any pending Send_After_Sequence_Completion reply.
+                     Self.Event_T_Send_If_Connected (Self.Events.Sequence_Out_Of_Range_Timeout (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Milliseconds => Timeout_Millis)));
+                     Frame.Status := Not_Running;
+                     Finish_Sequence (Self, Frame, Command_Response_Status.Failure);
+                  elsif Time >= Timeout then
+                     Self.Event_T_Send_If_Connected (Self.Events.Sequence_Timeout (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Step => Frame.Step)));
+                     Frame.Status := Not_Running;
+                     Finish_Sequence (Self, Frame, Command_Response_Status.Failure);
+                  end if;
+               end;
+            when Not_Running =>
+               null;
+         end case;
       end loop;
 
       Send_Summary_Packet_If_Due (Self);
@@ -513,6 +564,15 @@ package body Component.Simple_Command_Sequencer.Implementation is
             Frame.Flags.Wait_For_Cmd_Resp := Sequence.Wait_For_Cmd_Resp;
             Frame.Flags.Abort_On_Failed_Cmd := Sequence.Abort_On_Failed_Cmd;
             Self.Event_T_Send_If_Connected (Self.Events.Sequence_Started (Self.Sys_Time_T_Get, (Sequence_Id => Interfaces.Unsigned_32 (Arg.Sequence_Id), Frame_Id => Available_Id)));
+            -- Update the started counters and frame-count data products:
+            Self.Sequences_Started_Count := @ + 1;
+            declare
+               Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
+            begin
+               Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Sequences_Started_Count (Time, (Value => Self.Sequences_Started_Count)));
+               Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Last_Sequence_Started (Time, (Value => Arg.Sequence_Id)));
+            end;
+            Send_Frame_Count_Data_Products (Self);
             return Success;
          end;
       end if;
@@ -532,7 +592,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
             -- If the operator was waiting via Send_After_Sequence_Completion,
             -- emit Failure now -- the sequence is being killed before it could
             -- complete and the originating command would otherwise hang.
-            Send_Deferred_Response_If_Pending (Self, Frame, Command_Response_Status.Failure);
+            Finish_Sequence (Self, Frame, Command_Response_Status.Failure);
             Frame.Sequence_Id := 0;
             Frame.Step := 0;
             Frame.Arg_Length := 0;
@@ -541,6 +601,38 @@ package body Component.Simple_Command_Sequencer.Implementation is
       Self.Event_T_Send_If_Connected (Self.Events.Killed_All_Sequences (Self.Sys_Time_T_Get));
       return Success;
    end Kill_All_Sequences;
+
+   -- Halt the sequence running on a single frame and return that frame to its
+   -- initial state. Fails if the frame ID is out of range or the frame is not
+   -- running. As with Kill_All_Sequences, the frame's Source_Id assignment is
+   -- preserved so it remains claimable by future Run_Sequence calls.
+   overriding function Kill_Frame (Self : in out Instance; Arg : in Packed_U16.T) return Command_Execution_Status.E is
+      use Command_Execution_Status;
+      Frame_Id : constant Interfaces.Unsigned_32 := Interfaces.Unsigned_32 (Arg.Value);
+   begin
+      if Frame_Id not in Self.Sequence_Frames.all'Range then
+         Self.Event_T_Send_If_Connected (Self.Events.Invalid_Frame_Id (Self.Sys_Time_T_Get, (Value => Frame_Id)));
+         return Failure;
+      end if;
+      declare
+         Frame : Sequence_Frame.T renames Self.Sequence_Frames.all (Frame_Id);
+      begin
+         if Frame.Status = Not_Running then
+            Self.Event_T_Send_If_Connected (Self.Events.Invalid_Frame_Id (Self.Sys_Time_T_Get, (Value => Frame_Id)));
+            return Failure;
+         end if;
+         Frame.Status := Not_Running;
+         Self.Event_T_Send_If_Connected (Self.Events.Killed_Frame (Self.Sys_Time_T_Get, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame_Id)));
+         -- If the operator was waiting via Send_After_Sequence_Completion,
+         -- emit Failure now -- the sequence is being killed before it could
+         -- complete and the originating command would otherwise hang.
+         Finish_Sequence (Self, Frame, Command_Response_Status.Failure);
+         Frame.Sequence_Id := 0;
+         Frame.Step := 0;
+         Frame.Arg_Length := 0;
+         return Success;
+      end;
+   end Kill_Frame;
 
    -- Set the summary packet period, in ticks. Zero disables emission. The
    -- tick counter is reset so the new period starts a fresh phase.
@@ -551,6 +643,21 @@ package body Component.Simple_Command_Sequencer.Implementation is
       Self.Summary_Packet_Tick_Count := 0;
       return Success;
    end Set_Summary_Packet_Period;
+
+   -- Send out the initial (zeroed) values of all data products:
+   overriding procedure Set_Up (Self : in out Instance) is
+      Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
+   begin
+      Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Frame_Running_Count (Time, (Value => 0)));
+      Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Frame_Running_High_Water_Mark (Time, (Value => 0)));
+      Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Sequences_Started_Count (Time, (Value => 0)));
+      Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Sequences_Finished_Count (Time, (Value => 0)));
+      Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Sequences_Failed_Count (Time, (Value => 0)));
+      Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Commands_Sent_Count (Time, (Value => 0)));
+      Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Last_Sequence_Started (Time, (Value => 0)));
+      Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Last_Sequence_Finished (Time, (Value => 0)));
+      Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Last_Sequence_Failed (Time, (Value => 0)));
+   end Set_Up;
 
    -- Invalid command handler. This procedure is called when a command's arguments are found to be invalid:
    overriding procedure Invalid_Command (Self : in out Instance; Cmd : in Command.T; Errant_Field_Number : in Interfaces.Unsigned_32; Errant_Field : in Basic_Types.Poly_Type) is

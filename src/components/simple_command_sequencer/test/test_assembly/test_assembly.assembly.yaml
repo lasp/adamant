@@ -22,6 +22,13 @@ components:
     init:
       - "Num_Concurrent_Sequences => 2"
       - "Sequences => Test_Assembly_Command_Sequences_Example_Sequences.Sequences"
+    # Explicit command id base, matching what auto-assignment would pick. This
+    # deliberately exercises the deferred explicit-id-base path
+    # (set_id_base(assign_entity_ids=False) at instance setup, stamped by the
+    # assembly-wide id pass after the per-sequence commands are injected) --
+    # the resulting dictionary must be identical to the auto-assigned one.
+    set_id_bases:
+      - "Command_Id_Base => 19"
 connections:
   # Dummy connection. We need one to make schema happy, but it doesn't
   # affect testing.

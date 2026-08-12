@@ -8,8 +8,8 @@ fields:
     type: Interfaces.Unsigned_32
     format: U32
   - name: Step
-    type: Interfaces.Unsigned_32
-    format: U32
+    type: Interfaces.Unsigned_16
+    format: U16
   - name: Wait_Until
     type: Sys_Time.T
   - name: Status

@@ -15,6 +15,8 @@ with Command_Enums; use Command_Enums.Command_Response_Status;
 with Test_Assembly_Command_Sequences_Example_Sequences;
 with Test_Component_Commands;
 with Command.Assertion; use Command.Assertion;
+with Packed_U16.Assertion; use Packed_U16.Assertion;
+with Packed_U32.Assertion; use Packed_U32.Assertion;
 with Packed_U32;
 with Sequence_B_Arg;
 with Tick;
@@ -1375,5 +1377,119 @@ package body Simple_Command_Sequencer_Tests.Implementation is
          pragma Assert (Cr.Status = Success);
       end;
    end Test_Static_Deferred_Response;
+
+   --  Kill_Frame kills only the targeted frame: out-of-range and idle frames
+   --  are rejected with Invalid_Frame_Id and a Failure response, a running
+   --  frame is halted with a Killed_Frame event while other frames keep
+   --  running, and the killed frame remains claimable afterwards.
+   overriding procedure Test_Kill_Frame (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Component_A_Commands : Test_Component_Commands.Instance;
+      Cmd : Command.T;
+      Status : Serialization_Status;
+   begin
+      Component_A_Commands.Set_Id_Base (1);
+      Component_A_Commands.Set_Source_Id (0);
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      --  Out of range frame id (only 2 frames configured).
+      T.Command_T_Send (T.Commands.Kill_Frame ((Value => 99)));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Invalid_Frame_Id_History.Get_Count, 1);
+      Packed_U32_Assert.Eq (T.Invalid_Frame_Id_History.Get (1), (Value => 99));
+
+      --  Killing an idle frame is also rejected.
+      T.Command_T_Send (T.Commands.Kill_Frame ((Value => 0)));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Invalid_Frame_Id_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Killed_Frame_History.Get_Count, 0);
+
+      --  Start Sequence_A on both frames; each waits on its first command.
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 2);
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 2);
+
+      --  Kill frame 0 only.
+      T.Command_T_Send (T.Commands.Kill_Frame ((Value => 0)));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Killed_Frame_History.Get_Count, 1);
+      Sequence_Event_Info_Assert.Eq (T.Killed_Frame_History.Get (1), (Sequence_Id => 0, Frame_Id => 0));
+
+      --  Frame 1 keeps running: complete its first command and tick -- the
+      --  next command of its sequence is dispatched.
+      T.Command_Response_T_Send ((Source_Id => 1, Registration_Id => 0, Command_Id => Component_A_Commands.Get_Command_1_Id, Status => Success));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 3);
+
+      --  The killed frame remains claimable: a new sequence lands on frame 0.
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 2, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 3);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (3), (Sequence_Id => 2, Frame_Id => 0));
+   end Test_Kill_Frame;
+
+   --  Data products: Set_Up seeds all nine products with zero; running a
+   --  sequence to completion updates the started/finished counters, last-ids
+   --  and frame counts; killing a running sequence updates the failed
+   --  counters.
+   overriding procedure Test_Data_Products (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Cmd : Command.T;
+      Status : Serialization_Status;
+   begin
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      --  Set_Up (run during test setup) seeded every product with zero.
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 9);
+      Packed_U16_Assert.Eq (T.Frame_Running_Count_History.Get (1), (Value => 0));
+      Packed_U16_Assert.Eq (T.Frame_Running_High_Water_Mark_History.Get (1), (Value => 0));
+      Packed_U32_Assert.Eq (T.Sequences_Started_Count_History.Get (1), (Value => 0));
+      Packed_U32_Assert.Eq (T.Commands_Sent_Count_History.Get (1), (Value => 0));
+
+      --  Claiming a frame updates the started counters and frame counts.
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 2, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Packed_U32_Assert.Eq (T.Sequences_Started_Count_History.Get (T.Sequences_Started_Count_History.Get_Count), (Value => 1));
+      Packed_U16_Assert.Eq (T.Last_Sequence_Started_History.Get (T.Last_Sequence_Started_History.Get_Count), (Value => 2));
+      Packed_U16_Assert.Eq (T.Frame_Running_Count_History.Get (T.Frame_Running_Count_History.Get_Count), (Value => 1));
+      Packed_U16_Assert.Eq (T.Frame_Running_High_Water_Mark_History.Get (T.Frame_Running_High_Water_Mark_History.Get_Count), (Value => 1));
+
+      --  One tick runs the no-wait Sequence_C (two commands) to completion.
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Packed_U32_Assert.Eq (T.Commands_Sent_Count_History.Get (T.Commands_Sent_Count_History.Get_Count), (Value => 2));
+      Packed_U32_Assert.Eq (T.Sequences_Finished_Count_History.Get (T.Sequences_Finished_Count_History.Get_Count), (Value => 1));
+      Packed_U16_Assert.Eq (T.Last_Sequence_Finished_History.Get (T.Last_Sequence_Finished_History.Get_Count), (Value => 2));
+      Packed_U16_Assert.Eq (T.Frame_Running_Count_History.Get (T.Frame_Running_Count_History.Get_Count), (Value => 0));
+      --  The high water mark holds after the frame goes idle.
+      Packed_U16_Assert.Eq (T.Frame_Running_High_Water_Mark_History.Get (T.Frame_Running_High_Water_Mark_History.Get_Count), (Value => 1));
+      --  No failure yet -- only the Set_Up zero is in the failed history.
+      Natural_Assert.Eq (T.Sequences_Failed_Count_History.Get_Count, 1);
+
+      --  Start Sequence_A (parks waiting on its first command) and kill it:
+      --  the failed counters update.
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      T.Command_T_Send (T.Commands.Kill_Frame ((Value => 0)));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Packed_U32_Assert.Eq (T.Sequences_Failed_Count_History.Get (T.Sequences_Failed_Count_History.Get_Count), (Value => 1));
+      Packed_U16_Assert.Eq (T.Last_Sequence_Failed_History.Get (T.Last_Sequence_Failed_History.Get_Count), (Value => 0));
+      Packed_U16_Assert.Eq (T.Frame_Running_Count_History.Get (T.Frame_Running_Count_History.Get_Count), (Value => 0));
+   end Test_Data_Products;
 
 end Simple_Command_Sequencer_Tests.Implementation;
