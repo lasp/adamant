@@ -81,6 +81,8 @@ package body {{ name }} is
 
       -- Update the packet length and sequence count:
       Pkt.Header.Buffer_Length := Num_Bytes_Serialized;
+      pragma Annotate (GNATSAS, False_Positive, "range check",
+         "To_Byte_Array returns Success only after verifying the serialized length fits the destination buffer, and any other status returns before this assignment, so Num_Bytes_Serialized is at most the packet buffer length.");
       Self.{{ p.name }}_Sequence_Count := @ + 1;
 
       return Stat;
