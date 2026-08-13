@@ -11,6 +11,8 @@ with Data_Product_Types;
 with Packed_U32;
 with Packed_U16.Assertion; use Packed_U16.Assertion;
 with Data_Product.Assertion; use Data_Product.Assertion;
+with Store_Copy_Info.Assertion; use Store_Copy_Info.Assertion;
+with Product_Store_Enums; use Product_Store_Enums.Store_Copy;
 with Command_Response.Assertion; use Command_Response.Assertion;
 with Command_Enums; use Command_Enums.Command_Response_Status;
 with Test_Assembly_Ct_Stored_Products;
@@ -31,10 +33,13 @@ package body Product_Store_Tests.Implementation is
       Self.Tester.Connect;
 
       -- Zero out the store memory so that each test starts fresh:
-      Test_Store_Memory_Ct.Store_Bytes := [others => 0];
+      Test_Store_Memory_Ct.Store_Bytes_A := [others => 0];
+      Test_Store_Memory_Ct.Store_Bytes_B := [others => 0];
 
       -- Initialize the component:
-      Self.Tester.Component_Instance.Init (Bytes => Test_Store_Memory_Ct.Store_Bytes'Access);
+      Self.Tester.Component_Instance.Init (
+         Bytes_A => Test_Store_Memory_Ct.Store_Bytes_A'Access,
+         Bytes_B => Test_Store_Memory_Ct.Store_Bytes_B'Access);
 
       -- Call the component set up method that the assembly would normally call.
       -- This seeds the counter data products:
@@ -61,19 +66,21 @@ package body Product_Store_Tests.Implementation is
    -- Helper functions:
    -------------------------------------------------------------------------
 
-   -- Build the expected contents of the store given the values that should have
-   -- been saved. The layout matches the test assembly stored products model:
-   -- CRC [0 .. 1], save time [2 .. 9], data product A stored length [10],
-   -- data product A value [11 .. 14].
+   -- Build the expected contents of one copy of the store given the values that
+   -- should have been saved. The layout matches the test assembly stored products
+   -- model: CRC [0 .. 1], save counter [2 .. 5], save time [6 .. 13], data
+   -- product A stored length [14], data product A value [15 .. 18].
    function Expected_Store (
       Save_Time : in Sys_Time.T;
+      Save_Counter : in Interfaces.Unsigned_32;
       A_Value : in Interfaces.Unsigned_32
    ) return Basic_Types.Byte_Array is
       Bytes : Basic_Types.Byte_Array (0 .. Test_Assembly_Ct_Stored_Products.Store_Size_In_Bytes - 1) := [others => 0];
    begin
-      Bytes (2 .. 9) := Sys_Time.Serialization.To_Byte_Array (Save_Time);
-      Bytes (10) := Packed_U32.Serialization.Byte_Array'Length;
-      Bytes (11 .. 14) := Packed_U32.Serialization.To_Byte_Array ((Value => A_Value));
+      Bytes (2 .. 5) := Packed_U32.Serialization.To_Byte_Array ((Value => Save_Counter));
+      Bytes (6 .. 13) := Sys_Time.Serialization.To_Byte_Array (Save_Time);
+      Bytes (14) := Packed_U32.Serialization.Byte_Array'Length;
+      Bytes (15 .. 18) := Packed_U32.Serialization.To_Byte_Array ((Value => A_Value));
       Bytes (0 .. 1) := Crc_16.Compute_Crc_16 (Bytes (2 .. Bytes'Last));
       return Bytes;
    end Expected_Store;
@@ -107,10 +114,13 @@ package body Product_Store_Tests.Implementation is
       -- The data product should have been fetched:
       Natural_Assert.Eq (T.Data_Product_Fetch_T_Service_History.Get_Count, 1);
 
-      -- The store should contain the data product stamped with the current system
-      -- time rather than the tick time:
-      Byte_Array_Assert.Eq (Test_Store_Memory_Ct.Store_Bytes, Expected_Store (
-         Save_Time => (3, 17), A_Value => 23));
+      -- The first save lands in copy A, which should contain the data product
+      -- stamped with the current system time rather than the tick time. Copy B
+      -- is untouched:
+      Byte_Array_Assert.Eq (Test_Store_Memory_Ct.Store_Bytes_A, Expected_Store (
+         Save_Time => (3, 17), Save_Counter => 1, A_Value => 23));
+      Byte_Array_Assert.Eq (Test_Store_Memory_Ct.Store_Bytes_B,
+         [0 .. Test_Assembly_Ct_Stored_Products.Store_Size_In_Bytes - 1 => 0]);
 
       -- The save counter data product should have been updated:
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
@@ -136,6 +146,7 @@ package body Product_Store_Tests.Implementation is
       Packed_U16_Assert.Eq (T.Restore_Count_History.Get (1), (Value => 1));
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Products_Restored_History.Get_Count, 1);
+      Store_Copy_Info_Assert.Eq (T.Products_Restored_History.Get (1), (Copy => Copy_A, Save_Counter => 1));
    end Test_Save_Current_Time;
 
 end Product_Store_Tests.Implementation;

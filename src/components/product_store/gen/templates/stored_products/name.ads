@@ -18,8 +18,9 @@ package {{ name }} is
    pragma Compile_Time_Error (not {{ pkg }}.Always_Valid, "Data product type {{ pkg }} must be always valid to be included in a product store.");
 {% endfor %}
 
-   -- Total store size in bytes, including the CRC and save time header and the
-   -- per-entry stored length bytes:
+   -- Size of one copy of the store in bytes, including the CRC, save counter,
+   -- and save time header and the per-entry stored length bytes. The component
+   -- manages two copies of the store (double buffering), each of this size:
    Store_Size_In_Bytes : constant Natural := {{ store_size }};
 
    -- Store data product entries:

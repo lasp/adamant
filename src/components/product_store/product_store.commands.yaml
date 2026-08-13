@@ -4,9 +4,9 @@ commands:
   - name: Save_Products
     description: Save the configured data products from the database into the store. This works regardless of whether saving on tick is enabled or disabled. The current time is used as the save time, even if the store is configured for Tick_Time, since no tick is available.
   - name: Restore_Products
-    description: Restore the data product values held in the store back into the data product database. The store CRC is checked prior to the restore, and the command fails if the CRC does not validate.
+    description: Restore the data product values held in the store back into the data product database. The CRC of each store copy is checked prior to the restore, and the values are restored from the valid copy holding the newest save counter. The command fails if neither copy's CRC validates.
   - name: Dump_Store
-    description: Dump the current contents of the store into a packet. The store contents are dumped as-is, without validating the CRC, so that corrupted store contents can be inspected on the ground.
+    description: Dump the current contents of both store copies, each into its own packet. The store contents are dumped as-is, without validating the CRCs, so that corrupted store contents can be inspected on the ground.
   - name: Enable_Save_On_Tick
     description: Enable the automatic saving of the data products to the store upon receipt of a tick. Saving on tick is enabled by default at startup.
   - name: Disable_Save_On_Tick

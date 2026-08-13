@@ -13,22 +13,23 @@ with Command_Response.Representation;
 with Event.Representation;
 with Sys_Time.Representation;
 with Event;
+with Store_Copy_Info.Representation;
 with Data_Product_Id.Representation;
 with Invalid_Data_Product_Length.Representation;
 with Invalid_Stored_Length.Representation;
-with Crc_Mismatch_Info.Representation;
+with Copy_Crc_Mismatch_Info.Representation;
 with Invalid_Command_Info.Representation;
 with Command_Header.Representation;
+with Data_Product;
+with Packed_U16.Representation;
 
 -- Custom Includes:
 with Test_Assembly_Ct_Stored_Products;
 with Data_Product_Enums; use Data_Product_Enums;
 with Data_Product_Types; use Data_Product_Types;
-with Data_Product;
-with Packed_U16.Representation;
 
 -- The product store saves a predefined set of data products from the database to
--- a byte array (memory region) provided at initialization, usually located in
+-- two byte arrays (memory regions) provided at initialization, usually located in
 -- nonvolatile storage (i.e. MRAM). The set of data products to save is configured
 -- via an autocoded table provided at instantiation, produced from a
 -- stored_products.yaml model file named <assembly_name>.stored_products.yaml, or
@@ -36,18 +37,24 @@ with Packed_U16.Representation;
 -- store is instantiated within the same assembly. Data products are saved upon
 -- receipt of a tick (which can be divided down and enabled/disabled by command)
 -- or by command, and can be restored back into the data product database by
--- command or at Set_Up. The store is protected by a CRC which is written on every
--- save and checked prior to every restore, protecting against the restoration of
--- corrupted or never-initialized memory contents. Each store entry also holds the
--- stored length of its data product, where a length of zero marks an entry that
--- has never been saved. Entries whose data product cannot be fetched during a
--- save keep their previous contents, and entries that have never been saved are
--- silently skipped on restore, leaving those data products unavailable in the
--- database rather than restoring meaningless values. A command is provided to
--- dump the current contents of the store into a packet. The autocoder limits the
--- total size of the store to fit within a single Packet.T, and requires every
--- stored data product to have an always valid type, so a restore can never
--- produce a value that fails validation.
+-- command or at Set_Up. The store is double buffered so that a reboot in the
+-- middle of a save can never corrupt the only good copy - each save writes the
+-- copy NOT holding the most recent valid save, stamping it with a monotonic save
+-- counter and writing its CRC last, and a restore reads from the valid copy
+-- holding the newest counter. A reboot mid-save therefore costs at most one save
+-- interval of freshness. Each copy is protected by a CRC which is written on
+-- every save and checked prior to every restore, protecting against the
+-- restoration of corrupted or never-initialized memory contents. Each store entry
+-- also holds the stored length of its data product, where a length of zero marks
+-- an entry that has never been saved. Entries whose data product cannot be
+-- fetched during a save keep the values from the most recent valid save, and
+-- entries that have never been saved are silently skipped on restore, leaving
+-- those data products unavailable in the database rather than restoring
+-- meaningless values. A command is provided to dump the current contents of both
+-- store copies, each into its own packet. The autocoder limits the size of each
+-- store copy to fit within a single Packet.T, and requires every stored data
+-- product to have an always valid type, so a restore can never produce a value
+-- that fails validation.
 package Component.Product_Store.Implementation.Tester is
 
    use Component.Product_Store_Reciprocal;
@@ -61,8 +68,8 @@ package Component.Product_Store.Implementation.Tester is
    package Sys_Time_T_Return_History_Package is new Printable_History (Sys_Time.T, Sys_Time.Representation.Image);
 
    -- Event history packages:
-   package Products_Saved_History_Package is new Printable_History (Natural, Natural'Image);
-   package Products_Restored_History_Package is new Printable_History (Natural, Natural'Image);
+   package Products_Saved_History_Package is new Printable_History (Store_Copy_Info.T, Store_Copy_Info.Representation.Image);
+   package Products_Restored_History_Package is new Printable_History (Store_Copy_Info.T, Store_Copy_Info.Representation.Image);
    package Store_Dumped_History_Package is new Printable_History (Natural, Natural'Image);
    package Save_On_Tick_Enabled_History_Package is new Printable_History (Natural, Natural'Image);
    package Save_On_Tick_Disabled_History_Package is new Printable_History (Natural, Natural'Image);
@@ -70,7 +77,7 @@ package Component.Product_Store.Implementation.Tester is
    package Data_Product_Id_Out_Of_Range_History_Package is new Printable_History (Data_Product_Id.T, Data_Product_Id.Representation.Image);
    package Data_Product_Length_Mismatch_History_Package is new Printable_History (Invalid_Data_Product_Length.T, Invalid_Data_Product_Length.Representation.Image);
    package Stored_Length_Mismatch_History_Package is new Printable_History (Invalid_Stored_Length.T, Invalid_Stored_Length.Representation.Image);
-   package Store_Crc_Invalid_History_Package is new Printable_History (Crc_Mismatch_Info.T, Crc_Mismatch_Info.Representation.Image);
+   package Store_Crc_Invalid_History_Package is new Printable_History (Copy_Crc_Mismatch_Info.T, Copy_Crc_Mismatch_Info.Representation.Image);
    package Invalid_Command_Received_History_Package is new Printable_History (Invalid_Command_Info.T, Invalid_Command_Info.Representation.Image);
    package Dropped_Command_History_Package is new Printable_History (Command_Header.T, Command_Header.Representation.Image);
 
@@ -80,7 +87,8 @@ package Component.Product_Store.Implementation.Tester is
    package Crc_Invalid_Count_History_Package is new Printable_History (Packed_U16.T, Packed_U16.Representation.Image);
 
    -- Packet history packages:
-   package Stored_Products_History_Package is new Printable_History (Packet.T, Packet.Representation.Image);
+   package Stored_Products_A_History_Package is new Printable_History (Packet.T, Packet.Representation.Image);
+   package Stored_Products_B_History_Package is new Printable_History (Packet.T, Packet.Representation.Image);
 
    -- Component class instance:
    type Instance is new Component.Product_Store_Reciprocal.Base_Instance with record
@@ -111,7 +119,8 @@ package Component.Product_Store.Implementation.Tester is
       Restore_Count_History : Restore_Count_History_Package.Instance;
       Crc_Invalid_Count_History : Crc_Invalid_Count_History_Package.Instance;
       -- Packet histories:
-      Stored_Products_History : Stored_Products_History_Package.Instance;
+      Stored_Products_A_History : Stored_Products_A_History_Package.Instance;
+      Stored_Products_B_History : Stored_Products_B_History_Package.Instance;
       -- Booleans to control assertion if message is dropped on async queue:
       Expect_Command_T_Send_Dropped : Boolean := False;
       Command_T_Send_Dropped_Count : Natural := 0;
@@ -166,12 +175,14 @@ package Component.Product_Store.Implementation.Tester is
    -----------------------------------------------
    -- Description:
    --    Events for the Product Store component.
-   -- The data products were saved to the store by command.
-   overriding procedure Products_Saved (Self : in out Instance);
+   -- The data products were saved to the store by command. The parameter reports the
+   -- store copy that was written and the save counter it now holds.
+   overriding procedure Products_Saved (Self : in out Instance; Arg : in Store_Copy_Info.T);
    -- The data products held in the store were restored into the data product
-   -- database.
-   overriding procedure Products_Restored (Self : in out Instance);
-   -- Produced a packet with the contents of the store.
+   -- database. The parameter reports the store copy that was restored from (the
+   -- valid copy holding the newest save counter) and the save counter it holds.
+   overriding procedure Products_Restored (Self : in out Instance; Arg : in Store_Copy_Info.T);
+   -- Produced packets with the contents of both copies of the store.
    overriding procedure Store_Dumped (Self : in out Instance);
    -- The automatic saving of data products to the store upon receipt of a tick was
    -- enabled by command.
@@ -197,10 +208,11 @@ package Component.Product_Store.Implementation.Tester is
    -- indicates that the stored products model has changed since the store was last
    -- written.
    overriding procedure Stored_Length_Mismatch (Self : in out Instance; Arg : in Invalid_Stored_Length.T);
-   -- The store CRC did not validate prior to a restore, so the restore was not
-   -- performed. This is expected on the first boot before the store has ever been
+   -- A restore found no store copy with a valid CRC, so the restore was not
+   -- performed. This event is produced once per copy, reporting that copy's CRC
+   -- mismatch. This is expected on the first boot before the store has ever been
    -- written.
-   overriding procedure Store_Crc_Invalid (Self : in out Instance; Arg : in Crc_Mismatch_Info.T);
+   overriding procedure Store_Crc_Invalid (Self : in out Instance; Arg : in Copy_Crc_Mismatch_Info.T);
    -- A command was received with invalid parameters.
    overriding procedure Invalid_Command_Received (Self : in out Instance; Arg : in Invalid_Command_Info.T);
    -- A command was dropped due to a full queue.
@@ -217,21 +229,26 @@ package Component.Product_Store.Implementation.Tester is
    -- The number of times the store contents have been successfully restored into the
    -- data product database. This counter rolls over.
    overriding procedure Restore_Count (Self : in out Instance; Arg : in Packed_U16.T);
-   -- The number of times a restore was refused because the store CRC did not
-   -- validate. This counter rolls over.
+   -- The number of times a restore was refused because neither store copy held a
+   -- valid CRC. This counter rolls over.
    overriding procedure Crc_Invalid_Count (Self : in out Instance; Arg : in Packed_U16.T);
 
    -----------------------------------------------
    -- Packet handler primitives:
    -----------------------------------------------
    -- Description:
-   --    Packets for the Product Store component. The contents of this packet are
+   --    Packets for the Product Store component. The contents of these packets are
    --    populated based on the stored products model provided to the Product Store
-   --    component at instantiation.
-   -- This packet contains the contents of the data product store managed by this
-   -- component, including the store CRC, the save time (if configured), and each
-   -- stored data product (with its timestamp, if configured).
-   overriding procedure Stored_Products (Self : in out Instance; Arg : in Packet.T);
+   --    component at instantiation. The store is double buffered, and each copy is
+   --    dumped in its own packet.
+   -- This packet contains the contents of copy A of the data product store managed
+   -- by this component, including the store CRC, the save counter, the save time,
+   -- and each stored data product (with its timestamp, if configured).
+   overriding procedure Stored_Products_A (Self : in out Instance; Arg : in Packet.T);
+   -- This packet contains the contents of copy B of the data product store managed
+   -- by this component, including the store CRC, the save counter, the save time,
+   -- and each stored data product (with its timestamp, if configured).
+   overriding procedure Stored_Products_B (Self : in out Instance; Arg : in Packet.T);
 
    -----------------------------------------------
    -- Special primitives for activating component

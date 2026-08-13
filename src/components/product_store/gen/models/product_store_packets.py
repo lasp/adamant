@@ -27,12 +27,27 @@ class product_store_packets(packets):
         # contents. First get the package name from the discriminant:
         configs = self.component.discriminant.get_parameter_value("Store_Description")
         product_store_package = configs.split(".")[0]
-        # Based on the package name figure out the model name:
-        split_package = product_store_package.split("_Stored_Products")
-        product_store_model_name = split_package[0]
+        # Based on the package name figure out the model name. The package is
+        # named <model_name>_Stored_Products[_<specific_name>] by the stored
+        # products generator. Ada identifiers are case-insensitive, so match the
+        # marker case-insensitively:
+        marker = "_stored_products"
+        marker_idx = product_store_package.lower().find(marker)
+        if marker_idx < 0:
+            raise ModelException(
+                'Component "'
+                + self.component.instance_name
+                + '" has a Store_Description discriminant of "'
+                + configs
+                + '", which does not reference a package generated from a '
+                + 'stored_products.yaml model. Expected a package named '
+                + '"<Assembly_Name>_Stored_Products[_<Specific_Name>]".'
+            )
+        product_store_model_name = product_store_package[:marker_idx]
         specific_name = None
-        if len(split_package) > 1 and split_package[1]:
-            specific_name = split_package[1][1:]
+        remainder = product_store_package[marker_idx + len(marker):]
+        if remainder.startswith("_") and len(remainder) > 1:
+            specific_name = remainder[1:]
 
         # Get the model file paths:
         model_paths = model_loader.get_model_file_paths(
@@ -58,6 +73,16 @@ class product_store_packets(packets):
                 if len(sp) == 3:
                     model_path = p
                     break
+        if model_path is None:
+            raise ModelException(
+                'Could not find a stored_products model file named "'
+                + ((specific_name.lower() + ".") if specific_name else "")
+                + product_store_model_name.lower()
+                + '.stored_products.yaml" for the Store_Description discriminant "'
+                + configs
+                + '". Candidate model files found in the build path: '
+                + str(model_paths)
+            )
 
         # Load the model from the path:
         self.product_store_model = model_loader.load_model(model_path)

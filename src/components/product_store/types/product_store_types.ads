@@ -46,8 +46,8 @@ package Product_Store_Types is
    type Store_Entry_List_Type is array (Natural range <>) of Store_Entry_Type;
    type Store_Entry_List_Access_Type is access all Store_Entry_List_Type;
 
-   -- The total size of the store is constrained such that the entire store can
-   -- always be dumped within a single Packet.T:
+   -- The size of a single copy of the store is constrained such that each copy
+   -- can always be dumped within a single Packet.T:
    subtype Store_Size_Type is Natural range 0 .. Packet_Types.Packet_Buffer_Type'Length;
 
    -- A record describing the entire data product store:
@@ -56,7 +56,9 @@ package Product_Store_Types is
       Save_Time : Save_Time_Type := Current_Time;
       -- The data product entries that make up the store:
       Entries : not null Store_Entry_List_Access_Type;
-      -- The total size of the store in bytes, including the CRC and save time header:
+      -- The size of one copy of the store in bytes, including the CRC, save
+      -- counter, and save time header. The component manages two copies of the
+      -- store (double buffering), each of this size:
       Store_Size : Store_Size_Type := 0;
    end record;
    type Store_Description_Access_Type is access all Store_Description_Type;

@@ -1,5 +1,7 @@
 ---
-description: Packets for the Product Store component. The contents of this packet are populated based on the stored products model provided to the Product Store component at instantiation.
+description: Packets for the Product Store component. The contents of these packets are populated based on the stored products model provided to the Product Store component at instantiation. The store is double buffered, and each copy is dumped in its own packet.
 packets:
-  - name: Stored_Products
-    description: This packet contains the contents of the data product store managed by this component, including the store CRC, the save time (if configured), and each stored data product (with its timestamp, if configured).
+  - name: Stored_Products_A
+    description: This packet contains the contents of copy A of the data product store managed by this component, including the store CRC, the save counter, the save time, and each stored data product (with its timestamp, if configured).
+  - name: Stored_Products_B
+    description: This packet contains the contents of copy B of the data product store managed by this component, including the store CRC, the save counter, the save time, and each stored data product (with its timestamp, if configured).

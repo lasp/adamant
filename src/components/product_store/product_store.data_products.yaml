@@ -8,5 +8,5 @@ data_products:
     description: The number of times the store contents have been successfully restored into the data product database. This counter rolls over.
     type: Packed_U16.T
   - name: Crc_Invalid_Count
-    description: The number of times a restore was refused because the store CRC did not validate. This counter rolls over.
+    description: The number of times a restore was refused because neither store copy held a valid CRC. This counter rolls over.
     type: Packed_U16.T

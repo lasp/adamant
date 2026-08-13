@@ -20,7 +20,9 @@ with Data_Product_Fetch.Assertion; use Data_Product_Fetch.Assertion;
 with Data_Product_Id.Assertion; use Data_Product_Id.Assertion;
 with Invalid_Data_Product_Length.Assertion; use Invalid_Data_Product_Length.Assertion;
 with Invalid_Stored_Length.Assertion; use Invalid_Stored_Length.Assertion;
-with Crc_Mismatch_Info.Assertion; use Crc_Mismatch_Info.Assertion;
+with Copy_Crc_Mismatch_Info.Assertion; use Copy_Crc_Mismatch_Info.Assertion;
+with Store_Copy_Info.Assertion; use Store_Copy_Info.Assertion;
+with Product_Store_Enums; use Product_Store_Enums.Store_Copy;
 with Invalid_Command_Info.Assertion; use Invalid_Command_Info.Assertion;
 with Command_Header.Assertion; use Command_Header.Assertion;
 with Command_Response.Assertion; use Command_Response.Assertion;
@@ -44,10 +46,13 @@ package body Product_Store_Tests.Implementation is
       Self.Tester.Connect;
 
       -- Zero out the store memory so that each test starts fresh:
-      Test_Store_Memory.Store_Bytes := [others => 0];
+      Test_Store_Memory.Store_Bytes_A := [others => 0];
+      Test_Store_Memory.Store_Bytes_B := [others => 0];
 
       -- Initialize the component:
-      Self.Tester.Component_Instance.Init (Bytes => Test_Store_Memory.Store_Bytes'Access);
+      Self.Tester.Component_Instance.Init (
+         Bytes_A => Test_Store_Memory.Store_Bytes_A'Access,
+         Bytes_B => Test_Store_Memory.Store_Bytes_B'Access);
 
       -- Call the component set up method that the assembly would normally call.
       -- This seeds the counter data products (and would restore the store contents
@@ -76,16 +81,20 @@ package body Product_Store_Tests.Implementation is
    -- Helper functions:
    -------------------------------------------------------------------------
 
-   -- Build the expected contents of the store given the values that should have
-   -- been saved. The layout matches the test assembly stored products model:
-   -- CRC [0 .. 1], save time [2 .. 9], then per entry a stored length byte
-   -- followed by the timestamp (if configured) and the value:
-   -- A length [10], A timestamp [11 .. 18], A value [19 .. 22],
-   -- B length [23], B value [24 .. 35], C length [36], C value [37 .. 38].
+   -- The contents of a store copy that has never been written (all zeros):
+   Zeroed_Store : constant Basic_Types.Byte_Array (0 .. Test_Assembly_Stored_Products_Backup.Store_Size_In_Bytes - 1) := [others => 0];
+
+   -- Build the expected contents of one copy of the store given the values that
+   -- should have been saved. The layout matches the test assembly stored products
+   -- model: CRC [0 .. 1], save counter [2 .. 5], save time [6 .. 13], then per
+   -- entry a stored length byte followed by the timestamp (if configured) and the
+   -- value: A length [14], A timestamp [15 .. 22], A value [23 .. 26],
+   -- B length [27], B value [28 .. 39], C length [40], C value [41 .. 42].
    -- Entries marked as not written hold all zeros (a zero stored length marks a
    -- never-saved entry):
    function Expected_Store (
       Save_Time : in Sys_Time.T;
+      Save_Counter : in Interfaces.Unsigned_32;
       A_Time : in Sys_Time.T := (0, 0);
       A_Value : in Interfaces.Unsigned_32 := 0;
       B_Value : in Tick.T := ((0, 0), 0);
@@ -96,23 +105,32 @@ package body Product_Store_Tests.Implementation is
    ) return Basic_Types.Byte_Array is
       Bytes : Basic_Types.Byte_Array (0 .. Test_Assembly_Stored_Products_Backup.Store_Size_In_Bytes - 1) := [others => 0];
    begin
-      Bytes (2 .. 9) := Sys_Time.Serialization.To_Byte_Array (Save_Time);
+      Bytes (2 .. 5) := Packed_U32.Serialization.To_Byte_Array ((Value => Save_Counter));
+      Bytes (6 .. 13) := Sys_Time.Serialization.To_Byte_Array (Save_Time);
       if A_Written then
-         Bytes (10) := Packed_U32.Serialization.Byte_Array'Length;
-         Bytes (11 .. 18) := Sys_Time.Serialization.To_Byte_Array (A_Time);
-         Bytes (19 .. 22) := Packed_U32.Serialization.To_Byte_Array ((Value => A_Value));
+         Bytes (14) := Packed_U32.Serialization.Byte_Array'Length;
+         Bytes (15 .. 22) := Sys_Time.Serialization.To_Byte_Array (A_Time);
+         Bytes (23 .. 26) := Packed_U32.Serialization.To_Byte_Array ((Value => A_Value));
       end if;
       if B_Written then
-         Bytes (23) := Tick.Serialization.Byte_Array'Length;
-         Bytes (24 .. 35) := Tick.Serialization.To_Byte_Array (B_Value);
+         Bytes (27) := Tick.Serialization.Byte_Array'Length;
+         Bytes (28 .. 39) := Tick.Serialization.To_Byte_Array (B_Value);
       end if;
       if C_Written then
-         Bytes (36) := Packed_U16.Serialization.Byte_Array'Length;
-         Bytes (37 .. 38) := Packed_U16.Serialization.To_Byte_Array ((Value => C_Value));
+         Bytes (40) := Packed_U16.Serialization.Byte_Array'Length;
+         Bytes (41 .. 42) := Packed_U16.Serialization.To_Byte_Array ((Value => C_Value));
       end if;
       Bytes (0 .. 1) := Crc_16.Compute_Crc_16 (Bytes (2 .. Bytes'Last));
       return Bytes;
    end Expected_Store;
+
+   -- Build the expected contents of a store copy holding the nominal data product
+   -- values returned by the tester's mocked fetch handler:
+   function Expected_Nominal_Store (
+      Save_Time : in Sys_Time.T;
+      Save_Counter : in Interfaces.Unsigned_32
+   ) return Basic_Types.Byte_Array is
+      (Expected_Store (Save_Time => Save_Time, Save_Counter => Save_Counter, A_Time => (5, 11), A_Value => 23, B_Value => ((5, 11), 13), C_Value => 33));
 
    -- Build the expected data product produced by a restore:
    function Expected_Data_Product (
@@ -151,7 +169,7 @@ package body Product_Store_Tests.Implementation is
    end Test_Set_Up_Seeding;
 
    -- This unit test tests saving the data products to the store upon receipt of a
-   -- tick.
+   -- tick, verifying that consecutive saves alternate between the two copies.
    overriding procedure Test_Nominal_Save (Self : in out Instance) is
       T : Component.Product_Store.Implementation.Tester.Instance_Access renames Self.Tester;
       Tick_Time : constant Sys_Time.T := (7, 88);
@@ -165,9 +183,10 @@ package body Product_Store_Tests.Implementation is
       Data_Product_Fetch_Assert.Eq (T.Data_Product_Fetch_T_Service_History.Get (2), (Id => 101));
       Data_Product_Fetch_Assert.Eq (T.Data_Product_Fetch_T_Service_History.Get (3), (Id => 102));
 
-      -- The store should contain the data products stamped with the tick time:
-      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes, Expected_Store (
-         Save_Time => Tick_Time, A_Time => (5, 11), A_Value => 23, B_Value => ((5, 11), 13), C_Value => 33));
+      -- The store was never written, so the first save lands in copy A with a
+      -- save counter of one, stamped with the tick time. Copy B is untouched:
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_A, Expected_Nominal_Store (Save_Time => Tick_Time, Save_Counter => 1));
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_B, Zeroed_Store);
 
       -- The save counter data product should have been updated:
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
@@ -177,14 +196,22 @@ package body Product_Store_Tests.Implementation is
       -- No events should have been produced:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
 
-      -- Send another tick with a new time and make sure the save time and counter
-      -- are updated:
+      -- Send another tick with a new time. The save lands in copy B with a save
+      -- counter of two, and copy A is untouched:
       T.Tick_T_Send ((Time => (8, 99), Count => 2));
       Natural_Assert.Eq (T.Data_Product_Fetch_T_Service_History.Get_Count, 6);
-      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes, Expected_Store (
-         Save_Time => (8, 99), A_Time => (5, 11), A_Value => 23, B_Value => ((5, 11), 13), C_Value => 33));
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_B, Expected_Nominal_Store (Save_Time => (8, 99), Save_Counter => 2));
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_A, Expected_Nominal_Store (Save_Time => Tick_Time, Save_Counter => 1));
       Natural_Assert.Eq (T.Save_Count_History.Get_Count, 2);
       Packed_U16_Assert.Eq (T.Save_Count_History.Get (2), (Value => 2));
+
+      -- A third tick wraps back around to copy A with a save counter of three:
+      T.Tick_T_Send ((Time => (9, 0), Count => 3));
+      Natural_Assert.Eq (T.Data_Product_Fetch_T_Service_History.Get_Count, 9);
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_A, Expected_Nominal_Store (Save_Time => (9, 0), Save_Counter => 3));
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_B, Expected_Nominal_Store (Save_Time => (8, 99), Save_Counter => 2));
+      Natural_Assert.Eq (T.Save_Count_History.Get_Count, 3);
+      Packed_U16_Assert.Eq (T.Save_Count_History.Get (3), (Value => 3));
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
    end Test_Nominal_Save;
 
@@ -223,9 +250,11 @@ package body Product_Store_Tests.Implementation is
       Natural_Assert.Eq (T.Restore_Count_History.Get_Count, 1);
       Packed_U16_Assert.Eq (T.Restore_Count_History.Get (1), (Value => 1));
 
-      -- A single Products_Restored event should have been produced:
+      -- A single Products_Restored event should have been produced, reporting the
+      -- restore was performed from copy A with a save counter of one:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Products_Restored_History.Get_Count, 1);
+      Store_Copy_Info_Assert.Eq (T.Products_Restored_History.Get (1), (Copy => Copy_A, Save_Counter => 1));
    end Test_Nominal_Restore;
 
    -- This unit test tests restoring the data products from the store at Set_Up, both
@@ -235,19 +264,28 @@ package body Product_Store_Tests.Implementation is
       Tick_Time : constant Sys_Time.T := (7, 88);
    begin
       -- Re-initialize the component to restore the store contents at Set_Up:
-      T.Component_Instance.Init (Bytes => Test_Store_Memory.Store_Bytes'Access, Restore_On_Set_Up => True);
+      T.Component_Instance.Init (
+         Bytes_A => Test_Store_Memory.Store_Bytes_A'Access,
+         Bytes_B => Test_Store_Memory.Store_Bytes_B'Access,
+         Restore_On_Set_Up => True);
 
-      -- The store is zeroed out, so the CRC should not validate and the restore
-      -- should be skipped with an error event. The data product history should
-      -- contain the three counter seeds and the incremented Crc_Invalid_Count:
+      -- The store is zeroed out, so neither copy's CRC should validate and the
+      -- restore should be skipped with an error event per copy. The data product
+      -- history should contain the three counter seeds and the incremented
+      -- Crc_Invalid_Count:
       T.Component_Instance.Set_Up;
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 4);
       Natural_Assert.Eq (T.Crc_Invalid_Count_History.Get_Count, 2);
       Packed_U16_Assert.Eq (T.Crc_Invalid_Count_History.Get (2), (Value => 1));
-      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
-      Natural_Assert.Eq (T.Store_Crc_Invalid_History.Get_Count, 1);
-      Crc_Mismatch_Info_Assert.Eq (T.Store_Crc_Invalid_History.Get (1), (
-         Computed_Crc => Crc_16.Compute_Crc_16 (Test_Store_Memory.Store_Bytes (2 .. Test_Store_Memory.Store_Bytes'Last)),
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Store_Crc_Invalid_History.Get_Count, 2);
+      Copy_Crc_Mismatch_Info_Assert.Eq (T.Store_Crc_Invalid_History.Get (1), (
+         Copy => Copy_A,
+         Computed_Crc => Crc_16.Compute_Crc_16 (Test_Store_Memory.Store_Bytes_A (2 .. Test_Store_Memory.Store_Bytes_A'Last)),
+         Expected_Crc => [0, 0]));
+      Copy_Crc_Mismatch_Info_Assert.Eq (T.Store_Crc_Invalid_History.Get (2), (
+         Copy => Copy_B,
+         Computed_Crc => Crc_16.Compute_Crc_16 (Test_Store_Memory.Store_Bytes_B (2 .. Test_Store_Memory.Store_Bytes_B'Last)),
          Expected_Crc => [0, 0]));
 
       -- Save valid contents into the store via a tick:
@@ -267,8 +305,9 @@ package body Product_Store_Tests.Implementation is
       -- the increment from the successful restore:
       Natural_Assert.Eq (T.Restore_Count_History.Get_Count, 3);
       Packed_U16_Assert.Eq (T.Restore_Count_History.Get (3), (Value => 1));
-      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 3);
       Natural_Assert.Eq (T.Products_Restored_History.Get_Count, 1);
+      Store_Copy_Info_Assert.Eq (T.Products_Restored_History.Get (1), (Copy => Copy_A, Save_Counter => 1));
    end Test_Restore_On_Set_Up;
 
    -- This unit test tests the component's response to a restore command when the
@@ -277,12 +316,13 @@ package body Product_Store_Tests.Implementation is
       T : Component.Product_Store.Implementation.Tester.Instance_Access renames Self.Tester;
       Stored_Crc_Before : Crc_16.Crc_16_Type;
    begin
-      -- Send a tick to the component to save the data products:
+      -- Send a tick to the component to save the data products (into copy A):
       T.Tick_T_Send ((Time => (7, 88), Count => 1));
-      Stored_Crc_Before := Test_Store_Memory.Store_Bytes (0 .. 1);
+      Stored_Crc_Before := Test_Store_Memory.Store_Bytes_A (0 .. 1);
 
-      -- Corrupt a byte within the store:
-      Test_Store_Memory.Store_Bytes (20) := 16#FF#;
+      -- Corrupt a byte within copy A. Copy B has never been written, so no valid
+      -- copy remains:
+      Test_Store_Memory.Store_Bytes_A (24) := 16#FF#;
 
       -- Send the restore command, which should fail:
       T.Command_T_Send (T.Commands.Restore_Products);
@@ -297,12 +337,17 @@ package body Product_Store_Tests.Implementation is
       Natural_Assert.Eq (T.Crc_Invalid_Count_History.Get_Count, 1);
       Packed_U16_Assert.Eq (T.Crc_Invalid_Count_History.Get (1), (Value => 1));
 
-      -- A CRC error event should have been produced:
-      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
-      Natural_Assert.Eq (T.Store_Crc_Invalid_History.Get_Count, 1);
-      Crc_Mismatch_Info_Assert.Eq (T.Store_Crc_Invalid_History.Get (1), (
-         Computed_Crc => Crc_16.Compute_Crc_16 (Test_Store_Memory.Store_Bytes (2 .. Test_Store_Memory.Store_Bytes'Last)),
+      -- A CRC error event should have been produced for each copy:
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Store_Crc_Invalid_History.Get_Count, 2);
+      Copy_Crc_Mismatch_Info_Assert.Eq (T.Store_Crc_Invalid_History.Get (1), (
+         Copy => Copy_A,
+         Computed_Crc => Crc_16.Compute_Crc_16 (Test_Store_Memory.Store_Bytes_A (2 .. Test_Store_Memory.Store_Bytes_A'Last)),
          Expected_Crc => Stored_Crc_Before));
+      Copy_Crc_Mismatch_Info_Assert.Eq (T.Store_Crc_Invalid_History.Get (2), (
+         Copy => Copy_B,
+         Computed_Crc => Crc_16.Compute_Crc_16 (Test_Store_Memory.Store_Bytes_B (2 .. Test_Store_Memory.Store_Bytes_B'Last)),
+         Expected_Crc => [0, 0]));
    end Test_Crc_Invalid_On_Restore;
 
    -- This unit test tests saving the data products to the store by command.
@@ -322,17 +367,20 @@ package body Product_Store_Tests.Implementation is
       Natural_Assert.Eq (T.Data_Product_Fetch_T_Service_History.Get_Count, 3);
 
       -- The store is configured for Tick_Time, but a commanded save has no tick, so
-      -- the current system time should have been used as the save time instead:
-      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes, Expected_Store (
-         Save_Time => (3, 17), A_Time => (5, 11), A_Value => 23, B_Value => ((5, 11), 13), C_Value => 33));
+      -- the current system time should have been used as the save time instead. The
+      -- first save lands in copy A:
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_A, Expected_Nominal_Store (Save_Time => (3, 17), Save_Counter => 1));
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_B, Zeroed_Store);
 
       -- The save counter data product should have been updated:
       Natural_Assert.Eq (T.Save_Count_History.Get_Count, 1);
       Packed_U16_Assert.Eq (T.Save_Count_History.Get (1), (Value => 1));
 
-      -- A Products_Saved event should have been produced:
+      -- A Products_Saved event should have been produced, reporting the copy
+      -- written and its save counter:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Products_Saved_History.Get_Count, 1);
+      Store_Copy_Info_Assert.Eq (T.Products_Saved_History.Get (1), (Copy => Copy_A, Save_Counter => 1));
    end Test_Save_Command;
 
    -- This unit test tests disabling and enabling the automatic saving of data
@@ -357,11 +405,13 @@ package body Product_Store_Tests.Implementation is
       Natural_Assert.Eq (T.Data_Product_Fetch_T_Service_History.Get_Count, 3);
       Natural_Assert.Eq (T.Save_Count_History.Get_Count, 1);
 
-      -- A commanded save must still work while saving on tick is disabled:
+      -- A commanded save must still work while saving on tick is disabled. The
+      -- tick's save went to copy A, so the commanded save goes to copy B:
       T.Command_T_Send (T.Commands.Save_Products);
       T.Tick_T_Send ((Time => (10, 0), Count => 4));
       Natural_Assert.Eq (T.Data_Product_Fetch_T_Service_History.Get_Count, 6);
       Natural_Assert.Eq (T.Products_Saved_History.Get_Count, 1);
+      Store_Copy_Info_Assert.Eq (T.Products_Saved_History.Get (1), (Copy => Copy_B, Save_Counter => 2));
       Natural_Assert.Eq (T.Save_Count_History.Get_Count, 2);
 
       -- Re-enable saving on tick. The enable command is dispatched by the next
@@ -385,7 +435,10 @@ package body Product_Store_Tests.Implementation is
       T : Component.Product_Store.Implementation.Tester.Instance_Access renames Self.Tester;
    begin
       -- Re-initialize the component to save every 3 ticks:
-      T.Component_Instance.Init (Bytes => Test_Store_Memory.Store_Bytes'Access, Ticks_Per_Save => 3);
+      T.Component_Instance.Init (
+         Bytes_A => Test_Store_Memory.Store_Bytes_A'Access,
+         Bytes_B => Test_Store_Memory.Store_Bytes_B'Access,
+         Ticks_Per_Save => 3);
 
       -- The first tick saves (the divider counter starts elapsed), the next two
       -- do not:
@@ -401,9 +454,10 @@ package body Product_Store_Tests.Implementation is
       Natural_Assert.Eq (T.Data_Product_Fetch_T_Service_History.Get_Count, 6);
       Natural_Assert.Eq (T.Save_Count_History.Get_Count, 2);
 
-      -- The store should hold the save time of the most recent save:
-      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes, Expected_Store (
-         Save_Time => (10, 0), A_Time => (5, 11), A_Value => 23, B_Value => ((5, 11), 13), C_Value => 33));
+      -- The first save went to copy A and the second to copy B, each holding the
+      -- save time of its own save:
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_A, Expected_Nominal_Store (Save_Time => (7, 88), Save_Counter => 1));
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_B, Expected_Nominal_Store (Save_Time => (10, 0), Save_Counter => 2));
 
       -- Disable saving on tick. The divider is frozen while disabled, so ticks
       -- do not advance it:
@@ -428,12 +482,14 @@ package body Product_Store_Tests.Implementation is
    end Test_Ticks_Per_Save;
 
    -- This unit test tests the component's response to a data product that is missing
-   -- from the database on save, verifying that missing slots are zeroed.
+   -- from the database on save, verifying that slots keep the values from the most
+   -- recent valid save and that never-saved slots restore nothing.
    overriding procedure Test_Missing_Data_Product (Self : in out Instance) is
       T : Component.Product_Store.Implementation.Tester.Instance_Access renames Self.Tester;
    begin
-      -- Make all data product fetches return Not_Available. All slots should be
-      -- zeroed, with a valid save time and CRC:
+      -- Make all data product fetches return Not_Available. The store has never
+      -- been written, so all slots of the written copy (A) should be zeroed, with
+      -- a valid save counter, save time, and CRC:
       T.Data_Product_Fetch_Return_Status := Fetch_Status.Not_Available;
       T.Tick_T_Send ((Time => (7, 88), Count => 1));
       Natural_Assert.Eq (T.Data_Product_Fetch_T_Service_History.Get_Count, 3);
@@ -443,26 +499,43 @@ package body Product_Store_Tests.Implementation is
       Natural_Assert.Eq (T.Data_Product_Missing_On_Save_History.Get_Count, 2);
       Data_Product_Id_Assert.Eq (T.Data_Product_Missing_On_Save_History.Get (1), (Id => 100));
       Data_Product_Id_Assert.Eq (T.Data_Product_Missing_On_Save_History.Get (2), (Id => 102));
-      -- The store was never valid, so all slots hold the never-saved marker:
-      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes, Expected_Store (
-         Save_Time => (7, 88), A_Written => False, B_Written => False, C_Written => False));
+      -- No copy was ever valid, so all slots hold the never-saved marker:
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_A, Expected_Store (
+         Save_Time => (7, 88), Save_Counter => 1, A_Written => False, B_Written => False, C_Written => False));
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_B, Zeroed_Store);
 
-      -- Now perform a nominal save to fill the store with valid contents:
+      -- Restore the store. Copy A's CRC is valid, so the restore succeeds, but
+      -- every slot holds the never-saved marker, so no data products flow back
+      -- into the database:
+      T.Command_T_Send (T.Commands.Restore_Products);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
+      Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (
+         Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Restore_Products_Id, Status => Success));
+      -- The data product history holds only the Save_Count from the tick and the
+      -- Restore_Count - no restored products:
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Restore_Count_History.Get_Count, 1);
+      Packed_U16_Assert.Eq (T.Restore_Count_History.Get (1), (Value => 1));
+      Natural_Assert.Eq (T.Products_Restored_History.Get_Count, 1);
+      Store_Copy_Info_Assert.Eq (T.Products_Restored_History.Get (1), (Copy => Copy_A, Save_Counter => 1));
+
+      -- Now perform a nominal save to fill copy B with valid contents:
       T.Data_Product_Fetch_Return_Status := Fetch_Status.Success;
       T.Tick_T_Send ((Time => (8, 0), Count => 2));
-      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes, Expected_Store (
-         Save_Time => (8, 0), A_Time => (5, 11), A_Value => 23, B_Value => ((5, 11), 13), C_Value => 33));
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_B, Expected_Nominal_Store (Save_Time => (8, 0), Save_Counter => 2));
 
-      -- Make the fetches fail again. The store contents are valid, so the slots
-      -- keep the values from the last successful save, with an updated save time:
+      -- Make the fetches fail again. The next save writes copy A, seeding it from
+      -- copy B (the most recent valid save), so the slots keep those values with
+      -- an updated save counter and save time:
       T.Data_Product_Fetch_Return_Status := Fetch_Status.Not_Available;
       T.Tick_T_Send ((Time => (9, 0), Count => 3));
       Natural_Assert.Eq (T.Data_Product_Missing_On_Save_History.Get_Count, 4);
-      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes, Expected_Store (
-         Save_Time => (9, 0), A_Time => (5, 11), A_Value => 23, B_Value => ((5, 11), 13), C_Value => 33));
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_A, Expected_Nominal_Store (Save_Time => (9, 0), Save_Counter => 3));
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_B, Expected_Nominal_Store (Save_Time => (8, 0), Save_Counter => 2));
 
       -- Check the total event count and save counter:
-      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 4);
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 5);
       Natural_Assert.Eq (T.Save_Count_History.Get_Count, 3);
       Packed_U16_Assert.Eq (T.Save_Count_History.Get (3), (Value => 3));
    end Test_Missing_Data_Product;
@@ -487,9 +560,11 @@ package body Product_Store_Tests.Implementation is
       -- No missing events should have been produced:
       Natural_Assert.Eq (T.Data_Product_Missing_On_Save_History.Get_Count, 0);
 
-      -- All slots should be marked never-saved, with a valid save time and CRC:
-      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes, Expected_Store (
-         Save_Time => (7, 88), A_Written => False, B_Written => False, C_Written => False));
+      -- All slots of copy A should be marked never-saved, with a valid save
+      -- counter, save time, and CRC. Copy B is untouched:
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_A, Expected_Store (
+         Save_Time => (7, 88), Save_Counter => 1, A_Written => False, B_Written => False, C_Written => False));
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_B, Zeroed_Store);
    end Test_Id_Out_Of_Range;
 
    -- This unit test tests the component's response to a fetched data product with an
@@ -512,18 +587,20 @@ package body Product_Store_Tests.Implementation is
       Invalid_Data_Product_Length_Assert.Eq (T.Data_Product_Length_Mismatch_History.Get (3), (
          Header => (Time => (5, 11), Id => 102, Buffer_Length => 1), Expected_Length => 2));
 
-      -- The store was never valid, so all slots hold the never-saved marker:
-      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes, Expected_Store (
-         Save_Time => (7, 88), A_Written => False, B_Written => False, C_Written => False));
+      -- No copy was ever valid, so all slots of copy A hold the never-saved
+      -- marker. Copy B is untouched:
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_A, Expected_Store (
+         Save_Time => (7, 88), Save_Counter => 1, A_Written => False, B_Written => False, C_Written => False));
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_B, Zeroed_Store);
    end Test_Length_Mismatch;
 
-   -- This unit test tests dumping the contents of the store into a packet by
+   -- This unit test tests dumping the contents of both store copies into packets by
    -- command.
    overriding procedure Test_Dump_Store (Self : in out Instance) is
       T : Component.Product_Store.Implementation.Tester.Instance_Access renames Self.Tester;
       Pkt : Packet.T;
    begin
-      -- Send a tick to the component to save the data products:
+      -- Send a tick to the component to save the data products (into copy A):
       T.Tick_T_Send ((Time => (7, 88), Count => 1));
 
       -- Send the dump command:
@@ -533,31 +610,169 @@ package body Product_Store_Tests.Implementation is
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (
          Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Dump_Store_Id, Status => Success));
 
-      -- Make sure a packet is produced:
-      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
-      Natural_Assert.Eq (T.Stored_Products_History.Get_Count, 1);
+      -- Make sure a packet is produced for each copy:
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Stored_Products_A_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Stored_Products_B_History.Get_Count, 1);
 
-      -- Check the packet header and contents:
+      -- Check the copy A packet header and contents:
       Pkt := T.Packet_T_Recv_Sync_History.Get (1);
       Sys_Time_Assert.Eq (Pkt.Header.Time, (3, 17));
       Natural_Assert.Eq (Natural (Pkt.Header.Id), 0);
       Natural_Assert.Eq (Natural (Pkt.Header.Sequence_Count), 0);
       Natural_Assert.Eq (Pkt.Header.Buffer_Length, Test_Assembly_Stored_Products_Backup.Store_Size_In_Bytes);
-      Byte_Array_Assert.Eq (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1), Test_Store_Memory.Store_Bytes);
-      Byte_Array_Assert.Eq (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1), Expected_Store (
-         Save_Time => (7, 88), A_Time => (5, 11), A_Value => 23, B_Value => ((5, 11), 13), C_Value => 33));
+      Byte_Array_Assert.Eq (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1), Test_Store_Memory.Store_Bytes_A);
+      Byte_Array_Assert.Eq (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1), Expected_Nominal_Store (
+         Save_Time => (7, 88), Save_Counter => 1));
 
-      -- A Store_Dumped event should have been produced:
+      -- Check the copy B packet header and contents. Copy B has never been
+      -- written, so the packet holds zeros:
+      Pkt := T.Packet_T_Recv_Sync_History.Get (2);
+      Sys_Time_Assert.Eq (Pkt.Header.Time, (3, 17));
+      Natural_Assert.Eq (Natural (Pkt.Header.Id), 1);
+      Natural_Assert.Eq (Natural (Pkt.Header.Sequence_Count), 0);
+      Natural_Assert.Eq (Pkt.Header.Buffer_Length, Test_Assembly_Stored_Products_Backup.Store_Size_In_Bytes);
+      Byte_Array_Assert.Eq (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1), Test_Store_Memory.Store_Bytes_B);
+      Byte_Array_Assert.Eq (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1), Zeroed_Store);
+
+      -- A single Store_Dumped event should have been produced:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Store_Dumped_History.Get_Count, 1);
 
-      -- Dump again and make sure the sequence count increments:
+      -- Dump again and make sure the sequence counts increment (each packet keeps
+      -- its own sequence count):
+      T.Command_T_Send (T.Commands.Dump_Store);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 4);
+      Natural_Assert.Eq (Natural (T.Packet_T_Recv_Sync_History.Get (3).Header.Sequence_Count), 1);
+      Natural_Assert.Eq (Natural (T.Packet_T_Recv_Sync_History.Get (4).Header.Sequence_Count), 1);
+      Natural_Assert.Eq (T.Store_Dumped_History.Get_Count, 2);
+   end Test_Dump_Store;
+
+   -- This unit test tests that a reboot in the middle of a save costs only one save
+   -- of freshness, with the restore falling back to the intact copy and subsequent
+   -- saves recovering the corrupted copy.
+   overriding procedure Test_Mid_Save_Reboot_Recovery (Self : in out Instance) is
+      T : Component.Product_Store.Implementation.Tester.Instance_Access renames Self.Tester;
+   begin
+      -- Save twice, filling copy A (counter 1) and then copy B (counter 2):
+      T.Tick_T_Send ((Time => (7, 88), Count => 1));
+      T.Tick_T_Send ((Time => (8, 0), Count => 2));
+      Natural_Assert.Eq (T.Data_Product_Fetch_T_Service_History.Get_Count, 6);
+      Natural_Assert.Eq (T.Save_Count_History.Get_Count, 2);
+
+      -- Simulate a reboot in the middle of the next save: that save would write
+      -- copy A (the older copy), so corrupt copy A as a partial write would,
+      -- leaving its CRC invalid. Copy B - the only good copy - is untouched, which
+      -- is exactly the property the double buffering guarantees:
+      Test_Store_Memory.Store_Bytes_A (20) := 16#FF#;
+
+      -- Restore. The restore falls back to copy B, losing only the freshness of
+      -- the interrupted save:
+      T.Command_T_Send (T.Commands.Restore_Products);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
+      Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (
+         Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Restore_Products_Id, Status => Success));
+
+      -- The data product history holds the two Save_Counts, the three products
+      -- restored from copy B (with copy B's save time), and the Restore_Count:
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 6);
+      Data_Product_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get (3), Expected_Data_Product (
+         Id => 100, Timestamp => (5, 11), Value => Packed_U32.Serialization.To_Byte_Array ((Value => 23))));
+      Data_Product_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get (4), Expected_Data_Product (
+         Id => 101, Timestamp => (8, 0), Value => Tick.Serialization.To_Byte_Array (((5, 11), 13))));
+      Data_Product_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get (5), Expected_Data_Product (
+         Id => 102, Timestamp => (0, 0), Value => Packed_U16.Serialization.To_Byte_Array ((Value => 33))));
+      Natural_Assert.Eq (T.Restore_Count_History.Get_Count, 1);
+      Packed_U16_Assert.Eq (T.Restore_Count_History.Get (1), (Value => 1));
+      Natural_Assert.Eq (T.Products_Restored_History.Get_Count, 1);
+      Store_Copy_Info_Assert.Eq (T.Products_Restored_History.Get (1), (Copy => Copy_B, Save_Counter => 2));
+
+      -- The next save recovers the corrupted copy: it writes copy A (the copy not
+      -- holding the most recent valid save) with a counter one newer than copy
+      -- B's, leaving copy B untouched:
+      T.Tick_T_Send ((Time => (9, 0), Count => 3));
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_A, Expected_Nominal_Store (Save_Time => (9, 0), Save_Counter => 3));
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_B, Expected_Nominal_Store (Save_Time => (8, 0), Save_Counter => 2));
+
+      -- A restore now reads from the recovered copy A, which holds the newest
+      -- save counter:
+      T.Command_T_Send (T.Commands.Restore_Products);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Products_Restored_History.Get_Count, 2);
+      Store_Copy_Info_Assert.Eq (T.Products_Restored_History.Get (2), (Copy => Copy_A, Save_Counter => 3));
+
+      -- Check the total event count: two Products_Restored events:
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
+   end Test_Mid_Save_Reboot_Recovery;
+
+   -- This unit test tests that the component operates correctly when given byte
+   -- arrays that are larger than the store size and that have nonzero first
+   -- indices, verifying that only the first Store_Size bytes of each allocation
+   -- are used.
+   overriding procedure Test_Offset_Memory_Regions (Self : in out Instance) is
+      T : Component.Product_Store.Implementation.Tester.Instance_Access renames Self.Tester;
+      Store_Size : constant Natural := Test_Assembly_Stored_Products_Backup.Store_Size_In_Bytes;
+      A_First : constant Natural := Test_Store_Memory.Store_Bytes_Offset_A'First;
+      B_First : constant Natural := Test_Store_Memory.Store_Bytes_Offset_B'First;
+      Zero_Tail_A : constant Basic_Types.Byte_Array (A_First + Store_Size .. Test_Store_Memory.Store_Bytes_Offset_A'Last) := [others => 0];
+      Zero_Tail_B : constant Basic_Types.Byte_Array (B_First + Store_Size .. Test_Store_Memory.Store_Bytes_Offset_B'Last) := [others => 0];
+   begin
+      -- Re-initialize the component with byte arrays that are larger than the
+      -- store size and have nonzero first indices:
+      Test_Store_Memory.Store_Bytes_Offset_A := [others => 0];
+      Test_Store_Memory.Store_Bytes_Offset_B := [others => 0];
+      T.Component_Instance.Init (
+         Bytes_A => Test_Store_Memory.Store_Bytes_Offset_A'Access,
+         Bytes_B => Test_Store_Memory.Store_Bytes_Offset_B'Access);
+
+      -- Save twice, filling copy A and then copy B. Each save must land in the
+      -- first Store_Size bytes of its allocation, leaving the rest untouched:
+      T.Tick_T_Send ((Time => (7, 88), Count => 1));
+      Byte_Array_Assert.Eq (
+         Test_Store_Memory.Store_Bytes_Offset_A (A_First .. A_First + Store_Size - 1),
+         Expected_Nominal_Store (Save_Time => (7, 88), Save_Counter => 1));
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_Offset_A (Zero_Tail_A'Range), Zero_Tail_A);
+      T.Tick_T_Send ((Time => (8, 0), Count => 2));
+      Byte_Array_Assert.Eq (
+         Test_Store_Memory.Store_Bytes_Offset_B (B_First .. B_First + Store_Size - 1),
+         Expected_Nominal_Store (Save_Time => (8, 0), Save_Counter => 2));
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_Offset_B (Zero_Tail_B'Range), Zero_Tail_B);
+
+      -- Restore. The newest valid copy is B, and the products must restore with
+      -- the correct values despite the offset array bounds:
+      T.Command_T_Send (T.Commands.Restore_Products);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
+      Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (
+         Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Restore_Products_Id, Status => Success));
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 6);
+      Data_Product_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get (3), Expected_Data_Product (
+         Id => 100, Timestamp => (5, 11), Value => Packed_U32.Serialization.To_Byte_Array ((Value => 23))));
+      Data_Product_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get (4), Expected_Data_Product (
+         Id => 101, Timestamp => (8, 0), Value => Tick.Serialization.To_Byte_Array (((5, 11), 13))));
+      Data_Product_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get (5), Expected_Data_Product (
+         Id => 102, Timestamp => (0, 0), Value => Packed_U16.Serialization.To_Byte_Array ((Value => 33))));
+      Natural_Assert.Eq (T.Products_Restored_History.Get_Count, 1);
+      Store_Copy_Info_Assert.Eq (T.Products_Restored_History.Get (1), (Copy => Copy_B, Save_Counter => 2));
+
+      -- Dump the store and make sure each packet holds the first Store_Size bytes
+      -- of its allocation:
       T.Command_T_Send (T.Commands.Dump_Store);
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 2);
-      Natural_Assert.Eq (Natural (T.Packet_T_Recv_Sync_History.Get (2).Header.Sequence_Count), 1);
-      Natural_Assert.Eq (T.Store_Dumped_History.Get_Count, 2);
-   end Test_Dump_Store;
+      Byte_Array_Assert.Eq (
+         T.Packet_T_Recv_Sync_History.Get (1).Buffer (0 .. Store_Size - 1),
+         Test_Store_Memory.Store_Bytes_Offset_A (A_First .. A_First + Store_Size - 1));
+      Byte_Array_Assert.Eq (
+         T.Packet_T_Recv_Sync_History.Get (2).Buffer (0 .. Store_Size - 1),
+         Test_Store_Memory.Store_Bytes_Offset_B (B_First .. B_First + Store_Size - 1));
+
+      -- Check the total event count: Products_Restored and Store_Dumped:
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Store_Dumped_History.Get_Count, 1);
+   end Test_Offset_Memory_Regions;
 
    -- This unit test tests the component's response to an invalid command.
    overriding procedure Test_Invalid_Command (Self : in out Instance) is
@@ -630,8 +845,8 @@ package body Product_Store_Tests.Implementation is
       T.Tick_T_Send ((Time => (7, 88), Count => 1));
       Natural_Assert.Eq (T.Data_Product_Fetch_T_Service_History.Get_Count, 3);
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
-      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes, Expected_Store (
-         Save_Time => (7, 88), A_Time => (5, 11), A_Value => 23, C_Value => 33, B_Written => False));
+      Byte_Array_Assert.Eq (Test_Store_Memory.Store_Bytes_A, Expected_Store (
+         Save_Time => (7, 88), Save_Counter => 1, A_Time => (5, 11), A_Value => 23, C_Value => 33, B_Written => False));
 
       -- Restore. A and C are restored; B is skipped silently since it has never
       -- been saved:
@@ -653,6 +868,7 @@ package body Product_Store_Tests.Implementation is
       -- entry is silent:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Products_Restored_History.Get_Count, 1);
+      Store_Copy_Info_Assert.Eq (T.Products_Restored_History.Get (1), (Copy => Copy_A, Save_Counter => 1));
       Natural_Assert.Eq (T.Restore_Count_History.Get_Count, 1);
       Packed_U16_Assert.Eq (T.Restore_Count_History.Get (1), (Value => 1));
    end Test_Restore_Skips_Unwritten;
@@ -663,15 +879,15 @@ package body Product_Store_Tests.Implementation is
    overriding procedure Test_Stored_Length_Mismatch (Self : in out Instance) is
       T : Component.Product_Store.Implementation.Tester.Instance_Access renames Self.Tester;
    begin
-      -- Save the data products nominally:
+      -- Save the data products nominally (into copy A):
       T.Tick_T_Send ((Time => (7, 88), Count => 1));
 
       -- Simulate a stored products model change across boots by hand-writing a
       -- different (nonzero) stored length for B, and recomputing a valid CRC over
       -- the modified contents:
-      Test_Store_Memory.Store_Bytes (23) := 5;
-      Test_Store_Memory.Store_Bytes (0 .. 1) := Crc_16.Compute_Crc_16 (
-         Test_Store_Memory.Store_Bytes (2 .. Test_Store_Memory.Store_Bytes'Last));
+      Test_Store_Memory.Store_Bytes_A (27) := 5;
+      Test_Store_Memory.Store_Bytes_A (0 .. 1) := Crc_16.Compute_Crc_16 (
+         Test_Store_Memory.Store_Bytes_A (2 .. Test_Store_Memory.Store_Bytes_A'Last));
 
       -- Restore. The CRC validates, so A and C are restored, but B's stored
       -- length does not match and it is refused with an event:
@@ -696,6 +912,7 @@ package body Product_Store_Tests.Implementation is
       Invalid_Stored_Length_Assert.Eq (T.Stored_Length_Mismatch_History.Get (1), (
          Id => 101, Stored_Length => 5, Expected_Length => 12));
       Natural_Assert.Eq (T.Products_Restored_History.Get_Count, 1);
+      Store_Copy_Info_Assert.Eq (T.Products_Restored_History.Get (1), (Copy => Copy_A, Save_Counter => 1));
    end Test_Stored_Length_Mismatch;
 
 end Product_Store_Tests.Implementation;

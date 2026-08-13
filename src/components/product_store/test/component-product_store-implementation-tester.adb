@@ -5,6 +5,7 @@
 -- Includes:
 with String_Util;
 with Packed_U32;
+with Tick;
 
 package body Component.Product_Store.Implementation.Tester is
 
@@ -42,7 +43,8 @@ package body Component.Product_Store.Implementation.Tester is
       Self.Restore_Count_History.Init (Depth => 100);
       Self.Crc_Invalid_Count_History.Init (Depth => 100);
       -- Packet histories:
-      Self.Stored_Products_History.Init (Depth => 100);
+      Self.Stored_Products_A_History.Init (Depth => 100);
+      Self.Stored_Products_B_History.Init (Depth => 100);
    end Init_Base;
 
    procedure Final_Base (Self : in out Instance) is
@@ -73,7 +75,8 @@ package body Component.Product_Store.Implementation.Tester is
       Self.Restore_Count_History.Destroy;
       Self.Crc_Invalid_Count_History.Destroy;
       -- Packet histories:
-      Self.Stored_Products_History.Destroy;
+      Self.Stored_Products_A_History.Destroy;
+      Self.Stored_Products_B_History.Destroy;
 
       -- Destroy component heap:
       Self.Component_Instance.Final_Base;
@@ -216,24 +219,24 @@ package body Component.Product_Store.Implementation.Tester is
    -----------------------------------------------
    -- Description:
    --    Events for the Product Store component.
-   -- The data products were saved to the store by command.
-   overriding procedure Products_Saved (Self : in out Instance) is
-      Arg : constant Natural := 0;
+   -- The data products were saved to the store by command. The parameter reports the
+   -- store copy that was written and the save counter it now holds.
+   overriding procedure Products_Saved (Self : in out Instance; Arg : in Store_Copy_Info.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Products_Saved_History.Push (Arg);
    end Products_Saved;
 
    -- The data products held in the store were restored into the data product
-   -- database.
-   overriding procedure Products_Restored (Self : in out Instance) is
-      Arg : constant Natural := 0;
+   -- database. The parameter reports the store copy that was restored from (the
+   -- valid copy holding the newest save counter) and the save counter it holds.
+   overriding procedure Products_Restored (Self : in out Instance; Arg : in Store_Copy_Info.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Products_Restored_History.Push (Arg);
    end Products_Restored;
 
-   -- Produced a packet with the contents of the store.
+   -- Produced packets with the contents of both copies of the store.
    overriding procedure Store_Dumped (Self : in out Instance) is
       Arg : constant Natural := 0;
    begin
@@ -297,10 +300,11 @@ package body Component.Product_Store.Implementation.Tester is
       Self.Stored_Length_Mismatch_History.Push (Arg);
    end Stored_Length_Mismatch;
 
-   -- The store CRC did not validate prior to a restore, so the restore was not
-   -- performed. This is expected on the first boot before the store has ever been
+   -- A restore found no store copy with a valid CRC, so the restore was not
+   -- performed. This event is produced once per copy, reporting that copy's CRC
+   -- mismatch. This is expected on the first boot before the store has ever been
    -- written.
-   overriding procedure Store_Crc_Invalid (Self : in out Instance; Arg : in Crc_Mismatch_Info.T) is
+   overriding procedure Store_Crc_Invalid (Self : in out Instance; Arg : in Copy_Crc_Mismatch_Info.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Store_Crc_Invalid_History.Push (Arg);
@@ -341,8 +345,8 @@ package body Component.Product_Store.Implementation.Tester is
       Self.Restore_Count_History.Push (Arg);
    end Restore_Count;
 
-   -- The number of times a restore was refused because the store CRC did not
-   -- validate. This counter rolls over.
+   -- The number of times a restore was refused because neither store copy held a
+   -- valid CRC. This counter rolls over.
    overriding procedure Crc_Invalid_Count (Self : in out Instance; Arg : in Packed_U16.T) is
    begin
       -- Push the argument onto the test history for looking at later:
@@ -353,17 +357,27 @@ package body Component.Product_Store.Implementation.Tester is
    -- Packet handler primitive:
    -----------------------------------------------
    -- Description:
-   --    Packets for the Product Store component. The contents of this packet are
+   --    Packets for the Product Store component. The contents of these packets are
    --    populated based on the stored products model provided to the Product Store
-   --    component at instantiation.
-   -- This packet contains the contents of the data product store managed by this
-   -- component, including the store CRC, the save time (if configured), and each
-   -- stored data product (with its timestamp, if configured).
-   overriding procedure Stored_Products (Self : in out Instance; Arg : in Packet.T) is
+   --    component at instantiation. The store is double buffered, and each copy is
+   --    dumped in its own packet.
+   -- This packet contains the contents of copy A of the data product store managed
+   -- by this component, including the store CRC, the save counter, the save time,
+   -- and each stored data product (with its timestamp, if configured).
+   overriding procedure Stored_Products_A (Self : in out Instance; Arg : in Packet.T) is
    begin
       -- Push the argument onto the test history for looking at later:
-      Self.Stored_Products_History.Push (Arg);
-   end Stored_Products;
+      Self.Stored_Products_A_History.Push (Arg);
+   end Stored_Products_A;
+
+   -- This packet contains the contents of copy B of the data product store managed
+   -- by this component, including the store CRC, the save counter, the save time,
+   -- and each stored data product (with its timestamp, if configured).
+   overriding procedure Stored_Products_B (Self : in out Instance; Arg : in Packet.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Stored_Products_B_History.Push (Arg);
+   end Stored_Products_B;
 
    -----------------------------------------------
    -- Special primitives for activating component

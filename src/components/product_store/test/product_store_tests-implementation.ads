@@ -38,7 +38,8 @@ private
    -- Ticks_Per_Save ticks.
    overriding procedure Test_Ticks_Per_Save (Self : in out Instance);
    -- This unit test tests the component's response to a data product that is missing
-   -- from the database on save, verifying that slots keep their previous contents.
+   -- from the database on save, verifying that slots keep the values from the most
+   -- recent valid save and that never-saved slots restore nothing.
    overriding procedure Test_Missing_Data_Product (Self : in out Instance);
    -- This unit test tests the component's response to a data product id reported as
    -- out of range by the database on save, which produces an unmaskable event.
@@ -46,9 +47,18 @@ private
    -- This unit test tests the component's response to a fetched data product with an
    -- unexpected length.
    overriding procedure Test_Length_Mismatch (Self : in out Instance);
-   -- This unit test tests dumping the contents of the store into a packet by
+   -- This unit test tests dumping the contents of both store copies into packets by
    -- command.
    overriding procedure Test_Dump_Store (Self : in out Instance);
+   -- This unit test tests that a reboot in the middle of a save (simulated by
+   -- corrupting the copy that the next save would write) costs only one save of
+   -- freshness, with the restore falling back to the intact copy and subsequent
+   -- saves recovering the corrupted copy.
+   overriding procedure Test_Mid_Save_Reboot_Recovery (Self : in out Instance);
+   -- This unit test tests that the component operates correctly when given byte
+   -- arrays that are larger than the store size and that have nonzero first indices,
+   -- verifying that only the first Store_Size bytes of each allocation are used.
+   overriding procedure Test_Offset_Memory_Regions (Self : in out Instance);
    -- This unit test tests the component's response to an invalid command.
    overriding procedure Test_Invalid_Command (Self : in out Instance);
    -- This unit test tests a command being dropped due to a full queue.

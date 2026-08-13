@@ -48,12 +48,14 @@ def _get_time_obj():
     return time_obj[0]
 
 
-crc_obj = [None]
-
-
 def _get_crc_size():
     # The store CRC is a Crc_16, which is 2 bytes (16 bits):
     return 16
+
+
+def _get_save_counter_size():
+    # The store save counter is a Packed_U32, which is 4 bytes (32 bits):
+    return 32
 
 
 class store_entry(object):
@@ -155,17 +157,17 @@ class store_entry(object):
 
 class store_packet(packet):
     """
-    A specialized packet object which describes the contents of the product
-    store dump packet. The items of this packet are derived from the store
-    layout: the CRC, the save time (if configured), and each stored data
-    product (preceded by its timestamp, if configured).
+    A specialized packet object which describes the contents of one copy of
+    the product store dump packet. The items of this packet are derived from
+    the store layout: the CRC, the save counter, the save time, and each
+    stored data product (preceded by its timestamp, if configured).
     """
     def __init__(self, name, store_model, id=None, suite=None):
         self.store_model = store_model
         super(store_packet, self).__init__(
             name,
             type=None,
-            description="This packet contains the contents of the data product store.",
+            description="This packet contains the contents of one copy of the data product store.",
             id=id,
             suite=suite,
         )
@@ -187,6 +189,21 @@ class store_packet(packet):
         )
         crc_item.full_name = self.name + ".Store_Crc"
         self.items.update({crc_item.full_name: crc_item})
+
+        # Next comes the save counter:
+        counter_item = field(
+            name="Save_Counter",
+            type="Interfaces.Unsigned_32",
+            start_bit=0,
+            start_field_number=0,
+            format_string="U32",
+            description="The monotonic save counter written on each save. The store copy holding the larger counter holds the more recent save.",
+        )
+        counter_item.flattened_description = (
+            self.name + ".Save_Counter - The monotonic save counter written on each save."
+        )
+        counter_item.full_name = self.name + ".Save_Counter"
+        self.items.update({counter_item.full_name: counter_item})
 
         # Next comes the save time:
         items, ignore = _items_from_record(_get_time_obj())
@@ -293,11 +310,12 @@ class stored_products(assembly_submodel):
 
     def _resolve_data_products(self, assembly):
         # The assembly should be loaded first. For each entry, resolve the
-        # data product model and size, and compute the total store size. The
-        # store header always holds the CRC followed by the save time. Each
-        # entry then holds a one byte stored length (zero means never saved),
-        # followed by the timestamp (if configured), followed by the value:
-        store_size = _get_crc_size() + _get_time_obj().size  # in bits
+        # data product model and size, and compute the size of one copy of the
+        # store. The store header always holds the CRC followed by the save
+        # counter and the save time. Each entry then holds a one byte stored
+        # length (zero means never saved), followed by the timestamp (if
+        # configured), followed by the value:
+        store_size = _get_crc_size() + _get_save_counter_size() + _get_time_obj().size  # in bits
         self.type_packages = []
 
         for entry in self.entries:
@@ -391,7 +409,7 @@ class stored_products(assembly_submodel):
             if entry.store_timestamp:
                 store_size += _get_time_obj().size
 
-        # Check that the store will fit inside of a packet data type:
+        # Check that one copy of the store will fit inside of a packet data type:
         if store_size > _get_packet_buffer_size():
             raise ModelException(
                 'Store "'
@@ -400,10 +418,10 @@ class stored_products(assembly_submodel):
                 + str(store_size)
                 + " bits, which is larger than the buffer size of a Packet.T, which is "
                 + str(_get_packet_buffer_size())
-                + " bits. The store must fit within a single packet."
+                + " bits. Each copy of the store must fit within a single packet."
             )
 
-        # Set the store size in bytes:
+        # Set the size of one copy of the store in bytes:
         self.store_size = int(store_size / 8)
 
         self.dependencies = list(dict.fromkeys(self.dependencies))

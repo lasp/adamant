@@ -17,4 +17,5 @@ components:
     discriminant:
       - "Store_Description => Test_Assembly_Ct_Stored_Products.Store_Description'Access"
     init:
-      - "Bytes => Test_Store_Memory_Ct.Store_Bytes'Access"
+      - "Bytes_A => Test_Store_Memory_Ct.Store_Bytes_A'Access"
+      - "Bytes_B => Test_Store_Memory_Ct.Store_Bytes_B'Access"

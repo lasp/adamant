@@ -1,6 +1,6 @@
 ---
 description: |
-  The product store saves a predefined set of data products from the database to a byte array (memory region) provided at initialization, usually located in nonvolatile storage (i.e. MRAM). The set of data products to save is configured via an autocoded table provided at instantiation, produced from a stored_products.yaml model file named <assembly_name>.stored_products.yaml, or <specific_name>.<assembly_name>.stored_products.yaml when more than one product store is instantiated within the same assembly. Data products are saved upon receipt of a tick (which can be divided down and enabled/disabled by command) or by command, and can be restored back into the data product database by command or at Set_Up. The store is protected by a CRC which is written on every save and checked prior to every restore, protecting against the restoration of corrupted or never-initialized memory contents. Each store entry also holds the stored length of its data product, where a length of zero marks an entry that has never been saved. Entries whose data product cannot be fetched during a save keep their previous contents, and entries that have never been saved are silently skipped on restore, leaving those data products unavailable in the database rather than restoring meaningless values. A command is provided to dump the current contents of the store into a packet. The autocoder limits the total size of the store to fit within a single Packet.T, and requires every stored data product to have an always valid type, so a restore can never produce a value that fails validation.
+  The product store saves a predefined set of data products from the database to two byte arrays (memory regions) provided at initialization, usually located in nonvolatile storage (i.e. MRAM). The set of data products to save is configured via an autocoded table provided at instantiation, produced from a stored_products.yaml model file named <assembly_name>.stored_products.yaml, or <specific_name>.<assembly_name>.stored_products.yaml when more than one product store is instantiated within the same assembly. Data products are saved upon receipt of a tick (which can be divided down and enabled/disabled by command) or by command, and can be restored back into the data product database by command or at Set_Up. The store is double buffered so that a reboot in the middle of a save can never corrupt the only good copy - each save writes the copy NOT holding the most recent valid save, stamping it with a monotonic save counter and writing its CRC last, and a restore reads from the valid copy holding the newest counter. A reboot mid-save therefore costs at most one save interval of freshness. Each copy is protected by a CRC which is written on every save and checked prior to every restore, protecting against the restoration of corrupted or never-initialized memory contents. Each store entry also holds the stored length of its data product, where a length of zero marks an entry that has never been saved. Entries whose data product cannot be fetched during a save keep the values from the most recent valid save, and entries that have never been saved are silently skipped on restore, leaving those data products unavailable in the database rather than restoring meaningless values. A command is provided to dump the current contents of both store copies, each into its own packet. The autocoder limits the size of each store copy to fit within a single Packet.T, and requires every stored data product to have an always valid type, so a restore can never produce a value that fails validation.
 execution: passive
 discriminant:
   description: This component requires a description of the data products it is responsible for saving and restoring. This description should be provided as an autocoded output from a stored_products.yaml model file.
@@ -10,16 +10,20 @@ discriminant:
       description: The description of the data product store to manage.
       not_null: true
 init:
-  description: The component is initialized by providing the memory region it is to manage, which holds the data product store.
+  description: The component is initialized by providing the two memory regions it is to manage, which hold the two copies of the data product store.
   parameters:
-    - name: Bytes
+    - name: Bytes_A
       type: Basic_Types.Byte_Array_Access
       not_null: true
-      description: A pointer to an allocation of bytes to be used for storing the data products. The size of this byte array MUST be at least Store_Description.Store_Size bytes in length (which includes the CRC and save time header). Only the first Store_Description.Store_Size bytes will be used by this component.
+      description: A pointer to an allocation of bytes to be used for storing copy A of the data products. The size of this byte array MUST be at least Store_Description.Store_Size bytes in length (which includes the CRC, save counter, and save time header). Only the first Store_Description.Store_Size bytes will be used by this component. This allocation must not overlap the allocation provided for Bytes_B. The two copies may be placed in different memory banks so that a fault contained to one bank cannot corrupt both copies.
+    - name: Bytes_B
+      type: Basic_Types.Byte_Array_Access
+      not_null: true
+      description: A pointer to an allocation of bytes to be used for storing copy B of the data products, with the same size requirement as Bytes_A. This allocation must not overlap the allocation provided for Bytes_A.
     - name: Restore_On_Set_Up
       type: Boolean
       default: "False"
-      description: If set to True, the component will attempt to restore the stored data products into the data product database during Set_Up, seeding the database with the values saved before the last reboot. If the store CRC does not validate (i.e. the store was never written or was corrupted) the restore is skipped and an error event is produced.
+      description: If set to True, the component will attempt to restore the stored data products into the data product database during Set_Up, seeding the database with the values saved before the last reboot. If neither store copy holds a valid CRC (i.e. the store was never written or was corrupted) the restore is skipped and error events are produced.
     - name: Ticks_Per_Save
       type: Positive
       default: "1"

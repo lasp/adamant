@@ -1,12 +1,20 @@
 with Basic_Types;
 with Test_Assembly_Stored_Products_Backup;
 
--- Static allocation of memory used to hold the product store for the test assembly.
+-- Static allocation of memory used to hold the two copies of the product store
+-- for the test assembly.
 package Test_Store_Memory is
 
-   -- Note: The nominal subtype must be left unconstrained (with the bounds coming
-   -- from the initial value) so that 'Access of this object can be passed to the
-   -- component, whose Init expects an access-to-unconstrained byte array.
-   Store_Bytes : aliased Basic_Types.Byte_Array := [0 .. Test_Assembly_Stored_Products_Backup.Store_Size_In_Bytes - 1 => 0];
+   -- Note: The nominal subtypes must be left unconstrained (with the bounds coming
+   -- from the initial values) so that 'Access of these objects can be passed to the
+   -- component, whose Init expects access-to-unconstrained byte arrays.
+   Store_Bytes_A : aliased Basic_Types.Byte_Array := [0 .. Test_Assembly_Stored_Products_Backup.Store_Size_In_Bytes - 1 => 0];
+   Store_Bytes_B : aliased Basic_Types.Byte_Array := [0 .. Test_Assembly_Stored_Products_Backup.Store_Size_In_Bytes - 1 => 0];
+
+   -- Oversized allocations with nonzero first indices, used by the unit tests to
+   -- verify that the component only uses the first Store_Size bytes of each
+   -- allocation and handles arbitrary array bounds:
+   Store_Bytes_Offset_A : aliased Basic_Types.Byte_Array := [5 .. Test_Assembly_Stored_Products_Backup.Store_Size_In_Bytes + 14 => 0];
+   Store_Bytes_Offset_B : aliased Basic_Types.Byte_Array := [3 .. Test_Assembly_Stored_Products_Backup.Store_Size_In_Bytes + 22 => 0];
 
 end Test_Store_Memory;

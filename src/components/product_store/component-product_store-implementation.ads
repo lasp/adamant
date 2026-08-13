@@ -8,16 +8,21 @@ with Tick;
 with Command;
 
 -- The product store saves a predefined set of data products from the database to
--- a byte array (memory region) provided at initialization, usually located in
+-- two byte arrays (memory regions) provided at initialization, usually located in
 -- nonvolatile storage (i.e. MRAM). The set of data products to save is configured
 -- via an autocoded table provided at instantiation, produced from a
 -- stored_products.yaml model file. Data products are saved upon receipt of a tick
 -- or by command, and can be restored back into the data product database by
--- command or at Set_Up. The store is protected by a CRC which is written on every
--- save and checked prior to every restore, protecting against the restoration of
--- corrupted or never-initialized memory contents. A command is provided to dump
--- the current contents of the store into a packet. The autocoder limits the total
--- size of the store to fit within a single Packet.T.
+-- command or at Set_Up. The store is double buffered so that a reboot in the
+-- middle of a save can never corrupt the only good copy - each save writes the
+-- copy NOT holding the most recent valid save, stamping it with a monotonic save
+-- counter and writing its CRC last, and a restore reads from the valid copy
+-- holding the newest counter. Each copy is protected by a CRC which is written on
+-- every save and checked prior to every restore, protecting against the
+-- restoration of corrupted or never-initialized memory contents. A command is
+-- provided to dump the current contents of both store copies, each into its own
+-- packet. The autocoder limits the size of each store copy to fit within a
+-- single Packet.T.
 package Component.Product_Store.Implementation is
 
    -- The component class instance record:
@@ -34,23 +39,36 @@ package Component.Product_Store.Implementation is
    --------------------------------------------------
    -- Subprogram for implementation init method:
    --------------------------------------------------
-   -- The component is initialized by providing the memory region it is to manage,
-   -- which holds the data product store.
+   -- The component is initialized by providing the two memory regions it is to
+   -- manage, which hold the two copies of the data product store.
    --
    -- Init Parameters:
-   -- Bytes : Basic_Types.Byte_Array_Access - A pointer to an allocation of bytes to
-   -- be used for storing the data products. The size of this byte array MUST be at
-   -- least Store_Description.Store_Size bytes in length. Only the first
-   -- Store_Description.Store_Size bytes will be used by this component.
+   -- Bytes_A : Basic_Types.Byte_Array_Access - A pointer to an allocation of bytes
+   -- to be used for storing copy A of the data products. The size of this byte
+   -- array MUST be at least Store_Description.Store_Size bytes in length (which
+   -- includes the CRC, save counter, and save time header). Only the first
+   -- Store_Description.Store_Size bytes will be used by this component. This
+   -- allocation must not overlap the allocation provided for Bytes_B. The two
+   -- copies may be placed in different memory banks so that a fault contained to
+   -- one bank cannot corrupt both copies.
+   -- Bytes_B : Basic_Types.Byte_Array_Access - A pointer to an allocation of bytes
+   -- to be used for storing copy B of the data products, with the same size
+   -- requirement as Bytes_A. This allocation must not overlap the allocation
+   -- provided for Bytes_A.
    -- Restore_On_Set_Up : Boolean - If set to True, the component will attempt to
    -- restore the stored data products into the data product database during Set_Up,
-   -- seeding the database with the values saved before the last reboot. If the store
-   -- CRC does not validate (i.e. the store was never written or was corrupted) the
-   -- restore is skipped and an error event is produced.
+   -- seeding the database with the values saved before the last reboot. If neither
+   -- store copy holds a valid CRC (i.e. the store was never written or was
+   -- corrupted) the restore is skipped and error events are produced.
+   -- Ticks_Per_Save : Positive - The number of ticks that must be received before
+   -- the data products are saved to the store. This allows the component to be
+   -- connected to a rate group running at a speed appropriate for command
+   -- responsiveness (i.e. 1 Hz), while saving to the store at a slower rate (i.e.
+   -- every 600 ticks for a 10 minute save cadence).
    -- Commands_Dispatched_Per_Tick : Positive - The number of commands executed per
    -- tick, if any are in the queue.
    --
-   overriding procedure Init (Self : in out Instance; Bytes : in not null Basic_Types.Byte_Array_Access; Restore_On_Set_Up : in Boolean := False; Ticks_Per_Save : in Positive := 1; Commands_Dispatched_Per_Tick : in Positive := 3);
+   overriding procedure Init (Self : in out Instance; Bytes_A : in not null Basic_Types.Byte_Array_Access; Bytes_B : in not null Basic_Types.Byte_Array_Access; Restore_On_Set_Up : in Boolean := False; Ticks_Per_Save : in Positive := 1; Commands_Dispatched_Per_Tick : in Positive := 3);
 
 private
 
@@ -64,8 +82,9 @@ private
    -- description of the data product store to manage.
    --
    type Instance (Store_Description : not null Product_Store_Types.Store_Description_Access_Type) is new Product_Store.Base_Instance with record
-      -- The allocation of bytes used to hold the store:
-      Bytes : Basic_Types.Byte_Array_Access := null;
+      -- The allocations of bytes used to hold the two copies of the store:
+      Bytes_A : Basic_Types.Byte_Array_Access := null;
+      Bytes_B : Basic_Types.Byte_Array_Access := null;
       -- Should the store be restored into the data product database at Set_Up?
       Restore_On_Set_Up : Boolean := False;
       -- The number of ticks that must be received before a save is performed:
@@ -95,8 +114,9 @@ private
    ---------------------------------------
    -- Invokee connector primitives:
    ---------------------------------------
-   -- This is the base tick for the component. Each tick received saves the data
-   -- products to the store.
+   -- This is the base tick for the component. Commands are dispatched from the
+   -- queue on every tick, and the data products are saved to the store every
+   -- Ticks_Per_Save ticks (when saving on tick is enabled).
    overriding procedure Tick_T_Recv_Sync (Self : in out Instance; Arg : in Tick.T);
    -- This is the command receive connector.
    overriding procedure Command_T_Recv_Async (Self : in out Instance; Arg : in Command.T);
@@ -121,17 +141,18 @@ private
    -- Description:
    --    These are the commands for the Product Store component.
    -- Save the configured data products from the database into the store. This
-   -- performs the same operation as the receipt of a tick. If the store's save time
-   -- is configured as Tick_Time, the current time is used instead, since no tick is
-   -- available.
+   -- works regardless of whether saving on tick is enabled or disabled. The
+   -- current time is used as the save time, even if the store is configured for
+   -- Tick_Time, since no tick is available.
    overriding function Save_Products (Self : in out Instance) return Command_Execution_Status.E;
    -- Restore the data product values held in the store back into the data product
-   -- database. The store CRC is checked prior to the restore, and the command fails
-   -- if the CRC does not validate.
+   -- database. The CRC of each store copy is checked prior to the restore, and the
+   -- values are restored from the valid copy holding the newest save counter. The
+   -- command fails if neither copy's CRC validates.
    overriding function Restore_Products (Self : in out Instance) return Command_Execution_Status.E;
-   -- Dump the current contents of the store into a packet. The store contents are
-   -- dumped as-is, without validating the CRC, so that corrupted store contents can
-   -- be inspected on the ground.
+   -- Dump the current contents of both store copies, each into its own packet. The
+   -- store contents are dumped as-is, without validating the CRCs, so that
+   -- corrupted store contents can be inspected on the ground.
    overriding function Dump_Store (Self : in out Instance) return Command_Execution_Status.E;
    -- Enable the automatic saving of the data products to the store upon receipt of
    -- a tick.

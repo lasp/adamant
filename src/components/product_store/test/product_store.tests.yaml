@@ -18,13 +18,17 @@ tests:
   - name: Test_Ticks_Per_Save
     description: This unit test tests the tick divider, which saves the data products only every Ticks_Per_Save ticks.
   - name: Test_Missing_Data_Product
-    description: This unit test tests the component's response to a data product that is missing from the database on save, verifying that slots keep their previous contents.
+    description: This unit test tests the component's response to a data product that is missing from the database on save, verifying that slots keep the values from the most recent valid save and that never-saved slots restore nothing.
   - name: Test_Id_Out_Of_Range
     description: This unit test tests the component's response to a data product id reported as out of range by the database on save, which produces an unmaskable event.
   - name: Test_Length_Mismatch
     description: This unit test tests the component's response to a fetched data product with an unexpected length.
   - name: Test_Dump_Store
-    description: This unit test tests dumping the contents of the store into a packet by command.
+    description: This unit test tests dumping the contents of both store copies into packets by command.
+  - name: Test_Mid_Save_Reboot_Recovery
+    description: This unit test tests that a reboot in the middle of a save (simulated by corrupting the copy that the next save would write) costs only one save of freshness, with the restore falling back to the intact copy and subsequent saves recovering the corrupted copy.
+  - name: Test_Offset_Memory_Regions
+    description: This unit test tests that the component operates correctly when given byte arrays that are larger than the store size and that have nonzero first indices, verifying that only the first Store_Size bytes of each allocation are used.
   - name: Test_Invalid_Command
     description: This unit test tests the component's response to an invalid command.
   - name: Test_Full_Queue
