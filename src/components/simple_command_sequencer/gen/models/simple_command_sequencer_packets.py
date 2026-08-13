@@ -25,17 +25,26 @@ class simple_command_sequencer_packets(packets):
         # with in the assembly model. The FSW does not need this type to
         # correctly populate the packet, but ground tools and assembly
         # documentation do. So, we dynamically assign a type to this packet at
-        # assembly runtime.
+        # assembly runtime. The type is generated per command sequences suite
+        # (<Sequences package>_record, produced by the command_sequences_record_yaml
+        # generator), so each instance's packet is sized by its own
+        # Num_Concurrent_Sequences -- mirroring how the sequence_store resolves
+        # its slot summaries packet type from its Sequence_Slots parameter.
         for key, pkt in self.entities.items():
             # Find the packet we need to fill the type in for.
             if (
                 pkt.suite.component.name == "Simple_Command_Sequencer"
                 and pkt.name == "Summary_Packet"
             ):
-                model_name = (
-                    self.assembly.name
-                    + "_simple_command_sequencer_summary_packet_type"
+                sequences_value = self.component.init.get_parameter_value(
+                    "Sequences"
                 )
+                if "." not in str(sequences_value):
+                    raise ModelException(
+                        "Sequences param: '" + str(sequences_value)
+                        + "' not parsable."
+                    )
+                model_name = sequences_value.split(".")[0] + "_record"
                 model_path = model_loader.get_model_file_path(
                     model_name, model_types=["record"]
                 )
