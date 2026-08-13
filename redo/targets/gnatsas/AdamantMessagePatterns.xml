@@ -123,7 +123,7 @@
     </String_Specifier>
     <String_Specifier
       Name_Of_String_Attribute="Text"
-      String_To_Match="Self.All.Connector_* /= null">
+      String_To_Match="*Connector_* /= null">
     </String_Specifier>
   </Message_Pattern>
 </Message_Rule>
@@ -145,7 +145,7 @@
     </String_Specifier>
     <String_Specifier
       Name_Of_String_Attribute="Text"
-      String_To_Match="*Self.Connector_*.Connected*or*Self.Connector_*.Component_Access /= null*">
+      String_To_Match="*Connector_*.Connected*or*Connector_*.Component_Access /= null*">
     </String_Specifier>
   </Message_Pattern>
 </Message_Rule>
@@ -162,7 +162,7 @@
     </String_Specifier>
     <String_Specifier
       Name_Of_String_Attribute="Text"
-      String_To_Match="*Self.Connector_*.Connected*or*Self.Connector_*.Hook /= null*">
+      String_To_Match="*Connector_*.Connected*or*Connector_*.Hook /= null*">
     </String_Specifier>
   </Message_Pattern>
 </Message_Rule>
@@ -179,7 +179,7 @@
     </String_Specifier>
     <String_Specifier
       Name_Of_String_Attribute="Text"
-      String_To_Match="*Self.Connector_*.Component_Access /= null*">
+      String_To_Match="*Connector_*.Component_Access /= null*">
     </String_Specifier>
   </Message_Pattern>
 </Message_Rule>
@@ -196,7 +196,7 @@
     </String_Specifier>
     <String_Specifier
       Name_Of_String_Attribute="Text"
-      String_To_Match="*Self.Connector_*.Hook /= null*">
+      String_To_Match="*Connector_*.Hook /= null*">
     </String_Specifier>
   </Message_Pattern>
 </Message_Rule>
@@ -213,7 +213,7 @@
     </String_Specifier>
     <String_Specifier
       Name_Of_String_Attribute="Text"
-      String_To_Match="*Self.Connector_*.Connected = true*">
+      String_To_Match="*Connector_*.Connected = true*">
     </String_Specifier>
   </Message_Pattern>
 </Message_Rule>
