@@ -828,5 +828,34 @@
     </String_Specifier>
   </Message_Pattern>
 </Message_Rule>
+<!--155-->
+<!-- Suppress dead code findings on the Invalid arm of the generated parameter -->
+<!-- validation dispatch. The arm guards the user-defined extended validation -->
+<!-- hook (Validate_Parameters); for components whose hook performs no extended -->
+<!-- validation and returns Valid unconditionally, the analyzer proves the arm -->
+<!-- unreachable. The arm is intentional generated plumbing for components that -->
+<!-- do implement extended validation, and whether a component's hook validates -->
+<!-- is implementation content the code generator cannot know. -->
+<Message_Rule Matching_Probability="SUPPRESSED">
+  <Message_Pattern>
+    <String_Specifier
+      Name_Of_String_Attribute="Check_Kind"
+      String_To_Match="DEAD_BLOCK_WARNING">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="File"
+      String_To_Match="component-*.adb">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="File"
+      String_To_Match="component-*-implementation.adb"
+      Complemented="YES">
+    </String_Specifier>
+    <String_Specifier
+      Name_Of_String_Attribute="Text"
+      String_To_Match="*process_parameter_update*'Result) = Valid*">
+    </String_Specifier>
+  </Message_Pattern>
+</Message_Rule>
 
 </Message_Probability_Rules>
