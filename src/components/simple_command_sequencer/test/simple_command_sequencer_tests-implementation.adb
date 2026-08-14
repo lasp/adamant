@@ -149,16 +149,18 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0, Command_Id => Component_A_Commands.Get_Command_3_Id, Status => Success));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
-      -- Check no failed events
-      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
-
-      T.Tick_T_Send (((0, 0), 0));
-      Natural_Assert.Eq (T.Dispatch_All, 1);
-
-      -- Check Sequence Completed
+      -- The final response resumes execution inside the response handler: the
+      -- sequence crosses the end-of-sequence boundary and completes with no
+      -- tick required.
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
       Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
       Sequence_Event_Info_Assert.Eq (T.Sequence_Completed_History.Get (1), (Sequence_Id => 0, Frame_Id => 0));
+
+      -- A subsequent tick is a no-op on the now-idle frame.
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
    end Test_Start_Sequence;
 
    --  Sequence_B (id=1): two dynamic steps — Component_A.Command_3 then Component_B.Command_3,
@@ -220,16 +222,17 @@ package body Simple_Command_Sequencer_Tests.Implementation is
          Command_Id => Component_B_Commands.Get_Command_3_Id, Status => Success));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
-      -- No new events yet (still 1: Sequence_Started)
-      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
-
-      -- Final tick: step > last -> Sequence_Completed
-      T.Tick_T_Send (((0, 0), 0));
-      Natural_Assert.Eq (T.Dispatch_All, 1);
-
+      -- The final response resumes execution immediately: step > last ->
+      -- Sequence_Completed fires inside the response handler, no tick needed.
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
       Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
       Sequence_Event_Info_Assert.Eq (T.Sequence_Completed_History.Get (1), (Sequence_Id => 1, Frame_Id => 0));
+
+      -- A subsequent tick is a no-op on the now-idle frame.
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
    end Test_Dynamic_Sequence;
 
    --  Exercises an autocoded per-sequence command end-to-end. Sending
@@ -437,7 +440,8 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Command_Failure_History.Get_Count, 1);
       Natural_Assert.Eq (T.Sequence_Aborted_History.Get_Count, 0);
 
-      -- Next tick: frame is Running, Execute_Sequence picks up at step 1 (Command_2)
+      -- The failure response already resumed execution and dispatched step 1
+      -- (Command_2); the tick is a no-op on the waiting frame.
       T.Tick_T_Send (((0, 0), 0));
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 2);
@@ -499,7 +503,8 @@ package body Simple_Command_Sequencer_Tests.Implementation is
          Command_Id => Frame_1_Commands.Get_Command_1_Id, Status => Success));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
-      -- Next tick: both frames advance to step 1 (Command_2)
+      -- Each response already advanced its frame to step 1 (Command_2) inside
+      -- the response handler; the tick is a no-op on both waiting frames.
       T.Tick_T_Send (((0, 0), 0));
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 4);
@@ -575,10 +580,12 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       -- No timeout event fired (default sequence timeout is well above the tick interval)
       Natural_Assert.Eq (T.Sequence_Timeout_History.Get_Count, 0);
 
-      -- Confirm the response still wakes the frame correctly
+      -- Confirm the response wakes the frame and dispatches the next step
+      -- immediately (the subsequent tick is a no-op on the waiting frame).
       T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0,
          Command_Id => Component_A_Commands.Get_Command_1_Id, Status => Success));
       Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 2);
 
       T.Tick_T_Send (((0, 0), 0));
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -1228,12 +1235,13 @@ package body Simple_Command_Sequencer_Tests.Implementation is
          pragma Assert (Cr.Status = Success);
       end;
 
-      --  Route the reply back: frame 0 wakes.
+      --  Route the reply back: frame 0 wakes and immediately dispatches step 1
+      --  (Component_A.Command_1) inside the response handler, then waits.
       T.Command_Response_T_Send (T.Command_Response_T_Recv_Sync_History.Get (2));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
-      --  Tick: frame 0 advances to step 1 (Component_A.Command_1, waits) and
-      --  frame 1 runs the no-wait Sequence_C to completion.
+      --  Tick: frame 1 runs the no-wait Sequence_C to completion (frame 0 is
+      --  parked waiting on Command_1's response).
       T.Tick_T_Send (((0, 0), 0));
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 4);
@@ -1241,7 +1249,8 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
       Sequence_Event_Info_Assert.Eq (T.Sequence_Completed_History.Get (1), (Sequence_Id => 2, Frame_Id => 1));
 
-      --  Complete frame 0's final step; next tick finishes Sequence_E.
+      --  Complete frame 0's final step; the response handler finishes
+      --  Sequence_E immediately (the tick is a no-op on the idle frame).
       T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0,
          Command_Id => Component_A_Commands.Get_Command_1_Id, Status => Success));
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -1510,5 +1519,68 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Packed_U16_Assert.Eq (T.Last_Sequence_Failed_History.Get (T.Last_Sequence_Failed_History.Get_Count), (Value => 0));
       Packed_U16_Assert.Eq (T.Frame_Running_Count_History.Get (T.Frame_Running_Count_History.Get_Count), (Value => 0));
    end Test_Data_Products;
+
+   --  Response-driven execution: once a frame's awaited command response
+   --  arrives, the next step dispatches inside the response handler itself --
+   --  no tick is required between commands. Only sleep wake-ups and timeouts
+   --  remain on the tick cadence. Runs Sequence_A (Command_1 -> Command_2 ->
+   --  sleep 3000 -> Command_3) feeding responses back-to-back, with the only
+   --  tick after sequence start being the sleep wake-up.
+   overriding procedure Test_Response_Drives_Execution (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Component_A_Commands : Test_Component_Commands.Instance;
+      Cmd : Command.T;
+      Status : Serialization_Status;
+   begin
+      Component_A_Commands.Set_Id_Base (1);
+      Component_A_Commands.Set_Source_Id (0);
+
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      Status := T.Commands.Run_Sequence (
+         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 1);
+
+      -- One tick starts execution: step 0 (Command_1) dispatches and parks.
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 1);
+      Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (1), Component_A_Commands.Command_1);
+
+      -- Command_1's response dispatches step 1 (Command_2) with NO tick.
+      T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0,
+         Command_Id => Component_A_Commands.Get_Command_1_Id, Status => Success));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 2);
+      Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (2),
+         Component_A_Commands.Command_2 ((Seconds => 3, Subseconds => 14)));
+
+      -- Command_2's response resumes execution into the sleep step: the frame
+      -- parks in Waiting_For_Time (no new command dispatched) with the wake
+      -- time computed at response time.
+      T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0,
+         Command_Id => Component_A_Commands.Get_Command_2_Id, Status => Success));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 2);
+
+      -- Sleep wake-ups stay on the tick cadence: once time passes the wake
+      -- point, the tick resumes execution and dispatches step 3 (Command_3).
+      T.System_Time := (Seconds => 3, Subseconds => 0);
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 3);
+      Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (3), Component_A_Commands.Command_3 ((Value => 3)));
+
+      -- Command_3's response completes the sequence inside the handler.
+      T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0,
+         Command_Id => Component_A_Commands.Get_Command_3_Id, Status => Success));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Completed_History.Get (1), (Sequence_Id => 0, Frame_Id => 0));
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
+   end Test_Response_Drives_Execution;
 
 end Simple_Command_Sequencer_Tests.Implementation;

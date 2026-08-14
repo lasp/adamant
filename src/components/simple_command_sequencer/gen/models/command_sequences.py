@@ -504,6 +504,37 @@ class command_sequences(assembly_submodel):
                         lineno=seq.lineno,
                     )
                 step.command_obj = comp.commands.get_with_name(step.command_name)
+
+                # A sequence configured with send_after_sequence_completion may
+                # not invoke itself as a sub-sequence: the outer run's deferred
+                # reply waits on the inner run, which starts another copy of the
+                # same sequence, recursively occupying frames until none are
+                # free and the innermost dispatch fails. The configuration can
+                # never succeed, so reject it at model time. The target counts
+                # as "self" when it is a Simple_Command_Sequencer instance
+                # initialized with THIS suite and the invoked command name is
+                # the containing sequence's own name.
+                if (
+                    seq.response_behavior == "Send_After_Sequence_Completion"
+                    and step.command_name.lower() == seq.name.lower()
+                    and comp.name == "Simple_Command_Sequencer"
+                ):
+                    sequences_value = comp.init.get_parameter_value("Sequences")
+                    if (
+                        sequences_value
+                        and sequences_value.split(".")[0].lower() == self.name.lower()
+                    ):
+                        raise ModelException(
+                            f'Sequence "{seq.name}" has response_behavior '
+                            f'send_after_sequence_completion and calls itself via '
+                            f'"{step.command}" (step {step.index}). A deferred-'
+                            f'completion sequence may not invoke itself: each run '
+                            f'would wait on a new copy of the same sequence, '
+                            f'consuming frames until dispatch fails. Remove the '
+                            f'self-call or use send_after_sequence_start.',
+                            lineno=seq.lineno,
+                        )
+
                 # Resolve arg type — static and dynamic are mutually exclusive
                 if step.is_dynamic():
                     step.resolve_dynamic_arg_type(step.command_obj, seq)
