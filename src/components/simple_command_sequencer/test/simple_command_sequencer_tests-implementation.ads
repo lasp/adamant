@@ -46,6 +46,7 @@ private
    overriding procedure Test_Static_Deferred_Response (Self : in out Instance);
    overriding procedure Test_Kill_Frame (Self : in out Instance);
    overriding procedure Test_Data_Products (Self : in out Instance);
+   overriding procedure Test_Response_Drives_Execution (Self : in out Instance);
 
    -- Test data and state:
    type Instance is new Simple_Command_Sequencer_Tests.Base_Instance with record

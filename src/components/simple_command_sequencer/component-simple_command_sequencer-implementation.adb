@@ -375,9 +375,9 @@ package body Component.Simple_Command_Sequencer.Implementation is
                   -- and is deliberately ignored: acting on it would advance the
                   -- wrong step.
                   if Frame.Status = Waiting_For_Cmd_Resp then
-                     -- Wake the frame. Execution does not resume here -- the next
-                     -- Tick finds the frame Running and calls Execute_Sequence,
-                     -- which keeps all step dispatch on the tick cadence.
+                     -- Wake the frame and resume it below -- the response is the
+                     -- event the frame was parked on, so the next step dispatches
+                     -- now instead of waiting for the next tick.
                      Frame.Status := Running;
                      Frame.Flags.Last_Command_Success := Arg.Status = Command_Response_Status.Success;
 
@@ -393,6 +393,15 @@ package body Component.Simple_Command_Sequencer.Implementation is
                            Frame.Status := Not_Running;
                            Finish_Sequence (Self, Frame, Command_Response_Status.Failure);
                         end if;
+                     end if;
+
+                     -- Continue executing the sequence unless the failure path
+                     -- above already ended it. Execute_Sequence runs until the
+                     -- frame parks again (next command response or sleep) or the
+                     -- sequence completes. Timeouts and sleep wake-ups remain on
+                     -- the tick cadence.
+                     if Frame.Status = Running then
+                        Execute_Sequence (Self, Frame);
                      end if;
                   end if;
                end;
