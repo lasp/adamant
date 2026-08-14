@@ -74,6 +74,18 @@ if __name__ == "__main__":
         from rules.build_print_path import build_print_path as rule_cls
     elif base == "test":
         from rules.build_test import build_test as rule_cls
+    elif base == "test_renode":
+        try:
+            from rules.build_test_renode import build_test_renode as rule_cls
+        except ImportError:
+            from util import error
+            error.error_abort("default.do: 'test_renode' is not supported here. A consuming project must supply the build_test_renode rule on PYTHONPATH.")
+    elif base == "test_all_renode":
+        try:
+            from rules.build_test_all_renode import build_test_all_renode as rule_cls
+        except ImportError:
+            from util import error
+            error.error_abort("default.do: 'test_all_renode' is not supported here. A consuming project must supply the build_test_all_renode rule on PYTHONPATH.")
     elif base == "coverage":
         from rules.build_coverage import build_coverage as rule_cls
         from util import target as tgt
