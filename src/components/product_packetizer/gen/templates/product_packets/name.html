@@ -26,7 +26,7 @@
             <br/>
 {% endif %}
 {% if dp.pad_bytes %}
-            Reserved ({{ dp.size }} bits)
+            {% if dp.pad_name %}{{ dp.pad_name }} ({{ dp.size }} bits, reserved){% else %}Reserved ({{ dp.size }} bits){% endif %}
             {% if not loop.last %}<br/>{% endif %}
 {% elif dp.packet_period_item %}
             {{ dp.name }}
