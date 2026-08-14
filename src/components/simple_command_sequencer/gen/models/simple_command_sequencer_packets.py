@@ -3,6 +3,59 @@ from models.exceptions import ModelException
 from util import model_loader
 from util import redo
 
+# Fetch the sizes used to compute the true frame-count bound, mirroring
+# Num_Concurrent_Sequences_Type in simple_sequencer_types.ads
+# (Packet_Buffer_Type'Length / Sequence_Frame_Summary.Size_In_Bytes). Results
+# are cached at module level since they cannot change within a build.
+_packet_buffer_size_bytes = [None]
+_frame_summary_size_bytes = [None]
+
+
+def _get_packet_buffer_size_bytes():
+    if _packet_buffer_size_bytes[0] is None:
+        packet_model = model_loader.try_load_model_by_name(
+            "Packet", model_types="record"
+        )
+        if not packet_model:
+            raise ModelException(
+                "Could not load model for Packet.T. This must be in the path."
+            )
+        for fld in packet_model.fields.values():
+            if fld.name == "Buffer":
+                _packet_buffer_size_bytes[0] = int(fld.size / 8)
+                break
+        else:
+            assert False, "No field 'Buffer' found in Packet.T type"
+    return _packet_buffer_size_bytes[0]
+
+
+def _get_frame_summary_size_bytes():
+    if _frame_summary_size_bytes[0] is None:
+        summary_model = model_loader.try_load_model_by_name(
+            "Sequence_Frame_Summary", model_types="record"
+        )
+        if not summary_model:
+            raise ModelException(
+                "Could not load model for Sequence_Frame_Summary.T. This must "
+                "be in the path."
+            )
+        _frame_summary_size_bytes[0] = int(summary_model.size / 8)
+    return _frame_summary_size_bytes[0]
+
+
+def get_max_frames_per_packet():
+    """
+    The largest number of Sequence_Frame_Summary records that fit in one
+    packet buffer -- the Python mirror of Num_Concurrent_Sequences_Type'Last.
+    This is derived from the project's actual configuration (the packet buffer
+    size is set in the project configuration YAML), so it tracks configuration
+    changes automatically. Used both by the summary record generator family
+    (to decide which per-count record rules to register) and by this model
+    (to validate an instance's Num_Concurrent_Sequences with an accurate
+    message).
+    """
+    return _get_packet_buffer_size_bytes() // _get_frame_summary_size_bytes()
+
 
 class simple_command_sequencer_packets(packets):
     """
@@ -25,26 +78,51 @@ class simple_command_sequencer_packets(packets):
         # with in the assembly model. The FSW does not need this type to
         # correctly populate the packet, but ground tools and assembly
         # documentation do. So, we dynamically assign a type to this packet at
-        # assembly runtime. The type is generated per command sequences suite
-        # (<Sequences package>_record, produced by the command_sequences_record_yaml
-        # generator), so each instance's packet is sized by its own
-        # Num_Concurrent_Sequences -- mirroring how the sequence_store resolves
-        # its slot summaries packet type from its Sequence_Slots parameter.
+        # assembly runtime. The record's layout depends only on the frame
+        # count, so the type is resolved per count
+        # (Simple_Sequencer_Summary_Record_<N>, produced lazily by the summary
+        # record generator family) directly from this instance's
+        # Num_Concurrent_Sequences init parameter. The sequence suite plays no
+        # role here: instances sharing a suite may size their frame pools
+        # independently, and instances with equal counts share one identical
+        # record type.
         for key, pkt in self.entities.items():
             # Find the packet we need to fill the type in for.
             if (
                 pkt.suite.component.name == "Simple_Command_Sequencer"
                 and pkt.name == "Summary_Packet"
             ):
-                sequences_value = self.component.init.get_parameter_value(
-                    "Sequences"
+                num_frames_value = self.component.init.get_parameter_value(
+                    "Num_Concurrent_Sequences"
                 )
-                if "." not in str(sequences_value):
+                try:
+                    num_frames = int(num_frames_value)
+                except (TypeError, ValueError):
                     raise ModelException(
-                        "Sequences param: '" + str(sequences_value)
-                        + "' not parsable."
+                        "Simple_Command_Sequencer instance '"
+                        + self.component.instance_name
+                        + "' must be initialized with a literal integer "
+                        + "Num_Concurrent_Sequences to size its summary "
+                        + "packet type, found: '" + str(num_frames_value) + "'."
                     )
-                model_name = sequences_value.split(".")[0] + "_record"
+                max_frames = get_max_frames_per_packet()
+                if num_frames < 1 or num_frames > max_frames:
+                    raise ModelException(
+                        "Simple_Command_Sequencer instance '"
+                        + self.component.instance_name
+                        + "' has Num_Concurrent_Sequences => "
+                        + str(num_frames)
+                        + " outside the range 1 .. " + str(max_frames)
+                        + " (the packet buffer is "
+                        + str(_get_packet_buffer_size_bytes())
+                        + " bytes and each Sequence_Frame_Summary is "
+                        + str(_get_frame_summary_size_bytes())
+                        + " bytes, so at most " + str(max_frames)
+                        + " frame summaries fit in one summary packet)."
+                    )
+                model_name = (
+                    "simple_sequencer_summary_record_" + str(num_frames)
+                )
                 model_path = model_loader.get_model_file_path(
                     model_name, model_types=["record"]
                 )
