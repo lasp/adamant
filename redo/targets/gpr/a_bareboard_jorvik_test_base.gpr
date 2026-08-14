@@ -43,9 +43,12 @@ abstract project a_bareboard_jorvik_test_base extends all "a_adamant.gpr" is
    -- Common binder switches:
    package Binder is
       for Switches ("Ada") use a_adamant.Binder'Switches ("Ada") &
-         -- Default secondary stack. The framework default of 10k is
-         -- enough for production assemblies but starves tests.
-         ("-D64k");
+         -- Default secondary stack for test builds. The framework
+         -- default of 10k starves tests; generated Representation
+         -- strings can build large images on the secondary stack.
+         -- Test builds only, so the extra RAM cost never reaches a
+         -- production image.
+         ("-D128k");
    end Binder;
 
    -- Common linker switches:
