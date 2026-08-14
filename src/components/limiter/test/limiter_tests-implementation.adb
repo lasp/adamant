@@ -24,9 +24,10 @@ package body Limiter_Tests.Implementation is
    -- bareboard, where Free also restores the Tester's fresh state.
    -- Generic components must instantiate this themselves; the generated
    -- unit test base cannot (it does not know the concrete types).
-   package Tester_Alloc is new Tester_Allocator
-     (Tester_Inst   => Component_Tester_Package.Instance,
-      Tester_Access => Component_Tester_Package.Instance_Access);
+   package Tester_Alloc is new Tester_Allocator (
+      Tester_Inst => Component_Tester_Package.Instance,
+      Tester_Access => Component_Tester_Package.Instance_Access
+   );
 
    -------------------------------------------------------------------------
    -- Fixtures:
