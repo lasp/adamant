@@ -1,0 +1,272 @@
+# Triggers the Jenkins Renode cross unit-test job and waits for its
+# result. The GH Action's pass/fail mirrors the Jenkins build, so the
+# check on the PR is the commit status -- no separate Jenkins -> GitHub
+# callback is required.
+#
+# The Jenkins job cross-compiles this repository's unit tests for the
+# RV32IMAF_Test target and executes them under renode via
+# "redo test_all_renode". The cross toolchain, target definitions, and
+# renode run rules are supplied by a closed-source downstream project
+# repository cloned by the Jenkins job (see the job's configuration);
+# they are intentionally not part of this repository.
+#
+# Required repository secrets:
+#   JENKINS_URL               Jenkins instance base URL (no trailing slash)
+#   JENKINS_WEBHOOK_TOKEN     Generic Webhook Trigger token on the Jenkins job
+#   JENKINS_USER              Jenkins service-account username (for API polling)
+#   JENKINS_API_TOKEN         Jenkins API token for that user
+#   CF_ACCESS_CLIENT_ID       Cloudflare Access service token client ID
+#   CF_ACCESS_CLIENT_SECRET   Cloudflare Access service token client secret
+name: Trigger Jenkins Renode Unit Tests
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      adamant_ref:
+        description: "adamant ref (default: PR head SHA / push SHA)"
+        required: false
+        type: string
+      project_ref:
+        description: "downstream project repo ref supplying the cross toolchain rules (default: Jenkins job's hardcoded fallback)"
+        required: false
+        type: string
+# Cancel any in-flight run on the same ref when a new push arrives. The
+# cleanup step at the end of the job propagates the cancellation to
+# Jenkins so the superseded build doesn't keep occupying an executor.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  trigger_job:
+    name: trigger_jenkins_renode
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      JENKINS_URL: ${{ secrets.JENKINS_URL }}
+      CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+      CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+      # === Per-CI-run pins ============================================
+      # Uncomment a line below to pin the downstream project repo's ref
+      # for THIS branch's CI runs (e.g. one-off integration testing
+      # without touching the Jenkins UI). workflow_dispatch inputs still
+      # win over a PIN; revert (or comment back) before merging.
+      # PROJECT_REF_PIN: 'feature/your-branch-here'
+    steps:
+      - run: echo "Starting job triggered by a ${{ github.event_name }} event on a ${{ runner.os }} server hosted by GitHub."
+      - name: Resolve commit SHA
+        id: sha
+        run: |
+          set -euo pipefail
+          SHA="${{ github.event.pull_request.head.sha || github.sha }}"
+          if [ -z "$SHA" ]; then
+            echo "Could not resolve a commit SHA from this event."
+            exit 1
+          fi
+          echo "Resolved SHA: $SHA"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+      - name: Trigger Jenkins generic-webhook
+        id: trigger
+        env:
+          JENKINS_WEBHOOK_TOKEN: ${{ secrets.JENKINS_WEBHOOK_TOKEN }}
+          COMMIT_SHA: ${{ steps.sha.outputs.sha }}
+          # Adamant has no PIN: PR builds must always test the PR head SHA.
+          ADAMANT_REF_OVERRIDE: ${{ inputs.adamant_ref || '' }}
+          PROJECT_REF_OVERRIDE: ${{ inputs.project_ref || env.PROJECT_REF_PIN || '' }}
+        run: |
+          set -euo pipefail
+          if [ -z "${JENKINS_URL:-}" ]; then
+            echo "JENKINS_URL secret is not set on this repository."
+            exit 1
+          fi
+          if [ -z "${JENKINS_WEBHOOK_TOKEN:-}" ]; then
+            echo "JENKINS_WEBHOOK_TOKEN secret is not set on this repository."
+            exit 1
+          fi
+          # adamant ref defaults to the resolved PR/push SHA;
+          # workflow_dispatch can override it explicitly.
+          ADAMANT_REF="${ADAMANT_REF_OVERRIDE:-$COMMIT_SHA}"
+          # Build the payload, omitting any optional override that wasn't set.
+          BODY=$(jq -n \
+            --arg adamant "$ADAMANT_REF" \
+            --arg project "$PROJECT_REF_OVERRIDE" \
+            '{adamant_ref: $adamant}
+             + (if $project != "" then {project_ref: $project} else {} end)')
+          TRIGGER_URL="${JENKINS_URL}/generic-webhook-trigger/invoke"
+          echo "POST ${TRIGGER_URL}?token=***"
+          echo "Body: ${BODY}"
+          # Intentionally no --retry: Jenkins's Generic Webhook Trigger has no
+          # idempotency key, so a retried POST after a lost response would queue
+          # a duplicate build. Network failure should fail the workflow loudly.
+          RESPONSE=$(curl --max-time 120 \
+            -sS -w '\n__HTTP_STATUS__:%{http_code}' \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -H "CF-Access-Client-Id: ${CF_ACCESS_CLIENT_ID}" \
+            -H "CF-Access-Client-Secret: ${CF_ACCESS_CLIENT_SECRET}" \
+            --data-binary "${BODY}" \
+            "${TRIGGER_URL}?token=${JENKINS_WEBHOOK_TOKEN}")
+          HTTP_CODE="${RESPONSE##*__HTTP_STATUS__:}"
+          RESP_BODY="${RESPONSE%__HTTP_STATUS__:*}"
+          RESP_BODY="${RESP_BODY%$'\n'}"
+          echo "HTTP ${HTTP_CODE}"
+          echo "${RESP_BODY}"
+          if [ "${HTTP_CODE}" != "200" ]; then
+            echo "Jenkins returned non-200 status."
+            exit 1
+          fi
+          QUEUE_PATH=$(echo "${RESP_BODY}" | jq -r '[.jobs | to_entries[] | select(.value.triggered == true)][0].value.url // empty')
+          JOB_NAME=$(echo "${RESP_BODY}" | jq -r '[.jobs | to_entries[] | select(.value.triggered == true)][0].key // empty')
+          if [ -z "${QUEUE_PATH}" ]; then
+            echo "Jenkins accepted the request but no jobs reported triggered=true."
+            echo "  Likely a regexpFilter mismatch in the Generic Webhook Trigger config."
+            exit 1
+          fi
+          QUEUE_URL="${JENKINS_URL}/${QUEUE_PATH}"
+          echo "Triggered: ${JOB_NAME}"
+          echo "Queue:     ${QUEUE_URL}"
+          echo "queue_url=${QUEUE_URL}" >> "$GITHUB_OUTPUT"
+          echo "job_name=${JOB_NAME}" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Jenkins job triggered"
+            echo ""
+            echo "- **Job:** \`${JOB_NAME}\`"
+            echo "- **Commit:** \`${COMMIT_SHA}\`"
+            echo "- **Queue:** ${QUEUE_URL}"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Wait for Jenkins build to start
+        id: wait_start
+        env:
+          JENKINS_USER: ${{ secrets.JENKINS_USER }}
+          JENKINS_API_TOKEN: ${{ secrets.JENKINS_API_TOKEN }}
+          QUEUE_URL: ${{ steps.trigger.outputs.queue_url }}
+        run: |
+          set -euo pipefail
+          if [ -z "${JENKINS_USER:-}" ] || [ -z "${JENKINS_API_TOKEN:-}" ]; then
+            echo "JENKINS_USER and JENKINS_API_TOKEN secrets must be set to poll build status."
+            exit 1
+          fi
+          if [ -z "${CF_ACCESS_CLIENT_ID:-}" ] || [ -z "${CF_ACCESS_CLIENT_SECRET:-}" ]; then
+            echo "CF_ACCESS_CLIENT_ID and CF_ACCESS_CLIENT_SECRET must be set to reach Jenkins API through Cloudflare Access."
+            exit 1
+          fi
+          echo "Polling queue: ${QUEUE_URL}"
+          # Wait up to 45 minutes for an executor to pick up the build (540 * 5s).
+          # Renode builds can't run in parallel on this Jenkins, so concurrent
+          # PR triggers from this and sibling repos serialize through the queue.
+          for i in $(seq 1 540); do
+            Q=$(curl -sS --max-time 30 \
+              -H "CF-Access-Client-Id: ${CF_ACCESS_CLIENT_ID}" \
+              -H "CF-Access-Client-Secret: ${CF_ACCESS_CLIENT_SECRET}" \
+              --user "${JENKINS_USER}:${JENKINS_API_TOKEN}" \
+              "${QUEUE_URL}api/json")
+            CANCELLED=$(echo "$Q" | jq -r '.cancelled // false')
+            if [ "$CANCELLED" = "true" ]; then
+              echo "Build was cancelled while in queue."
+              exit 1
+            fi
+            EXEC_URL=$(echo "$Q" | jq -r '.executable.url // empty')
+            if [ -n "$EXEC_URL" ]; then
+              # Jenkins advertises itself with its internal address; rewrite to the
+              # Cloudflare-fronted host so the runner can actually reach it.
+              EXEC_PATH="${EXEC_URL#http*://*/}"
+              BUILD_URL="${JENKINS_URL}/${EXEC_PATH}"
+              echo "Build started: ${BUILD_URL}"
+              echo "build_url=${BUILD_URL}" >> "$GITHUB_OUTPUT"
+              {
+                echo ""
+                echo "### Build started"
+                echo "${BUILD_URL}"
+              } >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            REASON=$(echo "$Q" | jq -r '.why // "queued"')
+            echo "Waiting for executor ($i/540): ${REASON}"
+            sleep 5
+          done
+          echo "Build never started within 45 minutes."
+          exit 1
+      - name: Wait for Jenkins build to finish
+        env:
+          JENKINS_USER: ${{ secrets.JENKINS_USER }}
+          JENKINS_API_TOKEN: ${{ secrets.JENKINS_API_TOKEN }}
+          BUILD_URL: ${{ steps.wait_start.outputs.build_url }}
+        run: |
+          set -euo pipefail
+          # Poll the build's result field. Cap total wait at 180 minutes (360 * 30s):
+          # the full adamant cross sweep takes about an hour of build time alone.
+          for i in $(seq 1 360); do
+            B=$(curl -sS --max-time 30 \
+              -H "CF-Access-Client-Id: ${CF_ACCESS_CLIENT_ID}" \
+              -H "CF-Access-Client-Secret: ${CF_ACCESS_CLIENT_SECRET}" \
+              --user "${JENKINS_USER}:${JENKINS_API_TOKEN}" \
+              "${BUILD_URL}api/json")
+            RESULT=$(echo "$B" | jq -r '.result // "null"')
+            if [ "$RESULT" != "null" ]; then
+              echo "Build finished: ${RESULT}"
+              {
+                echo ""
+                echo "### Build finished: ${RESULT}"
+                echo "${BUILD_URL}"
+              } >> "$GITHUB_STEP_SUMMARY"
+              case "$RESULT" in
+                SUCCESS)
+                  exit 0
+                  ;;
+                *)
+                  echo "--- Tail of Jenkins console log ---"
+                  curl -sS --max-time 60 \
+                    -H "CF-Access-Client-Id: ${CF_ACCESS_CLIENT_ID}" \
+                    -H "CF-Access-Client-Secret: ${CF_ACCESS_CLIENT_SECRET}" \
+                    --user "${JENKINS_USER}:${JENKINS_API_TOKEN}" \
+                    "${BUILD_URL}consoleText" | tail -200 \
+                    || echo "(could not fetch Jenkins console log; check Jenkins UI: ${BUILD_URL})"
+                  exit 1
+                  ;;
+              esac
+            fi
+            echo "Building ($i/360)..."
+            sleep 30
+          done
+          echo "Build did not finish within 180 minutes."
+          exit 1
+      # Propagate GH-side cancellation / failure to Jenkins so the agent is
+      # freed for the new build. Only runs if the trigger step produced a queue
+      # URL (otherwise there's nothing on the Jenkins side to clean up).
+      - name: Cancel Jenkins build on cancellation / failure
+        if: always() && steps.trigger.outputs.queue_url != ''
+        env:
+          JENKINS_USER: ${{ secrets.JENKINS_USER }}
+          JENKINS_API_TOKEN: ${{ secrets.JENKINS_API_TOKEN }}
+          QUEUE_URL: ${{ steps.trigger.outputs.queue_url }}
+          BUILD_URL: ${{ steps.wait_start.outputs.build_url }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          set +e
+          # Success path: nothing to clean up.
+          if [ "${JOB_STATUS}" = "success" ]; then exit 0; fi
+
+          auth=(-H "CF-Access-Client-Id: ${CF_ACCESS_CLIENT_ID}"
+                -H "CF-Access-Client-Secret: ${CF_ACCESS_CLIENT_SECRET}"
+                --user "${JENKINS_USER}:${JENKINS_API_TOKEN}")
+
+          if [ -n "${BUILD_URL:-}" ]; then
+            echo "Stopping Jenkins build: ${BUILD_URL}"
+            curl -fsS --max-time 30 -X POST "${auth[@]}" "${BUILD_URL}stop" \
+              || echo "(stop request failed; build may still be running)"
+          else
+            # Build never started -- cancel the queue item.
+            QUEUE_ID=$(echo "${QUEUE_URL}" | grep -oP 'queue/item/\K[0-9]+')
+            if [ -n "${QUEUE_ID}" ]; then
+              echo "Cancelling Jenkins queue item: ${QUEUE_ID}"
+              curl -fsS --max-time 30 -X POST "${auth[@]}" \
+                "${JENKINS_URL}/queue/cancelItem?id=${QUEUE_ID}" \
+                || echo "(queue cancel failed; build may have started)"
+            fi
+          fi
+      - run: echo "Finished with status - ${{ job.status }}."
+        if: always()
