@@ -13,7 +13,7 @@ with Sequence_Timeout_Event_Info.Assertion; use Sequence_Timeout_Event_Info.Asse
 with Command_Response; use Command_Response;
 with Command_Enums; use Command_Enums.Command_Response_Status;
 with Test_Assembly_Command_Sequences_Example_Sequences;
-with Test_Assembly_Command_Sequences_Example_Sequences_Record;
+with Simple_Sequencer_Summary_Record_2;
 with Test_Component_Commands;
 with Command.Assertion; use Command.Assertion;
 with Packed_U16.Assertion; use Packed_U16.Assertion;
@@ -1333,15 +1333,16 @@ package body Simple_Command_Sequencer_Tests.Implementation is
          Sequence_Frame_Summary_Assert.Eq (Get_Frame_Summary (Pkt, 1),
             (Sequence_Id => 0, Step => 0, Status => Not_Running, Response_Behavior => Send_After_Sequence_Start, Operator_Source_Id => 0));
 
-         --  The autocoded per-suite ground type must describe the wire layout
+         --  The autocoded per-count ground type (resolved from this instance's
+         --  Num_Concurrent_Sequences => 2) must describe the wire layout
          --  exactly: the packet is precisely one record's worth of bytes, and
          --  decoding through the generated type yields the same frame
          --  summaries as the manual per-frame decode above (this is what the
          --  ground system will do with this packet).
          Natural_Assert.Eq (Natural (Pkt.Header.Buffer_Length),
-            Test_Assembly_Command_Sequences_Example_Sequences_Record.Size_In_Bytes);
+            Simple_Sequencer_Summary_Record_2.Size_In_Bytes);
          declare
-            package Suite_Record renames Test_Assembly_Command_Sequences_Example_Sequences_Record;
+            package Suite_Record renames Simple_Sequencer_Summary_Record_2;
             Rec : constant Suite_Record.T :=
                Suite_Record.Serialization.From_Byte_Array (Pkt.Buffer (Pkt.Buffer'First .. Pkt.Buffer'First + Suite_Record.Serialization.Serialized_Length - 1));
          begin
