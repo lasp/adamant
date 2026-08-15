@@ -465,7 +465,8 @@ package body Tests.Implementation is
       T : Component.Product_Packetizer.Implementation.Tester.Instance_Access renames Self.Tester;
       The_Tick : constant Tick.T := ((0, 0), 1);
       The_Packet : Packet.T;
-      Pd_Ids : constant Packet_Data_Product_Ids.T := (Packet_Id => 7, Data_Product_Id => 1);
+      Pd_Packet_Id : constant Packet_Data_Product_Ids.Packet_Id_Type := 7;
+      Pd_Data_Product_Id : constant Packet_Data_Product_Ids.Data_Product_Id_Type := 1;
    begin
       -- Send tick, expect no packets received:
       T.Tick_T_Send (The_Tick);
@@ -513,7 +514,7 @@ package body Tests.Implementation is
       -- Check event:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Data_Product_Missing_On_Fetch_History.Get_Count, 1);
-      Packet_Data_Product_Ids_Assert.Eq (T.Data_Product_Missing_On_Fetch_History.Get (1), Pd_Ids);
+      Packet_Data_Product_Ids_Assert.Eq (T.Data_Product_Missing_On_Fetch_History.Get (1), (Packet_Id => Pd_Packet_Id, Data_Product_Id => Pd_Data_Product_Id));
 
       -- Send tick, expect no packets received:
       T.Tick_T_Send (The_Tick);
@@ -538,7 +539,7 @@ package body Tests.Implementation is
       -- Check event:
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
       Natural_Assert.Eq (T.Data_Product_Missing_On_Fetch_History.Get_Count, 2);
-      Packet_Data_Product_Ids_Assert.Eq (T.Data_Product_Missing_On_Fetch_History.Get (2), Pd_Ids);
+      Packet_Data_Product_Ids_Assert.Eq (T.Data_Product_Missing_On_Fetch_History.Get (2), (Packet_Id => Pd_Packet_Id, Data_Product_Id => Pd_Data_Product_Id));
 
       -- Set the data product return status to success:
       T.Data_Product_Fetch_Return_Status := Fetch_Status.Success;
