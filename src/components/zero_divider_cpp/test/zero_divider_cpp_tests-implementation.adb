@@ -129,24 +129,29 @@ package body Zero_Divider_Cpp_Tests.Implementation is
    -- return a value instead, which the command reports in an event.
    overriding procedure Test_Int_Divide_By_Zero_In_Cpp (Self : in out Instance) is
       T : Component.Zero_Divider_Cpp.Implementation.Tester.Instance_Access renames Self.Tester;
+      Exception_Was_Raised : Boolean := False;
    begin
-      -- Send command with good magic number:
-      T.Command_T_Send (T.Commands.Int_Divide_By_Zero_In_Cpp (Int_Divide_By_Zero_In_Cpp_Arg.Pack ((Magic_Number => (Magic_Number => 42), Dividend => 1))));
-      pragma Assert (False, "Should never get here...");
-   exception
-      when E : others =>
-         -- Verify that we caught a CONSTRAINT_ERROR
-         pragma Assert (Exception_Name (E) = "CONSTRAINT_ERROR",
-            "Expected Constraint_Error but got " & Exception_Information (E));
-         Put_Line ("Expected exception " & Exception_Information (E));
-         -- Verify no invalid magic number event was sent:
-         Natural_Assert.Eq (T.Invalid_Magic_Number_History.Get_Count, 0);
-         -- Verify the info event was sent before the exception:
-         Natural_Assert.Eq (T.Int_Dividing_By_Zero_In_Cpp_History.Get_Count, 1);
-         -- Verify the no-exception event did not fire:
-         Natural_Assert.Eq (T.Int_Divide_By_Zero_No_Exception_History.Get_Count, 0);
-         -- Verify only 1 event total was sent:
-         Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
+      begin
+         -- Send command with good magic number:
+         T.Command_T_Send (T.Commands.Int_Divide_By_Zero_In_Cpp (Int_Divide_By_Zero_In_Cpp_Arg.Pack ((Magic_Number => (Magic_Number => 42), Dividend => 1))));
+      exception
+         when E : others =>
+            Exception_Was_Raised := True;
+            -- Verify that we caught a CONSTRAINT_ERROR:
+            pragma Assert (Exception_Name (E) = "CONSTRAINT_ERROR",
+               "Expected Constraint_Error but got " & Exception_Information (E));
+            Put_Line ("Expected exception " & Exception_Information (E));
+            -- Verify no invalid magic number event was sent:
+            Natural_Assert.Eq (T.Invalid_Magic_Number_History.Get_Count, 0);
+            -- Verify the info event was sent before the exception:
+            Natural_Assert.Eq (T.Int_Dividing_By_Zero_In_Cpp_History.Get_Count, 1);
+            -- Verify the no-exception event did not fire:
+            Natural_Assert.Eq (T.Int_Divide_By_Zero_No_Exception_History.Get_Count, 0);
+            -- Verify only 1 event total was sent:
+            Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
+      end;
+
+      pragma Assert (Exception_Was_Raised, "Command returned without raising an exception.");
    end Test_Int_Divide_By_Zero_In_Cpp;
 
    -- This test records how the floating point division by zero behaves in the
@@ -160,47 +165,57 @@ package body Zero_Divider_Cpp_Tests.Implementation is
    -- the command reports in an event.
    overriding procedure Test_Fp_Divide_By_Zero_In_Cpp (Self : in out Instance) is
       T : Component.Zero_Divider_Cpp.Implementation.Tester.Instance_Access renames Self.Tester;
+      Exception_Was_Raised : Boolean := False;
    begin
-      -- Send command with good magic number and a non-zero dividend:
-      T.Command_T_Send (T.Commands.Fp_Divide_By_Zero_In_Cpp (Fp_Divide_By_Zero_In_Cpp_Arg.Pack ((Magic_Number => (Magic_Number => 42), Dividend => 1.0))));
-      pragma Assert (False, "Should never get here...");
-   exception
-      when E : others =>
-         -- Verify that we caught a CONSTRAINT_ERROR:
-         pragma Assert (Exception_Name (E) = "CONSTRAINT_ERROR",
-            "Expected Constraint_Error but got " & Exception_Information (E));
-         Put_Line ("Expected exception " & Exception_Information (E));
-         -- Verify no invalid magic number event was sent:
-         Natural_Assert.Eq (T.Invalid_Magic_Number_History.Get_Count, 0);
-         -- Verify the info event was sent before the exception:
-         Natural_Assert.Eq (T.Fp_Dividing_By_Zero_In_Cpp_History.Get_Count, 1);
-         -- Verify the no-exception event did not fire:
-         Natural_Assert.Eq (T.Fp_Divide_By_Zero_No_Exception_History.Get_Count, 0);
-         -- Verify only 1 event total was sent:
-         Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
+      begin
+         -- Send command with good magic number and a non-zero dividend:
+         T.Command_T_Send (T.Commands.Fp_Divide_By_Zero_In_Cpp (Fp_Divide_By_Zero_In_Cpp_Arg.Pack ((Magic_Number => (Magic_Number => 42), Dividend => 1.0))));
+      exception
+         when E : others =>
+            Exception_Was_Raised := True;
+            -- Verify that we caught a CONSTRAINT_ERROR:
+            pragma Assert (Exception_Name (E) = "CONSTRAINT_ERROR",
+               "Expected Constraint_Error but got " & Exception_Information (E));
+            Put_Line ("Expected exception " & Exception_Information (E));
+            -- Verify no invalid magic number event was sent:
+            Natural_Assert.Eq (T.Invalid_Magic_Number_History.Get_Count, 0);
+            -- Verify the info event was sent before the exception:
+            Natural_Assert.Eq (T.Fp_Dividing_By_Zero_In_Cpp_History.Get_Count, 1);
+            -- Verify the no-exception event did not fire:
+            Natural_Assert.Eq (T.Fp_Divide_By_Zero_No_Exception_History.Get_Count, 0);
+            -- Verify only 1 event total was sent:
+            Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
+      end;
+
+      pragma Assert (Exception_Was_Raised, "Command returned without raising an exception.");
    end Test_Fp_Divide_By_Zero_In_Cpp;
 
    -- This test makes sure a C++ exception is raised and propagated.
    overriding procedure Test_Raise_Exception_In_Cpp (Self : in out Instance) is
       T : Component.Zero_Divider_Cpp.Implementation.Tester.Instance_Access renames Self.Tester;
+      Exception_Was_Raised : Boolean := False;
    begin
-      -- Send command with good magic number:
-      T.Command_T_Send (T.Commands.Raise_Exception_In_Cpp ((Magic_Number => 42)));
-      pragma Assert (False, "Should never get here...");
-   exception
-      when E : others =>
-         -- Verify we caught a SYSTEM.EXCEPTIONS.FOREIGN_EXCEPTION
-         pragma Assert (Exception_Name (E) = "SYSTEM.EXCEPTIONS.FOREIGN_EXCEPTION",
-            "Expected Foreign_Exception but got " & Exception_Information (E));
-         Put_Line ("Expected exception " & Exception_Information (E));
-         -- Verify no invalid magic number event was sent:
-         Natural_Assert.Eq (T.Invalid_Magic_Number_History.Get_Count, 0);
-         -- Verify the info event was sent before the exception:
-         Natural_Assert.Eq (T.Raising_Exception_In_Cpp_History.Get_Count, 1);
-         -- Verify the no-exception event did not fire:
-         Natural_Assert.Eq (T.Raise_Exception_In_Cpp_No_Exception_History.Get_Count, 0);
-         -- Verify only 1 event total was sent:
-         Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
+      begin
+         -- Send command with good magic number:
+         T.Command_T_Send (T.Commands.Raise_Exception_In_Cpp ((Magic_Number => 42)));
+      exception
+         when E : others =>
+            Exception_Was_Raised := True;
+            -- Verify we caught a SYSTEM.EXCEPTIONS.FOREIGN_EXCEPTION:
+            pragma Assert (Exception_Name (E) = "SYSTEM.EXCEPTIONS.FOREIGN_EXCEPTION",
+               "Expected Foreign_Exception but got " & Exception_Information (E));
+            Put_Line ("Expected exception " & Exception_Information (E));
+            -- Verify no invalid magic number event was sent:
+            Natural_Assert.Eq (T.Invalid_Magic_Number_History.Get_Count, 0);
+            -- Verify the info event was sent before the exception:
+            Natural_Assert.Eq (T.Raising_Exception_In_Cpp_History.Get_Count, 1);
+            -- Verify the no-exception event did not fire:
+            Natural_Assert.Eq (T.Raise_Exception_In_Cpp_No_Exception_History.Get_Count, 0);
+            -- Verify only 1 event total was sent:
+            Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
+      end;
+
+      pragma Assert (Exception_Was_Raised, "Command returned without raising an exception.");
    end Test_Raise_Exception_In_Cpp;
 
    -- This test makes sure an invalid command is rejected.
