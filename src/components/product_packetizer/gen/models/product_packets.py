@@ -288,6 +288,14 @@ class product_packet(packet):
             # Colliding names would otherwise silently overwrite one another
             # here, producing ground artifacts whose item list diverges from
             # the packet the flight software actually builds.
+            #
+            # The items dict is keyed by the packet-relative item name:
+            # Component.Data_Product.Field for data product items and the
+            # pad name for pads. Project-level generators (for example
+            # ground dictionary generators) consume these keys as telemetry
+            # item names, so the key shape is part of the model's interface.
+            # The item objects' full_name carries the packet-prefixed form
+            # used in display artifacts.
             for item_name, item in new_items.items():
                 if item_name in self.items:
                     raise ModelException(
@@ -316,7 +324,8 @@ class product_packet(packet):
                         product_packet_item.from_packet_item(item, dp, self)
                         for item in items.values()
                     ]
-                    new_names = [item.full_name for item in time_items]
+                    # The raw items carry the packet-relative names used as keys:
+                    new_names = [item.full_name for item in items.values()]
                     update_items(OrderedDict(zip(new_names, time_items)))
                 # Get items list from the data product
                 items, bit = items_list_from_ided_entity(dp.data_product, start_bit=bit)
@@ -325,9 +334,8 @@ class product_packet(packet):
                     product_packet_item.from_packet_item(item, dp, self)
                     for item in items.values()
                 ]
-                # Key by the packet-prefixed full name of the converted items,
-                # consistent with the timestamp and pad items:
-                new_names = [item.full_name for item in product_packet_items]
+                # The raw items carry the packet-relative names used as keys:
+                new_names = [item.full_name for item in items.values()]
                 # Update the items dict:
                 update_items(OrderedDict(zip(new_names, product_packet_items)))
             else:
@@ -372,7 +380,7 @@ class product_packet(packet):
                     self.name + "." + item_name + " - " + flat_description
                 )
                 item.full_name = self.name + "." + item_name
-                update_items({item.full_name: item})
+                update_items({item_name: item})
 
     def load_type_ranges(self):
         """
