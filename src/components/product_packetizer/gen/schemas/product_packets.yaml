@@ -68,7 +68,11 @@ mapping:
                 mapping:
                   # The name of the data product. The name should be in the format
                   # Component_Name.Data_Product_Name. The name is a required field unless
-                  # pad_bytes is specified.
+                  # pad_bytes is specified. If specified alongside pad_bytes, the name
+                  # instead labels the pad bytes in the generated packet layout and ground
+                  # artifacts. A pad name may be a bare identifier or a dotted path (useful
+                  # to mirror the name a future real item will have on the ground) and is
+                  # never resolved against the assembly.
                   name:
                     type: str
                     required: False
@@ -97,7 +101,9 @@ mapping:
                     required: False
                   # Pad bytes can be used to insert a n-number of bytes of unused data into a packet. This is
                   # also useful to add in spacing for data products that do not exist yet, but are expected
-                  # in the packet. Pad bytes can only be specified if no other fields are specified.
+                  # in the packet. Pad bytes may optionally be combined with "name" to label the reserved
+                  # space in the generated packet layout and ground artifacts. No other fields may be
+                  # combined with pad_bytes.
                   pad_bytes:
                     type: int
                     required: False

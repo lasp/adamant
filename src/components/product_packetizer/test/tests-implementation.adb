@@ -177,6 +177,12 @@ package body Tests.Implementation is
       Expected.Buffer (Idx .. End_Idx) := [0 .. 5 - 1 => 0];
       Idx := End_Idx + 1;
 
+      -- Next serialize the included timestamp for Data product A, which
+      -- lands mid-packet, after the pad bytes:
+      End_Idx := Idx + Sys_Time.Serialization.Serialized_Length - 1;
+      Expected.Buffer (Idx .. End_Idx) := Sys_Time.Serialization.To_Byte_Array ((5, 11));
+      Idx := End_Idx + 1;
+
       -- Next Serialize Data product A:
       End_Idx := Idx + Packed_U32.Serialization.Serialized_Length - 1;
       Expected.Buffer (Idx .. End_Idx) := Packed_U32.Serialization.To_Byte_Array ((Value => 23));
@@ -185,6 +191,11 @@ package body Tests.Implementation is
       -- Next serialize 3 pad bytes:
       End_Idx := Idx + 3 - 1;
       Expected.Buffer (Idx .. End_Idx) := [0 .. 3 - 1 => 0];
+      Idx := End_Idx + 1;
+
+      -- Next serialize 1 pad byte:
+      End_Idx := Idx + 1 - 1;
+      Expected.Buffer (Idx .. End_Idx) := [0 .. 1 - 1 => 0];
       Idx := End_Idx + 1;
 
       -- Calculate packet length:
@@ -224,6 +235,25 @@ package body Tests.Implementation is
       -- Compare packets:
       Packet_Assert.Eq (To_Compare, Expected, "", Filename, Line);
    end Check_Packet_5;
+
+   procedure Check_Packet_6 (Self : in Instance; To_Compare : Packet.T; The_Time : Sys_Time.T; Expected_Sequence_Count : Packet_Types.Sequence_Count_Mod_Type; Filename : in String := Smart_Assert.Sinfo.File; Line : in Natural := Smart_Assert.Sinfo.Line) is
+      Ignore : Instance renames Self;
+      Expected : Packet.T := (Header => (Time => The_Time, Id => 16, Sequence_Count => Expected_Sequence_Count, Buffer_Length => 0), Buffer => [others => 0]);
+      Idx : Natural := Expected.Buffer'First;
+      End_Idx : Natural := 0;
+   begin
+      -- This packet consists solely of pad bytes (named and anonymous), which
+      -- are functionally identical at runtime. Serialize 8 + 4 + 2 + 1 pad bytes:
+      End_Idx := Idx + 15 - 1;
+      Expected.Buffer (Idx .. End_Idx) := [0 .. 15 - 1 => 0];
+      Idx := End_Idx + 1;
+
+      -- Calculate packet length:
+      Expected.Header.Buffer_Length := Idx - Expected.Buffer'First;
+
+      -- Compare packets:
+      Packet_Assert.Eq (To_Compare, Expected, "", Filename, Line);
+   end Check_Packet_6;
 
    -------------------------------------------------------------------------
    -- Tests:
@@ -1017,31 +1047,40 @@ package body Tests.Implementation is
       -- Command object:
       Commands : Product_Packetizer_Commands.Instance;
    begin
-      -- We just want to test packet 12, since it is the only one with
+      -- We just want to test packets 12 and 16, since they are the only ones with
       -- padding
       -- Send command to disable packet 1:
       T.Command_T_Send (Commands.Disable_Packet ((Id => 7)));
-      -- Send command to enable packet 3:
+      -- Send commands to enable packets 12 and 16:
       T.Command_T_Send (Commands.Enable_Packet ((Id => 12)));
+      T.Command_T_Send (Commands.Enable_Packet ((Id => 16)));
 
       -- Send a tick:
       T.Tick_T_Send (The_Tick);
-      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 3);
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Disable_Packet_Id, Status => Success));
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (2), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Enable_Packet_Id, Status => Success));
-      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
+      Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (3), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Enable_Packet_Id, Status => Success));
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 2);
 
-      -- OK now check the packet. This also tests the use_tick_timestamp feature.
+      -- OK now check the packets. This also tests the use_tick_timestamp feature.
       The_Packet := T.Packet_T_Recv_Sync_History.Get (1);
       Check_Packet_4 (Self, The_Packet, The_Tick.Time, 0);
 
-      -- Send command to disable packet 3:
+      -- Check the named pads packet. Named pads must be functionally identical
+      -- to anonymous pads at runtime:
+      The_Packet := T.Packet_T_Recv_Sync_History.Get (2);
+      Check_Packet_6 (Self, The_Packet, The_Tick.Time, 0);
+
+      -- Send commands to disable packets:
       T.Command_T_Send (Commands.Disable_Packet ((Id => 12)));
+      T.Command_T_Send (Commands.Disable_Packet ((Id => 16)));
       T.Command_T_Send (Commands.Disable_Packet ((Id => 7)));
       T.Tick_T_Send (The_Tick);
-      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 4);
-      Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (3), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Disable_Packet_Id, Status => Success));
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 6);
       Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (4), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Disable_Packet_Id, Status => Success));
+      Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (5), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Disable_Packet_Id, Status => Success));
+      Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (6), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Disable_Packet_Id, Status => Success));
    end Test_Padding;
 
    overriding procedure Test_Zero_Period (Self : in out Instance) is

@@ -18,7 +18,7 @@ package {{ name }} is
    -- Total packet buffer size: {{ packet.size }} bits
    {{ packet["name"] }}_Items : aliased Packet_Items_Type := [
 {% for dp in packet.data_products %}
-      -- Item entry for {{ dp.name }}:
+      -- Item entry for {{ dp.name or dp.pad_name or "pad bytes" }}:
       {{ loop.index }} => (Data_Product_Id => {% if dp.data_product %}{{ dp.data_product.id }}{% else %}0{% endif %}, Use_Timestamp => {% if dp.use_timestamp %}True{% else %}False{% endif %}, Include_Timestamp => {% if dp.include_timestamp %}True{% else %}False{% endif %}, Event_On_Missing => {% if dp.event_on_missing %}True{% else %}False{% endif %}, Used_For_On_Change => {% if dp.used_for_on_change %}True{% else %}False{% endif %}, Packet_Period_Item => {% if dp.packet_period_item %}True{% else %}False{% endif %}, Size => {{ (dp.size/8)|int }}){{ "," if not loop.last }}
 {% endfor %}
    ];

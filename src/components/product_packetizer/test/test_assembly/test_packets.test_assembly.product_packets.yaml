@@ -50,9 +50,10 @@ packets:
       - pad_bytes: 5
       - name: Test_Component_1_Instance.Data_Product_A
         use_timestamp: False
-        include_timestamp: False
+        include_timestamp: True # Include a timestamp mid-packet, after a pad.
         event_on_missing: False
       - pad_bytes: 3
+      - pad_bytes: 1
     period: "1" # create every tick
     offset: "0"
     enabled: False
@@ -63,4 +64,18 @@ packets:
       - name: Product_Packetizer_Instance.Packet_5_Period
       - name: Product_Packetizer_Instance.Packet_3_Period
     period: "2"
+    enabled: False
+  - name: Packet_6
+    description: This packet tests named padding
+    id: 16
+    use_tick_timestamp: True
+    data_products:
+      - name: Omeg_Norm # A named pad with a bare identifier name.
+        pad_bytes: 8
+      - name: Test_Component_1_Instance.Future_Item # A named pad with a dotted name.
+        pad_bytes: 4
+      - pad_bytes: 2
+      - pad_bytes: 1
+    period: "1" # create every tick
+    offset: "0"
     enabled: False

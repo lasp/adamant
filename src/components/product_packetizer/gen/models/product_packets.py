@@ -62,15 +62,14 @@ class data_product_entry(object):
         pad_bytes=None,
     ):
         if pad_bytes and (
-            name
-            or event_on_missing
+            event_on_missing
             or use_timestamp
             or include_timestamp
             or used_for_on_change is not True
         ):
             raise ModelException(
                 ('Packet data product list specifies "pad_bytes". If "pad_bytes" is specified'
-                 'then [name, event_on_missing, use_timestamp, include_timestamp, used_for_on_change] may not be specified.')
+                 ' then [event_on_missing, use_timestamp, include_timestamp, used_for_on_change] may not be specified.')
             )
 
         if not name and not pad_bytes:
@@ -78,7 +77,20 @@ class data_product_entry(object):
                 'Packet data product list MUST specify a "name" unless "pad_bytes" is specified.'
             )
 
-        if name:
+        # Pads may optionally carry a name, which labels the reserved space in the
+        # generated packet layout and ground artifacts. A pad name is an opaque
+        # label: it may be a bare identifier or a dotted path (to mirror the name a
+        # future real item will have on the ground), and it is never resolved
+        # against the assembly.
+        self.pad_name = None
+        if pad_bytes:
+            if name:
+                self.pad_name = ada.formatType(name)
+            self.name = ""
+            self.component_name = ""
+            self.data_product_name = ""
+            self.pad_bytes = pad_bytes
+        else:
             split_name = name.split(".")
             if len(split_name) != 2:
                 raise ModelException(
@@ -90,11 +102,6 @@ class data_product_entry(object):
             self.component_name = ada.formatVariable(split_name[0])
             self.data_product_name = ada.formatType(split_name[1])
             self.pad_bytes = 0
-        else:
-            self.name = ""
-            self.component_name = ""
-            self.data_product_name = ""
-            self.pad_bytes = pad_bytes
 
         self.event_on_missing = event_on_missing
         self.use_timestamp = use_timestamp
@@ -235,6 +242,31 @@ class product_packet(packet):
                 + " as True. Both of these cannot be specified."
             )
 
+        # Make sure pad names within the packet do not collide with each other or
+        # with the name of a data product entry in the same packet:
+        entry_names = set(dp.name for dp in data_products if dp.name)
+        seen_pad_names = set()
+        for dp in data_products:
+            if dp.pad_name:
+                if dp.pad_name in seen_pad_names:
+                    raise ModelException(
+                        "Packet '"
+                        + str(name)
+                        + "' contains duplicate pad name '"
+                        + dp.pad_name
+                        + "'. All named pads within a packet must have unique names."
+                    )
+                seen_pad_names.add(dp.pad_name)
+                if dp.pad_name in entry_names:
+                    raise ModelException(
+                        "Packet '"
+                        + str(name)
+                        + "' contains pad name '"
+                        + dp.pad_name
+                        + "' which collides with a data product entry of the same name"
+                        + " in this packet."
+                    )
+
         # Call the base class initialization
         super(product_packet, self).__init__(
             name, type=None, description=description, id=id, suite=suite
@@ -244,18 +276,48 @@ class product_packet(packet):
         # Create item list:
         pad_count = 0
         bit = 0
+
+        # Rebuild the item list from scratch. final() (which calls this) can
+        # run more than once on the same packet object when a loaded model is
+        # cached and reused across generator invocations. Items left over from
+        # a prior pass would falsely trip the duplicate-name check below.
+        self.items = OrderedDict()
+
+        def update_items(new_items):
+            # Add items to the packet items dict, catching any name collision.
+            # Colliding names would otherwise silently overwrite one another
+            # here, producing ground artifacts whose item list diverges from
+            # the packet the flight software actually builds.
+            for item_name, item in new_items.items():
+                if item_name in self.items:
+                    raise ModelException(
+                        "Packet '"
+                        + self.name
+                        + "' contains duplicate item name '"
+                        + item_name
+                        + "'."
+                    )
+            self.items.update(new_items)
+
         for dp in self.data_products:
             if dp.name:
                 if dp.include_timestamp:
-                    items, bit = _items_from_record(_get_time_obj())
-                    new_names = [
-                        (self.name + "." + dp.name + "." + name)
-                        for name in items.keys()
+                    # Pass the data product as the container object so the
+                    # timestamp items are named like the data product items
+                    # below, e.g. Component_Instance.Data_Product.Seconds,
+                    # instead of a bare (and possibly colliding) "Seconds":
+                    items, bit = _items_from_record(
+                        _get_time_obj(), start_bit=bit, container_obj=dp.data_product
+                    )
+                    # Convert the packet items to product packet items, exactly
+                    # like the data product items below. This also references
+                    # the data product entry via item.dp for usage later:
+                    time_items = [
+                        product_packet_item.from_packet_item(item, dp, self)
+                        for item in items.values()
                     ]
-                    # Add data product reference to item for usage later:
-                    for item in items.values():
-                        item.dp = dp
-                    self.items.update(OrderedDict(zip(new_names, items.values())))
+                    new_names = [item.full_name for item in time_items]
+                    update_items(OrderedDict(zip(new_names, time_items)))
                 # Get items list from the data product
                 items, bit = items_list_from_ided_entity(dp.data_product, start_bit=bit)
                 # Convert the packet items to product packet items, which have a bit different handling
@@ -263,27 +325,54 @@ class product_packet(packet):
                     product_packet_item.from_packet_item(item, dp, self)
                     for item in items.values()
                 ]
-                new_names = [item.full_name for name, item in items.items()]
+                # Key by the packet-prefixed full name of the converted items,
+                # consistent with the timestamp and pad items:
+                new_names = [item.full_name for item in product_packet_items]
                 # Update the items dict:
-                self.items.update(OrderedDict(zip(new_names, product_packet_items)))
+                update_items(OrderedDict(zip(new_names, product_packet_items)))
             else:
+                # Determine the pad name and description. Named pads carry their
+                # user-provided label into the generated packet layout and ground
+                # artifacts. Anonymous pads are auto-named Reserved_NN.
+                count_str = str(dp.pad_bytes)
+                byte_word = " pad byte" if dp.pad_bytes == 1 else " pad bytes"
+                if dp.pad_name:
+                    item_name = dp.pad_name
+                    item_description = (
+                        count_str + " reserved" + byte_word
+                        + " for future item " + dp.pad_name + "."
+                    )
+                    flat_description = item_description
+                else:
+                    item_name = "Reserved_%02d" % pad_count
+                    pad_count += 1
+                    item_description = count_str + byte_word + "."
+                    flat_description = count_str + " unused" + byte_word + "."
                 # Create fake field object to simulate pad bytes:
                 item = field(
-                    name=("Reserved_%02d" % pad_count),
-                    type="Natural",
+                    name=item_name,
+                    type=(
+                        "Basic_Types.Byte_Array"
+                        if dp.pad_bytes > 1
+                        else "Basic_Types.Byte"
+                    ),
                     start_bit=0,
                     start_field_number=0,
                     format_string=(
                         "U8" + ("x" + str(dp.pad_bytes) if (dp.pad_bytes > 1) else "")
                     ),
-                    description="Pad bytes.",
+                    description=item_description,
                 )
+                # Give the pad item its position within the packet, like real
+                # packet items have, and advance the running bit position:
+                item.packet_start_bit = bit
+                item.packet_end_bit = bit + dp.pad_bytes * 8 - 1
+                bit += dp.pad_bytes * 8
                 item.flattened_description = (
-                    self.name + (".Reserved_%02d" % pad_count) + " - Unused pad bytes."
+                    self.name + "." + item_name + " - " + flat_description
                 )
-                item.full_name = self.name + ".Reserved_%02d" % pad_count
-                self.items.update({item.full_name: item})
-                pad_count += 1
+                item.full_name = self.name + "." + item_name
+                update_items({item.full_name: item})
 
     def load_type_ranges(self):
         """
