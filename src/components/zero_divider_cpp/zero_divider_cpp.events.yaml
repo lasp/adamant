@@ -11,19 +11,19 @@ events:
     description: An Int_Divide_By_Zero_In_Cpp command was received and the magic number was correct. The division will occur in N milliseconds, where N is provided as the event parameter.
     param_type: Packed_U32.T
   - name: Int_Divide_By_Zero_No_Exception
-    description: The integer divide-by-zero in C++ did not raise an exception and returned a value. This indicates the target does not trap on integer division by zero. The parameter is the raw result returned by C++.
+    description: The integer divide by zero in C++ returned to Ada without raising an exception. This is one of the outcomes the command exists to discover, not an anomaly. The parameter is the raw result returned by C++.
     param_type: Packed_I32.T
   # Floating Point Divide By Zero Events
   - name: Fp_Dividing_By_Zero_In_Cpp
-    description: An Fp_Divide_By_Zero_In_Cpp command was received and the magic number was correct. The floating-point division will occur in N milliseconds, where N is provided as the event parameter.
+    description: An Fp_Divide_By_Zero_In_Cpp command was received and the magic number was correct. The floating point division will occur in N milliseconds, where N is provided as the event parameter.
     param_type: Packed_U32.T
   - name: Fp_Divide_By_Zero_No_Exception
-    description: The floating-point divide-by-zero in C++ returned a value that did not trigger a Constraint_Error. This event should never fire under normal operation and indicates the target does not conform to the C++ reference for IEEE floating-point division by zero. The parameter is the raw result returned by C++.
+    description: The floating point divide by zero in C++ returned to Ada without raising an exception. This is one of the outcomes the command exists to discover, not an anomaly. The parameter is the raw result returned by C++.
     param_type: Packed_F32.T
   # General Events
   - name: Invalid_Magic_Number
-    description: A command was received, but the magic number was incorrect.
-    param_type: Packed_U32.T
+    description: A command was received, but the magic number was incorrect. A magic number outside the range the type permits never reaches this event, it is rejected by command validation and reported as an invalid command instead.
+    param_type: Packed_Magic_Number.T
   - name: Invalid_Command_Received
     description: A command was received with invalid parameters.
     param_type: Invalid_Command_Info.T
