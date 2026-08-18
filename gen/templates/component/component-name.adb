@@ -271,6 +271,25 @@ package body Component.{{ name }} is
    end Map_Data_Dependencies;
 
 {% endif %}
+{% if parameters %}
+   -----------------------------------------------------------------------
+   -- Validate the default values of the component's parameters:
+   -----------------------------------------------------------------------
+   not overriding procedure Validate_Parameter_Defaults (Self : in out Base_Instance) is
+      use Parameter_Validation_Status;
+   begin
+      pragma Assert (
+         Base_Instance'Class (Self).Validate_Parameters (
+{% for par in parameters %}
+            {{ par.name }} => Self.{{ par.name }}{{ "," if not loop.last }}
+{% endfor %}
+         ) = Valid,
+         "{{ name }} default parameter validation failed."
+      );
+      null;
+   end Validate_Parameter_Defaults;
+
+{% endif %}
 {% if connectors.requires_queue() %}
    ---------------------------------------------------------------
    -- Visible private dispatching procedures for component queue:

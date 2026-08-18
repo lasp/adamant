@@ -31,3 +31,5 @@ tests:
     description: This unit test tests a command or memory region being dropped due to a full queue.
   - name: Test_Invalid_Command
     description: This unit test exercises that an invalid command throws the appropriate event.
+  - name: Test_Validate_Parameter_Defaults
+    description: This unit test tests the startup validation of component default parameter values, including the assertion failure on an invalid result.

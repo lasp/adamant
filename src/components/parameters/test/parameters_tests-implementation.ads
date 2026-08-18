@@ -41,6 +41,8 @@ private
    overriding procedure Test_Full_Queue (Self : in out Instance);
    -- This unit test exercises that an invalid command throws the appropriate event.
    overriding procedure Test_Invalid_Command (Self : in out Instance);
+   -- This unit test tests the startup validation of component default parameter values, including the assertion failure on an invalid result.
+   overriding procedure Test_Validate_Parameter_Defaults (Self : in out Instance);
 
    -- Test data and state:
    type Instance is new Parameters_Tests.Base_Instance with record
