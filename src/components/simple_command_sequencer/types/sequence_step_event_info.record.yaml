@@ -3,8 +3,8 @@ description: Sequence, frame, and step identification for events
 fields:
   - name: Sequence_Id
     description: The ID of the sequence
-    type: Interfaces.Unsigned_32
-    format: U32
+    type: Interfaces.Unsigned_16
+    format: U16
   - name: Frame_Id
     description: The frame the sequence is executing on
     type: Interfaces.Unsigned_32

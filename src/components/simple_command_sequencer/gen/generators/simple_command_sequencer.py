@@ -85,8 +85,8 @@ class command_sequences_ads(command_sequences_gen, generator_base):
     """
     Generates <suite_package>.ads – a package spec that declares a fully
     initialised Sequences_Type constant (and a stable Sequences_Access
-    pointer) plus the per-sequence command builder surface (id getters and
-    Command.T constructors) used by unit tests and other on-board callers.
+    pointer), the To_Arg buffer-padding helper, and the per-dynamic-step
+    Resolver function declarations.
     """
 
     def __init__(self):
@@ -95,14 +95,39 @@ class command_sequences_ads(command_sequences_gen, generator_base):
 
 class command_sequences_adb(command_sequences_gen, generator_base):
     """
-    Generates <suite_package>.adb – the body implementing the command builders
-    (always present) and the per-dynamic-step Resolver functions (when the
-    suite has dynamic steps). The builders guarantee the spec always requires
-    a body, so this pair is emitted unconditionally.
+    Generates <suite_package>.adb – the body implementing To_Arg and the
+    per-dynamic-step Resolver functions. When the suite needs neither, the
+    body degenerates to "pragma No_Body;".
     """
 
     def __init__(self):
         command_sequences_gen.__init__(self, template_filename="name.adb")
+
+
+class command_sequences_commands_ads(command_sequences_gen, generator_base):
+    """
+    Generates <suite_package>_commands.ads – the operator-side command builder
+    surface (id getters and Command.T constructors) for the suite's
+    per-sequence ghost commands, used by unit tests and other on-board
+    callers. Split from the sequences package because the sequencer component
+    itself never uses the builders.
+    """
+
+    def __init__(self):
+        command_sequences_gen.__init__(
+            self, template_filename="name_commands.ads"
+        )
+
+
+class command_sequences_commands_adb(command_sequences_gen, generator_base):
+    """
+    Generates <suite_package>_commands.adb – the command builder bodies.
+    """
+
+    def __init__(self):
+        command_sequences_gen.__init__(
+            self, template_filename="name_commands.adb"
+        )
 
 
 # The summary packet's ground/documentation type is one Sequence_Frame_Summary

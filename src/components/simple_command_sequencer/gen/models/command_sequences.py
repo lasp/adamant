@@ -26,6 +26,10 @@ class sequence_step(object):
     # expression.
     _DYNAMIC_ARG_RE = re.compile(r'^Arg(\.[A-Za-z][A-Za-z0-9_]*)*$')
 
+    # Static sleeps are bounded to Ada's Natural so the duration always fits
+    # an Ada.Real_Time.Time_Span by construction — no runtime range check.
+    MAX_STATIC_SLEEP_MS = 2**31 - 1
+
     def __init__(
         self,
         command=None,
@@ -37,7 +41,22 @@ class sequence_step(object):
         # parser/validator enforces this so downstream code can branch on
         # is_sleep() / is_command().
         self.command = command
-        self.sleep_ms = sleep_ms
+        # sleep_ms is either a static integer millisecond count or a dynamic
+        # reference into the sequence's argument ("Arg" or "Arg.A.B"), resolved
+        # at execution time as a Packed_U32.
+        self.sleep_ms = None
+        self.dynamic_sleep_arg = None
+        if sleep_ms is not None:
+            if isinstance(sleep_ms, int) and not isinstance(sleep_ms, bool):
+                self.sleep_ms = sleep_ms
+            elif self._DYNAMIC_ARG_RE.match(str(sleep_ms).strip()):
+                self.dynamic_sleep_arg = str(sleep_ms).strip()
+            else:
+                raise ModelException(
+                    f"sleep_ms value '{sleep_ms}' must be an integer or a "
+                    "dynamic argument reference of the form 'Arg' or "
+                    "'Arg.Field_Name'"
+                )
         if command is not None:
             self.parse_command()
         else:
@@ -95,15 +114,16 @@ class sequence_step(object):
 
     def validate(self):
         # Mutual exclusivity: exactly one of command/sleep_ms.
-        if self.command is None and self.sleep_ms is None:
+        if self.command is None and not self.is_sleep():
             raise ModelException(
                 f"Step {self.index} must specify either 'command' or 'sleep_ms'"
             )
-        if self.command is not None and self.sleep_ms is not None:
+        if self.command is not None and self.is_sleep():
             raise ModelException(
                 f"Step {self.index} cannot specify both 'command' and 'sleep_ms'"
             )
-        # Sleep-form: no arg/wait_for_completion fields allowed.
+        # Sleep-form: no arg/wait_for_completion fields allowed, and static
+        # durations must fit a Natural (and thus an Ada.Real_Time.Time_Span).
         if self.is_sleep():
             if self.arg is not None or self.dynamic_arg is not None:
                 raise ModelException(
@@ -112,6 +132,13 @@ class sequence_step(object):
             if self._wait_for_completion is not None:
                 raise ModelException(
                     f"Step {self.index} has 'sleep_ms' and cannot also have 'wait_for_completion'"
+                )
+            if self.sleep_ms is not None and not (
+                0 <= self.sleep_ms <= self.MAX_STATIC_SLEEP_MS
+            ):
+                raise ModelException(
+                    f"Step {self.index} sleep_ms {self.sleep_ms} is out of "
+                    f"range 0 .. {self.MAX_STATIC_SLEEP_MS}"
                 )
             return
         # Command-form parenthesis sanity.
@@ -180,6 +207,37 @@ class sequence_step(object):
             f"{parent_sequence.name}_Step_{self.index}_Resolver"
         )
 
+    def resolve_dynamic_sleep(self, parent_sequence):
+        """
+        For dynamic sleep steps, resolve the same fields as
+        resolve_dynamic_arg_type, except the leaf type is fixed: a dynamic
+        sleep always resolves its duration as a Packed_U32 millisecond count,
+        so no command object is involved.
+        """
+        if not self.dynamic_sleep_arg:
+            return
+
+        if not parent_sequence.arg_type_package:
+            raise ModelException(
+                f"Step {self.index} has dynamic sleep_ms "
+                f"'{self.dynamic_sleep_arg}' but sequence "
+                f"'{parent_sequence.name}' has no arg_type defined"
+            )
+
+        self.input_type_package = parent_sequence.arg_type_package
+        self.traversal_path = (
+            self.dynamic_sleep_arg[len("Arg."):]
+            if "." in self.dynamic_sleep_arg
+            else None
+        )
+        self.dynamic_arg_type_package = "Packed_U32"
+        self.resolver_type_name = (
+            f"{parent_sequence.name}_Step_{self.index}_Resolver_T"
+        )
+        self.resolver_instance_name = (
+            f"{parent_sequence.name}_Step_{self.index}_Resolver"
+        )
+
     def get_arg_expression(self):
         """Replace bare 'Arg' references with 'Sequence_Arg' in the command arg expression."""
         if not self.arg:
@@ -187,10 +245,10 @@ class sequence_step(object):
         return re.sub(r'\bArg\b', 'Sequence_Arg', self.arg)
 
     def get_sleep_expression(self):
-        """Render the sleep duration as a Packed_U32.T aggregate for the step table."""
+        """Render the static sleep duration (a plain Natural) for the step table."""
         if self.sleep_ms is None:
             return None
-        return f"(Value => {self.sleep_ms})"
+        return str(self.sleep_ms)
 
     def has_arg(self):
         return self.arg is not None
@@ -199,7 +257,19 @@ class sequence_step(object):
         return self.dynamic_arg is not None
 
     def is_sleep(self):
+        return self.sleep_ms is not None or self.dynamic_sleep_arg is not None
+
+    def is_static_sleep(self):
         return self.sleep_ms is not None
+
+    def is_dynamic_sleep(self):
+        return self.dynamic_sleep_arg is not None
+
+    def needs_resolver(self):
+        """True for any step whose value is resolved from the sequence's
+        per-call argument at execution time (dynamic command arg or dynamic
+        sleep) -- these each get a generated Resolver function."""
+        return self.is_dynamic() or self.is_dynamic_sleep()
 
     @classmethod
     @throw_exception_with_lineno
@@ -305,6 +375,12 @@ class command_sequence(command):
                     f"Step {idx} references 'Arg' but sequence '{self.name}' "
                     "has no arg_type defined"
                 )
+            if step.is_dynamic_sleep() and not self.arg_type:
+                raise ModelException(
+                    f"Step {idx} has dynamic sleep_ms "
+                    f"'{step.dynamic_sleep_arg}' but sequence '{self.name}' "
+                    "has no arg_type defined"
+                )
         # The command's wire/arg type is the sequence's own arg_type (or none
         # for an argless sequence) -- a user-written, normally-registered type.
         # Response behavior is static per-sequence configuration in the
@@ -321,7 +397,7 @@ class command_sequence(command):
         return self.arg_type is not None
 
     def has_dynamic_steps(self):
-        return any(step.is_dynamic() for step in self.steps)
+        return any(step.needs_resolver() for step in self.steps)
 
     @property
     def command_timeout_millis(self):
@@ -438,20 +514,29 @@ class command_sequences(assembly_submodel):
         return any(seq.has_dynamic_steps() for seq in self.sequences.values())
 
     def _compute_template_flags(self):
-        """Compute boolean flags used by name.ads as plain instance attributes
-        so the Jinja template can reference them directly via the model's
+        """Compute boolean flags used by the templates as plain instance
+        attributes so Jinja can reference them directly via the model's
         __dict__ render context. Call after self.sequences is populated."""
         # True if any sequence in this suite has at least one dynamic step
         # (drives Resolver type emission in name.ads).
         self.suite_has_dynamic_steps = self.has_dynamic_steps()
         # True if any step in any sequence needs the To_Arg helper: static
-        # command arg expressions use it in the spec's step arrays, and dynamic
-        # steps use it in the body's Resolver functions (drives
-        # `with Sequence_Arg_Utils;` in name.ads).
-        self.needs_sequence_arg_utils = any(
-            step.has_arg() or step.is_dynamic()
+        # command arg expressions use it in the spec's step arrays, and
+        # resolver-backed steps use it in the body's Resolver functions.
+        self.needs_to_arg = any(
+            step.has_arg() or step.needs_resolver()
             for seq in self.sequences.values()
             for step in seq.steps
+        )
+        # Arg type packages needed by the split-out command builders package
+        # (name_commands.ads/adb) -- the builders take each sequence's native
+        # arg type and serialize it.
+        self.builder_includes = sorted(
+            {
+                seq.arg_type_package
+                for seq in self.sequences.values()
+                if seq.arg_type_package
+            }
         )
 
     # Resolution errors raised here (unknown component, unknown command, bad
@@ -473,7 +558,14 @@ class command_sequences(assembly_submodel):
                 self.includes.append(seq.arg_type_package)
             for step in seq.steps:
                 # Sleep steps don't reference any assembly component or
-                # command, so skip assembly-level resolution for them.
+                # command, so skip command resolution for them. A dynamic
+                # sleep still needs its Resolver fields populated (leaf type
+                # fixed at Packed_U32) so the templates can emit its resolver.
+                if step.is_dynamic_sleep():
+                    step.resolve_dynamic_sleep(seq)
+                    if "Packed_U32" not in self.includes:
+                        self.includes.append("Packed_U32")
+                    continue
                 if step.is_sleep():
                     continue
                 comp = self.assembly.get_component_with_name(step.component_name)
@@ -561,6 +653,55 @@ class command_sequences(assembly_submodel):
                 seen.add(inc)
                 deduped.append(inc)
         self.includes = deduped
+
+        self._check_engine_connection_counts()
+
+    def _check_engine_connection_counts(self):
+        """
+        Each sequencer frame (engine) is claimed via a Register_Source reply
+        routed back on Command_Response_T_Recv_Async -- typically one arrayed
+        command-router connector entry per engine. A frame that never receives
+        one is a phantom: it can never be claimed. The component cannot see
+        its inbound connection count at runtime, but the assembly knows it at
+        generation time, so warn when it differs from the instance's
+        configured engine count.
+        """
+        for comp in self.assembly.components.values():
+            if comp.name != "Simple_Command_Sequencer" or not comp.init:
+                continue
+            sequences_value = comp.init.get_parameter_value("Sequences")
+            if (
+                not sequences_value
+                or sequences_value.split(".")[0].lower() != self.name.lower()
+            ):
+                continue
+            num_engines_value = comp.init.get_parameter_value(
+                "Num_Concurrent_Sequences"
+            )
+            try:
+                num_engines = int(str(num_engines_value).strip())
+            except (TypeError, ValueError):
+                # The engine count is a non-literal expression; it cannot be
+                # checked at generation time.
+                continue
+            num_connections = sum(
+                1
+                for conn in self.assembly.connections
+                if conn.to_component is comp
+                and conn.to_connector is not None
+                and conn.to_connector.name == "Command_Response_T_Recv_Async"
+            )
+            if num_connections != num_engines:
+                self.warn(
+                    f"component '{comp.instance_name}' is configured with "
+                    f"Num_Concurrent_Sequences => {num_engines} but has "
+                    f"{num_connections} connection(s) into "
+                    "Command_Response_T_Recv_Async. Each engine needs its own "
+                    "inbound command-response connection (one command-router "
+                    "arrayed connector entry per engine) to receive a "
+                    "Register_Source reply; engines without one can never be "
+                    "claimed."
+                )
 
     def load_type(self, type_name):
         return model_loader.try_load_model_by_name(type_name, model_types="type")

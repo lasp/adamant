@@ -1,0 +1,10 @@
+---
+description: Sequence argument whose enumeration field can fail validation, used to exercise the invalid-dynamic-argument paths (every other test argument type accepts all bit patterns).
+fields:
+  - name: Mode
+    description: An enumeration field with unused representation values, so garbage bytes fail validation.
+    type: Sequence_Enums.Sequence_State.E
+    format: E8
+  - name: Duration
+    description: A millisecond duration leaf for dynamic command and sleep steps.
+    type: Packed_U32.T
