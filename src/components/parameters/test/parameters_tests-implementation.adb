@@ -32,8 +32,18 @@ with Parameter_Table_Header;
 with Crc_16;
 with Packed_Table_Operation_Status.Assertion; use Packed_Table_Operation_Status.Assertion;
 with System.Storage_Elements; use System.Storage_Elements;
+with Ada.Assertions;
+with Component.Test_Component_2.Implementation;
+with Tick;
 
 package body Parameters_Tests.Implementation is
+
+   -- A test component whose validation rejects every parameter set, including its defaults:
+   type Invalid_Defaults_Instance is new Component.Test_Component_2.Implementation.Instance with null record;
+   overriding function Validate_Parameters (
+      Self : in out Invalid_Defaults_Instance;
+      The_Tick : in Tick.U
+   ) return Parameter_Enums.Parameter_Validation_Status.E is (Parameter_Enums.Parameter_Validation_Status.Invalid);
 
    -------------------------------------------------------------------------
    -- Fixtures:
@@ -1168,5 +1178,25 @@ package body Parameters_Tests.Implementation is
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
       Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Dump_Parameters_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 22]));
    end Test_Invalid_Command;
+
+   overriding procedure Test_Assert_Valid_Parameters (Self : in out Instance) is
+      T : Component.Parameters.Implementation.Tester.Instance_Access renames Self.Tester;
+      Bad_Component : Invalid_Defaults_Instance;
+      Assertion_Raised : Boolean := False;
+   begin
+      -- Components whose defaults pass validation return without raising:
+      T.Component_A.Assert_Valid_Parameters;
+      T.Component_B.Assert_Valid_Parameters;
+      T.Component_C.Assert_Valid_Parameters;
+
+      -- A component whose validation rejects its defaults fails an assertion:
+      begin
+         Bad_Component.Assert_Valid_Parameters;
+      exception
+         when Ada.Assertions.Assertion_Error =>
+            Assertion_Raised := True;
+      end;
+      Boolean_Assert.Eq (Assertion_Raised, True);
+   end Test_Assert_Valid_Parameters;
 
 end Parameters_Tests.Implementation;

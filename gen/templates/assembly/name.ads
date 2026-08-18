@@ -25,7 +25,8 @@ package {{ name }} is
 {% if component_kind_dict["set_id_bases"] %}
    -- Set the appropriate command, event, parameter, packet and data product id bases in all the
    -- components. This also resolves the data dependency ids for components that have data
-   -- dependencies.
+   -- dependencies, and validates the default parameter values of components that have
+   -- parameters.
    procedure Set_Id_Bases;
 {% endif %}
 {% if connections %}

@@ -133,12 +133,13 @@ private
    -- hardware registers, or performing other special functionality that only needs to be performed after parameters have
    -- been updated.
    overriding procedure Update_Parameters_Action (Self : in out Instance) is null;
-   -- This function is called when the parameter operation type is "Validate". The default implementation of this
+   -- This function is called when the parameter operation type is "Validate", and once at startup by
+   -- Assert_Valid_Parameters to check the compiled-in default parameter values. The default implementation of this
    -- subprogram in the implementation package is a function that returns "Valid". However, this function can, and should be
-   -- overridden if something special needs to happen to further validate a parameter. Examples of this might be validation of
-   -- certain parameters beyond individual type ranges, or performing other special functionality that only needs to be
-   -- performed after parameters have been validated. Note that range checking is performed during staging, and does not need
-   -- to be implemented here.
+   -- overridden if a parameter requires validation beyond its individual type range, such as enforcing a relationship
+   -- between parameters. Note that range checking is performed during staging, and does not need to be implemented here.
+   -- The startup call runs before components are connected or initialized, so an override must be a pure function of its
+   -- parameter arguments - it must not invoke connectors or rely on state established during component initialization.
    overriding function Validate_Parameters (
       Self : in out Instance;
       P_Gain : in Packed_F32.U;
