@@ -11,7 +11,6 @@ with Packed_U16;
 with Interfaces;
 with Basic_Types;
 with Simple_Sequencer_Types;
-with Sequence_Frame;
 
 -- The Command Sequencer component executes predefined sequences of commands.
 -- It receives high-level sequence commands and breaks them down into individual
@@ -35,33 +34,35 @@ package Component.Simple_Command_Sequencer.Implementation is
    -- Sequences : Simple_Sequencer_Types.Sequences_Access - Access to statically
    -- defined sequence list.
    --
-   overriding procedure Init (Self : in out Instance; Num_Concurrent_Sequences : in Simple_Sequencer_Types.Num_Concurrent_Sequences_Type; Sequences : in Simple_Sequencer_Types.Sequences_Access);
+   overriding procedure Init (Self : in out Instance; Num_Concurrent_Sequences : in Simple_Sequencer_Types.Num_Concurrent_Sequences_Type; Sequences : in not null Simple_Sequencer_Types.Sequences_Access);
 
 private
-   type Sequence_Frame_Array is array (Interfaces.Unsigned_32 range <>) of Sequence_Frame.T;
-   type Sequence_Frame_Array_Access is access all Sequence_Frame_Array;
+   -- Response context of the command currently in dispatch, captured by
+   -- Command_T_Recv_Async and consumed by the Run_Sequence handler. The
+   -- active component's serial queue makes a side-channel through Self safe:
+   -- only one inbound command is in dispatch at a time, so the context is set
+   -- on entry and read once before the next message is processed.
+   --
+   -- Defer_Command_Response is set by Run_Sequence when it claims a frame
+   -- whose sequence is configured Send_After_Sequence_Completion;
+   -- Command_T_Recv_Async then suppresses the immediate reply and the
+   -- sequence-end paths emit it later.
+   type Caller_Context is record
+      Source_Id : Command_Types.Command_Source_Id := 0;
+      Command_Id : Command_Types.Command_Id := 0;
+      Defer_Command_Response : Boolean := False;
+   end record;
 
    -- The component class instance record:
    type Instance is new Simple_Command_Sequencer.Base_Instance with record
-      Sequence_Frames : Sequence_Frame_Array_Access := null;
+      Sequence_Frames : Simple_Sequencer_Types.Sequence_Frame_Array_Access := null;
       Sequences : Simple_Sequencer_Types.Sequences_Access := null;
       Summary_Packet_Period : Interfaces.Unsigned_16 := 0;
       -- Ticks elapsed since the last summary packet emission. Reset on
       -- emission and by Set_Summary_Packet_Period (so a new period starts a
       -- fresh phase).
       Summary_Packet_Tick_Count : Interfaces.Unsigned_16 := 0;
-      -- Per-call response-context scratch set by Command_T_Recv_Async and
-      -- consumed by the Run_Sequence handler. The active component's serial
-      -- queue makes a side-channel through Self safe: only one inbound command
-      -- is in dispatch at a time, so Pending_Operator_* is set on entry and
-      -- read once before the next message is processed.
-      --
-      -- Pending_Defer is set by Run_Sequence when it claims a frame with
-      -- Send_After_Sequence_Completion; Command_T_Recv_Async then suppresses
-      -- the immediate reply and the sequence-completion paths emit it later.
-      Pending_Operator_Source_Id : Command_Types.Command_Source_Id := 0;
-      Pending_Operator_Command_Id : Command_Types.Command_Id := 0;
-      Pending_Defer : Boolean := False;
+      Caller : Caller_Context;
       -- Data product counters. The high water mark tracks the peak number of
       -- concurrently running frames; the rest are monotonic totals since
       -- startup.
@@ -75,7 +76,8 @@ private
    ---------------------------------------
    -- Set Up Procedure
    ---------------------------------------
-   -- Sends out the initial (zeroed) values of all data products.
+   -- Sends out the initial values of all data products, seeded from the
+   -- component state so the startup defaults are observable.
    overriding procedure Set_Up (Self : in out Instance);
 
    ---------------------------------------
@@ -117,14 +119,15 @@ private
    --    load time by gen/models/simple_command_sequencer_commands.py.
    -- Run a command sequence by ID. The synthesised per-sequence commands are the
    -- operator-friendly form; this is the underlying backbone they all dispatch
-   -- through, and the only form that carries a per-call Response_Behavior.
+   -- through. Response behavior is the sequence's static configuration from the
+   -- autocoded sequence table.
    overriding function Run_Sequence (Self : in out Instance; Arg : in Run_Sequence_Arg.T) return Command_Execution_Status.E;
    -- Halt every running sequence and return all frames to their initial state. Does
    -- not affect frames that were not running.
    overriding function Kill_All_Sequences (Self : in out Instance) return Command_Execution_Status.E;
    -- Halt the sequence running on a single frame and return that frame to its
-   -- initial state. Fails if the frame ID is out of range or the frame is not
-   -- running.
+   -- initial state. Fails if the frame ID is out of range; killing a frame
+   -- that is not running has no effect and succeeds.
    overriding function Kill_Frame (Self : in out Instance; Arg : in Packed_U16.T) return Command_Execution_Status.E;
    -- Set the period of the sequencer summary packet, in ticks. A period of zero
    -- disables the packet.

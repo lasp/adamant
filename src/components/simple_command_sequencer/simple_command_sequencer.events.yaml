@@ -22,8 +22,8 @@ events:
     param_type: Sequence_Sleep_Event_Info.T
 
   - name: Sequence_Out_Of_Range_Timeout
-    description: A sequence timeout duration is out of range either underflow or overflow.
-    param_type: Sequence_Timeout_Event_Info.T
+    description: Computing a sequence's command response deadline overflowed the system time representation.
+    param_type: Sequence_Step_Event_Info.T
 
   - name: Command_Failure
     description: A command sent by a sequence received a failure response
@@ -31,10 +31,10 @@ events:
 
   - name: Invalid_Sequence_Id
     description: A Run_Sequence command was received with an out of range sequence ID
-    param_type: Packed_U32.T
+    param_type: Packed_U16.T
 
-  - name: Extra_Sequence_Id
-    description: Too many sequence IDs were passed to the Simple Command Sequencer
+  - name: Unexpected_Register_Source
+    description: A Register_Source command response was received but all sequence frames already have a source ID.
 
   - name: No_Frame_Available
     description: A Run_Sequence command was received but all frames are in use
@@ -67,9 +67,21 @@ events:
     param_type: Sequence_Event_Info.T
 
   - name: Invalid_Frame_Id
-    description: A Kill_Frame command was received with an out of range frame ID, or the frame was not running.
+    description: A Kill_Frame command was received with an out of range frame ID.
     param_type: Packed_U32.T
 
   - name: Invalid_Dynamic_Command_Argument
     description: A Command with a Dynamic Argument cannot be executed as the Argument is Invalid
     param_type: Sequence_Step_Command_Event_Info.T
+
+  - name: Frame_Not_Running
+    description: A Kill_Frame command targeted a frame that was not running, so there was nothing to kill.
+    param_type: Packed_U32.T
+
+  - name: Summary_Packet_Period_Set
+    description: The summary packet period was set to a new value, in ticks.
+    param_type: Packed_U16.T
+
+  - name: Invalid_Dynamic_Sleep_Argument
+    description: A dynamic sleep step could not resolve its duration because the sequence's argument failed validation.
+    param_type: Sequence_Step_Event_Info.T

@@ -30,9 +30,11 @@ private
    overriding procedure Test_No_Wait_Sequence (Self : in out Instance);
    overriding procedure Test_Frame_Reuse_After_Completion (Self : in out Instance);
    overriding procedure Test_Out_Of_Range_Sleep (Self : in out Instance);
+   overriding procedure Test_Static_Out_Of_Range_Sleep (Self : in out Instance);
+   overriding procedure Test_Dynamic_Sleep (Self : in out Instance);
    overriding procedure Test_Timeout (Self : in out Instance);
    overriding procedure Test_Out_Of_Range_Timeout (Self : in out Instance);
-   overriding procedure Test_Extra_Sequence_Id (Self : in out Instance);
+   overriding procedure Test_Unexpected_Register_Source (Self : in out Instance);
    overriding procedure Test_Kill_All_Sequences (Self : in out Instance);
    overriding procedure Test_Set_Summary_Packet_Period (Self : in out Instance);
    overriding procedure Test_Synthesized_Sequence_Command (Self : in out Instance);
@@ -41,12 +43,17 @@ private
    overriding procedure Test_Deferred_Response_On_Timeout (Self : in out Instance);
    overriding procedure Test_Deferred_Response_On_Kill_All (Self : in out Instance);
    overriding procedure Test_Concurrent_Deferred_Responses (Self : in out Instance);
+   overriding procedure Test_Deferred_Claim_Failure (Self : in out Instance);
    overriding procedure Test_Sub_Sequence_Call (Self : in out Instance);
    overriding procedure Test_Summary_Packet (Self : in out Instance);
    overriding procedure Test_Static_Deferred_Response (Self : in out Instance);
    overriding procedure Test_Kill_Frame (Self : in out Instance);
    overriding procedure Test_Data_Products (Self : in out Instance);
    overriding procedure Test_Response_Drives_Execution (Self : in out Instance);
+   overriding procedure Test_Dynamic_Arg_Packing (Self : in out Instance);
+   overriding procedure Test_Invalid_Dynamic_Command_Argument (Self : in out Instance);
+   overriding procedure Test_Invalid_Dynamic_Sleep_Argument (Self : in out Instance);
+   overriding procedure Test_Ghost_Command_Rejections (Self : in out Instance);
 
    -- Test data and state:
    type Instance is new Simple_Command_Sequencer_Tests.Base_Instance with record
