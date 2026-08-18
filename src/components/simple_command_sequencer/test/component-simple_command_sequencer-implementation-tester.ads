@@ -14,7 +14,6 @@ with Event;
 with Sequence_Event_Info.Representation;
 with Sequence_Step_Event_Info.Representation;
 with Sequence_Sleep_Event_Info.Representation;
-with Sequence_Timeout_Event_Info.Representation;
 with Sequence_Step_Command_Event_Info.Representation;
 with Packed_U32.Representation;
 with Packed_U16.Representation;
@@ -45,10 +44,10 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    package Sequence_Aborted_History_Package is new Printable_History (Sequence_Step_Event_Info.T, Sequence_Step_Event_Info.Representation.Image);
    package Sequence_Timeout_History_Package is new Printable_History (Sequence_Step_Event_Info.T, Sequence_Step_Event_Info.Representation.Image);
    package Sequence_Out_Of_Range_Sleep_History_Package is new Printable_History (Sequence_Sleep_Event_Info.T, Sequence_Sleep_Event_Info.Representation.Image);
-   package Sequence_Out_Of_Range_Timeout_History_Package is new Printable_History (Sequence_Timeout_Event_Info.T, Sequence_Timeout_Event_Info.Representation.Image);
+   package Sequence_Out_Of_Range_Timeout_History_Package is new Printable_History (Sequence_Step_Event_Info.T, Sequence_Step_Event_Info.Representation.Image);
    package Command_Failure_History_Package is new Printable_History (Sequence_Step_Command_Event_Info.T, Sequence_Step_Command_Event_Info.Representation.Image);
-   package Invalid_Sequence_Id_History_Package is new Printable_History (Packed_U32.T, Packed_U32.Representation.Image);
-   package Extra_Sequence_Id_History_Package is new Printable_History (Natural, Natural'Image);
+   package Invalid_Sequence_Id_History_Package is new Printable_History (Packed_U16.T, Packed_U16.Representation.Image);
+   package Unexpected_Register_Source_History_Package is new Printable_History (Natural, Natural'Image);
    package No_Frame_Available_History_Package is new Printable_History (Natural, Natural'Image);
    package Dropped_Command_History_Package is new Printable_History (Command_Header.T, Command_Header.Representation.Image);
    package Dropped_Command_Response_History_Package is new Printable_History (Command_Response.T, Command_Response.Representation.Image);
@@ -59,6 +58,9 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    package Killed_Frame_History_Package is new Printable_History (Sequence_Event_Info.T, Sequence_Event_Info.Representation.Image);
    package Invalid_Frame_Id_History_Package is new Printable_History (Packed_U32.T, Packed_U32.Representation.Image);
    package Invalid_Dynamic_Command_Argument_History_Package is new Printable_History (Sequence_Step_Command_Event_Info.T, Sequence_Step_Command_Event_Info.Representation.Image);
+   package Frame_Not_Running_History_Package is new Printable_History (Packed_U32.T, Packed_U32.Representation.Image);
+   package Summary_Packet_Period_Set_History_Package is new Printable_History (Packed_U16.T, Packed_U16.Representation.Image);
+   package Invalid_Dynamic_Sleep_Argument_History_Package is new Printable_History (Sequence_Step_Event_Info.T, Sequence_Step_Event_Info.Representation.Image);
 
    -- Data product history packages:
    package Frame_Running_Count_History_Package is new Printable_History (Packed_U16.T, Packed_U16.Representation.Image);
@@ -94,7 +96,7 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
       Sequence_Out_Of_Range_Timeout_History : Sequence_Out_Of_Range_Timeout_History_Package.Instance;
       Command_Failure_History : Command_Failure_History_Package.Instance;
       Invalid_Sequence_Id_History : Invalid_Sequence_Id_History_Package.Instance;
-      Extra_Sequence_Id_History : Extra_Sequence_Id_History_Package.Instance;
+      Unexpected_Register_Source_History : Unexpected_Register_Source_History_Package.Instance;
       No_Frame_Available_History : No_Frame_Available_History_Package.Instance;
       Dropped_Command_History : Dropped_Command_History_Package.Instance;
       Dropped_Command_Response_History : Dropped_Command_Response_History_Package.Instance;
@@ -105,6 +107,9 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
       Killed_Frame_History : Killed_Frame_History_Package.Instance;
       Invalid_Frame_Id_History : Invalid_Frame_Id_History_Package.Instance;
       Invalid_Dynamic_Command_Argument_History : Invalid_Dynamic_Command_Argument_History_Package.Instance;
+      Frame_Not_Running_History : Frame_Not_Running_History_Package.Instance;
+      Summary_Packet_Period_Set_History : Summary_Packet_Period_Set_History_Package.Instance;
+      Invalid_Dynamic_Sleep_Argument_History : Invalid_Dynamic_Sleep_Argument_History_Package.Instance;
       -- Data product histories:
       Frame_Running_Count_History : Frame_Running_Count_History_Package.Instance;
       Frame_Running_High_Water_Mark_History : Frame_Running_High_Water_Mark_History_Package.Instance;
@@ -186,14 +191,16 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    overriding procedure Sequence_Timeout (Self : in out Instance; Arg : in Sequence_Step_Event_Info.T);
    -- A sequence has entered sleep state with either overflow or underflow.
    overriding procedure Sequence_Out_Of_Range_Sleep (Self : in out Instance; Arg : in Sequence_Sleep_Event_Info.T);
-   -- A sequence timeout duration is out of range either underflow or overflow.
-   overriding procedure Sequence_Out_Of_Range_Timeout (Self : in out Instance; Arg : in Sequence_Timeout_Event_Info.T);
+   -- Computing a sequence's command response deadline overflowed the system time
+   -- representation.
+   overriding procedure Sequence_Out_Of_Range_Timeout (Self : in out Instance; Arg : in Sequence_Step_Event_Info.T);
    -- A command sent by a sequence received a failure response
    overriding procedure Command_Failure (Self : in out Instance; Arg : in Sequence_Step_Command_Event_Info.T);
    -- A Run_Sequence command was received with an out of range sequence ID
-   overriding procedure Invalid_Sequence_Id (Self : in out Instance; Arg : in Packed_U32.T);
-   -- Too many sequence IDs were passed to the Simple Command Sequencer
-   overriding procedure Extra_Sequence_Id (Self : in out Instance);
+   overriding procedure Invalid_Sequence_Id (Self : in out Instance; Arg : in Packed_U16.T);
+   -- A Register_Source command response was received but all sequence frames
+   -- already have a source ID.
+   overriding procedure Unexpected_Register_Source (Self : in out Instance);
    -- A Run_Sequence command was received but all frames are in use
    overriding procedure No_Frame_Available (Self : in out Instance);
    -- A command was dropped due to a full queue
@@ -213,11 +220,18 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    -- A Kill_Frame command was executed and the running sequence on the frame was
    -- halted.
    overriding procedure Killed_Frame (Self : in out Instance; Arg : in Sequence_Event_Info.T);
-   -- A Kill_Frame command was received with an out of range frame ID, or the frame
-   -- was not running.
+   -- A Kill_Frame command was received with an out of range frame ID.
    overriding procedure Invalid_Frame_Id (Self : in out Instance; Arg : in Packed_U32.T);
    -- A Command with a Dynamic Argument cannot be executed as the Argument is Invalid
    overriding procedure Invalid_Dynamic_Command_Argument (Self : in out Instance; Arg : in Sequence_Step_Command_Event_Info.T);
+   -- A Kill_Frame command targeted a frame that was not running, so there was
+   -- nothing to kill.
+   overriding procedure Frame_Not_Running (Self : in out Instance; Arg : in Packed_U32.T);
+   -- The summary packet period was set to a new value, in ticks.
+   overriding procedure Summary_Packet_Period_Set (Self : in out Instance; Arg : in Packed_U16.T);
+   -- A dynamic sleep step could not resolve its duration because the sequence's
+   -- argument failed validation.
+   overriding procedure Invalid_Dynamic_Sleep_Argument (Self : in out Instance; Arg : in Sequence_Step_Event_Info.T);
 
    -----------------------------------------------
    -- Data product handler primitives:

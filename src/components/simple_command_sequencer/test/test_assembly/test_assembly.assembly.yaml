@@ -28,7 +28,7 @@ components:
     # assembly-wide id pass after the per-sequence commands are injected) --
     # the resulting dictionary must be identical to the auto-assigned one.
     set_id_bases:
-      - "Command_Id_Base => 19"
+      - "Command_Id_Base => 25"
 connections:
   # Dummy connection. We need one to make schema happy, but it doesn't
   # affect testing.

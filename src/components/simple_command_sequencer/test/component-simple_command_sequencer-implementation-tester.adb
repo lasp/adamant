@@ -32,7 +32,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Sequence_Out_Of_Range_Timeout_History.Init (Depth => 100);
       Self.Command_Failure_History.Init (Depth => 100);
       Self.Invalid_Sequence_Id_History.Init (Depth => 100);
-      Self.Extra_Sequence_Id_History.Init (Depth => 100);
+      Self.Unexpected_Register_Source_History.Init (Depth => 100);
       Self.No_Frame_Available_History.Init (Depth => 100);
       Self.Dropped_Command_History.Init (Depth => 100);
       Self.Dropped_Command_Response_History.Init (Depth => 100);
@@ -43,6 +43,9 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Killed_Frame_History.Init (Depth => 100);
       Self.Invalid_Frame_Id_History.Init (Depth => 100);
       Self.Invalid_Dynamic_Command_Argument_History.Init (Depth => 100);
+      Self.Frame_Not_Running_History.Init (Depth => 100);
+      Self.Summary_Packet_Period_Set_History.Init (Depth => 100);
+      Self.Invalid_Dynamic_Sleep_Argument_History.Init (Depth => 100);
       -- Data product histories:
       Self.Frame_Running_Count_History.Init (Depth => 100);
       Self.Frame_Running_High_Water_Mark_History.Init (Depth => 100);
@@ -76,7 +79,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Sequence_Out_Of_Range_Timeout_History.Destroy;
       Self.Command_Failure_History.Destroy;
       Self.Invalid_Sequence_Id_History.Destroy;
-      Self.Extra_Sequence_Id_History.Destroy;
+      Self.Unexpected_Register_Source_History.Destroy;
       Self.No_Frame_Available_History.Destroy;
       Self.Dropped_Command_History.Destroy;
       Self.Dropped_Command_Response_History.Destroy;
@@ -87,6 +90,9 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Killed_Frame_History.Destroy;
       Self.Invalid_Frame_Id_History.Destroy;
       Self.Invalid_Dynamic_Command_Argument_History.Destroy;
+      Self.Frame_Not_Running_History.Destroy;
+      Self.Summary_Packet_Period_Set_History.Destroy;
+      Self.Invalid_Dynamic_Sleep_Argument_History.Destroy;
       -- Data product histories:
       Self.Frame_Running_Count_History.Destroy;
       Self.Frame_Running_High_Water_Mark_History.Destroy;
@@ -258,8 +264,9 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Sequence_Out_Of_Range_Sleep_History.Push (Arg);
    end Sequence_Out_Of_Range_Sleep;
 
-   -- A sequence timeout duration is out of range either underflow or overflow.
-   overriding procedure Sequence_Out_Of_Range_Timeout (Self : in out Instance; Arg : in Sequence_Timeout_Event_Info.T) is
+   -- Computing a sequence's command response deadline overflowed the system time
+   -- representation.
+   overriding procedure Sequence_Out_Of_Range_Timeout (Self : in out Instance; Arg : in Sequence_Step_Event_Info.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Sequence_Out_Of_Range_Timeout_History.Push (Arg);
@@ -273,19 +280,20 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
    end Command_Failure;
 
    -- A Run_Sequence command was received with an out of range sequence ID
-   overriding procedure Invalid_Sequence_Id (Self : in out Instance; Arg : in Packed_U32.T) is
+   overriding procedure Invalid_Sequence_Id (Self : in out Instance; Arg : in Packed_U16.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Invalid_Sequence_Id_History.Push (Arg);
    end Invalid_Sequence_Id;
 
-   -- Too many sequence IDs were passed to the Simple Command Sequencer
-   overriding procedure Extra_Sequence_Id (Self : in out Instance) is
+   -- A Register_Source command response was received but all sequence frames
+   -- already have a source ID.
+   overriding procedure Unexpected_Register_Source (Self : in out Instance) is
       Arg : constant Natural := 0;
    begin
       -- Push the argument onto the test history for looking at later:
-      Self.Extra_Sequence_Id_History.Push (Arg);
-   end Extra_Sequence_Id;
+      Self.Unexpected_Register_Source_History.Push (Arg);
+   end Unexpected_Register_Source;
 
    -- A Run_Sequence command was received but all frames are in use
    overriding procedure No_Frame_Available (Self : in out Instance) is
@@ -348,8 +356,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Killed_Frame_History.Push (Arg);
    end Killed_Frame;
 
-   -- A Kill_Frame command was received with an out of range frame ID, or the frame
-   -- was not running.
+   -- A Kill_Frame command was received with an out of range frame ID.
    overriding procedure Invalid_Frame_Id (Self : in out Instance; Arg : in Packed_U32.T) is
    begin
       -- Push the argument onto the test history for looking at later:
@@ -362,6 +369,29 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       -- Push the argument onto the test history for looking at later:
       Self.Invalid_Dynamic_Command_Argument_History.Push (Arg);
    end Invalid_Dynamic_Command_Argument;
+
+   -- A Kill_Frame command targeted a frame that was not running, so there was
+   -- nothing to kill.
+   overriding procedure Frame_Not_Running (Self : in out Instance; Arg : in Packed_U32.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Frame_Not_Running_History.Push (Arg);
+   end Frame_Not_Running;
+
+   -- The summary packet period was set to a new value, in ticks.
+   overriding procedure Summary_Packet_Period_Set (Self : in out Instance; Arg : in Packed_U16.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Summary_Packet_Period_Set_History.Push (Arg);
+   end Summary_Packet_Period_Set;
+
+   -- A dynamic sleep step could not resolve its duration because the sequence's
+   -- argument failed validation.
+   overriding procedure Invalid_Dynamic_Sleep_Argument (Self : in out Instance; Arg : in Sequence_Step_Event_Info.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Invalid_Dynamic_Sleep_Argument_History.Push (Arg);
+   end Invalid_Dynamic_Sleep_Argument;
 
    -----------------------------------------------
    -- Data product handler primitives:

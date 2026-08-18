@@ -26,12 +26,13 @@ mapping:
   command_timeout_seconds:
     required: false
     type: int
-    range: { min: 0 }
+    range: { min: 0, max: 2147483 }
     desc: |
       Default timeout, in whole seconds, that the sequencer will wait for
       a sub-command's response before declaring the sequence failed. Used
       for any sequence in this suite that does not specify its own
-      command_timeout_seconds.
+      command_timeout_seconds. Bounded so the millisecond count always
+      fits an Ada.Real_Time.Time_Span.
 
   with:
     required: false
@@ -108,10 +109,12 @@ mapping:
           command_timeout_seconds:
             required: false
             type: int
-            range: { min: 0 }
+            range: { min: 0, max: 2147483 }
             desc: |
               Override the suite-level default timeout for sub-command
-              responses, in whole seconds, for this sequence only.
+              responses, in whole seconds, for this sequence only. Bounded
+              so the millisecond count always fits an
+              Ada.Real_Time.Time_Span.
 
           sequence:
             required: true
@@ -160,16 +163,24 @@ mapping:
 
                   sleep_ms:
                     required: false
-                    type: int
-                    range: { min: 0, max: 4294967295 }
+                    type: text
                     desc: |
-                      Number of milliseconds to pause the sequence. Not
-                      bus-routed; the sequencer frame parks itself for the
-                      duration without issuing any command. Mutually exclusive
-                      with `command:`/`arg:`/`wait_for_completion:`.
+                      Milliseconds to pause the sequence. Not bus-routed; the
+                      sequencer frame parks itself for the duration without
+                      issuing any command. Mutually exclusive with
+                      `command:`/`arg:`/`wait_for_completion:`.
 
-                      Example:
-                        - sleep_ms: 3000  # sleep 3 seconds
+                      Either a static integer (bounded to 0 .. 2**31 - 1 so it
+                      always fits an Ada.Real_Time.Time_Span; enforced by the
+                      model), or a dynamic reference into the sequence's
+                      argument using the same "Arg[.field]..." syntax as
+                      dynamic command args. A dynamic sleep's referenced field
+                      must be a Packed_U32.T; its value is range-checked at
+                      execution time.
+
+                      Examples:
+                        - sleep_ms: 3000            # sleep 3 seconds
+                        - sleep_ms: Arg.Settle_Time # duration from the sequence argument
 
 # Additional validation rules (enforced in the model Python code):
 # - Command format must be "Component.Command" with valid identifiers, or

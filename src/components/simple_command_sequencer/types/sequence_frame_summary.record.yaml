@@ -3,8 +3,8 @@ description: Per-frame entry in the sequencer summary packet. One of these is pr
 fields:
   - name: Sequence_Id
     description: Id of the sequence running (or last run) on this frame. Only meaningful once a sequence has been started on the frame; check Status to disambiguate.
-    type: Interfaces.Unsigned_32
-    format: U32
+    type: Interfaces.Unsigned_16
+    format: U16
   - name: Step
     description: Current (or last executed) step of the sequence on this frame.
     type: Interfaces.Unsigned_16

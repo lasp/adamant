@@ -5,13 +5,10 @@
 {% endif %}
 with Simple_Sequencer_Types; use Simple_Sequencer_Types;
 with {{ assembly_name }}_Commands; use {{ assembly_name }}_Commands;
-with Command;
 with Command_Types;
 with Basic_Types;
 with Sequence_Enums;
-{% if needs_sequence_arg_utils %}
-with Sequence_Arg_Utils; use Sequence_Arg_Utils;
-{% endif %}
+with Ada.Real_Time;
 {% for include in includes %}
 with {{ include }};
 {% endfor %}
@@ -19,13 +16,25 @@ package {{ name }} is
 {% if preamble %}
    {{ preamble }}
 {% endif %}
+{% if needs_to_arg %}
+   -- Make the "&" operator on Byte_Array visible for To_Arg below.
+   use type Basic_Types.Byte_Array;
+
+   ---------------------------------------------------------------------------
+   -- Pad a serialized argument out to a full command argument buffer. An
+   -- expression function so the step-array constants below (elaborated with
+   -- this spec) can call it without an access-before-elaboration failure.
+   ---------------------------------------------------------------------------
+   function To_Arg (Bytes : Basic_Types.Byte_Array) return Command_Types.Command_Arg_Buffer_Type is
+      (Command_Types.Command_Arg_Buffer_Type (Bytes & Basic_Types.Byte_Array'(1 .. Command_Types.Command_Arg_Buffer_Type'Length - Bytes'Length => 0)));
+{% endif %}
 {% if suite_has_dynamic_steps %}
    ---------------------------------------------------------------------------
    -- Resolver types – one per dynamic step, each encodes a traversal path.
    ---------------------------------------------------------------------------
 {% for seq in sequences.values() %}
 {% for step in seq.steps %}
-{% if step.is_dynamic() %}
+{% if step.needs_resolver() %}
    function {{ step.resolver_type_name }} (Bytes : Basic_Types.Byte_Array; Args : out Command_Types.Command_Arg_Buffer_Type) return Boolean;
 {% endif %}
 {% endfor %}
@@ -38,29 +47,40 @@ package {{ name }} is
    {{ seq.name }}_Steps : aliased constant Step_Array :=
      [
 {% for step in seq.steps %}
-{% if step.is_sleep() %}
-      {{ loop.index0 }} => (Kind       => Sleep,
-                           Id         => 0,
-                           Arg_Length => 0,
-                           Sleep_Arg  => {{ step.get_sleep_expression() }}){% if not loop.last %},{% endif %}
+{% if step.is_static_sleep() %}
+      {{ loop.index0 }} =>
+         (Kind       => Sleep,
+          Id         => 0,
+          Arg_Length => 0,
+          Sleep_Arg  => {{ step.get_sleep_expression() }}){% if not loop.last %},{% endif %}
+
+{% elif step.is_dynamic_sleep() %}
+      {{ loop.index0 }} =>
+         (Kind           => Runtime_Sleep,
+          Id             => 0,
+          Arg_Length     => Packed_U32.Serialization.Serialized_Length,
+          Sleep_Resolver => {{ step.resolver_type_name }}'Access){% if not loop.last %},{% endif %}
 
 {% elif step.is_dynamic() %}
-      {{ loop.index0 }} => (Kind       => Runtime_Argument_Command_Step,
-                           Id         => {{ step.component_name }}_{{ step.command_name }},
-                           Arg_Length => {{ step.dynamic_arg_type_package }}.Serialization.Serialized_Length,
-                           Resolver => {{ step.resolver_type_name }}'Access){% if not loop.last %},{% endif %}
+      {{ loop.index0 }} =>
+         (Kind       => Runtime_Argument_Command_Step,
+          Id         => {{ step.component_name }}_{{ step.command_name }},
+          Arg_Length => {{ step.dynamic_arg_type_package }}.Serialization.Serialized_Length,
+          Resolver   => {{ step.resolver_type_name }}'Access){% if not loop.last %},{% endif %}
 
 {% elif step.has_arg() %}
-      {{ loop.index0 }} => (Kind       => Command_Step,
-                           Id         => {{ step.component_name }}_{{ step.command_name }},
-                           Arg_Length => {{ step.arg_type_package }}.Serialization.Serialized_Length,
-                           Arg        => To_Arg ({{ step.arg_type_package }}.Serialization.To_Byte_Array (({{ step.get_arg_expression() }})))){% if not loop.last %},{% endif %}
+      {{ loop.index0 }} =>
+         (Kind       => Command_Step,
+          Id         => {{ step.component_name }}_{{ step.command_name }},
+          Arg_Length => {{ step.arg_type_package }}.Serialization.Serialized_Length,
+          Arg        => To_Arg ({{ step.arg_type_package }}.Serialization.To_Byte_Array (({{ step.get_arg_expression() }})))){% if not loop.last %},{% endif %}
 
 {% else %}
-      {{ loop.index0 }} => (Kind       => Command_Step,
-                           Id         => {{ step.component_name }}_{{ step.command_name }},
-                           Arg_Length => 0,
-                           Arg        => [others => 0]){% if not loop.last %},{% endif %}
+      {{ loop.index0 }} =>
+         (Kind       => Command_Step,
+          Id         => {{ step.component_name }}_{{ step.command_name }},
+          Arg_Length => 0,
+          Arg        => [others => 0]){% if not loop.last %},{% endif %}
 
 {% endif %}
 {% endfor %}
@@ -72,48 +92,15 @@ package {{ name }} is
    Sequences_Table : aliased constant Sequences_Type :=
      [
 {% for seq in sequences.values() %}
-      {{ loop.index0 }} => (
-         Wait_For_Cmd_Resp      => {{ "True" if seq.wait_for_command_completion else "False" }},
-         Abort_On_Failed_Cmd    => {{ "False" if seq.continue_on_failure else "True" }},
-         Command_Timeout_Millis => {{ seq.command_timeout_millis }},
-         Response_Behavior      => Sequence_Enums.Sequence_Response_Behavior.{{ seq.response_behavior }},
-         Steps                  => {{ seq.name }}_Steps'Access){% if not loop.last %},{% endif %}
+      {{ loop.index0 }} =>
+         (Wait_For_Cmd_Resp   => {{ "True" if seq.wait_for_command_completion else "False" }},
+          Abort_On_Failed_Cmd => {{ "False" if seq.continue_on_failure else "True" }},
+          Command_Timeout     => Ada.Real_Time.Milliseconds ({{ seq.command_timeout_millis }}),
+          Response_Behavior   => Sequence_Enums.Sequence_Response_Behavior.{{ seq.response_behavior }},
+          Steps               => {{ seq.name }}_Steps'Access){% if not loop.last %},{% endif %}
 
 {% endfor %}
      ];
 
    Sequences : constant Sequences_Access := Sequences_Table'Access;
-
-   ---------------------------------------------------------------------------
-   -- Command builders for the per-sequence ("ghost") commands. These commands
-   -- are first-class in the assembly command dictionary but have no generated
-   -- Ada handler on the component, so this surface reconstructs the
-   -- operator-side builders (id getters + Command.T constructors) for unit
-   -- tests and other on-board callers.
-   --
-   -- Set Id_Base to the sequencer instance's command id base (the value passed
-   -- to Set_Id_Bases). Each sequence command id is then
-   -- Id_Base + Simple_Command_Sequencer_Commands.Num_Commands + declaration
-   -- index.
-   ---------------------------------------------------------------------------
-   type Instance is tagged private;
-
-   -- Set the sequencer instance's command id base so constructed commands carry
-   -- ids that match what the component registered at runtime.
-   procedure Set_Id_Base (Self : in out Instance; Id_Base : in Command_Types.Command_Id);
-
-   -- Set the operator source id stamped into the header of constructed commands
-   -- (defaults to 0). Mirrors the command suite's Set_Source_Id.
-   procedure Set_Source_Id (Self : in out Instance; Source_Id : in Command_Types.Command_Source_Id);
-
-{% for seq in sequences.values() %}
-   function Get_{{ seq.name }}_Id (Self : in Instance) return Command_Types.Command_Id;
-   function {{ seq.name }} (Self : in Instance{% if seq.has_arg() %}; Arg : in {{ seq.arg_type }}{% endif %}) return Command.T;
-{% endfor %}
-
-private
-   type Instance is tagged record
-      Id_Base : Command_Types.Command_Id := 0;
-      Source_Id : Command_Types.Command_Source_Id := 0;
-   end record;
 end {{ name }};

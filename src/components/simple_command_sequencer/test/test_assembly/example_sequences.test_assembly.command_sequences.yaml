@@ -43,12 +43,13 @@ sequences:
       - command: Component_A.Command_1
 
   - name: Sequence_D
-    description: Sequence with a large sleep value to test an overflow sleep
+    description: Sequence with a dynamic sleep duration taken from the sequence argument
     wait_for_command_completion: true
     continue_on_failure: false
+    arg_type: Packed_U32.T
 
     sequence:
-      - sleep_ms: 4294967295
+      - sleep_ms: Arg
 
   # A sequence that calls another sequence. Each sequence is a first-class
   # command on the sequencer, so a sub-sequence step is just a command step
@@ -75,3 +76,64 @@ sequences:
 
     sequence:
       - command: Component_A.Command_1
+
+  # A deferred sequence that waits on its sub-command, so the operator's
+  # deferred reply arrives only when the sub-command completes (or the
+  # sequence aborts, times out, or is killed).
+  - name: Sequence_G
+    description: Waiting sequence with a statically deferred command response
+    wait_for_command_completion: true
+    continue_on_failure: false
+    response_behavior: send_after_sequence_completion
+
+    sequence:
+      - command: Component_A.Command_1
+
+  # Regression coverage for dynamic-arg repacking: the sequence argument's
+  # leading 4-bit pad puts both leaf fields at non-byte-aligned offsets. Each
+  # step's resolver must deserialize the packed argument and re-serialize the
+  # leaf field standalone -- byte-offset slicing would corrupt both.
+  - name: Sequence_H
+    description: Dynamic steps traversing misaligned 8-bit and 16-bit packed fields
+    wait_for_command_completion: true
+    continue_on_failure: false
+    arg_type: Nibble_Test_Args.T
+
+    sequence:
+      - command: Component_A.Command_8
+        arg: Arg.Wide
+      - command: Component_A.Command_7
+        arg: Arg.Nibble
+
+  # A sequence whose FIRST step is a static sleep, so wake-time overflow (the
+  # only failure a model-bounded static sleep has left) can be exercised
+  # without a command step's response deadline overflowing first.
+  - name: Sequence_I
+    description: A lone static sleep, for wake-time overflow coverage
+    wait_for_command_completion: true
+    continue_on_failure: false
+
+    sequence:
+      - sleep_ms: 3000
+
+  # The two sequences below take Validated_Args, whose Mode enumeration can
+  # fail validation -- exercising the invalid-dynamic-argument failure paths
+  # (all other test argument types accept every bit pattern).
+  - name: Sequence_J
+    description: Dynamic command argument resolved from a validatable record
+    wait_for_command_completion: true
+    continue_on_failure: false
+    arg_type: Validated_Args.T
+
+    sequence:
+      - command: Component_A.Command_3
+        arg: Arg.Duration
+
+  - name: Sequence_K
+    description: Dynamic sleep resolved from a validatable record
+    wait_for_command_completion: true
+    continue_on_failure: false
+    arg_type: Validated_Args.T
+
+    sequence:
+      - sleep_ms: Arg.Duration

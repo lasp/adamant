@@ -9,10 +9,14 @@ with Sequence_Enums; use Sequence_Enums.Sequence_Response_Behavior;
 with Sequence_Event_Info.Assertion; use Sequence_Event_Info.Assertion;
 with Sequence_Step_Event_Info.Assertion; use Sequence_Step_Event_Info.Assertion;
 with Sequence_Sleep_Event_Info.Assertion; use Sequence_Sleep_Event_Info.Assertion;
-with Sequence_Timeout_Event_Info.Assertion; use Sequence_Timeout_Event_Info.Assertion;
+with Sequence_Step_Command_Event_Info.Assertion; use Sequence_Step_Command_Event_Info.Assertion;
 with Command_Response; use Command_Response;
 with Command_Enums; use Command_Enums.Command_Response_Status;
+with Command_Types;
 with Test_Assembly_Command_Sequences_Example_Sequences;
+with Test_Assembly_Command_Sequences_Example_Sequences_Commands;
+with Nibble_Test_Args;
+with Validated_Args;
 with Simple_Sequencer_Summary_Record_2;
 with Test_Component_Commands;
 with Command.Assertion; use Command.Assertion;
@@ -93,7 +97,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       -- We rely on the sequence's default Command_Timeout_Millis to be well above
       -- any time advance in this test, so no timeout fires.
-      Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
 
       T.Command_T_Send (Cmd);
@@ -176,7 +180,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
    begin
       Component_A_Commands.Set_Id_Base (1);
       Component_A_Commands.Set_Source_Id (0);
-      Component_B_Commands.Set_Id_Base (7);
+      Component_B_Commands.Set_Id_Base (9);
       Component_B_Commands.Set_Source_Id (0);
 
       T.System_Time := (Seconds => 0, Subseconds => 0);
@@ -188,8 +192,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       BArray (BArray'First .. BArray'First + Sequence_B_Arg.Serialization.Serialized_Length - 1) :=
          Sequence_B_Arg.Serialization.To_Byte_Array (Argument);
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 1, Response_Behavior => Send_After_Sequence_Start,
-          Arg_Length => Sequence_B_Arg.Serialization.Serialized_Length, Buffer_Arg => BArray), Cmd);
+         (Sequence_Id => 1, Arg_Length => Sequence_B_Arg.Serialization.Serialized_Length, Buffer_Arg => BArray), Cmd);
       pragma Assert (Status = Success);
 
       T.Command_T_Send (Cmd);
@@ -250,13 +253,13 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       -- sequencer's command id base (default 1 in this test) so the constructed
       -- command id lands in the ghost block the component translates to
       -- Run_Sequence.
-      Seq_Commands : Test_Assembly_Command_Sequences_Example_Sequences.Instance;
+      Seq_Commands : Test_Assembly_Command_Sequences_Example_Sequences_Commands.Instance;
       Argument : constant Sequence_B_Arg.T := (Component_A_Arg => (Value => 12), Component_B_Arg => (Value => 13));
       Cmd : Command.T;
    begin
       Component_A_Commands.Set_Id_Base (1);
       Component_A_Commands.Set_Source_Id (0);
-      Component_B_Commands.Set_Id_Base (7);
+      Component_B_Commands.Set_Id_Base (9);
       Component_B_Commands.Set_Source_Id (0);
       Seq_Commands.Set_Id_Base (1);
 
@@ -301,7 +304,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
    begin
       -- 99 is well out of range for our three-sequence table
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 99, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 99, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
 
       T.Command_T_Send (Cmd);
@@ -324,7 +327,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
    begin
       -- Occupy Frame 0
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -332,7 +335,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       -- Occupy Frame 1
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -340,7 +343,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       -- Both frames now in Running state; attempt a third sequence
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -368,8 +371,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       BArray (BArray'First .. BArray'First + Packed_U32.Serialization.Serialized_Length - 1) :=
          Packed_U32.Serialization.To_Byte_Array (Argument);
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 1, Response_Behavior => Send_After_Sequence_Start,
-          Arg_Length => Packed_U32.Serialization.Serialized_Length, Buffer_Arg => BArray), Cmd);
+         (Sequence_Id => 1, Arg_Length => Packed_U32.Serialization.Serialized_Length, Buffer_Arg => BArray), Cmd);
       pragma Assert (Status = Success);
 
       T.Command_T_Send (Cmd);
@@ -417,7 +419,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       T.System_Time := (Seconds => 0, Subseconds => 0);
 
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
 
       T.Command_T_Send (Cmd);
@@ -467,7 +469,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       -- Start Sequence_A on Frame 0
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -476,7 +478,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       -- Start Sequence_A on Frame 1
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -556,7 +558,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       T.System_Time := (Seconds => 0, Subseconds => 0);
 
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
 
       T.Command_T_Send (Cmd);
@@ -602,7 +604,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Status : Serialization_Status;
    begin
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
 
       -- Simulate a queue-full drop by calling the drop handler directly
@@ -630,7 +632,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       -- Start a sequence and get to Waiting_For_Cmd_Resp
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -699,7 +701,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       T.System_Time := (Seconds => 0, Subseconds => 0);
 
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 2, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 2, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
 
       T.Command_T_Send (Cmd);
@@ -736,7 +738,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       -- Run Sequence_C (no-wait, completes in one tick) on Frame 0
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 2, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 2, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -749,7 +751,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       -- Frame 0 is now Not_Running; start a second sequence and confirm it reuses Frame 0
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 2, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 2, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -763,32 +765,103 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 4); -- 2 per run * 2 runs
    end Test_Frame_Reuse_After_Completion;
 
+   --  Sequence_D's sleep duration is dynamic, resolved from the sequence's
+   --  Packed_U32 argument at execution time. Unlike static sleeps (bounded to
+   --  Natural by the model), a runtime value above Natural'Last cannot be
+   --  represented as a Time_Span, so the sequence must fail at the sleep step
+   --  with Sequence_Out_Of_Range_Sleep.
    overriding procedure Test_Out_Of_Range_Sleep (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      BArray : Simple_Sequencer_Types.Run_Sequence_Buffer_Type;
+      Cmd : Command.T;
+      Status : Serialization_Status;
+   begin
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
+
+      BArray := [others => 0];
+      BArray (BArray'First .. BArray'First + Packed_U32.Serialization.Serialized_Length - 1) :=
+         Packed_U32.Serialization.To_Byte_Array ((Value => Interfaces.Unsigned_32'Last));
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 3, Arg_Length => Packed_U32.Serialization.Serialized_Length, Buffer_Arg => BArray), Cmd);
+      pragma Assert (Status = Success);
+
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      --  The claim starts execution immediately: the sequence starts and then
+      --  fails at the dynamic sleep step because the resolved duration is out
+      --  of range.
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 1);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (1), (Sequence_Id => 3, Frame_Id => 0));
+      Natural_Assert.Eq (T.Sequence_Out_Of_Range_Sleep_History.Get_Count, 1);
+      Sequence_Sleep_Event_Info_Assert.Eq (T.Sequence_Out_Of_Range_Sleep_History.Get (1), (Sequence_Id => 3, Frame_Id => 0, Milliseconds => Interfaces.Unsigned_32'Last));
+   end Test_Out_Of_Range_Sleep;
+
+   --  Sequence_I's first step is a static sleep. Static durations are bounded
+   --  by the model, so the only failure left is Sys_Time overflowing while
+   --  computing the wake time -- provoked by parking the system clock at the
+   --  end of its range.
+   overriding procedure Test_Static_Out_Of_Range_Sleep (Self : in out Instance) is
       T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
       Cmd : Command.T;
       Status : Serialization_Status;
    begin
       T.System_Time := (Seconds => Interfaces.Unsigned_32'Last, Subseconds => 0);
 
-      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 8, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
 
-      Status := T.Commands.Run_Sequence ((Sequence_Id => 3, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      --  The claim starts execution and immediately fails at the sleep step:
+      --  the wake time cannot be represented.
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Sequence_Out_Of_Range_Sleep_History.Get_Count, 1);
+      Sequence_Sleep_Event_Info_Assert.Eq (T.Sequence_Out_Of_Range_Sleep_History.Get (1), (Sequence_Id => 8, Frame_Id => 0, Milliseconds => 3_000));
+   end Test_Static_Out_Of_Range_Sleep;
+
+   --  Happy-path dynamic sleep: Sequence_D parks for the number of
+   --  milliseconds carried in its argument, then completes on the wake-up
+   --  tick.
+   overriding procedure Test_Dynamic_Sleep (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      BArray : Simple_Sequencer_Types.Run_Sequence_Buffer_Type;
+      Cmd : Command.T;
+      Status : Serialization_Status;
+   begin
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      BArray := [others => 0];
+      BArray (BArray'First .. BArray'First + Packed_U32.Serialization.Serialized_Length - 1) :=
+         Packed_U32.Serialization.To_Byte_Array ((Value => 3_000));
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 3, Arg_Length => Packed_U32.Serialization.Serialized_Length, Buffer_Arg => BArray), Cmd);
       pragma Assert (Status = Success);
 
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
-      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
+      --  The claim resolves the duration and parks the frame; no command is
+      --  dispatched and nothing has failed.
       Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 1);
-      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (1), (Sequence_Id => 3, Frame_Id => 0));
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 0);
+      Natural_Assert.Eq (T.Invalid_Dynamic_Sleep_Argument_History.Get_Count, 0);
+      Natural_Assert.Eq (T.Sequence_Out_Of_Range_Sleep_History.Get_Count, 0);
 
+      --  Before the wake point the tick is a no-op.
+      T.System_Time := (Seconds => 2, Subseconds => 0);
       T.Tick_T_Send (((0, 0), 0));
       Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 0);
 
-      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
-      Natural_Assert.Eq (T.Sequence_Out_Of_Range_Sleep_History.Get_Count, 1);
-      Sequence_Sleep_Event_Info_Assert.Eq (T.Sequence_Out_Of_Range_Sleep_History.Get (1), (Sequence_Id => 3, Frame_Id => 0, Milliseconds => Interfaces.Unsigned_32'Last));
-   end Test_Out_Of_Range_Sleep;
+      --  At the wake point the sequence resumes and completes.
+      T.System_Time := (Seconds => 3, Subseconds => 0);
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Completed_History.Get (1), (Sequence_Id => 3, Frame_Id => 0));
+   end Test_Dynamic_Sleep;
 
    overriding procedure Test_Timeout (Self : in out Instance) is
       T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
@@ -803,7 +876,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
 
-      Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
 
       T.Command_T_Send (Cmd);
@@ -829,44 +902,36 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Sequence_Step_Event_Info_Assert.Eq (T.Sequence_Timeout_History.Get (1), (Sequence_Id => 0, Frame_Id => 0, Step => 1));
    end Test_Timeout;
 
+   --  With system time at the far end of its range, the response deadline for
+   --  the first dispatched command cannot be represented. The overflow is
+   --  detected at dispatch time -- the command is never sent and the sequence
+   --  fails immediately.
    overriding procedure Test_Out_Of_Range_Timeout (Self : in out Instance) is
       T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
-      Component_A_Commands : Test_Component_Commands.Instance;
       Cmd : Command.T;
       Status : Serialization_Status;
    begin
-      Component_A_Commands.Set_Id_Base (1);
-      Component_A_Commands.Set_Source_Id (0);
-
       T.System_Time := (Seconds => Interfaces.Unsigned_32'Last, Subseconds => 0);
 
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
 
-      Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
 
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
-      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
       Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 1);
       Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (1), (Sequence_Id => 0, Frame_Id => 0));
-
-      T.Tick_T_Send (((0, 0), 0));
-      Natural_Assert.Eq (T.Dispatch_All, 1);
-
-      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 1);
-      Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (1), Component_A_Commands.Command_1);
-
-      T.Tick_T_Send (((0, 0), 0));
-      Natural_Assert.Eq (T.Dispatch_All, 1);
-
-      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
       Natural_Assert.Eq (T.Sequence_Out_Of_Range_Timeout_History.Get_Count, 1);
-      Sequence_Timeout_Event_Info_Assert.Eq (T.Sequence_Out_Of_Range_Timeout_History.Get (1), (Sequence_Id => 0, Frame_Id => 0, Milliseconds => 10_000));
+      Sequence_Step_Event_Info_Assert.Eq (T.Sequence_Out_Of_Range_Timeout_History.Get (1), (Sequence_Id => 0, Frame_Id => 0, Step => 0));
+
+      --  The step's command was never dispatched.
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 0);
    end Test_Out_Of_Range_Timeout;
 
-   overriding procedure Test_Extra_Sequence_Id (Self : in out Instance) is
+   overriding procedure Test_Unexpected_Register_Source (Self : in out Instance) is
       T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
    begin
       T.Command_Response_T_Send ((
@@ -878,8 +943,8 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
-      Natural_Assert.Eq (T.Extra_Sequence_Id_History.Get_Count, 1);
-   end Test_Extra_Sequence_Id;
+      Natural_Assert.Eq (T.Unexpected_Register_Source_History.Get_Count, 1);
+   end Test_Unexpected_Register_Source;
 
    --  Kill_All_Sequences halts running sequences. Frames previously assigned a Source_Id
    --  remain claimable for the next Run_Sequence call.
@@ -892,8 +957,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       -- Start a sequence so a frame is in Running state
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start,
-          Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -908,8 +972,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       -- A subsequent Run_Sequence must succeed - the frame is claimable again
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start,
-          Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -927,8 +990,10 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
-      -- No events on the happy path
-      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
+      -- The new period is reported in an event.
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Summary_Packet_Period_Set_History.Get_Count, 1);
+      Packed_U16_Assert.Eq (T.Summary_Packet_Period_Set_History.Get (1), (Value => 42));
    end Test_Set_Summary_Packet_Period;
 
    --  ---------- Send_After_Sequence_Completion (deferred Command_Response) ---
@@ -942,32 +1007,38 @@ package body Simple_Command_Sequencer_Tests.Implementation is
    --  (before/after completion) and its Source_Id/Status.
 
    --  Happy path: the operator gets a Success reply only after the sequence
-   --  has actually completed, not at dispatch time.
+   --  has actually completed, not at dispatch time. Sequence_G is statically
+   --  configured send_after_sequence_completion and waits on its sub-command,
+   --  so the reply is held while the frame is parked.
    overriding procedure Test_Deferred_Response_On_Completion (Self : in out Instance) is
       T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Component_A_Commands : Test_Component_Commands.Instance;
       Cmd : Command.T;
       Status : Serialization_Status;
    begin
+      Component_A_Commands.Set_Id_Base (1);
+      Component_A_Commands.Set_Source_Id (0);
       T.Commands.Set_Source_Id (100);
       T.System_Time := (Seconds => 0, Subseconds => 0);
 
-      --  Sequence_C is no-wait, so a single tick runs it to completion.
       Status := T.Commands.Run_Sequence
-        ((Sequence_Id => 2, Response_Behavior => Send_After_Sequence_Completion,
-          Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+        ((Sequence_Id => 6, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
 
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
+      --  The claim dispatched the sub-command and parked the frame;
       --  Sequence_Started fired but no reply yet — it is being held.
       Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 0);
 
-      --  Single tick runs Sequence_C to completion. The deferred Command_Response
-      --  is sent from inside Tick processing and delivered synchronously to the
+      --  Complete the sub-command: the sequence finishes inside the response
+      --  handler and the deferred Success is delivered synchronously to the
       --  tester's Command_Response_T_Recv_Sync history.
-      T.Tick_T_Send (((0, 0), 0));
+      T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0,
+         Command_Id => Component_A_Commands.Get_Command_1_Id, Status => Success));
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
 
@@ -980,14 +1051,12 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       end;
    end Test_Deferred_Response_On_Completion;
 
-   --  Sub-command failure on a wait_for_completion sequence (Sequence_B) with
-   --  Abort_On_Failed_Cmd should fire Sequence_Aborted and emit a deferred
-   --  Failure to the operator.
+   --  Sub-command failure on the deferred, waiting Sequence_G (which aborts on
+   --  failure) should fire Sequence_Aborted and emit a deferred Failure to the
+   --  operator.
    overriding procedure Test_Deferred_Response_On_Abort (Self : in out Instance) is
       T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
       Component_A_Commands : Test_Component_Commands.Instance;
-      Argument : Sequence_B_Arg.T;
-      BArray : Simple_Sequencer_Types.Run_Sequence_Buffer_Type;
       Cmd : Command.T;
       Status : Serialization_Status;
    begin
@@ -996,30 +1065,21 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       T.Commands.Set_Source_Id (100);
       T.System_Time := (Seconds => 0, Subseconds => 0);
 
-      Argument := (Component_A_Arg => (Value => 7), Component_B_Arg => (Value => 8));
-      BArray := [others => 0];
-      BArray (BArray'First .. BArray'First + Sequence_B_Arg.Serialization.Serialized_Length - 1) :=
-         Sequence_B_Arg.Serialization.To_Byte_Array (Argument);
       Status := T.Commands.Run_Sequence
-        ((Sequence_Id => 1, Response_Behavior => Send_After_Sequence_Completion,
-          Arg_Length => Sequence_B_Arg.Serialization.Serialized_Length,
-          Buffer_Arg => BArray), Cmd);
+        ((Sequence_Id => 6, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
 
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
-      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 0);
 
-      --  Tick dispatches step 0; frame goes to Waiting_For_Cmd_Resp.
-      T.Tick_T_Send (((0, 0), 0));
-      Natural_Assert.Eq (T.Dispatch_All, 1);
+      --  The claim dispatched step 0 and parked the frame; the reply is held.
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 1);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 0);
 
       --  Feed Failure for the sub-command -- sequence aborts and the deferred
       --  Failure is delivered synchronously inside the response handler.
       T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0,
-         Command_Id => Component_A_Commands.Get_Command_3_Id, Status => Failure));
+         Command_Id => Component_A_Commands.Get_Command_1_Id, Status => Failure));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       Natural_Assert.Eq (T.Sequence_Aborted_History.Get_Count, 1);
@@ -1043,16 +1103,14 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       T.System_Time := (Seconds => 0, Subseconds => 0);
 
       Status := T.Commands.Run_Sequence
-        ((Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Completion,
-          Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+        ((Sequence_Id => 6, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
-      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 0);
 
-      --  Tick: dispatch step 0; frame parks awaiting sub-command response.
-      T.Tick_T_Send (((0, 0), 0));
-      Natural_Assert.Eq (T.Dispatch_All, 1);
+      --  The claim dispatched step 0 and parked the frame; the reply is held.
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 0);
 
       --  Advance well past the 10-second command_timeout without responding.
       --  Timeout fires and the deferred Failure is delivered synchronously.
@@ -1084,8 +1142,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       T.Commands.Set_Source_Id (100);
       Status := T.Commands.Run_Sequence
-        ((Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Completion,
-          Arg_Length => 0, Buffer_Arg => [others => 0]), Run_Cmd);
+        ((Sequence_Id => 6, Arg_Length => 0, Buffer_Arg => [others => 0]), Run_Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Run_Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -1120,37 +1177,42 @@ package body Simple_Command_Sequencer_Tests.Implementation is
    --  Source_Id, no cross-talk.
    overriding procedure Test_Concurrent_Deferred_Responses (Self : in out Instance) is
       T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Component_A_Commands : Test_Component_Commands.Instance;
       Cmd : Command.T;
       Status : Serialization_Status;
    begin
+      Component_A_Commands.Set_Id_Base (1);
       T.System_Time := (Seconds => 0, Subseconds => 0);
 
-      --  Operator A starts a deferred Sequence_C in Frame[0].
+      --  Operator A starts the deferred, waiting Sequence_G in Frame[0].
       T.Commands.Set_Source_Id (100);
       Status := T.Commands.Run_Sequence
-        ((Sequence_Id => 2, Response_Behavior => Send_After_Sequence_Completion,
-          Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+        ((Sequence_Id => 6, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
 
-      --  Operator B starts a deferred Sequence_C in Frame[1].
+      --  Operator B starts a second Sequence_G in Frame[1].
       T.Commands.Set_Source_Id (101);
       Status := T.Commands.Run_Sequence
-        ((Sequence_Id => 2, Response_Behavior => Send_After_Sequence_Completion,
-          Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+        ((Sequence_Id => 6, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
 
       Natural_Assert.Eq (T.Dispatch_All, 2);
       Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 2);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 0);
 
-      --  One tick completes both no-wait Sequence_C runs in their respective
-      --  frames (Execute_Sequence runs per-frame inside the Tick handler).
-      --  Both deferred Success replies are delivered synchronously inside the
-      --  Tick processing -- by the time Dispatch_All returns, both are in
-      --  Command_Response_T_Recv_Sync_History.
-      T.Tick_T_Send (((0, 0), 0));
+      --  Complete Frame[0]'s sub-command: only operator A's deferred Success
+      --  is delivered.
+      T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0,
+         Command_Id => Component_A_Commands.Get_Command_1_Id, Status => Success));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
+
+      --  Complete Frame[1]'s sub-command: operator B's reply follows.
+      T.Command_Response_T_Send ((Source_Id => 1, Registration_Id => 0,
+         Command_Id => Component_A_Commands.Get_Command_1_Id, Status => Success));
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 2);
@@ -1159,13 +1221,52 @@ package body Simple_Command_Sequencer_Tests.Implementation is
          Cr1 : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (1);
          Cr2 : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (2);
       begin
-         --  Frame[0] (operator A) completes first since it's iterated first.
          Natural_Assert.Eq (Natural (Cr1.Source_Id), 100);
          pragma Assert (Cr1.Status = Success);
          Natural_Assert.Eq (Natural (Cr2.Source_Id), 101);
          pragma Assert (Cr2.Status = Success);
       end;
    end Test_Concurrent_Deferred_Responses;
+
+   --  A deferred-configured sequence that fails to claim a frame must still
+   --  produce an immediate Failure reply -- the defer flag is only set on a
+   --  successful claim, so the operator is never left waiting on a reply that
+   --  can never come.
+   overriding procedure Test_Deferred_Claim_Failure (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Cmd : Command.T;
+      Status : Serialization_Status;
+   begin
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      --  Occupy both frames with Sequence_A (each parks on its first command).
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 2);
+      --  Each start-behavior Run_Sequence replied immediately with Success.
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 2);
+
+      --  The deferred Sequence_G cannot claim a frame: No_Frame_Available and
+      --  an IMMEDIATE Failure reply to the operator.
+      T.Commands.Set_Source_Id (100);
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 6, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      Natural_Assert.Eq (T.No_Frame_Available_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 3);
+      declare
+         Cr : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (3);
+      begin
+         Natural_Assert.Eq (Natural (Cr.Source_Id), 100);
+         pragma Assert (Cr.Status = Failure);
+      end;
+   end Test_Deferred_Claim_Failure;
 
    --  Sequences calling sequences: each sequence is a first-class command on
    --  the sequencer, so Sequence_E's first step is the sequencer's own
@@ -1182,7 +1283,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
    overriding procedure Test_Sub_Sequence_Call (Self : in out Instance) is
       T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
       Component_A_Commands : Test_Component_Commands.Instance;
-      Seq_Commands : Test_Assembly_Command_Sequences_Example_Sequences.Instance;
+      Seq_Commands : Test_Assembly_Command_Sequences_Example_Sequences_Commands.Instance;
       Sub_Cmd : Command.T;
    begin
       Component_A_Commands.Set_Id_Base (1);
@@ -1222,11 +1323,23 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       T.Command_T_Send (Sub_Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
-      --  Sequence_C started on frame 1. Its immediate Success reply targets
-      --  frame 0's source id -- that reply IS the sub-command response that
-      --  frame 0 is waiting on.
+      --  Sequence_C started on frame 1 and -- being no-wait -- ran to
+      --  completion inside the claim itself, dispatching its two Command_1s
+      --  with frame 1's source id. Its Success reply targets frame 0's source
+      --  id -- that reply IS the sub-command response frame 0 is waiting on.
       Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 2);
       Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (2), (Sequence_Id => 2, Frame_Id => 1));
+      Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Completed_History.Get (1), (Sequence_Id => 2, Frame_Id => 1));
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 3);
+      declare
+         Frame_1_Commands : Test_Component_Commands.Instance;
+      begin
+         Frame_1_Commands.Set_Id_Base (1);
+         Frame_1_Commands.Set_Source_Id (1);
+         Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (2), Frame_1_Commands.Command_1);
+         Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (3), Frame_1_Commands.Command_1);
+      end;
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 2);
       declare
          Cr : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (2);
@@ -1239,15 +1352,8 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       --  (Component_A.Command_1) inside the response handler, then waits.
       T.Command_Response_T_Send (T.Command_Response_T_Recv_Sync_History.Get (2));
       Natural_Assert.Eq (T.Dispatch_All, 1);
-
-      --  Tick: frame 1 runs the no-wait Sequence_C to completion (frame 0 is
-      --  parked waiting on Command_1's response).
-      T.Tick_T_Send (((0, 0), 0));
-      Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 4);
-      Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (2), Component_A_Commands.Command_1);
-      Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
-      Sequence_Event_Info_Assert.Eq (T.Sequence_Completed_History.Get (1), (Sequence_Id => 2, Frame_Id => 1));
+      Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (4), Component_A_Commands.Command_1);
 
       --  Complete frame 0's final step; the response handler finishes
       --  Sequence_E immediately (the tick is a no-op on the idle frame).
@@ -1311,14 +1417,12 @@ package body Simple_Command_Sequencer_Tests.Implementation is
             (Sequence_Id => 0, Step => 0, Status => Not_Running, Response_Behavior => Send_After_Sequence_Start, Operator_Source_Id => 0));
       end;
 
-      --  Start Sequence_E deferred (operator 100) through the generic
-      --  Run_Sequence command, which carries the per-call response behavior.
-      --  The next tick dispatches its first step and parks the frame; the same
-      --  tick's packet reflects that end-of-tick state.
+      --  Start the statically deferred, waiting Sequence_G (operator 100). The
+      --  claim dispatches its first step and parks the frame; the next tick's
+      --  packet reflects that state.
       T.Commands.Set_Source_Id (100);
       Status := T.Commands.Run_Sequence
-        ((Sequence_Id => 4, Response_Behavior => Send_After_Sequence_Completion,
-          Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+        ((Sequence_Id => 6, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -1329,7 +1433,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
          Pkt : constant Packet.T := T.Summary_Packet_History.Get (2);
       begin
          Sequence_Frame_Summary_Assert.Eq (Get_Frame_Summary (Pkt, 0),
-            (Sequence_Id => 4, Step => 1, Status => Waiting_For_Cmd_Resp, Response_Behavior => Send_After_Sequence_Completion, Operator_Source_Id => 100));
+            (Sequence_Id => 6, Step => 1, Status => Waiting_For_Cmd_Resp, Response_Behavior => Send_After_Sequence_Completion, Operator_Source_Id => 100));
          Sequence_Frame_Summary_Assert.Eq (Get_Frame_Summary (Pkt, 1),
             (Sequence_Id => 0, Step => 0, Status => Not_Running, Response_Behavior => Send_After_Sequence_Start, Operator_Source_Id => 0));
 
@@ -1347,7 +1451,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
                Suite_Record.Serialization.From_Byte_Array (Pkt.Buffer (Pkt.Buffer'First .. Pkt.Buffer'First + Suite_Record.Serialization.Serialized_Length - 1));
          begin
             Sequence_Frame_Summary_Assert.Eq (Rec.Frame_0_Summary,
-               (Sequence_Id => 4, Step => 1, Status => Waiting_For_Cmd_Resp, Response_Behavior => Send_After_Sequence_Completion, Operator_Source_Id => 100));
+               (Sequence_Id => 6, Step => 1, Status => Waiting_For_Cmd_Resp, Response_Behavior => Send_After_Sequence_Completion, Operator_Source_Id => 100));
             Sequence_Frame_Summary_Assert.Eq (Rec.Frame_1_Summary,
                (Sequence_Id => 0, Step => 0, Status => Not_Running, Response_Behavior => Send_After_Sequence_Start, Operator_Source_Id => 0));
          end;
@@ -1379,24 +1483,20 @@ package body Simple_Command_Sequencer_Tests.Implementation is
    --  argument on the wire.
    overriding procedure Test_Static_Deferred_Response (Self : in out Instance) is
       T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
-      Seq_Commands : Test_Assembly_Command_Sequences_Example_Sequences.Instance;
+      Seq_Commands : Test_Assembly_Command_Sequences_Example_Sequences_Commands.Instance;
    begin
       Seq_Commands.Set_Id_Base (1);
       Seq_Commands.Set_Source_Id (100);
       T.System_Time := (Seconds => 0, Subseconds => 0);
 
       --  Send the synthesized Sequence_F command (slot 5). Its static
-      --  configuration defers the reply, so nothing is emitted at dispatch.
+      --  configuration defers the reply, and the no-wait sequence runs to
+      --  completion inside the dispatch itself -- so exactly one reply, the
+      --  deferred Success, is emitted, carrying the operator's source id.
       T.Command_T_Send (Seq_Commands.Sequence_F);
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 1);
       Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (1), (Sequence_Id => 5, Frame_Id => 0));
-      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 0);
-
-      --  A single tick runs the no-wait sequence to completion; the deferred
-      --  Success reply is delivered with the operator's source id.
-      T.Tick_T_Send (((0, 0), 0));
-      Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
       declare
@@ -1407,8 +1507,9 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       end;
    end Test_Static_Deferred_Response;
 
-   --  Kill_Frame kills only the targeted frame: out-of-range and idle frames
-   --  are rejected with Invalid_Frame_Id and a Failure response, a running
+   --  Kill_Frame kills only the targeted frame: an out-of-range frame id is
+   --  rejected with Invalid_Frame_Id and a Failure response, killing an idle
+   --  frame is benign (Frame_Not_Running info event, Success), a running
    --  frame is halted with a Killed_Frame event while other frames keep
    --  running, and the killed frame remains claimable afterwards.
    overriding procedure Test_Kill_Frame (Self : in out Instance) is
@@ -1427,14 +1528,17 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Invalid_Frame_Id_History.Get_Count, 1);
       Packed_U32_Assert.Eq (T.Invalid_Frame_Id_History.Get (1), (Value => 99));
 
-      --  Killing an idle frame is also rejected.
+      --  Killing an idle frame is benign: an info event, no kill, and the
+      --  command succeeds.
       T.Command_T_Send (T.Commands.Kill_Frame ((Value => 0)));
       Natural_Assert.Eq (T.Dispatch_All, 1);
-      Natural_Assert.Eq (T.Invalid_Frame_Id_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Frame_Not_Running_History.Get_Count, 1);
+      Packed_U32_Assert.Eq (T.Frame_Not_Running_History.Get (1), (Value => 0));
+      Natural_Assert.Eq (T.Invalid_Frame_Id_History.Get_Count, 1);
       Natural_Assert.Eq (T.Killed_Frame_History.Get_Count, 0);
 
       --  Start Sequence_A on both frames; each waits on its first command.
-      Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -1460,7 +1564,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 3);
 
       --  The killed frame remains claimable: a new sequence lands on frame 0.
-      Status := T.Commands.Run_Sequence ((Sequence_Id => 2, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 2, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -1486,34 +1590,32 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Packed_U32_Assert.Eq (T.Sequences_Started_Count_History.Get (1), (Value => 0));
       Packed_U32_Assert.Eq (T.Commands_Sent_Count_History.Get (1), (Value => 0));
 
-      --  Claiming a frame updates the started counters and frame counts.
-      Status := T.Commands.Run_Sequence ((Sequence_Id => 2, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      --  Claiming a frame starts and -- for the no-wait Sequence_C -- also
+      --  completes the run inside the dispatch itself: started and finished
+      --  counters, last-ids and frame counts all update.
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 2, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Packed_U32_Assert.Eq (T.Sequences_Started_Count_History.Get (T.Sequences_Started_Count_History.Get_Count), (Value => 1));
       Packed_U16_Assert.Eq (T.Last_Sequence_Started_History.Get (T.Last_Sequence_Started_History.Get_Count), (Value => 2));
-      Packed_U16_Assert.Eq (T.Frame_Running_Count_History.Get (T.Frame_Running_Count_History.Get_Count), (Value => 1));
-      Packed_U16_Assert.Eq (T.Frame_Running_High_Water_Mark_History.Get (T.Frame_Running_High_Water_Mark_History.Get_Count), (Value => 1));
-
-      --  One tick runs the no-wait Sequence_C (two commands) to completion.
-      T.Tick_T_Send (((0, 0), 0));
-      Natural_Assert.Eq (T.Dispatch_All, 1);
       Packed_U32_Assert.Eq (T.Commands_Sent_Count_History.Get (T.Commands_Sent_Count_History.Get_Count), (Value => 2));
       Packed_U32_Assert.Eq (T.Sequences_Finished_Count_History.Get (T.Sequences_Finished_Count_History.Get_Count), (Value => 1));
       Packed_U16_Assert.Eq (T.Last_Sequence_Finished_History.Get (T.Last_Sequence_Finished_History.Get_Count), (Value => 2));
+      --  The frame count peaked at 1 (the claim) and returned to 0 (the
+      --  finish); the high water mark holds.
       Packed_U16_Assert.Eq (T.Frame_Running_Count_History.Get (T.Frame_Running_Count_History.Get_Count), (Value => 0));
-      --  The high water mark holds after the frame goes idle.
       Packed_U16_Assert.Eq (T.Frame_Running_High_Water_Mark_History.Get (T.Frame_Running_High_Water_Mark_History.Get_Count), (Value => 1));
       --  No failure yet -- only the Set_Up zero is in the failed history.
       Natural_Assert.Eq (T.Sequences_Failed_Count_History.Get_Count, 1);
 
       --  Start Sequence_A (parks waiting on its first command) and kill it:
       --  the failed counters update.
-      Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
+      Packed_U16_Assert.Eq (T.Frame_Running_Count_History.Get (T.Frame_Running_Count_History.Get_Count), (Value => 1));
       T.Command_T_Send (T.Commands.Kill_Frame ((Value => 0)));
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Packed_U32_Assert.Eq (T.Sequences_Failed_Count_History.Get (T.Sequences_Failed_Count_History.Get_Count), (Value => 1));
@@ -1539,7 +1641,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       T.System_Time := (Seconds => 0, Subseconds => 0);
 
       Status := T.Commands.Run_Sequence (
-         (Sequence_Id => 0, Response_Behavior => Send_After_Sequence_Start, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         (Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -1583,5 +1685,151 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Sequence_Event_Info_Assert.Eq (T.Sequence_Completed_History.Get (1), (Sequence_Id => 0, Frame_Id => 0));
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
    end Test_Response_Drives_Execution;
+
+   --  Regression for dynamic-arg repacking (review request): Sequence_H's
+   --  argument has a leading 4-bit pad, so both leaf fields sit at
+   --  non-byte-aligned offsets. Each step's resolver must deserialize the
+   --  packed argument and re-serialize its leaf field standalone --
+   --  byte-offset slicing would corrupt both values.
+   overriding procedure Test_Dynamic_Arg_Packing (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Component_A_Commands : Test_Component_Commands.Instance;
+      Argument : constant Nibble_Test_Args.T :=
+         (Lead_Pad => 0, Wide => (Value => 16#1234#), Nibble => (Value => 9, Reserved => 0), Tail_Pad => 0);
+      BArray : Simple_Sequencer_Types.Run_Sequence_Buffer_Type;
+      Cmd : Command.T;
+      Status : Serialization_Status;
+   begin
+      Component_A_Commands.Set_Id_Base (1);
+      Component_A_Commands.Set_Source_Id (0);
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      BArray := [others => 0];
+      BArray (BArray'First .. BArray'First + Nibble_Test_Args.Serialization.Serialized_Length - 1) :=
+         Nibble_Test_Args.Serialization.To_Byte_Array (Argument);
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 7, Arg_Length => Nibble_Test_Args.Serialization.Serialized_Length, Buffer_Arg => BArray), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      --  Step 0: the misaligned 16-bit field (bit offset 4), repacked to a
+      --  standalone Packed_U16.
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 1);
+      Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (1), Component_A_Commands.Command_8 ((Value => 16#1234#)));
+      T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0,
+         Command_Id => Component_A_Commands.Get_Command_8_Id, Status => Success));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      --  Step 1: the byte-sized nibble field at bit offset 20, repacked to a
+      --  standalone byte-aligned Packed_Nibble.
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 2);
+      Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (2), Component_A_Commands.Command_7 ((Value => 9, Reserved => 0)));
+      T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0,
+         Command_Id => Component_A_Commands.Get_Command_7_Id, Status => Success));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Invalid_Dynamic_Command_Argument_History.Get_Count, 0);
+   end Test_Dynamic_Arg_Packing;
+
+   --  A dynamic command step whose sequence argument fails validation must
+   --  fail the sequence with Invalid_Dynamic_Command_Argument and dispatch
+   --  nothing. Sequence_J's Validated_Args carries an enumeration whose unused
+   --  representation values make validation failable.
+   overriding procedure Test_Invalid_Dynamic_Command_Argument (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      BArray : Simple_Sequencer_Types.Run_Sequence_Buffer_Type;
+      Cmd : Command.T;
+      Status : Serialization_Status;
+   begin
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      --  99 is not a valid Sequence_State representation, so the resolver's
+      --  validation of the sequence argument fails.
+      BArray := [others => 0];
+      BArray (BArray'First) := 99;
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 9, Arg_Length => Validated_Args.Serialization.Serialized_Length, Buffer_Arg => BArray), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Invalid_Dynamic_Command_Argument_History.Get_Count, 1);
+      Sequence_Step_Command_Event_Info_Assert.Eq (T.Invalid_Dynamic_Command_Argument_History.Get (1), (Sequence_Id => 9, Frame_Id => 0, Step => 0, Command_Id => 3));
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 0);
+      Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 0);
+   end Test_Invalid_Dynamic_Command_Argument;
+
+   --  A dynamic sleep step whose sequence argument fails validation must fail
+   --  the sequence with Invalid_Dynamic_Sleep_Argument.
+   overriding procedure Test_Invalid_Dynamic_Sleep_Argument (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      BArray : Simple_Sequencer_Types.Run_Sequence_Buffer_Type;
+      Cmd : Command.T;
+      Status : Serialization_Status;
+   begin
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      BArray := [others => 0];
+      BArray (BArray'First) := 99;
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 10, Arg_Length => Validated_Args.Serialization.Serialized_Length, Buffer_Arg => BArray), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Invalid_Dynamic_Sleep_Argument_History.Get_Count, 1);
+      Sequence_Step_Event_Info_Assert.Eq (T.Invalid_Dynamic_Sleep_Argument_History.Get (1), (Sequence_Id => 10, Frame_Id => 0, Step => 0));
+      Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 0);
+   end Test_Invalid_Dynamic_Sleep_Argument;
+
+   --  Two ghost-command rejection paths: an argument too large for the
+   --  Run_Sequence passthrough buffer is rejected as an invalid command, and
+   --  a ghost command that fails to claim a frame gets its Failure execution
+   --  status mapped into a Failure reply.
+   overriding procedure Test_Ghost_Command_Rejections (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Seq_Commands : Test_Assembly_Command_Sequences_Example_Sequences_Commands.Instance;
+      Oversized : Command.T;
+      Cmd : Command.T;
+      Status : Serialization_Status;
+   begin
+      Seq_Commands.Set_Id_Base (1);
+      Seq_Commands.Set_Source_Id (100);
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      --  An argument longer than the passthrough buffer can carry is a
+      --  malformed command: Invalid_Command_Received plus a Failure reply,
+      --  and no sequence starts.
+      Oversized := Seq_Commands.Sequence_A;
+      Oversized.Header.Arg_Buffer_Length := Command_Types.Command_Arg_Buffer_Length_Type'Last;
+      T.Command_T_Send (Oversized);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
+      pragma Assert (T.Command_Response_T_Recv_Sync_History.Get (1).Status = Failure);
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 0);
+
+      --  Occupy both frames, then a ghost command cannot claim one: its
+      --  Failure execution status maps to a Failure reply to the operator.
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 2);
+
+      T.Command_T_Send (Seq_Commands.Sequence_A);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.No_Frame_Available_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 4);
+      declare
+         Cr : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (4);
+      begin
+         Natural_Assert.Eq (Natural (Cr.Source_Id), 100);
+         pragma Assert (Cr.Status = Failure);
+      end;
+   end Test_Ghost_Command_Rejections;
 
 end Simple_Command_Sequencer_Tests.Implementation;
