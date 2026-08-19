@@ -50,6 +50,13 @@ package body {{ name }} is
 {% for component in component_kind_dict["data_dependencies"] %}
       {{ component.instance_name }}.Map_Data_Dependencies{% if component.map_data_dependencies.parameter_call_string() %} ({{ component.map_data_dependencies.parameter_call_string() }}){% endif %};
 {% endfor %}
+
+      -----------------------------------
+      -- Default Parameter Validation:
+      -----------------------------------
+{% for component in component_kind_dict["parameters"] %}
+      {{ component.instance_name }}.Validate_Parameter_Defaults;
+{% endfor %}
    end Set_Id_Bases;
 
 {% endif %}
