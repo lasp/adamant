@@ -4,6 +4,10 @@
 name: Flight_Sequences
 description: Common flight software command sequences
 
+# Two sequence frames: sequences can run on both concurrently, and the
+# generated summary packet type carries two frame summaries.
+num_concurrent_sequences: 2
+
 command_timeout_seconds: 10  # default wait for sub-command responses
 
 sequences:

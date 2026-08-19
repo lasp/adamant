@@ -20,8 +20,7 @@ components:
     init_base:
       - "Queue_Size => Sequencer.Get_Max_Queue_Element_Size * 10"
     init:
-      - "Num_Concurrent_Sequences => 2"
-      - "Sequences => Test_Assembly_Command_Sequences_Example_Sequences.Sequences"
+      - "Config => Test_Assembly_Command_Sequences_Example_Sequences.Config"
     # Explicit command id base, matching what auto-assignment would pick. This
     # deliberately exercises the deferred explicit-id-base path
     # (set_id_base(assign_entity_ids=False) at instance setup, stamped by the

@@ -87,6 +87,17 @@ package Simple_Sequencer_Types is
    -- system at Init.
    subtype Num_Concurrent_Sequences_Type is Interfaces.Unsigned_32 range 1 .. Interfaces.Unsigned_32 (Packet_Types.Packet_Buffer_Type'Length / Sequence_Frame_Summary.Size_In_Bytes);
 
+   -- A sequencer instance's complete static configuration, exported as a
+   -- Config constant by each generated command sequences suite package. The
+   -- frame-pool size lives in the suite's model (num_concurrent_sequences),
+   -- which also sizes the suite's generated summary packet ground type --
+   -- bundling both here makes a mismatch between the frame pool and the
+   -- packet type impossible by construction.
+   type Sequencer_Config is record
+      Sequences : not null Sequences_Access;
+      Num_Concurrent_Sequences : Num_Concurrent_Sequences_Type;
+   end record;
+
    ---------------------------------------------------------------------------
    -- A frame executes one running sequence. Frames are plain (unpacked)
    -- records -- they are internal component state, never serialized; the

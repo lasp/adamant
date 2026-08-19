@@ -103,4 +103,13 @@ package {{ name }} is
      ];
 
    Sequences : constant Sequences_Access := Sequences_Table'Access;
+
+   -- The instance configuration handed to Simple_Command_Sequencer.Init. The
+   -- frame-pool size comes from this suite's model (num_concurrent_sequences),
+   -- which also sizes the generated {{ name }}_Summary_Record ground type for
+   -- the summary packet -- so the frame pool and the packet layout can never
+   -- disagree.
+   Config : constant Sequencer_Config :=
+      (Sequences => Sequences_Table'Access,
+       Num_Concurrent_Sequences => {{ num_concurrent_sequences }});
 end {{ name }};

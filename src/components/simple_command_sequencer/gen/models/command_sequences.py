@@ -10,6 +10,7 @@ from models.assembly import assembly_submodel
 from models.commands import (
     command
 )
+from models.simple_command_sequencer_packets import get_max_frames_per_packet
 from util import model_loader
 import re
 
@@ -455,6 +456,7 @@ class command_sequences(assembly_submodel):
         self.name = None
         self.description = None
         self.preamble = None
+        self.num_concurrent_sequences = None
         self.command_timeout_seconds = None
         self.includes = []
         self.sequences = OrderedDict()
@@ -475,6 +477,20 @@ class command_sequences(assembly_submodel):
 
         if "preamble" in self.data:
             self.preamble = self.data["preamble"]
+
+        # The suite owns the frame-pool size. It also sizes the suite's
+        # generated summary packet ground type, so validate it against the
+        # project configuration (how many frame summaries fit in one packet
+        # buffer) right here at model load -- the earliest possible moment.
+        self.num_concurrent_sequences = self.data["num_concurrent_sequences"]
+        max_frames = get_max_frames_per_packet()
+        if self.num_concurrent_sequences > max_frames:
+            raise ModelException(
+                f"num_concurrent_sequences is {self.num_concurrent_sequences} "
+                f"but at most {max_frames} Sequence_Frame_Summary entries fit "
+                "in one summary packet with the project's configured packet "
+                "buffer size."
+            )
 
         if "command_timeout_seconds" in self.data:
             self.command_timeout_seconds = self.data["command_timeout_seconds"]
@@ -611,10 +627,10 @@ class command_sequences(assembly_submodel):
                     and step.command_name.lower() == seq.name.lower()
                     and comp.name == "Simple_Command_Sequencer"
                 ):
-                    sequences_value = comp.init.get_parameter_value("Sequences")
+                    config_value = comp.init.get_parameter_value("Config")
                     if (
-                        sequences_value
-                        and sequences_value.split(".")[0].lower() == self.name.lower()
+                        config_value
+                        and config_value.split(".")[0].lower() == self.name.lower()
                     ):
                         raise ModelException(
                             f'Sequence "{seq.name}" has response_behavior '
@@ -669,21 +685,13 @@ class command_sequences(assembly_submodel):
         for comp in self.assembly.components.values():
             if comp.name != "Simple_Command_Sequencer" or not comp.init:
                 continue
-            sequences_value = comp.init.get_parameter_value("Sequences")
+            config_value = comp.init.get_parameter_value("Config")
             if (
-                not sequences_value
-                or sequences_value.split(".")[0].lower() != self.name.lower()
+                not config_value
+                or config_value.split(".")[0].lower() != self.name.lower()
             ):
                 continue
-            num_engines_value = comp.init.get_parameter_value(
-                "Num_Concurrent_Sequences"
-            )
-            try:
-                num_engines = int(str(num_engines_value).strip())
-            except (TypeError, ValueError):
-                # The engine count is a non-literal expression; it cannot be
-                # checked at generation time.
-                continue
+            num_engines = self.num_concurrent_sequences
             num_connections = sum(
                 1
                 for conn in self.assembly.connections

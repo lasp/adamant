@@ -8,15 +8,13 @@ description: |
 execution: active
 init:
   parameters:
-    - name: Num_Concurrent_Sequences
-      type: Simple_Sequencer_Types.Num_Concurrent_Sequences_Type
-      description: Denotes the Number of Sequences that can be running at the same time. Any Run_Sequence commands
-        that are sent that would increase the number of concurrent sequences beyond this number will be rejected.
-        The type bounds this to the number of frames whose summaries fit in one summary packet.
-    - name: Sequences
-      type: Simple_Sequencer_Types.Sequences_Access
-      description: Access to statically defined sequence list.
-      not_null: true
+    - name: Config
+      type: Simple_Sequencer_Types.Sequencer_Config
+      description: The sequencer's static configuration, exported as the Config constant by the generated
+        command sequences suite package. Carries the sequence table and the number of concurrent sequence
+        frames; the frame count comes from the suite model's num_concurrent_sequences, which also sizes the
+        suite's generated summary packet type, so the two can never disagree. Any Run_Sequence commands that
+        would exceed the frame count are rejected.
 connectors:
   - type: Command.T
     kind: recv_async
