@@ -1,0 +1,6 @@
+---
+description: These are the data products for the CCSDS command forwarder component.
+data_products:
+  - name: Packets_Forwarded_Count
+    description: The number of CCSDS packets forwarded by this component since startup.
+    type: Packed_U32.T
