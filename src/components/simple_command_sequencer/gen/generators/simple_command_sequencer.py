@@ -1,10 +1,7 @@
 import os.path
 from models.command_sequences import command_sequences
 from models.simple_command_sequencer_commands import simple_command_sequencer_commands
-from models.simple_command_sequencer_packets import (
-    simple_command_sequencer_packets,
-    get_max_frames_per_packet,
-)
+from models.simple_command_sequencer_packets import simple_command_sequencer_packets
 from base_classes.generator_base import generator_base
 from generators.basic import basic_generator, add_basic_generators_to_module
 from generators.ided_suite import command_templates, packet_templates
@@ -130,100 +127,31 @@ class command_sequences_commands_adb(command_sequences_gen, generator_base):
         )
 
 
-# The summary packet's ground/documentation type is one Sequence_Frame_Summary
-# field per frame. Its layout depends only on the frame count -- not on the
-# sequence suite or the instance -- so a single family of per-count record
-# types (Simple_Sequencer_Summary_Record_<N>) serves every sequencer instance.
-# Each instance's packets model resolves its packet type from its own
-# Num_Concurrent_Sequences init parameter (see
-# simple_command_sequencer_packets.py), so instances sharing a sequence suite
-# are free to size their frame pools independently.
-#
-# Rule registration is gated by the REAL frame-count bound -- the number of
-# frame summaries that fit in the project's configured packet buffer
-# (get_max_frames_per_packet, the Python mirror of
-# Num_Concurrent_Sequences_Type'Last). The model database is built before
-# generator rules are enumerated precisely so generators can query it like
-# this, and the bound tracks the project configuration automatically: growing
-# the packet buffer in the configuration YAML registers more record rules
-# with no framework change. Only counts actually referenced by an assembly
-# are ever demanded and built.
-#
-# The Python class family itself must be sized before any database exists, so
-# its ceiling is set by the wire format rather than configuration: a CCSDS
-# packet length field is 16 bits (buffer <= 65536 bytes) and a
-# Sequence_Frame_Summary can never be smaller than 8 bytes, so no
-# configuration can ever need more than 8192 record types.
-_SUMMARY_RECORD_FAMILY_CEILING = 8192
+class command_sequences_summary_record(command_sequences_gen, generator_base):
+    """
+    Generates <suite_package>_summary_record.record.yaml -- the summary
+    packet's ground/documentation type for this suite: one
+    Sequence_Frame_Summary field per sequence frame (the suite's
+    num_concurrent_sequences, in frame order). Generated per suite, right
+    next to the suite's other outputs, so the frame pool and the packet
+    layout come from the same model value and can never disagree. The FSW
+    never withs this type; the packets model resolves an instance's
+    Summary_Packet type to it via the instance's Config init parameter.
+    """
 
-# Cache for the computed registration bound (per python invocation).
-_summary_record_bound = [None]
+    def __init__(self):
+        command_sequences_gen.__init__(
+            self, template_filename="name_summary_record.record.yaml"
+        )
 
-
-def _get_summary_record_bound():
-    if _summary_record_bound[0] is None:
-        try:
-            _summary_record_bound[0] = get_max_frames_per_packet()
-        except Exception:
-            # If the model database is unavailable in this context, fall back
-            # to registering the whole family -- unused rules are never built.
-            _summary_record_bound[0] = _SUMMARY_RECORD_FAMILY_CEILING
-    return _summary_record_bound[0]
-
-
-def _make_summary_record_generator(num_frames):
-    class summary_record_generator(generator_base):
-        frames = num_frames
-
-        def input_file_regex(self):
-            # Match only the component's own packet suite file so the record
-            # family generates exactly once, in this component's build
-            # directory, shared by every assembly in the build path.
-            return (
-                r".*/simple_command_sequencer\."
-                r"simple_command_sequencer_packets\.yaml$"
-            )
-
-        def output_filename(self, input_filename):
-            # Register a rule only for counts within the real, buffer-derived
-            # bound. Returning an empty name suppresses the rule.
-            if self.frames > _get_summary_record_bound():
-                return ""
-            dirname = os.path.dirname(input_filename)
-            return (
-                dirname + os.sep + "build" + os.sep + "yaml" + os.sep
-                + "simple_sequencer_summary_record_" + str(self.frames)
-                + ".record.yaml"
-            )
-
-        def generate(self, input_filename):
-            lines = [
-                "---",
-                "description: This is an autocoded summary packet type for a "
-                "Simple Command Sequencer instance initialized with "
-                "Num_Concurrent_Sequences => " + str(self.frames) + ". It "
-                "contains one Sequence_Frame_Summary record per sequence "
-                "frame, in frame order.",
-                "fields:",
-            ]
-            for frame in range(self.frames):
-                lines.append("  - name: Frame_" + str(frame) + "_Summary")
-                lines.append(
-                    '    description: "A summary of the state of sequence '
-                    'frame ' + str(frame) + '."'
-                )
-                lines.append("    type: Sequence_Frame_Summary.T")
-            print("\n".join(lines))
-
-    summary_record_generator.__name__ = (
-        "simple_sequencer_summary_record_" + str(num_frames) + "_record_yaml"
-    )
-    return summary_record_generator
-
-
-for _num_frames in range(1, _SUMMARY_RECORD_FAMILY_CEILING + 1):
-    _generator_class = _make_summary_record_generator(_num_frames)
-    globals()[_generator_class.__name__] = _generator_class
+    def generate(self, input_filename):
+        # Load the suite model WITHOUT resolving it against its assembly: the
+        # record's layout depends only on the suite's own
+        # num_concurrent_sequences, and the assembly load path itself demands
+        # this record (via the packets model), so resolving against the
+        # assembly here would create a circular dependency.
+        cs = command_sequences(input_filename)
+        print(cs.render(self.template, template_path=self.template_dir))
 
 
 # Register the standard commands code generators (.ads, .adb, .html) for the

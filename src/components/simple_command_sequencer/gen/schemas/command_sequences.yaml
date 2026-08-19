@@ -23,6 +23,19 @@ mapping:
     desc: |
       Custom preamble text to include in the generated Ada package.
 
+  num_concurrent_sequences:
+    required: true
+    type: int
+    range: { min: 1 }
+    desc: |
+      The number of sequence frames (concurrently running sequences) a
+      sequencer instance initialized with this suite allocates. This also
+      sizes the suite's generated summary packet ground type (one
+      Sequence_Frame_Summary per frame), so the frame pool and the packet
+      layout can never disagree. The upper bound -- how many frame
+      summaries fit in one packet buffer -- is enforced by the model
+      against the project configuration.
+
   command_timeout_seconds:
     required: false
     type: int

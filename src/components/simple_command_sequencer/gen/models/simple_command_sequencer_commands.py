@@ -29,9 +29,9 @@ class simple_command_sequencer_commands(commands):
         self.assembly = assembly
 
         # Find the command_sequences model this instance was initialized with.
-        # First get the package name from the instance's Sequences init
+        # First get the package name from the instance's Config init
         # parameter:
-        configs = self.component.init.get_parameter_value("Sequences")
+        configs = self.component.init.get_parameter_value("Config")
         command_sequences_package = configs.split(".")[0]
         # Based on the package name figure out the model name:
         split_package = command_sequences_package.split("_Command_Sequences")

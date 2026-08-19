@@ -26,15 +26,15 @@ package Component.Simple_Command_Sequencer.Implementation is
    --------------------------------------------------
    --
    -- Init Parameters:
-   -- Num_Concurrent_Sequences : Simple_Sequencer_Types.Num_Concurrent_Sequences_Type - Denotes the Number of
-   -- Sequences that can be running at the same time. Any Run_Sequence commands that
-   -- are sent that would increase the number of concurrent sequences beyond this
-   -- number will be rejected. The type bounds this to the number of frames whose
-   -- summaries fit in one summary packet.
-   -- Sequences : Simple_Sequencer_Types.Sequences_Access - Access to statically
-   -- defined sequence list.
+   -- Config : Simple_Sequencer_Types.Sequencer_Config - The sequencer's static
+   -- configuration, exported as the Config constant by the generated command
+   -- sequences suite package. Carries the sequence table and the number of
+   -- concurrent sequence frames; the frame count comes from the suite model's
+   -- num_concurrent_sequences, which also sizes the suite's generated summary
+   -- packet type, so the two can never disagree. Any Run_Sequence commands that
+   -- would exceed the frame count are rejected.
    --
-   overriding procedure Init (Self : in out Instance; Num_Concurrent_Sequences : in Simple_Sequencer_Types.Num_Concurrent_Sequences_Type; Sequences : in not null Simple_Sequencer_Types.Sequences_Access);
+   overriding procedure Init (Self : in out Instance; Config : in Simple_Sequencer_Types.Sequencer_Config);
 
 private
    -- Response context of the command currently in dispatch, captured by
