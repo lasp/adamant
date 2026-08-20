@@ -1,0 +1,45 @@
+---
+description: |
+  The Command Sequencer component executes predefined sequences of commands.
+  It receives high-level sequence commands and breaks them down into individual
+  sub-commands that are sent to the command router. The sequencer handles
+  command response tracking, timeouts, and failure modes.
+
+execution: active
+init:
+  parameters:
+    - name: Config
+      type: Simple_Sequencer_Types.Sequencer_Config
+      description: The sequencer's static configuration, exported as the Config constant by the generated
+        command sequences suite package. Carries the sequence table and the number of concurrent sequence
+        frames; the frame count comes from the suite model's num_concurrent_sequences, which also sizes the
+        suite's generated summary packet type, so the two can never disagree. Any Run_Sequence commands that
+        would exceed the frame count are rejected.
+connectors:
+  - type: Command.T
+    kind: recv_async
+    description: Sequence commands are received on this connector
+  - type: Command.T
+    kind: send
+    description: Sub-commands are sent out this connector
+  - type: Command_Response.T
+    kind: send
+    description: Sends the response to a Run_Sequence (or synthesised per-sequence) command back to the command router. The Send_After_Sequence_Completion path emits its deferred reply here on completion / abort / timeout / kill; the default Send_After_Sequence_Start path emits its reply here immediately at dispatch time.
+  - type: Command_Response.T
+    kind: recv_async
+    description: Responses to sub-commands are received here, allowing subsequent commands in a sequence to be sent out. During initialization the command router sends a Register_Source message via this connector for each sequence frame (engine), providing the unique source identifier that frame stamps into its outgoing commands. If using the command router, include one unique arrayed connector entry per frame; a frame that never receives a Register_Source reply can never be claimed (the sequences model warns when the connection count does not match the configured engine count).
+  - description: The packet send connector, used for sending the periodic sequencer summary packet.
+    type: Packet.T
+    kind: send
+  - description: Data products are sent out of this connector.
+    type: Data_Product.T
+    kind: send
+  - type: Tick.T
+    kind: recv_async
+    description: Tick for managing timeouts and delays
+  - type: Event.T
+    kind: send
+    description: Events are sent out of this connector
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get
