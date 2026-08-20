@@ -92,9 +92,10 @@ class command_sequences_ads(command_sequences_gen, generator_base):
 
 class command_sequences_adb(command_sequences_gen, generator_base):
     """
-    Generates <suite_package>.adb – the body implementing To_Arg and the
-    per-dynamic-step Resolver functions. When the suite needs neither, the
-    body degenerates to "pragma No_Body;".
+    Generates <suite_package>.adb – the body implementing the
+    per-dynamic-step Resolver functions (To_Arg lives in the spec as an
+    expression function). When the suite has no dynamic steps, the body
+    degenerates to "pragma No_Body;".
     """
 
     def __init__(self):
@@ -135,7 +136,7 @@ class command_sequences_summary_record(command_sequences_gen, generator_base):
     num_concurrent_sequences, in frame order). Generated per suite, right
     next to the suite's other outputs, so the frame pool and the packet
     layout come from the same model value and can never disagree. The FSW
-    never withs this type; the packets model resolves an instance's
+    never imports this type; the packets model resolves an instance's
     Summary_Packet type to it via the instance's Config init parameter.
     """
 
