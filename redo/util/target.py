@@ -52,6 +52,29 @@ def get_default_target():
         return platform.system()
 
 
+def get_native_build_for():
+    """
+    Get the name of the build directory used for executables that are
+    compiled for, and run on, the build machine itself, ie. something
+    like "Linux" or "Linux_Test".
+
+    This is NOT the current target. Some executables (ie. the type
+    ranges programs) must run on the build machine even when cross
+    compiling, so they are always built for the native platform. The
+    "_Test" and "_Deprecated" variants of the current target are still
+    honored, since those select different source, and therefore
+    different results, on the native platform.
+    """
+    the_target = try_get_target()
+    build_for = platform.system()
+    if the_target:
+        if the_target.endswith("_Test"):
+            build_for += "_Test"
+        if the_target.endswith("_Deprecated"):
+            build_for += "_Deprecated"
+    return build_for
+
+
 def set_default_target():
     """
     Set the current target to the default target which
