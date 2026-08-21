@@ -1,0 +1,12 @@
+---
+description: Enumerations used by the Product Store component.
+enums:
+  - name: Store_Copy
+    description: Identifies one of the two copies of the double-buffered data product store.
+    literals:
+      - name: Copy_A
+        value: 0
+        description: The first copy of the store.
+      - name: Copy_B
+        value: 1
+        description: The second copy of the store.
