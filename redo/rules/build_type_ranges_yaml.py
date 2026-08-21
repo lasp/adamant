@@ -7,7 +7,6 @@ from util import redo_arg
 from util import target
 from base_classes.build_rule_base import build_rule_base
 import database.model_database
-import platform
 
 
 class build_type_ranges_yaml(build_rule_base):
@@ -24,13 +23,7 @@ class build_type_ranges_yaml(build_rule_base):
             model_type,
             specific_name,
         ) = database.model_database.split_model_file_name(redo_1)
-        the_target = target.try_get_target()
-        build_for = platform.system()
-        if the_target:
-            if the_target.endswith("_Test"):
-                build_for += "_Test"
-            if the_target.endswith("_Deprecated"):
-                build_for += "_Deprecated"
+        build_for = target.get_native_build_for()
         elf = (
             directory
             + os.sep
