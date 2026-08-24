@@ -74,6 +74,10 @@ package body {{ name }} is
       Self.Tester := Tester_Alloc.Allocate;
       -- Link the log access type to the logger in the reciprocal
       Self.Tester.Set_Logger (Self.Logger'Unchecked_Access);
+{% if component.parameters %}
+      -- Assert that the component's compiled-in default parameter values are valid:
+      Self.Tester.Component_Instance.Assert_Valid_Parameters;
+{% endif %}
 {% endif %}
       -- Call up to the implementation setup
       Base_Instance'Class (Self).Set_Up_Test;

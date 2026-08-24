@@ -23,6 +23,13 @@ package body {{ name }}.Implementation is
       -- Set the logger in the component
       Self.Tester.Set_Logger (Self.Logger'Unchecked_Access);
 
+{% if component.parameters %}
+      -- Assert that the component's compiled-in default parameter values are valid.
+      -- The generated test base performs this check for non-generic components; a
+      -- generic component's tester only exists here, so the call is made here.
+      Self.Tester.Component_Instance.Assert_Valid_Parameters;
+
+{% endif %}
 {% endif %}
 {% if component.connectors.invoker() or component.connectors.of_kind("recv_async") or component.events %}
       -- Allocate heap memory to component:

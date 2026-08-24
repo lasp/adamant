@@ -32,6 +32,11 @@ package body Limiter_Tests.Implementation is
       -- Set the logger in the component
       Self.Tester.Set_Logger (Self.Logger'Unchecked_Access);
 
+      -- Assert that the component's compiled-in default parameter values are valid.
+      -- The generated test base performs this check for non-generic components; a
+      -- generic component's tester only exists here, so the call is made here.
+      Self.Tester.Component_Instance.Assert_Valid_Parameters;
+
       -- Allocate heap memory to component:
       Self.Tester.Init_Base (Queue_Size => Self.Tester.Component_Instance.Get_Max_Queue_Element_Size * 4);
 
