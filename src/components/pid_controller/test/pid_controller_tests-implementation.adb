@@ -17,6 +17,7 @@ with Parameter_Enums.Assertion;
 use Parameter_Enums.Parameter_Update_Status;
 use Parameter_Enums.Assertion;
 with Pid_Diagnostic_Subpacket;
+with Packed_Natural;
 with Packet_Types;
 
 package body Pid_Controller_Tests.Implementation is
@@ -56,6 +57,10 @@ package body Pid_Controller_Tests.Implementation is
       Subpacket_Duration : Natural;
       Extra_Packets : constant Natural := 2;
       Packet_Buffer_Length : constant Natural := Packet_Buffer_Type'Length;
+      -- The number of subpackets that fit in a full diagnostic packet: the buffer holds
+      -- a Packed_Natural subpacket count followed by the subpackets.
+      Max_Subpackets_Per_Packet : constant Natural :=
+         (Packet_Buffer_Length - Packed_Natural.Max_Serialized_Length) / Pid_Diagnostic_Subpacket.Max_Serialized_Length;
    begin
       Put_Line ("");
       Put_Line ("----------------------------------");
@@ -86,13 +91,13 @@ package body Pid_Controller_Tests.Implementation is
       -- Check that we got the count in the buffer and that we got the expected patterns in the two subpackets
       -- Using a floating point converter we know that 1.0 should be 0x3F800000 or 63, 128, 0, 0
       -- Using a floating point converter we know that 2.0 should be 0x40000000 or 64, 0, 0, 0
-      Byte_Array_Assert.Eq (T.Pid_Controller_Diagnostic_Packet_History.Get (1).Buffer (0 .. 3), [0, 0, 0, 2]);
+      Byte_Array_Assert.Eq (T.Pid_Controller_Diagnostic_Packet_History.Get (1).Buffer (0 .. 3), Packed_Natural.Serialization.To_Byte_Array ((Value => 2)));
       Byte_Array_Assert.Eq (T.Pid_Controller_Diagnostic_Packet_History.Get (1).Buffer (4 .. 15), [63, 128, 0, 0, 63, 128, 0, 0, 63, 128, 0, 0]); --subpacket from the first control input
       Byte_Array_Assert.Eq (T.Pid_Controller_Diagnostic_Packet_History.Get (1).Buffer (16 .. 27), [64, 0, 0, 0, 64, 0, 0, 0, 64, 0, 0, 0]); --subpacket from the second control input
 
       -- Start a new packet and this time let's make sure we fill the packet and send.
       -- Need to find out how many subpackets we should issue to get at least one full packet sent plus a couple more
-      Subpacket_Duration := Natural (Packet_Buffer_Length / Pid_Diagnostic_Subpacket.Max_Serialized_Length) + Extra_Packets;
+      Subpacket_Duration := Max_Subpackets_Per_Packet + Extra_Packets;
 
       T.Command_T_Send (T.Commands.Start_Diagnostics ((Duration => Subpacket_Duration)));
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 2);
@@ -113,13 +118,13 @@ package body Pid_Controller_Tests.Implementation is
       T.Control_Input_U_Send (((0, 0), 1.0, 1.0, 1.0, False));
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 2);
       Natural_Assert.Eq (T.Pid_Controller_Diagnostic_Packet_History.Get_Count, 2);
-      Byte_Array_Assert.Eq (T.Pid_Controller_Diagnostic_Packet_History.Get (2).Buffer (0 .. 3), [0, 0, 0, 103]);
+      Byte_Array_Assert.Eq (T.Pid_Controller_Diagnostic_Packet_History.Get (2).Buffer (0 .. 3), Packed_Natural.Serialization.To_Byte_Array ((Value => Max_Subpackets_Per_Packet)));
 
       -- Now make sure there was one more packet with just a couple sub packets
       T.Control_Input_U_Send (((0, 0), 1.0, 1.0, 1.0, False));
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 3);
       Natural_Assert.Eq (T.Pid_Controller_Diagnostic_Packet_History.Get_Count, 3);
-      Byte_Array_Assert.Eq (T.Pid_Controller_Diagnostic_Packet_History.Get (3).Buffer (0 .. 3), [0, 0, 0, 2]);
+      Byte_Array_Assert.Eq (T.Pid_Controller_Diagnostic_Packet_History.Get (3).Buffer (0 .. 3), Packed_Natural.Serialization.To_Byte_Array ((Value => Extra_Packets)));
 
       -- Make sure no others are issued
       T.Control_Input_U_Send (((0, 0), 1.0, 1.0, 1.0, False));
