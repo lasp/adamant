@@ -8,6 +8,23 @@ with Parameter;
 package body Component.Parameter_Component.Implementation.Tester is
 
    ---------------------------------------
+   -- Initialize heap variables:
+   ---------------------------------------
+   procedure Init_Base (Self : in out Instance) is
+   begin
+      -- Initialize the component base:
+      Self.Component_Instance.Init_Base;
+
+      -- Initialize tester heap:
+   end Init_Base;
+
+   procedure Final_Base (Self : in out Instance) is
+   begin
+      -- Destroy tester heap:
+      null;
+   end Final_Base;
+
+   ---------------------------------------
    -- Test initialization functions:
    ---------------------------------------
    procedure Connect (Self : in out Instance) is

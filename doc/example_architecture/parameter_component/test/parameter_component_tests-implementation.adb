@@ -14,6 +14,9 @@ package body Parameter_Component_Tests.Implementation is
 
    overriding procedure Set_Up_Test (Self : in out Instance) is
    begin
+      -- Initialize the component and tester base:
+      Self.Tester.Init_Base;
+
       -- Make necessary connections between tester and component:
       Self.Tester.Connect;
 

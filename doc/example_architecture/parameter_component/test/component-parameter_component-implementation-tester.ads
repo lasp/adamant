@@ -17,6 +17,12 @@ package Component.Parameter_Component.Implementation.Tester is
    type Instance_Access is access all Instance;
 
    ---------------------------------------
+   -- Initialize component heap variables:
+   ---------------------------------------
+   procedure Init_Base (Self : in out Instance);
+   procedure Final_Base (Self : in out Instance);
+
+   ---------------------------------------
    -- Test initialization functions:
    ---------------------------------------
    procedure Connect (Self : in out Instance);

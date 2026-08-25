@@ -12,6 +12,9 @@ package body Component.Pid_Controller.Implementation.Tester is
    ---------------------------------------
    procedure Init_Base (Self : in out Instance) is
    begin
+      -- Initialize the component base:
+      Self.Component_Instance.Init_Base;
+
       -- Initialize tester heap:
       -- Connector histories:
       Self.Control_Output_U_Recv_Sync_History.Init (Depth => 500);
