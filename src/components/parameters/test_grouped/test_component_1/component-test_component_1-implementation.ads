@@ -66,8 +66,9 @@ private
    -- subprogram in the implementation package is a function that returns "Valid". However, this function can, and should be
    -- overridden if a parameter requires validation beyond its individual type range, such as enforcing a relationship
    -- between parameters. Note that range checking is performed during staging, and does not need to be implemented here.
-   -- The Init_Base call runs before components are connected or set up, so an override must be a pure function of its
-   -- parameter arguments - it must not invoke connectors or rely on state established during component initialization.
+   -- Init_Base is the first step of component initialization - it runs before ID bases are set, connectors are
+   -- connected, and Init and Set_Up are called - so an override must compute its result from its parameter arguments
+   -- alone, without invoking connectors or reading component state that initialization establishes.
    overriding function Validate_Parameters (
       Self : in out Instance;
       Parameter_U16 : in Packed_U16.U;
