@@ -71,6 +71,7 @@ This component contains no instantiation parameters in its discriminant.
 
 \subsubsection{Component Base Initialization}
 %- if init_base
+%- if init_base.parameters
 This component achieves base class initialization using the \texttt{init\_Base} subprogram. This subprogram requires the following parameters:
 
 \captionof{table}{\VAR{prettyname|e} Base Initialization Parameters}
@@ -90,6 +91,9 @@ Parameter Descriptions:
 %- endfor
 \end{spaceditemize}
 \vspace{5mm} %5mm vertical space
+%- else
+This component achieves base class initialization using the \texttt{init\_Base} subprogram. This subprogram takes no parameters. \VAR{init_base.description|e}
+%- endif
 %- else
 This component contains no base class initialization, meaning there is no \texttt{init\_Base} subprogram for this component.
 %- endif
