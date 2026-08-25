@@ -172,6 +172,10 @@ package body Component.{{ name }} is
       Self.{{ connector.name }}_Count := {{ connector.name }}_Count;
 {% endfor %}
 {% endif %}
+{% if parameters %}
+      -- Assert that the component's compiled-in default parameter values are valid:
+      Self.Assert_Valid_Parameters;
+{% endif %}
    end Init_Base;
 {% if connectors.of_kind("recv_async") or connectors.n_arrayed().invoker() %}
 
@@ -269,6 +273,27 @@ package body Component.{{ name }} is
 {% endfor %}
       );
    end Map_Data_Dependencies;
+
+{% endif %}
+{% if parameters %}
+   -----------------------------------------------------------------------
+   -- Assert that the component's default parameter values are valid:
+   -----------------------------------------------------------------------
+   not overriding procedure Assert_Valid_Parameters (Self : in out Base_Instance) is
+      use Parameter_Validation_Status;
+   begin
+      -- An assertion failure here means the default parameter values of {{ name }}
+      -- failed validation. The assertion carries no message string to keep it out of
+      -- the binary; the failure is traceable through this subprogram's symbol and the
+      -- assertion's file and line.
+      pragma Assert (
+         Base_Instance'Class (Self).Validate_Parameters (
+{% for par in parameters %}
+            {{ par.name }} => Self.{{ par.name }}{{ "," if not loop.last }}
+{% endfor %}
+         ) = Valid
+      );
+   end Assert_Valid_Parameters;
 
 {% endif %}
 {% if connectors.requires_queue() %}

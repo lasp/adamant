@@ -24,8 +24,8 @@ package body {{ name }}.Implementation is
       Self.Tester.Set_Logger (Self.Logger'Unchecked_Access);
 
 {% endif %}
-{% if component.connectors.invoker() or component.connectors.of_kind("recv_async") or component.events %}
-      -- Allocate heap memory to component:
+{% if component.init_base or component.connectors.invoker() or component.connectors.of_kind("recv_async") or component.events %}
+      -- Initialize the component and tester base:
       Self.Tester.Init_Base{% if component.init_base.parameters %} ({% for n in component.init_base.parameter_names %}{% if n == "Queue_Size" %}{{ n }} => Self.Tester.Component_Instance.Get_Max_Queue_Element_Size * 10{% else %}{{ n }} => 3{% endif %}{{ ", " if not loop.last }}{% endfor %}){% endif %};
 
 {% endif %}

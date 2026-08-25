@@ -256,7 +256,7 @@ class component(base):
                         )
 
         # Handle base class initialization:
-        # Create a subprogram from the component properties:
+        # Gather the parameters that Init_Base takes from the component properties:
         init_base_parameters = []
         if self.connectors.requires_priority_queue():
             init_base_parameters.append(
@@ -298,16 +298,6 @@ class component(base):
                     + " invokee connector array.",
                 )
             )
-        if init_base_parameters:
-            self.init_base = subprogram(
-                name="init_Base",
-                description=("This procedure allocates memory for the component base class including the "
-                             "internal queue and/or arrayed connectors."),
-                # Sort parameters for deterministic ordering.
-                parameters=sorted(init_base_parameters, key=lambda p: p.name.lower()),
-            )
-        else:
-            self.init_base = None
 
         # Load component submodels dynamically, we ignore this model and any test models during this load:
         submodel_files = [
@@ -358,6 +348,30 @@ class component(base):
                     + error_str[5:]
                     + ". All component entities must have unique names."
                 )
+
+        # Create the Init_Base subprogram. A component with parameters is given an
+        # Init_Base even when it has no heap to allocate; Init_Base asserts the
+        # component's default parameter values.
+        if init_base_parameters or self.parameters:
+            init_base_actions = []
+            if init_base_parameters:
+                init_base_actions.append(
+                    "allocates memory for the component base class including the "
+                    "internal queue and/or arrayed connectors"
+                )
+            if self.parameters:
+                init_base_actions.append(
+                    "asserts that the component's compiled-in default parameter values "
+                    "are valid"
+                )
+            self.init_base = subprogram(
+                name="init_Base",
+                description="This procedure " + " and ".join(init_base_actions) + ".",
+                # Sort parameters for deterministic ordering.
+                parameters=sorted(init_base_parameters, key=lambda p: p.name.lower()),
+            )
+        else:
+            self.init_base = None
 
         # Handle ID base initialization:
         # Set the component's set_id_bases parameters. This list is filled in by
@@ -726,7 +740,11 @@ class component(base):
                     + subprogram_name.lower()
                 )
             if check_missing:
-                if subprogram and subprogram_name not in self.instance_data:
+                if (
+                    subprogram
+                    and subprogram.parameters
+                    and subprogram_name not in self.instance_data
+                ):
                     err(
                         '"'
                         + subprogram_name

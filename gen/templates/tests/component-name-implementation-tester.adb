@@ -22,7 +22,7 @@ package body Component.{{ name }}.Implementation.Tester is
    procedure Init_Base (Self : in out Instance{% if init_base.parameters %}; {{ init_base.parameter_declaration_string() }}{% endif %}) is
    begin
 {% if init_base %}
-      -- Initialize component heap:
+      -- Initialize the component base:
       Self.Component_Instance.Init_Base{% if init_base.parameters %} ({% for n in init_base.parameter_names %}{{ n }} => {{ n }}{{ ", " if not loop.last }}{% endfor %}){% endif %};
 
 {% endif %}
@@ -81,6 +81,9 @@ package body Component.{{ name }}.Implementation.Tester is
 {% endif %}
    begin
       -- Destroy tester heap:
+{% if not (connectors.invoker() or connectors.of_kind("recv_async") or connectors.n_arrayed().invokee() or events or data_products or packets or faults) %}
+      null;
+{% endif %}
 {% if connectors.invoker() %}
       -- Connector histories:
 {% for connector in connectors.invoker() %}
