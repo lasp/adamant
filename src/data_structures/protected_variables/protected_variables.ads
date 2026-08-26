@@ -2,7 +2,7 @@
 -- components. Each protected variable pattern is contained within a generic
 -- package that can be adapted for the particular type needed.
 
-package Protected_Variables is
+package Protected_Variables with SPARK_Mode => On is
 
    -- A generic variable that can be set/fetched in a thread safe way.
    generic
@@ -40,11 +40,21 @@ package Protected_Variables is
       end Counter;
    end Generic_Protected_Counter;
 
-   -- A generic counter whose members are set/fetched/incremented in a thread safe way.
+   -- A generic countdown whose members are set/fetched/decremented in a thread
+   -- safe way. The count never goes below zero: decrementing by more than the
+   -- current count leaves the count at zero. A caller can therefore decrement
+   -- freely and treat a count of zero as "expired" without guarding the
+   -- decrement, and no operation of this counter raises an exception. To
+   -- detect the moment the countdown expires, read the count before
+   -- decrementing.
    generic
-      -- Any modular type
+      -- Any signed integer type whose range starts at zero, such as Natural,
+      -- so that zero is the floor of the countdown and a decrement of 1 is
+      -- always representable.
       type T is range <>;
    package Generic_Protected_Counter_Decrement is
+      pragma Compile_Time_Error (T'First /= 0 or else T'Last < 1, "Generic_Protected_Counter_Decrement requires a type whose range starts at zero and includes one; the count is a countdown that saturates at zero.");
+
       protected type Counter is
          -- Set the count.
          procedure Set_Count (Value : in T);
@@ -52,11 +62,15 @@ package Protected_Variables is
          function Get_Count return T;
          -- Set the count to zero.
          procedure Reset_Count;
-         -- Increment the count, by 1 by default.
+         -- Decrement the count, by 1 by default. The count saturates at zero:
+         -- if To_Subtract is more than the current count, the count becomes
+         -- zero. Never raises.
          procedure Decrement_Count (To_Subtract : in T := 1);
-         -- Same as Decrement_Count but returns the previous value.
+         -- Same as Decrement_Count but returns the previous value, so a caller
+         -- can tell exactly which decrement expired the countdown.
          procedure Decrement_Count_And_Return_Previous (Prev_Count : out T; To_Subtract : in T := 1);
       private
+         -- The count starts expired:
          Count : T := 0;
       end Counter;
    end Generic_Protected_Counter_Decrement;

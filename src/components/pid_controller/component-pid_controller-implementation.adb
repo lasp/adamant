@@ -160,8 +160,10 @@ package body Component.Pid_Controller.Implementation is
          -- Diagnostic packet - only save if the number of commanded samples is not finished
          declare
             use Pid_Diagnostic_Subpacket;
-            -- The current diagnostic count:
-            Diag_Count : constant Integer := Self.Diagnostic_Counter.Get_Count;
+            -- The diagnostic count before this cycle's decrement. The countdown
+            -- saturates at zero, so it is decremented unconditionally below in a
+            -- single protected action:
+            Diag_Count : Natural;
             -- The current index in the packet we are filling:
             Diagnostic_Packet_Index : Natural := (Self.Diagnostic_Subpacket_Count * Pid_Diagnostic_Subpacket.Max_Serialized_Length) + Packed_Natural.Max_Serialized_Length;
 
@@ -189,6 +191,7 @@ package body Component.Pid_Controller.Implementation is
                Diagnostic_Packet_Index := Packed_Natural.Max_Serialized_Length;
             end Send_Packet;
          begin
+            Self.Diagnostic_Counter.Decrement_Count_And_Return_Previous (Diag_Count, 1);
             if Diag_Count > 0 then
                -- If there is not enough room in the current packet, then send the packet and start a new one.
                if (Diagnostic_Packet_Index + Pid_Diagnostic_Subpacket.Max_Serialized_Length) > Self.Diagnostic_Packet.Buffer'Length then
@@ -208,8 +211,7 @@ package body Component.Pid_Controller.Implementation is
                -- Increment the diagnostic subpacket count:
                Self.Diagnostic_Subpacket_Count := @ + 1;
 
-               -- Decrement the count. If it is 0 here (is. was equal to 1) we will not return here so we need to send what we have of the packet.
-               Self.Diagnostic_Counter.Decrement_Count (1);
+               -- This was the last commanded sample, so send what we have of the packet.
                if Diag_Count = 1 then
                   Send_Packet;
                end if;
@@ -244,7 +246,7 @@ package body Component.Pid_Controller.Implementation is
       use Command_Execution_Status;
    begin
       -- Set the diagnostic subpacket count
-      Self.Diagnostic_Counter.Set_Count (Integer (Arg.Duration));
+      Self.Diagnostic_Counter.Set_Count (Arg.Duration);
       -- Throw informational event:
       Self.Event_T_Send_If_Connected (Self.Events.Diagnostics_Started (Self.Sys_Time_T_Get, Arg));
       return Success;

@@ -17,8 +17,8 @@ package body Protected_Variables_Tests.Implementation is
    type Byte_Mod is mod 2**8;
    package Byte_Counter is new Protected_Variables.Generic_Protected_Counter (T => Byte_Mod);
 
-   type Signed_Range is range -100 .. 100;
-   package Signed_Counter is new Protected_Variables.Generic_Protected_Counter_Decrement (T => Signed_Range);
+   type Countdown_Range is range 0 .. 100;
+   package Countdown_Counter is new Protected_Variables.Generic_Protected_Counter_Decrement (T => Countdown_Range);
 
    package Byte_Periodic_Counter is new Protected_Variables.Generic_Protected_Periodic_Counter (T => Byte_Mod);
 
@@ -33,7 +33,7 @@ package body Protected_Variables_Tests.Implementation is
    -- Smart-assert instantiations for the custom types declared above.
    -- Integer_Assert / Boolean_Assert come from Basic_Assertions.
    package Byte_Mod_Assert is new Smart_Assert.Discrete (Byte_Mod, Byte_Mod'Image);
-   package Signed_Range_Assert is new Smart_Assert.Discrete (Signed_Range, Signed_Range'Image);
+   package Countdown_Range_Assert is new Smart_Assert.Discrete (Countdown_Range, Countdown_Range'Image);
    package Pair_Assert is new Smart_Assert.Basic (Pair, Pair'Image);
 
    -------------------------------------------------------------------------
@@ -103,37 +103,46 @@ package body Protected_Variables_Tests.Implementation is
 
    overriding procedure Test_Protected_Counter_Decrement (Self : in out Instance) is
       Ignore : Instance renames Self;
-      C : Signed_Counter.Counter;
-      Prev : Signed_Range;
+      C : Countdown_Counter.Counter;
+      Prev : Countdown_Range;
    begin
       -- Default starts at 0.
-      Signed_Range_Assert.Eq (C.Get_Count, 0);
-
+      Countdown_Range_Assert.Eq (C.Get_Count, 0);
       -- Set / Get.
       C.Set_Count (50);
-      Signed_Range_Assert.Eq (C.Get_Count, 50);
-
+      Countdown_Range_Assert.Eq (C.Get_Count, 50);
       -- Default decrement is 1.
       C.Decrement_Count;
-      Signed_Range_Assert.Eq (C.Get_Count, 49);
-
+      Countdown_Range_Assert.Eq (C.Get_Count, 49);
       -- Decrement by N.
       C.Decrement_Count (To_Subtract => 9);
-      Signed_Range_Assert.Eq (C.Get_Count, 40);
-
-      -- Reset.
-      C.Reset_Count;
-      Signed_Range_Assert.Eq (C.Get_Count, 0);
-
-      -- Negative range (counter is signed).
+      Countdown_Range_Assert.Eq (C.Get_Count, 40);
+      -- Decrement exactly to the floor.
+      C.Decrement_Count (To_Subtract => 40);
+      Countdown_Range_Assert.Eq (C.Get_Count, 0);
+      -- Decrementing at the floor saturates, it does not raise or wrap.
+      C.Decrement_Count;
+      Countdown_Range_Assert.Eq (C.Get_Count, 0);
+      C.Decrement_Count (To_Subtract => 100);
+      Countdown_Range_Assert.Eq (C.Get_Count, 0);
+      -- Decrementing by more than the count saturates.
+      C.Set_Count (5);
       C.Decrement_Count (To_Subtract => 20);
-      Signed_Range_Assert.Eq (C.Get_Count, -20);
-
+      Countdown_Range_Assert.Eq (C.Get_Count, 0);
+      -- Reset.
+      C.Set_Count (7);
+      C.Reset_Count;
+      Countdown_Range_Assert.Eq (C.Get_Count, 0);
       -- Return-previous semantics.
       C.Set_Count (10);
       C.Decrement_Count_And_Return_Previous (Prev_Count => Prev, To_Subtract => 4);
-      Signed_Range_Assert.Eq (Prev, 10);
-      Signed_Range_Assert.Eq (C.Get_Count, 6);
+      Countdown_Range_Assert.Eq (Prev, 10);
+      Countdown_Range_Assert.Eq (C.Get_Count, 6);
+      -- Return-previous saturates too, and still reports the previous value.
+      C.Decrement_Count_And_Return_Previous (Prev_Count => Prev, To_Subtract => 50);
+      Countdown_Range_Assert.Eq (Prev, 6);
+      Countdown_Range_Assert.Eq (C.Get_Count, 0);
+
    end Test_Protected_Counter_Decrement;
 
    overriding procedure Test_Protected_Periodic_Counter (Self : in out Instance) is
