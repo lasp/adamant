@@ -161,7 +161,7 @@ package body Component.Pid_Controller.Implementation is
          declare
             use Pid_Diagnostic_Subpacket;
             -- The current diagnostic count:
-            Diag_Count : constant Integer := Self.Diagnostic_Counter.Get_Count;
+            Diag_Count : constant Natural := Self.Diagnostic_Counter.Get_Count;
             -- The current index in the packet we are filling:
             Diagnostic_Packet_Index : Natural := (Self.Diagnostic_Subpacket_Count * Pid_Diagnostic_Subpacket.Max_Serialized_Length) + Packed_Natural.Max_Serialized_Length;
 
@@ -244,7 +244,7 @@ package body Component.Pid_Controller.Implementation is
       use Command_Execution_Status;
    begin
       -- Set the diagnostic subpacket count
-      Self.Diagnostic_Counter.Set_Count (Integer (Arg.Duration));
+      Self.Diagnostic_Counter.Set_Count (Natural (Arg.Duration));
       -- Throw informational event:
       Self.Event_T_Send_If_Connected (Self.Events.Diagnostics_Started (Self.Sys_Time_T_Get, Arg));
       return Success;

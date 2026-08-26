@@ -1,4 +1,4 @@
-package body Protected_Variables is
+package body Protected_Variables with SPARK_Mode => On is
 
    package body Generic_Variable is
       protected body Variable is
@@ -63,13 +63,23 @@ package body Protected_Variables is
 
          procedure Decrement_Count (To_Subtract : in T := 1) is
          begin
-            Count := @ - To_Subtract;
+            -- Saturate at zero:
+            if To_Subtract > Count then
+               Count := 0;
+            else
+               Count := @ - To_Subtract;
+            end if;
          end Decrement_Count;
 
          procedure Decrement_Count_And_Return_Previous (Prev_Count : out T; To_Subtract : in T := 1) is
          begin
             Prev_Count := Count;
-            Count := @ - To_Subtract;
+            -- Saturate at zero:
+            if To_Subtract > Count then
+               Count := 0;
+            else
+               Count := @ - To_Subtract;
+            end if;
          end Decrement_Count_And_Return_Previous;
       end Counter;
    end Generic_Protected_Counter_Decrement;

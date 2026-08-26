@@ -1,0 +1,4 @@
+---
+description: GNATprove configuration for the protected variables package. The target is silver, absence of runtime errors.
+level: 3
+mode: "silver"

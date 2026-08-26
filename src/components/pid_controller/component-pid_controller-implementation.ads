@@ -29,7 +29,7 @@ package Component.Pid_Controller.Implementation is
 private
 
    -- Protected objects for protecting data that can be modified by synchronous command.
-   package Protected_Signed_16_Counter is new Protected_Variables.Generic_Protected_Counter_Decrement (Integer);
+   package Protected_Natural_Counter is new Protected_Variables.Generic_Protected_Counter_Decrement (Natural);
    package Protected_Unsigned_16_Counter is new Protected_Variables.Generic_Protected_Periodic_Counter (Interfaces.Unsigned_16);
    package Moving_Average_Variable is new Moving_Average (Short_Float);
 
@@ -59,7 +59,7 @@ private
       Control_Out_Prev_D : Short_Float := 0.0;
 
       -- Diagnostic packet variables
-      Diagnostic_Counter : Protected_Signed_16_Counter.Counter;
+      Diagnostic_Counter : Protected_Natural_Counter.Counter;
       Diagnostic_Packet : Packet.T;
       Diagnostic_Subpacket_Count : Natural := 0;
 
