@@ -241,6 +241,9 @@ package body Component.{{ name }} is
       pragma Assert (Natural (Parameter_Id_Base) + {{ (parameters|length) - 1 }} <= Natural (Parameter_Types.Parameter_Id'Last));
 {% endif %}
       Self.Parameter_Id_Base := Parameter_Id_Base;
+      -- Check the component's compiled-in default parameter values against the
+      -- component's parameter validation:
+      Self.Assert_Valid_Parameter_Defaults;
 {% endif %}
    end Set_Id_Bases;
 
