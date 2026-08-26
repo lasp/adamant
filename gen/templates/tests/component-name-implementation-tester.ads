@@ -145,7 +145,7 @@ package Component.{{ name }}.Implementation.Tester is
    end record;
    type Instance_Access is access all Instance;
 
-{% if init_base or connectors.invoker() or events or data_products or packets or faults %}
+{% if init_base or connectors.invoker() or events or data_products or packets or faults or parameters %}
    ---------------------------------------
    -- Initialize component heap variables:
    ---------------------------------------

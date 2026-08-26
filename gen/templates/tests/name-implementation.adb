@@ -33,6 +33,14 @@ package body {{ name }}.Implementation is
       -- Set the logger in the component
       Self.Tester.Set_Logger (Self.Logger'Unchecked_Access);
 
+{% if component.parameters %}
+      -- Check the component's compiled-in default parameter values against the
+      -- component's parameter validation. Generic components are checked here
+      -- because the generated unit test base cannot allocate their tester;
+      -- non-generic components are checked in the base test Set_Up instead.
+      Self.Tester.Component_Instance.Assert_Valid_Parameter_Defaults;
+
+{% endif %}
 {% endif %}
 {% if component.connectors.invoker() or component.connectors.of_kind("recv_async") or component.events %}
       -- Allocate heap memory to component:
