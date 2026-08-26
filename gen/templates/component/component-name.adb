@@ -1054,6 +1054,16 @@ package body Component.{{ name }} is
    -- Parameter handling primitives:
    -------------------------------------------
 
+   not overriding procedure Assert_Valid_Parameter_Defaults (Self : in out Base_Instance) is
+      use Parameter_Validation_Status;
+   begin
+      pragma Assert (Base_Instance'Class (Self).Validate_Parameters (
+{% for par in parameters %}
+         {{ par.name }} => Self.{{ par.name }}{{ "," if not loop.last }}
+{% endfor %}
+      ) = Valid);
+   end Assert_Valid_Parameter_Defaults;
+
    not overriding procedure Update_Parameters (Self : in out Base_Instance) is
    begin
       -- If parameters have finished being staged, then we need to update

@@ -282,6 +282,11 @@ package Component.{{ name }} is
 {% endfor %}
    ) return Parameter_Validation_Status.E is abstract;
 
+   -- This procedure asserts that the component's working parameter values, which
+   -- hold the defaults declared in the component model until the first parameter
+   -- update, are valid according to the component's Validate_Parameters function.
+   not overriding procedure Assert_Valid_Parameter_Defaults (Self : in out Base_Instance);
+
 {% endif %}
 {% if data_dependencies %}
    -----------------------------------------------
