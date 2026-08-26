@@ -18,6 +18,7 @@ from database.utility_database import utility_database
 from database.redo_target_database import redo_target_database
 from database.build_target_database import build_target_database
 import database.model_cache_database
+import database.type_ranges_cache_database
 from database.model_database import model_database
 
 # Base class imports:
@@ -331,6 +332,8 @@ def create_pre_build_path():
     #######################################
     # Create an empty model cache database if it doesn't already exist:
     database.model_cache_database.touch_model_cache_database()
+    # Create an empty type ranges cache database if it doesn't already exist:
+    database.type_ranges_cache_database.touch_type_ranges_cache_database()
 
     #######################################
     # Create build target database:

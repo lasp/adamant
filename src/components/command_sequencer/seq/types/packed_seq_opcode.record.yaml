@@ -4,4 +4,4 @@ fields:
   - name: Opcode
     description: Instruction code
     type: Seq_Enums.Seq_Opcode.E
-    format: U8
+    format: E8
