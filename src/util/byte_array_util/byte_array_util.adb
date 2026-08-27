@@ -1,6 +1,18 @@
 with Interfaces; use Interfaces;
 
-package body Byte_Array_Util is
+package body Byte_Array_Util with SPARK_Mode => On is
+
+   -- See the note in the package specification. All contracts are for proof
+   -- only and are disabled at runtime:
+   pragma Assertion_Policy
+      (Pre => Ignore,
+       Post => Ignore,
+       Contract_Cases => Ignore,
+       Ghost => Ignore,
+       Loop_Invariant => Ignore,
+       Loop_Variant => Ignore,
+       Assert_And_Cut => Ignore,
+       Assume => Ignore);
 
    function Safe_Right_Copy (Dest : in out Byte_Array; Src : in Byte_Array) return Natural is
    begin
@@ -15,8 +27,8 @@ package body Byte_Array_Util is
             -- must be less than or equal to both the destination and src array
             -- lengths at this point. We know that both dest and src cannot be
             -- a null array.
-            pragma Assert (Num_Bytes_To_Copy <= Signed_Length (Dest));
-            pragma Assert (Num_Bytes_To_Copy <= Signed_Length (Src));
+            pragma Assert (Num_Bytes_To_Copy <= Dest'Length);
+            pragma Assert (Num_Bytes_To_Copy <= Src'Length);
 
             -- Perform the copy:
             Dest (Dest'Last - Num_Bytes_To_Copy + 1 .. Dest'Last) := Src (Src'Last - Num_Bytes_To_Copy + 1 .. Src'Last);
@@ -46,8 +58,8 @@ package body Byte_Array_Util is
             -- must be less than or equal to both the destination and src array
             -- lengths at this point. We know that both dest and src cannot be
             -- a null array.
-            pragma Assert (Num_Bytes_To_Copy <= Signed_Length (Dest));
-            pragma Assert (Num_Bytes_To_Copy <= Signed_Length (Src));
+            pragma Assert (Num_Bytes_To_Copy <= Dest'Length);
+            pragma Assert (Num_Bytes_To_Copy <= Src'Length);
 
             -- Perform the copy:
             Dest (Dest'First .. Dest'First + Num_Bytes_To_Copy - 1) := Src (Src'First .. Src'First + Num_Bytes_To_Copy - 1);
@@ -78,9 +90,10 @@ package body Byte_Array_Util is
       Value := [0, 0, 0, 0];
 
       -- Validate offset and size. Size must be <= 32 bits. The size + offset must not overflow
-      -- the size of the byte array. Size must be greater than zero.
+      -- the size of the byte array. Size must be greater than zero. The comparison is done in
+      -- 64 bits so that it cannot itself overflow for any offset or array length.
       if Size > Poly_32_Type'Object_Size or else
-          Offset + Size > Src'Length * Byte'Object_Size
+          Long_Long_Integer (Offset) + Long_Long_Integer (Size) > Long_Long_Integer (Src'Length) * Long_Long_Integer (Byte'Object_Size)
       then
          return Error;
       end if;
@@ -91,16 +104,20 @@ package body Byte_Array_Util is
          Num_Dest_Bytes : constant Natural := (Size + Byte'Object_Size - 1) / Byte'Object_Size;
          First_Dest_Idx : constant Natural := Value'Last - Num_Dest_Bytes + 1;
          Last_Dest_Idx : constant Natural := Value'Last;
+         -- Split the offset into whole bytes and remaining bits. All the index arithmetic below
+         -- works from these two parts, so it stays small and cannot overflow for any offset.
+         Offset_Bytes : constant Natural := Offset / Byte'Object_Size;
+         Offset_Bits : constant Natural := Offset mod Byte'Object_Size;
          -- Calculate the first byte we need to copy from the source, the offset rounded down to nearest byte:
-         First_Src_Idx : constant Natural := Src'First + (Offset / Byte'Object_Size);
+         First_Src_Idx : constant Natural := Src'First + Offset_Bytes;
          -- Calculate the last byte we need to extract from the source to completely encapsulate the data we seek.
-         Last_Src_Idx : constant Natural := Src'First + ((Offset + Size - 1) / Byte'Object_Size);
+         Last_Src_Idx : constant Natural := First_Src_Idx + ((Offset_Bits + Size - 1) / Byte'Object_Size);
          -- Index for grabbing bytes out of source array.
          Src_Idx : Natural := Last_Src_Idx;
          -- Calculate the number of bits we need to shift everything right, this 8 minus the offset mod 8,
          -- i.e. the number of padding bits between the last bit we care about and the last whole byte we need
          -- data from.
-         Left_Shift : constant Natural := (Offset + Size) mod Byte'Object_Size;
+         Left_Shift : constant Natural := (Offset_Bits + Size) mod Byte'Object_Size;
          Right_Shift : constant Natural := (Byte'Object_Size - Left_Shift) mod Byte'Object_Size;
          -- Create a mask for the shifts.
          Right_Mask : constant Unsigned_8 := Bit_Mask (Mod_1_8 (Left_Shift));
@@ -158,9 +175,10 @@ package body Byte_Array_Util is
       Value_To_Set : Poly_32_Type := Value;
    begin
       -- Validate offset and size. Size must be <= 32 bits. The size + offset must not overflow
-      -- the size of the byte array. Size must be greater than zero.
+      -- the size of the byte array. Size must be greater than zero. The comparison is done in
+      -- 64 bits so that it cannot itself overflow for any offset or array length.
       if Size > Poly_32_Type'Object_Size or else
-          Offset + Size > (Dest'Last - Dest'First + 1) * Byte'Object_Size
+          Long_Long_Integer (Offset) + Long_Long_Integer (Size) > Long_Long_Integer (Dest'Length) * Long_Long_Integer (Byte'Object_Size)
       then
          return Error;
       end if;
@@ -205,18 +223,23 @@ package body Byte_Array_Util is
          First_Src_Idx : constant Natural := Value_To_Set'Last - Num_Src_Bytes + 1;
          Last_Src_Idx : constant Natural := Value_To_Set'Last;
 
+         -- Split the offset into whole bytes and remaining bits. All the index arithmetic below
+         -- works from these two parts, so it stays small and cannot overflow for any offset.
+         Offset_Bytes : constant Natural := Offset / Byte'Object_Size;
+         Offset_Bits : constant Natural := Offset mod Byte'Object_Size;
+
          -- Calculate indexes in the destination we need to copy to.
-         First_Dest_Idx : constant Natural := Dest'First + (Offset / Byte'Object_Size);
-         Last_Dest_Idx : constant Natural := Dest'First + (Size + Offset - 1) / Byte'Object_Size;
+         First_Dest_Idx : constant Natural := Dest'First + Offset_Bytes;
+         Last_Dest_Idx : constant Natural := First_Dest_Idx + (Offset_Bits + Size - 1) / Byte'Object_Size;
 
          -- Calculate the number of bits we need to shift everything left from the source as we copy to
          -- the destination.
-         Right_Shift : constant Natural := (Offset + Size) mod Byte'Object_Size;
+         Right_Shift : constant Natural := (Offset_Bits + Size) mod Byte'Object_Size;
          Left_Shift : constant Natural := (Byte'Object_Size - Right_Shift) mod Byte'Object_Size;
          -- Create masks for the shifts.
          Left_Mask : constant Unsigned_8 := Shift_Left (16#FF#, Left_Shift);
          Right_Mask : constant Unsigned_8 := 16#FF# xor Left_Mask;
-         Last_Mask : constant Unsigned_8 := Shift_Left (16#FF#, Byte'Object_Size - (Offset mod Byte'Object_Size)) and 16#FF#;
+         Last_Mask : constant Unsigned_8 := Shift_Left (16#FF#, Byte'Object_Size - Offset_Bits) and 16#FF#;
 
          -- Save off the first destination data, since there may be bits in here we don't want to overwrite, but
          -- the algorithm corrupts.
