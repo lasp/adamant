@@ -52,7 +52,8 @@ package Serializer is
    -- the first bytes of the array will be filled with the type. If the array is smaller,
    -- a Constraint_Error will likely be called, or a segmentation fault may occur.
    -- Use the To_Byte_Array function above whenever possible.
-   function To_Byte_Array_Unchecked (Dest : out Basic_Types.Byte_Array; Src : in T) return Natural;
+   function To_Byte_Array_Unchecked (Dest : out Basic_Types.Byte_Array; Src : in T) return Natural
+      with Side_Effects;
    procedure To_Byte_Array_Unchecked (Dest : out Basic_Types.Byte_Array; Src : in T);
    function To_Byte_Array_Unchecked (Src : in T) return Basic_Types.Byte_Array;
 
@@ -65,7 +66,8 @@ package Serializer is
    -- the type will not receive updated serialized data from the array. If this is not
    -- your intended behavior, then you might be in trouble. Use the From_Byte_Array
    -- function above whenever possible.
-   function From_Byte_Array_Unchecked (Dest : out T; Src : in Basic_Types.Byte_Array) return Natural;
+   function From_Byte_Array_Unchecked (Dest : out T; Src : in Basic_Types.Byte_Array) return Natural
+      with Side_Effects;
    procedure From_Byte_Array_Unchecked (Dest : out T; Src : in Basic_Types.Byte_Array);
    function From_Byte_Array_Unchecked (Src : in Basic_Types.Byte_Array) return T;
 end Serializer;
