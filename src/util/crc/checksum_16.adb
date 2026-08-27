@@ -1,6 +1,6 @@
 with Interfaces; use Interfaces;
 
-package body Checksum_16 is
+package body Checksum_16 with SPARK_Mode => On is
 
    -- This function computes the 16-bit checksum in terms of an unsigned 16 which is easier. It uses
    -- multiplies in order to be endian agnostic.

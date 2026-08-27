@@ -1,6 +1,6 @@
 with Interfaces; use Interfaces;
 
-package body Crc_16 is
+package body Crc_16 with SPARK_Mode => On is
 
    -- Function to compute CRC on a variable array of bytes. A CRC of the whole
    -- array is computed.
@@ -71,7 +71,10 @@ package body Crc_16 is
       return [Crc_16_Type'First => High_Parity, Crc_16_Type'First + 1 => Low_Parity];
    end Compute_Crc_16;
 
-   function Compute_Crc_16 (Byte_Ptr : in Byte_Array_Pointer.Instance; Seed : in Crc_16_Type := [0 => 16#FF#, 1 => 16#FF#]) return Crc_16_Type is
+   -- The body is not analyzed by SPARK since it overlays the memory behind
+   -- the pointer with a byte array by address, which is outside the SPARK
+   -- memory model. It delegates the computation to the proved function above.
+   function Compute_Crc_16 (Byte_Ptr : in Byte_Array_Pointer.Instance; Seed : in Crc_16_Type := [0 => 16#FF#, 1 => 16#FF#]) return Crc_16_Type with SPARK_Mode => Off is
       use Byte_Array_Pointer;
       subtype Safe_Byte_Array_Type is Basic_Types.Byte_Array (0 .. Length (Byte_Ptr) - 1);
       -- Perform overlay manually instead of using Byte_Array_Pointer.Pointer to avoid Byte_Array_Access range checking.

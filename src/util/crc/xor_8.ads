@@ -1,6 +1,6 @@
 with Basic_Types;
 
-package Xor_8 is
+package Xor_8 with SPARK_Mode => On is
 
    -- 8-bit XOR type. This type is just an 8-bit unsigned value which contains an 8-bit longitudinal parity
    -- byte computed over a byte array.
