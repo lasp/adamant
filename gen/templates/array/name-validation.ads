@@ -32,7 +32,8 @@ package {{ name }}.Validation is
       Errant_Field : out Unsigned_32;
       First_Index : in Unconstrained_Index_Type := T'First;
       Last_Index : in Unconstrained_Index_Type := T'Last
-   ) return Boolean;
+   ) return Boolean
+      with Side_Effects;
 {% endif %}
 {% if endianness in ["either", "little"] %}
    -- Valid_Le function accepting a byte array. Optionally, a first or last index can be passed in to only check
@@ -42,7 +43,8 @@ package {{ name }}.Validation is
       Errant_Field : out Unsigned_32;
       First_Index : in Unconstrained_Index_Type := T_Le'First;
       Last_Index : in Unconstrained_Index_Type := T_Le'Last
-   ) return Boolean;
+   ) return Boolean
+      with Side_Effects;
 {% endif %}
 
    -- Return a field (provided by a field number) as a polymorphic type.

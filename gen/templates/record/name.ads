@@ -491,19 +491,23 @@ package {{ name }} is
    -- Max_Serialized_Length, then the number symbolizes the actual calculated length, which is
    -- too large.
 {% if endianness in ["either", "big"] %}
-   function Serialized_Length (Src : in T; Num_Bytes_Serialized : out Natural) return Serialization_Status;
+   function Serialized_Length (Src : in T; Num_Bytes_Serialized : out Natural) return Serialization_Status
+      with Side_Effects;
 {% endif %}
 {% if endianness in ["either", "little"] %}
-   function Serialized_Length_Le (Src : in T_Le; Num_Bytes_Serialized : out Natural) return Serialization_Status;
+   function Serialized_Length_Le (Src : in T_Le; Num_Bytes_Serialized : out Natural) return Serialization_Status
+      with Side_Effects;
 {% endif %}
 
    -- Get the size of the already serialized type inside of the byte array. If the byte array is too small then
    -- a serialization error is returned.
 {% if endianness in ["either", "big"] %}
-   function Serialized_Length (Src : in Basic_Types.Byte_Array; Num_Bytes_Serialized : out Natural) return Serialization_Status;
+   function Serialized_Length (Src : in Basic_Types.Byte_Array; Num_Bytes_Serialized : out Natural) return Serialization_Status
+      with Side_Effects;
 {% endif %}
 {% if endianness in ["either", "little"] %}
-   function Serialized_Length_Le (Src : in Basic_Types.Byte_Array; Num_Bytes_Serialized : out Natural) return Serialization_Status;
+   function Serialized_Length_Le (Src : in Basic_Types.Byte_Array; Num_Bytes_Serialized : out Natural) return Serialization_Status
+      with Side_Effects;
 {% endif %}
 
    -- Serializing functions for entire record:
@@ -539,22 +543,22 @@ package {{ name }} is
    -- definition below, but its for a statically sized type.
 {% if endianness in ["either", "big"] %}
    function Serialized_Length (Src : in T; Num_Bytes_Serialized : out Natural) return Serialization_Status
-      with Inline => True;
+      with Side_Effects, Inline => True;
 {% endif %}
 {% if endianness in ["either", "little"] %}
    function Serialized_Length_Le (Src : in T_Le; Num_Bytes_Serialized : out Natural) return Serialization_Status
-      with Inline => True;
+      with Side_Effects, Inline => True;
 {% endif %}
 
    -- Get the size of the already serialized type inside of the byte array. If the byte array is too small then
    -- a serialization error is returned.
 {% if endianness in ["either", "big"] %}
    function Serialized_Length (Src : in Basic_Types.Byte_Array; Num_Bytes_Serialized : out Natural) return Serialization_Status
-      with Inline => True;
+      with Side_Effects, Inline => True;
 {% endif %}
 {% if endianness in ["either", "little"] %}
    function Serialized_Length_Le (Src : in Basic_Types.Byte_Array; Num_Bytes_Serialized : out Natural) return Serialization_Status
-      with Inline => True;
+      with Side_Effects, Inline => True;
 {% endif %}
 {% endif %}
 
