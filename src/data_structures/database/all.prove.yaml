@@ -1,0 +1,4 @@
+---
+description: GNATprove configuration for the database packages. The target is silver, absence of runtime errors, including proof of the defensive assertions.
+level: 2
+mode: "silver"
