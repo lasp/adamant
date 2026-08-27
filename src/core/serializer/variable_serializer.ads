@@ -49,12 +49,16 @@ package Variable_Serializer is
    -- Convert type to byte array, return number of bytes serialized:
    -- These functions may produce an error if the length of a variable field
    -- is invalid.
-   function To_Byte_Array (Dest : out Basic_Types.Byte_Array; Src : in T; Num_Bytes_Serialized : out Natural) return Serialization_Status;
-   function To_Byte_Array (Dest : out Basic_Types.Byte_Array; Src : in T) return Serialization_Status;
+   function To_Byte_Array (Dest : out Basic_Types.Byte_Array; Src : in T; Num_Bytes_Serialized : out Natural) return Serialization_Status
+      with Side_Effects;
+   function To_Byte_Array (Dest : out Basic_Types.Byte_Array; Src : in T) return Serialization_Status
+      with Side_Effects;
 
    -- Convert byte array to type, return number of bytes deserialized:
    -- These functions may produce an error if the length of a variable field
    -- is invalid.
-   function From_Byte_Array (Dest : out T; Src : in Basic_Types.Byte_Array; Num_Bytes_Deserialized : out Natural) return Serialization_Status;
-   function From_Byte_Array (Dest : out T; Src : in Basic_Types.Byte_Array) return Serialization_Status;
+   function From_Byte_Array (Dest : out T; Src : in Basic_Types.Byte_Array; Num_Bytes_Deserialized : out Natural) return Serialization_Status
+      with Side_Effects;
+   function From_Byte_Array (Dest : out T; Src : in Basic_Types.Byte_Array) return Serialization_Status
+      with Side_Effects;
 end Variable_Serializer;

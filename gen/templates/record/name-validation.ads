@@ -22,10 +22,12 @@ package {{ name }}.Validation is
    -- False is returned and the Errant_Field parameter is filled in with a
    -- Natural specifying which field was out of range.
 {% if endianness in ["either", "big"] %}
-   function Valid (Bytes : in Serialization.Byte_Array; Errant_Field : out Interfaces.Unsigned_32) return Boolean;
+   function Valid (Bytes : in Serialization.Byte_Array; Errant_Field : out Interfaces.Unsigned_32) return Boolean
+      with Side_Effects;
 {% endif %}
 {% if endianness in ["either", "little"] %}
-   function Valid_Le (Bytes : in Serialization_Le.Byte_Array; Errant_Field : out Interfaces.Unsigned_32) return Boolean;
+   function Valid_Le (Bytes : in Serialization_Le.Byte_Array; Errant_Field : out Interfaces.Unsigned_32) return Boolean
+      with Side_Effects;
 {% endif %}
 
    -- Return a field (provided by a field number) as a polymorphic type.
