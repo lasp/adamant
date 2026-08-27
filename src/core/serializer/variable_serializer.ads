@@ -9,7 +9,7 @@ generic
    type T is private;
    with function Serialized_Length_T (Src : in T; Num_Bytes_Serialized : out Natural) return Serialization_Status;
    with function Serialized_Length_Byte_Array (Src : in Basic_Types.Byte_Array; Num_Bytes_Serialized : out Natural) return Serialization_Status;
-package Variable_Serializer is
+package Variable_Serializer with SPARK_Mode => On is
 
    -- The maximum length in bytes of the serialized type.
    Max_Serialized_Length : constant Natural := T'Object_Size / Basic_Types.Byte'Object_Size; -- in bytes

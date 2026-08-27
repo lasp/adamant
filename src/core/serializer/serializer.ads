@@ -5,7 +5,10 @@ with Basic_Types;
 -- using overlays.
 generic
    type T is private;
-package Serializer is
+-- The declarations of this package are in SPARK, so that SPARK code can
+-- instantiate it directly. The body overlays memory, which is outside the
+-- SPARK memory model, so it is not analyzed.
+package Serializer with SPARK_Mode => On is
    -- Note: 'Object_Size is used here because it represents the actual
    -- size of the type when instantiated in memory, not the minimum
    -- size of the type (as the 'Size attribute specifies)

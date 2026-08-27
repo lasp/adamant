@@ -1,4 +1,4 @@
-package body Variable_Serializer is
+package body Variable_Serializer with SPARK_Mode => Off is
 
    -- Byte arrays don't have a "scalar storage order" since they are an array of single byte
    -- items. So this warning doesn't apply. We can safely overlay a byte array with any type
