@@ -1,0 +1,33 @@
+project linux_prove extends all "a_linux_debug_base.gpr" is
+
+   -----------------------------------------------
+   -- These lines of code must be included at the
+   -- top of every Adamant based .gpr file. They
+   -- are used to connect the Adamant build system
+   -- to GPRBuild.
+   -----------------------------------------------
+   for Source_Dirs use a_adamant.SOURCE_DIRS;
+   for Excluded_Source_Files use a_adamant.EXCLUDED_SOURCE_FILES;
+   for Object_Dir use a_adamant.OBJECT_DIR;
+   for Exec_Dir use a_adamant.EXEC_DIR;
+
+   --
+   -- This GPR file is the same as linux_debug.gpr but also enforces the
+   -- sequential partition elaboration policy, as the bareboard targets do.
+   -- GNATprove requires it to analyze tasking constructs such as protected
+   -- types (SPARK RM 9(2)), and it matches the configuration the flight
+   -- software actually runs under.
+   --
+   package Compiler is
+      -- Add preprocessor definitions and configuration pragma switches:
+      for Switches ("Ada") use a_linux_debug_base.Compiler'Switches ("Ada") &
+         -- add ravenscar restriction
+         ("-gnatec=" & a_adamant.ADAMANT_DIR & "/redo/targets/configuration_pragmas/ravenscar.adc") &
+         -- add sequential elaboration policy
+         ("-gnatec=" & a_adamant.ADAMANT_DIR & "/redo/targets/configuration_pragmas/sequential_elaboration.adc");
+      for Switches ("C++") use a_linux_debug_base.Compiler'Switches ("C++");
+      for Switches ("C") use a_linux_debug_base.Compiler'Switches ("C");
+      for Switches ("Asm_Cpp") use a_linux_debug_base.Compiler'Switches ("Asm_Cpp");
+   end Compiler;
+
+end linux_prove;

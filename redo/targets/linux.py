@@ -77,7 +77,15 @@ class Linux_Coverage(Linux_Base):
 class Linux_Prove(Linux_Debug):
     """This is the target used with GNATprove to verify SPARK code."""
     def description(self):
-        return "This target is used to generate the path for calls to GNATprove to analyze SPARK code."
+        return ("This target is used to generate the path for calls to GNATprove to analyze SPARK code. "
+                "It is the same as Linux_Debug but also enforces the sequential partition elaboration "
+                "policy, which GNATprove requires to analyze tasking constructs.")
+
+    def gpr_project_file(self):
+        return os.path.join(
+            os.environ["ADAMANT_DIR"],
+            "redo" + os.sep + "targets" + os.sep + "gpr" + os.sep + "linux_prove.gpr",
+        )
 
 
 class Linux_Analyze(Linux_Base):
