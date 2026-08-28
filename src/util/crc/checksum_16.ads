@@ -1,6 +1,6 @@
 with Basic_Types;
 
-package Checksum_16 is
+package Checksum_16 with SPARK_Mode => On is
 
    -- 16-bit Checksum type. This type is just a 2 element 8-bit array. This
    -- is used instead of a 16-bit type to prevent endianness issues. We never
