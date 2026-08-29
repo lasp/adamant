@@ -3,6 +3,9 @@
 --------------------------------------------------------------------------------
 
 with AUnit.Assertions; use AUnit.Assertions;
+with Data_Product_Types;
+with Fault_Correction_Types;
+with Safe_Deallocator;
 with Test_Assembly_Fault_Responses;
 with Test_Assembly_Fault_Responses_Status_Record.Assertion; use Test_Assembly_Fault_Responses_Status_Record.Assertion;
 with Test_Assembly_Faults;
@@ -88,17 +91,28 @@ package body Fault_Correction_Tests.Implementation is
       end Init_Duplicate;
 
       procedure Init_Too_Many is
+         --  Init rejects a list whose statuses cannot fit in one data product,
+         --  which caps it at four responses per data product buffer byte. Size
+         --  the list from that so the scenario keeps testing the limit under
+         --  any data_product_buffer_size.
+         Too_Many : constant Natural := 4 * Data_Product_Types.Data_Product_Buffer_Type'Length;
+         --  Allocate on heap to avoid overflowing task stack, especially on bareboard targets.
+         type Big_List_Access is access Fault_Correction_Types.Fault_Response_Config_List;
+         procedure Free is new Safe_Deallocator.Deallocate_If_Testing (
+            Object => Fault_Correction_Types.Fault_Response_Config_List,
+            Name => Big_List_Access
+         );
+         Big_List : Big_List_Access := new Fault_Correction_Types.Fault_Response_Config_List'
+            (0 .. Too_Many => Test_Assembly_Fault_Responses.Component_A_Fault_1_Response);
       begin
-         -- Empty list not ok.
-         Self.Tester.Component_Instance.Init (Fault_Response_Configurations => [
-            0 .. 5000 => Test_Assembly_Fault_Responses.Component_A_Fault_1_Response
-         ]);
+         Self.Tester.Component_Instance.Init (Fault_Response_Configurations => Big_List.all);
+         Free (Big_List);
          -- Should never get here:
-         Assert (False, "Init dupe dupe did not produce exception!");
+         Assert (False, "Init too-many did not produce exception!");
       exception
          -- Expecting exception to be thrown:
          when others =>
-            null;
+            Free (Big_List);
       end Init_Too_Many;
    begin
       -- Make sure no events are thrown at start up:
