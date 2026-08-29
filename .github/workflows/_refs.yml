@@ -1,0 +1,36 @@
+# Single source of truth for the toolchain image (and any future
+# cross-repo refs) that this repo's CI builds against.
+#
+# Edit the "outputs:" block at the bottom. Every workflow in
+# .github/workflows reads these values, so a value changes in exactly
+# one place.
+#
+name: CI dependency refs
+
+on:
+  workflow_call:
+    outputs:
+      image:
+        description: "Adamant toolchain container image, including tag"
+        value: ${{ jobs.refs.outputs.image }}
+
+# This workflow reads nothing and writes nothing.
+permissions: {}
+
+jobs:
+  refs:
+    runs-on: ubuntu-latest
+    # ===== EDIT HERE ==================================================
+    # These are literal strings rather than values written to $GITHUB_OUTPUT
+    # by a step: a workflow_call output must reference a *job* output, and
+    # routing an empty value through $GITHUB_OUTPUT has been observed to go
+    # stale across job re-runs. Literals avoid both hazards.
+    outputs:
+      # Used by the amd64 jobs (job-level container:) and by the arm64 jobs
+      # (docker run under QEMU).
+      image: 'ghcr.io/lasp/adamant:0.2'
+    steps:
+      # A job must declare at least one step. Everything this workflow
+      # provides lives in outputs: above.
+      - name: Emit shared refs
+        run: 'true'

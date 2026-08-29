@@ -4,7 +4,10 @@ on:
     types: [published]
   workflow_dispatch:
 jobs:
+  refs:
+    uses: ./.github/workflows/_refs.yml
   compile_job:
+    needs: refs
     name: test_all (arm64)
     runs-on: ubuntu-latest
     steps:
@@ -22,7 +25,7 @@ jobs:
           docker run --rm --platform linux/arm64 \
             -v ${{ github.workspace }}:/workspace \
             -w /workspace \
-            ghcr.io/lasp/adamant:0.2 \
+            ${{ needs.refs.outputs.image }} \
             bash env/github_run.sh "redo src/components/command_router/coverage_all"
 
       - name: Archive logs for failed unit tests

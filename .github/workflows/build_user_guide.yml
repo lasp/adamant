@@ -8,11 +8,14 @@ on:
       - main
   workflow_dispatch:
 jobs:
+  refs:
+    uses: ./.github/workflows/_refs.yml
   compile_job:
+    needs: refs
     name: build_user_guide
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/lasp/adamant:0.2
+      image: ${{ needs.refs.outputs.image }}
       options: --user root
     steps:
       - run: echo "Starting job triggered by a ${{ github.event_name }} event on a ${{ runner.os }} server hosted by GitHub."

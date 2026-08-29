@@ -4,7 +4,10 @@ on:
     types: [published]
   workflow_dispatch:
 jobs:
+  refs:
+    uses: ./.github/workflows/_refs.yml
   compile_job:
+    needs: refs
     name: build_user_guide (arm64)
     runs-on: ubuntu-latest
     steps:
@@ -22,7 +25,7 @@ jobs:
           docker run --rm --platform linux/arm64 \
             -v ${{ github.workspace }}:/workspace \
             -w /workspace \
-            ghcr.io/lasp/adamant:0.2 \
+            ${{ needs.refs.outputs.image }} \
             bash env/github_run.sh "redo doc/user_guide/build_user_guide"
 
       - name: Archive user guide PDF
@@ -37,7 +40,7 @@ jobs:
           docker run --rm --platform linux/arm64 \
             -v ${{ github.workspace }}:/workspace \
             -w /workspace \
-            ghcr.io/lasp/adamant:0.2 \
+            ${{ needs.refs.outputs.image }} \
             bash env/github_run.sh "redo doc/architecture_description_document/build/pdf/architecture_description_document.pdf"
 
       - name: Archive architecture description document PDF
