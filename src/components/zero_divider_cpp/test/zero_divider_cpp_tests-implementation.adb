@@ -2,6 +2,7 @@
 -- Zero_Divider_Cpp Tests Body
 --------------------------------------------------------------------------------
 
+with Zero_Divider_Test_Config;
 with Ada.Exceptions; use Ada.Exceptions;
 with Ada.Text_IO; use Ada.Text_IO;
 with Basic_Assertions; use Basic_Assertions;
@@ -151,7 +152,22 @@ package body Zero_Divider_Cpp_Tests.Implementation is
             Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
       end;
 
-      pragma Assert (Exception_Was_Raised, "Command returned without raising an exception.");
+      if Zero_Divider_Test_Config.Integer_Division_Traps then
+         pragma Assert (Exception_Was_Raised, "Command returned without raising an exception.");
+      else
+         -- Where the division returns a value instead of trapping, the command
+         -- runs to completion and reports the value it got back. This covers
+         -- the send and the return that a trapping target cannot reach.
+         pragma Assert (not Exception_Was_Raised, "Command raised an exception on a target where division does not trap.");
+         -- Verify no invalid magic number event was sent:
+         Natural_Assert.Eq (T.Invalid_Magic_Number_History.Get_Count, 0);
+         -- Verify the info event was sent:
+         Natural_Assert.Eq (T.Int_Dividing_By_Zero_In_Cpp_History.Get_Count, 1);
+         -- Verify the no-exception event reported the returned value:
+         Natural_Assert.Eq (T.Int_Divide_By_Zero_No_Exception_History.Get_Count, 1);
+         -- Verify only those 2 events were sent:
+         Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
+      end if;
    end Test_Int_Divide_By_Zero_In_Cpp;
 
    -- This test records how the floating point division by zero behaves in the
