@@ -49,7 +49,11 @@ package body Global is
             when Quit =>
                exit;
             when Nothing =>
-               null;
+               -- Idle poll. Without a delay this task spins and starves
+               -- the main task on single-core targets with no time
+               -- slicing, so the test hangs after the first handler
+               -- action.
+               delay until One_Second_Later;
          end case;
       end loop;
    end Unblock;
