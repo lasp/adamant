@@ -16,6 +16,11 @@
 -- protected components (No_Protected_Type_Allocators) and
 -- function-local protected objects (No_Local_Protected_Objects).
 --
+-- Both bodies snapshot the Tester (see State_Snapshot): the first
+-- Allocate captures its freshly-elaborated byte image, and every Free
+-- restores it. On bareboard this resets all Tester and component
+-- state between scenarios; no hand-written reset code is needed.
+--
 -- Generic instantiation must occur at library level in the generated
 -- test scaffold so the bb body's static storage lives at library level
 -- too -- declaring it inside a subprogram would still be a "local
