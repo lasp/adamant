@@ -9,7 +9,13 @@ cat build/template/$name | awk '
   next
 }
 /TODO declarations/ {
-  print "      Data_A : constant Aa.T := (One => 4, Two => 20, Three => 20);"
+  print "      -- Constructed through Pack at run time rather than written as a"
+  print "      -- named constant aggregate: a named constant of a 32-bit packed"
+  print "      -- record with Scalar_Storage_Order High_Order_First is miscompiled"
+  print "      -- when passed by value on riscv32, its first field reading as"
+  print "      -- zero. The Pack call constructs the value at run time, away from"
+  print "      -- the constant folding that carries the bug."
+  print "      Data_A : constant Aa.T := Aa.Pack ((One => 4, Two => 20, Three => 20));"
   print "      Data_B : constant Bb.T := (Element => 4, Element2 => 20);"
   print "      Data_B_Ret : Bb.T;"
   print "      package Natural_Assert is new Smart_Assert.Discrete (Natural, Natural@Image);"
