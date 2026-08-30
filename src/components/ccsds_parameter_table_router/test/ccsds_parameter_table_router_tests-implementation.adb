@@ -495,14 +495,16 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
    -- Test_Buffer_Overflow: Data exceeding buffer capacity.
    overriding procedure Test_Buffer_Overflow (Self : in out Instance) is
       T : Component.Ccsds_Parameter_Table_Router.Implementation.Tester.Instance_Access renames Self.Tester;
-      -- Our buffer is 1024 bytes. Send a first segment with some data,
-      -- then a continuation that exceeds the buffer.
-      Small_Payload : constant Basic_Types.Byte_Array (0 .. 9) := [others => 16#EE#];
-      -- The continuation data plus the first data should exceed 1024 bytes.
-      -- First segment contributed 2 (table ID) + 10 (payload) = 12 bytes of data to the buffer.
-      -- Actually, the staging buffer stores the raw data including the table ID bytes.
-      -- Send a continuation with 1020 bytes which should overflow.
-      Large_Payload : constant Basic_Types.Byte_Array (0 .. 1019) := [others => 16#EE#];
+      -- Our staging buffer is 1024 bytes. Send a first segment with some
+      -- data, then a continuation that exceeds the buffer. Derive the
+      -- segment sizes from the configured CCSDS payload capacity so the
+      -- continuation always fits a CCSDS packet and the staged total
+      -- (first payload + 2 table ID bytes + continuation) always
+      -- exceeds the buffer, under any packet size configuration.
+      Continuation_Length : constant Natural := Natural'Min (Ccsds_Space_Packet.Ccsds_Data_Type'Length, 1023);
+      First_Length : constant Natural := Natural'Max (10, 1033 - Continuation_Length);
+      Small_Payload : constant Basic_Types.Byte_Array (0 .. First_Length - 1) := [others => 16#EE#];
+      Large_Payload : constant Basic_Types.Byte_Array (0 .. Continuation_Length - 1) := [others => 16#EE#];
    begin
       -- Send FirstSegment with small payload:
       T.Ccsds_Space_Packet_T_Send (Make_Table_Packet (
