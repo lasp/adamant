@@ -16,9 +16,17 @@ with Invalid_Parameter_Info.Assertion; use Invalid_Parameter_Info.Assertion;
 with Interfaces; use Interfaces;
 with Parameter.Assertion; use Parameter.Assertion;
 with Packed_U16.Assertion; use Packed_U16.Assertion;
-with Safe_Deallocator;
+with Tester_Allocator;
 
 package body Limiter_Tests.Implementation is
+
+   -- Target-aware tester allocator: heap on Linux, a static instance on
+   -- bareboard, where Free also restores the Tester's fresh state.
+   -- Generic components must instantiate this themselves; the generated
+   -- unit test base cannot (it does not know the concrete types).
+   package Tester_Alloc is new Tester_Allocator
+     (Tester_Inst   => Component_Tester_Package.Instance,
+      Tester_Access => Component_Tester_Package.Instance_Access);
 
    -------------------------------------------------------------------------
    -- Fixtures:
@@ -26,8 +34,8 @@ package body Limiter_Tests.Implementation is
 
    overriding procedure Set_Up_Test (Self : in out Instance) is
    begin
-      -- Dynamically allocate the generic component tester:
-      Self.Tester := new Component_Tester_Package.Instance;
+      -- Acquire a Tester from the target-aware allocator:
+      Self.Tester := Tester_Alloc.Allocate;
 
       -- Set the logger in the component
       Self.Tester.Set_Logger (Self.Logger'Unchecked_Access);
@@ -46,12 +54,12 @@ package body Limiter_Tests.Implementation is
    end Set_Up_Test;
 
    overriding procedure Tear_Down_Test (Self : in out Instance) is
-      -- Free the tester component:
-      procedure Free_If_Testing is new Safe_Deallocator.Deallocate_If_Testing (Object => Component_Tester_Package.Instance, Name => Component_Tester_Package.Instance_Access);
    begin
       -- Free component heap:
       Self.Tester.Final_Base;
-      Free_If_Testing (Self.Tester);
+
+      -- Release the tester (restores its fresh state on bareboard):
+      Tester_Alloc.Free (Self.Tester);
    end Tear_Down_Test;
 
    -------------------------------------------------------------------------
