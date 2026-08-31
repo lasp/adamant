@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 
 with Task_Types;
-with Ada.Interrupts.Names;
+with Cpu_Monitor_Test_Interrupts;
 with Ada.Task_Identification;
 with Interrupt_Types;
 with Tick;
@@ -35,7 +35,9 @@ package body Cpu_Monitor_Tests.Implementation is
    Task_List : aliased Task_Types.Task_Info_List := [0 => Task_Info_1'Access, 1 => Task_Info_2'Access];
 
    -- List of all interrupts used in the system:
-   Interrupt_List : aliased Interrupt_Types.Interrupt_Id_List := [0 => Ada.Interrupts.Names.SIGUSR1, 1 => Ada.Interrupts.Names.SIGUSR2];
+   -- Target-selected: two POSIX signals on Linux, empty on bareboard
+   -- (see Cpu_Monitor_Test_Interrupts).
+   Interrupt_List : constant Interrupt_Types.Interrupt_Id_List_Access := Cpu_Monitor_Test_Interrupts.Get;
 
    -------------------------------------------------------------------------
    -- Fixtures:
@@ -50,7 +52,7 @@ package body Cpu_Monitor_Tests.Implementation is
       Self.Tester.Connect;
 
       -- Call component init here.
-      Self.Tester.Component_Instance.Init (Task_List => Task_List'Access, Interrupt_List => Interrupt_List'Access, Execution_Periods => [1, 5, 10], Packet_Period => 1);
+      Self.Tester.Component_Instance.Init (Task_List => Task_List'Access, Interrupt_List => Interrupt_List, Execution_Periods => [1, 5, 10], Packet_Period => 1);
    end Set_Up_Test;
 
    overriding procedure Tear_Down_Test (Self : in out Instance) is
@@ -140,7 +142,7 @@ package body Cpu_Monitor_Tests.Implementation is
       -- check the headers of all the packets.
       Natural_Assert.Eq (T.Cpu_Usage_Packet_History.Get_Count, 7);
       for Idx in Positive range 1 .. 7 loop
-         Packet_Header_Assert.Eq (T.Cpu_Usage_Packet_History.Get (Idx).Header, (Time => (0, 0), Id => T.Packets.Get_Cpu_Usage_Packet_Id, Sequence_Count => Sequence_Count_Mod_Type (Idx - 1), Buffer_Length => 3 * (Task_List'Length + Interrupt_List'Length)));
+         Packet_Header_Assert.Eq (T.Cpu_Usage_Packet_History.Get (Idx).Header, (Time => (0, 0), Id => T.Packets.Get_Cpu_Usage_Packet_Id, Sequence_Count => Sequence_Count_Mod_Type (Idx - 1), Buffer_Length => 3 * (Task_List'Length + Interrupt_List.all'Length)));
       end loop;
    end Test_Packet_Period;
 
