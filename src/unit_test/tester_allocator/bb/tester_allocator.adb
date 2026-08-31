@@ -1,3 +1,5 @@
+with State_Snapshot;
+
 package body Tester_Allocator is
 
    -- Single shared static storage. AUnit serializes test execution,
@@ -15,15 +17,20 @@ package body Tester_Allocator is
    -- error you get from `Tester_Access (Storage'Unchecked_Access)`.
    Storage_Ref : constant Tester_Access := Storage'Unchecked_Access;
 
+   -- Fixture state snapshot: Allocate saves, Free restores (see spec).
+   package Snap is new State_Snapshot (Object_Type => Tester_Inst);
+
    function Allocate return Tester_Access is
    begin
+      Snap.Save (Storage);
       return Storage_Ref;
    end Allocate;
 
    procedure Free (T : in out Tester_Access) is
    begin
-      -- Static storage -- nothing to free. Null the user's handle
-      -- so dangling-reference behavior matches the host body.
+      -- Restore the Tester's freshly-elaborated state for the next
+      -- scenario. Static storage, so nothing to free.
+      Snap.Restore (Storage);
       T := null;
    end Free;
 

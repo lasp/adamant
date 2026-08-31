@@ -15,8 +15,8 @@ with Tester_Allocator;
 package body {{ name }} is
 {% if component and not component.generic %}
 
-   -- Instantiate tester allocator, uses heap for Linux but not for
-   -- bareboard runtimes.
+   -- Target-aware tester allocator: heap on Linux, a static instance on
+   -- bareboard, where Free also restores the Tester's fresh state.
    package Tester_Alloc is new Tester_Allocator
      (Tester_Inst   => Component.{{ component.name }}.Implementation.Tester.Instance,
       Tester_Access => Component.{{ component.name }}.Implementation.Tester.Instance_Access);
@@ -69,8 +69,8 @@ package body {{ name }} is
       -- Log that we are starting to setup
       Self.Log ("    Starting Set_Up for test " & Test_String);
 {% if component and not component.generic %}
-      -- Acquire a Tester via the target-aware allocator (heap on Linux,
-      -- static on bareboard) and wire its logger to ours.
+      -- Acquire a Tester from the target-aware allocator and wire its
+      -- logger to ours:
       Self.Tester := Tester_Alloc.Allocate;
       -- Link the log access type to the logger in the reciprocal
       Self.Tester.Set_Logger (Self.Logger'Unchecked_Access);
@@ -93,7 +93,7 @@ package body {{ name }} is
       -- Increment counter for the next test name in the list and pass the log to close back up to the tear down (or component unit test)
       Self.Test_Name_Index := @ + 1;
 {% if component and not component.generic %}
-      -- Release the tester (heap free on Linux, no-op on bareboard).
+      -- Release the tester (restores its fresh state on bareboard):
       Tester_Alloc.Free (Self.Tester);
 {% endif %}
    end Tear_Down;

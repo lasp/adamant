@@ -1,4 +1,5 @@
 with Safe_Deallocator;
+with State_Snapshot;
 
 package body Tester_Allocator is
 
@@ -12,14 +13,20 @@ package body Tester_Allocator is
      (Object => Tester_Inst,
       Name   => Tester_Access);
 
+   -- Fixture state snapshot (no-op body on this target; see the spec):
+   package Snap is new State_Snapshot (Object_Type => Tester_Inst);
+
    function Allocate return Tester_Access is
+      T : constant Tester_Access := new Tester_Inst;
    begin
-      return new Tester_Inst;
+      Snap.Save (T.all);
+      return T;
    end Allocate;
 
    procedure Free (T : in out Tester_Access) is
    begin
       if T /= null then
+         Snap.Restore (T.all);
          Inner_Free (T);
       end if;
    end Free;
