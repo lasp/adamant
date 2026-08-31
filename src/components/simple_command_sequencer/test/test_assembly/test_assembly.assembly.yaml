@@ -1,0 +1,37 @@
+---
+description: This is an assembly for testing the Command Sequencer component.
+########################################
+components:
+########################################
+# Include some components so our assembly as commands.
+  - type: Test_Component
+    name: Component_A
+  - type: Test_Component
+    name: Component_B
+  - type: Test_Component
+    name: Component_C
+# The sequencer itself, so sequences can call other sequences as commands.
+# Declared last so Component_A/B/C keep their command id bases stable.
+  - type: Simple_Command_Sequencer
+    name: Sequencer
+    priority: 1
+    stack_size: 2000
+    secondary_stack_size: 1
+    init_base:
+      - "Queue_Size => Sequencer.Get_Max_Queue_Element_Size * 10"
+    init:
+      - "Config => Test_Assembly_Command_Sequences_Example_Sequences.Config"
+    # Explicit command id base, matching what auto-assignment would pick. This
+    # deliberately exercises the deferred explicit-id-base path
+    # (set_id_base(assign_entity_ids=False) at instance setup, stamped by the
+    # assembly-wide id pass after the per-sequence commands are injected) --
+    # the resulting dictionary must be identical to the auto-assigned one.
+    set_id_bases:
+      - "Command_Id_Base => 25"
+connections:
+  # Dummy connection. We need one to make schema happy, but it doesn't
+  # affect testing.
+  - from_component: ignore
+    from_connector: ignore
+    to_component: Component_A
+    to_connector: Command_T_Recv_Sync

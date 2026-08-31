@@ -174,13 +174,13 @@ class packets(component_submodel, ided_suite):
                 self.typeless_packet = True
                 break
 
-    def set_id_base(self, start_id):
+    def set_id_base(self, start_id, assign_entity_ids=True):
         """
         Override this method. If we have a packet suite with static ids, then we do not want to call the base class,
         otherwise we do.
         """
         if not self.ids:
-            ided_suite.set_id_base(self, start_id)
+            ided_suite.set_id_base(self, start_id, assign_entity_ids)
 
     def set_component(self, component):
         # Set the id bases parameter:

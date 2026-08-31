@@ -1,0 +1,16 @@
+---
+description: A packed record which holds a complex argument layout for a command.
+preamble: |
+  type A_Type is (Red, Green, Blue);
+  for A_Type use (Red => 1, Green => 3, Blue => 7);
+  type C_Type is mod 2**5;
+fields:
+  - name: A
+    type: A_Type
+    format: E3
+  - name: B
+    type: Short_Float
+    format: F32
+  - name: C
+    type: C_Type
+    format: U5
