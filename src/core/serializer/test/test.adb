@@ -217,4 +217,6 @@ begin
    Test_Exception_Handling;
    Test_Copy_By_Reference;
    Test_Variable_Serializer;
+   --  Sentinel for the cross test runner.
+   Put_Line ("=== ALL TESTS PASSED ===");
 end Test;

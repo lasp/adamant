@@ -14,4 +14,6 @@ procedure Test is
    pragma Unreferenced (Tester);
 begin
    Put_Line ("If this compiled, it worked.");
+   --  Sentinel for the cross test runner.
+   Put_Line ("=== ALL TESTS PASSED ===");
 end Test;

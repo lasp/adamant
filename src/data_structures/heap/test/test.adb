@@ -247,4 +247,7 @@ begin
    pragma Assert (My_Heap.Get_Size = 0);
    pragma Assert (My_Heap.Get_Maximum_Size = 0);
    Put_Line ("passed.");
+
+   --  Sentinel for the cross test runner.
+   Put_Line ("=== ALL TESTS PASSED ===");
 end Test;

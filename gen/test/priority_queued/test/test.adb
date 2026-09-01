@@ -25,4 +25,6 @@ begin
    Put_Line ("----------------------------------------------");
    Test_Concurrent.Test;
    New_Line;
+   --  Sentinel for the cross test runner.
+   Put_Line ("=== ALL TESTS PASSED ===");
 end Test;

@@ -79,4 +79,6 @@ begin
    end if;
 
    Put_Line ("passed.");
+   --  Sentinel for the cross test runner.
+   Put_Line ("=== ALL TESTS PASSED ===");
 end Test;

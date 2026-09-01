@@ -1,3 +1,4 @@
+with Ada.Text_IO; use Ada.Text_IO;
 with Checksum_16; use Checksum_16;
 with Basic_Types.Representation; use Basic_Types;
 
@@ -183,4 +184,6 @@ begin
       16#08#
    ]);
    pragma Assert (Checksum = [16#E5#, 16#7D#], "Expected " & Basic_Types.Representation.To_Tuple_String ([16#E5#, 16#7D#]) & " and got " & Basic_Types.Representation.To_Tuple_String (Checksum));
+   --  Sentinel for the cross test runner.
+   Put_Line ("=== ALL TESTS PASSED ===");
 end Test;

@@ -88,4 +88,6 @@ begin
    Put ("Destroy queue test... ");
    My_Queue.Destroy;
    Put_Line ("passed.");
+   --  Sentinel for the cross test runner.
+   Put_Line ("=== ALL TESTS PASSED ===");
 end Test;

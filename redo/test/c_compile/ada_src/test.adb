@@ -1,3 +1,5 @@
+with Ada.Text_IO;
+
 procedure Test is
    --   Declare then export an Integer entity called Num_From_Ada using the
    -- "with" syntax.
@@ -17,4 +19,6 @@ procedure Test is
       with Import => True, Convention => C, External_Name => "print_num";
 begin
    Print_Num (Get_Num);
+   --  Sentinel for the cross test runner.
+   Ada.Text_IO.Put_Line ("=== ALL TESTS PASSED ===");
 end Test;

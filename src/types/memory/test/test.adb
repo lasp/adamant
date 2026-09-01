@@ -180,4 +180,6 @@ begin
    New_Line;
    Go (Data_Ptr);
    pragma Unreferenced (Data_Ptr);
+   --  Sentinel for the cross test runner.
+   Put_Line ("=== ALL TESTS PASSED ===");
 end Test;

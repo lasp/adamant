@@ -169,4 +169,6 @@ begin
    Go (Data_Ptr);
    Destroy (Data_Ptr);
    pragma Unreferenced (Data_Ptr);
+   --  Sentinel for the cross test runner.
+   Put_Line ("=== ALL TESTS PASSED ===");
 end Test;

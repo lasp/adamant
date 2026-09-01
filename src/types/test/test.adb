@@ -83,4 +83,6 @@ begin
    pragma Assert (My_Packed_Record = My_Converted_Record);
    -- These byte arrays should be equal:
    pragma Assert (Byte_Array_1 = Byte_Array_2);
+   --  Sentinel for the cross test runner.
+   Put_Line ("=== ALL TESTS PASSED ===");
 end Test;
