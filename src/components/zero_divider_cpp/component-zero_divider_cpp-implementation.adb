@@ -87,7 +87,10 @@ package body Component.Zero_Divider_Cpp.Implementation is
             declare
                Result : constant Interfaces.Integer_32 := Zerodividercpp_Intdividebyzero (Self.Zero_Divider_Cpp, Arg.Dividend);
             begin
-               -- Report the value the cpp returned:
+               -- Report the value the cpp returned. The unit tests cannot cover this
+               -- send or the return below: in the test configuration the division
+               -- raises Constraint_Error instead of returning (see
+               -- Test_Int_Divide_By_Zero_In_Cpp).
                Self.Event_T_Send_If_Connected (Self.Events.Int_Divide_By_Zero_No_Exception (Self.Sys_Time_T_Get, (Value => Result)));
             end;
             return Success;
@@ -113,7 +116,10 @@ package body Component.Zero_Divider_Cpp.Implementation is
             declare
                Result : constant Short_Float := Zerodividercpp_Fpdividebyzero (Self.Zero_Divider_Cpp, Arg.Dividend);
             begin
-               -- Report the value the cpp returned:
+               -- Report the value the cpp returned. The unit tests cannot cover this
+               -- send or the return below: in the test configuration the division
+               -- raises Constraint_Error instead of returning (see
+               -- Test_Fp_Divide_By_Zero_In_Cpp).
                Self.Event_T_Send_If_Connected (Self.Events.Fp_Divide_By_Zero_No_Exception (Self.Sys_Time_T_Get, (Value => Result)));
             end;
             return Success;
@@ -133,7 +139,9 @@ package body Component.Zero_Divider_Cpp.Implementation is
             -- Do the dirty, call the cpp:
             Zerodividercpp_Raiseexception (Self.Zero_Divider_Cpp);
 
-            -- We should never reach here:
+            -- We should never reach here: the raised C++ exception propagates to Ada
+            -- rather than returning, so this send and the return below are not
+            -- covered by the unit tests.
             Self.Event_T_Send_If_Connected (Self.Events.Raise_Exception_In_Cpp_No_Exception (Self.Sys_Time_T_Get));
             return Success;
          when Failure =>
