@@ -2,7 +2,6 @@
 pragma Profile (Ravenscar);
 
 with Ada.Text_IO; use Ada.Text_IO;
-with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 with Test_Record.Representation; use Test_Record;
 with Basic_Types; use Basic_Types;
 with Ada.Streams.Stream_IO;
@@ -38,7 +37,7 @@ procedure Test is
 
       Put ("Bytes in byte array:");
       for I in Mybytearray'Range loop
-         Put (Natural (Mybytearray (I)));
+         Put (Natural'Image (Natural (Mybytearray (I))));
       end loop;
       Put_Line ("");
 
@@ -60,7 +59,7 @@ procedure Test is
       Put ("Bytes in byte array:");
       Mybytearray2 := Myserializer.To_Byte_Array (Mypackedrecord2);
       for I in Mybytearray2'Range loop
-         Put (Natural (Mybytearray2 (I)));
+         Put (Natural'Image (Natural (Mybytearray2 (I))));
       end loop;
       pragma Assert (Mypackedrecord2 = Mypackedrecord);
    end Test_Serializer;
@@ -103,21 +102,21 @@ procedure Test is
    begin
       Put ("Natural test... ");
       Put ("Byte Array Size: ");
-      Put (Naturalbytearray'Size);
+      Put (Integer'Image (Naturalbytearray'Size));
       New_Line;
       Put ("Byte Array Length: ");
-      Put (Naturalbytearray'Length);
+      Put (Integer'Image (Naturalbytearray'Length));
       New_Line;
       Put ("Natural Size: ");
-      Put (Natural'Size);
+      Put (Integer'Image (Natural'Size));
       New_Line;
-      Put (Natural'Object_Size);
+      Put (Integer'Image (Natural'Object_Size));
       New_Line;
       Put ("Byte Size: ");
-      Put (Byte'Size);
+      Put (Integer'Image (Byte'Size));
       New_Line;
       Put ("compute: ");
-      Put ((Natural'Object_Size) / (Byte'Object_Size));
+      Put (Integer'Image ((Natural'Object_Size) / (Byte'Object_Size)));
       New_Line;
       Naturalbytearray := Naturalserializer.To_Byte_Array (N);
       M := Naturalserializer.From_Byte_Array (Naturalbytearray);

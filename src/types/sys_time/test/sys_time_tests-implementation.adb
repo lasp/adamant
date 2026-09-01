@@ -75,10 +75,6 @@ package body Sys_Time_Tests.Implementation is
 
    -- Run the specified number of random add tests
    procedure Test_Add_Rand_Time (Tests : in Integer := 500) is
-      -- Used to print out floating point numbers
-      package Flt_Io is new Ada.Text_Io.Float_Io (Float);
-      use Flt_Io;
-
       Float1 : Long_Float;
       Float2 : Long_Float;
       Float_Sum : Long_Float;
@@ -149,17 +145,12 @@ package body Sys_Time_Tests.Implementation is
       Diff_Ave := (Diff_Sum_Float / Float (Tests)) * 10.0**9;
       Put_Line (ASCII.LF & "Add Time Random Tests" & ", Tests Run:" & Integer'Image (Tests));
       Put_Line ("   Difference Max(nsec):   " & Integer'Image (Diff_Max / Nanoseconds (1)));
-      Put ("   Difference Ave(nsec):");
-      Put (Diff_Ave, 5, 2, 0);
-      New_Line (2);
+      Put_Line ("   Difference Ave(nsec):" & Float'Image (Diff_Ave));
+      New_Line;
    end Test_Add_Rand_Time;
 
    -- Run the specified number of random subtraction tests
    procedure Test_Subtract_Rand_Time (Tests : in Integer := 500) is
-      -- Used to print out floating point numbers
-      package Flt_Io is new Ada.Text_Io.Float_Io (Float);
-      use Flt_Io;
-
       -- Used to the floating point math along side the Sys_Time math
       Float1 : Long_Float;
       Float2 : Long_Float;
@@ -240,17 +231,12 @@ package body Sys_Time_Tests.Implementation is
       Diff_Ave := (Diff_Sum_Float / Float (Tests)) * 10.0**9;
       Put_Line (ASCII.LF & "Subtract Time Random Tests" & ", Tests Run:" & Integer'Image (Tests));
       Put_Line ("   Difference Max(nsec):   " & Integer'Image (Diff_Max / Nanoseconds (1)));
-      Put ("   Difference Ave(nsec):");
-      Put (Diff_Ave, 5, 2, 0);
-      New_Line (2);
+      Put_Line ("   Difference Ave(nsec):" & Float'Image (Diff_Ave));
+      New_Line;
    end Test_Subtract_Rand_Time;
 
    -- Run the specified number of random subtraction using a time_span tests
    procedure Test_Subtract_Rand_Time_Span (Tests : in Integer := 500) is
-      -- Used to print out floating point numbers
-      package Flt_Io is new Ada.Text_Io.Float_Io (Float);
-      use Flt_Io;
-
       -- Used to the floating point math along side the Sys_Time math
       Float1 : Long_Float;
       Float2 : Long_Float;
@@ -333,9 +319,8 @@ package body Sys_Time_Tests.Implementation is
       Diff_Ave := (Diff_Sum_Float / Float (Tests)) * 10.0**9;
       Put_Line (ASCII.LF & "Subtract Time Random Time Span Tests" & ", Tests Run:" & Integer'Image (Tests));
       Put_Line ("   Difference Max(nsec):   " & Integer'Image (Diff_Max / Nanoseconds (1)));
-      Put ("   Difference Ave(nsec):");
-      Put (Diff_Ave, 5, 2, 0);
-      New_Line (2);
+      Put_Line ("   Difference Ave(nsec):" & Float'Image (Diff_Ave));
+      New_Line;
    end Test_Subtract_Rand_Time_Span;
    -------------------------------------------------------------------------
    -- Fixtures:
