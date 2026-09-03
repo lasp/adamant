@@ -25,10 +25,22 @@ export SOURCE_DATE_EPOCH
 # and the architecture description document publish through their own rules.
 redo publish doc/user_guide/publish doc/architecture_description_document/publish
 
-# The PDF metadata differs on every build, so compare the document text.
+# The PDF metadata differs on every build, so compare the document text. The
+# user guide embeds its own build: test logs with the time of the run, generated
+# code with its generation stamp, and tool output with the build path. Those
+# fields are masked so that only document content decides.
+text() {
+  pdftotext -layout "$1" - | sed -E \
+    -e 's/^[[:space:]]*[0-9]{10}\.[0-9]+ //' \
+    -e 's/ at [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/ at <time>/' \
+    -e 's/(Generated from .*) on [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}/\1 on <time>/' \
+    -e 's/(Report generation time: ).*/\1<time>/' \
+    -e 's#/[[:alnum:]_./-]*/adamant/#<root>/#g'
+}
+
 changed=()
 for pdf in $(git ls-files '*.pdf'); do
-  if [ "$(git show "HEAD:$pdf" | pdftotext -layout - -)" = "$(pdftotext -layout "$pdf" -)" ]; then
+  if [ "$(git show "HEAD:$pdf" | text -)" = "$(text "$pdf")" ]; then
     git checkout -- "$pdf"
   else
     changed+=("$(basename "$pdf" .pdf)")
