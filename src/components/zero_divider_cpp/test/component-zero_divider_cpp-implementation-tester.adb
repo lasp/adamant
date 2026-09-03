@@ -118,8 +118,8 @@ package body Component.Zero_Divider_Cpp.Implementation.Tester is
       Self.Int_Dividing_By_Zero_In_Cpp_History.Push (Arg);
    end Int_Dividing_By_Zero_In_Cpp;
 
-   -- The integer divide-by-zero in C++ did not raise an exception and returned a
-   -- value. This indicates the target does not trap on integer division by zero. The
+   -- The integer divide by zero in C++ returned to Ada without raising an exception.
+   -- This is one of the outcomes the command exists to discover, not an anomaly. The
    -- parameter is the raw result returned by C++.
    overriding procedure Int_Divide_By_Zero_No_Exception (Self : in out Instance; Arg : in Packed_I32.T) is
    begin
@@ -128,7 +128,7 @@ package body Component.Zero_Divider_Cpp.Implementation.Tester is
    end Int_Divide_By_Zero_No_Exception;
 
    -- An Fp_Divide_By_Zero_In_Cpp command was received and the magic number was
-   -- correct. The floating-point division will occur in N milliseconds, where N is
+   -- correct. The floating point division will occur in N milliseconds, where N is
    -- provided as the event parameter.
    overriding procedure Fp_Dividing_By_Zero_In_Cpp (Self : in out Instance; Arg : in Packed_U32.T) is
    begin
@@ -136,18 +136,19 @@ package body Component.Zero_Divider_Cpp.Implementation.Tester is
       Self.Fp_Dividing_By_Zero_In_Cpp_History.Push (Arg);
    end Fp_Dividing_By_Zero_In_Cpp;
 
-   -- The floating-point divide-by-zero in C++ returned a value that did not trigger
-   -- a Constraint_Error. This event should never fire under normal operation and
-   -- indicates the target does not conform to the C++ reference for IEEE floating-
-   -- point division by zero. The parameter is the raw result returned by C++.
+   -- The floating point divide by zero in C++ returned to Ada without raising an
+   -- exception. This is one of the outcomes the command exists to discover, not an
+   -- anomaly. The parameter is the raw result returned by C++.
    overriding procedure Fp_Divide_By_Zero_No_Exception (Self : in out Instance; Arg : in Packed_F32.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Fp_Divide_By_Zero_No_Exception_History.Push (Arg);
    end Fp_Divide_By_Zero_No_Exception;
 
-   -- A command was received, but the magic number was incorrect.
-   overriding procedure Invalid_Magic_Number (Self : in out Instance; Arg : in Packed_U32.T) is
+   -- A command was received, but the magic number was incorrect. A magic number
+   -- outside the range the type permits never reaches this event, it is rejected by
+   -- command validation and reported as an invalid command instead.
+   overriding procedure Invalid_Magic_Number (Self : in out Instance; Arg : in Packed_Magic_Number.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Invalid_Magic_Number_History.Push (Arg);
@@ -172,7 +173,9 @@ package body Component.Zero_Divider_Cpp.Implementation.Tester is
    -- triggers the Last_Chance_Handler to get invoked. This packet is not produced
    -- directly by this component, and should be produced by the last chance handler
    -- implementation. This packet definition exists to ensure that the packet gets
-   -- reflected in the documentation and ground system definitions.
+   -- reflected in the documentation and ground system definitions. For the ground
+   -- system to identify the packet, the APID assigned to this definition must be
+   -- coordinated with the APID the last chance handler implementation emits.
    overriding procedure Last_Chance_Handler_Packet (Self : in out Instance; Arg : in Packed_Exception_Occurrence.T) is
    begin
       -- Push the argument onto the test history for looking at later:

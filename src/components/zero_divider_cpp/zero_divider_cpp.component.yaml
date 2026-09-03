@@ -1,10 +1,12 @@
 ---
-description: This component provides commands intended for testing propagation of C++ faults through a user-implemented C++ Termination Handler (TH) to the Ada Last Chance Handler (LCH). The `Raise_Exception_in_Cpp` command explicitly raises a C++ exception. When a TH is configured to forward termination events to the Ada LCH, this command allows verification that the exception propagation pathway is functioning correctly. The `Int_Divide_By_Zero_In_Cpp` command performs an integer division by zero in C++ and reports the outcome. In C++, integer division by zero is undefined behavior whose handling is target-dependent. Some platforms raise a hardware trap (mapped to Constraint_Error in Ada), while others silently return a value. This command allows the user to determine how their target handles this condition. If no exception occurs, the returned value is reported via an event. The `Fp_Divide_By_Zero_In_Cpp` command performs a floating-point division by zero in C++, which per IEEE 754 produces +infinity or -infinity. The result is assigned to an Ada constrained float subtype that excludes infinities, triggering a Constraint_Error that propagates to the Last Chance Handler.
+description: This component provides commands that exercise C++ fault and arithmetic behavior so that a target's response to them can be observed. The `Raise_Exception_in_Cpp` command explicitly raises a C++ exception. When a user-implemented C++ Termination Handler (TH) is configured to forward termination events to the Ada Last Chance Handler (LCH), this command allows verification that the exception propagation pathway is functioning correctly. The `Int_Divide_By_Zero_In_Cpp` and `Fp_Divide_By_Zero_In_Cpp` commands are informational rather than authoritative. Each performs a division by zero in C++ and reports what the target does with the result. That outcome depends on the target architecture, the compiler, and the compiler and runtime flags the project is built with, so this component makes no claim about which outcome any particular configuration produces. Integer division by zero is undefined behavior in C++, so a target may trap or may return a value. Floating point division by zero on a target that implements IEEE 754 typically yields a signed infinity for a non-zero dividend and a NaN for a zero dividend, though whether such a value reaches Ada or raises an exception on the way is itself configuration dependent. Whenever a division returns to Ada without raising an exception, the returned value is reported in an event. Run these commands on the intended target to establish how that configuration behaves.
 execution: passive
+with:
+  - Packed_Magic_Number
 preamble: |
-  subtype Magic_Number_Type is Interfaces.Unsigned_32 range 2 .. Interfaces.Unsigned_32'Last;
+  subtype Magic_Number_Type is Packed_Magic_Number.Magic_Number_Type;
 init:
-  description: The magic number is provided at instantiation.
+  description: The magic number and the time to sleep before each command executes are provided at instantiation.
   parameters:
     - name: Magic_Number
       type: Magic_Number_Type

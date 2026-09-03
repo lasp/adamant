@@ -3,4 +3,4 @@ description: The packet listed here is not actually produced by this component, 
 packets:
   - name: Last_Chance_Handler_Packet
     type: Packed_Exception_Occurrence.T
-    description: This packet contains information regarding an exception occurrence that triggers the Last_Chance_Handler to get invoked. This packet is not produced directly by this component, and should be produced by the last chance handler implementation. This packet definition exists to ensure that the packet gets reflected in the documentation and ground system definitions.
+    description: This packet contains information regarding an exception occurrence that triggers the Last_Chance_Handler to get invoked. This packet is not produced directly by this component, and should be produced by the last chance handler implementation. This packet definition exists to ensure that the packet gets reflected in the documentation and ground system definitions. For the ground system to identify the packet, the APID assigned to this definition must be coordinated with the APID the last chance handler implementation emits.

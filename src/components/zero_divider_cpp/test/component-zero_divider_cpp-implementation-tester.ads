@@ -12,25 +12,29 @@ with Event;
 with Packed_U32.Representation;
 with Packed_I32.Representation;
 with Packed_F32.Representation;
+with Packed_Magic_Number.Representation;
 with Invalid_Command_Info.Representation;
 with Packed_Exception_Occurrence.Representation;
 
--- This component provides commands intended for testing propagation of C++ faults
--- through a user-implemented C++ Termination Handler (TH) to the Ada Last Chance
--- Handler (LCH). The `Raise_Exception_in_Cpp` command explicitly raises a C++
--- exception. When a TH is configured to forward termination events to the Ada
--- LCH, this command allows verification that the exception propagation pathway is
--- functioning correctly. The `Int_Divide_By_Zero_In_Cpp` command performs an
--- integer division by zero in C++ and reports the outcome. In C++, integer
--- division by zero is undefined behavior whose handling is target-dependent. Some
--- platforms raise a hardware trap (mapped to Constraint_Error in Ada), while
--- others silently return a value. This command allows the user to determine how
--- their target handles this condition. If no exception occurs, the returned value
--- is reported via an event. The `Fp_Divide_By_Zero_In_Cpp` command performs a
--- floating-point division by zero in C++, which per IEEE 754 produces +infinity
--- or -infinity. The result is assigned to an Ada constrained float subtype that
--- excludes infinities, triggering a Constraint_Error that propagates to the Last
--- Chance Handler.
+-- This component provides commands that exercise C++ fault and arithmetic
+-- behavior so that a target's response to them can be observed. The
+-- `Raise_Exception_in_Cpp` command explicitly raises a C++ exception. When a
+-- user-implemented C++ Termination Handler (TH) is configured to forward
+-- termination events to the Ada Last Chance Handler (LCH), this command allows
+-- verification that the exception propagation pathway is functioning correctly.
+-- The `Int_Divide_By_Zero_In_Cpp` and `Fp_Divide_By_Zero_In_Cpp` commands are
+-- informational rather than authoritative. Each performs a division by zero in
+-- C++ and reports what the target does with the result. That outcome depends on
+-- the target architecture, the compiler, and the compiler and runtime flags the
+-- project is built with, so this component makes no claim about which outcome any
+-- particular configuration produces. Integer division by zero is undefined
+-- behavior in C++, so a target may trap or may return a value. Floating point
+-- division by zero on a target that implements IEEE 754 typically yields a signed
+-- infinity for a non-zero dividend and a NaN for a zero dividend, though whether
+-- such a value reaches Ada or raises an exception on the way is itself
+-- configuration dependent. Whenever a division returns to Ada without raising an
+-- exception, the returned value is reported in an event. Run these commands on
+-- the intended target to establish how that configuration behaves.
 package Component.Zero_Divider_Cpp.Implementation.Tester is
 
    use Component.Zero_Divider_Cpp_Reciprocal;
@@ -46,7 +50,7 @@ package Component.Zero_Divider_Cpp.Implementation.Tester is
    package Int_Divide_By_Zero_No_Exception_History_Package is new Printable_History (Packed_I32.T, Packed_I32.Representation.Image);
    package Fp_Dividing_By_Zero_In_Cpp_History_Package is new Printable_History (Packed_U32.T, Packed_U32.Representation.Image);
    package Fp_Divide_By_Zero_No_Exception_History_Package is new Printable_History (Packed_F32.T, Packed_F32.Representation.Image);
-   package Invalid_Magic_Number_History_Package is new Printable_History (Packed_U32.T, Packed_U32.Representation.Image);
+   package Invalid_Magic_Number_History_Package is new Printable_History (Packed_Magic_Number.T, Packed_Magic_Number.Representation.Image);
    package Invalid_Command_Received_History_Package is new Printable_History (Invalid_Command_Info.T, Invalid_Command_Info.Representation.Image);
 
    -- Packet history packages:
@@ -110,21 +114,22 @@ package Component.Zero_Divider_Cpp.Implementation.Tester is
    -- correct. The division will occur in N milliseconds, where N is provided as the
    -- event parameter.
    overriding procedure Int_Dividing_By_Zero_In_Cpp (Self : in out Instance; Arg : in Packed_U32.T);
-   -- The integer divide-by-zero in C++ did not raise an exception and returned a
-   -- value. This indicates the target does not trap on integer division by zero. The
+   -- The integer divide by zero in C++ returned to Ada without raising an exception.
+   -- This is one of the outcomes the command exists to discover, not an anomaly. The
    -- parameter is the raw result returned by C++.
    overriding procedure Int_Divide_By_Zero_No_Exception (Self : in out Instance; Arg : in Packed_I32.T);
    -- An Fp_Divide_By_Zero_In_Cpp command was received and the magic number was
-   -- correct. The floating-point division will occur in N milliseconds, where N is
+   -- correct. The floating point division will occur in N milliseconds, where N is
    -- provided as the event parameter.
    overriding procedure Fp_Dividing_By_Zero_In_Cpp (Self : in out Instance; Arg : in Packed_U32.T);
-   -- The floating-point divide-by-zero in C++ returned a value that did not trigger
-   -- a Constraint_Error. This event should never fire under normal operation and
-   -- indicates the target does not conform to the C++ reference for IEEE floating-
-   -- point division by zero. The parameter is the raw result returned by C++.
+   -- The floating point divide by zero in C++ returned to Ada without raising an
+   -- exception. This is one of the outcomes the command exists to discover, not an
+   -- anomaly. The parameter is the raw result returned by C++.
    overriding procedure Fp_Divide_By_Zero_No_Exception (Self : in out Instance; Arg : in Packed_F32.T);
-   -- A command was received, but the magic number was incorrect.
-   overriding procedure Invalid_Magic_Number (Self : in out Instance; Arg : in Packed_U32.T);
+   -- A command was received, but the magic number was incorrect. A magic number
+   -- outside the range the type permits never reaches this event, it is rejected by
+   -- command validation and reported as an invalid command instead.
+   overriding procedure Invalid_Magic_Number (Self : in out Instance; Arg : in Packed_Magic_Number.T);
    -- A command was received with invalid parameters.
    overriding procedure Invalid_Command_Received (Self : in out Instance; Arg : in Invalid_Command_Info.T);
 
@@ -140,7 +145,9 @@ package Component.Zero_Divider_Cpp.Implementation.Tester is
    -- triggers the Last_Chance_Handler to get invoked. This packet is not produced
    -- directly by this component, and should be produced by the last chance handler
    -- implementation. This packet definition exists to ensure that the packet gets
-   -- reflected in the documentation and ground system definitions.
+   -- reflected in the documentation and ground system definitions. For the ground
+   -- system to identify the packet, the APID assigned to this definition must be
+   -- coordinated with the APID the last chance handler implementation emits.
    overriding procedure Last_Chance_Handler_Packet (Self : in out Instance; Arg : in Packed_Exception_Occurrence.T);
 
 end Component.Zero_Divider_Cpp.Implementation.Tester;

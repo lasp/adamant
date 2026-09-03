@@ -2,6 +2,7 @@
 -- Zero_Divider_Cpp Component Implementation Body
 --------------------------------------------------------------------------------
 
+with Packed_U32;
 with Sleep;
 
 package body Component.Zero_Divider_Cpp.Implementation is
@@ -9,7 +10,8 @@ package body Component.Zero_Divider_Cpp.Implementation is
    --------------------------------------------------
    -- Subprogram for implementation init method:
    --------------------------------------------------
-   -- The magic number is provided at instantiation.
+   -- The magic number and the time to sleep before each command executes are
+   -- provided at instantiation.
    --
    -- Init Parameters:
    -- Magic_Number : Magic_Number_Type - As commands to this component crash the
@@ -39,104 +41,112 @@ package body Component.Zero_Divider_Cpp.Implementation is
    end Command_T_Recv_Sync;
 
    -----------------------------------------------
+   -- Helper subprograms:
+   -----------------------------------------------
+
+   -- Helper subprogram which returns the configured sleep as an event parameter.
+   function Sleep_Duration (Self : in Instance) return Packed_U32.T is
+      (Value => Interfaces.Unsigned_32 (Self.Sleep_Before_Execute_Ms));
+
+   -- Helper subprogram which performs the staging every command in this component
+   -- runs before doing its own work: reports the provided magic number and returns
+   -- Failure when it does not match the one held in the C++ class, and otherwise
+   -- sends the provided announcement event, sleeps for the configured time, and
+   -- returns Success.
+   function Stage_Command (Self : in out Instance; Magic_Number : in Packed_Magic_Number.T; Announcement : in Event.T) return Command_Execution_Status.E is
+      use Command_Execution_Status;
+   begin
+      if Zerodividercpp_Checkmagicnumber (Self.Zero_Divider_Cpp, Magic_Number.Magic_Number) = False then
+         Self.Event_T_Send_If_Connected (Self.Events.Invalid_Magic_Number (Self.Sys_Time_T_Get, Magic_Number));
+         return Failure;
+      end if;
+
+      Self.Event_T_Send_If_Connected (Announcement);
+      Sleep.Sleep_Ms (Self.Sleep_Before_Execute_Ms);
+      return Success;
+   end Stage_Command;
+
+   -----------------------------------------------
    -- Command handler primitives:
    -----------------------------------------------
    -- Description:
    --    Commands for the Zero Divider Cpp component.
-   -- Performs an integer division by zero in C++. The behavior is target-dependent,
-   -- some platforms trap and others return a value. You must provide the correct
+   -- Performs an integer division by zero in C++ and reports the outcome. Integer
+   -- division by zero is undefined behavior in C++, so what happens depends on the
+   -- target and the flags the project is built with. A target may trap, or may
+   -- return a value that is reported in an event. This command is informational, run
+   -- it to establish what a given configuration does. You must provide the correct
    -- value for the magic number and an integer dividend for this command to execute.
    overriding function Int_Divide_By_Zero_In_Cpp (Self : in out Instance; Arg : in Int_Divide_By_Zero_In_Cpp_Arg.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
+      Stage_Status : constant Command_Execution_Status.E := Stage_Command (Self, Arg.Magic_Number, Announcement => Self.Events.Int_Dividing_By_Zero_In_Cpp (Self.Sys_Time_T_Get, Sleep_Duration (Self)));
    begin
-      -- See if the provided argument matches the magic number. If it doesn't then don't execute the command.
-      if Zerodividercpp_Checkmagicnumber (Self.Zero_Divider_Cpp, Arg.Magic_Number) = False then
-         Self.Event_T_Send_If_Connected (Self.Events.Invalid_Magic_Number (Self.Sys_Time_T_Get, (Value => Arg.Magic_Number)));
-         return Failure;
-      else
-         -- Send info event:
-         Self.Event_T_Send_If_Connected (Self.Events.Int_Dividing_By_Zero_In_Cpp (Self.Sys_Time_T_Get, (Value => Interfaces.Unsigned_32 (Self.Sleep_Before_Execute_Ms))));
-
-         -- Sleep for a bit:
-         Sleep.Sleep_Ms (Self.Sleep_Before_Execute_Ms);
-
-         -- Do the dirty, call the cpp:
-         declare
-            -- Integer divide-by-zero is undefined behavior in C++. The result
-            -- is target-dependent: some platforms raise a hardware trap (mapped
-            -- to Constraint_Error in Ada), while others silently return a value.
-            Result : constant Interfaces.Integer_32 := Zerodividercpp_Intdividebyzero (Self.Zero_Divider_Cpp, Arg.Dividend);
-         begin
-            -- If we reach here, the target did not trap. Report the returned value:
-            Self.Event_T_Send_If_Connected (Self.Events.Int_Divide_By_Zero_No_Exception (Self.Sys_Time_T_Get, (Value => Result)));
-         end;
-      end if;
-
-      return Success;
+      case Stage_Status is
+         when Success =>
+            -- Do the dirty, call the cpp:
+            declare
+               Result : constant Interfaces.Integer_32 := Zerodividercpp_Intdividebyzero (Self.Zero_Divider_Cpp, Arg.Dividend);
+            begin
+               -- Report the value the cpp returned. The unit tests cannot cover this
+               -- send or the return below: in the test configuration the division
+               -- raises Constraint_Error instead of returning (see
+               -- Test_Int_Divide_By_Zero_In_Cpp).
+               Self.Event_T_Send_If_Connected (Self.Events.Int_Divide_By_Zero_No_Exception (Self.Sys_Time_T_Get, (Value => Result)));
+            end;
+            return Success;
+         when Failure =>
+            return Stage_Status;
+      end case;
    end Int_Divide_By_Zero_In_Cpp;
 
-   -- Performs a floating-point division by zero in C++. Per IEEE 754, dividing a
-   -- floating-point value by zero produces +infinity or -infinity rather than
-   -- trapping. You must provide the correct value for the magic number and a
-   -- floating-point dividend for this command to execute.
+   -- Performs a floating point division by zero in C++ and reports the outcome. A
+   -- target that implements IEEE 754 typically produces a signed infinity for a non-
+   -- zero dividend and a NaN for a zero dividend, but whether such a value reaches
+   -- Ada or raises an exception on the way depends on the target and the flags the
+   -- project is built with. This command is informational, run it to establish what
+   -- a given configuration does. You must provide the correct value for the magic
+   -- number and a floating point dividend for this command to execute.
    overriding function Fp_Divide_By_Zero_In_Cpp (Self : in out Instance; Arg : in Fp_Divide_By_Zero_In_Cpp_Arg.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
+      Stage_Status : constant Command_Execution_Status.E := Stage_Command (Self, Arg.Magic_Number, Announcement => Self.Events.Fp_Dividing_By_Zero_In_Cpp (Self.Sys_Time_T_Get, Sleep_Duration (Self)));
    begin
-      -- See if the provided argument matches the magic number. If it doesn't then don't execute the command.
-      if Zerodividercpp_Checkmagicnumber (Self.Zero_Divider_Cpp, Arg.Magic_Number) = False then
-         Self.Event_T_Send_If_Connected (Self.Events.Invalid_Magic_Number (Self.Sys_Time_T_Get, (Value => Arg.Magic_Number)));
-         return Failure;
-      else
-         -- Send info event:
-         Self.Event_T_Send_If_Connected (Self.Events.Fp_Dividing_By_Zero_In_Cpp (Self.Sys_Time_T_Get, (Value => Interfaces.Unsigned_32 (Self.Sleep_Before_Execute_Ms))));
-
-         -- Sleep for a bit:
-         Sleep.Sleep_Ms (Self.Sleep_Before_Execute_Ms);
-
-         -- Do the dirty, call the cpp:
-         declare
-            -- Per the C++ reference, if both operands have a floating-point type
-            -- and the type supports IEEE floating-point arithmetic (std::numeric_limits::is_iec559):
-            --   - If one operand is NaN, the result is NaN.
-            --   - Dividing a non-zero number by +/-0.0 gives the correctly-signed
-            --     infinity and FE_DIVBYZERO is raised.
-            --   - Dividing 0.0 by 0.0 gives NaN and FE_INVALID is raised.
-            -- To detect these conditions, we assign the C++ result to an Ada constrained
-            -- float subtype that excludes infinities and NaN, triggering a
-            -- Constraint_Error routed to the Last Chance Handler.
-            Result : constant Short_Float := Zerodividercpp_Fpdividebyzero (Self.Zero_Divider_Cpp, Arg.Dividend);
-         begin
-            -- We should never reach here:
-            Self.Event_T_Send_If_Connected (Self.Events.Fp_Divide_By_Zero_No_Exception (Self.Sys_Time_T_Get, (Value => Result)));
-         end;
-      end if;
-
-      return Success;
+      case Stage_Status is
+         when Success =>
+            -- Do the dirty, call the cpp:
+            declare
+               Result : constant Short_Float := Zerodividercpp_Fpdividebyzero (Self.Zero_Divider_Cpp, Arg.Dividend);
+            begin
+               -- Report the value the cpp returned. The unit tests cannot cover this
+               -- send or the return below: in the test configuration the division
+               -- raises Constraint_Error instead of returning (see
+               -- Test_Fp_Divide_By_Zero_In_Cpp).
+               Self.Event_T_Send_If_Connected (Self.Events.Fp_Divide_By_Zero_No_Exception (Self.Sys_Time_T_Get, (Value => Result)));
+            end;
+            return Success;
+         when Failure =>
+            return Stage_Status;
+      end case;
    end Fp_Divide_By_Zero_In_Cpp;
 
    -- Raises a standard exception in C++. You must provide the correct value for the
    -- magic number argument of this command for it to be executed.
-   overriding function Raise_Exception_In_Cpp (Self : in out Instance; Arg : in Packed_U32.T) return Command_Execution_Status.E is
+   overriding function Raise_Exception_In_Cpp (Self : in out Instance; Arg : in Packed_Magic_Number.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
+      Stage_Status : constant Command_Execution_Status.E := Stage_Command (Self, Arg, Announcement => Self.Events.Raising_Exception_In_Cpp (Self.Sys_Time_T_Get, Sleep_Duration (Self)));
    begin
-      -- See if the provided argument matches the magic number. If it doesn't then don't execute the command.
-      if Zerodividercpp_Checkmagicnumber (Self.Zero_Divider_Cpp, Arg.Value) = False then
-         Self.Event_T_Send_If_Connected (Self.Events.Invalid_Magic_Number (Self.Sys_Time_T_Get, Arg));
-         return Failure;
-      else
-         -- Send info event:
-         Self.Event_T_Send_If_Connected (Self.Events.Raising_Exception_In_Cpp (Self.Sys_Time_T_Get, (Value => Interfaces.Unsigned_32 (Self.Sleep_Before_Execute_Ms))));
+      case Stage_Status is
+         when Success =>
+            -- Do the dirty, call the cpp:
+            Zerodividercpp_Raiseexception (Self.Zero_Divider_Cpp);
 
-         -- Sleep for a bit:
-         Sleep.Sleep_Ms (Self.Sleep_Before_Execute_Ms);
-
-         -- Do the dirty, call the cpp:
-         Zerodividercpp_Raiseexception (Self.Zero_Divider_Cpp);
-
-         -- We should never reach here:
-         Self.Event_T_Send_If_Connected (Self.Events.Raise_Exception_In_Cpp_No_Exception (Self.Sys_Time_T_Get));
-      end if;
-      return Success;
+            -- We should never reach here: the raised C++ exception propagates to Ada
+            -- rather than returning, so this send and the return below are not
+            -- covered by the unit tests.
+            Self.Event_T_Send_If_Connected (Self.Events.Raise_Exception_In_Cpp_No_Exception (Self.Sys_Time_T_Get));
+            return Success;
+         when Failure =>
+            return Stage_Status;
+      end case;
    end Raise_Exception_In_Cpp;
 
    -- Invalid command handler. This procedure is called when a command's arguments are found to be invalid:

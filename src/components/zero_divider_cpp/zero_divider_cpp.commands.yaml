@@ -2,11 +2,11 @@
 description: Commands for the Zero Divider Cpp component.
 commands:
   - name: Int_Divide_By_Zero_In_Cpp
-    description: Performs an integer division by zero in C++. The behavior is target-dependent, some platforms trap and others return a value. You must provide the correct value for the magic number and an integer dividend for this command to execute.
+    description: Performs an integer division by zero in C++ and reports the outcome. Integer division by zero is undefined behavior in C++, so what happens depends on the target and the flags the project is built with. A target may trap, or may return a value that is reported in an event. This command is informational, run it to establish what a given configuration does. You must provide the correct value for the magic number and an integer dividend for this command to execute.
     arg_type: Int_Divide_By_Zero_In_Cpp_Arg.T
   - name: Fp_Divide_By_Zero_In_Cpp
-    description: Performs a floating-point division by zero in C++. Per IEEE 754, dividing a floating-point value by zero produces +infinity or -infinity rather than trapping. You must provide the correct value for the magic number and a floating-point dividend for this command to execute.
+    description: Performs a floating point division by zero in C++ and reports the outcome. A target that implements IEEE 754 typically produces a signed infinity for a non-zero dividend and a NaN for a zero dividend, but whether such a value reaches Ada or raises an exception on the way depends on the target and the flags the project is built with. This command is informational, run it to establish what a given configuration does. You must provide the correct value for the magic number and a floating point dividend for this command to execute.
     arg_type: Fp_Divide_By_Zero_In_Cpp_Arg.T
   - name: Raise_Exception_In_Cpp
     description: Raises a standard exception in C++. You must provide the correct value for the magic number argument of this command for it to be executed.
-    arg_type: Packed_U32.T
+    arg_type: Packed_Magic_Number.T
