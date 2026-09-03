@@ -7,6 +7,7 @@
 
 repo_dir=$(cd "$(dirname "$0")/../.." && pwd)
 branch="nightly/documentation"
+TARGET_BRANCH_NAME="main"
 
 if [ -z "${GITHUB_TOKEN:-}" ] && [ "${DRY_RUN:-0}" != "1" ]; then
   echo "GITHUB_TOKEN is not set." >&2
@@ -38,20 +39,45 @@ text() {
     -e 's#/[[:alnum:]_./-]*/adamant/#<root>/#g'
 }
 
+# The text diff of every changed document goes under build/ for the run to
+# attach, and into the job summary when GitHub provides one.
+diff_file="$repo_dir/build/doc_regen/regen.diff"
+mkdir -p "$(dirname "$diff_file")"
+: > "$diff_file"
+summary=${GITHUB_STEP_SUMMARY:-/dev/null}
+work=$(mktemp -d)
 changed=()
+details=""
 for pdf in $(git ls-files '*.pdf'); do
-  if [ "$(git show "HEAD:$pdf" | text -)" = "$(text "$pdf")" ]; then
+  git show "HEAD:$pdf" | text - > "$work/old.txt"
+  text "$pdf" > "$work/new.txt"
+  if cmp -s "$work/old.txt" "$work/new.txt"; then
     git checkout -- "$pdf"
   else
-    changed+=("$(basename "$pdf" .pdf)")
+    name=$(basename "$pdf" .pdf)
+    changed+=("$name")
+    diff -u --label "a/$pdf" --label "b/$pdf" "$work/old.txt" "$work/new.txt" > "$work/one.diff" || true
+    count=$(($(grep -c '^[-+]' "$work/one.diff") - 2))
+    echo "  $name: $count differing text lines"
+    cat "$work/one.diff" >> "$diff_file"
+    details+="<details><summary>$name ($count lines)</summary>"$'\n\n'"\`\`\`diff"$'\n'"$(head -n 120 "$work/one.diff")"$'\n'"\`\`\`"$'\n\n'"</details>"$'\n'
   fi
 done
+rm -rf "$work"
 
 if [ ${#changed[@]} -eq 0 ]; then
   echo "Documentation is current at $base."
+  echo "Documentation is current at $base." >> "$summary"
   exit 0
 fi
 echo "Regenerated: ${changed[*]}"
+{
+  echo "## Regenerated documents"
+  echo
+  echo "${#changed[@]} of $(git ls-files '*.pdf' | wc -l) tracked PDFs differ in text from the copies on $TARGET_BRANCH_NAME. The full diff is the regenerated-documentation-diff artifact of this run; each block below shows up to 120 lines."
+  echo
+  echo "$details"
+} >> "$summary"
 
 git checkout -B "$branch" "$base"
 git add -u -- '*.pdf'

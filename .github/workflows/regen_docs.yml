@@ -30,5 +30,11 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           DRY_RUN: ${{ (github.event_name == 'workflow_dispatch' && inputs.dry_run == true) && '1' || '0' }}
         run: bash env/github_run.sh ".github/scripts/regen_docs.sh"
+      - name: Attach the text diff of the regenerated documents
+        if: ${{ hashFiles('build/doc_regen/regen.diff') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: regenerated-documentation-diff
+          path: build/doc_regen/regen.diff
       - run: echo "Finished with status - ${{ job.status }}."
         if: always()
