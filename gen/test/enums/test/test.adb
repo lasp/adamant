@@ -23,4 +23,6 @@ begin
    Second_Enum_Assert.Eq (Se, Second_Enum.Yellow);
 
    Put_Line ("Done.");
+   --  Sentinel for the cross test runner.
+   Put_Line ("=== ALL TESTS PASSED ===");
 end Test;

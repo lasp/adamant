@@ -2,13 +2,13 @@
 -- Ccsds_Parameter_Table_Router Tests Body
 --------------------------------------------------------------------------------
 
-with Ada.Real_Time;
 with Basic_Assertions; use Basic_Assertions;
 with Basic_Types;
 with Ccsds_Enums;
 with Ccsds_Primary_Header;
 with Ccsds_Primary_Header.Assertion; use Ccsds_Primary_Header.Assertion;
 with Ccsds_Space_Packet;
+with Ccsds_Parameter_Table_Router_Tests.Implementation.Simulator;
 with Command;
 with Command_Enums; use Command_Enums.Command_Response_Status;
 with Command_Response.Assertion; use Command_Response.Assertion;
@@ -26,89 +26,6 @@ with System; use System;
 with Test_Assembly_Parameter_Table_Router_Table;
 
 package body Ccsds_Parameter_Table_Router_Tests.Implementation is
-
-   -------------------------------------------------------------------------
-   -- Globals to control simulator task behavior:
-   -------------------------------------------------------------------------
-   Task_Send_Response : Boolean := False;
-   Task_Response_Status : Parameter_Enums.Parameter_Table_Update_Status.E := Parameter_Enums.Parameter_Table_Update_Status.Success;
-   Task_Send_Timeout : Boolean := False;
-   Task_Responses_To_Send : Natural := 0;
-
-   -- Simulator task parameter table byte array
-   Sim_Bytes : aliased Basic_Types.Byte_Array := [0 .. 1023 => 16#AB#];
-
-   -- Optional response schedule - If populated, the simulator reads successive
-   -- statuses from this list and overrides Task_Response_Status for each response
-   -- sent.
-   Max_Schedule_Length : constant := 20;
-   Response_Schedule : array (0 .. Max_Schedule_Length - 1) of Parameter_Enums.Parameter_Table_Update_Status.E :=
-      [others => Parameter_Enums.Parameter_Table_Update_Status.Success];
-   Schedule_Length : Natural := 0;
-   Schedule_Index : Natural := 0;
-
-   -------------------------------------------------------------------------
-   -- Helper: sleep for a number of milliseconds:
-   -------------------------------------------------------------------------
-   procedure Sleep (Ms : in Natural := 5) is
-      use Ada.Real_Time;
-      Sleep_Time : constant Ada.Real_Time.Time_Span := Ada.Real_Time.Milliseconds (Ms);
-      Wake_Time : constant Ada.Real_Time.Time := Ada.Real_Time.Clock + Sleep_Time;
-   begin
-      delay until Wake_Time;
-   end Sleep;
-
-   -------------------------------------------------------------------------
-   -- Simulator task type for downstream components:
-   -------------------------------------------------------------------------
-   type Boolean_Access is access all Boolean;
-
-   task type Simulator_Task (
-      Class_Self : Class_Access;
-      Task_Exit : Boolean_Access
-   );
-
-   task body Simulator_Task is
-      Count : Natural := 0;
-      Tick_Count : Natural := 0;
-   begin
-      while not Task_Exit.all and then Count < 500 loop
-         Count := @ + 1;
-
-         if Task_Send_Response and then Task_Responses_To_Send > 0 then
-            Sleep (4);
-            -- Use schedule if available, otherwise use Task_Response_Status:
-            declare
-               Status_To_Send : Parameter_Enums.Parameter_Table_Update_Status.E;
-            begin
-               if Schedule_Length > 0 and then Schedule_Index < Schedule_Length then
-                  Status_To_Send := Response_Schedule (Schedule_Index);
-                  Schedule_Index := @ + 1;
-               else
-                  Status_To_Send := Task_Response_Status;
-               end if;
-               Class_Self.all.Tester.Parameters_Memory_Region_Release_T_Send ((
-                  Region => (Address => Sim_Bytes'Address, Length => Sim_Bytes'Length),
-                  Status => Status_To_Send
-               ));
-            end;
-            Task_Responses_To_Send := @ - 1;
-            if Task_Responses_To_Send = 0 then
-               Task_Send_Response := False;
-            end if;
-         elsif Task_Send_Timeout then
-            Sleep (4);
-            Class_Self.all.Tester.Timeout_Tick_Send (((0, 0), 0));
-            Tick_Count := @ + 1;
-            if Tick_Count > 4 then
-               Tick_Count := 0;
-               Task_Send_Timeout := False;
-            end if;
-         else
-            Sleep (2);
-         end if;
-      end loop;
-   end Simulator_Task;
 
    -------------------------------------------------------------------------
    -- Helper that constructs a CCSDS packet:
@@ -160,12 +77,12 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
    overriding procedure Set_Up_Test (Self : in out Instance) is
    begin
       -- Reset globals:
-      Task_Send_Response := False;
-      Task_Response_Status := Parameter_Enums.Parameter_Table_Update_Status.Success;
-      Task_Send_Timeout := False;
-      Task_Responses_To_Send := 0;
-      Schedule_Length := 0;
-      Schedule_Index := 0;
+      Simulator.Task_Send_Response := False;
+      Simulator.Task_Response_Status := Parameter_Enums.Parameter_Table_Update_Status.Success;
+      Simulator.Task_Send_Timeout := False;
+      Simulator.Task_Responses_To_Send := 0;
+      Simulator.Schedule_Length := 0;
+      Simulator.Schedule_Index := 0;
 
       -- Allocate heap memory to component:
       Self.Tester.Init_Base (Parameters_Memory_Region_T_Send_Count => 5, Queue_Size => Self.Tester.Component_Instance.Get_Max_Queue_Element_Size * 10);
@@ -187,6 +104,11 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
 
    overriding procedure Tear_Down_Test (Self : in out Instance) is
    begin
+      -- Make sure the simulator task is disarmed and idle before the
+      -- Tester is released:
+      Simulator.Disarm;
+      Simulator.Wait_Idle;
+
       Self.Tester.Component_Instance.Final;
       Self.Tester.Final_Base;
    end Tear_Down_Test;
@@ -239,9 +161,8 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
    -- Verify tables are loaded during Set_Up.
    overriding procedure Test_Set_Up_Load_All (Self : in out Instance) is
       T : Component.Ccsds_Parameter_Table_Router.Implementation.Tester.Instance_Access renames Self.Tester;
-      Task_Exit : aliased Boolean := False;
-      Sim_Task : Simulator_Task (Self'Unchecked_Access, Task_Exit'Unchecked_Access);
    begin
+      Simulator.Arm (Self'Unchecked_Access);
       -- Re-init with Load_All_Parameter_Tables_On_Set_Up => True.
       -- Final the previous Init, then re-Init with the new flag:
       T.Component_Instance.Final;
@@ -260,8 +181,8 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
       -- Table 1: 1 Get + 1 Set = 2 responses
       -- Table 3: 1 Get + 2 Set = 3 responses
       -- Total: 7 responses needed.
-      Task_Responses_To_Send := 7;
-      Task_Send_Response := True;
+      Simulator.Task_Responses_To_Send := 7;
+      Simulator.Task_Send_Response := True;
 
       -- Call Set_Up which should load all tables:
       T.Component_Instance.Set_Up;
@@ -284,18 +205,17 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
       -- Total events: 1 Loading_All + 1 All_Loaded + 3 Loading_Table + 3 Table_Loaded = 8
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 8);
 
-      Task_Exit := True;
+      Simulator.Disarm;
    end Test_Set_Up_Load_All;
 
    -- Test_Nominal_Segmented_Upload: Send First + Continuation + Last for table ID 10.
    overriding procedure Test_Nominal_Segmented_Upload (Self : in out Instance) is
       T : Component.Ccsds_Parameter_Table_Router.Implementation.Tester.Instance_Access renames Self.Tester;
-      Task_Exit : aliased Boolean := False;
-      Sim_Task : Simulator_Task (Self'Unchecked_Access, Task_Exit'Unchecked_Access);
       Payload : constant Basic_Types.Byte_Array (0 .. 9) := [others => 16#AA#];
       -- Table ID 10: Working_Params (idx 1, no load_from) + Primary_Param_Store (idx 2, load_from)
       -- That means 2 responses needed (1 non-load_from + 1 load_from).
    begin
+      Simulator.Arm (Self'Unchecked_Access);
       -- Send packets and dispatch:
       declare
       begin
@@ -322,8 +242,8 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
          Boolean_Assert.Eq (T.Table_Received_History.Is_Empty, True);
 
          -- Send Last segment - this completes the table and triggers distribution:
-         Task_Responses_To_Send := 2;
-         Task_Send_Response := True;
+         Simulator.Task_Responses_To_Send := 2;
+         Simulator.Task_Send_Response := True;
 
          T.Ccsds_Space_Packet_T_Send (Make_Packet (
             Ccsds_Enums.Ccsds_Sequence_Flag.Lastsegment,
@@ -377,19 +297,18 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
          end;
       end;
 
-      Task_Exit := True;
+      Simulator.Disarm;
    end Test_Nominal_Segmented_Upload;
 
    -- Test_Unsegmented_Upload: Send a single Unsegmented packet for table ID 10.
    overriding procedure Test_Unsegmented_Upload (Self : in out Instance) is
       T : Component.Ccsds_Parameter_Table_Router.Implementation.Tester.Instance_Access renames Self.Tester;
-      Task_Exit : aliased Boolean := False;
-      Sim_Task : Simulator_Task (Self'Unchecked_Access, Task_Exit'Unchecked_Access);
       Payload : constant Basic_Types.Byte_Array (0 .. 9) := [others => 16#BB#];
    begin
+      Simulator.Arm (Self'Unchecked_Access);
       -- Table ID 10: 2 destinations (1 non-load_from + 1 load_from) = 2 responses
-      Task_Responses_To_Send := 2;
-      Task_Send_Response := True;
+      Simulator.Task_Responses_To_Send := 2;
+      Simulator.Task_Send_Response := True;
 
       T.Ccsds_Space_Packet_T_Send (Make_Table_Packet (
          Ccsds_Enums.Ccsds_Sequence_Flag.Unsegmented,
@@ -436,21 +355,20 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
       -- Total DPs: 1 Num_Packets_Received + 1 Num_Tables_Updated + 1 Last_Table_Received = 3
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 3);
 
-      Task_Exit := True;
+      Simulator.Disarm;
    end Test_Unsegmented_Upload;
 
    -- Test_Multi_Destination_Order: Verify non-Load_From destinations sent first, Load_From last.
    overriding procedure Test_Multi_Destination_Order (Self : in out Instance) is
       T : Component.Ccsds_Parameter_Table_Router.Implementation.Tester.Instance_Access renames Self.Tester;
-      Task_Exit : aliased Boolean := False;
-      Sim_Task : Simulator_Task (Self'Unchecked_Access, Task_Exit'Unchecked_Access);
       Payload : constant Basic_Types.Byte_Array (0 .. 9) := [others => 16#CC#];
    begin
+      Simulator.Arm (Self'Unchecked_Access);
       -- Table ID 3: Working_Params (idx 1, no LF) + Another_Params (idx 3, no LF) + Primary_Param_Store (idx 2, LF=True)
       -- Expected order: idx 1, idx 3 (non-load_from), then idx 2 (load_from)
       -- Total: 3 responses needed
-      Task_Responses_To_Send := 3;
-      Task_Send_Response := True;
+      Simulator.Task_Responses_To_Send := 3;
+      Simulator.Task_Send_Response := True;
 
       T.Ccsds_Space_Packet_T_Send (Make_Table_Packet (
          Ccsds_Enums.Ccsds_Sequence_Flag.Unsegmented,
@@ -494,7 +412,7 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
       -- Total DPs: 1 Num_Packets_Received + 1 Num_Tables_Updated + 1 Last_Table_Received = 3
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 3);
 
-      Task_Exit := True;
+      Simulator.Disarm;
    end Test_Multi_Destination_Order;
 
    -- Test_Packet_Ignored: Continuation and Last without prior First.
@@ -577,14 +495,16 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
    -- Test_Buffer_Overflow: Data exceeding buffer capacity.
    overriding procedure Test_Buffer_Overflow (Self : in out Instance) is
       T : Component.Ccsds_Parameter_Table_Router.Implementation.Tester.Instance_Access renames Self.Tester;
-      -- Our buffer is 1024 bytes. Send a first segment with some data,
-      -- then a continuation that exceeds the buffer.
-      Small_Payload : constant Basic_Types.Byte_Array (0 .. 9) := [others => 16#EE#];
-      -- The continuation data plus the first data should exceed 1024 bytes.
-      -- First segment contributed 2 (table ID) + 10 (payload) = 12 bytes of data to the buffer.
-      -- Actually, the staging buffer stores the raw data including the table ID bytes.
-      -- Send a continuation with 1020 bytes which should overflow.
-      Large_Payload : constant Basic_Types.Byte_Array (0 .. 1019) := [others => 16#EE#];
+      -- Our staging buffer is 1024 bytes. Send a first segment with some
+      -- data, then a continuation that exceeds the buffer. Derive the
+      -- segment sizes from the configured CCSDS payload capacity so the
+      -- continuation always fits a CCSDS packet and the staged total
+      -- (first payload + 2 table ID bytes + continuation) always
+      -- exceeds the buffer, under any packet size configuration.
+      Continuation_Length : constant Natural := Natural'Min (Ccsds_Space_Packet.Ccsds_Data_Type'Length, 1023);
+      First_Length : constant Natural := Natural'Max (10, 1033 - Continuation_Length);
+      Small_Payload : constant Basic_Types.Byte_Array (0 .. First_Length - 1) := [others => 16#EE#];
+      Large_Payload : constant Basic_Types.Byte_Array (0 .. Continuation_Length - 1) := [others => 16#EE#];
    begin
       -- Send FirstSegment with small payload:
       T.Ccsds_Space_Packet_T_Send (Make_Table_Packet (
@@ -654,15 +574,14 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
    -- Test_Destination_Failure: Downstream returns failure status.
    overriding procedure Test_Destination_Failure (Self : in out Instance) is
       T : Component.Ccsds_Parameter_Table_Router.Implementation.Tester.Instance_Access renames Self.Tester;
-      Task_Exit : aliased Boolean := False;
-      Sim_Task : Simulator_Task (Self'Unchecked_Access, Task_Exit'Unchecked_Access);
       Payload : constant Basic_Types.Byte_Array (0 .. 4) := [others => 16#88#];
    begin
+      Simulator.Arm (Self'Unchecked_Access);
       -- Table ID 10: Working_Params (idx 1, no LF) is sent first.
       -- Simulator returns Parameter_Error for first destination.
-      Task_Response_Status := Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error;
-      Task_Responses_To_Send := 1;
-      Task_Send_Response := True;
+      Simulator.Task_Response_Status := Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error;
+      Simulator.Task_Responses_To_Send := 1;
+      Simulator.Task_Send_Response := True;
 
       T.Ccsds_Space_Packet_T_Send (Make_Table_Packet (
          Ccsds_Enums.Ccsds_Sequence_Flag.Unsegmented,
@@ -676,7 +595,7 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
       Parameter_Table_Operation_Failure_Info_Assert.Eq (T.Table_Update_Failure_History.Get (1), (
          Table_Id => 10,
          Connector_Index => 1,
-         Release => (Region => (Address => Sim_Bytes'Address, Length => Sim_Bytes'Length), Status => Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error)
+         Release => (Region => (Address => Simulator.Sim_Bytes'Address, Length => Simulator.Sim_Bytes'Length), Status => Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error)
       ));
 
       -- Verify no Table_Updated event (it failed):
@@ -694,18 +613,17 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
       -- Total DPs: 1 Num_Packets_Received + 1 Num_Tables_Invalid + 1 Last_Table_Received = 3
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 3);
 
-      Task_Exit := True;
+      Simulator.Disarm;
    end Test_Destination_Failure;
 
    -- Test_Destination_Timeout: Downstream does not respond.
    overriding procedure Test_Destination_Timeout (Self : in out Instance) is
       T : Component.Ccsds_Parameter_Table_Router.Implementation.Tester.Instance_Access renames Self.Tester;
-      Task_Exit : aliased Boolean := False;
-      Sim_Task : Simulator_Task (Self'Unchecked_Access, Task_Exit'Unchecked_Access);
       Payload : constant Basic_Types.Byte_Array (0 .. 4) := [others => 16#77#];
    begin
+      Simulator.Arm (Self'Unchecked_Access);
       -- Send timeout ticks instead of response:
-      Task_Send_Timeout := True;
+      Simulator.Task_Send_Timeout := True;
 
       T.Ccsds_Space_Packet_T_Send (Make_Table_Packet (
          Ccsds_Enums.Ccsds_Sequence_Flag.Unsegmented,
@@ -733,21 +651,20 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
       -- Total DPs: 1 Num_Packets_Received + 1 Num_Tables_Invalid + 1 Last_Table_Received = 3
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 3);
 
-      Task_Exit := True;
+      Simulator.Disarm;
    end Test_Destination_Timeout;
 
    -- Test_Partial_Failure_Stops: Multi-destination table where first destination fails.
    overriding procedure Test_Partial_Failure_Stops (Self : in out Instance) is
       T : Component.Ccsds_Parameter_Table_Router.Implementation.Tester.Instance_Access renames Self.Tester;
-      Task_Exit : aliased Boolean := False;
-      Sim_Task : Simulator_Task (Self'Unchecked_Access, Task_Exit'Unchecked_Access);
       Payload : constant Basic_Types.Byte_Array (0 .. 4) := [others => 16#66#];
    begin
+      Simulator.Arm (Self'Unchecked_Access);
       -- Table ID 3 has 3 destinations: Working_Params (idx 1), Another_Params (idx 3), Primary_Param_Store (idx 2, LF)
       -- First non-load_from fails. Remaining destinations not sent to.
-      Task_Response_Status := Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error;
-      Task_Responses_To_Send := 1;
-      Task_Send_Response := True;
+      Simulator.Task_Response_Status := Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error;
+      Simulator.Task_Responses_To_Send := 1;
+      Simulator.Task_Send_Response := True;
 
       T.Ccsds_Space_Packet_T_Send (Make_Table_Packet (
          Ccsds_Enums.Ccsds_Sequence_Flag.Unsegmented,
@@ -764,7 +681,7 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
       Parameter_Table_Operation_Failure_Info_Assert.Eq (T.Table_Update_Failure_History.Get (1), (
          Table_Id => 3,
          Connector_Index => 1,
-         Release => (Region => (Address => Sim_Bytes'Address, Length => Sim_Bytes'Length), Status => Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error)
+         Release => (Region => (Address => Simulator.Sim_Bytes'Address, Length => Simulator.Sim_Bytes'Length), Status => Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error)
       ));
 
       -- Verify no Table_Updated event:
@@ -779,19 +696,18 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
       -- Total DPs: 1 Num_Packets_Received + 1 Num_Tables_Invalid + 1 Last_Table_Received = 3
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 3);
 
-      Task_Exit := True;
+      Simulator.Disarm;
    end Test_Partial_Failure_Stops;
 
    -- Test_Load_Table_Nominal: Load table from load_from source.
    overriding procedure Test_Load_Table_Nominal (Self : in out Instance) is
       T : Component.Ccsds_Parameter_Table_Router.Implementation.Tester.Instance_Access renames Self.Tester;
-      Task_Exit : aliased Boolean := False;
-      Sim_Task : Simulator_Task (Self'Unchecked_Access, Task_Exit'Unchecked_Access);
    begin
+      Simulator.Arm (Self'Unchecked_Access);
       -- Table ID 10: 1 Get from Primary_Param_Store (idx 2, LF) + 1 Set to Working_Params (idx 1) = 2 responses
-      Task_Response_Status := Parameter_Enums.Parameter_Table_Update_Status.Success;
-      Task_Responses_To_Send := 2;
-      Task_Send_Response := True;
+      Simulator.Task_Response_Status := Parameter_Enums.Parameter_Table_Update_Status.Success;
+      Simulator.Task_Responses_To_Send := 2;
+      Simulator.Task_Send_Response := True;
 
       T.Command_T_Send (T.Commands.Load_Parameter_Table ((Id => 10)));
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -828,7 +744,7 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
       -- Total DPs: 0 (Set_Up not called)
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 0);
 
-      Task_Exit := True;
+      Simulator.Disarm;
    end Test_Load_Table_Nominal;
 
    -- Test_Load_Table_No_Load_Source: Load command for table with no load_from.
@@ -892,14 +808,13 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
    -- Test_Load_Table_Failure: Load fails during Get or Set.
    overriding procedure Test_Load_Table_Failure (Self : in out Instance) is
       T : Component.Ccsds_Parameter_Table_Router.Implementation.Tester.Instance_Access renames Self.Tester;
-      Task_Exit : aliased Boolean := False;
-      Sim_Task : Simulator_Task (Self'Unchecked_Access, Task_Exit'Unchecked_Access);
    begin
+      Simulator.Arm (Self'Unchecked_Access);
       -- Test 1: Get failure (load from source fails)
       -- Table ID 10: Get from Primary_Param_Store (idx 2, LF)
-      Task_Response_Status := Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error;
-      Task_Responses_To_Send := 1;
-      Task_Send_Response := True;
+      Simulator.Task_Response_Status := Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error;
+      Simulator.Task_Responses_To_Send := 1;
+      Simulator.Task_Send_Response := True;
 
       T.Command_T_Send (T.Commands.Load_Parameter_Table ((Id => 10)));
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -909,7 +824,7 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
       Parameter_Table_Operation_Failure_Info_Assert.Eq (T.Table_Load_Failure_History.Get (1), (
          Table_Id => 10,
          Connector_Index => 2,
-         Release => (Region => (Address => Sim_Bytes'Address, Length => Sim_Bytes'Length), Status => Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error)
+         Release => (Region => (Address => Simulator.Sim_Bytes'Address, Length => Simulator.Sim_Bytes'Length), Status => Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error)
       ));
 
       -- Verify command failure:
@@ -933,23 +848,22 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
       -- Total DPs: 0 (Set_Up not called)
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 0);
 
-      Task_Exit := True;
+      Simulator.Disarm;
    end Test_Load_Table_Failure;
 
    -- Test_Load_All_Nominal: Load all tables.
    overriding procedure Test_Load_All_Nominal (Self : in out Instance) is
       T : Component.Ccsds_Parameter_Table_Router.Implementation.Tester.Instance_Access renames Self.Tester;
-      Task_Exit : aliased Boolean := False;
-      Sim_Task : Simulator_Task (Self'Unchecked_Access, Task_Exit'Unchecked_Access);
    begin
+      Simulator.Arm (Self'Unchecked_Access);
       -- 3 tables have load_from (IDs 10, 1, 3). Table 4 is skipped.
       -- Table 10: 1 Get + 1 Set = 2
       -- Table 1: 1 Get + 1 Set = 2
       -- Table 3: 1 Get + 2 Set = 3
       -- Total: 7 responses needed
-      Task_Response_Status := Parameter_Enums.Parameter_Table_Update_Status.Success;
-      Task_Responses_To_Send := 7;
-      Task_Send_Response := True;
+      Simulator.Task_Response_Status := Parameter_Enums.Parameter_Table_Update_Status.Success;
+      Simulator.Task_Responses_To_Send := 7;
+      Simulator.Task_Send_Response := True;
 
       T.Command_T_Send (T.Commands.Load_All_Parameter_Tables);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -990,27 +904,26 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
       -- Total DPs: 0 (Set_Up not called)
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 0);
 
-      Task_Exit := True;
+      Simulator.Disarm;
    end Test_Load_All_Nominal;
 
    -- Test_Load_All_Partial_Failure: One table fails during load all.
    overriding procedure Test_Load_All_Partial_Failure (Self : in out Instance) is
       T : Component.Ccsds_Parameter_Table_Router.Implementation.Tester.Instance_Access renames Self.Tester;
-      Task_Exit : aliased Boolean := False;
-      Sim_Task : Simulator_Task (Self'Unchecked_Access, Task_Exit'Unchecked_Access);
    begin
+      Simulator.Arm (Self'Unchecked_Access);
       -- Tree is sorted by ID: 1, 3, 4, 10. Table 4 has no Load_From (skipped).
       -- First table (ID 1) Get will fail. The component continues to remaining tables.
       -- Schedule: 1 failure (table 1 Get) + 5 successes (table 3: Get+2*Set, table 10: Get+Set)
       -- Total: 6 responses
-      Schedule_Length := 6;
-      Schedule_Index := 0;
-      Response_Schedule (0) := Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error;
+      Simulator.Schedule_Length := 6;
+      Simulator.Schedule_Index := 0;
+      Simulator.Response_Schedule (0) := Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error;
       for I in 1 .. 5 loop
-         Response_Schedule (I) := Parameter_Enums.Parameter_Table_Update_Status.Success;
+         Simulator.Response_Schedule (I) := Parameter_Enums.Parameter_Table_Update_Status.Success;
       end loop;
-      Task_Responses_To_Send := 6;
-      Task_Send_Response := True;
+      Simulator.Task_Responses_To_Send := 6;
+      Simulator.Task_Send_Response := True;
 
       T.Command_T_Send (T.Commands.Load_All_Parameter_Tables);
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -1026,7 +939,7 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
       Parameter_Table_Operation_Failure_Info_Assert.Eq (T.Table_Load_Failure_History.Get (1), (
          Table_Id => 1,
          Connector_Index => 2,
-         Release => (Region => (Address => Sim_Bytes'Address, Length => Sim_Bytes'Length), Status => Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error)
+         Release => (Region => (Address => Simulator.Sim_Bytes'Address, Length => Simulator.Sim_Bytes'Length), Status => Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error)
       ));
 
       -- Verify Loading_Table events for all 3 loadable tables:
@@ -1055,7 +968,7 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
       -- Total DPs: 0 (Set_Up not called)
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 0);
 
-      Task_Exit := True;
+      Simulator.Disarm;
    end Test_Load_All_Partial_Failure;
 
    -- Test_Packet_Dropped: Overflow CCSDS packet queue.
@@ -1157,18 +1070,17 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
    -- but Load_From (sent last) fails. Covers Send_Table_To_Destinations Load_From failure path.
    overriding procedure Test_Load_From_Destination_Failure (Self : in out Instance) is
       T : Component.Ccsds_Parameter_Table_Router.Implementation.Tester.Instance_Access renames Self.Tester;
-      Task_Exit : aliased Boolean := False;
-      Sim_Task : Simulator_Task (Self'Unchecked_Access, Task_Exit'Unchecked_Access);
       Payload : constant Basic_Types.Byte_Array (0 .. 9) := [others => 16#AA#];
    begin
+      Simulator.Arm (Self'Unchecked_Access);
       -- Table ID 10: Working_Params (idx 1, no LF) + Primary_Param_Store (idx 2, LF)
       -- Schedule: first send (non-LF) succeeds, second send (LF) fails.
-      Schedule_Length := 2;
-      Schedule_Index := 0;
-      Response_Schedule (0) := Parameter_Enums.Parameter_Table_Update_Status.Success;
-      Response_Schedule (1) := Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error;
-      Task_Responses_To_Send := 2;
-      Task_Send_Response := True;
+      Simulator.Schedule_Length := 2;
+      Simulator.Schedule_Index := 0;
+      Simulator.Response_Schedule (0) := Parameter_Enums.Parameter_Table_Update_Status.Success;
+      Simulator.Response_Schedule (1) := Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error;
+      Simulator.Task_Responses_To_Send := 2;
+      Simulator.Task_Send_Response := True;
 
       -- Send unsegmented table for quick complete:
       T.Ccsds_Space_Packet_T_Send (Make_Table_Packet (
@@ -1189,7 +1101,7 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
       Parameter_Table_Operation_Failure_Info_Assert.Eq (T.Table_Update_Failure_History.Get (1), (
          Table_Id => 10,
          Connector_Index => 2,
-         Release => (Region => (Address => Sim_Bytes'Address, Length => Sim_Bytes'Length), Status => Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error)
+         Release => (Region => (Address => Simulator.Sim_Bytes'Address, Length => Simulator.Sim_Bytes'Length), Status => Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error)
       ));
 
       -- Invalid table count incremented:
@@ -1201,24 +1113,23 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
       -- Total DPs: 1 Num_Packets_Received + 1 Num_Tables_Invalid + 1 Last_Table_Received = 3
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 3);
 
-      Task_Exit := True;
+      Simulator.Disarm;
    end Test_Load_From_Destination_Failure;
 
    -- Test_Load_Command_Set_Failure: Load command where Get succeeds but Set fails.
    -- Covers Do_Table_Load Set failure path.
    overriding procedure Test_Load_Command_Set_Failure (Self : in out Instance) is
       T : Component.Ccsds_Parameter_Table_Router.Implementation.Tester.Instance_Access renames Self.Tester;
-      Task_Exit : aliased Boolean := False;
-      Sim_Task : Simulator_Task (Self'Unchecked_Access, Task_Exit'Unchecked_Access);
    begin
+      Simulator.Arm (Self'Unchecked_Access);
       -- Table ID 10: Get from Primary_Param_Store (LF, idx 2) + Set to Working_Params (idx 1)
       -- Schedule: Get succeeds, Set fails.
-      Schedule_Length := 2;
-      Schedule_Index := 0;
-      Response_Schedule (0) := Parameter_Enums.Parameter_Table_Update_Status.Success;
-      Response_Schedule (1) := Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error;
-      Task_Responses_To_Send := 2;
-      Task_Send_Response := True;
+      Simulator.Schedule_Length := 2;
+      Simulator.Schedule_Index := 0;
+      Simulator.Response_Schedule (0) := Parameter_Enums.Parameter_Table_Update_Status.Success;
+      Simulator.Response_Schedule (1) := Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error;
+      Simulator.Task_Responses_To_Send := 2;
+      Simulator.Task_Send_Response := True;
 
       T.Command_T_Send (T.Commands.Load_Parameter_Table ((Id => 10)));
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -1234,7 +1145,7 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
       Parameter_Table_Operation_Failure_Info_Assert.Eq (T.Table_Update_Failure_History.Get (1), (
          Table_Id => 10,
          Connector_Index => 1,
-         Release => (Region => (Address => Sim_Bytes'Address, Length => Sim_Bytes'Length), Status => Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error)
+         Release => (Region => (Address => Simulator.Sim_Bytes'Address, Length => Simulator.Sim_Bytes'Length), Status => Parameter_Enums.Parameter_Table_Update_Status.Parameter_Error)
       ));
 
       -- Command should fail:
@@ -1252,7 +1163,11 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
       -- Total DPs: 0 (Set_Up not called)
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 0);
 
-      Task_Exit := True;
+      Simulator.Disarm;
+
+      -- This is the suite's last scenario: let the simulator task quit
+      -- so the host binary can terminate.
+      Simulator.Request_Quit;
    end Test_Load_Command_Set_Failure;
 
 end Ccsds_Parameter_Table_Router_Tests.Implementation;

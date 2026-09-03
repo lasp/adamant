@@ -4,7 +4,13 @@ with Bb, Aa; use Bb; use Aa;
 
 package body Test_Sequential is
    procedure Test is
-      Data_A : constant Aa.T := (One => 4, Two => 20, Three => 20);
+      -- Constructed through Pack at run time rather than written as a
+      -- named constant aggregate: a named constant of a 32-bit packed
+      -- record with Scalar_Storage_Order High_Order_First is miscompiled
+      -- when passed by value on riscv32, its first field reading as
+      -- zero. The Pack call constructs the value at run time, away from
+      -- the constant folding that carries the bug.
+      Data_A : constant Aa.T := Aa.Pack ((One => 4, Two => 20, Three => 20));
       Data_B : constant Bb.T := (Element => 4, Element2 => 20);
    begin
       Put_Line ("Initializing heap... ");

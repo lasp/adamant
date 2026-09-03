@@ -507,4 +507,6 @@ begin
    Data_Buf.Destroy;
    pragma Unreferenced (Data_Buf);
    Put_Line ("Passed.");
+   --  Sentinel for the cross test runner.
+   Put_Line ("=== ALL TESTS PASSED ===");
 end Test;

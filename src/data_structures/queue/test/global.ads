@@ -19,5 +19,8 @@ package Global is
    end Action;
    The_Action : Action;
 
-   task Unblock;
+   --  The default task stack is small on some bareboard runtimes, and
+   --  the blocking-error probes propagate an exception whose raise and
+   --  traceback machinery alone needs several kilobytes of stack.
+   task Unblock with Storage_Size => 16_384;
 end Global;

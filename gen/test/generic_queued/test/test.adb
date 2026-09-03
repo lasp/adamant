@@ -3,18 +3,13 @@
 
 with Ada.Text_IO; use Ada.Text_IO;
 
-with Component.Generic_Queued.Implementation.Tester;
 with Aa;
 with Bb;
+with Global; use Global;
 
 procedure Test is
    Data_A : constant Aa.T := (One => 17, Two => 23, Three => 5);
    Data_B : constant Bb.T := (Element => 31, Element2 => 34);
-   package Generic_Component_Base is new Component.Generic_Queued (Aa.T, Bb.T, Bb.Serialized_Length);
-   package Component_Package is new Generic_Component_Base.Implementation;
-   package Tester_Package is new Component_Package.Tester;
-   Tester : aliased Tester_Package.Instance;
-   Comp : aliased Component_Package.Instance;
 begin
    Put_Line ("Attaching component connectors... ");
    Tester.Init_Base (Queue_Size => 100);
@@ -34,4 +29,6 @@ begin
 
    Tester.Final_Base;
    Comp.Final_Base;
+   --  Sentinel for the cross test runner.
+   Put_Line ("=== ALL TESTS PASSED ===");
 end Test;

@@ -2,12 +2,10 @@
 pragma Profile (Ravenscar);
 
 with Ada.Text_IO; use Ada.Text_IO;
-with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;
 with Test_Record.Representation; use Test_Record;
 with Basic_Types; use Basic_Types;
-with Ada.Streams.Stream_IO;
 with Serializer;
-with Stream_Serializer;
+with Serializer_Stream_Test;
 with System.Address_Image;
 with Command;
 with Command_Types;
@@ -38,7 +36,7 @@ procedure Test is
 
       Put ("Bytes in byte array:");
       for I in Mybytearray'Range loop
-         Put (Natural (Mybytearray (I)));
+         Put (Natural'Image (Natural (Mybytearray (I))));
       end loop;
       Put_Line ("");
 
@@ -60,40 +58,10 @@ procedure Test is
       Put ("Bytes in byte array:");
       Mybytearray2 := Myserializer.To_Byte_Array (Mypackedrecord2);
       for I in Mybytearray2'Range loop
-         Put (Natural (Mybytearray2 (I)));
+         Put (Natural'Image (Natural (Mybytearray2 (I))));
       end loop;
       pragma Assert (Mypackedrecord2 = Mypackedrecord);
    end Test_Serializer;
-
-   procedure Test_Stream_Serializer is
-      package Mystreamserializer is new Stream_Serializer (Test_Record.T);
-      Outfile : Ada.Streams.Stream_IO.File_Type;
-      Infile : Ada.Streams.Stream_IO.File_Type;
-      Outstream : Ada.Streams.Stream_IO.Stream_Access;
-      Instream : Ada.Streams.Stream_IO.Stream_Access;
-      Mypackedrecord : constant Test_Record.T := (Id => 7, Value => 15, Fvalue => 0.1);
-      Mypackedrecordcopy : Test_Record.T := (Id => 0, Value => 0, Fvalue => 0.0);
-   begin
-      Put ("Serializing to file... ");
-      Ada.Streams.Stream_IO.Create (Outfile, Ada.Streams.Stream_IO.Out_File, "/tmp/file1.bin");
-      Outstream := Ada.Streams.Stream_IO.Stream (Outfile);
-      Mystreamserializer.Serialize (Outstream, Mypackedrecord);
-      Ada.Streams.Stream_IO.Close (Outfile);
-      Put_Line ("passed.");
-
-      Put ("Deserializing from file... ");
-      Ada.Streams.Stream_IO.Open (Infile, Ada.Streams.Stream_IO.In_File, "/tmp/file1.bin");
-      Instream := Ada.Streams.Stream_IO.Stream (Infile);
-      Mystreamserializer.Deserialize (Instream, Mypackedrecordcopy);
-      Ada.Streams.Stream_IO.Close (Infile);
-      pragma Unreferenced (Infile);
-      Put_Line ("Record serialized: " & Test_Record.Representation.Image (Mypackedrecord));
-      Put_Line ("Record deserialized: " & Test_Record.Representation.Image (Mypackedrecordcopy));
-      -- The following line should work, but it currently does not pass due to a bug
-      -- in the GNAT Linux GPL compiler...
-      -- pragma Assert(myPackedRecordCopy = myPackedRecord);
-      Put_Line ("passed.");
-   end Test_Stream_Serializer;
 
    procedure Test_Single_Element_Serialization is
       package Naturalserializer is new Serializer (Natural);
@@ -103,21 +71,21 @@ procedure Test is
    begin
       Put ("Natural test... ");
       Put ("Byte Array Size: ");
-      Put (Naturalbytearray'Size);
+      Put (Integer'Image (Naturalbytearray'Size));
       New_Line;
       Put ("Byte Array Length: ");
-      Put (Naturalbytearray'Length);
+      Put (Integer'Image (Naturalbytearray'Length));
       New_Line;
       Put ("Natural Size: ");
-      Put (Natural'Size);
+      Put (Integer'Image (Natural'Size));
       New_Line;
-      Put (Natural'Object_Size);
+      Put (Integer'Image (Natural'Object_Size));
       New_Line;
       Put ("Byte Size: ");
-      Put (Byte'Size);
+      Put (Integer'Image (Byte'Size));
       New_Line;
       Put ("compute: ");
-      Put ((Natural'Object_Size) / (Byte'Object_Size));
+      Put (Integer'Image ((Natural'Object_Size) / (Byte'Object_Size)));
       New_Line;
       Naturalbytearray := Naturalserializer.To_Byte_Array (N);
       M := Naturalserializer.From_Byte_Array (Naturalbytearray);
@@ -211,10 +179,12 @@ procedure Test is
 -- Run all tests:
 begin
    Test_Serializer;
-   Test_Stream_Serializer;
+   Serializer_Stream_Test.Run;
    Test_Single_Element_Serialization;
    Test_Errant_Serialization;
    Test_Exception_Handling;
    Test_Copy_By_Reference;
    Test_Variable_Serializer;
+   --  Sentinel for the cross test runner.
+   Put_Line ("=== ALL TESTS PASSED ===");
 end Test;

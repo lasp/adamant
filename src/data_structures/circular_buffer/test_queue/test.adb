@@ -266,4 +266,6 @@ begin
    Data_Queue.Destroy;
    pragma Unreferenced (Data_Queue);
    Put_Line ("Passed.");
+   --  Sentinel for the cross test runner.
+   Put_Line ("=== ALL TESTS PASSED ===");
 end Test;

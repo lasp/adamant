@@ -75,10 +75,6 @@ package body Sys_Time_Tests.Implementation is
 
    -- Run the specified number of random add tests
    procedure Test_Add_Rand_Time (Tests : in Integer := 500) is
-      -- Used to print out floating point numbers
-      package Flt_Io is new Ada.Text_Io.Float_Io (Float);
-      use Flt_Io;
-
       Float1 : Long_Float;
       Float2 : Long_Float;
       Float_Sum : Long_Float;
@@ -148,18 +144,13 @@ package body Sys_Time_Tests.Implementation is
       -- Put_Line (ASCII.LF & "Difference Sum(nsec): " & Float'Image( diff_sum_float ));
       Diff_Ave := (Diff_Sum_Float / Float (Tests)) * 10.0**9;
       Put_Line (ASCII.LF & "Add Time Random Tests" & ", Tests Run:" & Integer'Image (Tests));
-      Put_Line ("   Difference Max(nsec):   " & Integer'Image (Diff_Max / Nanoseconds (1)));
-      Put ("   Difference Ave(nsec):");
-      Put (Diff_Ave, 5, 2, 0);
-      New_Line (2);
+      Put_Line ("   Difference Max(sec):   " & Duration'Image (To_Duration (Diff_Max)));
+      Put_Line ("   Difference Ave(nsec):" & Float'Image (Diff_Ave));
+      New_Line;
    end Test_Add_Rand_Time;
 
    -- Run the specified number of random subtraction tests
    procedure Test_Subtract_Rand_Time (Tests : in Integer := 500) is
-      -- Used to print out floating point numbers
-      package Flt_Io is new Ada.Text_Io.Float_Io (Float);
-      use Flt_Io;
-
       -- Used to the floating point math along side the Sys_Time math
       Float1 : Long_Float;
       Float2 : Long_Float;
@@ -225,12 +216,15 @@ package body Sys_Time_Tests.Implementation is
          -- diff_sum_float := Float(To_Duration(diff_sum));
          -- Put_Line (ASCII.LF & "Difference Sum(nsec): " & Float'Image( diff_sum_float ));
 
-         -- System times can not be negative, so negative time spans must be skipped
-         --if float_sum_time_span > nanoseconds(0) and time_sum > nanoseconds(0) then
-         Ignore := To_Sys_Time (Time_Of (Seconds_Count (0), Float_Sum_Time_Span), Sys_Time1);
-         Ignore := To_Sys_Time (Time_Of (Seconds_Count (0), Float_Sum_Time_Span), Sys_Time2);
-         Sys_Time_Assert.Eq (Sys_Time1, Sys_Time2, Eps);
-         --end if;
+         -- System times cannot be negative, and on runtimes whose
+         -- Ada.Real_Time.Time starts at zero, Time_Of with a negative
+         -- span raises before To_Sys_Time can reject it, so negative
+         -- time spans must be skipped:
+         if Float_Sum_Time_Span > Nanoseconds (0) and then Time_Sum > Nanoseconds (0) then
+            Ignore := To_Sys_Time (Time_Of (Seconds_Count (0), Float_Sum_Time_Span), Sys_Time1);
+            Ignore := To_Sys_Time (Time_Of (Seconds_Count (0), Float_Sum_Time_Span), Sys_Time2);
+            Sys_Time_Assert.Eq (Sys_Time1, Sys_Time2, Eps);
+         end if;
       end loop;
 
       --Put_Line("tests: " & Integer'Image(tests));
@@ -239,18 +233,13 @@ package body Sys_Time_Tests.Implementation is
       -- Put_Line (ASCII.LF & "Difference Sum(nsec): " & Float'Image( diff_sum_float ));
       Diff_Ave := (Diff_Sum_Float / Float (Tests)) * 10.0**9;
       Put_Line (ASCII.LF & "Subtract Time Random Tests" & ", Tests Run:" & Integer'Image (Tests));
-      Put_Line ("   Difference Max(nsec):   " & Integer'Image (Diff_Max / Nanoseconds (1)));
-      Put ("   Difference Ave(nsec):");
-      Put (Diff_Ave, 5, 2, 0);
-      New_Line (2);
+      Put_Line ("   Difference Max(sec):   " & Duration'Image (To_Duration (Diff_Max)));
+      Put_Line ("   Difference Ave(nsec):" & Float'Image (Diff_Ave));
+      New_Line;
    end Test_Subtract_Rand_Time;
 
    -- Run the specified number of random subtraction using a time_span tests
    procedure Test_Subtract_Rand_Time_Span (Tests : in Integer := 500) is
-      -- Used to print out floating point numbers
-      package Flt_Io is new Ada.Text_Io.Float_Io (Float);
-      use Flt_Io;
-
       -- Used to the floating point math along side the Sys_Time math
       Float1 : Long_Float;
       Float2 : Long_Float;
@@ -332,10 +321,9 @@ package body Sys_Time_Tests.Implementation is
       -- Put_Line (ASCII.LF & "Difference Sum(nsec): " & Float'Image( diff_sum_float ));
       Diff_Ave := (Diff_Sum_Float / Float (Tests)) * 10.0**9;
       Put_Line (ASCII.LF & "Subtract Time Random Time Span Tests" & ", Tests Run:" & Integer'Image (Tests));
-      Put_Line ("   Difference Max(nsec):   " & Integer'Image (Diff_Max / Nanoseconds (1)));
-      Put ("   Difference Ave(nsec):");
-      Put (Diff_Ave, 5, 2, 0);
-      New_Line (2);
+      Put_Line ("   Difference Max(sec):   " & Duration'Image (To_Duration (Diff_Max)));
+      Put_Line ("   Difference Ave(nsec):" & Float'Image (Diff_Ave));
+      New_Line;
    end Test_Subtract_Rand_Time_Span;
    -------------------------------------------------------------------------
    -- Fixtures:

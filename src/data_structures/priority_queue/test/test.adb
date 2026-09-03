@@ -363,4 +363,6 @@ begin
    pragma Assert (My_Queue.Max_Num_Bytes_Used = 4 * 5);
    My_Queue.Destroy;
    Put_Line ("passed.");
+   --  Sentinel for the cross test runner.
+   Put_Line ("=== ALL TESTS PASSED ===");
 end Test;

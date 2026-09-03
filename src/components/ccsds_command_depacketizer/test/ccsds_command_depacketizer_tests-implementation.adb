@@ -7,6 +7,7 @@ with Ccsds_Primary_Header.Assertion; use Ccsds_Primary_Header.Assertion;
 use Ccsds_Primary_Header;
 with Ccsds_Command_Secondary_Header;
 with Interfaces; use Interfaces;
+with Packet_Types;
 with Basic_Types; use Basic_Types;
 with Xor_8;
 with Command_Types;
@@ -272,7 +273,13 @@ package body Ccsds_Command_Depacketizer_Tests.Implementation is
 
    overriding procedure Test_Packet_Too_Large (Self : in out Instance) is
       T : Component.Ccsds_Command_Depacketizer.Implementation.Tester.Instance_Access renames Self.Tester;
-      Bytes : constant Byte_Array := [0 .. 997 => 1];
+      -- The largest data payload whose error packet still fits a
+      -- Packet.T losslessly: the error packet holds the whole errant
+      -- CCSDS packet (primary header, command secondary header, command
+      -- id, and data) in its buffer. Deriving the size from the packet
+      -- configuration keeps the packet-copy assertions below exact
+      -- under any packet_buffer_size.
+      Bytes : constant Byte_Array := [0 .. Packet_Types.Packet_Buffer_Type'Length - Ccsds_Primary_Header.Size_In_Bytes - Ccsds_Command_Secondary_Header.Serialization.Serialized_Length - Command_Id.Serialization.Serialized_Length - 1 => 1];
       Packet : Ccsds_Space_Packet.T := Construct_Command_Packet (16#0101#, Bytes);
    begin
       -- Send the packet many times:

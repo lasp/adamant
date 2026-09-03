@@ -4,13 +4,18 @@ redo-ifchange build/template/$name
 cat build/template/$name | awk '
 /with AUnit.Assertions/ {
   print "with Ada.Text_IO; use Ada.Text_IO;"
-  print "with Ada.Integer_Text_IO; use Ada.Integer_Text_IO;"
   print "with Aa.Representation, Bb;"
   print "with Smart_Assert;"
   next
 }
 /TODO declarations/ {
-  print "      Data_A : constant Aa.T := (One => 4, Two => 20, Three => 20);"
+  print "      -- Constructed through Pack at run time rather than written as a"
+  print "      -- named constant aggregate: a named constant of a 32-bit packed"
+  print "      -- record with Scalar_Storage_Order High_Order_First is miscompiled"
+  print "      -- when passed by value on riscv32, its first field reading as"
+  print "      -- zero. The Pack call constructs the value at run time, away from"
+  print "      -- the constant folding that carries the bug."
+  print "      Data_A : constant Aa.T := Aa.Pack ((One => 4, Two => 20, Three => 20));"
   print "      Data_B : constant Bb.T := (Element => 4, Element2 => 20);"
   print "      Data_B_Ret : Bb.T;"
   print "      package Natural_Assert is new Smart_Assert.Discrete (Natural, Natural@Image);"
@@ -20,10 +25,10 @@ cat build/template/$name | awk '
   print "      Data_B_Ret := Self.Tester.Bb_T_Request (Data_B);"
   print "      Put_Line (\"Tester main got B back\");"
   print "      Put_Line (\"Element: \");"
-  print "      Put (Data_B_Ret.Element);"
+  print "      Put (Integer@Image (Integer (Data_B_Ret.Element)));"
   print "      New_Line;"
   print "      Put_Line (\"Element 2: \");"
-  print "      Put (Data_B_Ret.Element2);"
+  print "      Put (Integer@Image (Integer (Data_B_Ret.Element2)));"
   print "      New_Line;"
   print "      Natural_Assert.Eq (Self.Tester.Aa_T_Service_History.Get_Count, 1);"
   print "      A_Assert.Eq (Data_A, Self.Tester.Aa_T_Service_History.Get (1));"

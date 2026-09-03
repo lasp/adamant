@@ -52,11 +52,21 @@ package body Protected_Variables_Tests.Implementation is
 
    -------------------------------------------------------------------------
    -- Tests:
+   -- Scenario objects at library level, one per scenario, since the
+   -- Jorvik profile forbids local protected objects. Each is only
+   -- touched by its own scenario, so default initialization holds
+   -- when that scenario runs.
+   Variable_Obj : Integer_Variable.Variable;
+   Counter_Obj : Byte_Counter.Counter;
+   Countdown_Obj : Countdown_Counter.Counter;
+   Periodic_Obj : Byte_Periodic_Counter.Counter;
+   Staged_Obj : Pair_Staged.Staged_Variable;
+
    -------------------------------------------------------------------------
 
    overriding procedure Test_Variable (Self : in out Instance) is
       Ignore : Instance renames Self;
-      V : Integer_Variable.Variable;
+      V : Integer_Variable.Variable renames Variable_Obj;
    begin
       V.Set_Var (42);
       Integer_Assert.Eq (V.Get_Var, 42);
@@ -67,7 +77,7 @@ package body Protected_Variables_Tests.Implementation is
 
    overriding procedure Test_Protected_Counter (Self : in out Instance) is
       Ignore : Instance renames Self;
-      C : Byte_Counter.Counter;
+      C : Byte_Counter.Counter renames Counter_Obj;
       Prev : Byte_Mod;
    begin
       -- Default starts at 0.
@@ -103,7 +113,7 @@ package body Protected_Variables_Tests.Implementation is
 
    overriding procedure Test_Protected_Counter_Decrement (Self : in out Instance) is
       Ignore : Instance renames Self;
-      C : Countdown_Counter.Counter;
+      C : Countdown_Counter.Counter renames Countdown_Obj;
       Prev : Countdown_Range;
    begin
       -- Default starts at 0.
@@ -147,7 +157,7 @@ package body Protected_Variables_Tests.Implementation is
 
    overriding procedure Test_Protected_Periodic_Counter (Self : in out Instance) is
       Ignore : Instance renames Self;
-      C : Byte_Periodic_Counter.Counter;
+      C : Byte_Periodic_Counter.Counter renames Periodic_Obj;
    begin
       -- Default period is 1, count is 0. Count mod 1 = 0, so Is_Count_At_Period is True.
       Byte_Mod_Assert.Eq (C.Get_Period, 1);
@@ -186,7 +196,7 @@ package body Protected_Variables_Tests.Implementation is
 
    overriding procedure Test_Staged_Variable (Self : in out Instance) is
       Ignore : Instance renames Self;
-      S : Pair_Staged.Staged_Variable;
+      S : Pair_Staged.Staged_Variable renames Staged_Obj;
       Out_Val : Pair;
    begin
       -- Default state.
