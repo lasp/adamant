@@ -636,7 +636,7 @@ package body Component.{{ name }}_Reciprocal is
       Local_Id : {{ commands.name }}.Local_Command_Id_Type;
    begin
       if Self.Log_Commands then
-         if Natural (Cmd.Header.Id) <= {{ commands.name }}.Num_Commands then
+         if Natural (Cmd.Header.Id) <= {{ commands.name }}.Num_Commands and then Cmd.Header.Id >= {{ commands.name }}.Get_Id_Base (Self.Commands) then
             Local_Id := {{ commands.name }}.Local_Command_Id_Type'Val (Cmd.Header.Id - {{ commands.name }}.Get_Id_Base (Self.Commands));
             case Local_Id is
 {% for command in commands %}
