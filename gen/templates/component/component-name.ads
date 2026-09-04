@@ -274,13 +274,24 @@ package Component.{{ name }} is
    -- overridden if something special needs to happen to further validate a parameter. Examples of this might be validation of
    -- certain parameters beyond individual type ranges, or performing other special functionality that only needs to be
    -- performed after parameters have been validated. Note that range checking is performed during staging, and does not need
-   -- to be implemented here.
+   -- to be implemented here. This function is also called through Assert_Valid_Parameter_Defaults from Set_Id_Bases and from
+   -- unit test setup, before the component is connected or initialized, to check the compiled-in default parameter values. The
+   -- implementation must therefore be a pure function of the passed-in parameter values, with no dependence on Init state and
+   -- no connector invocations.
    not overriding function Validate_Parameters (
       Self : in out Base_Instance;
 {% for par in parameters %}
       {{ par.name }} : in {% if par.type_package %}{{ par.type_package }}.U{% else %}{{ par.type }}{% endif %}{{ ";" if not loop.last }}
 {% endfor %}
    ) return Parameter_Validation_Status.E is abstract;
+
+   -- This procedure asserts that the component's working parameter values, which
+   -- hold the defaults declared in the component model until the first parameter
+   -- update, are valid according to the component's Validate_Parameters function.
+   -- Set_Id_Bases calls it at startup and the generated unit test infrastructure
+   -- calls it during test setup, checking the model defaults against any custom
+   -- validation.
+   not overriding procedure Assert_Valid_Parameter_Defaults (Self : in out Base_Instance);
 
 {% endif %}
 {% if data_dependencies %}
