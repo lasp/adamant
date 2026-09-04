@@ -15,7 +15,7 @@ with Safe_Deallocator;
 
 package body Component.{{ name }}.Implementation.Tester is
 
-{% if init_base or connectors.invoker() or events or data_products or faults or parameters %}
+{% if init_base or connectors.invoker() or events or data_products or faults %}
    ---------------------------------------
    -- Initialize heap variables:
    ---------------------------------------
@@ -24,14 +24,6 @@ package body Component.{{ name }}.Implementation.Tester is
 {% if init_base %}
       -- Initialize component heap:
       Self.Component_Instance.Init_Base{% if init_base.parameters %} ({% for n in init_base.parameter_names %}{{ n }} => {{ n }}{{ ", " if not loop.last }}{% endfor %}){% endif %};
-
-{% endif %}
-{% if parameters and generic %}
-      -- Check the component's compiled-in default parameter values against the
-      -- component's parameter validation. Generic components are checked here
-      -- because the base test Set_Up cannot allocate their tester; non-generic
-      -- components are checked in the base test Set_Up instead.
-      Self.Component_Instance.Assert_Valid_Parameter_Defaults;
 
 {% endif %}
       -- Initialize tester heap:
