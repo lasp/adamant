@@ -74,6 +74,8 @@ jobs:
         env:
           JENKINS_WEBHOOK_TOKEN: ${{ secrets.JENKINS_WEBHOOK_TOKEN }}
           COMMIT_SHA: ${{ steps.sha.outputs.sha }}
+          # The repository that holds the SHA: the PR head's fork, or this repository.
+          ADAMANT_REPO: ${{ github.event.pull_request.head.repo.clone_url || format('{0}/{1}.git', github.server_url, github.repository) }}
           # Adamant has no PIN: PR builds must always test the PR head SHA.
           ADAMANT_REF_OVERRIDE: ${{ inputs.adamant_ref || '' }}
           PROJECT_REF_OVERRIDE: ${{ inputs.project_ref || env.PROJECT_REF_PIN || '' }}
@@ -93,8 +95,9 @@ jobs:
           # Build the payload, omitting any optional override that wasn't set.
           BODY=$(jq -n \
             --arg adamant "$ADAMANT_REF" \
+            --arg repo "$ADAMANT_REPO" \
             --arg project "$PROJECT_REF_OVERRIDE" \
-            '{adamant_ref: $adamant}
+            '{adamant_ref: $adamant, adamant_repo: $repo}
              + (if $project != "" then {project_ref: $project} else {} end)')
           TRIGGER_URL="${JENKINS_URL}/generic-webhook-trigger/invoke"
           echo "POST ${TRIGGER_URL}?token=***"
