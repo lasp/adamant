@@ -1,0 +1,5 @@
+---
+description: This is a unit test suite for the Product Store component with a store configured to save the current time.
+tests:
+  - name: Test_Save_Current_Time
+    description: This unit test tests saving the data products to a store configured to save the current time upon receipt of a tick, and restoring them with the save time.

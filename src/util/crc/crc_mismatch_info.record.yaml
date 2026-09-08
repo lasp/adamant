@@ -1,0 +1,15 @@
+---
+description: A packed record which holds a computed CRC alongside the CRC that was expected, used for reporting a CRC mismatch.
+fields:
+  - name: Computed_Crc
+    description: The CRC computed over the data.
+    type: Crc_16.Crc_16_Type
+    format: U16
+    skip_validation: True
+    byte_image: True
+  - name: Expected_Crc
+    description: The CRC that the computed CRC was expected to match.
+    type: Crc_16.Crc_16_Type
+    format: U16
+    skip_validation: True
+    byte_image: True
