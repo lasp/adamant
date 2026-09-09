@@ -12,9 +12,7 @@ init:
       type: Simple_Sequencer_Types.Sequencer_Config
       description: The sequencer's static configuration, exported as the Config constant by the generated
         command sequences suite package. Carries the sequence table and the number of concurrent sequence
-        frames; the frame count comes from the suite model's num_concurrent_sequences, which also sizes the
-        suite's generated summary packet type, so the two can never disagree. Any Run_Sequence commands that
-        would exceed the frame count are rejected.
+        frames, which also sizes the suite's generated summary packet type.
 connectors:
   - type: Command.T
     kind: recv_async
@@ -24,10 +22,10 @@ connectors:
     description: Sub-commands are sent out this connector
   - type: Command_Response.T
     kind: send
-    description: Sends the response to a Run_Sequence (or synthesised per-sequence) command back to the command router. The Send_After_Sequence_Completion path emits its deferred reply here on completion / abort / timeout / kill; the default Send_After_Sequence_Start path emits its reply here immediately at dispatch time.
+    description: Sends the response to a Run_Sequence (or synthesised per-sequence) command back to the command router, either at dispatch or, for Send_After_Sequence_Completion sequences, when the sequence ends.
   - type: Command_Response.T
     kind: recv_async
-    description: Responses to sub-commands are received here, allowing subsequent commands in a sequence to be sent out. During initialization the command router sends a Register_Source message via this connector for each sequence frame (engine), providing the unique source identifier that frame stamps into its outgoing commands. If using the command router, include one unique arrayed connector entry per frame; a frame that never receives a Register_Source reply can never be claimed (the sequences model warns when the connection count does not match the configured engine count).
+    description: Responses to sub-commands are received here, advancing the waiting sequence. At startup the command router sends a Register_Source message per frame via this connector with the source identifier the frame stamps into its commands. Include one arrayed connector entry per frame; a frame that never receives one can never be claimed.
   - description: The packet send connector, used for sending the periodic sequencer summary packet.
     type: Packet.T
     kind: send

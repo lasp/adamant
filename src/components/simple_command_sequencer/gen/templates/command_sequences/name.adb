@@ -16,10 +16,9 @@ with {{ w }};
 package body {{ name }} is
 
    ---------------------------------------------------------------------------
-   -- Resolvers – one per dynamic step. Each validates the sequence's per-call
-   -- argument buffer, deserializes it as the sequence's arg type, and returns
-   -- the serialized leaf field for its step's buffer (a sub-command's
-   -- Arg_Buffer, or a Packed_U32 millisecond count for a dynamic sleep).
+   -- Resolvers – one per dynamic step. Each validates and deserializes the
+   -- sequence argument, then returns the addressed field serialized (a
+   -- sub-command argument, or a Packed_Natural millisecond count for a sleep).
    ---------------------------------------------------------------------------
 {% for seq in sequences.values() %}
 {% for step in seq.steps %}

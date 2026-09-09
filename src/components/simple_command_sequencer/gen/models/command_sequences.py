@@ -44,7 +44,7 @@ class sequence_step(object):
         self.command = command
         # sleep_ms is either a static integer millisecond count or a dynamic
         # reference into the sequence's argument ("Arg" or "Arg.A.B"), resolved
-        # at execution time as a Packed_U32.
+        # at execution time as a Packed_Natural.
         self.sleep_ms = None
         self.dynamic_sleep_arg = None
         if sleep_ms is not None:
@@ -210,10 +210,9 @@ class sequence_step(object):
 
     def resolve_dynamic_sleep(self, parent_sequence):
         """
-        For dynamic sleep steps, resolve the same fields as
-        resolve_dynamic_arg_type, except the leaf type is fixed: a dynamic
-        sleep always resolves its duration as a Packed_U32 millisecond count,
-        so no command object is involved.
+        Like resolve_dynamic_arg_type, but the leaf type is fixed: a dynamic
+        sleep resolves its duration as a Packed_Natural millisecond count, so
+        it always fits an Ada.Real_Time.Time_Span.
         """
         if not self.dynamic_sleep_arg:
             return
@@ -231,7 +230,7 @@ class sequence_step(object):
             if "." in self.dynamic_sleep_arg
             else None
         )
-        self.dynamic_arg_type_package = "Packed_U32"
+        self.dynamic_arg_type_package = "Packed_Natural"
         self.resolver_type_name = (
             f"{parent_sequence.name}_Step_{self.index}_Resolver_T"
         )
@@ -318,11 +317,9 @@ class command_sequence(command):
         self.suite = suite
         self.steps = sequence_steps
 
-        # When the sequencer replies to this sequence's own command: immediately
-        # on start (the default) or deferred until the sequence completes,
-        # carrying its final success/failure. Static per-sequence configuration,
-        # baked into the generated Sequences_Table. Invocations via the generic
-        # Run_Sequence command choose their behavior per-call instead.
+        # When the sequencer replies to this sequence's command: on start (the
+        # default) or on completion, carrying the final success/failure. Baked
+        # into the generated Sequences_Table.
         if response_behavior is None:
             self.response_behavior = "Send_After_Sequence_Start"
         else:
@@ -346,9 +343,8 @@ class command_sequence(command):
         self.arg_type_name = None
 
         if self.arg_type:
-            # The generated builders and resolvers reference the arg type's
-            # package children (Serialization, Validation), so the type must be
-            # package-qualified.
+            # Generated code references the type's Serialization and Validation
+            # children, so it must be package-qualified.
             if "." not in self.arg_type:
                 raise ModelException(
                     f"Sequence '{self.name}' arg_type '{self.arg_type}' must be "
@@ -358,8 +354,8 @@ class command_sequence(command):
             self.arg_type_package = parts[0]
             self.arg_type_name = parts[1]
 
-        # The generated step tables are indexed by Interfaces.Unsigned_16 and
-        # the step counter must be able to advance one past the last index.
+        # Step tables are indexed by Unsigned_16; the counter must advance one
+        # past the last index.
         if len(self.steps) > 65535:
             raise ModelException(
                 f"Sequence '{self.name}' has {len(self.steps)} steps; at most "
@@ -382,11 +378,8 @@ class command_sequence(command):
                     f"'{step.dynamic_sleep_arg}' but sequence '{self.name}' "
                     "has no arg_type defined"
                 )
-        # The command's wire/arg type is the sequence's own arg_type (or none
-        # for an argless sequence) -- a user-written, normally-registered type.
-        # Response behavior is static per-sequence configuration in the
-        # generated Sequences_Table, so nothing is appended to the wire type
-        # and no record generation is involved.
+        # The command's arg type is the sequence's own arg_type (or none), a
+        # user-written, normally-registered type; nothing is generated for it.
         super(command_sequence, self).__init__(
             name, type=self.arg_type, description=description, id=id, suite=suite
         )
@@ -478,10 +471,8 @@ class command_sequences(assembly_submodel):
         if "preamble" in self.data:
             self.preamble = self.data["preamble"]
 
-        # The suite owns the frame-pool size. It also sizes the suite's
-        # generated summary packet ground type, so validate it against the
-        # project configuration (how many frame summaries fit in one packet
-        # buffer) right here at model load -- the earliest possible moment.
+        # The suite owns the frame-pool size, which also sizes its summary packet
+        # type, so check it fits one packet buffer at model load.
         self.num_concurrent_sequences = self.data["num_concurrent_sequences"]
         max_frames = get_max_frames_per_packet()
         if self.num_concurrent_sequences > max_frames:
@@ -500,10 +491,7 @@ class command_sequences(assembly_submodel):
             for include in self.includes:
                 include = ada.formatType(include)
             self.includes = list(set(self.includes))
-            # The generated spec always carries "with Sequence_Enums;" (the
-            # per-sequence Response_Behavior configuration in the
-            # Sequences_Table), so drop it from user includes to avoid a
-            # duplicate with clause.
+            # The generated spec already has "with Sequence_Enums;"; drop it from user includes.
             self.includes = [inc for inc in self.includes if inc != "Sequence_Enums"]
 
         if "sequences" not in self.data or not self.data["sequences"]:
@@ -555,10 +543,8 @@ class command_sequences(assembly_submodel):
             }
         )
 
-    # Resolution errors raised here (unknown component, unknown command, bad
-    # dynamic arg) happen outside the base class's load path, so attach the
-    # yaml filename to them explicitly -- load-time errors get it from the
-    # base class already.
+    # Errors raised here are outside the base class's load path, so attach the
+    # yaml filename explicitly.
     @throw_exception_with_filename
     def final(self):
         # Used by name.ads to `with` the assembly's command-id package
@@ -573,14 +559,12 @@ class command_sequences(assembly_submodel):
             if seq.arg_type_package and seq.arg_type_package not in self.includes:
                 self.includes.append(seq.arg_type_package)
             for step in seq.steps:
-                # Sleep steps don't reference any assembly component or
-                # command, so skip command resolution for them. A dynamic
-                # sleep still needs its Resolver fields populated (leaf type
-                # fixed at Packed_U32) so the templates can emit its resolver.
+                # Sleep steps reference no assembly command. A dynamic sleep
+                # still needs its Resolver fields so the templates can emit it.
                 if step.is_dynamic_sleep():
                     step.resolve_dynamic_sleep(seq)
-                    if "Packed_U32" not in self.includes:
-                        self.includes.append("Packed_U32")
+                    if "Packed_Natural" not in self.includes:
+                        self.includes.append("Packed_Natural")
                     continue
                 if step.is_sleep():
                     continue
@@ -613,15 +597,10 @@ class command_sequences(assembly_submodel):
                     )
                 step.command_obj = comp.commands.get_with_name(step.command_name)
 
-                # A sequence configured with send_after_sequence_completion may
-                # not invoke itself as a sub-sequence: the outer run's deferred
-                # reply waits on the inner run, which starts another copy of the
-                # same sequence, recursively occupying frames until none are
-                # free and the innermost dispatch fails. The configuration can
-                # never succeed, so reject it at model time. The target counts
-                # as "self" when it is a Simple_Command_Sequencer instance
-                # initialized with THIS suite and the invoked command name is
-                # the containing sequence's own name.
+                # A send_after_sequence_completion sequence may not call itself: the outer
+                # run's deferred reply waits on an inner run of the same sequence, recursing
+                # until no frame is free. "Self" means a Simple_Command_Sequencer instance
+                # initialized with THIS suite invoking the containing sequence's own name.
                 if (
                     seq.response_behavior == "Send_After_Sequence_Completion"
                     and step.command_name.lower() == seq.name.lower()

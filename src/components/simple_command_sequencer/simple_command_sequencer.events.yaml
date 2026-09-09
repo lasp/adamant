@@ -18,7 +18,7 @@ events:
     param_type: Sequence_Step_Event_Info.T
 
   - name: Sequence_Out_Of_Range_Sleep
-    description: A sequence has entered sleep state with either overflow or underflow.
+    description: A sleep step's wake time overflowed the system time representation, so the sequence was ended.
     param_type: Sequence_Sleep_Event_Info.T
 
   - name: Sequence_Out_Of_Range_Timeout
@@ -32,6 +32,10 @@ events:
   - name: Invalid_Sequence_Id
     description: A Run_Sequence command was received with an out of range sequence ID
     param_type: Packed_U16.T
+
+  - name: Invalid_Sequence_Argument_Length
+    description: A sequence command was received with an argument length that does not match the serialized length of the sequence's argument type, so the sequence was not started.
+    param_type: Sequence_Argument_Length_Event_Info.T
 
   - name: Unexpected_Register_Source
     description: A Register_Source command response was received but all sequence frames already have a source ID.

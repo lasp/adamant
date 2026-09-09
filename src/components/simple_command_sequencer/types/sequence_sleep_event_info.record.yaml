@@ -11,5 +11,5 @@ fields:
     format: U32
   - name: Milliseconds
     description: The number of milliseconds to sleep
-    type: Interfaces.Unsigned_32
+    type: Natural
     format: U32

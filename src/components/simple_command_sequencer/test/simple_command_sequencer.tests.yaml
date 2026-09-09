@@ -41,3 +41,4 @@ tests:
   - name: Test_Invalid_Dynamic_Command_Argument
   - name: Test_Invalid_Dynamic_Sleep_Argument
   - name: Test_Ghost_Command_Rejections
+  - name: Test_Invalid_Sequence_Argument_Length

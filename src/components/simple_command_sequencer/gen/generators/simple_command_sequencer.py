@@ -23,10 +23,8 @@ def load_command_sequences_model(input_filename):
     )
     if assembly_model:
         cs.set_assembly(assembly_model)
-        # Step resolution, includes, and assembly_name are populated in final()
-        # (set_assembly only attaches the assembly). The assembly load path gets
-        # final() called for it automatically, but this standalone generator
-        # must drive it itself so name.ads/adb render fully resolved.
+        # final() resolves steps, includes, and assembly_name. The assembly load path
+        # calls it; this standalone generator must call it itself.
         cs.final()
     return cs
 
@@ -67,10 +65,8 @@ class command_sequences_gen(basic_generator):
             input_filename
         )
         build_dir = self._get_default_build_dir()
-        # Compute the output name from the filename parts rather than
-        # constructing the command_sequences model, so redo's DB-setup pass
-        # (which calls output_filename for every rule) never triggers model
-        # loads.
+        # Derive the output name from the filename so redo's DB-setup pass (which
+        # calls output_filename for every rule) never loads the model.
         base_name = self._suite_package_name(input_filename).lower()
         # Substitute "name" in the template basename with the actual model name
         a = self.template_basename.rsplit("name", maxsplit=1)
@@ -146,19 +142,15 @@ class command_sequences_summary_record(command_sequences_gen, generator_base):
         )
 
     def generate(self, input_filename):
-        # Load the suite model WITHOUT resolving it against its assembly: the
-        # record's layout depends only on the suite's own
-        # num_concurrent_sequences, and the assembly load path itself demands
-        # this record (via the packets model), so resolving against the
-        # assembly here would create a circular dependency.
+        # Load the suite without resolving against its assembly: the record depends
+        # only on num_concurrent_sequences, and the assembly load itself needs this
+        # record, so resolving here would be circular.
         cs = command_sequences(input_filename)
         print(cs.render(self.template, template_path=self.template_dir))
 
 
-# Register the standard commands code generators (.ads, .adb, .html) for the
-# component's *.simple_command_sequencer_commands.yaml suite. The framework
-# derives the input_file_regex from the model class name, so this is what
-# makes the file's build rules appear.
+# Standard commands generators for *.simple_command_sequencer_commands.yaml;
+# the framework derives input_file_regex from the model class name.
 add_basic_generators_to_module(
     simple_command_sequencer_commands, command_templates, module=globals()
 )

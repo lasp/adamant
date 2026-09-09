@@ -4,12 +4,9 @@
 -- {{ description }}
 {% endif %}
 --
--- Operator-side command builders for the per-sequence ("ghost") commands of
--- the {{ name }} suite. These commands are first-class in the assembly
--- command dictionary but have no generated Ada handler on the component, so
--- this package reconstructs the builders (id getters + Command.T
--- constructors) for unit tests and other on-board callers. The sequencer
--- component itself does not use this package.
+-- Operator-side builders (id getters and Command.T constructors) for the
+-- {{ name }} suite's per-sequence commands, for unit tests and on-board
+-- callers. The sequencer component itself does not use this package.
 with Command;
 with Command_Types;
 {% for include in builder_includes %}
@@ -17,10 +14,8 @@ with {{ include }};
 {% endfor %}
 package {{ name }}_Commands is
 
-   -- Set Id_Base to the sequencer instance's command id base (the value passed
-   -- to Set_Id_Bases). Each sequence command id is then
-   -- Id_Base + Simple_Command_Sequencer_Commands.Num_Commands + declaration
-   -- index.
+   -- Set Id_Base to the sequencer instance's command id base. Each sequence
+   -- command id is Id_Base + Num_Commands + declaration index.
    type Instance is tagged private;
 
    -- Set the sequencer instance's command id base so constructed commands carry

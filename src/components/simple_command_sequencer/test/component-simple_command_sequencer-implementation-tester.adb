@@ -46,6 +46,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Frame_Not_Running_History.Init (Depth => 100);
       Self.Summary_Packet_Period_Set_History.Init (Depth => 100);
       Self.Invalid_Dynamic_Sleep_Argument_History.Init (Depth => 100);
+      Self.Invalid_Sequence_Argument_Length_History.Init (Depth => 100);
       -- Data product histories:
       Self.Frame_Running_Count_History.Init (Depth => 100);
       Self.Frame_Running_High_Water_Mark_History.Init (Depth => 100);
@@ -93,6 +94,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Frame_Not_Running_History.Destroy;
       Self.Summary_Packet_Period_Set_History.Destroy;
       Self.Invalid_Dynamic_Sleep_Argument_History.Destroy;
+      Self.Invalid_Sequence_Argument_Length_History.Destroy;
       -- Data product histories:
       Self.Frame_Running_Count_History.Destroy;
       Self.Frame_Running_High_Water_Mark_History.Destroy;
@@ -137,10 +139,8 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
    end Command_T_Recv_Sync;
 
    -- Sends the response to a Run_Sequence (or synthesised per-sequence) command
-   -- back to the command router. The Send_After_Sequence_Completion path emits its
-   -- deferred reply here on completion / abort / timeout / kill; the default
-   -- Send_After_Sequence_Start path emits its reply here immediately at dispatch
-   -- time.
+   -- back to the command router, either at dispatch or, for
+   -- Send_After_Sequence_Completion sequences, when the sequence ends.
    overriding procedure Command_Response_T_Recv_Sync (Self : in out Instance; Arg : in Command_Response.T) is
    begin
       -- Push the argument onto the test history for looking at later:
@@ -393,6 +393,14 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Invalid_Dynamic_Sleep_Argument_History.Push (Arg);
    end Invalid_Dynamic_Sleep_Argument;
 
+   -- A sequence command was received with an argument length that does not match
+   -- the serialized length of the sequence's argument type.
+   overriding procedure Invalid_Sequence_Argument_Length (Self : in out Instance; Arg : in Sequence_Argument_Length_Event_Info.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Invalid_Sequence_Argument_Length_History.Push (Arg);
+   end Invalid_Sequence_Argument_Length;
+
    -----------------------------------------------
    -- Data product handler primitives:
    -----------------------------------------------
@@ -468,13 +476,10 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
    -----------------------------------------------
    -- Description:
    --    Packets for the Simple Command Sequencer component.
-   -- Periodic summary of all sequence frames. Contains one Sequence_Frame_Summary
-   -- record per frame (Num_Concurrent_Sequences total, in frame order), reporting
-   -- which sequence is running on each frame, its current step, its execution state,
-   -- and whether an operator is still waiting on a deferred command response.
-   -- Emitted every Summary_Packet_Period ticks; a period of zero (the default)
-   -- disables emission. The period is set with the Set_Summary_Packet_Period
-   -- command.
+   -- Periodic summary of all sequence frames, one Sequence_Frame_Summary per frame
+   -- in frame order (sequence, step, state, and whether an operator awaits a
+   -- deferred reply). Emitted every Summary_Packet_Period ticks; zero (the
+   -- default) disables it.
    overriding procedure Summary_Packet (Self : in out Instance; Arg : in Packet.T) is
    begin
       -- Push the argument onto the test history for looking at later:

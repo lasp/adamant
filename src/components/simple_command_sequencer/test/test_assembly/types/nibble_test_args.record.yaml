@@ -1,5 +1,5 @@
 ---
-description: Sequence argument whose leading 4-bit pad pushes every following field off byte alignment. Used to test dynamic-arg repacking of misaligned leaf fields.
+description: Sequence argument whose leading 4-bit pad puts every following field off byte alignment, to test dynamic-arg repacking.
 preamble: |
   type Four_Bit_Pad_Type is mod 2**4;
 fields:

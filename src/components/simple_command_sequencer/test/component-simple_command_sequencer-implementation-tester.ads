@@ -15,6 +15,7 @@ with Sequence_Event_Info.Representation;
 with Sequence_Step_Event_Info.Representation;
 with Sequence_Sleep_Event_Info.Representation;
 with Sequence_Step_Command_Event_Info.Representation;
+with Sequence_Argument_Length_Event_Info.Representation;
 with Packed_U32.Representation;
 with Packed_U16.Representation;
 with Command_Header.Representation;
@@ -61,6 +62,7 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    package Frame_Not_Running_History_Package is new Printable_History (Packed_U32.T, Packed_U32.Representation.Image);
    package Summary_Packet_Period_Set_History_Package is new Printable_History (Packed_U16.T, Packed_U16.Representation.Image);
    package Invalid_Dynamic_Sleep_Argument_History_Package is new Printable_History (Sequence_Step_Event_Info.T, Sequence_Step_Event_Info.Representation.Image);
+   package Invalid_Sequence_Argument_Length_History_Package is new Printable_History (Sequence_Argument_Length_Event_Info.T, Sequence_Argument_Length_Event_Info.Representation.Image);
 
    -- Data product history packages:
    package Frame_Running_Count_History_Package is new Printable_History (Packed_U16.T, Packed_U16.Representation.Image);
@@ -110,6 +112,7 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
       Frame_Not_Running_History : Frame_Not_Running_History_Package.Instance;
       Summary_Packet_Period_Set_History : Summary_Packet_Period_Set_History_Package.Instance;
       Invalid_Dynamic_Sleep_Argument_History : Invalid_Dynamic_Sleep_Argument_History_Package.Instance;
+      Invalid_Sequence_Argument_Length_History : Invalid_Sequence_Argument_Length_History_Package.Instance;
       -- Data product histories:
       Frame_Running_Count_History : Frame_Running_Count_History_Package.Instance;
       Frame_Running_High_Water_Mark_History : Frame_Running_High_Water_Mark_History_Package.Instance;
@@ -149,10 +152,8 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    -- Sub-commands are sent out this connector
    overriding procedure Command_T_Recv_Sync (Self : in out Instance; Arg : in Command.T);
    -- Sends the response to a Run_Sequence (or synthesised per-sequence) command
-   -- back to the command router. The Send_After_Sequence_Completion path emits its
-   -- deferred reply here on completion / abort / timeout / kill; the default
-   -- Send_After_Sequence_Start path emits its reply here immediately at dispatch
-   -- time.
+   -- back to the command router, either at dispatch or, for
+   -- Send_After_Sequence_Completion sequences, when the sequence ends.
    overriding procedure Command_Response_T_Recv_Sync (Self : in out Instance; Arg : in Command_Response.T);
    -- The packet send connector, used for sending the periodic sequencer summary
    -- packet.
@@ -232,6 +233,9 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    -- A dynamic sleep step could not resolve its duration because the sequence's
    -- argument failed validation.
    overriding procedure Invalid_Dynamic_Sleep_Argument (Self : in out Instance; Arg : in Sequence_Step_Event_Info.T);
+   -- A sequence command was received with an argument length that does not match
+   -- the serialized length of the sequence's argument type.
+   overriding procedure Invalid_Sequence_Argument_Length (Self : in out Instance; Arg : in Sequence_Argument_Length_Event_Info.T);
 
    -----------------------------------------------
    -- Data product handler primitives:
@@ -264,13 +268,10 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    -----------------------------------------------
    -- Description:
    --    Packets for the Simple Command Sequencer component.
-   -- Periodic summary of all sequence frames. Contains one Sequence_Frame_Summary
-   -- record per frame (Num_Concurrent_Sequences total, in frame order), reporting
-   -- which sequence is running on each frame, its current step, its execution state,
-   -- and whether an operator is still waiting on a deferred command response.
-   -- Emitted every Summary_Packet_Period ticks; a period of zero (the default)
-   -- disables emission. The period is set with the Set_Summary_Packet_Period
-   -- command.
+   -- Periodic summary of all sequence frames, one Sequence_Frame_Summary per frame
+   -- in frame order (sequence, step, state, and whether an operator awaits a
+   -- deferred reply). Emitted every Summary_Packet_Period ticks; zero (the
+   -- default) disables it.
    overriding procedure Summary_Packet (Self : in out Instance; Arg : in Packet.T);
 
    -----------------------------------------------

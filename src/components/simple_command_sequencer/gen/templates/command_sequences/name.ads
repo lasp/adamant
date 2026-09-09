@@ -22,15 +22,15 @@ package {{ name }} is
 
    ---------------------------------------------------------------------------
    -- Pad a serialized argument out to a full command argument buffer. An
-   -- expression function so the step-array constants below (elaborated with
-   -- this spec) can call it without an access-before-elaboration failure.
+   -- expression function so the step arrays below can call it at elaboration.
    ---------------------------------------------------------------------------
    function To_Arg (Bytes : Basic_Types.Byte_Array) return Command_Types.Command_Arg_Buffer_Type is
       (Command_Types.Command_Arg_Buffer_Type (Bytes & Basic_Types.Byte_Array'(1 .. Command_Types.Command_Arg_Buffer_Type'Length - Bytes'Length => 0)));
 {% endif %}
 {% if suite_has_dynamic_steps %}
    ---------------------------------------------------------------------------
-   -- Resolver types – one per dynamic step, each encodes a traversal path.
+   -- Resolvers – one per dynamic step, each extracting one field of the
+   -- sequence argument.
    ---------------------------------------------------------------------------
 {% for seq in sequences.values() %}
 {% for step in seq.steps %}
@@ -58,7 +58,7 @@ package {{ name }} is
       {{ loop.index0 }} =>
          (Kind           => Runtime_Sleep,
           Id             => 0,
-          Arg_Length     => Packed_U32.Serialization.Serialized_Length,
+          Arg_Length     => Packed_Natural.Serialization.Serialized_Length,
           Sleep_Resolver => {{ step.resolver_type_name }}'Access){% if not loop.last %},{% endif %}
 
 {% elif step.is_dynamic() %}
@@ -97,6 +97,7 @@ package {{ name }} is
           Abort_On_Failed_Cmd => {{ "False" if seq.continue_on_failure else "True" }},
           Command_Timeout     => Ada.Real_Time.Milliseconds ({{ seq.command_timeout_millis }}),
           Response_Behavior   => Sequence_Enums.Sequence_Response_Behavior.{{ seq.response_behavior }},
+          Arg_Length          => {% if seq.has_arg() %}{{ seq.arg_type_package }}.Serialization.Serialized_Length{% else %}0{% endif %},
           Steps               => {{ seq.name }}_Steps'Access){% if not loop.last %},{% endif %}
 
 {% endfor %}
@@ -104,11 +105,9 @@ package {{ name }} is
 
    Sequences : constant Sequences_Access := Sequences_Table'Access;
 
-   -- The instance configuration handed to Simple_Command_Sequencer.Init. The
-   -- frame-pool size comes from this suite's model (num_concurrent_sequences),
-   -- which also sizes the generated {{ name }}_Summary_Record ground type for
-   -- the summary packet -- so the frame pool and the packet layout can never
-   -- disagree.
+   -- Passed to Simple_Command_Sequencer.Init. num_concurrent_sequences also
+   -- sizes the generated {{ name }}_Summary_Record packet type, so the frame
+   -- pool and the packet layout cannot disagree.
    Config : constant Sequencer_Config :=
       (Sequences => Sequences_Table'Access,
        Num_Concurrent_Sequences => {{ num_concurrent_sequences }});

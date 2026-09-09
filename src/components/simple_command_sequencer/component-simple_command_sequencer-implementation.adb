@@ -3,7 +3,7 @@
 --------------------------------------------------------------------------------
 
 with Sequence_Enums; use Sequence_Enums.Sequence_State; use Sequence_Enums.Sequence_Response_Behavior;
-with Packed_U32;
+with Packed_Natural;
 with Ada.Real_Time;
 with Sys_Time.Arithmetic;
 with Command_Types; use Command_Types;
@@ -15,19 +15,15 @@ with Sleep;
 
 package body Component.Simple_Command_Sequencer.Implementation is
 
-   -- The OS 'Sleep' package collides with the 'Sleep' Step_Kind enum literal.
-   -- Alias it so we never reference the bare name as a package prefix.
+   -- The OS 'Sleep' package collides with the 'Sleep' Step_Kind literal; alias it.
    package Os_Sleep renames Sleep;
 
-   -- Shorthand for the frame record; the full array types live in
-   -- Simple_Sequencer_Types.
    subtype Sequence_Frame is Simple_Sequencer_Types.Sequence_Frame;
+   subtype Sequence_Type is Simple_Sequencer_Types.Sequence_Type;
 
    overriding procedure Init (Self : in out Instance; Config : in Simple_Sequencer_Types.Sequencer_Config) is
    begin
       Self.Sequence_Frames := new Simple_Sequencer_Types.Sequence_Frame_Array (0 .. Config.Num_Concurrent_Sequences - 1);
-      -- Frames start with their record defaults; only the identifying
-      -- Frame_Id varies per element.
       Self.Sequence_Frames.all := [for Id in Self.Sequence_Frames.all'Range => (Frame_Id => Id, others => <>)];
       Self.Sequences := Config.Sequences;
    end Init;
@@ -58,15 +54,9 @@ package body Component.Simple_Command_Sequencer.Implementation is
       return False;
    end Find_Sequence_Frame_Id_From_Source_Id;
 
-   -- Attempts to put `Frame` into the Waiting_For_Time state with a wake time
-   -- of `Time` + `Millis` milliseconds.
-   --
-   -- Returns True if the sleep was scheduled successfully. The duration itself
-   -- always fits a Time_Span by construction (it is a Natural), so the only
-   -- failure left is Sys_Time arithmetic overflowing when adding it to the
-   -- current time; on False the frame is left unchanged and the caller is
-   -- expected to emit Sequence_Out_Of_Range_Sleep so the operator can see the
-   -- step was skipped rather than silently lost.
+   -- Park `Frame` in Waiting_For_Time until `Time` + `Millis`. Returns False,
+   -- leaving the frame unchanged, if the wake time overflows Sys_Time; the
+   -- duration itself always fits a Time_Span.
    function Try_Schedule_Sleep (Frame : in out Sequence_Frame; Millis : in Natural; Time : in Sys_Time.T) return Boolean is
       use Ada.Real_Time;
       use Sys_Time.Arithmetic;
@@ -82,13 +72,8 @@ package body Component.Simple_Command_Sequencer.Implementation is
       return True;
    end Try_Schedule_Sleep;
 
-   -- Emit a deferred Command_Response for `Frame`, but only if the frame was
-   -- claimed with Send_After_Sequence_Completion (otherwise the immediate reply
-   -- has already been sent from Command_T_Recv_Async and we do nothing). Called
-   -- from every code path that ends a sequence: natural completion (Success),
-   -- abort on sub-command failure / timeout / kill / out-of-range sleep or
-   -- timeout (Failure). The reply uses the operator context captured on the
-   -- frame at claim time and the sequencer's own registration id.
+   -- Emit the deferred reply for a frame claimed with
+   -- Send_After_Sequence_Completion. Called from every path that ends a sequence.
    procedure Send_Deferred_Response_If_Pending
      (Self  : in out Instance;
       Frame : in Sequence_Frame;
@@ -103,9 +88,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
       end if;
    end Send_Deferred_Response_If_Pending;
 
-   -- Recount the running frames and update the frame-count data products,
-   -- raising the high water mark when exceeded. Called whenever a frame is
-   -- claimed or returns to idle.
+   -- Recount the running frames and update the frame-count data products.
    procedure Send_Frame_Count_Data_Products (Self : in out Instance; Time : in Sys_Time.T) is
       Count : Interfaces.Unsigned_16 := 0;
    begin
@@ -121,15 +104,9 @@ package body Component.Simple_Command_Sequencer.Implementation is
       Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Frame_Running_High_Water_Mark (Time, (Value => Self.Frame_Running_Hwm)));
    end Send_Frame_Count_Data_Products;
 
-   -- End the sequence running on `Frame`: return the frame to idle, update the
-   -- finished/failed counters and last-sequence data products, refresh the
-   -- frame-count products, and emit the deferred operator reply when the frame
-   -- was claimed with Send_After_Sequence_Completion.
-   --
-   -- Only Status is reset here. All other per-run frame state is deliberately
-   -- left in place -- it is fully re-seeded when Run_Sequence claims the frame
-   -- again, and while idle it lets the summary packet report the frame's last
-   -- run.
+   -- Return `Frame` to idle, update the counters and data products, and emit
+   -- any deferred reply. Only Status is reset: the next claim re-seeds the
+   -- rest, and while idle it lets the summary packet report the last run.
    procedure Finish_Sequence
      (Self  : in out Instance;
       Frame : in out Sequence_Frame;
@@ -151,70 +128,66 @@ package body Component.Simple_Command_Sequencer.Implementation is
       Send_Deferred_Response_If_Pending (Self, Frame, Stat);
    end Finish_Sequence;
 
-   -- Count a dispatched sub-command and update its data product.
+   -- Count a dispatched sub-command.
    procedure Note_Command_Sent (Self : in out Instance; Time : in Sys_Time.T) is
    begin
       Self.Commands_Sent_Count := @ + 1;
       Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Commands_Sent_Count (Time, (Value => Self.Commands_Sent_Count)));
    end Note_Command_Sent;
 
-   -- Dispatch a step's sub-command: stamp the response deadline and park the
-   -- frame on the response (when the sequence waits on command completion),
-   -- then send and count the command. The deadline is computed once here --
-   -- the tick handler only compares against it. If the deadline cannot be
-   -- represented in system time, the sequence is ended instead of dispatching:
-   -- the frame would otherwise wait forever on a deadline that never arrives.
-   procedure Dispatch_Step_Command (Self : in out Instance; Frame : in out Sequence_Frame; Cmd : in Command.T; Time : in Sys_Time.T) is
+   -- Send a step's sub-command. If the sequence waits on responses, stamp the
+   -- deadline and pending command id and park the frame first. A deadline that
+   -- overflows Sys_Time ends the sequence instead; the frame would otherwise
+   -- wait forever.
+   procedure Dispatch_Step_Command (Self : in out Instance; Frame : in out Sequence_Frame; Seq : in Sequence_Type; Cmd : in Command.T; Time : in Sys_Time.T) is
       use Sys_Time.Arithmetic;
       Add_Status : Sys_Time_Status;
    begin
-      if Frame.Sequence.Wait_For_Cmd_Resp then
-         Add_Status := Add (Time, Frame.Sequence.Command_Timeout, Frame.Timeout_Deadline);
+      if Seq.Wait_For_Cmd_Resp then
+         Add_Status := Add (Time, Seq.Command_Timeout, Frame.Timeout_Deadline);
          if Add_Status /= Success then
             Self.Event_T_Send_If_Connected (Self.Events.Sequence_Out_Of_Range_Timeout (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Step => Frame.Step)));
             Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);
             return;
          end if;
+         Frame.Pending_Command_Id := Cmd.Header.Id;
          Frame.Status := Waiting_For_Cmd_Resp;
       end if;
       Self.Command_T_Send (Cmd);
       Note_Command_Sent (Self, Time);
    end Dispatch_Step_Command;
 
+   -- Run `Frame` until it parks (command response or sleep) or its sequence ends.
    procedure Execute_Sequence (Self : in out Instance; Frame : in out Sequence_Frame) is
       use Simple_Sequencer_Types;
+      Seq : Sequence_Type renames Self.Sequences.all (Frame.Sequence_Id);
    begin
       while Frame.Status = Running loop
-         if Frame.Step > Frame.Sequence.Steps.all'Last then
+         if Frame.Step > Seq.Steps.all'Last then
             declare
                Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
             begin
-               -- Sequence end event
                Self.Event_T_Send_If_Connected (Self.Events.Sequence_Completed (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id)));
                Finish_Sequence (Self, Frame, Command_Response_Status.Success, Time);
             end;
          else
             declare
-               Step_Obj : Step renames Frame.Sequence.Steps.all (Frame.Step);
+               Step_Obj : Step renames Seq.Steps.all (Frame.Step);
                Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
             begin
                case Step_Obj.Kind is
                   when Command_Step =>
-                     Dispatch_Step_Command (Self, Frame,
+                     Dispatch_Step_Command (Self, Frame, Seq,
                         (Header => (Source_Id => Frame.Source_Id, Id => Step_Obj.Id, Arg_Buffer_Length => Step_Obj.Arg_Length), Arg_Buffer => Step_Obj.Arg), Time);
                   when Runtime_Argument_Command_Step =>
-                     -- Dynamic-arg step: dispatch the per-step Resolver to
-                     -- deserialize the sequence's per-call argument buffer and
-                     -- extract this sub-command's typed argument. The resolver
-                     -- (one type per dynamic step) encodes the traversal path
-                     -- through the caller's arg record and returns the serialized
-                     -- leaf, ready to use as the sub-command's Arg_Buffer.
+                     -- The step's Resolver validates the sequence argument and
+                     -- extracts this sub-command's argument from it.
                      declare
                         Resolved : Command_Types.Command_Arg_Buffer_Type;
                         Valid : constant Boolean := Step_Obj.Resolver (Frame.Dynamic_Arg, Resolved);
                      begin
                         if Valid then
-                           Dispatch_Step_Command (Self, Frame,
+                           Dispatch_Step_Command (Self, Frame, Seq,
                               (Header => (Source_Id => Frame.Source_Id, Id => Step_Obj.Id, Arg_Buffer_Length => Step_Obj.Arg_Length), Arg_Buffer => Resolved), Time);
                         else
                            Self.Event_T_Send_If_Connected (Self.Events.Invalid_Dynamic_Command_Argument (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Step => Frame.Step, Command_Id => Step_Obj.Id)));
@@ -222,33 +195,27 @@ package body Component.Simple_Command_Sequencer.Implementation is
                         end if;
                      end;
                   when Simple_Sequencer_Types.Sleep =>
-                     -- Static sleeps are bounded to Natural by the model, so
-                     -- the only failure left is Sys_Time overflow computing
-                     -- the wake time. End the sequence cleanly in that case --
-                     -- letting it continue would leave the frame stuck in
-                     -- Waiting_For_Time with a stale Wait_Until -- and emit
-                     -- Failure to any pending deferred reply.
+                     -- Static sleeps are model-bounded, so only Sys_Time overflow
+                     -- of the wake time can fail. End the sequence rather than
+                     -- leave the frame parked on a stale wake time.
                      if not Try_Schedule_Sleep (Frame, Step_Obj.Sleep_Arg, Time) then
-                        Self.Event_T_Send_If_Connected (Self.Events.Sequence_Out_Of_Range_Sleep (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Milliseconds => Interfaces.Unsigned_32 (Step_Obj.Sleep_Arg))));
+                        Self.Event_T_Send_If_Connected (Self.Events.Sequence_Out_Of_Range_Sleep (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Milliseconds => Step_Obj.Sleep_Arg)));
                         Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);
                      end if;
                   when Runtime_Sleep =>
-                     -- Dynamic sleep: resolve the duration from the sequence's
-                     -- per-call argument as a Packed_U32 millisecond count.
-                     -- Unlike static sleeps the value is not bounded by the
-                     -- model, so range check it here before scheduling.
+                     -- The step's Resolver validates the sequence argument and
+                     -- extracts the duration as a Packed_Natural, so it always
+                     -- fits a Time_Span. As above, only wake-time overflow remains.
                      declare
                         Resolved : Command_Types.Command_Arg_Buffer_Type;
                         Valid : constant Boolean := Step_Obj.Sleep_Resolver (Frame.Dynamic_Arg, Resolved);
                      begin
                         if Valid then
                            declare
-                              Millis : constant Interfaces.Unsigned_32 :=
-                                 Packed_U32.Serialization.From_Byte_Array (Resolved (Resolved'First .. Resolved'First + Packed_U32.Serialization.Serialized_Length - 1)).Value;
+                              Millis : constant Natural :=
+                                 Packed_Natural.Serialization.From_Byte_Array (Resolved (Resolved'First .. Resolved'First + Packed_Natural.Serialization.Serialized_Length - 1)).Value;
                            begin
-                              if Millis > Interfaces.Unsigned_32 (Natural'Last)
-                                 or else not Try_Schedule_Sleep (Frame, Natural (Millis), Time)
-                              then
+                              if not Try_Schedule_Sleep (Frame, Millis, Time) then
                                  Self.Event_T_Send_If_Connected (Self.Events.Sequence_Out_Of_Range_Sleep (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Milliseconds => Millis)));
                                  Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);
                               end if;
@@ -259,7 +226,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
                         end if;
                      end;
                end case;
-               if Frame.Step <= Frame.Sequence.Steps.all'Last then
+               if Frame.Step <= Seq.Steps.all'Last then
                   Frame.Step := Frame.Step + 1;
                end if;
             end;
@@ -267,12 +234,8 @@ package body Component.Simple_Command_Sequencer.Implementation is
       end loop;
    end Execute_Sequence;
 
-   -- Execute a modeled (non-ghost) command and emit its response. This mirrors
-   -- the autocoded Command_T_Recv_Async body from the component's base package
-   -- -- execute the command, then reply with its status -- with one addition:
-   -- when Run_Sequence claims a frame whose sequence is configured
-   -- Send_After_Sequence_Completion, it sets Caller.Defer_Command_Response and
-   -- the reply is emitted by the sequence-end paths instead of here.
+   -- Execute a modeled command and reply, as the autocoded Command_T_Recv_Async
+   -- does, unless Run_Sequence deferred the reply to the sequence-end paths.
    procedure Execute_Command_And_Respond (Self : in out Instance; Arg : in Command.T) is
       Stat : constant Command_Response_Status.E := Self.Execute_Command (Arg);
    begin
@@ -283,87 +246,60 @@ package body Component.Simple_Command_Sequencer.Implementation is
 
    -- Sequence commands are received on this connector
    overriding procedure Command_T_Recv_Async (Self : in out Instance; Arg : in Command.T) is
-      -- The per-sequence "ghost" commands occupy the command-ID block
-      -- immediately after the modeled commands. They are first-class in
-      -- the assembly/COSMOS dictionary but absent from this component's static
-      -- command model, so Execute_Command's range check would reject them.
-      -- Intercept that block here and translate it to a Run_Sequence call.
+      -- The per-sequence "ghost" commands occupy the id block right after the
+      -- modeled commands. They are absent from this component's command model,
+      -- so intercept them here and translate to Run_Sequence rather than let
+      -- Execute_Command reject them.
       First_Ghost_Id : constant Command_Types.Command_Id :=
          Self.Command_Id_Base + Command_Types.Command_Id (Simple_Command_Sequencer_Commands.Num_Commands);
       Num_Ghosts : constant Command_Types.Command_Id :=
          Command_Types.Command_Id (Self.Sequences.all'Length);
    begin
-      -- Stash the caller's response context before dispatch so Run_Sequence
-      -- can copy it into the frame it claims. The active component's serial
-      -- queue guarantees one dispatch in flight at a time, so this scratch
-      -- can't be clobbered mid-flight. Defer_Command_Response is reset here so
-      -- a prior command's defer flag can't leak into this one.
+      -- Stash the caller's response context for Run_Sequence. The active
+      -- component's serial queue dispatches one command at a time, so this
+      -- cannot be clobbered. Defer is reset so it cannot leak between commands.
       Self.Caller := (Source_Id => Arg.Header.Source_Id, Command_Id => Arg.Header.Id, Defer_Command_Response => False);
 
       if Arg.Header.Id >= First_Ghost_Id and then Arg.Header.Id < First_Ghost_Id + Num_Ghosts then
-         -- Ghost (per-sequence) command: the argument buffer carries the
-         -- sequence's native argument verbatim (empty for argless sequences).
-         -- Translate to a Run_Sequence_Arg.T and dispatch through the
-         -- Run_Sequence backbone.
+         -- The argument buffer carries the sequence's native argument verbatim.
          declare
-            Seq_Index : constant Interfaces.Unsigned_16 :=
-               Interfaces.Unsigned_16 (Arg.Header.Id - First_Ghost_Id); -- 0-based = Sequence_Id
+            Seq_Index : constant Interfaces.Unsigned_16 := Interfaces.Unsigned_16 (Arg.Header.Id - First_Ghost_Id);
             Native_Len : constant Natural := Natural (Arg.Header.Arg_Buffer_Length);
          begin
             if Native_Len > Natural (Simple_Sequencer_Types.Run_Sequence_Arg_Buffer_Length_Type'Last) then
-               -- The argument cannot fit the Run_Sequence passthrough buffer.
-               -- No modeled sequence argument type can exceed it, so this is a
-               -- malformed command -- reject it as invalid rather than
-               -- truncating the argument.
-               Self.Event_T_Send_If_Connected (Self.Events.Invalid_Command_Received (
-                  Self.Sys_Time_T_Get,
-                  (Id => Arg.Header.Id, Errant_Field_Number => 0, Errant_Field => [others => 0])));
+               -- Too long for the passthrough buffer; no sequence argument type is.
+               Self.Event_T_Send_If_Connected (Self.Events.Invalid_Sequence_Argument_Length (Self.Sys_Time_T_Get,
+                  (Sequence_Id => Seq_Index, Received_Length => Native_Len, Expected_Length => Self.Sequences.all (Seq_Index).Arg_Length)));
                Self.Command_Response_T_Send_If_Connected ((Source_Id => Arg.Header.Source_Id, Registration_Id => Self.Command_Reg_Id, Command_Id => Arg.Header.Id, Status => Command_Response_Status.Failure));
             else
                declare
-                  Run_Arg : Run_Sequence_Arg.T :=
+                  Exec_Stat : constant Command_Execution_Status.E := Self.Run_Sequence (
                      (Sequence_Id => Seq_Index,
                       Arg_Length => Simple_Sequencer_Types.Run_Sequence_Arg_Buffer_Length_Type (Native_Len),
-                      Buffer_Arg => [others => 0]);
+                      Buffer_Arg => Arg.Arg_Buffer (Arg.Arg_Buffer'First .. Arg.Arg_Buffer'First + Simple_Sequencer_Types.Run_Sequence_Buffer_Type'Length - 1)));
                begin
-                  if Native_Len > 0 then
-                     Run_Arg.Buffer_Arg (Run_Arg.Buffer_Arg'First .. Run_Arg.Buffer_Arg'First + Native_Len - 1) :=
-                        Arg.Arg_Buffer (Arg.Arg_Buffer'First .. Arg.Arg_Buffer'First + Native_Len - 1);
+                  -- A deferred reply is emitted by the sequence-end paths instead.
+                  if not Self.Caller.Defer_Command_Response then
+                     Self.Command_Response_T_Send_If_Connected
+                       ((Source_Id       => Arg.Header.Source_Id,
+                         Registration_Id => Self.Command_Reg_Id,
+                         Command_Id      => Arg.Header.Id,
+                         Status          =>
+                           (case Exec_Stat is
+                              when Command_Execution_Status.Success => Command_Response_Status.Success,
+                              when Command_Execution_Status.Failure => Command_Response_Status.Failure)));
                   end if;
-
-                  declare
-                     Exec_Stat : constant Command_Execution_Status.E := Self.Run_Sequence (Run_Arg);
-                  begin
-                     -- The Command_Execution_Status -> Command_Response_Status
-                     -- mapping is only needed when replying immediately; a
-                     -- deferred reply is emitted by the sequence-end paths
-                     -- with its own final status.
-                     if not Self.Caller.Defer_Command_Response then
-                        Self.Command_Response_T_Send_If_Connected
-                          ((Source_Id       => Arg.Header.Source_Id,
-                            Registration_Id => Self.Command_Reg_Id,
-                            Command_Id      => Arg.Header.Id,
-                            Status          =>
-                              (case Exec_Stat is
-                                 when Command_Execution_Status.Success => Command_Response_Status.Success,
-                                 when Command_Execution_Status.Failure => Command_Response_Status.Failure)));
-                     end if;
-                  end;
                end;
             end if;
          end;
       else
-         -- Not a ghost command: follow the normal component command execution
-         -- logic.
          Execute_Command_And_Respond (Self, Arg);
       end if;
    end Command_T_Recv_Async;
 
-   -- Responses to sub-commands are received here. Two cases:
-   --   1) Register_Source: the command router is allocating us a source ID for
-   --      one of our frames. We claim the first frame that doesn't yet have one.
-   --   2) Anything else: a downstream command we issued has returned a result.
-   --      Look up the owning frame by source ID, advance or abort it.
+   -- A Register_Source response assigns a source id to the next unassigned
+   -- frame. Any other response is a sub-command result: find the owning frame
+   -- by source id and advance or abort it.
    overriding procedure Command_Response_T_Recv_Async (Self : in out Instance; Arg : in Command_Response.T) is
       use Command_Response_Status;
       Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
@@ -392,46 +328,33 @@ package body Component.Simple_Command_Sequencer.Implementation is
             if Find_Sequence_Frame_Id_From_Source_Id (Self, Arg.Source_Id, Frame_To_Wake_Id) then
                declare
                   Frame : Sequence_Frame renames Self.Sequence_Frames.all (Frame_To_Wake_Id);
+                  Seq : Sequence_Type renames Self.Sequences.all (Frame.Sequence_Id);
                begin
-                  -- Only a frame parked in Waiting_For_Cmd_Resp is advanced by a
-                  -- response. In any other state the response is late or stale --
-                  -- e.g. the frame already timed out, was killed, or was even
-                  -- reused for a new sequence that hasn't issued a command yet --
-                  -- and is deliberately ignored: acting on it would advance the
-                  -- wrong step.
-                  if Frame.Status = Waiting_For_Cmd_Resp then
-                     -- Wake the frame and resume it below -- the response is the
-                     -- event the frame was parked on, so the next step dispatches
-                     -- now instead of waiting for the next tick.
-                     Frame.Status := Running;
-
+                  -- Only the response the frame is parked on advances it. Anything
+                  -- else is late or stale (timed out, killed, or the frame was
+                  -- reused) and is ignored: acting on it would advance the wrong step.
+                  if Frame.Status = Waiting_For_Cmd_Resp and then Arg.Command_Id = Frame.Pending_Command_Id then
                      if Arg.Status = Command_Response_Status.Failure then
                         Self.Event_T_Send_If_Connected (Self.Events.Command_Failure (Time,
                            (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame_To_Wake_Id,
                             Step => Frame.Step, Command_Id => Arg.Command_Id)));
-
-                        if Frame.Sequence.Abort_On_Failed_Cmd then
-                           Self.Event_T_Send_If_Connected (Self.Events.Sequence_Aborted (Time,
-                              (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame_To_Wake_Id,
-                               Step => Frame.Step)));
-                           Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);
-                        end if;
                      end if;
 
-                     -- Continue executing the sequence unless the failure path
-                     -- above already ended it. Execute_Sequence runs until the
-                     -- frame parks again (next command response or sleep) or the
-                     -- sequence completes. Timeouts and sleep wake-ups remain on
-                     -- the tick cadence.
-                     if Frame.Status = Running then
+                     if Arg.Status = Command_Response_Status.Failure and then Seq.Abort_On_Failed_Cmd then
+                        Self.Event_T_Send_If_Connected (Self.Events.Sequence_Aborted (Time,
+                           (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame_To_Wake_Id,
+                            Step => Frame.Step)));
+                        Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);
+                     else
+                        -- Resume now rather than on the next tick. Timeouts and
+                        -- sleep wake-ups stay on the tick cadence.
+                        Frame.Status := Running;
                         Execute_Sequence (Self, Frame);
                      end if;
                   end if;
                end;
             else
-               -- A command response came back tagged with a source ID we don't recognise.
-               -- This is unexpected (usually a routing or registration bug); surface it
-               -- so it isn't silently dropped.
+               -- Unknown source id: usually a routing or registration bug.
                Self.Event_T_Send_If_Connected (Self.Events.Unexpected_Command_Response (Time, Arg));
             end if;
          end;
@@ -439,8 +362,6 @@ package body Component.Simple_Command_Sequencer.Implementation is
    end Command_Response_T_Recv_Async;
 
    -- Emit the summary packet if a period is set and enough ticks have elapsed.
-   -- Called once per tick, after the frames have been advanced, so the packet
-   -- reflects this tick's end state.
    procedure Send_Summary_Packet_If_Due (Self : in out Instance; Time : in Sys_Time.T) is
    begin
       if Self.Summary_Packet_Period = 0 then
@@ -453,13 +374,9 @@ package body Component.Simple_Command_Sequencer.Implementation is
       end if;
       Self.Summary_Packet_Tick_Count := 0;
 
-      -- Build the summary packet: one Sequence_Frame_Summary per frame, in
-      -- frame order. The packet's type is autogenerated per command sequences
-      -- suite from the suite's num_concurrent_sequences (see the
-      -- simple_command_sequencer_packets model), which makes the per-frame
-      -- fields visible field-by-field in the ground system. The FSW does not
-      -- need that type; it fills the packet buffer one frame at a time using
-      -- the Sequence_Frame_Summary serializer.
+      -- One Sequence_Frame_Summary per frame, in frame order. The packet's
+      -- ground type is generated per sequences suite; the FSW just fills the
+      -- buffer with the Sequence_Frame_Summary serializer.
       declare
          Pkt : Packet.T := Self.Packets.Summary_Packet_Empty (Time);
          Idx : Packet_Types.Packet_Buffer_Length_Type := Pkt.Buffer'First;
@@ -495,18 +412,17 @@ package body Component.Simple_Command_Sequencer.Implementation is
                   Execute_Sequence (Self, Frame);
                end if;
             when Waiting_For_Cmd_Resp =>
-               -- The response deadline was stamped when the sub-command was
-               -- dispatched; only the comparison happens per tick.
+               -- The deadline was stamped at dispatch; only the comparison happens here.
                if Time >= Frame.Timeout_Deadline then
                   Self.Event_T_Send_If_Connected (Self.Events.Sequence_Timeout (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Step => Frame.Step)));
                   Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);
                end if;
-            when Not_Running | Running =>
-               -- Nothing to do for an idle frame. A frame is also never seen
-               -- Running here: every path that sets Running (claim, response
-               -- wake, sleep wake above) executes the sequence to a parked or
-               -- idle state before returning.
+            when Not_Running =>
                null;
+            when Running =>
+               -- Every path that sets Running executes the sequence to a parked
+               -- or idle state before returning.
+               pragma Assert (False, "Sequence frame found Running at tick, which should not be possible.");
          end case;
       end loop;
 
@@ -522,8 +438,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
    -- This procedure is called when a Command_Response_T_Recv_Async message is dropped due to a full queue.
    overriding procedure Command_Response_T_Recv_Async_Dropped (Self : in out Instance; Arg : in Command_Response.T) is
    begin
-      -- Should this abort the sequence? Likely because it will never be re-sent.
-      -- So we just lose an executor
+      -- The waiting frame is not aborted here; its response timeout will end it.
       Self.Event_T_Send_If_Connected (Self.Events.Dropped_Command_Response (Self.Sys_Time_T_Get, Arg));
    end Command_Response_T_Recv_Async_Dropped;
 
@@ -533,86 +448,76 @@ package body Component.Simple_Command_Sequencer.Implementation is
       Self.Event_T_Send_If_Connected (Self.Events.Dropped_Tick (Self.Sys_Time_T_Get, Arg));
    end Tick_T_Recv_Async_Dropped;
 
-   -- Run a Command Sequence. Allocates a free frame, copies the caller's
-   -- buffer arg into the frame's Dynamic_Arg slot (for later Resolver
-   -- traversal), seeds frame state from the autocoded sequence table, and
-   -- starts executing the sequence.
+   -- Validate the request, claim a free frame, seed it, and start executing.
    overriding function Run_Sequence (Self : in out Instance; Arg : in Run_Sequence_Arg.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
       Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
       Available_Id : Interfaces.Unsigned_32;
    begin
-      -- Early exits: unknown sequence id, or no idle frame to claim.
       if Arg.Sequence_Id not in Self.Sequences.all'Range then
          Self.Event_T_Send_If_Connected (Self.Events.Invalid_Sequence_Id (Time, (Value => Arg.Sequence_Id)));
          return Failure;
       end if;
-      if not Find_Available_Sequence_Frame (Self, Available_Id) then
-         Self.Event_T_Send_If_Connected (Self.Events.No_Frame_Available (Time));
-         return Failure;
-      end if;
 
       declare
-         Frame : Sequence_Frame renames Self.Sequence_Frames.all (Available_Id);
+         Seq : Sequence_Type renames Self.Sequences.all (Arg.Sequence_Id);
       begin
-         -- Seed ALL per-run frame state. The sequence-end paths only ever
-         -- reset Status, so nothing here may rely on leftover state from a
-         -- previous run.
-         --
-         -- Only the used prefix of the caller's buffer is meaningful (and the
-         -- no-argument case is common), so skip the copy when it is empty.
-         if Arg.Arg_Length > 0 then
-            Frame.Dynamic_Arg (Frame.Dynamic_Arg'First .. Frame.Dynamic_Arg'First + Arg.Arg_Length - 1) :=
-               Arg.Buffer_Arg (Arg.Buffer_Arg'First .. Arg.Buffer_Arg'First + Arg.Arg_Length - 1);
+         if Arg.Arg_Length /= Seq.Arg_Length then
+            Self.Event_T_Send_If_Connected (Self.Events.Invalid_Sequence_Argument_Length (Time,
+               (Sequence_Id => Arg.Sequence_Id, Received_Length => Arg.Arg_Length, Expected_Length => Seq.Arg_Length)));
+            return Failure;
          end if;
-         Frame.Arg_Length := Arg.Arg_Length;
-         Frame.Sequence_Id := Arg.Sequence_Id;
-         Frame.Sequence := Self.Sequences.all (Arg.Sequence_Id)'Access;
-         Frame.Step := 0;
-         -- Response behavior is the sequence's static configuration from the
-         -- autocoded sequence table.
-         Frame.Response_Behavior := Frame.Sequence.Response_Behavior;
-         -- Snapshot the caller's response context (captured by
-         -- Command_T_Recv_Async into Self.Caller). Always stored, but only
-         -- read on the Send_After_Sequence_Completion emission paths; for the
-         -- default Send_After_Sequence_Start the immediate reply is built from
-         -- the Command.T header directly.
-         Frame.Operator_Source_Id := Self.Caller.Source_Id;
-         Frame.Operator_Command_Id := Self.Caller.Command_Id;
-         if Frame.Sequence.Response_Behavior = Send_After_Sequence_Completion then
-            -- Signal Command_T_Recv_Async to suppress the immediate reply --
-            -- this frame will emit it on completion (or abort / timeout / kill).
-            Self.Caller.Defer_Command_Response := True;
+         if not Find_Available_Sequence_Frame (Self, Available_Id) then
+            Self.Event_T_Send_If_Connected (Self.Events.No_Frame_Available (Time));
+            return Failure;
          end if;
-         Frame.Status := Running; -- Claim The Executor Frame
-         Self.Event_T_Send_If_Connected (Self.Events.Sequence_Started (Time, (Sequence_Id => Arg.Sequence_Id, Frame_Id => Available_Id)));
-         -- Update the started counters and frame-count data products:
-         Self.Sequences_Started_Count := @ + 1;
-         Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Sequences_Started_Count (Time, (Value => Self.Sequences_Started_Count)));
-         Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Last_Sequence_Started (Time, (Value => Arg.Sequence_Id)));
-         Send_Frame_Count_Data_Products (Self, Time);
-         -- Start executing immediately -- the sequence's first steps dispatch
-         -- from the Run_Sequence command itself, running until the frame parks
-         -- (command response or sleep) or the sequence completes. Ticks only
-         -- resume parked frames.
-         Execute_Sequence (Self, Frame);
-         return Success;
+
+         declare
+            Frame : Sequence_Frame renames Self.Sequence_Frames.all (Available_Id);
+         begin
+            -- Seed every per-run field; nothing may rely on state left from a
+            -- previous run. Frame_Id and the registered source id are kept.
+            Frame := (Frame_Id            => Frame.Frame_Id,
+                      Source_Id           => Frame.Source_Id,
+                      Has_Source_Id       => Frame.Has_Source_Id,
+                      Sequence_Id         => Arg.Sequence_Id,
+                      Step                => 0,
+                      Status              => Running,
+                      Wait_Until          => (0, 0),
+                      Timeout_Deadline    => (0, 0),
+                      Pending_Command_Id  => 0,
+                      Response_Behavior   => Seq.Response_Behavior,
+                      Operator_Source_Id  => Self.Caller.Source_Id,
+                      Operator_Command_Id => Self.Caller.Command_Id,
+                      Dynamic_Arg         => Arg.Buffer_Arg);
+            -- Command_T_Recv_Async then suppresses its immediate reply; the
+            -- sequence-end paths send it instead.
+            if Seq.Response_Behavior = Send_After_Sequence_Completion then
+               Self.Caller.Defer_Command_Response := True;
+            end if;
+            Self.Event_T_Send_If_Connected (Self.Events.Sequence_Started (Time, (Sequence_Id => Arg.Sequence_Id, Frame_Id => Available_Id)));
+            Self.Sequences_Started_Count := @ + 1;
+            Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Sequences_Started_Count (Time, (Value => Self.Sequences_Started_Count)));
+            Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Last_Sequence_Started (Time, (Value => Arg.Sequence_Id)));
+            Send_Frame_Count_Data_Products (Self, Time);
+            -- Run until the frame parks or the sequence completes. Ticks only
+            -- resume parked frames.
+            Execute_Sequence (Self, Frame);
+            return Success;
+         end;
       end;
    end Run_Sequence;
 
-   -- Halt every running sequence and return each frame to a Not_Running idle state.
-   -- The Source_Id assignment (made when the command router registers each frame at
-   -- startup) is preserved so frames remain claimable by future Run_Sequence calls.
+   -- Halt every running sequence. Registered source ids are kept, so the frames
+   -- remain claimable.
    overriding function Kill_All_Sequences (Self : in out Instance) return Command_Execution_Status.E is
       use Command_Execution_Status;
       Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
    begin
       for Frame of Self.Sequence_Frames.all loop
          if Frame.Status /= Not_Running then
-            -- If the operator was waiting via Send_After_Sequence_Completion,
-            -- Finish_Sequence emits Failure now -- the sequence is being killed
-            -- before it could complete and the originating command would
-            -- otherwise hang.
+            -- Any deferred reply is sent now with Failure, so the operator's
+            -- command does not hang.
             Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);
          end if;
       end loop;
@@ -620,11 +525,8 @@ package body Component.Simple_Command_Sequencer.Implementation is
       return Success;
    end Kill_All_Sequences;
 
-   -- Halt the sequence running on a single frame and return that frame to an
-   -- idle state. Fails if the frame ID is out of range; killing a frame that
-   -- is not running has no effect and succeeds. As with Kill_All_Sequences,
-   -- the frame's Source_Id assignment is preserved so it remains claimable by
-   -- future Run_Sequence calls.
+   -- Halt the sequence on one frame. Fails for an out of range frame id;
+   -- killing an idle frame is a no-op that succeeds.
    overriding function Kill_Frame (Self : in out Instance; Arg : in Packed_U16.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
       Frame_Id : constant Interfaces.Unsigned_32 := Interfaces.Unsigned_32 (Arg.Value);
@@ -638,22 +540,18 @@ package body Component.Simple_Command_Sequencer.Implementation is
          Frame : Sequence_Frame renames Self.Sequence_Frames.all (Frame_Id);
       begin
          if Frame.Status = Not_Running then
-            -- Nothing to kill -- note it and succeed.
             Self.Event_T_Send_If_Connected (Self.Events.Frame_Not_Running (Time, (Value => Frame_Id)));
             return Success;
          end if;
-         Self.Event_T_Send_If_Connected (Self.Events.Killed_Frame (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame_Id)));
-         -- If the operator was waiting via Send_After_Sequence_Completion,
-         -- Finish_Sequence emits Failure now -- the sequence is being killed
-         -- before it could complete and the originating command would
-         -- otherwise hang.
+         -- Any deferred reply is sent now with Failure, so the operator's
+         -- command does not hang.
          Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);
+         Self.Event_T_Send_If_Connected (Self.Events.Killed_Frame (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame_Id)));
          return Success;
       end;
    end Kill_Frame;
 
-   -- Set the summary packet period, in ticks. Zero disables emission. The
-   -- tick counter is reset so the new period starts a fresh phase.
+   -- Set the summary packet period, in ticks. Zero disables emission.
    overriding function Set_Summary_Packet_Period (Self : in out Instance; Arg : in Packed_U16.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
    begin
@@ -663,8 +561,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
       return Success;
    end Set_Summary_Packet_Period;
 
-   -- Send out the initial values of all data products, seeded from the
-   -- component state so the startup defaults are observable:
+   -- Send out the initial values of all data products:
    overriding procedure Set_Up (Self : in out Instance) is
       Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
    begin
@@ -688,14 +585,11 @@ package body Component.Simple_Command_Sequencer.Implementation is
 
    overriding procedure Register_Commands (Self : in out Instance; Arg : in Command_Registration_Request.T) is
    begin
-      -- Register the statically-modeled commands. The inherited version also
-      -- stashes Self.Command_Reg_Id := Arg.Registration_Id for us.
+      -- The inherited version also stores Self.Command_Reg_Id.
       Component.Simple_Command_Sequencer.Base_Instance (Self).Register_Commands (Arg);
 
-      -- Register one "ghost" command per defined sequence. These aren't in the
-      -- model; their IDs continue right after the modeled block
-      -- (Command_Id_Base + Num_Commands + I) and line up with the IDs the
-      -- assembly reserved for the per-sequence commands (e.g. 22..26).
+      -- Register one "ghost" command per sequence. Their ids continue right
+      -- after the modeled block, matching the ids the assembly reserved.
       for I in 0 .. Self.Sequences.all'Length - 1 loop
          Self.Command_Response_T_Send_If_Connected
          ((Source_Id       => 0,

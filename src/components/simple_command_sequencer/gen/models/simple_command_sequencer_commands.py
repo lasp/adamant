@@ -12,11 +12,8 @@ class simple_command_sequencer_commands(commands):
 
     def load(self):
         super(simple_command_sequencer_commands, self).load()
-        # The per-sequence commands are injected per-assembly in set_assembly, so
-        # this suite is context-dependent. Never serve it from the (filename+mtime-
-        # keyed, session-shared) model cache, or a standalone statically-modeled
-        # load gets reused for an assembly's command dictionary. (Framework
-        # precedent: assembly.py:550.)
+        # Per-sequence commands are injected per assembly in set_assembly, so never
+        # serve this suite from the session-shared model cache (see assembly.py:550).
         self.do_save_to_cache = False
 
     # Errors raised here happen outside the base class's load path, so attach
@@ -68,37 +65,25 @@ class simple_command_sequencer_commands(commands):
         # Load the model from the path:
         self.command_sequences_model = model_loader.load_model(model_path)
 
-        # The per-sequence command entities keep their .suite pointing at the
-        # command_sequences model (it backs command_timeout_millis and the
-        # name.ads/adb templates). The assembly command-dictionary template
-        # renders `command.suite.component.instance_name`, so the cs model needs
-        # a .component back-pointer to this instance's component for that to
-        # resolve. (Re-parenting .suite to this commands suite would break the
-        # cs model's own timeout/template lookups.)
+        # Injected commands keep .suite on the command_sequences model (it backs
+        # command_timeout_millis and the templates). The assembly dictionary template
+        # renders command.suite.component.instance_name, so give that model a
+        # .component back-pointer.
         self.command_sequences_model.component = self.component
 
         # Provide the assembly to the product packetizer model
         self.command_sequences_model.set_assembly(assembly)
 
-        # Inject the per-sequence commands. Their ids are NOT assigned here:
-        # entity-id assignment for id-based suites is deferred to the
-        # assembly-wide id pass (assembly._generate_component_ids), which now
-        # runs after this injection, so the injected commands are stamped along
-        # with the built-in ones from the component's Command_Id_Base.
+        # Inject the per-sequence commands. Ids are stamped later by the assembly-wide
+        # id pass, together with the built-in commands.
         self.entities.update(self.command_sequences_model.sequences)
         self.ids = [e.id for e in self.entities.values() if e.id]
 
-        # The injected per-sequence commands carry the sequence's native arg
-        # type -- a user-written, assembly-level type the component itself never
-        # references. The component's complex_types dict (and hence the
-        # assembly's) was built at component-load time, BEFORE this injection,
-        # so those types are absent from it. Assembly-level consumers that
-        # look up the type by package in complex_types -- e.g. the Hydra command
-        # config (complex_types[command.type_package].hydra_field_strings) --
-        # then fail with KeyError/UndefinedError. Register each injected command's
-        # resolved type_model (and its embedded types) into the component's
-        # complex_types now. This is a plain dict update of already-resolved
-        # models: no model loads, no redo-ifchange, no dependency changes.
+        # The injected commands carry user-written arg types the component never
+        # references, so they are missing from the component's complex_types (built
+        # before injection) and assembly consumers such as the Hydra command config
+        # would KeyError. Register each resolved type_model (and embedded types) now.
+        # Plain dict update of resolved models: no model loads, no redo-ifchange.
         for cmd in self.command_sequences_model.sequences.values():
             type_model = cmd.type_model
             if type_model is not None:

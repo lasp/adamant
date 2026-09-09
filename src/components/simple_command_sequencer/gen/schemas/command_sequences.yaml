@@ -115,9 +115,8 @@ mapping:
               send_after_sequence_start (the default) acknowledges as soon as
               the sequence is started; send_after_sequence_completion defers
               the reply until the sequence finishes, carrying its final
-              success or failure. This is static per-sequence configuration.
-              Invocations through the generic Run_Sequence command choose
-              their behavior per-call in the command argument instead.
+              success or failure. Static per-sequence configuration; the
+              generic Run_Sequence command uses it too.
 
           command_timeout_seconds:
             required: false
@@ -183,12 +182,12 @@ mapping:
                       issuing any command. Mutually exclusive with
                       `command:`/`arg:`/`wait_for_completion:`.
 
-                      Either a static integer (bounded to 0 .. 2**31 - 1 so it
-                      always fits an Ada.Real_Time.Time_Span; enforced by the
-                      model), or a dynamic reference into the sequence's
-                      argument using the same "Arg[.field]..." syntax as
-                      dynamic command args. A dynamic sleep's referenced field
-                      must be a Packed_U32.T; its value is range-checked at
+                      Either a static integer (0 .. 2**31 - 1, so it always fits
+                      an Ada.Real_Time.Time_Span; enforced by the model), or a
+                      dynamic reference into the sequence's argument using the
+                      same "Arg[.field]..." syntax as dynamic command args. A
+                      dynamic sleep's referenced field must be a
+                      Packed_Natural.T, which the resolver validates at
                       execution time.
 
                       Examples:
