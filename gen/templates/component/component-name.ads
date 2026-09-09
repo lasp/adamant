@@ -550,6 +550,9 @@ private
 
    -- Default implementation of register commands. Override if you want different behavior.
    not overriding procedure Register_Commands (Self : in out Base_Instance; Arg : in Command_Registration_Request.T);
+   -- Register a single command id (an offset from Command_Id_Base) with the command router. Called by
+   -- Register_Commands for each modeled command; an override may call it to register additional ids.
+   not overriding procedure Register_Command (Self : in out Base_Instance; Local_Command_Id : in Command_Types.Command_Id);
    not overriding procedure Execute_Register_Commands (Self : in out Base_Instance; Cmd : in Command.T);
    not overriding procedure Handle_Command_Length_Error (Self : in out Base_Instance; Cmd : in Command.T);
 {% if "Command_Response" not in connectors.invoker().includes %}

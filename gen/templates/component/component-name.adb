@@ -826,32 +826,40 @@ package body Component.{{ name }} is
       Base_Instance'Class (Self).Register_Commands (Command_Registration_Request.Serialization.From_Byte_Array (Cmd.Arg_Buffer (Cmd.Arg_Buffer'First .. Cmd.Arg_Buffer'First + Command_Registration_Request.Serialization.Serialized_Length - 1)));
    end Execute_Register_Commands;
 
-   -- Default implementation of special Register Commands handler. Override if you need different behavior.
-   not overriding procedure Register_Commands (Self : in out Base_Instance; Arg : in Command_Registration_Request.T) is
+   -- Register a single command with the command router. Local_Command_Id is the
+   -- command's offset from Command_Id_Base, numbered like {{ commands.name }}.Local_Command_Id_Type.
+   -- Register_Commands calls this for every modeled command; an override may call it
+   -- to register additional command ids.
+   not overriding procedure Register_Command (Self : in out Base_Instance; Local_Command_Id : in Command_Types.Command_Id) is
       use Command_Types;
       use Command_Response_Status;
+   begin
+      Self.Command_Response_T_Send_If_Connected (
+         (
+            Source_Id => 0, -- Set to zero so this command registration does not get forwarded as a command response.
+            Registration_Id => Self.Command_Reg_Id,
+            Command_Id => Self.Command_Id_Base + Local_Command_Id,
+            Status => Register
+         ),
+         -- Waiting would risk more than one task on a protected object which would violate Ravenscar, so drop instead and
+         -- hope user sees the event and corrects the problem.
+         Full_Queue_Behavior => Connector_Types.Drop
+      );
+      pragma Annotate (GNATSAS, False_Positive, "range check",
+         "The command ID cannot be out of range since range checking is done in Set_Id_Bases.");
+      -- Sleep a bit, so as to not stress out the command router component's queue.
+      Sleep.Sleep_Us (Configuration.Command_Registration_Delay);
+   end Register_Command;
+
+   -- Default implementation of special Register Commands handler. Override if you need different behavior.
+   not overriding procedure Register_Commands (Self : in out Base_Instance; Arg : in Command_Registration_Request.T) is
    begin
       -- Set the registration id in the component:
       Self.Command_Reg_Id := Arg.Registration_Id;
 
       -- Register each command:
       for Command_Enum in {{ commands.name }}.Local_Command_Id_Type loop
-         -- Send the registration.
-         Self.Command_Response_T_Send_If_Connected (
-            (
-               Source_Id => 0, -- Set to zero so this command registration does not get forwarded as a command response.
-               Registration_Id => Self.Command_Reg_Id,
-               Command_Id => Self.Command_Id_Base + Command_Types.Command_Id ({{ commands.name }}.Local_Command_Id_Type'Enum_Rep (Command_Enum)),
-               Status => Register
-            ),
-            -- Waiting would risk more than one task on a protected object which would violate Ravenscar, so drop instead and
-            -- hope user sees the event and corrects the problem.
-            Full_Queue_Behavior => Connector_Types.Drop
-         );
-         pragma Annotate (GNATSAS, False_Positive, "range check",
-            "The command ID cannot be out of range since range checking is done in Set_Id_Bases.");
-         -- Sleep a bit, so as to not stress out the command router component's queue.
-         Sleep.Sleep_Us (Configuration.Command_Registration_Delay);
+         Self.Register_Command (Command_Types.Command_Id ({{ commands.name }}.Local_Command_Id_Type'Enum_Rep (Command_Enum)));
       end loop;
    end Register_Commands;
 
