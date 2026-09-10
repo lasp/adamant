@@ -1,0 +1,40 @@
+name: Regenerate Documentation
+on:
+  schedule:
+    - cron: "0 7 1 1,4,7,10 *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Stop after the local commit and push nothing"
+        type: boolean
+        default: true
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  regenerate_job:
+    name: regenerate_docs
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/lasp/adamant:0.2
+      options: --user root
+    steps:
+      - run: echo "Starting job triggered by a ${{ github.event_name }} event on a ${{ runner.os }} server hosted by GitHub."
+      - run: echo "Checking out ${{ github.repository }} on branch ${{ github.ref }}."
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - name: Trust the checkout owned by the runner user
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Regenerate documentation
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          DRY_RUN: ${{ (github.event_name == 'workflow_dispatch' && inputs.dry_run == true) && '1' || '0' }}
+        run: bash env/github_run.sh ".github/scripts/regen_docs.sh"
+      - name: Attach the text diff of the regenerated documents
+        if: ${{ hashFiles('build/doc_regen/regen.diff') != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: regenerated-documentation-diff
+          path: build/doc_regen/regen.diff
+      - run: echo "Finished with status - ${{ job.status }}."
+        if: always()
