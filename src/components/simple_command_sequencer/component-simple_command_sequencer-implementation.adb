@@ -199,8 +199,8 @@ package body Component.Simple_Command_Sequencer.Implementation is
                      -- of the wake time can fail. End the sequence rather than
                      -- leave the frame parked on a stale wake time.
                      if not Try_Schedule_Sleep (Frame, Step_Obj.Sleep_Arg, Time) then
-                        Self.Event_T_Send_If_Connected (Self.Events.Sequence_Out_Of_Range_Sleep (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Milliseconds => Step_Obj.Sleep_Arg)));
                         Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);
+                        Self.Event_T_Send_If_Connected (Self.Events.Sequence_Out_Of_Range_Sleep (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Milliseconds => Step_Obj.Sleep_Arg)));
                      end if;
                   when Runtime_Sleep =>
                      -- The step's Resolver validates the sequence argument and
@@ -216,13 +216,13 @@ package body Component.Simple_Command_Sequencer.Implementation is
                                  Packed_Natural.Serialization.From_Byte_Array (Resolved (Resolved'First .. Resolved'First + Packed_Natural.Serialization.Serialized_Length - 1)).Value;
                            begin
                               if not Try_Schedule_Sleep (Frame, Millis, Time) then
-                                 Self.Event_T_Send_If_Connected (Self.Events.Sequence_Out_Of_Range_Sleep (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Milliseconds => Millis)));
                                  Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);
+                                 Self.Event_T_Send_If_Connected (Self.Events.Sequence_Out_Of_Range_Sleep (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Milliseconds => Millis)));
                               end if;
                            end;
                         else
-                           Self.Event_T_Send_If_Connected (Self.Events.Invalid_Dynamic_Sleep_Argument (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Step => Frame.Step)));
                            Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);
+                           Self.Event_T_Send_If_Connected (Self.Events.Invalid_Dynamic_Sleep_Argument (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Step => Frame.Step)));
                         end if;
                      end;
                end case;
@@ -341,10 +341,10 @@ package body Component.Simple_Command_Sequencer.Implementation is
                      end if;
 
                      if Arg.Status = Command_Response_Status.Failure and then Seq.Abort_On_Failed_Cmd then
+                        Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);
                         Self.Event_T_Send_If_Connected (Self.Events.Sequence_Aborted (Time,
                            (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame_To_Wake_Id,
                             Step => Frame.Step)));
-                        Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);
                      else
                         -- Resume now rather than on the next tick. Timeouts and
                         -- sleep wake-ups stay on the tick cadence.
@@ -414,8 +414,8 @@ package body Component.Simple_Command_Sequencer.Implementation is
             when Waiting_For_Cmd_Resp =>
                -- The deadline was stamped at dispatch; only the comparison happens here.
                if Time >= Frame.Timeout_Deadline then
-                  Self.Event_T_Send_If_Connected (Self.Events.Sequence_Timeout (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Step => Frame.Step)));
                   Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);
+                  Self.Event_T_Send_If_Connected (Self.Events.Sequence_Timeout (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Step => Frame.Step)));
                end if;
             when Not_Running =>
                null;
