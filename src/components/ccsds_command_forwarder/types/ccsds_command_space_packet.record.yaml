@@ -1,0 +1,21 @@
+---
+description: A CCSDS space packet sized to fit within a command argument buffer. This type mirrors Ccsds_Space_Packet.T, but the maximum size of the data field is reduced so that the entire packet fits within the argument buffer of a command, allowing the type to be used as a command argument.
+with:
+  - Ccsds_Primary_Header
+  - Command_Types
+  - Basic_Types
+preamble: |
+  use Command_Types;
+  subtype Ccsds_Command_Data_Index_Type is Command_Arg_Buffer_Index_Type range Command_Arg_Buffer_Index_Type'First .. Command_Arg_Buffer_Index_Type'Last - Ccsds_Primary_Header.Size_In_Bytes;
+  subtype Ccsds_Command_Data_Type is Basic_Types.Byte_Array (Ccsds_Command_Data_Index_Type);
+fields:
+  - name: Header
+    description: The CCSDS Primary Header
+    type: Ccsds_Primary_Header.T
+  - name: Data
+    description: User Data Field
+    type: Ccsds_Command_Data_Type
+    format: U8x{{ command_buffer_size - 6 }}
+    variable_length: Header.Packet_Length
+    variable_length_offset: 1
+    skip_validation: True

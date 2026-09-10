@@ -1,0 +1,22 @@
+---
+description: The CCSDS command forwarder is a component that forwards CCSDS packets received as command arguments out of a CCSDS space packet send connector. The purpose of this component is to allow CCSDS packets to be injected into a CCSDS packet processing chain (e.g. into a CCSDS router) via command, which is useful for testing and debugging the software. The packet is forwarded exactly as provided in the command argument, with no validation or modification of its contents. Note that the maximum size packet that can be forwarded by this component is limited by the size of the command argument buffer, as configured by the command_buffer_size configuration parameter.
+execution: passive
+connectors:
+  - description: This is the command receive connector.
+    type: Command.T
+    kind: recv_sync
+  - description: This connector is used to send command responses.
+    type: Command_Response.T
+    kind: send
+  - description: The connector that forwards on CCSDS packets received by command.
+    type: Ccsds_Space_Packet.T
+    kind: send
+  - description: The event send connector.
+    type: Event.T
+    kind: send
+  - description: The connector for data products.
+    type: Data_Product.T
+    kind: send
+  - description: The system time is retrieved via this connector.
+    return_type: Sys_Time.T
+    kind: get
