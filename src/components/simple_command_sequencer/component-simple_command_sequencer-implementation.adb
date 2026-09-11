@@ -10,13 +10,8 @@ with Command_Types; use Command_Types;
 with Packet;
 with Packet_Types;
 with Sequence_Frame_Summary;
-with Configuration;
-with Sleep;
 
 package body Component.Simple_Command_Sequencer.Implementation is
-
-   -- The OS 'Sleep' package collides with the 'Sleep' Step_Kind literal; alias it.
-   package Os_Sleep renames Sleep;
 
    subtype Sequence_Frame is Simple_Sequencer_Types.Sequence_Frame;
    subtype Sequence_Type is Simple_Sequencer_Types.Sequence_Type;
@@ -591,15 +586,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
       -- Register one "ghost" command per sequence. Their ids continue right
       -- after the modeled block, matching the ids the assembly reserved.
       for I in 0 .. Self.Sequences.all'Length - 1 loop
-         Self.Command_Response_T_Send_If_Connected
-         ((Source_Id       => 0,
-            Registration_Id => Self.Command_Reg_Id,
-            Command_Id      => Self.Command_Id_Base
-                              + Command_Types.Command_Id (Simple_Command_Sequencer_Commands.Num_Commands)
-                              + Command_Types.Command_Id (I),
-            Status          => Command_Response_Status.Register),
-            Full_Queue_Behavior => Connector_Types.Drop);
-         Os_Sleep.Sleep_Us (Configuration.Command_Registration_Delay);
+         Self.Register_Command (Command_Types.Command_Id (Simple_Command_Sequencer_Commands.Num_Commands) + Command_Types.Command_Id (I));
       end loop;
    end Register_Commands;
 

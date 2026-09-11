@@ -26,7 +26,7 @@ package body {{ name }} is
    function {{ step.resolver_type_name }} (Bytes : Basic_Types.Byte_Array; Args : out Command_Types.Command_Arg_Buffer_Type) return Boolean is
       Errant_Field : Interfaces.Unsigned_32;
       Input : {{ step.input_type_package }}.T;
-      Valid : Boolean := {{ step.input_type_package }}.Validation.Valid (Bytes (Bytes'First .. Bytes'First + {{ step.input_type_package }}.Serialization.Serialized_Length - 1), Errant_Field);
+      Valid : constant Boolean := {{ step.input_type_package }}.Validation.Valid (Bytes (Bytes'First .. Bytes'First + {{ step.input_type_package }}.Serialization.Serialized_Length - 1), Errant_Field);
    begin
       if Valid then
          Input := {{ step.input_type_package }}.Serialization.From_Byte_Array (Bytes (Bytes'First .. Bytes'First + {{ step.input_type_package }}.Serialization.Serialized_Length - 1));
