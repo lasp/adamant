@@ -1,0 +1,4 @@
+---
+description: GNATprove configuration for the double buffer store. The target is gold, absence of runtime errors and functional contracts.
+level: 2
+mode: "gold"
