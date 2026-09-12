@@ -162,11 +162,19 @@ jobs:
           # Renode builds can't run in parallel on this Jenkins, so concurrent
           # PR triggers from this and sibling repos serialize through the queue.
           for i in $(seq 1 540); do
-            Q=$(curl -sS --max-time 30 \
+            # A failed poll is not a failed build. Retry transient errors inside
+            # curl, and if the request still fails or returns no JSON, skip this
+            # iteration rather than abort the step (set -e would otherwise fail
+            # the workflow).
+            Q=$(curl -fsS --max-time 30 --retry 3 --retry-delay 5 --retry-all-errors \
               -H "CF-Access-Client-Id: ${CF_ACCESS_CLIENT_ID}" \
               -H "CF-Access-Client-Secret: ${CF_ACCESS_CLIENT_SECRET}" \
               --user "${JENKINS_USER}:${JENKINS_API_TOKEN}" \
-              "${QUEUE_URL}api/json")
+              "${QUEUE_URL}api/json" | jq -c .) || {
+              echo "Waiting for executor ($i/540): Jenkins API request failed, will retry"
+              sleep 5
+              continue
+            }
             CANCELLED=$(echo "$Q" | jq -r '.cancelled // false')
             if [ "$CANCELLED" = "true" ]; then
               echo "Build was cancelled while in queue."
@@ -203,11 +211,19 @@ jobs:
           # Poll the build's result field. Cap total wait at 180 minutes (360 * 30s):
           # the full adamant cross sweep takes about an hour of build time alone.
           for i in $(seq 1 360); do
-            B=$(curl -sS --max-time 30 \
+            # A failed poll is not a failed build. Retry transient errors inside
+            # curl, and if the request still fails or returns no JSON, skip this
+            # iteration rather than abort the step (set -e would otherwise fail
+            # the workflow).
+            B=$(curl -fsS --max-time 30 --retry 3 --retry-delay 10 --retry-all-errors \
               -H "CF-Access-Client-Id: ${CF_ACCESS_CLIENT_ID}" \
               -H "CF-Access-Client-Secret: ${CF_ACCESS_CLIENT_SECRET}" \
               --user "${JENKINS_USER}:${JENKINS_API_TOKEN}" \
-              "${BUILD_URL}api/json")
+              "${BUILD_URL}api/json" | jq -c .) || {
+              echo "Building ($i/360)... Jenkins API request failed, will retry"
+              sleep 30
+              continue
+            }
             RESULT=$(echo "$B" | jq -r '.result // "null"')
             if [ "$RESULT" != "null" ]; then
               echo "Build finished: ${RESULT}"
