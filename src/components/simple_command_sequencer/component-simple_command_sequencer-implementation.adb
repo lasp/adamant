@@ -154,22 +154,20 @@ package body Component.Simple_Command_Sequencer.Implementation is
    end Dispatch_Step_Command;
 
    -- Run `Frame` until it parks (command response or sleep) or its sequence ends.
-   procedure Execute_Sequence (Self : in out Instance; Frame : in out Sequence_Frame) is
+   -- `Time` stamps every event, deadline, and wake time in the run; the
+   -- staleness across a no-wait step chain is immaterial next to the
+   -- second-scale timeouts and sleeps.
+   procedure Execute_Sequence (Self : in out Instance; Frame : in out Sequence_Frame; Time : in Sys_Time.T) is
       use Simple_Sequencer_Types;
       Seq : Sequence_Type renames Self.Sequences.all (Frame.Sequence_Id);
    begin
       while Frame.Status = Running loop
          if Frame.Step > Seq.Steps.all'Last then
-            declare
-               Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
-            begin
-               Self.Event_T_Send_If_Connected (Self.Events.Sequence_Completed (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id)));
-               Finish_Sequence (Self, Frame, Command_Response_Status.Success, Time);
-            end;
+            Self.Event_T_Send_If_Connected (Self.Events.Sequence_Completed (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id)));
+            Finish_Sequence (Self, Frame, Command_Response_Status.Success, Time);
          else
             declare
                Step_Obj : Step renames Seq.Steps.all (Frame.Step);
-               Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
             begin
                case Step_Obj.Kind is
                   when Command_Step =>
@@ -348,7 +346,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
                                Step => Frame.Step)));
                         else
                            Frame.Status := Running;
-                           Execute_Sequence (Self, Frame);
+                           Execute_Sequence (Self, Frame, Time);
                         end if;
                      end;
                   end if;
@@ -409,7 +407,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
             when Waiting_For_Time =>
                if Time >= Frame.Wait_Until then
                   Frame.Status := Running;
-                  Execute_Sequence (Self, Frame);
+                  Execute_Sequence (Self, Frame, Time);
                end if;
             when Waiting_For_Cmd_Resp =>
                -- The deadline was stamped at dispatch; only the comparison happens here.
@@ -502,7 +500,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
             Send_Frame_Count_Data_Products (Self, Time);
             -- Run until the frame parks or the sequence completes. Ticks only
             -- resume parked frames.
-            Execute_Sequence (Self, Frame);
+            Execute_Sequence (Self, Frame, Time);
             return Success;
          end;
       end;
