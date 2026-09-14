@@ -39,7 +39,7 @@ mapping:
   command_timeout_seconds:
     required: false
     type: int
-    range: { min: 0, max: 2147483 }
+    range: { min: 1, max: 2147483 }
     desc: |
       Default timeout, in whole seconds, that the sequencer will wait for
       a sub-command's response before declaring the sequence failed. Used
