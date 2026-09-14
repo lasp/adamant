@@ -4,11 +4,13 @@
 type: map
 mapping:
   name:
-    required: true
+    required: false
     type: str
     desc: |
-      The name of the command sequences package. This will be used as the
-      Ada package name, so it must follow Ada naming conventions.
+      Optional human-readable name for this command sequences suite. The
+      generated Ada package name is NOT taken from here -- it is derived
+      from the model filename
+      (<model_name>_Command_Sequences[_<specific_name>]).
 
   description:
     required: false

@@ -1,8 +1,7 @@
 # Command Sequences Definition
 # This file defines composite commands that execute sequences of sub-commands
 
-name: Flight_Sequences
-description: Common flight software command sequences
+description: Example command sequences exercising the generator's features
 
 # Two frames: two sequences may run concurrently, and the generated summary
 # packet type carries two frame summaries.
