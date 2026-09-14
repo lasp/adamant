@@ -15,15 +15,16 @@ package body Component.Simple_Command_Sequencer.Implementation is
 
    subtype Sequence_Frame is Simple_Sequencer_Types.Sequence_Frame;
    subtype Sequence_Type is Simple_Sequencer_Types.Sequence_Type;
+   subtype Frame_Id_Type is Simple_Sequencer_Types.Frame_Id_Type;
 
    overriding procedure Init (Self : in out Instance; Config : in Simple_Sequencer_Types.Sequencer_Config) is
    begin
-      Self.Sequence_Frames := new Simple_Sequencer_Types.Sequence_Frame_Array (0 .. Config.Num_Concurrent_Sequences - 1);
+      Self.Sequence_Frames := new Simple_Sequencer_Types.Sequence_Frame_Array (0 .. Frame_Id_Type (Config.Num_Concurrent_Sequences - 1));
       Self.Sequence_Frames.all := [for Id in Self.Sequence_Frames.all'Range => (Frame_Id => Id, others => <>)];
       Self.Sequences := Config.Sequences;
    end Init;
 
-   function Find_Available_Sequence_Frame (Self : in Instance; Frame_Id : out Interfaces.Unsigned_32) return Boolean is
+   function Find_Available_Sequence_Frame (Self : in Instance; Frame_Id : out Frame_Id_Type) return Boolean is
    begin
       Frame_Id := 0;
 
@@ -36,7 +37,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
       return False;
    end Find_Available_Sequence_Frame;
 
-   function Find_Sequence_Frame_Id_From_Source_Id (Self : in Instance; Source_Id : in Command_Source_Id; Frame_Id : out Interfaces.Unsigned_32) return Boolean is
+   function Find_Sequence_Frame_Id_From_Source_Id (Self : in Instance; Source_Id : in Command_Source_Id; Frame_Id : out Frame_Id_Type) return Boolean is
    begin
       Frame_Id := 0;
 
@@ -318,7 +319,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
          end;
       else
          declare
-            Frame_To_Wake_Id : Interfaces.Unsigned_32;
+            Frame_To_Wake_Id : Frame_Id_Type;
          begin
             if Find_Sequence_Frame_Id_From_Source_Id (Self, Arg.Source_Id, Frame_To_Wake_Id) then
                declare
@@ -451,7 +452,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
    overriding function Run_Sequence (Self : in out Instance; Arg : in Run_Sequence_Arg.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
       Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
-      Available_Id : Interfaces.Unsigned_32;
+      Available_Id : Frame_Id_Type;
    begin
       if Arg.Sequence_Id not in Self.Sequences.all'Range then
          Self.Event_T_Send_If_Connected (Self.Events.Invalid_Sequence_Id (Time, (Value => Arg.Sequence_Id)));
@@ -528,7 +529,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
    -- killing an idle frame is a no-op that succeeds.
    overriding function Kill_Frame (Self : in out Instance; Arg : in Packed_U16.T) return Command_Execution_Status.E is
       use Command_Execution_Status;
-      Frame_Id : constant Interfaces.Unsigned_32 := Interfaces.Unsigned_32 (Arg.Value);
+      Frame_Id : constant Interfaces.Unsigned_16 := Arg.Value;
       Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
    begin
       if Frame_Id not in Self.Sequence_Frames.all'Range then

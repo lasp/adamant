@@ -68,6 +68,10 @@ package Simple_Sequencer_Types is
    -- Sequence_Frame_Summary entries that fit in one summary packet.
    subtype Num_Concurrent_Sequences_Type is Interfaces.Unsigned_32 range 1 .. Interfaces.Unsigned_32 (Packet_Types.Packet_Buffer_Type'Length / Sequence_Frame_Summary.Size_In_Bytes);
 
+   -- Frame ids index the frame pool, so they are bounded by the frame cap
+   -- above and fit 16 bits like the sequence and step ids on the wire.
+   subtype Frame_Id_Type is Interfaces.Unsigned_16 range 0 .. Interfaces.Unsigned_16 (Natural (Num_Concurrent_Sequences_Type'Last) - 1);
+
    -- Exported as the Config constant by each generated sequences suite package.
    -- Num_Concurrent_Sequences also sizes the suite's generated summary packet
    -- type, so the frame pool and the packet layout cannot disagree.
@@ -82,7 +86,7 @@ package Simple_Sequencer_Types is
    -- Status to Not_Running, so an idle frame still reports its last run.
    type Sequence_Frame is record
       Sequence_Id : Interfaces.Unsigned_16 := 0;
-      Frame_Id : Interfaces.Unsigned_32 := 0;
+      Frame_Id : Frame_Id_Type := 0;
       Step : Interfaces.Unsigned_16 := 0;
       Status : Sequence_Enums.Sequence_State.E := Sequence_Enums.Sequence_State.Not_Running;
       -- Wake time while Waiting_For_Time:
@@ -104,6 +108,6 @@ package Simple_Sequencer_Types is
       Dynamic_Arg : Run_Sequence_Buffer_Type := [others => 0];
    end record;
 
-   type Sequence_Frame_Array is array (Interfaces.Unsigned_32 range <>) of Sequence_Frame;
+   type Sequence_Frame_Array is array (Frame_Id_Type range <>) of Sequence_Frame;
    type Sequence_Frame_Array_Access is access all Sequence_Frame_Array;
 end Simple_Sequencer_Types;

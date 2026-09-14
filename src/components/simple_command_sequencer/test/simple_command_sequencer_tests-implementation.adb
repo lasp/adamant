@@ -1520,14 +1520,14 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       T.Command_T_Send (T.Commands.Kill_Frame ((Value => 99)));
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Invalid_Frame_Id_History.Get_Count, 1);
-      Packed_U32_Assert.Eq (T.Invalid_Frame_Id_History.Get (1), (Value => 99));
+      Packed_U16_Assert.Eq (T.Invalid_Frame_Id_History.Get (1), (Value => 99));
 
       --  Killing an idle frame is benign: an info event, no kill, and the
       --  command succeeds.
       T.Command_T_Send (T.Commands.Kill_Frame ((Value => 0)));
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Frame_Not_Running_History.Get_Count, 1);
-      Packed_U32_Assert.Eq (T.Frame_Not_Running_History.Get (1), (Value => 0));
+      Packed_U16_Assert.Eq (T.Frame_Not_Running_History.Get (1), (Value => 0));
       Natural_Assert.Eq (T.Invalid_Frame_Id_History.Get_Count, 1);
       Natural_Assert.Eq (T.Killed_Frame_History.Get_Count, 0);
 

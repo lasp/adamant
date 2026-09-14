@@ -357,7 +357,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
    end Killed_Frame;
 
    -- A Kill_Frame command was received with an out of range frame ID.
-   overriding procedure Invalid_Frame_Id (Self : in out Instance; Arg : in Packed_U32.T) is
+   overriding procedure Invalid_Frame_Id (Self : in out Instance; Arg : in Packed_U16.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Invalid_Frame_Id_History.Push (Arg);
@@ -372,7 +372,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
 
    -- A Kill_Frame command targeted a frame that was not running, so there was
    -- nothing to kill.
-   overriding procedure Frame_Not_Running (Self : in out Instance; Arg : in Packed_U32.T) is
+   overriding procedure Frame_Not_Running (Self : in out Instance; Arg : in Packed_U16.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.Frame_Not_Running_History.Push (Arg);

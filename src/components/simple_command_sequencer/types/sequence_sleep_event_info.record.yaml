@@ -7,8 +7,8 @@ fields:
     format: U16
   - name: Frame_Id
     description: The frame the sequence is executing on
-    type: Interfaces.Unsigned_32
-    format: U32
+    type: Interfaces.Unsigned_16
+    format: U16
   - name: Milliseconds
     description: The number of milliseconds to sleep
     type: Natural

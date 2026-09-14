@@ -57,9 +57,9 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    package Unexpected_Command_Response_History_Package is new Printable_History (Command_Response.T, Command_Response.Representation.Image);
    package Killed_All_Sequences_History_Package is new Printable_History (Natural, Natural'Image);
    package Killed_Frame_History_Package is new Printable_History (Sequence_Event_Info.T, Sequence_Event_Info.Representation.Image);
-   package Invalid_Frame_Id_History_Package is new Printable_History (Packed_U32.T, Packed_U32.Representation.Image);
+   package Invalid_Frame_Id_History_Package is new Printable_History (Packed_U16.T, Packed_U16.Representation.Image);
    package Invalid_Dynamic_Command_Argument_History_Package is new Printable_History (Sequence_Step_Command_Event_Info.T, Sequence_Step_Command_Event_Info.Representation.Image);
-   package Frame_Not_Running_History_Package is new Printable_History (Packed_U32.T, Packed_U32.Representation.Image);
+   package Frame_Not_Running_History_Package is new Printable_History (Packed_U16.T, Packed_U16.Representation.Image);
    package Summary_Packet_Period_Set_History_Package is new Printable_History (Packed_U16.T, Packed_U16.Representation.Image);
    package Invalid_Dynamic_Sleep_Argument_History_Package is new Printable_History (Sequence_Step_Event_Info.T, Sequence_Step_Event_Info.Representation.Image);
    package Invalid_Sequence_Argument_Length_History_Package is new Printable_History (Sequence_Argument_Length_Event_Info.T, Sequence_Argument_Length_Event_Info.Representation.Image);
@@ -222,12 +222,12 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    -- halted.
    overriding procedure Killed_Frame (Self : in out Instance; Arg : in Sequence_Event_Info.T);
    -- A Kill_Frame command was received with an out of range frame ID.
-   overriding procedure Invalid_Frame_Id (Self : in out Instance; Arg : in Packed_U32.T);
+   overriding procedure Invalid_Frame_Id (Self : in out Instance; Arg : in Packed_U16.T);
    -- A Command with a Dynamic Argument cannot be executed as the Argument is Invalid
    overriding procedure Invalid_Dynamic_Command_Argument (Self : in out Instance; Arg : in Sequence_Step_Command_Event_Info.T);
    -- A Kill_Frame command targeted a frame that was not running, so there was
    -- nothing to kill.
-   overriding procedure Frame_Not_Running (Self : in out Instance; Arg : in Packed_U32.T);
+   overriding procedure Frame_Not_Running (Self : in out Instance; Arg : in Packed_U16.T);
    -- The summary packet period was set to a new value, in ticks.
    overriding procedure Summary_Packet_Period_Set (Self : in out Instance; Arg : in Packed_U16.T);
    -- A dynamic sleep step could not resolve its duration because the sequence's
