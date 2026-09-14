@@ -49,6 +49,7 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    package Command_Failure_History_Package is new Printable_History (Sequence_Step_Command_Event_Info.T, Sequence_Step_Command_Event_Info.Representation.Image);
    package Invalid_Sequence_Id_History_Package is new Printable_History (Packed_U16.T, Packed_U16.Representation.Image);
    package Unexpected_Register_Source_History_Package is new Printable_History (Natural, Natural'Image);
+   package Duplicate_Register_Source_History_Package is new Printable_History (Command_Response.T, Command_Response.Representation.Image);
    package No_Frame_Available_History_Package is new Printable_History (Natural, Natural'Image);
    package Dropped_Command_History_Package is new Printable_History (Command_Header.T, Command_Header.Representation.Image);
    package Dropped_Command_Response_History_Package is new Printable_History (Command_Response.T, Command_Response.Representation.Image);
@@ -99,6 +100,7 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
       Command_Failure_History : Command_Failure_History_Package.Instance;
       Invalid_Sequence_Id_History : Invalid_Sequence_Id_History_Package.Instance;
       Unexpected_Register_Source_History : Unexpected_Register_Source_History_Package.Instance;
+      Duplicate_Register_Source_History : Duplicate_Register_Source_History_Package.Instance;
       No_Frame_Available_History : No_Frame_Available_History_Package.Instance;
       Dropped_Command_History : Dropped_Command_History_Package.Instance;
       Dropped_Command_Response_History : Dropped_Command_Response_History_Package.Instance;
@@ -202,6 +204,7 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    -- A Register_Source command response was received but all sequence frames
    -- already have a source ID.
    overriding procedure Unexpected_Register_Source (Self : in out Instance);
+   overriding procedure Duplicate_Register_Source (Self : in out Instance; Arg : in Command_Response.T);
    -- A Run_Sequence command was received but all frames are in use
    overriding procedure No_Frame_Available (Self : in out Instance);
    -- A command was dropped due to a full queue

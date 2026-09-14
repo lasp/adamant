@@ -37,6 +37,8 @@ package body Component.Simple_Command_Sequencer.Implementation is
       return False;
    end Find_Available_Sequence_Frame;
 
+   -- Frame source ids are unique by design: registration refuses a duplicate
+   -- (see Duplicate_Register_Source), so the first match here is the only match.
    function Find_Sequence_Frame_Id_From_Source_Id (Self : in Instance; Source_Id : in Command_Source_Id; Frame_Id : out Frame_Id_Type) return Boolean is
    begin
       Frame_Id := 0;
@@ -302,6 +304,18 @@ package body Component.Simple_Command_Sequencer.Implementation is
          declare
             Source_Id_Set : Boolean := False;
          begin
+            -- Refuse a source id some frame already holds. Responses are routed
+            -- to frames by source id alone, so a duplicate would leave one frame
+            -- shadowed: its responses would resolve to the other frame and it
+            -- would only ever time out. Refusing registration keeps every
+            -- assigned id unique, making that routing unambiguous.
+            for Frame of Self.Sequence_Frames.all loop
+               if Frame.Has_Source_Id and then Frame.Source_Id = Arg.Source_Id then
+                  Self.Event_T_Send_If_Connected (Self.Events.Duplicate_Register_Source (Time, Arg));
+                  return;
+               end if;
+            end loop;
+
             for Frame of Self.Sequence_Frames.all loop
                if Frame.Has_Source_Id = False then
                   Frame.Source_Id := Arg.Source_Id;

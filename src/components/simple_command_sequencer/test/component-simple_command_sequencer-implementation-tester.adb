@@ -33,6 +33,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Command_Failure_History.Init (Depth => 100);
       Self.Invalid_Sequence_Id_History.Init (Depth => 100);
       Self.Unexpected_Register_Source_History.Init (Depth => 100);
+      Self.Duplicate_Register_Source_History.Init (Depth => 100);
       Self.No_Frame_Available_History.Init (Depth => 100);
       Self.Dropped_Command_History.Init (Depth => 100);
       Self.Dropped_Command_Response_History.Init (Depth => 100);
@@ -81,6 +82,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Command_Failure_History.Destroy;
       Self.Invalid_Sequence_Id_History.Destroy;
       Self.Unexpected_Register_Source_History.Destroy;
+      Self.Duplicate_Register_Source_History.Destroy;
       Self.No_Frame_Available_History.Destroy;
       Self.Dropped_Command_History.Destroy;
       Self.Dropped_Command_Response_History.Destroy;
@@ -294,6 +296,14 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       -- Push the argument onto the test history for looking at later:
       Self.Unexpected_Register_Source_History.Push (Arg);
    end Unexpected_Register_Source;
+
+   -- A Register_Source command response carried a source ID some frame already
+   -- holds, so it was refused.
+   overriding procedure Duplicate_Register_Source (Self : in out Instance; Arg : in Command_Response.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Duplicate_Register_Source_History.Push (Arg);
+   end Duplicate_Register_Source;
 
    -- A Run_Sequence command was received but all frames are in use
    overriding procedure No_Frame_Available (Self : in out Instance) is

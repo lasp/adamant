@@ -657,8 +657,8 @@ class command_sequences(assembly_submodel):
         routed back on Command_Response_T_Recv_Async -- typically one arrayed
         command-router connector entry per engine. A frame that never receives
         one is a phantom: it can never be claimed. The component cannot see
-        its inbound connection count at runtime, but the assembly knows it at
-        generation time, so warn when it differs from the instance's
+        its inbound wiring at runtime, but the assembly knows it at generation
+        time, so warn when the connection count differs from the instance's
         configured engine count.
         """
         for comp in self.assembly.components.values():
@@ -671,18 +671,20 @@ class command_sequences(assembly_submodel):
             ):
                 continue
             num_engines = self.num_concurrent_sequences
-            num_connections = sum(
-                1
-                for conn in self.assembly.connections
-                if conn.to_component is comp
-                and conn.to_connector is not None
-                and conn.to_connector.name == "Command_Response_T_Recv_Async"
+            # On the invokee side each index of get_connections() is None,
+            # "ignore", or the list of connections fanned into that index.
+            inbound = []
+            response_connector = comp.connectors.of_name(
+                "Command_Response_T_Recv_Async"
             )
-            if num_connections != num_engines:
+            for index_connections in response_connector.get_connections():
+                if index_connections is not None and index_connections != "ignore":
+                    inbound.extend(index_connections)
+            if len(inbound) != num_engines:
                 self.warn(
                     f"component '{comp.instance_name}' is configured with "
                     f"Num_Concurrent_Sequences => {num_engines} but has "
-                    f"{num_connections} connection(s) into "
+                    f"{len(inbound)} connection(s) into "
                     "Command_Response_T_Recv_Async. Each engine needs its own "
                     "inbound command-response connection (one command-router "
                     "arrayed connector entry per engine) to receive a "

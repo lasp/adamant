@@ -22,6 +22,7 @@ tests:
   - name: Test_Timeout
   - name: Test_Out_Of_Range_Timeout
   - name: Test_Unexpected_Register_Source
+  - name: Test_Duplicate_Register_Source
   - name: Test_Kill_All_Sequences
   - name: Test_Set_Summary_Packet_Period
   - name: Test_Synthesized_Sequence_Command

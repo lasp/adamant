@@ -40,6 +40,10 @@ events:
   - name: Unexpected_Register_Source
     description: A Register_Source command response was received but all sequence frames already have a source ID.
 
+  - name: Duplicate_Register_Source
+    description: A Register_Source command response carried a source ID some frame already holds, so it was refused. Responses are routed to frames by source ID alone, so frames may never share one.
+    param_type: Command_Response.T
+
   - name: No_Frame_Available
     description: A Run_Sequence command was received but all frames are in use
 

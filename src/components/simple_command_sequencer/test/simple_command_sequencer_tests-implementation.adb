@@ -972,6 +972,39 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Unexpected_Register_Source_History.Get_Count, 1);
    end Test_Unexpected_Register_Source;
 
+   --  A Register_Source carrying a source id some frame already holds is refused
+   --  with Duplicate_Register_Source, not reported as Unexpected_Register_Source.
+   overriding procedure Test_Duplicate_Register_Source (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+   begin
+      --  Set_Up_Test registered source ids 0 and 1. Register id 1 again:
+      T.Command_Response_T_Send ((
+         Source_Id => 1,
+         Registration_Id => 0,
+         Command_Id => 0,
+         Status => Register_Source
+      ));
+
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Duplicate_Register_Source_History.Get_Count, 1);
+      Natural_Assert.Eq (Natural (T.Duplicate_Register_Source_History.Get (1).Source_Id), 1);
+      Natural_Assert.Eq (T.Unexpected_Register_Source_History.Get_Count, 0);
+
+      --  A fresh id with every frame already registered is still the
+      --  full-frames case:
+      T.Command_Response_T_Send ((
+         Source_Id => 2,
+         Registration_Id => 0,
+         Command_Id => 0,
+         Status => Register_Source
+      ));
+
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Duplicate_Register_Source_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Unexpected_Register_Source_History.Get_Count, 1);
+   end Test_Duplicate_Register_Source;
+
    --  Kill_All_Sequences halts running sequences. Frames previously assigned a Source_Id
    --  remain claimable for the next Run_Sequence call.
    overriding procedure Test_Kill_All_Sequences (Self : in out Instance) is

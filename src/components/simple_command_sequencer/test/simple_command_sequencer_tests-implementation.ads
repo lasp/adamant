@@ -35,6 +35,7 @@ private
    overriding procedure Test_Timeout (Self : in out Instance);
    overriding procedure Test_Out_Of_Range_Timeout (Self : in out Instance);
    overriding procedure Test_Unexpected_Register_Source (Self : in out Instance);
+   overriding procedure Test_Duplicate_Register_Source (Self : in out Instance);
    overriding procedure Test_Kill_All_Sequences (Self : in out Instance);
    overriding procedure Test_Set_Summary_Packet_Period (Self : in out Instance);
    overriding procedure Test_Synthesized_Sequence_Command (Self : in out Instance);
