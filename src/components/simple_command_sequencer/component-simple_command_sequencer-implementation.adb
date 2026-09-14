@@ -329,23 +329,27 @@ package body Component.Simple_Command_Sequencer.Implementation is
                   -- else is late or stale (timed out, killed, or the frame was
                   -- reused) and is ignored: acting on it would advance the wrong step.
                   if Frame.Status = Waiting_For_Cmd_Resp and then Arg.Command_Id = Frame.Pending_Command_Id then
-                     if Arg.Status = Command_Response_Status.Failure then
-                        Self.Event_T_Send_If_Connected (Self.Events.Command_Failure (Time,
-                           (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame_To_Wake_Id,
-                            Step => Frame.Step, Command_Id => Arg.Command_Id)));
-                     end if;
+                     declare
+                        Failed : constant Boolean := Arg.Status /= Command_Response_Status.Success;
+                     begin
+                        if Failed then
+                           -- Any non-success status is a failed sub-command: Failure, Id_Error,
+                           -- Validation_Error, Length_Error, or Dropped.
+                           Self.Event_T_Send_If_Connected (Self.Events.Command_Failure (Time,
+                              (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame_To_Wake_Id,
+                               Step => Frame.Step, Command_Id => Arg.Command_Id)));
+                        end if;
 
-                     if Arg.Status = Command_Response_Status.Failure and then Seq.Abort_On_Failed_Cmd then
-                        Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);
-                        Self.Event_T_Send_If_Connected (Self.Events.Sequence_Aborted (Time,
-                           (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame_To_Wake_Id,
-                            Step => Frame.Step)));
-                     else
-                        -- Resume now rather than on the next tick. Timeouts and
-                        -- sleep wake-ups stay on the tick cadence.
-                        Frame.Status := Running;
-                        Execute_Sequence (Self, Frame);
-                     end if;
+                        if Failed and then Seq.Abort_On_Failed_Cmd then
+                           Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);
+                           Self.Event_T_Send_If_Connected (Self.Events.Sequence_Aborted (Time,
+                              (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame_To_Wake_Id,
+                               Step => Frame.Step)));
+                        else
+                           Frame.Status := Running;
+                           Execute_Sequence (Self, Frame);
+                        end if;
+                     end;
                   end if;
                end;
             else

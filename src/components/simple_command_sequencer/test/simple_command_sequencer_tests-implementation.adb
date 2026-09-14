@@ -389,6 +389,10 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Command_Failure_History.Get_Count, 1);
       Natural_Assert.Eq (T.Sequence_Aborted_History.Get_Count, 1);
 
+      -- The failure response already aborted the sequence and set the frame to Not_Running
+      Sequence_Step_Command_Event_Info_Assert.Eq (T.Command_Failure_History.Get (1),
+         (Sequence_Id => 1, Frame_Id => 0, Step => 1, Command_Id => Component_A_Commands.Get_Command_3_Id));
+
       -- Step was incremented to 1 before the response arrived
       Sequence_Step_Event_Info_Assert.Eq (T.Sequence_Aborted_History.Get (1),
          (Sequence_Id => 1, Frame_Id => 0, Step => 1));
