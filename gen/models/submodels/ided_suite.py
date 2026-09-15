@@ -259,6 +259,15 @@ class ided_suite(renderable_object):
                 + "provided for some entities but not others, which is forbidden."
             )
 
+        self.derive_entity_lists()
+
+    def derive_entity_lists(self):
+        """
+        Compute the lists templates and the build system read off the suite's
+        entities: includes, types, type models, and the model-file dependency
+        list. Called at initialization, and again by a model that injects
+        entities into the suite after it was loaded.
+        """
         # Store the includes necessary to include the entity types:
         self.includes = list(
             OrderedDict.fromkeys(
