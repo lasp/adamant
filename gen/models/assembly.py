@@ -1065,6 +1065,19 @@ class assembly(subassembly):
             if suite_type not in self.entity_dict:
                 self.entity_dict[suite_type] = {}
 
+            # Stamp ids for any suite whose explicit id base was stored with
+            # set_id_base(..., assign_entity_ids=False) at component-instance
+            # setup. Assignment is deferred to here so that entities injected
+            # during set_assembly() (e.g. the simple_command_sequencer's
+            # per-sequence commands) are present before the suite's ids are
+            # assigned. This runs before the reservation/auto-base passes below,
+            # so explicitly-based suites reserve their ids first, exactly as
+            # they did when set_id_base() stamped them at instance setup --
+            # every other component's ids come out identical.
+            for suite in suite_list:
+                if suite.id_base is not None:
+                    suite.assign_entity_ids()
+
             # Reserve any entities that already have static ids set:
             for suite in suite_list:
                 for entity in suite.entities.values():
