@@ -1,0 +1,13 @@
+---
+description: Sequence argument whose enumeration field can fail validation, for the invalid-dynamic-argument tests.
+fields:
+  - name: Mode
+    description: Enumeration with unused representation values, so garbage bytes fail validation.
+    type: Sequence_Enums.Sequence_State.E
+    format: E8
+  - name: Duration
+    description: A Packed_U32 value forwarded to a dynamic command step.
+    type: Packed_U32.T
+  - name: Sleep_Duration
+    description: A millisecond duration for a dynamic sleep step.
+    type: Packed_Natural.T

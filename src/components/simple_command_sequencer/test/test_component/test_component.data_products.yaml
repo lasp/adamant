@@ -1,0 +1,11 @@
+---
+description: Data products for the Test Component.
+data_products:
+  - name: Data_Product_1
+    type: Packed_U16.T
+  - name: Data_Product_2
+    type: Packed_F32.T
+  - name: Data_Product_3
+    type: Sys_Time.T
+  - name: Data_Product_4
+    type: Packed_I16.T

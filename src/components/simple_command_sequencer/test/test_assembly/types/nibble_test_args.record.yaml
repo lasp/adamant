@@ -1,0 +1,19 @@
+---
+description: Sequence argument whose leading 4-bit pad puts every following field off byte alignment, to test dynamic-arg repacking.
+preamble: |
+  type Four_Bit_Pad_Type is mod 2**4;
+fields:
+  - name: Lead_Pad
+    description: 4-bit pad forcing the following fields off byte alignment.
+    type: Four_Bit_Pad_Type
+    format: U4
+  - name: Wide
+    description: 16-bit field at bit offset 4 (deliberately misaligned).
+    type: Packed_U16.T
+  - name: Nibble
+    description: Byte-sized nibble field at bit offset 20 (deliberately misaligned).
+    type: Packed_Nibble.T
+  - name: Tail_Pad
+    description: Pad out to a byte boundary.
+    type: Four_Bit_Pad_Type
+    format: U4
