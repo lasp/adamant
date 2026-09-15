@@ -748,6 +748,40 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
    end Test_No_Wait_Sequence;
 
+   --  A per-step wait_for_completion override mixes fire-and-forget and confirmed
+   --  commands in one sequence: the no-wait step dispatches without parking the
+   --  frame, and the following waiting step parks it until its response arrives.
+   overriding procedure Test_Per_Step_Wait (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Component_A_Commands : Test_Component_Commands.Instance;
+      Cmd : Command.T;
+      Status : Serialization_Status;
+   begin
+      Component_A_Commands.Set_Id_Base (1);
+      Component_A_Commands.Set_Source_Id (0);
+
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      Status := T.Commands.Run_Sequence (
+         (Sequence_Id => 11, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      -- Both commands dispatched in one call: the no-wait step did not park the
+      -- frame, and the waiting step then did.
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 2);
+      Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (1), Component_A_Commands.Command_1);
+      Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (2), Component_A_Commands.Command_3 ((Value => 7)));
+      Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 0);
+
+      -- Only the waiting step's response completes the sequence.
+      T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0, Command_Id => Component_A_Commands.Get_Command_3_Id, Status => Success));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Completed_History.Get (1), (Sequence_Id => 11, Frame_Id => 0));
+   end Test_Per_Step_Wait;
+
    --  After a sequence completes, its frame returns to Not_Running with Has_Source_Id
    --  still set. Find_Available_Sequence_Frame must rediscover it for the next run.
    overriding procedure Test_Frame_Reuse_After_Completion (Self : in out Instance) is

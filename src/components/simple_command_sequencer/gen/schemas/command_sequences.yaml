@@ -161,10 +161,18 @@ mapping:
                     required: false
                     type: bool
                     desc: |
-                      Whether to wait for this specific command to complete before
+                      Whether to wait for this specific command's response before
                       proceeding. If not specified, uses the parent sequence's
                       wait_for_command_completion setting. Only valid alongside
                       `command:`.
+
+                      A non-waiting step is fire-and-forget: its response is
+                      discarded when it arrives, so a failed sub-command is
+                      invisible (continue_on_failure does not apply) and the
+                      step is never timed out. A non-waiting step followed later
+                      in the same sequence by a waiting step on the same command
+                      is rejected at generation time, since the stale response
+                      could wake the waiting step early.
 
                   sleep_ms:
                     required: false

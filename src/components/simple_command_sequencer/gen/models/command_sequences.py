@@ -378,6 +378,25 @@ class command_sequence(command):
                     f"'{step.dynamic_sleep_arg}' but sequence '{self.name}' "
                     "has no arg_type defined"
                 )
+
+        # A no-wait step is fire-and-forget: its response arrives after the
+        # frame has moved on and responses are matched by command id alone. A
+        # later waiting step on the same command could therefore be woken
+        # early by the no-wait step's stale response, so reject that shape.
+        for idx, step in enumerate(self.steps):
+            if step.command is None or step.wait_for_completion:
+                continue
+            for later in self.steps[idx + 1:]:
+                if later.command == step.command and later.wait_for_completion:
+                    raise ModelException(
+                        f"Sequence '{self.name}': step {idx} dispatches "
+                        f"'{step.command}' without waiting for completion, "
+                        f"and step {later.index} waits on the same command. "
+                        "The no-wait step's late response could wake the "
+                        "waiting step early, since responses are matched by "
+                        "command id. Reorder the steps, use a different "
+                        "command, or make both steps wait."
+                    )
         # The command's arg type is the sequence's own arg_type (or none), a
         # user-written, normally-registered type; nothing is generated for it.
         super(command_sequence, self).__init__(
