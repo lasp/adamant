@@ -1,0 +1,8 @@
+---
+description: Autocoded summary packet type for the {{ name }} command sequences suite. Contains one Sequence_Frame_Summary record per sequence frame ({{ num_concurrent_sequences }} total, from the suite's num_concurrent_sequences), in frame order.
+fields:
+{% for frame in range(num_concurrent_sequences) %}
+  - name: Frame_{{ frame }}_Summary
+    description: "A summary of the state of sequence frame {{ frame }}."
+    type: Sequence_Frame_Summary.T
+{% endfor %}

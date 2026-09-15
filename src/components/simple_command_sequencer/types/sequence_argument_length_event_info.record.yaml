@@ -1,0 +1,15 @@
+---
+description: Sequence identification with the received and expected argument lengths for events
+fields:
+  - name: Sequence_Id
+    description: The ID of the sequence
+    type: Interfaces.Unsigned_16
+    format: U16
+  - name: Received_Length
+    description: The argument length received with the command, in bytes
+    type: Natural
+    format: U32
+  - name: Expected_Length
+    description: The serialized length of the sequence's argument type, in bytes
+    type: Natural
+    format: U32

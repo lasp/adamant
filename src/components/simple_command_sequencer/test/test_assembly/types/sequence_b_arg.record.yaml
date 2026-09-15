@@ -1,0 +1,8 @@
+---
+description: Nested Packed Record for Sequence B
+fields:
+  - name: Component_A_Arg
+    type: Packed_U32.T
+  - name: Component_B_Arg
+    type: Packed_U32.T
+
