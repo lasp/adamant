@@ -1,0 +1,30 @@
+---
+description: Data products for the Simple Command Sequencer component.
+data_products:
+  - name: Frame_Running_Count
+    description: The number of sequence frames currently running (not idle).
+    type: Packed_U16.T
+  - name: Frame_Running_High_Water_Mark
+    description: The maximum number of concurrently running sequence frames observed since startup.
+    type: Packed_U16.T
+  - name: Sequences_Started_Count
+    description: The total number of sequences started since startup.
+    type: Packed_U32.T
+  - name: Sequences_Finished_Count
+    description: The total number of sequences that ran to completion successfully since startup.
+    type: Packed_U32.T
+  - name: Sequences_Failed_Count
+    description: The total number of sequences that ended in failure (aborted on a failed sub-command, timed out, killed, or rejected a step) since startup.
+    type: Packed_U32.T
+  - name: Commands_Sent_Count
+    description: The total number of sub-commands the sequencer has dispatched since startup.
+    type: Packed_U32.T
+  - name: Last_Sequence_Started
+    description: The sequence id of the most recently started sequence.
+    type: Packed_U16.T
+  - name: Last_Sequence_Finished
+    description: The sequence id of the most recent sequence to run to completion successfully.
+    type: Packed_U16.T
+  - name: Last_Sequence_Failed
+    description: The sequence id of the most recent sequence to end in failure.
+    type: Packed_U16.T
