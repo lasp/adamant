@@ -100,6 +100,7 @@ package {{ name }} is
       {{ loop.index0 }} =>
          (Abort_On_Failed_Cmd => {{ "False" if seq.continue_on_failure else "True" }},
           Command_Timeout     => Ada.Real_Time.Milliseconds ({{ seq.command_timeout_millis }}),
+          Response_Timeout    => Ada.Real_Time.Milliseconds ({{ seq.response_timeout_millis }}),
           Response_Behavior   => Sequence_Enums.Sequence_Response_Behavior.{{ seq.response_behavior }},
           Arg_Length          => {% if seq.has_arg() %}{{ seq.arg_type_package }}.Serialization.Serialized_Length{% else %}0{% endif %},
           Steps               => {{ seq.name }}_Steps'Access){% if not loop.last %},{% endif %}

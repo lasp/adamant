@@ -93,3 +93,7 @@ events:
   - name: Invalid_Dynamic_Sleep_Argument
     description: A dynamic sleep step could not resolve its duration because the sequence's argument failed validation.
     param_type: Sequence_Step_Event_Info.T
+
+  - name: Frame_Response_Timeout
+    description: A frame whose sequence had ended was still awaiting sub-command responses that never arrived, so it was returned to service without them. A response addressed to this frame's previous run may still be in flight.
+    param_type: Sequence_Event_Info.T

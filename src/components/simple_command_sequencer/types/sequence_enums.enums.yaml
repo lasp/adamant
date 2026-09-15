@@ -6,6 +6,7 @@ enums:
       - name: Waiting_For_Cmd_Resp
       - name: Waiting_For_Time
       - name: Running
+      - name: Draining
   - name: Sequence_Response_Behavior
     literals:
       - name: Send_After_Sequence_Start

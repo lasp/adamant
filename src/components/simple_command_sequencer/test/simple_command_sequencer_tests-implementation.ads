@@ -30,6 +30,7 @@ private
    overriding procedure Test_No_Wait_Sequence (Self : in out Instance);
    overriding procedure Test_Per_Step_Wait (Self : in out Instance);
    overriding procedure Test_Frame_Reuse_After_Completion (Self : in out Instance);
+   overriding procedure Test_Outstanding_Response_Timeout (Self : in out Instance);
    overriding procedure Test_Out_Of_Range_Sleep (Self : in out Instance);
    overriding procedure Test_Static_Out_Of_Range_Sleep (Self : in out Instance);
    overriding procedure Test_Dynamic_Sleep (Self : in out Instance);

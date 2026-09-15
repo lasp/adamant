@@ -782,13 +782,17 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Sequence_Event_Info_Assert.Eq (T.Sequence_Completed_History.Get (1), (Sequence_Id => 11, Frame_Id => 0));
    end Test_Per_Step_Wait;
 
-   --  After a sequence completes, its frame returns to Not_Running with Has_Source_Id
-   --  still set. Find_Available_Sequence_Frame must rediscover it for the next run.
+   --  After a sequence completes and its outstanding responses drain, its frame
+   --  returns to Not_Running with Has_Source_Id still set.
+   --  Find_Available_Sequence_Frame must rediscover it for the next run.
    overriding procedure Test_Frame_Reuse_After_Completion (Self : in out Instance) is
       T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Component_A_Commands : Test_Component_Commands.Instance;
       Cmd : Command.T;
       Status : Serialization_Status;
    begin
+      Component_A_Commands.Set_Id_Base (1);
+      Component_A_Commands.Set_Source_Id (0);
       T.System_Time := (Seconds => 0, Subseconds => 0);
 
       -- Run Sequence_C (no-wait, completes in one tick) on Frame 0
@@ -803,6 +807,15 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
       Sequence_Event_Info_Assert.Eq (T.Sequence_Completed_History.Get (1), (Sequence_Id => 2, Frame_Id => 0));
+
+      -- The run ended with its two no-wait responses still in flight, so the
+      -- frame parks in Draining rather than idling. Deliver both responses to
+      -- complete the drain; they must not dispatch anything.
+      T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0, Command_Id => Component_A_Commands.Get_Command_1_Id, Status => Success));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0, Command_Id => Component_A_Commands.Get_Command_1_Id, Status => Success));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 2);
 
       -- Frame 0 is now Not_Running; start a second sequence and confirm it reuses Frame 0
       Status := T.Commands.Run_Sequence (
@@ -819,6 +832,107 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 2);
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 4); -- 2 per run * 2 runs
    end Test_Frame_Reuse_After_Completion;
+
+   --  A frame whose sequence ends with sub-command responses still in flight
+   --  parks in Draining: it is not claimable, and a late response wakes nothing
+   --  -- it only completes the drain. The drain is bounded by the sequence's
+   --  response timeout, which measures inactivity (it restarts on every drained
+   --  response); once it passes, the frame is released with a
+   --  Frame_Response_Timeout event.
+   overriding procedure Test_Outstanding_Response_Timeout (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Component_A_Commands : Test_Component_Commands.Instance;
+      Cmd : Command.T;
+      Status : Serialization_Status;
+   begin
+      Component_A_Commands.Set_Id_Base (1);
+      Component_A_Commands.Set_Source_Id (0);
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      --  Sequence_L dispatches a no-wait Command_1 and parks on Command_3.
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 11, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 2);
+
+      --  Command_3's response ends the sequence, but the no-wait Command_1
+      --  response is still in flight: the frame drains instead of idling.
+      T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0, Command_Id => Component_A_Commands.Get_Command_3_Id, Status => Success));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
+      Packed_U16_Assert.Eq (T.Frame_Running_Count_History.Get (T.Frame_Running_Count_History.Get_Count), (Value => 1));
+
+      --  The draining frame is not claimable: a new run of the same sequence
+      --  lands on frame 1. Were frame 0 reclaimed now, the late Command_1
+      --  response would wake the new run's matching no-wait step.
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 11, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (2), (Sequence_Id => 11, Frame_Id => 1));
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 4);
+      Packed_U16_Assert.Eq (T.Frame_Running_Count_History.Get (T.Frame_Running_Count_History.Get_Count), (Value => 2));
+
+      --  The late response only completes frame 0's drain: nothing is
+      --  dispatched, nothing completes, and the frame count falls to the one
+      --  live run.
+      T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0, Command_Id => Component_A_Commands.Get_Command_1_Id, Status => Success));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 4);
+      Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
+      Packed_U16_Assert.Eq (T.Frame_Running_Count_History.Get (T.Frame_Running_Count_History.Get_Count), (Value => 1));
+
+      --  Frame 1's waited step completes; its no-wait response never arrives,
+      --  so it drains on the suite default timeout (the 10 s command timeout).
+      T.Command_Response_T_Send ((Source_Id => 1, Registration_Id => 0, Command_Id => Component_A_Commands.Get_Command_3_Id, Status => Success));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 2);
+
+      --  Frame 0 reruns with Sequence_C (two no-wait commands, 20 s response
+      --  timeout override), completing at the claim with both responses in
+      --  flight.
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 2, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (3), (Sequence_Id => 2, Frame_Id => 0));
+      Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 3);
+      Packed_U16_Assert.Eq (T.Frame_Running_Count_History.Get (T.Frame_Running_Count_History.Get_Count), (Value => 2));
+
+      --  One of frame 0's responses arrives at t=5, restarting its response
+      --  timeout (deadline now t=25). Frame 1 stays untouched (deadline t=10).
+      T.System_Time := (Seconds => 5, Subseconds => 0);
+      T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0, Command_Id => Component_A_Commands.Get_Command_1_Id, Status => Success));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Packed_U16_Assert.Eq (T.Frame_Running_Count_History.Get (T.Frame_Running_Count_History.Get_Count), (Value => 2));
+
+      --  t=11: frame 1's drain has been inactive a full timeout and is given
+      --  up; frame 0 keeps draining.
+      T.System_Time := (Seconds => 11, Subseconds => 0);
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Frame_Response_Timeout_History.Get_Count, 1);
+      Sequence_Event_Info_Assert.Eq (T.Frame_Response_Timeout_History.Get (1), (Sequence_Id => 11, Frame_Id => 1));
+      Packed_U16_Assert.Eq (T.Frame_Running_Count_History.Get (T.Frame_Running_Count_History.Get_Count), (Value => 1));
+
+      --  t=22: past frame 0's original t=20 deadline, but the t=5 response
+      --  restarted it -- the timeout measures inactivity, so the frame holds.
+      T.System_Time := (Seconds => 22, Subseconds => 0);
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Frame_Response_Timeout_History.Get_Count, 1);
+      Packed_U16_Assert.Eq (T.Frame_Running_Count_History.Get (T.Frame_Running_Count_History.Get_Count), (Value => 1));
+
+      --  t=26: frame 0's restarted deadline (t=25) has passed; the frame is
+      --  released and says so.
+      T.System_Time := (Seconds => 26, Subseconds => 0);
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Frame_Response_Timeout_History.Get_Count, 2);
+      Sequence_Event_Info_Assert.Eq (T.Frame_Response_Timeout_History.Get (2), (Sequence_Id => 2, Frame_Id => 0));
+      Packed_U16_Assert.Eq (T.Frame_Running_Count_History.Get (T.Frame_Running_Count_History.Get_Count), (Value => 0));
+   end Test_Outstanding_Response_Timeout;
 
    --  Dynamic sleep failures on Sequence_D. A duration above Natural'Last
    --  fails the resolver's Packed_Natural validation
@@ -1624,13 +1738,34 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 3);
 
-      --  The killed frame remains claimable: a new sequence lands on frame 0.
+      --  The killed frame's first command response is still in flight, so the
+      --  frame drains before returning to service. The late response wakes
+      --  nothing; it only completes the drain.
+      T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0, Command_Id => Component_A_Commands.Get_Command_1_Id, Status => Success));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 3);
+
+      --  The drained frame is claimable again: a new sequence lands on frame 0.
       Status := T.Commands.Run_Sequence ((Sequence_Id => 2, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 3);
       Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (3), (Sequence_Id => 2, Frame_Id => 0));
+
+      --  The no-wait run above ended with both its responses in flight, so
+      --  frame 0 is draining again. Killing a draining frame force-releases
+      --  it: the operator reclaims the frame without waiting out the drain.
+      T.Command_T_Send (T.Commands.Kill_Frame ((Value => 0)));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Killed_Frame_History.Get_Count, 2);
+      Sequence_Event_Info_Assert.Eq (T.Killed_Frame_History.Get (2), (Sequence_Id => 2, Frame_Id => 0));
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 2, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 4);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (4), (Sequence_Id => 2, Frame_Id => 0));
    end Test_Kill_Frame;
 
    --  Data products: Set_Up seeds all nine with zero; a completed sequence updates
@@ -1638,9 +1773,12 @@ package body Simple_Command_Sequencer_Tests.Implementation is
    --  the failed counters.
    overriding procedure Test_Data_Products (Self : in out Instance) is
       T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Component_A_Commands : Test_Component_Commands.Instance;
       Cmd : Command.T;
       Status : Serialization_Status;
    begin
+      Component_A_Commands.Set_Id_Base (1);
+      Component_A_Commands.Set_Source_Id (0);
       T.System_Time := (Seconds => 0, Subseconds => 0);
 
       --  Set_Up (run during test setup) seeded every product with zero.
@@ -1662,10 +1800,18 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Packed_U32_Assert.Eq (T.Commands_Sent_Count_History.Get (T.Commands_Sent_Count_History.Get_Count), (Value => 2));
       Packed_U32_Assert.Eq (T.Sequences_Finished_Count_History.Get (T.Sequences_Finished_Count_History.Get_Count), (Value => 1));
       Packed_U16_Assert.Eq (T.Last_Sequence_Finished_History.Get (T.Last_Sequence_Finished_History.Get_Count), (Value => 2));
-      --  The frame count peaked at 1 (the claim) and returned to 0 (the
-      --  finish); the high water mark holds.
-      Packed_U16_Assert.Eq (T.Frame_Running_Count_History.Get (T.Frame_Running_Count_History.Get_Count), (Value => 0));
+      --  The frame count rose at the claim and holds at 1 through the finish:
+      --  the run's two no-wait responses are still in flight, so the frame
+      --  drains before returning to service. The high water mark holds.
+      Packed_U16_Assert.Eq (T.Frame_Running_Count_History.Get (T.Frame_Running_Count_History.Get_Count), (Value => 1));
       Packed_U16_Assert.Eq (T.Frame_Running_High_Water_Mark_History.Get (T.Frame_Running_High_Water_Mark_History.Get_Count), (Value => 1));
+      --  Delivering the outstanding responses completes the drain and returns
+      --  the frame count to 0.
+      T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0, Command_Id => Component_A_Commands.Get_Command_1_Id, Status => Success));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0, Command_Id => Component_A_Commands.Get_Command_1_Id, Status => Success));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Packed_U16_Assert.Eq (T.Frame_Running_Count_History.Get (T.Frame_Running_Count_History.Get_Count), (Value => 0));
       --  No failure yet -- only the Set_Up zero is in the failed history.
       Natural_Assert.Eq (T.Sequences_Failed_Count_History.Get_Count, 1);
 
@@ -1680,6 +1826,11 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Packed_U32_Assert.Eq (T.Sequences_Failed_Count_History.Get (T.Sequences_Failed_Count_History.Get_Count), (Value => 1));
       Packed_U16_Assert.Eq (T.Last_Sequence_Failed_History.Get (T.Last_Sequence_Failed_History.Get_Count), (Value => 0));
+      --  The killed frame's dispatched command response is still in flight, so
+      --  the frame count holds at 1 until the drain completes.
+      Packed_U16_Assert.Eq (T.Frame_Running_Count_History.Get (T.Frame_Running_Count_History.Get_Count), (Value => 1));
+      T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0, Command_Id => Component_A_Commands.Get_Command_1_Id, Status => Success));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
       Packed_U16_Assert.Eq (T.Frame_Running_Count_History.Get (T.Frame_Running_Count_History.Get_Count), (Value => 0));
    end Test_Data_Products;
 

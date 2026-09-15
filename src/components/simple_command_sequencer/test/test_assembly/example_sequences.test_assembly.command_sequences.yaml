@@ -40,6 +40,9 @@ sequences:
     description: No-wait sequence for direct-dispatch testing
     wait_for_command_completion: false
     continue_on_failure: false
+    # Longer than the suite's command timeout, so the per-sequence response
+    # timeout override is observable in tests.
+    response_timeout_seconds: 20
 
     sequence:
       - command: Component_A.Command_1

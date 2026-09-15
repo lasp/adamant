@@ -64,6 +64,7 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    package Summary_Packet_Period_Set_History_Package is new Printable_History (Packed_U16.T, Packed_U16.Representation.Image);
    package Invalid_Dynamic_Sleep_Argument_History_Package is new Printable_History (Sequence_Step_Event_Info.T, Sequence_Step_Event_Info.Representation.Image);
    package Invalid_Sequence_Argument_Length_History_Package is new Printable_History (Sequence_Argument_Length_Event_Info.T, Sequence_Argument_Length_Event_Info.Representation.Image);
+   package Frame_Response_Timeout_History_Package is new Printable_History (Sequence_Event_Info.T, Sequence_Event_Info.Representation.Image);
 
    -- Data product history packages:
    package Frame_Running_Count_History_Package is new Printable_History (Packed_U16.T, Packed_U16.Representation.Image);
@@ -115,6 +116,7 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
       Summary_Packet_Period_Set_History : Summary_Packet_Period_Set_History_Package.Instance;
       Invalid_Dynamic_Sleep_Argument_History : Invalid_Dynamic_Sleep_Argument_History_Package.Instance;
       Invalid_Sequence_Argument_Length_History : Invalid_Sequence_Argument_Length_History_Package.Instance;
+      Frame_Response_Timeout_History : Frame_Response_Timeout_History_Package.Instance;
       -- Data product histories:
       Frame_Running_Count_History : Frame_Running_Count_History_Package.Instance;
       Frame_Running_High_Water_Mark_History : Frame_Running_High_Water_Mark_History_Package.Instance;
@@ -239,6 +241,9 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    -- A sequence command was received with an argument length that does not match
    -- the serialized length of the sequence's argument type.
    overriding procedure Invalid_Sequence_Argument_Length (Self : in out Instance; Arg : in Sequence_Argument_Length_Event_Info.T);
+   -- A frame whose sequence had ended was still awaiting sub-command responses
+   -- that never arrived, so it was returned to service without them.
+   overriding procedure Frame_Response_Timeout (Self : in out Instance; Arg : in Sequence_Event_Info.T);
 
    -----------------------------------------------
    -- Data product handler primitives:

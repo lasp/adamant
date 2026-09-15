@@ -55,6 +55,11 @@ package Simple_Sequencer_Types is
       Abort_On_Failed_Cmd   : Boolean;
       -- Converted from the model's milliseconds once, at elaboration.
       Command_Timeout       : Ada.Real_Time.Time_Span;
+      -- Outstanding-response timeout: how long a frame whose sequence has
+      -- ended may await its outstanding sub-command responses without any
+      -- arriving before the remainder are given up for lost and the frame is
+      -- released.
+      Response_Timeout      : Ada.Real_Time.Time_Span;
       -- Reply when the sequence starts, or defer the reply until it completes.
       Response_Behavior     : Sequence_Enums.Sequence_Response_Behavior.E;
       -- Serialized length of the sequence's argument type (0 if it has none).
@@ -86,8 +91,8 @@ package Simple_Sequencer_Types is
 
    -- One running sequence. Internal state only, never serialized; the
    -- downlinked view is Sequence_Frame_Summary. Run_Sequence re-seeds every
-   -- per-run field when it claims a frame, and ending a sequence only sets
-   -- Status to Not_Running, so an idle frame still reports its last run.
+   -- per-run field when it claims a frame, and ending a sequence only updates
+   -- Status, so an idle frame still reports its last run.
    type Sequence_Frame is record
       Sequence_Id : Interfaces.Unsigned_16 := 0;
       Frame_Id : Frame_Id_Type := 0;
@@ -95,11 +100,19 @@ package Simple_Sequencer_Types is
       Status : Sequence_Enums.Sequence_State.E := Sequence_Enums.Sequence_State.Not_Running;
       -- Wake time while Waiting_For_Time:
       Wait_Until : Sys_Time.T := (0, 0);
-      -- Response deadline while Waiting_For_Cmd_Resp, stamped at dispatch:
+      -- Response deadline while Waiting_For_Cmd_Resp, stamped at dispatch.
+      -- While Draining: the outstanding-response deadline, restarted whenever
+      -- an outstanding response arrives.
       Timeout_Deadline : Sys_Time.T := (0, 0);
       -- Id of the sub-command awaited while Waiting_For_Cmd_Resp. Responses
       -- carrying any other id are stale and ignored.
       Pending_Command_Id : Command_Types.Command_Id := 0;
+      -- Sub-command responses dispatched by the current run that have not come
+      -- back yet. Responses carry no run tag, so a frame may only return to
+      -- Not_Running once this reaches zero; a sequence that ends first parks
+      -- in Draining. Reclaiming the frame earlier would let a late response
+      -- wake the next run's step whenever the command ids happen to match.
+      Outstanding_Responses : Natural := 0;
       -- Assigned by the command router's Register_Source handshake at startup:
       Source_Id : Command_Types.Command_Source_Id := 0;
       Has_Source_Id : Boolean := False;

@@ -86,7 +86,8 @@ package body Component.Simple_Command_Sequencer.Implementation is
       end if;
    end Send_Deferred_Response_If_Pending;
 
-   -- Recount the running frames and update the frame-count data products.
+   -- Recount the in-use frames (running or draining, i.e. not claimable) and
+   -- update the frame-count data products.
    procedure Send_Frame_Count_Data_Products (Self : in out Instance; Time : in Sys_Time.T) is
       Count : Interfaces.Unsigned_16 := 0;
    begin
@@ -102,9 +103,33 @@ package body Component.Simple_Command_Sequencer.Implementation is
       Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Frame_Running_High_Water_Mark (Time, (Value => Self.Frame_Running_Hwm)));
    end Send_Frame_Count_Data_Products;
 
-   -- Return `Frame` to idle, update the counters and data products, and emit
-   -- any deferred reply. Only Status is reset: the next claim re-seeds the
-   -- rest, and while idle it lets the summary packet report the last run.
+   -- Park `Frame` in Draining and stamp its deadline one sequence
+   -- Response_Timeout from now. The deadline bounds inactivity, not the whole
+   -- drain -- it is restarted whenever an outstanding response arrives -- so a
+   -- permanently lost response cannot leak the frame. On Sys_Time overflow the
+   -- frame is released immediately: the stale-response window is preferable to
+   -- a frame parked on a deadline that never passes.
+   procedure Park_Draining (Self : in out Instance; Frame : in out Sequence_Frame; Time : in Sys_Time.T) is
+      use Sys_Time.Arithmetic;
+      Add_Status : Sys_Time_Status;
+   begin
+      Add_Status := Add (Time, Self.Sequences.all (Frame.Sequence_Id).Response_Timeout, Frame.Timeout_Deadline);
+      if Add_Status = Success then
+         Frame.Status := Draining;
+      else
+         Frame.Status := Not_Running;
+         Frame.Outstanding_Responses := 0;
+      end if;
+   end Park_Draining;
+
+   -- End the sequence on `Frame`, update the counters and data products, and
+   -- emit any deferred reply. Only Status is reset: the next claim re-seeds
+   -- the rest, and it lets the summary packet report the last run. The frame
+   -- returns to idle only when no sub-command response is still in flight;
+   -- otherwise it parks in Draining, not claimable, until every outstanding
+   -- response arrives or the response timeout passes. Responses carry no run
+   -- tag, so reclaiming the frame earlier would let a late response wake the
+   -- next run's step whenever the command ids happen to match.
    procedure Finish_Sequence
      (Self  : in out Instance;
       Frame : in out Sequence_Frame;
@@ -113,6 +138,9 @@ package body Component.Simple_Command_Sequencer.Implementation is
       use Command_Response_Status;
    begin
       Frame.Status := Not_Running;
+      if Frame.Outstanding_Responses > 0 then
+         Park_Draining (Self, Frame, Time);
+      end if;
       if Stat = Success then
          Self.Sequences_Finished_Count := @ + 1;
          Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Sequences_Finished_Count (Time, (Value => Self.Sequences_Finished_Count)));
@@ -152,6 +180,9 @@ package body Component.Simple_Command_Sequencer.Implementation is
          Frame.Status := Waiting_For_Cmd_Resp;
       end if;
       Self.Command_T_Send (Cmd);
+      -- Every dispatch, waiting or not, yields one response routed back on the
+      -- frame's source id; the frame may not be reclaimed until all arrive.
+      Frame.Outstanding_Responses := @ + 1;
       Note_Command_Sent (Self, Time);
    end Dispatch_Step_Command;
 
@@ -338,9 +369,19 @@ package body Component.Simple_Command_Sequencer.Implementation is
                   Frame : Sequence_Frame renames Self.Sequence_Frames.all (Frame_To_Wake_Id);
                   Seq : Sequence_Type renames Self.Sequences.all (Frame.Sequence_Id);
                begin
+                  -- Every response addressed to this frame consumes one
+                  -- outstanding dispatch, whether or not it wakes anything. The
+                  -- floor guards against a straggler arriving after a response
+                  -- timeout already gave it up for lost.
+                  if Frame.Outstanding_Responses > 0 then
+                     Frame.Outstanding_Responses := @ - 1;
+                  end if;
+
                   -- Only the response the frame is parked on advances it. Anything
-                  -- else is late or stale (timed out, killed, or the frame was
-                  -- reused) and is ignored: acting on it would advance the wrong step.
+                  -- else is late or stale (timed out, killed, or a no-wait
+                  -- dispatch) and only drains: acting on it would advance the
+                  -- wrong step. A frame is never reclaimed while a response is
+                  -- outstanding, so a late response cannot reach a new run.
                   if Frame.Status = Waiting_For_Cmd_Resp and then Arg.Command_Id = Frame.Pending_Command_Id then
                      declare
                         Failed : constant Boolean := Arg.Status /= Command_Response_Status.Success;
@@ -363,6 +404,20 @@ package body Component.Simple_Command_Sequencer.Implementation is
                            Execute_Sequence (Self, Frame, Time);
                         end if;
                      end;
+                  elsif Frame.Status = Draining then
+                     if Frame.Outstanding_Responses = 0 then
+                        -- The last in-flight response arrived; the frame is
+                        -- now safe to reclaim.
+                        Frame.Status := Not_Running;
+                     else
+                        -- Responses are still trickling in: restart the
+                        -- response timeout, which bounds inactivity, not the
+                        -- whole drain.
+                        Park_Draining (Self, Frame, Time);
+                     end if;
+                     if Frame.Status = Not_Running then
+                        Send_Frame_Count_Data_Products (Self, Time);
+                     end if;
                   end if;
                end;
             else
@@ -428,6 +483,17 @@ package body Component.Simple_Command_Sequencer.Implementation is
                if Time >= Frame.Timeout_Deadline then
                   Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);
                   Self.Event_T_Send_If_Connected (Self.Events.Sequence_Timeout (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Step => Frame.Step)));
+               end if;
+            when Draining =>
+               -- The sequence already ended; the frame is only awaiting late
+               -- responses. Once no response has arrived for a whole response
+               -- timeout, the rest are given up for lost — waiting longer
+               -- cannot make them arrive.
+               if Time >= Frame.Timeout_Deadline then
+                  Frame.Status := Not_Running;
+                  Frame.Outstanding_Responses := 0;
+                  Self.Event_T_Send_If_Connected (Self.Events.Frame_Response_Timeout (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id)));
+                  Send_Frame_Count_Data_Products (Self, Time);
                end if;
             when Not_Running =>
                null;
@@ -498,6 +564,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
                       Wait_Until          => (0, 0),
                       Timeout_Deadline    => (0, 0),
                       Pending_Command_Id  => 0,
+                      Outstanding_Responses => 0,
                       Response_Behavior   => Seq.Response_Behavior,
                       Operator_Source_Id  => Self.Caller.Source_Id,
                       Operator_Command_Id => Self.Caller.Command_Id,
@@ -521,13 +588,16 @@ package body Component.Simple_Command_Sequencer.Implementation is
    end Run_Sequence;
 
    -- Halt every running sequence. Registered source ids are kept, so the frames
-   -- remain claimable.
+   -- remain claimable. A Draining frame's sequence already ended (and its
+   -- bookkeeping already ran), so there is nothing to halt: it is left to
+   -- finish draining, since force-releasing it here would reopen the
+   -- stale-response window exactly when sequences are about to be restarted.
    overriding function Kill_All_Sequences (Self : in out Instance) return Command_Execution_Status.E is
       use Command_Execution_Status;
       Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
    begin
       for Frame of Self.Sequence_Frames.all loop
-         if Frame.Status /= Not_Running then
+         if Frame.Status not in Not_Running | Draining then
             -- Any deferred reply is sent now with Failure, so the operator's
             -- command does not hang.
             Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);
@@ -553,6 +623,16 @@ package body Component.Simple_Command_Sequencer.Implementation is
       begin
          if Frame.Status = Not_Running then
             Self.Event_T_Send_If_Connected (Self.Events.Frame_Not_Running (Time, (Value => Frame_Id)));
+            return Success;
+         end if;
+         if Frame.Status = Draining then
+            -- The sequence already ended and its bookkeeping already ran; the
+            -- operator is explicitly reclaiming the frame without waiting out
+            -- the drain, accepting that a late response may still be in flight.
+            Frame.Status := Not_Running;
+            Frame.Outstanding_Responses := 0;
+            Send_Frame_Count_Data_Products (Self, Time);
+            Self.Event_T_Send_If_Connected (Self.Events.Killed_Frame (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame_Id)));
             return Success;
          end if;
          -- Any deferred reply is sent now with Failure, so the operator's

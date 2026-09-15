@@ -48,6 +48,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Summary_Packet_Period_Set_History.Init (Depth => 100);
       Self.Invalid_Dynamic_Sleep_Argument_History.Init (Depth => 100);
       Self.Invalid_Sequence_Argument_Length_History.Init (Depth => 100);
+      Self.Frame_Response_Timeout_History.Init (Depth => 100);
       -- Data product histories:
       Self.Frame_Running_Count_History.Init (Depth => 100);
       Self.Frame_Running_High_Water_Mark_History.Init (Depth => 100);
@@ -97,6 +98,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Summary_Packet_Period_Set_History.Destroy;
       Self.Invalid_Dynamic_Sleep_Argument_History.Destroy;
       Self.Invalid_Sequence_Argument_Length_History.Destroy;
+      Self.Frame_Response_Timeout_History.Destroy;
       -- Data product histories:
       Self.Frame_Running_Count_History.Destroy;
       Self.Frame_Running_High_Water_Mark_History.Destroy;
@@ -410,6 +412,14 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       -- Push the argument onto the test history for looking at later:
       Self.Invalid_Sequence_Argument_Length_History.Push (Arg);
    end Invalid_Sequence_Argument_Length;
+
+   -- A frame whose sequence had ended was still awaiting sub-command responses
+   -- that never arrived, so it was returned to service without them.
+   overriding procedure Frame_Response_Timeout (Self : in out Instance; Arg : in Sequence_Event_Info.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Frame_Response_Timeout_History.Push (Arg);
+   end Frame_Response_Timeout;
 
    -----------------------------------------------
    -- Data product handler primitives:

@@ -17,6 +17,7 @@ tests:
   - name: Test_No_Wait_Sequence
   - name: Test_Per_Step_Wait
   - name: Test_Frame_Reuse_After_Completion
+  - name: Test_Outstanding_Response_Timeout
   - name: Test_Out_Of_Range_Sleep
   - name: Test_Static_Out_Of_Range_Sleep
   - name: Test_Dynamic_Sleep
