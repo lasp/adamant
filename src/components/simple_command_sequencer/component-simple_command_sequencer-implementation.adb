@@ -133,15 +133,15 @@ package body Component.Simple_Command_Sequencer.Implementation is
       Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Commands_Sent_Count (Time, (Value => Self.Commands_Sent_Count)));
    end Note_Command_Sent;
 
-   -- Send a step's sub-command. If the sequence waits on responses, stamp the
+   -- Send a step's sub-command. If the step waits on its response, stamp the
    -- deadline and pending command id and park the frame first. A deadline that
    -- overflows Sys_Time ends the sequence instead; the frame would otherwise
    -- wait forever.
-   procedure Dispatch_Step_Command (Self : in out Instance; Frame : in out Sequence_Frame; Seq : in Sequence_Type; Cmd : in Command.T; Time : in Sys_Time.T) is
+   procedure Dispatch_Step_Command (Self : in out Instance; Frame : in out Sequence_Frame; Seq : in Sequence_Type; Cmd : in Command.T; Wait : in Boolean; Time : in Sys_Time.T) is
       use Sys_Time.Arithmetic;
       Add_Status : Sys_Time_Status;
    begin
-      if Seq.Wait_For_Cmd_Resp then
+      if Wait then
          Add_Status := Add (Time, Seq.Command_Timeout, Frame.Timeout_Deadline);
          if Add_Status /= Success then
             Self.Event_T_Send_If_Connected (Self.Events.Sequence_Out_Of_Range_Timeout (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Step => Frame.Step)));
@@ -174,7 +174,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
                case Step_Obj.Kind is
                   when Command_Step =>
                      Dispatch_Step_Command (Self, Frame, Seq,
-                        (Header => (Source_Id => Frame.Source_Id, Id => Step_Obj.Id, Arg_Buffer_Length => Step_Obj.Arg_Length), Arg_Buffer => Step_Obj.Arg), Time);
+                        (Header => (Source_Id => Frame.Source_Id, Id => Step_Obj.Id, Arg_Buffer_Length => Step_Obj.Arg_Length), Arg_Buffer => Step_Obj.Arg), Step_Obj.Wait_For_Cmd_Resp, Time);
                   when Runtime_Argument_Command_Step =>
                      -- The step's Resolver validates the sequence argument and
                      -- extracts this sub-command's argument from it.
@@ -184,7 +184,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
                      begin
                         if Valid then
                            Dispatch_Step_Command (Self, Frame, Seq,
-                              (Header => (Source_Id => Frame.Source_Id, Id => Step_Obj.Id, Arg_Buffer_Length => Step_Obj.Arg_Length), Arg_Buffer => Resolved), Time);
+                              (Header => (Source_Id => Frame.Source_Id, Id => Step_Obj.Id, Arg_Buffer_Length => Step_Obj.Arg_Length), Arg_Buffer => Resolved), Step_Obj.Wait_For_Cmd_Resp, Time);
                         else
                            Self.Event_T_Send_If_Connected (Self.Events.Invalid_Dynamic_Command_Argument (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Step => Frame.Step, Command_Id => Step_Obj.Id)));
                            Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);

@@ -52,6 +52,7 @@ package {{ name }} is
          (Kind       => Sleep,
           Id         => 0,
           Arg_Length => 0,
+          Wait_For_Cmd_Resp => False,
           Sleep_Arg  => {{ step.get_sleep_expression() }}){% if not loop.last %},{% endif %}
 
 {% elif step.is_dynamic_sleep() %}
@@ -59,6 +60,7 @@ package {{ name }} is
          (Kind           => Runtime_Sleep,
           Id             => 0,
           Arg_Length     => Packed_Natural.Serialization.Serialized_Length,
+          Wait_For_Cmd_Resp => False,
           Sleep_Resolver => {{ step.resolver_type_name }}'Access){% if not loop.last %},{% endif %}
 
 {% elif step.is_dynamic() %}
@@ -66,6 +68,7 @@ package {{ name }} is
          (Kind       => Runtime_Argument_Command_Step,
           Id         => {{ step.component_name }}_{{ step.command_name }},
           Arg_Length => {{ step.dynamic_arg_type_package }}.Serialization.Serialized_Length,
+          Wait_For_Cmd_Resp => {{ "True" if step.wait_for_completion else "False" }},
           Resolver   => {{ step.resolver_type_name }}'Access){% if not loop.last %},{% endif %}
 
 {% elif step.has_arg() %}
@@ -73,6 +76,7 @@ package {{ name }} is
          (Kind       => Command_Step,
           Id         => {{ step.component_name }}_{{ step.command_name }},
           Arg_Length => {{ step.arg_type_package }}.Serialization.Serialized_Length,
+          Wait_For_Cmd_Resp => {{ "True" if step.wait_for_completion else "False" }},
           Arg        => To_Arg ({{ step.arg_type_package }}.Serialization.To_Byte_Array (({{ step.get_arg_expression() }})))){% if not loop.last %},{% endif %}
 
 {% else %}
@@ -80,6 +84,7 @@ package {{ name }} is
          (Kind       => Command_Step,
           Id         => {{ step.component_name }}_{{ step.command_name }},
           Arg_Length => 0,
+          Wait_For_Cmd_Resp => {{ "True" if step.wait_for_completion else "False" }},
           Arg        => [others => 0]){% if not loop.last %},{% endif %}
 
 {% endif %}
@@ -93,8 +98,7 @@ package {{ name }} is
      [
 {% for seq in sequences.values() %}
       {{ loop.index0 }} =>
-         (Wait_For_Cmd_Resp   => {{ "True" if seq.wait_for_command_completion else "False" }},
-          Abort_On_Failed_Cmd => {{ "False" if seq.continue_on_failure else "True" }},
+         (Abort_On_Failed_Cmd => {{ "False" if seq.continue_on_failure else "True" }},
           Command_Timeout     => Ada.Real_Time.Milliseconds ({{ seq.command_timeout_millis }}),
           Response_Behavior   => Sequence_Enums.Sequence_Response_Behavior.{{ seq.response_behavior }},
           Arg_Length          => {% if seq.has_arg() %}{{ seq.arg_type_package }}.Serialization.Serialized_Length{% else %}0{% endif %},

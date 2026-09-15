@@ -22,6 +22,11 @@ package Simple_Sequencer_Types is
    type Step (Kind : Step_Kind := Command_Step) is record
       Id         : Command_Types.Command_Id         := 0;
       Arg_Length : Command_Types.Command_Arg_Buffer_Length_Type := 0;
+      -- Park the frame for this command's response before the next step, or
+      -- dispatch fire-and-forget. Resolved per step at codegen time (the
+      -- step's wait_for_completion, defaulted from the sequence's
+      -- wait_for_command_completion). Meaningful only for command steps.
+      Wait_For_Cmd_Resp : Boolean := True;
       case Kind is
          when Command_Step =>
             Arg       : Command_Types.Command_Arg_Buffer_Type := [others => 0];
@@ -47,7 +52,6 @@ package Simple_Sequencer_Types is
    subtype Run_Sequence_Buffer_Type is Basic_Types.Byte_Array (Run_Sequence_Arg_Buffer_Index_Type);
 
    type Sequence_Type is record
-      Wait_For_Cmd_Resp     : Boolean;
       Abort_On_Failed_Cmd   : Boolean;
       -- Converted from the model's milliseconds once, at elaboration.
       Command_Timeout       : Ada.Real_Time.Time_Span;

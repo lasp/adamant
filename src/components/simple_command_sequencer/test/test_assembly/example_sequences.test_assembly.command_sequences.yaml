@@ -132,3 +132,17 @@ sequences:
 
     sequence:
       - sleep_ms: Arg.Sleep_Duration
+
+  # Mixed per-step waits: the first command dispatches fire-and-forget (its
+  # response is discarded, so a failure is invisible), and the second is
+  # confirmed before the sequence completes.
+  - name: Sequence_L
+    description: A no-wait config command followed by a confirmed command
+    wait_for_command_completion: true
+    continue_on_failure: false
+
+    sequence:
+      - command: Component_A.Command_1
+        wait_for_completion: false
+      - command: Component_A.Command_3
+        arg: (Value => 7)
