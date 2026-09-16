@@ -567,6 +567,14 @@ class command_sequences(assembly_submodel):
                     lineno=seq.lineno,
                 )
 
+        # The generated suite and everything the assembly derives from the
+        # injected commands change with the argument types, so depend on them.
+        for seq in self.sequences.values():
+            if seq.type_model is not None:
+                self.dependencies.append(seq.type_model.full_filename)
+                self.dependencies.extend(seq.type_model.get_dependencies())
+        self.dependencies = list(dict.fromkeys(self.dependencies))
+
         # A sequence's argument travels inside the Run_Sequence command argument,
         # behind its Sequence_Id and Arg_Length header fields, so it has less room
         # than an ordinary command argument. The generated Sequences_Table stores
