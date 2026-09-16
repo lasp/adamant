@@ -39,7 +39,6 @@ sequences:
   - name: Sequence_C
     description: No-wait sequence for direct-dispatch testing
     wait_for_command_completion: false
-    continue_on_failure: false
     # Longer than the suite's command timeout, so the per-sequence response
     # timeout override is observable in tests.
     response_timeout_ms: 20000
@@ -74,7 +73,6 @@ sequences:
   - name: Sequence_F
     description: No-wait sequence with a statically deferred command response
     wait_for_command_completion: false
-    continue_on_failure: false
     response_behavior: send_after_sequence_completion
 
     sequence:

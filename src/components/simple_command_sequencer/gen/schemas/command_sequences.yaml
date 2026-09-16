@@ -118,6 +118,12 @@ mapping:
               If true, the sequence will continue executing even if a sub-command
               fails. If false, the sequence will abort on the first failure.
 
+              Only a step that waits for its command's response can see the
+              command fail; a no-wait step's failure is invisible. Setting this
+              key to false on a sequence whose command steps all dispatch
+              without waiting is therefore rejected, since the sequence could
+              never abort.
+
           response_behavior:
             required: false
             type: str

@@ -315,7 +315,7 @@ class command_sequence(command):
         description=None,
         arg_type=None,
         wait_for_command_completion=True,
-        continue_on_failure=False,
+        continue_on_failure=None,
         command_timeout_ms=None,
         response_timeout_ms=None,
         response_behavior=None,
@@ -325,7 +325,10 @@ class command_sequence(command):
         self.description = description
         self.arg_type = arg_type
         self.wait_for_command_completion = wait_for_command_completion
-        self.continue_on_failure = continue_on_failure
+        # None means the key was omitted: the sequence aborts on failure, but
+        # the author promised nothing.
+        self.continue_on_failure = bool(continue_on_failure)
+        self._continue_on_failure_explicit = continue_on_failure is not None
         self._command_timeout_ms = command_timeout_ms
         self._response_timeout_ms = response_timeout_ms
         self.suite = suite
@@ -394,6 +397,27 @@ class command_sequence(command):
                     "has no arg_type defined"
                 )
 
+        # A sub-command failure is only ever seen by a step that waits for its
+        # response, so on a sequence whose command steps all dispatch without
+        # waiting, continue_on_failure can never abort anything. Refuse an
+        # explicit false there rather than let the yaml promise an abort the
+        # sequencer cannot deliver. A sequence with no command steps has
+        # nothing to fail and is left alone.
+        command_steps = [step for step in self.steps if step.command is not None]
+        if (
+            self._continue_on_failure_explicit
+            and not self.continue_on_failure
+            and command_steps
+            and not any(step.wait_for_completion for step in command_steps)
+        ):
+            raise ModelException(
+                f"Sequence '{self.name}' sets continue_on_failure: false but "
+                "none of its command steps waits for its response, so no "
+                "sub-command failure can ever be seen and the sequence could "
+                "never abort. Remove continue_on_failure, or make at least one "
+                "command step wait for completion."
+            )
+
         # A no-wait step is fire-and-forget: its response arrives after the
         # frame has moved on and responses are matched by command id alone. A
         # later waiting step on the same command could therefore be woken
@@ -454,7 +478,7 @@ class command_sequence(command):
         name = seq_data["name"]
         description = seq_data.get("description", None)
         wait_for_command_completion = seq_data.get("wait_for_command_completion", True)
-        continue_on_failure = seq_data.get("continue_on_failure", False)
+        continue_on_failure = seq_data.get("continue_on_failure", None)
         command_timeout_ms = seq_data.get("command_timeout_ms", None)
         response_timeout_ms = seq_data.get("response_timeout_ms", None)
         response_behavior = seq_data.get("response_behavior", None)
