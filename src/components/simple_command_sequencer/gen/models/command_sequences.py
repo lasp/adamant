@@ -638,6 +638,10 @@ class command_sequences(assembly_submodel):
         # which runs before final(); assembly_name was left None at load() time.
         self.assembly_name = self.assembly.name
 
+        # Sequence-to-sequence calls, for the deferred-call cycle check below.
+        sequences_by_lower_name = {name.lower(): s for name, s in self.sequences.items()}
+        calls = {name: [] for name in self.sequences}
+
         for seq in self.sequences.values():
             # The generated builder surface takes each sequence's native arg
             # type directly in the spec, so its package always needs a with
@@ -683,30 +687,18 @@ class command_sequences(assembly_submodel):
                     )
                 step.command_obj = comp.commands.get_with_name(step.command_name)
 
-                # A send_after_sequence_completion sequence may not call itself: the outer
-                # run's deferred reply waits on an inner run of the same sequence, recursing
-                # until no frame is free. "Self" means a Simple_Command_Sequencer instance
-                # initialized with THIS suite invoking the containing sequence's own name.
-                if (
-                    seq.response_behavior == "Send_After_Sequence_Completion"
-                    and step.command_name.lower() == seq.name.lower()
-                    and comp.name == "Simple_Command_Sequencer"
-                ):
+                # A step that targets a sequence of this suite, through a
+                # sequencer instance initialized with it, is an edge in the
+                # suite's call graph.
+                if comp.name == "Simple_Command_Sequencer":
                     config_value = comp.init.get_parameter_value("Config")
+                    callee = sequences_by_lower_name.get(step.command_name.lower())
                     if (
-                        config_value
+                        callee is not None
+                        and config_value
                         and config_value.split(".")[0].lower() == self.name.lower()
                     ):
-                        raise ModelException(
-                            f'Sequence "{seq.name}" has response_behavior '
-                            f'send_after_sequence_completion and calls itself via '
-                            f'"{step.command}" (step {step.index}). A deferred-'
-                            f'completion sequence may not invoke itself: each run '
-                            f'would wait on a new copy of the same sequence, '
-                            f'consuming frames until dispatch fails. Remove the '
-                            f'self-call or use send_after_sequence_start.',
-                            lineno=seq.lineno,
-                        )
+                        calls[seq.name].append((callee.name, step))
 
                 # Resolve arg type — static and dynamic are mutually exclusive
                 if step.is_dynamic():
@@ -735,7 +727,57 @@ class command_sequences(assembly_submodel):
                 deduped.append(inc)
         self.includes = deduped
 
+        self._check_deferred_call_cycles(calls)
         self._check_engine_connection_counts()
+
+    def _check_deferred_call_cycles(self, calls):
+        """
+        Reject a cycle of sequence calls in which every sequence replies on
+        completion. A call into a send_after_sequence_completion sequence holds
+        the caller's frame until the callee finishes, whether or not the step
+        waits, because the deferred reply is an outstanding response. Around
+        such a cycle no run can ever finish: each waits on a fresh run of the
+        next, claiming frames until dispatch fails. A cycle that passes through
+        a send_after_sequence_start sequence completes one run per lap, so it
+        is left alone; a sequence may loop through itself that way on purpose.
+        """
+        deferred = {
+            name
+            for name, seq in self.sequences.items()
+            if seq.response_behavior == "Send_After_Sequence_Completion"
+        }
+        # Depth-first search over the deferred sequences only; a back edge to a
+        # sequence still on the path closes a cycle.
+        on_path = []
+        finished = set()
+
+        def visit(name):
+            on_path.append(name)
+            for callee, step in calls[name]:
+                if callee not in deferred:
+                    continue
+                if callee in on_path:
+                    cycle = on_path[on_path.index(callee):] + [callee]
+                    raise ModelException(
+                        f'Sequence "{name}" calls "{callee}" via "{step.command}" '
+                        f'(step {step.index}), closing the cycle '
+                        + " -> ".join(cycle)
+                        + " in which every sequence has response_behavior "
+                        "send_after_sequence_completion. Each run would wait on a "
+                        "new run of the next sequence, so none could finish and "
+                        "frames would be consumed until dispatch fails. Break the "
+                        "cycle or give one of these sequences "
+                        "send_after_sequence_start.",
+                        lineno=self.sequences[name].lineno,
+                    )
+                if callee not in finished:
+                    visit(callee)
+            on_path.pop()
+            finished.add(name)
+
+        for name in deferred:
+            if name not in finished:
+                visit(name)
 
     def _check_engine_connection_counts(self):
         """
