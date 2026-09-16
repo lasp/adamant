@@ -959,6 +959,16 @@ class assembly(subassembly):
             # Now generate all entity ids each component:
             if not self.shallow_load:
                 self._generate_component_ids()
+            else:
+                # A shallow load skips the assembly-wide id pass, which is where
+                # a stored explicit id base is normally stamped, but generators
+                # that shallow-load still render entity ids. Stamp the explicit
+                # bases here; nothing is injected on a shallow load, so these are
+                # the same ids a full load assigns to the modeled entities.
+                for component in self.components.values():
+                    for suite_type, suite in component.ided_suites.items():
+                        if suite_type != "data_dependencies" and suite.id_base is not None:
+                            suite.assign_entity_ids()
 
             # Load the complex types:
             self._load_complex_types()
