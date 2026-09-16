@@ -6,7 +6,7 @@ fields:
     type: Interfaces.Unsigned_16
     format: U16
   - name: Step
-    description: Current (or last executed) step of the sequence on this frame.
+    description: The step the sequence on this frame is executing or parked on (one past the last step once it has completed, or the step it ended on if it failed).
     type: Interfaces.Unsigned_16
     format: U16
   - name: Status

@@ -253,7 +253,8 @@ package body Component.Simple_Command_Sequencer.Implementation is
                         end if;
                      end;
                end case;
-               if Frame.Step <= Seq.Steps.all'Last then
+               -- The resume paths advance a parked frame past its step.
+               if Frame.Status = Running then
                   Frame.Step := Frame.Step + 1;
                end if;
             end;
@@ -400,6 +401,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
                               (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame_To_Wake_Id,
                                Step => Frame.Step)));
                         else
+                           Frame.Step := @ + 1;
                            Frame.Status := Running;
                            Execute_Sequence (Self, Frame, Time);
                         end if;
@@ -475,6 +477,7 @@ package body Component.Simple_Command_Sequencer.Implementation is
          case Frame.Status is
             when Waiting_For_Time =>
                if Time >= Frame.Wait_Until then
+                  Frame.Step := @ + 1;
                   Frame.Status := Running;
                   Execute_Sequence (Self, Frame, Time);
                end if;
