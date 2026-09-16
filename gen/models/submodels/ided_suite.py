@@ -402,11 +402,42 @@ class ided_suite(renderable_object):
         counterpart to the deferred form of set_id_base(...,
         assign_entity_ids=False), called from the assembly-wide id pass once
         all injected entities are in place.
+
+        Only entities without an id are stamped, in declaration order from the
+        base: an entity injected with a static id keeps it and does not consume
+        a number, and the assembly-wide reservation pass reports any collision
+        with a stamped id. A suite whose every entity already had an id is
+        refused, since the explicit base could never apply to it.
         """
-        assert self.id_base is not None, (
-            "assign_entity_ids requires an id base to have been stored via set_id_base."
-        )
-        self._set_ids(self.id_base)
+        if self.id_base is None:
+            raise ModelException(
+                "assign_entity_ids requires an id base to have been stored via set_id_base."
+            )
+        unassigned = [e for e in self.entities.values() if e.id is None]
+        if self.entities and not unassigned:
+            raise ModelException(
+                "Cannot apply id base "
+                + str(self.id_base)
+                + " to '"
+                + str(self.name)
+                + "' because every entity already has an id (first: '"
+                + str(next(iter(self.entities.values())).name)
+                + "' = "
+                + str(next(iter(self.entities.values())).id)
+                + "). Remove the static ids or the explicit id base."
+            )
+        next_id = self.id_base
+        for entity in unassigned:
+            entity.id = next_id
+            next_id += 1
+            if entity.id > 65535:
+                raise ModelException(
+                    "Entity: '"
+                    + str(entity.name)
+                    + " cannot be assigned ID "
+                    + str(entity.id)
+                    + " because it is larger than 2**16-1."
+                )
 
     def get_with_name(self, entity_name):
         try:
