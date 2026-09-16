@@ -92,6 +92,17 @@ class simple_command_sequencer_commands(commands):
         # id pass, together with the built-in commands.
         self.entities.update(self.command_sequences_model.sequences)
         self.ids = [e.id for e in self.entities.values() if e.id]
+        self.commands = list(self.entities.values())
+        self.derive_entity_lists()
+
+        # The component copied this suite's dependency list when it loaded, before
+        # the injection, so hand it the sequences model and the new type models too.
+        self.component.dependencies.extend(
+            [self.command_sequences_model.full_filename]
+            + self.command_sequences_model.get_dependencies()
+            + self.deps_list
+        )
+        self.component.dependencies = list(dict.fromkeys(self.component.dependencies))
 
         # The injected commands carry user-written arg types the component never
         # references, so they are missing from the component's complex_types (built

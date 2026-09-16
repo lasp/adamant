@@ -506,6 +506,14 @@ class command_sequences(assembly_submodel):
                     lineno=seq.lineno,
                 )
 
+        # The generated suite and everything the assembly derives from the
+        # injected commands change with the argument types, so depend on them.
+        for seq in self.sequences.values():
+            if seq.type_model is not None:
+                self.dependencies.append(seq.type_model.full_filename)
+                self.dependencies.extend(seq.type_model.get_dependencies())
+        self.dependencies = list(dict.fromkeys(self.dependencies))
+
         # All sequences are now in place; populate template-context flags.
         self._compute_template_flags()
 
