@@ -408,11 +408,12 @@ class command_sequence(command):
         # frame has moved on and responses are matched by command id alone. A
         # later waiting step on the same command could therefore be woken
         # early by the no-wait step's stale response, so reject that shape.
+        # Ada names are case-insensitive, so the commands are compared that way.
         for idx, step in enumerate(self.steps):
             if step.command is None or step.wait_for_completion:
                 continue
             for later in self.steps[idx + 1:]:
-                if later.command == step.command and later.wait_for_completion:
+                if later.command is not None and later.command.lower() == step.command.lower() and later.wait_for_completion:
                     raise ModelException(
                         f"Sequence '{self.name}': step {idx} dispatches "
                         f"'{step.command}' without waiting for completion, "
