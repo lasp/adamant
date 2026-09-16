@@ -29,8 +29,8 @@ package {{ name }} is
 {% endif %}
 {% if suite_has_dynamic_steps %}
    ---------------------------------------------------------------------------
-   -- Resolvers – one per dynamic step, each extracting one field of the
-   -- sequence argument.
+   -- Resolvers – one per dynamic step, each evaluating the step's expression
+   -- of the sequence argument.
    ---------------------------------------------------------------------------
 {% for seq in sequences.values() %}
 {% for step in seq.steps %}
@@ -77,7 +77,7 @@ package {{ name }} is
           Id         => {{ step.component_name }}_{{ step.command_name }},
           Arg_Length => {{ step.arg_type_package }}.Serialization.Serialized_Length,
           Wait_For_Cmd_Resp => {{ "True" if step.wait_for_completion else "False" }},
-          Arg        => To_Arg ({{ step.arg_type_package }}.Serialization.To_Byte_Array (({{ step.get_arg_expression() }})))){% if not loop.last %},{% endif %}
+          Arg        => To_Arg ({{ step.arg_type_package }}.Serialization.To_Byte_Array (({{ step.arg }})))){% if not loop.last %},{% endif %}
 
 {% else %}
       {{ loop.index0 }} =>

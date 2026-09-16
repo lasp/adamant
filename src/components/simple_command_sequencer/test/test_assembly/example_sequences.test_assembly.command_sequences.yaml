@@ -149,3 +149,15 @@ sequences:
         wait_for_completion: false
       - command: Component_A.Command_3
         arg: (Value => 7)
+
+  # A mixed step argument: a field of the sequence argument and a literal in
+  # one aggregate, evaluated by the step's Resolver at execution time.
+  - name: Sequence_M
+    description: Sub-command argument built from a sequence argument field and a literal
+    wait_for_command_completion: true
+    continue_on_failure: false
+    arg_type: Sequence_B_Arg.T
+
+    sequence:
+      - command: Component_A.Command_2
+        arg: (Seconds => Arg.Component_A_Arg.Value, Subseconds => 14)

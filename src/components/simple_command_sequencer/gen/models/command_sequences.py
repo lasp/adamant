@@ -51,10 +51,13 @@ class sequence_step(object):
     Represents a single step in a command sequence.
     """
 
-    # Regex that identifies a dynamic arg value — "Arg" followed by one or
-    # more ".Identifier" segments.  Anything else is treated as a static Ada
-    # expression.
+    # A dynamic value references the sequence's per-call argument as "Arg".
+    # _DYNAMIC_ARG_RE matches the pure path form, "Arg" or "Arg.Field.Sub",
+    # which forwards one field; _ARG_TOKEN_RE finds any reference, so a larger
+    # Ada expression embedding one is dynamic too. An arg with no reference is
+    # a static Ada expression serialized at build time.
     _DYNAMIC_ARG_RE = re.compile(r'^Arg(\.[A-Za-z][A-Za-z0-9_]*)*$')
+    _ARG_TOKEN_RE = re.compile(r'\bArg\b')
 
     # Static sleeps are bounded to Ada's Natural so the duration always fits
     # an Ada.Real_Time.Time_Span by construction — no runtime range check.
@@ -92,11 +95,11 @@ class sequence_step(object):
         else:
             self.component_name = None
             self.command_name = None
-        # If arg matches the dynamic pattern (e.g. "Arg.A.B.C") it is stored
-        # in dynamic_arg and arg is cleared; otherwise it stays in arg.
-        if arg is not None and self._DYNAMIC_ARG_RE.match(arg):
+        # An arg that references the sequence argument is stored in dynamic_arg
+        # and arg is cleared; otherwise it stays in arg.
+        if arg is not None and self._ARG_TOKEN_RE.search(arg):
             self.arg = None
-            self.dynamic_arg = arg
+            self.dynamic_arg = arg.strip()
         else:
             self.arg = arg
             self.dynamic_arg = None
@@ -113,12 +116,14 @@ class sequence_step(object):
         # Dynamic step resolution fields, populated by resolve_dynamic_arg_type:
         #   input_type_package  - Ada package of the sequence-level arg type
         #                         e.g. "My_Input_Type"
-        #   traversal_path      - dotted Ada field path after the root
-        #                         e.g. "A.B.C.D" for "Arg.A.B.C.D"
+        #   resolver_expression - the Ada expression the Resolver serializes,
+        #                         with the deserialized argument as "Input",
+        #                         e.g. "Input.A.B" for "Arg.A.B" or
+        #                         "(Mode => Input.Mode, Enable => True)"
         #   dynamic_arg_type_package - Ada package of the leaf field type
         #                         e.g. "Sys_Time_32"
         self.input_type_package = None
-        self.traversal_path = None
+        self.resolver_expression = None
         self.dynamic_arg_type_package = None
         self.resolver_type_name = None
         self.resolver_instance_name = None
@@ -172,11 +177,11 @@ class sequence_step(object):
                 )
             return
         # Command-form parenthesis sanity.
-        if self.arg:
-            if self.arg.count("(") != self.arg.count(")"):
-                raise ModelException(
-                    f"Mismatched parentheses in arg expression for step {self.index}: {self.arg}"
-                )
+        expression = self.arg or self.dynamic_arg
+        if expression and expression.count("(") != expression.count(")"):
+            raise ModelException(
+                f"Mismatched parentheses in arg expression for step {self.index}: {expression}"
+            )
 
     def resolve_arg_type(self, command_obj):
         """
@@ -193,12 +198,13 @@ class sequence_step(object):
         """
         For dynamic steps, resolve:
           - input_type_package: the Ada package of the sequence's arg_type
-            (the root "Arg" in "Arg.A.B.C.D")
-          - traversal_path: the dotted path after "Arg." e.g. "A.B.C.D"
+            (what "Arg" refers to)
+          - resolver_expression: the step's expression with every "Arg"
+            reference rebound to the Resolver's deserialized "Input"
           - dynamic_arg_type_package: the Ada package of the leaf field type,
             derived from the command's argument datatype (same as static arg_type_package)
 
-        The generator trusts that the traversal path is valid — Ada will reject
+        The generator trusts that the expression is valid — Ada will reject
         the generated code at compile time if it isn't.
         """
         if not self.dynamic_arg:
@@ -212,10 +218,7 @@ class sequence_step(object):
             )
 
         self.input_type_package = parent_sequence.arg_type_package
-
-        # Strip the leading "Arg." to get the field traversal path.
-        # For bare "Arg" there is no traversal — the root type is the leaf.
-        self.traversal_path = self.dynamic_arg[len("Arg."):] if "." in self.dynamic_arg else None
+        self.resolver_expression = self._ARG_TOKEN_RE.sub("Input", self.dynamic_arg)
 
         # The leaf type is the command's argument datatype — same resolution
         # as for static args
@@ -254,11 +257,7 @@ class sequence_step(object):
             )
 
         self.input_type_package = parent_sequence.arg_type_package
-        self.traversal_path = (
-            self.dynamic_sleep_arg[len("Arg."):]
-            if "." in self.dynamic_sleep_arg
-            else None
-        )
+        self.resolver_expression = self._ARG_TOKEN_RE.sub("Input", self.dynamic_sleep_arg)
         self.dynamic_arg_type_package = "Packed_Natural"
         self.resolver_type_name = (
             f"{parent_sequence.name}_Step_{self.index}_Resolver_T"
@@ -266,12 +265,6 @@ class sequence_step(object):
         self.resolver_instance_name = (
             f"{parent_sequence.name}_Step_{self.index}_Resolver"
         )
-
-    def get_arg_expression(self):
-        """Replace bare 'Arg' references with 'Sequence_Arg' in the command arg expression."""
-        if not self.arg:
-            return None
-        return re.sub(r'\bArg\b', 'Sequence_Arg', self.arg)
 
     def get_sleep_expression(self):
         """Render the static sleep duration (a plain Natural) for the step table."""
@@ -398,10 +391,11 @@ class command_sequence(command):
             step.set_defaults(self)
             step.validate()
 
-            if step.arg and "Arg" in step.arg and not self.arg_type:
+            if step.is_dynamic() and not self.arg_type:
                 raise ModelException(
-                    f"Step {idx} references 'Arg' but sequence '{self.name}' "
-                    "has no arg_type defined"
+                    f"Step {idx} arg '{step.dynamic_arg}' references the sequence "
+                    f"argument 'Arg' but sequence '{self.name}' has no arg_type "
+                    "defined"
                 )
             if step.is_dynamic_sleep() and not self.arg_type:
                 raise ModelException(

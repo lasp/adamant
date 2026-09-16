@@ -178,15 +178,25 @@ mapping:
                     type: str
                     desc: |
                       An Ada expression that evaluates to the argument for this
-                      command. You can reference the parent sequence's argument
-                      using "Arg.field_name" syntax. If the command takes no
-                      argument, omit this field. Only valid alongside `command:`.
+                      command. If the command takes no argument, omit this
+                      field. Only valid alongside `command:`. Three forms:
 
-                      Examples:
-                        - "Arg" - pass through the entire sequence argument
-                        - "Arg.Power_Mode" - pass a field from the sequence argument
-                        - "(Mode => Arg.Mode, Enable => True)" - construct a record
-                        - "42" - a literal value
+                        - A static expression, with no reference to the
+                          sequence argument, serialized once at build time:
+                          "42", or "(Seconds => 3, Subseconds => 14)".
+                        - "Arg" or "Arg.Field.Subfield": forward the whole
+                          sequence argument, or one field of it.
+                        - Any expression embedding such references:
+                          "(Mode => Arg.Mode, Enable => True)".
+
+                      The last two are resolved at execution time. The
+                      sequencer validates and deserializes the sequence
+                      argument, then evaluates the expression with "Arg" bound
+                      to it, so a sequence without an arg_type may not use
+                      them. A package the expression names that is not pulled
+                      in automatically -- an enumeration package for a
+                      qualified literal, say -- must be listed under the
+                      top-level "with:" key.
 
                   wait_for_completion:
                     required: false

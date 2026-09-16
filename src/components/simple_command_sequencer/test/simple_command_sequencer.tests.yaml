@@ -42,6 +42,7 @@ tests:
   - name: Test_Data_Products
   - name: Test_Response_Drives_Execution
   - name: Test_Dynamic_Arg_Packing
+  - name: Test_Mixed_Dynamic_Arg
   - name: Test_Invalid_Dynamic_Command_Argument
   - name: Test_Invalid_Dynamic_Sleep_Argument
   - name: Test_Ghost_Command_Rejections

@@ -55,6 +55,7 @@ private
    overriding procedure Test_Data_Products (Self : in out Instance);
    overriding procedure Test_Response_Drives_Execution (Self : in out Instance);
    overriding procedure Test_Dynamic_Arg_Packing (Self : in out Instance);
+   overriding procedure Test_Mixed_Dynamic_Arg (Self : in out Instance);
    overriding procedure Test_Invalid_Dynamic_Command_Argument (Self : in out Instance);
    overriding procedure Test_Invalid_Dynamic_Sleep_Argument (Self : in out Instance);
    overriding procedure Test_Ghost_Command_Rejections (Self : in out Instance);

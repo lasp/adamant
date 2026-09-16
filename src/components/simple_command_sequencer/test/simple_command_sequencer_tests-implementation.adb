@@ -1996,6 +1996,40 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Invalid_Dynamic_Command_Argument_History.Get_Count, 0);
    end Test_Dynamic_Arg_Packing;
 
+   --  Sequence_M (id=12): one step whose argument mixes a field of the sequence
+   --  argument with a literal in one aggregate. The Resolver evaluates the whole
+   --  expression against the deserialized sequence argument at execution time.
+   overriding procedure Test_Mixed_Dynamic_Arg (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Component_A_Commands : Test_Component_Commands.Instance;
+      Argument : constant Sequence_B_Arg.T := (Component_A_Arg => (Value => 77), Component_B_Arg => (Value => 99));
+      BArray : Simple_Sequencer_Types.Run_Sequence_Buffer_Type;
+      Cmd : Command.T;
+      Status : Serialization_Status;
+   begin
+      Component_A_Commands.Set_Id_Base (1);
+      Component_A_Commands.Set_Source_Id (0);
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      BArray := [others => 0];
+      BArray (BArray'First .. BArray'First + Sequence_B_Arg.Serialization.Serialized_Length - 1) :=
+         Sequence_B_Arg.Serialization.To_Byte_Array (Argument);
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 12, Arg_Length => Sequence_B_Arg.Serialization.Serialized_Length, Buffer_Arg => BArray), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      --  Seconds comes from the sequence argument, Subseconds from the literal.
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 1);
+      Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (1), Component_A_Commands.Command_2 ((Seconds => 77, Subseconds => 14)));
+      T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0,
+         Command_Id => Component_A_Commands.Get_Command_2_Id, Status => Success));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Invalid_Dynamic_Command_Argument_History.Get_Count, 0);
+   end Test_Mixed_Dynamic_Arg;
+
    --  A dynamic command step whose sequence argument fails validation fails the
    --  sequence with Invalid_Dynamic_Command_Argument and dispatches nothing.
    overriding procedure Test_Invalid_Dynamic_Command_Argument (Self : in out Instance) is

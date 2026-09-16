@@ -17,8 +17,9 @@ package body {{ name }} is
 
    ---------------------------------------------------------------------------
    -- Resolvers – one per dynamic step. Each validates and deserializes the
-   -- sequence argument, then returns the addressed field serialized (a
-   -- sub-command argument, or a Packed_Natural millisecond count for a sleep).
+   -- sequence argument as Input, then serializes the step's expression of it
+   -- (a sub-command argument, or a Packed_Natural millisecond count for a
+   -- sleep).
    ---------------------------------------------------------------------------
 {% for seq in sequences.values() %}
 {% for step in seq.steps %}
@@ -30,11 +31,7 @@ package body {{ name }} is
    begin
       if Valid then
          Input := {{ step.input_type_package }}.Serialization.From_Byte_Array (Bytes (Bytes'First .. Bytes'First + {{ step.input_type_package }}.Serialization.Serialized_Length - 1));
-{% if step.traversal_path %}
-         Args := To_Arg ({{ step.dynamic_arg_type_package }}.Serialization.To_Byte_Array (Input.{{ step.traversal_path }}));
-{% else %}
-         Args := To_Arg ({{ step.dynamic_arg_type_package }}.Serialization.To_Byte_Array (Input));
-{% endif %}
+         Args := To_Arg ({{ step.dynamic_arg_type_package }}.Serialization.To_Byte_Array (({{ step.resolver_expression }})));
       end if;
       return Valid;
    end {{ step.resolver_type_name }};
