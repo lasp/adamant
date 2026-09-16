@@ -81,7 +81,10 @@ mapping:
             type: str
             desc: |
               Name of this sequence. This will become a command that can be
-              executed. Must follow Ada naming conventions.
+              executed on the sequencer instance, so it may not reuse the name
+              of one of the sequencer's built-in commands (Run_Sequence,
+              Kill_All_Sequences, Kill_Frame, Set_Summary_Packet_Period); the
+              build rejects such a sequence. Must follow Ada naming conventions.
 
           description:
             required: false

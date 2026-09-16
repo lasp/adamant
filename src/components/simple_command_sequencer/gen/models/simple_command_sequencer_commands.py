@@ -74,6 +74,20 @@ class simple_command_sequencer_commands(commands):
         # Provide the assembly to the product packetizer model
         self.command_sequences_model.set_assembly(assembly)
 
+        # Each sequence becomes a command on the sequencer instance, so a sequence
+        # may not share a name with one of the built-in commands already in the suite.
+        built_in_names = list(self.entities.keys())
+        for seq in self.command_sequences_model.sequences.values():
+            if seq.name in self.entities:
+                raise ModelException(
+                    f'Sequence "{seq.name}" is named like a built-in command of the '
+                    f'Simple Command Sequencer. Each sequence becomes a command on '
+                    f'the sequencer instance, so a sequence may not be named any of: '
+                    + ", ".join(built_in_names) + ".",
+                    filename=self.command_sequences_model.full_filename,
+                    lineno=seq.lineno,
+                )
+
         # Inject the per-sequence commands. Ids are stamped later by the assembly-wide
         # id pass, together with the built-in commands.
         self.entities.update(self.command_sequences_model.sequences)
