@@ -16,6 +16,35 @@ import re
 
 DEFAULT_COMMAND_TIMEOUT_MS = 30000
 
+# The passthrough capacity for a sequence's argument, cached at module level.
+_run_sequence_buffer_size_bytes = [None]
+
+
+def get_max_sequence_arg_size_bytes():
+    """
+    The largest sequence argument, in bytes, that fits the Run_Sequence
+    passthrough buffer -- the Python mirror of
+    Simple_Sequencer_Types.Run_Sequence_Arg_Buffer_Length_Type'Last. Read from
+    the Buffer_Arg field of the Run_Sequence_Arg record, which the project's
+    configured command buffer size shapes, so the model and the Ada subtype
+    cannot disagree.
+    """
+    if _run_sequence_buffer_size_bytes[0] is None:
+        arg_model = model_loader.try_load_model_by_name(
+            "Run_Sequence_Arg", model_types="record"
+        )
+        if not arg_model:
+            raise ModelException(
+                "Could not load model for Run_Sequence_Arg.T. This must be in the path."
+            )
+        for fld in arg_model.fields.values():
+            if fld.name == "Buffer_Arg":
+                _run_sequence_buffer_size_bytes[0] = int(fld.size / 8)
+                break
+        else:
+            assert False, "No field 'Buffer_Arg' found in Run_Sequence_Arg.T type"
+    return _run_sequence_buffer_size_bytes[0]
+
 
 class sequence_step(object):
     """
@@ -543,6 +572,26 @@ class command_sequences(assembly_submodel):
                     f'Duplicate sequence name found: "{seq.name}"',
                     lineno=seq.lineno,
                 )
+
+        # A sequence's argument travels inside the Run_Sequence command argument,
+        # behind its Sequence_Id and Arg_Length header fields, so it has less room
+        # than an ordinary command argument. The generated Sequences_Table stores
+        # each argument's serialized length in the passthrough length subtype,
+        # which would otherwise fail its range check at elaboration.
+        max_arg_bytes = get_max_sequence_arg_size_bytes()
+        for seq in self.sequences.values():
+            if seq.type_model is not None:
+                arg_bytes = (seq.type_model.size + 7) // 8
+                if arg_bytes > max_arg_bytes:
+                    raise ModelException(
+                        f'Sequence "{seq.name}" arg_type "{seq.arg_type}" serializes '
+                        f'to {arg_bytes} bytes, but a sequence argument may be at most '
+                        f'{max_arg_bytes} bytes. It is carried inside the Run_Sequence '
+                        f'command argument behind the Sequence_Id and Arg_Length '
+                        f'header fields, so a type that fits an ordinary command '
+                        f'argument can still be too large here.',
+                        lineno=seq.lineno,
+                    )
 
         # All sequences are now in place; populate template-context flags.
         self._compute_template_flags()
