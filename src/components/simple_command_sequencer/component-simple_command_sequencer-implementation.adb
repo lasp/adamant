@@ -179,11 +179,17 @@ package body Component.Simple_Command_Sequencer.Implementation is
          Frame.Pending_Command_Id := Cmd.Header.Id;
          Frame.Status := Waiting_For_Cmd_Resp;
       end if;
+      Self.Sub_Command_Dropped := False;
       Self.Command_T_Send (Cmd);
       -- Every dispatch, waiting or not, yields one response routed back on the
       -- frame's source id; the frame may not be reclaimed until all arrive.
+      -- A dropped send is no exception: the command router replies Dropped on
+      -- the receiver's behalf whether its own queue or the destination's
+      -- refused the sub-command, so the count is not adjusted for a drop.
       Frame.Outstanding_Responses := @ + 1;
-      Note_Command_Sent (Self, Time);
+      if not Self.Sub_Command_Dropped then
+         Note_Command_Sent (Self, Time);
+      end if;
    end Dispatch_Step_Command;
 
    -- Run `Frame` until it parks (command response or sleep) or its sequence ends.
@@ -371,9 +377,12 @@ package body Component.Simple_Command_Sequencer.Implementation is
                   Seq : Sequence_Type renames Self.Sequences.all (Frame.Sequence_Id);
                begin
                   -- Every response addressed to this frame consumes one
-                  -- outstanding dispatch, whether or not it wakes anything. The
-                  -- floor guards against a straggler arriving after a response
-                  -- timeout already gave it up for lost.
+                  -- outstanding dispatch, whether or not it wakes anything. That
+                  -- includes the Dropped reply the command router synthesizes
+                  -- for a sub-command a queue refused: it is the one response
+                  -- that dispatch will ever get. The floor guards against a
+                  -- straggler arriving after a response timeout already gave it
+                  -- up for lost.
                   if Frame.Outstanding_Responses > 0 then
                      Frame.Outstanding_Responses := @ - 1;
                   end if;
@@ -528,6 +537,13 @@ package body Component.Simple_Command_Sequencer.Implementation is
    begin
       Self.Event_T_Send_If_Connected (Self.Events.Dropped_Tick (Self.Sys_Time_T_Get, Arg));
    end Tick_T_Recv_Async_Dropped;
+
+   -- This procedure is called when a Command_T_Send message is dropped due to a full queue.
+   overriding procedure Command_T_Send_Dropped (Self : in out Instance; Arg : in Command.T) is
+   begin
+      Self.Sub_Command_Dropped := True;
+      Self.Event_T_Send_If_Connected (Self.Events.Dropped_Sub_Command (Self.Sys_Time_T_Get, Arg.Header));
+   end Command_T_Send_Dropped;
 
    -- Validate the request, claim a free frame, seed it, and start executing.
    overriding function Run_Sequence (Self : in out Instance; Arg : in Run_Sequence_Arg.T) return Command_Execution_Status.E is

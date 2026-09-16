@@ -59,6 +59,10 @@ events:
     description: A tick was dropped due to a full queue
     param_type: Tick.T
 
+  - name: Dropped_Sub_Command
+    description: A sub-command sent by a sequence was dropped because the receiving queue was full. The command router replies to the frame with a Dropped response, which fails the step if it was waiting; a no-wait step's loss is visible only through this event. A dropped sub-command is not counted in Commands_Sent_Count.
+    param_type: Command_Header.T
+
   - name: Invalid_Command_Received
     description: A command was received with invalid parameters.
     param_type: Invalid_Command_Info.T

@@ -63,6 +63,9 @@ private
       Sequences_Finished_Count : Interfaces.Unsigned_32 := 0;
       Sequences_Failed_Count : Interfaces.Unsigned_32 := 0;
       Commands_Sent_Count : Interfaces.Unsigned_32 := 0;
+      -- Set by Command_T_Send_Dropped, which runs inside Command_T_Send.
+      -- Dispatch_Step_Command clears it before the send and reads it after.
+      Sub_Command_Dropped : Boolean := False;
    end record;
 
    ---------------------------------------
@@ -91,7 +94,7 @@ private
    -- Invoker connector primitives:
    ---------------------------------------
    -- This procedure is called when a Command_T_Send message is dropped due to a full queue.
-   overriding procedure Command_T_Send_Dropped (Self : in out Instance; Arg : in Command.T) is null;
+   overriding procedure Command_T_Send_Dropped (Self : in out Instance; Arg : in Command.T);
    -- This procedure is called when a Command_Response_T_Send message is dropped due to a full queue.
    overriding procedure Command_Response_T_Send_Dropped (Self : in out Instance; Arg : in Command_Response.T) is null;
    -- This procedure is called when a Packet_T_Send message is dropped due to a full queue.

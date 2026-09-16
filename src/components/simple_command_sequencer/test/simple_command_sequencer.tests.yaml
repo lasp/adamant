@@ -13,6 +13,7 @@ tests:
   - name: Test_Dropped_Command
   - name: Test_Dropped_Command_Response
   - name: Test_Dropped_Tick
+  - name: Test_Dropped_Sub_Command
   - name: Test_Invalid_Command
   - name: Test_No_Wait_Sequence
   - name: Test_Per_Step_Wait

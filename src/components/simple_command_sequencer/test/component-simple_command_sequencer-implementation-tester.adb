@@ -38,6 +38,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Dropped_Command_History.Init (Depth => 100);
       Self.Dropped_Command_Response_History.Init (Depth => 100);
       Self.Dropped_Tick_History.Init (Depth => 100);
+      Self.Dropped_Sub_Command_History.Init (Depth => 100);
       Self.Invalid_Command_Received_History.Init (Depth => 100);
       Self.Unexpected_Command_Response_History.Init (Depth => 100);
       Self.Killed_All_Sequences_History.Init (Depth => 100);
@@ -88,6 +89,7 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Dropped_Command_History.Destroy;
       Self.Dropped_Command_Response_History.Destroy;
       Self.Dropped_Tick_History.Destroy;
+      Self.Dropped_Sub_Command_History.Destroy;
       Self.Invalid_Command_Received_History.Destroy;
       Self.Unexpected_Command_Response_History.Destroy;
       Self.Killed_All_Sequences_History.Destroy;
@@ -335,6 +337,13 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       -- Push the argument onto the test history for looking at later:
       Self.Dropped_Tick_History.Push (Arg);
    end Dropped_Tick;
+
+   -- A sub-command sent by a sequence was dropped because the receiving queue was full.
+   overriding procedure Dropped_Sub_Command (Self : in out Instance; Arg : in Command_Header.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Dropped_Sub_Command_History.Push (Arg);
+   end Dropped_Sub_Command;
 
    -- A command was received with invalid parameters.
    overriding procedure Invalid_Command_Received (Self : in out Instance; Arg : in Invalid_Command_Info.T) is

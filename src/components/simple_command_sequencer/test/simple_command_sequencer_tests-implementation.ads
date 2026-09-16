@@ -26,6 +26,7 @@ private
    overriding procedure Test_Dropped_Command (Self : in out Instance);
    overriding procedure Test_Dropped_Command_Response (Self : in out Instance);
    overriding procedure Test_Dropped_Tick (Self : in out Instance);
+   overriding procedure Test_Dropped_Sub_Command (Self : in out Instance);
    overriding procedure Test_Invalid_Command (Self : in out Instance);
    overriding procedure Test_No_Wait_Sequence (Self : in out Instance);
    overriding procedure Test_Per_Step_Wait (Self : in out Instance);

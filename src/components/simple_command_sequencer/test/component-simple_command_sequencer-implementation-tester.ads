@@ -54,6 +54,7 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    package Dropped_Command_History_Package is new Printable_History (Command_Header.T, Command_Header.Representation.Image);
    package Dropped_Command_Response_History_Package is new Printable_History (Command_Response.T, Command_Response.Representation.Image);
    package Dropped_Tick_History_Package is new Printable_History (Tick.T, Tick.Representation.Image);
+   package Dropped_Sub_Command_History_Package is new Printable_History (Command_Header.T, Command_Header.Representation.Image);
    package Invalid_Command_Received_History_Package is new Printable_History (Invalid_Command_Info.T, Invalid_Command_Info.Representation.Image);
    package Unexpected_Command_Response_History_Package is new Printable_History (Command_Response.T, Command_Response.Representation.Image);
    package Killed_All_Sequences_History_Package is new Printable_History (Natural, Natural'Image);
@@ -106,6 +107,7 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
       Dropped_Command_History : Dropped_Command_History_Package.Instance;
       Dropped_Command_Response_History : Dropped_Command_Response_History_Package.Instance;
       Dropped_Tick_History : Dropped_Tick_History_Package.Instance;
+      Dropped_Sub_Command_History : Dropped_Sub_Command_History_Package.Instance;
       Invalid_Command_Received_History : Invalid_Command_Received_History_Package.Instance;
       Unexpected_Command_Response_History : Unexpected_Command_Response_History_Package.Instance;
       Killed_All_Sequences_History : Killed_All_Sequences_History_Package.Instance;
@@ -215,6 +217,8 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    overriding procedure Dropped_Command_Response (Self : in out Instance; Arg : in Command_Response.T);
    -- A tick was dropped due to a full queue
    overriding procedure Dropped_Tick (Self : in out Instance; Arg : in Tick.T);
+   -- A sub-command sent by a sequence was dropped because the receiving queue was full.
+   overriding procedure Dropped_Sub_Command (Self : in out Instance; Arg : in Command_Header.T);
    -- A command was received with invalid parameters.
    overriding procedure Invalid_Command_Received (Self : in out Instance; Arg : in Invalid_Command_Info.T);
    -- A command response was received with a source ID that does not belong to any

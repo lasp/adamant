@@ -21,6 +21,8 @@ with Validated_Args;
 with Test_Assembly_Command_Sequences_Example_Sequences_Summary_Record;
 with Test_Component_Commands;
 with Command.Assertion; use Command.Assertion;
+with Command_Header.Assertion; use Command_Header.Assertion;
+with Connector_Types;
 with Packed_U16.Assertion; use Packed_U16.Assertion;
 with Packed_U32.Assertion; use Packed_U32.Assertion;
 with Packed_U32;
@@ -686,6 +688,66 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 0);
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 0);
    end Test_Dropped_Tick;
+
+   --  A sub-command send refused by the receiving queue fires the component's
+   --  Command_T_Send_Dropped through the real send path: a Dropped_Sub_Command
+   --  event carries the header and the sent counter is left alone. The command
+   --  router replies Dropped to the frame on the receiver's behalf, so the
+   --  waiting step then fails like any other failed sub-command and the
+   --  sequence carries on per continue_on_failure.
+   overriding procedure Test_Dropped_Sub_Command (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Component_A_Commands : Test_Component_Commands.Instance;
+      Cmd : Command.T;
+      Status : Serialization_Status;
+   begin
+      Component_A_Commands.Set_Id_Base (1);
+      Component_A_Commands.Set_Source_Id (0);
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      --  Set_Up seeded the sent counter with zero.
+      Natural_Assert.Eq (T.Commands_Sent_Count_History.Get_Count, 1);
+      Packed_U32_Assert.Eq (T.Commands_Sent_Count_History.Get (1), (Value => 0));
+
+      --  Refuse every sub-command the component sends. The tester still records
+      --  the command it was handed before returning the drop.
+      T.Connector_Command_T_Recv_Sync_Status := Connector_Types.Message_Dropped;
+
+      --  Start Sequence_A; its first step dispatches Command_1, which is dropped.
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 1);
+      Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (1), Component_A_Commands.Command_1);
+      Natural_Assert.Eq (T.Dropped_Sub_Command_History.Get_Count, 1);
+      Command_Header_Assert.Eq (T.Dropped_Sub_Command_History.Get (1), T.Command_T_Recv_Sync_History.Get (1).Header);
+
+      --  The dropped sub-command was not counted as sent.
+      Natural_Assert.Eq (T.Commands_Sent_Count_History.Get_Count, 1);
+
+      --  The frame is parked on step 0 awaiting the router's reply: a tick
+      --  dispatches nothing new.
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 1);
+
+      --  Accept sub-commands again, then deliver the router's Dropped reply.
+      --  Step 0 fails; Sequence_A continues on failure and dispatches step 1,
+      --  which is counted.
+      T.Connector_Command_T_Recv_Sync_Status := Connector_Types.Success;
+      T.Command_Response_T_Send ((Source_Id => 0, Registration_Id => 0, Command_Id => Component_A_Commands.Get_Command_1_Id, Status => Dropped));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_Failure_History.Get_Count, 1);
+      Sequence_Step_Command_Event_Info_Assert.Eq (T.Command_Failure_History.Get (1),
+         (Sequence_Id => 0, Frame_Id => 0, Step => 0, Command_Id => Component_A_Commands.Get_Command_1_Id));
+      Natural_Assert.Eq (T.Sequence_Aborted_History.Get_Count, 0);
+      Natural_Assert.Eq (T.Dropped_Sub_Command_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 2);
+      Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (2), Component_A_Commands.Command_2 ((Seconds => 3, Subseconds => 14)));
+      Natural_Assert.Eq (T.Commands_Sent_Count_History.Get_Count, 2);
+      Packed_U32_Assert.Eq (T.Commands_Sent_Count_History.Get (2), (Value => 1));
+   end Test_Dropped_Sub_Command;
 
    --  A raw Command.T with Arg_Buffer_Length = 0 has the wrong size for
    --  Run_Sequence_Arg, so it fails validation with Invalid_Command_Received.
