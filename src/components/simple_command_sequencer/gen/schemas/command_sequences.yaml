@@ -29,32 +29,32 @@ mapping:
       summaries fit in one packet buffer -- is enforced by the model
       against the project configuration.
 
-  command_timeout_seconds:
+  command_timeout_ms:
     required: false
     type: int
-    range: { min: 1, max: 2147483 }
+    range: { min: 1, max: 2147483647 }
     desc: |
-      Default timeout, in whole seconds, that the sequencer will wait for
+      Default timeout, in milliseconds, that the sequencer will wait for
       a sub-command's response before declaring the sequence failed. Used
       for any sequence in this suite that does not specify its own
-      command_timeout_seconds. Bounded so the millisecond count always
-      fits an Ada.Real_Time.Time_Span.
+      command_timeout_ms. Bounded so the count always fits an
+      Ada.Real_Time.Time_Span.
 
-  response_timeout_seconds:
+  response_timeout_ms:
     required: false
     type: int
-    range: { min: 1, max: 2147483 }
+    range: { min: 1, max: 2147483647 }
     desc: |
-      Default timeout, in whole seconds, on sub-command responses that are
+      Default timeout, in milliseconds, on sub-command responses that are
       still outstanding when their sequence ends. The frame is held
       (draining, not claimable) until every outstanding response arrives,
       so a late response cannot wake a later run of the frame; the timeout
       restarts on each arrival, and once it passes with none the remainder
       are given up for lost and the frame is released. Used for any
       sequence in this suite that does not specify its own
-      response_timeout_seconds; when neither is given, the sequence's
-      command timeout is used. Bounded so the millisecond count always
-      fits an Ada.Real_Time.Time_Span.
+      response_timeout_ms; when neither is given, the sequence's command
+      timeout is used. Bounded so the count always fits an
+      Ada.Real_Time.Time_Span.
 
   with:
     required: false
@@ -127,29 +127,27 @@ mapping:
               success or failure. Static per-sequence configuration; the
               generic Run_Sequence command uses it too.
 
-          command_timeout_seconds:
+          command_timeout_ms:
             required: false
             type: int
-            range: { min: 1, max: 2147483 }
+            range: { min: 1, max: 2147483647 }
             desc: |
               Override the suite-level default timeout for sub-command
-              responses, in whole seconds, for this sequence only. Bounded
-              so the millisecond count always fits an
-              Ada.Real_Time.Time_Span.
+              responses, in milliseconds, for this sequence only. Bounded
+              so the count always fits an Ada.Real_Time.Time_Span.
 
-          response_timeout_seconds:
+          response_timeout_ms:
             required: false
             type: int
-            range: { min: 1, max: 2147483 }
+            range: { min: 1, max: 2147483647 }
             desc: |
               Override the suite-level outstanding-response timeout, in
-              whole seconds, for this sequence only: how long this
+              milliseconds, for this sequence only: how long this
               sequence's frame may await its outstanding sub-command
               responses after the sequence ends without any arriving,
               before the remainder are given up for lost and the frame is
               released. Defaults to the sequence's command timeout. Bounded
-              so the millisecond count always fits an
-              Ada.Real_Time.Time_Span.
+              so the count always fits an Ada.Real_Time.Time_Span.
 
           sequence:
             required: true

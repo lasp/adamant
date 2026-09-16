@@ -14,7 +14,7 @@ from models.simple_command_sequencer_packets import get_max_frames_per_packet
 from util import model_loader
 import re
 
-DEFAULT_COMMAND_TIMEOUT_SECONDS = 30
+DEFAULT_COMMAND_TIMEOUT_MS = 30000
 
 
 class sequence_step(object):
@@ -304,8 +304,8 @@ class command_sequence(command):
         arg_type=None,
         wait_for_command_completion=True,
         continue_on_failure=False,
-        command_timeout_seconds=None,
-        response_timeout_seconds=None,
+        command_timeout_ms=None,
+        response_timeout_ms=None,
         response_behavior=None,
         suite=None,
     ):
@@ -314,8 +314,8 @@ class command_sequence(command):
         self.arg_type = arg_type
         self.wait_for_command_completion = wait_for_command_completion
         self.continue_on_failure = continue_on_failure
-        self._command_timeout_seconds = command_timeout_seconds
-        self._response_timeout_seconds = response_timeout_seconds
+        self._command_timeout_ms = command_timeout_ms
+        self._response_timeout_ms = response_timeout_ms
         self.suite = suite
         self.steps = sequence_steps
 
@@ -416,23 +416,23 @@ class command_sequence(command):
 
     @property
     def command_timeout_millis(self):
-        seconds = self._command_timeout_seconds
-        if seconds is None and self.suite is not None:
-            seconds = getattr(self.suite, "command_timeout_seconds", None)
-        if seconds is None:
-            seconds = DEFAULT_COMMAND_TIMEOUT_SECONDS
-        return seconds * 1000
+        millis = self._command_timeout_ms
+        if millis is None and self.suite is not None:
+            millis = getattr(self.suite, "command_timeout_ms", None)
+        if millis is None:
+            millis = DEFAULT_COMMAND_TIMEOUT_MS
+        return millis
 
     @property
     def response_timeout_millis(self):
-        seconds = self._response_timeout_seconds
-        if seconds is None and self.suite is not None:
-            seconds = getattr(self.suite, "response_timeout_seconds", None)
-        if seconds is None:
+        millis = self._response_timeout_ms
+        if millis is None and self.suite is not None:
+            millis = getattr(self.suite, "response_timeout_ms", None)
+        if millis is None:
             # A response is expected within the command timeout, so silence
             # beyond one command timeout means it is lost.
             return self.command_timeout_millis
-        return seconds * 1000
+        return millis
 
     @classmethod
     @throw_exception_with_lineno
@@ -441,8 +441,8 @@ class command_sequence(command):
         description = seq_data.get("description", None)
         wait_for_command_completion = seq_data.get("wait_for_command_completion", True)
         continue_on_failure = seq_data.get("continue_on_failure", False)
-        command_timeout_seconds = seq_data.get("command_timeout_seconds", None)
-        response_timeout_seconds = seq_data.get("response_timeout_seconds", None)
+        command_timeout_ms = seq_data.get("command_timeout_ms", None)
+        response_timeout_ms = seq_data.get("response_timeout_ms", None)
         response_behavior = seq_data.get("response_behavior", None)
         arg_type = seq_data.get("arg_type", None)
 
@@ -460,8 +460,8 @@ class command_sequence(command):
             arg_type=arg_type,
             wait_for_command_completion=wait_for_command_completion,
             continue_on_failure=continue_on_failure,
-            command_timeout_seconds=command_timeout_seconds,
-            response_timeout_seconds=response_timeout_seconds,
+            command_timeout_ms=command_timeout_ms,
+            response_timeout_ms=response_timeout_ms,
             response_behavior=response_behavior,
             suite=suite,
         )
@@ -484,8 +484,8 @@ class command_sequences(assembly_submodel):
         self.description = None
         self.preamble = None
         self.num_concurrent_sequences = None
-        self.command_timeout_seconds = None
-        self.response_timeout_seconds = None
+        self.command_timeout_ms = None
+        self.response_timeout_ms = None
         self.includes = []
         self.sequences = OrderedDict()
         self.sequence_names = []
@@ -514,11 +514,11 @@ class command_sequences(assembly_submodel):
                 "buffer size."
             )
 
-        if "command_timeout_seconds" in self.data:
-            self.command_timeout_seconds = self.data["command_timeout_seconds"]
+        if "command_timeout_ms" in self.data:
+            self.command_timeout_ms = self.data["command_timeout_ms"]
 
-        if "response_timeout_seconds" in self.data:
-            self.response_timeout_seconds = self.data["response_timeout_seconds"]
+        if "response_timeout_ms" in self.data:
+            self.response_timeout_ms = self.data["response_timeout_ms"]
 
         if "with" in self.data:
             self.includes = self.data["with"]

@@ -7,7 +7,7 @@ description: Example command sequences exercising the generator's features
 # packet type carries two frame summaries.
 num_concurrent_sequences: 2
 
-command_timeout_seconds: 10  # default wait for sub-command responses
+command_timeout_ms: 10000  # default wait for sub-command responses
 
 sequences:
   # Simple sequence with no arguments
@@ -42,7 +42,7 @@ sequences:
     continue_on_failure: false
     # Longer than the suite's command timeout, so the per-sequence response
     # timeout override is observable in tests.
-    response_timeout_seconds: 20
+    response_timeout_ms: 20000
 
     sequence:
       - command: Component_A.Command_1
