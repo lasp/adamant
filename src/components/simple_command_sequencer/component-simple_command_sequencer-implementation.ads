@@ -51,6 +51,10 @@ private
    type Instance is new Simple_Command_Sequencer.Base_Instance with record
       Sequence_Frames : Simple_Sequencer_Types.Sequence_Frame_Array_Access := null;
       Sequences : Simple_Sequencer_Types.Sequences_Access := null;
+      -- Where the next frame search starts: one past the frame claimed most
+      -- recently, so frames are handed out round robin and the frame released
+      -- most recently is the last one reused.
+      Next_Frame_Hint : Simple_Sequencer_Types.Frame_Id_Type := 0;
       Summary_Packet_Period : Interfaces.Unsigned_16 := 0;
       -- Ticks since the last summary packet. Reset on emission and by
       -- Set_Summary_Packet_Period.
