@@ -389,13 +389,11 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Command_Failure_History.Get_Count, 1);
       Natural_Assert.Eq (T.Sequence_Aborted_History.Get_Count, 1);
 
-      -- The failure response already aborted the sequence and set the frame to Not_Running
+      -- Both events blame step 0, the step the frame was parked on.
       Sequence_Step_Command_Event_Info_Assert.Eq (T.Command_Failure_History.Get (1),
-         (Sequence_Id => 1, Frame_Id => 0, Step => 1, Command_Id => Component_A_Commands.Get_Command_3_Id));
-
-      -- Step was incremented to 1 before the response arrived
+         (Sequence_Id => 1, Frame_Id => 0, Step => 0, Command_Id => Component_A_Commands.Get_Command_3_Id));
       Sequence_Step_Event_Info_Assert.Eq (T.Sequence_Aborted_History.Get (1),
-         (Sequence_Id => 1, Frame_Id => 0, Step => 1));
+         (Sequence_Id => 1, Frame_Id => 0, Step => 0));
 
       -- Subsequent ticks must not dispatch any further commands
       T.Tick_T_Send (((0, 0), 0));
@@ -927,7 +925,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
       Natural_Assert.Eq (T.Sequence_Timeout_History.Get_Count, 1);
-      Sequence_Step_Event_Info_Assert.Eq (T.Sequence_Timeout_History.Get (1), (Sequence_Id => 0, Frame_Id => 0, Step => 1));
+      Sequence_Step_Event_Info_Assert.Eq (T.Sequence_Timeout_History.Get (1), (Sequence_Id => 0, Frame_Id => 0, Step => 0));
    end Test_Timeout;
 
    --  With the clock at the end of its range the response deadline cannot be
@@ -1470,7 +1468,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
          Pkt : constant Packet.T := T.Summary_Packet_History.Get (2);
       begin
          Sequence_Frame_Summary_Assert.Eq (Get_Frame_Summary (Pkt, 0),
-            (Sequence_Id => 6, Step => 1, Status => Waiting_For_Cmd_Resp, Response_Behavior => Send_After_Sequence_Completion, Operator_Source_Id => 100));
+            (Sequence_Id => 6, Step => 0, Status => Waiting_For_Cmd_Resp, Response_Behavior => Send_After_Sequence_Completion, Operator_Source_Id => 100));
          Sequence_Frame_Summary_Assert.Eq (Get_Frame_Summary (Pkt, 1),
             (Sequence_Id => 0, Step => 0, Status => Not_Running, Response_Behavior => Send_After_Sequence_Start, Operator_Source_Id => 0));
 
@@ -1484,7 +1482,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
                Suite_Record.Serialization.From_Byte_Array (Pkt.Buffer (Pkt.Buffer'First .. Pkt.Buffer'First + Suite_Record.Serialization.Serialized_Length - 1));
          begin
             Sequence_Frame_Summary_Assert.Eq (Rec.Frame_0_Summary,
-               (Sequence_Id => 6, Step => 1, Status => Waiting_For_Cmd_Resp, Response_Behavior => Send_After_Sequence_Completion, Operator_Source_Id => 100));
+               (Sequence_Id => 6, Step => 0, Status => Waiting_For_Cmd_Resp, Response_Behavior => Send_After_Sequence_Completion, Operator_Source_Id => 100));
             Sequence_Frame_Summary_Assert.Eq (Rec.Frame_1_Summary,
                (Sequence_Id => 0, Step => 0, Status => Not_Running, Response_Behavior => Send_After_Sequence_Start, Operator_Source_Id => 0));
          end;
