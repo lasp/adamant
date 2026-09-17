@@ -105,11 +105,14 @@ package body Component.Simple_Command_Sequencer.Implementation is
    -- Return `Frame` to idle, update the counters and data products, and emit
    -- any deferred reply. Only Status is reset: the next claim re-seeds the
    -- rest, and while idle it lets the summary packet report the last run.
+   -- Kill_All_Sequences passes Update_Frame_Counts as False and refreshes the
+   -- frame counts once for every frame it kills.
    procedure Finish_Sequence
      (Self  : in out Instance;
       Frame : in out Sequence_Frame;
       Stat  : in Command_Response_Status.E;
-      Time  : in Sys_Time.T) is
+      Time  : in Sys_Time.T;
+      Update_Frame_Counts : in Boolean := True) is
       use Command_Response_Status;
    begin
       Frame.Status := Not_Running;
@@ -122,7 +125,9 @@ package body Component.Simple_Command_Sequencer.Implementation is
          Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Sequences_Failed_Count (Time, (Value => Self.Sequences_Failed_Count)));
          Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Last_Sequence_Failed (Time, (Value => Frame.Sequence_Id)));
       end if;
-      Send_Frame_Count_Data_Products (Self, Time);
+      if Update_Frame_Counts then
+         Send_Frame_Count_Data_Products (Self, Time);
+      end if;
       Send_Deferred_Response_If_Pending (Self, Frame, Stat);
    end Finish_Sequence;
 
@@ -529,14 +534,19 @@ package body Component.Simple_Command_Sequencer.Implementation is
    overriding function Kill_All_Sequences (Self : in out Instance) return Command_Execution_Status.E is
       use Command_Execution_Status;
       Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
+      Killed_Any : Boolean := False;
    begin
       for Frame of Self.Sequence_Frames.all loop
          if Frame.Status /= Not_Running then
             -- Any deferred reply is sent now with Failure, so the operator's
             -- command does not hang.
-            Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);
+            Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time, Update_Frame_Counts => False);
+            Killed_Any := True;
          end if;
       end loop;
+      if Killed_Any then
+         Send_Frame_Count_Data_Products (Self, Time);
+      end if;
       Self.Event_T_Send_If_Connected (Self.Events.Killed_All_Sequences (Time));
       return Success;
    end Kill_All_Sequences;
