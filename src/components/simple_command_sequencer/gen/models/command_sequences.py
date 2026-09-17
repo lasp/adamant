@@ -35,7 +35,6 @@ class sequence_step(object):
         self,
         command=None,
         arg=None,
-        wait_for_completion=None,
         sleep_ms=None,
     ):
         # A step is either a command dispatch or a sleep, never both. The
@@ -71,7 +70,6 @@ class sequence_step(object):
         else:
             self.arg = arg
             self.dynamic_arg = None
-        self._wait_for_completion = wait_for_completion
 
         # Set during assembly resolution:
         self.component = None
@@ -107,12 +105,6 @@ class sequence_step(object):
         self.component_name = parts[0]
         self.command_name = parts[1]
 
-    def set_defaults(self, parent_sequence):
-        if self._wait_for_completion is None:
-            self.wait_for_completion = parent_sequence.wait_for_command_completion
-        else:
-            self.wait_for_completion = self._wait_for_completion
-
     def validate(self):
         # Mutual exclusivity: exactly one of command/sleep_ms.
         if self.command is None and not self.is_sleep():
@@ -123,16 +115,12 @@ class sequence_step(object):
             raise ModelException(
                 f"Step {self.index} cannot specify both 'command' and 'sleep_ms'"
             )
-        # Sleep-form: no arg/wait_for_completion fields allowed, and static
-        # durations must fit a Natural (and thus an Ada.Real_Time.Time_Span).
+        # Sleep-form: no arg field allowed, and static durations must fit a
+        # Natural (and thus an Ada.Real_Time.Time_Span).
         if self.is_sleep():
             if self.arg is not None or self.dynamic_arg is not None:
                 raise ModelException(
                     f"Step {self.index} has 'sleep_ms' and cannot also have 'arg'"
-                )
-            if self._wait_for_completion is not None:
-                raise ModelException(
-                    f"Step {self.index} has 'sleep_ms' and cannot also have 'wait_for_completion'"
                 )
             if self.sleep_ms is not None and not (
                 0 <= self.sleep_ms <= self.MAX_STATIC_SLEEP_MS
@@ -274,14 +262,18 @@ class sequence_step(object):
     @classmethod
     @throw_exception_with_lineno
     def from_step_data(cls, step_data):
+        if "wait_for_completion" in step_data:
+            raise ModelException(
+                "Step has 'wait_for_completion', but the sequencer waits for "
+                "sub-command responses per sequence, not per step: set "
+                "wait_for_command_completion on the sequence instead."
+            )
         command = step_data.get("command", None)
         arg = step_data.get("arg", None)
-        wait_for_completion = step_data.get("wait_for_completion", None)
         sleep_ms = step_data.get("sleep_ms", None)
         return cls(
             command=command,
             arg=arg,
-            wait_for_completion=wait_for_completion,
             sleep_ms=sleep_ms,
         )
 
@@ -367,7 +359,6 @@ class command_sequence(command):
 
         for idx, step in enumerate(self.steps):
             step.index = idx
-            step.set_defaults(self)
             step.validate()
 
             if step.arg and "Arg" in step.arg and not self.arg_type:

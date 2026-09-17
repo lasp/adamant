@@ -87,9 +87,8 @@ mapping:
             type: bool
             default: true
             desc: |
-              Default setting for whether to wait for each sub-command to
-              complete before executing the next one. Individual steps can
-              override this.
+              Whether to wait for each sub-command's response before executing
+              the next step. Applies to every command step of the sequence.
 
           continue_on_failure:
             required: false
@@ -161,15 +160,6 @@ mapping:
                         - "(Mode => Arg.Mode, Enable => True)" - construct a record
                         - "42" - a literal value
 
-                  wait_for_completion:
-                    required: false
-                    type: bool
-                    desc: |
-                      Whether to wait for this specific command to complete before
-                      proceeding. If not specified, uses the parent sequence's
-                      wait_for_command_completion setting. Only valid alongside
-                      `command:`.
-
                   sleep_ms:
                     required: false
                     type: text
@@ -177,7 +167,7 @@ mapping:
                       Milliseconds to pause the sequence. Not bus-routed; the
                       sequencer frame parks itself for the duration without
                       issuing any command. Mutually exclusive with
-                      `command:`/`arg:`/`wait_for_completion:`.
+                      `command:`/`arg:`.
 
                       Either a static integer (0 .. 2**31 - 1, so it always fits
                       an Ada.Real_Time.Time_Span; enforced by the model), or a
