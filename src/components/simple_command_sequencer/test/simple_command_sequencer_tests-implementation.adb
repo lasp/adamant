@@ -768,7 +768,8 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
       Sequence_Event_Info_Assert.Eq (T.Sequence_Completed_History.Get (1), (Sequence_Id => 2, Frame_Id => 0));
 
-      -- Frame 0 is now Not_Running; start a second sequence and confirm it reuses Frame 0
+      -- Frame 0 is Not_Running again, but frames are handed out round robin:
+      -- the second run lands on Frame 1, the other idle frame.
       Status := T.Commands.Run_Sequence (
          (Sequence_Id => 2, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
@@ -776,12 +777,26 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 2);
-      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (2), (Sequence_Id => 2, Frame_Id => 0));
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (2), (Sequence_Id => 2, Frame_Id => 1));
 
       T.Tick_T_Send (((0, 0), 0));
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 2);
-      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 4); -- 2 per run * 2 runs
+
+      -- Both frames idle again; the search wraps and the third run reuses Frame 0.
+      Status := T.Commands.Run_Sequence (
+         (Sequence_Id => 2, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 3);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (3), (Sequence_Id => 2, Frame_Id => 0));
+
+      T.Tick_T_Send (((0, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 3);
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 6); -- 2 per run * 3 runs
    end Test_Frame_Reuse_After_Completion;
 
    --  Dynamic sleep failures on Sequence_D. A duration above Natural'Last
@@ -824,7 +839,8 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 2);
       Natural_Assert.Eq (T.Sequence_Out_Of_Range_Sleep_History.Get_Count, 1);
-      Sequence_Sleep_Event_Info_Assert.Eq (T.Sequence_Out_Of_Range_Sleep_History.Get (1), (Sequence_Id => 3, Frame_Id => 0, Milliseconds => Natural'Last));
+      --  Round-robin allocation put this second run on Frame 1.
+      Sequence_Sleep_Event_Info_Assert.Eq (T.Sequence_Out_Of_Range_Sleep_History.Get (1), (Sequence_Id => 3, Frame_Id => 1, Milliseconds => Natural'Last));
    end Test_Out_Of_Range_Sleep;
 
    --  Sequence_I's first step is a static sleep. With the clock parked at the end of
@@ -1640,7 +1656,8 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Packed_U16_Assert.Eq (T.Frame_Running_Count_History.Get (T.Frame_Running_Count_History.Get_Count), (Value => 1));
-      T.Command_T_Send (T.Commands.Kill_Frame ((Value => 0)));
+      -- Round-robin allocation put this second run on Frame 1.
+      T.Command_T_Send (T.Commands.Kill_Frame ((Value => 1)));
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Packed_U32_Assert.Eq (T.Sequences_Failed_Count_History.Get (T.Sequences_Failed_Count_History.Get_Count), (Value => 1));
       Packed_U16_Assert.Eq (T.Last_Sequence_Failed_History.Get (T.Last_Sequence_Failed_History.Get_Count), (Value => 0));

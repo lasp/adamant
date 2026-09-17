@@ -24,15 +24,25 @@ package body Component.Simple_Command_Sequencer.Implementation is
       Self.Sequences := Config.Sequences;
    end Init;
 
+   -- Scan from Next_Frame_Hint and wrap, so a frame is not reused until every
+   -- other idle frame has had a turn. Sub-command responses are matched to a
+   -- frame by source id alone, so a response still in flight to a frame that
+   -- just finished is least likely to meet a new run there.
    function Find_Available_Sequence_Frame (Self : in Instance; Frame_Id : out Frame_Id_Type) return Boolean is
+      Frames : Simple_Sequencer_Types.Sequence_Frame_Array renames Self.Sequence_Frames.all;
+      Count : constant Natural := Frames'Length;
    begin
       Frame_Id := 0;
 
-      for Frame of Self.Sequence_Frames.all loop
-         if Frame.Status = Not_Running and then Frame.Has_Source_Id then
-            Frame_Id := Frame.Frame_Id;
-            return True;
-         end if;
+      for Offset in 0 .. Count - 1 loop
+         declare
+            Id : constant Frame_Id_Type := Frames'First + Frame_Id_Type ((Natural (Self.Next_Frame_Hint - Frames'First) + Offset) mod Count);
+         begin
+            if Frames (Id).Status = Not_Running and then Frames (Id).Has_Source_Id then
+               Frame_Id := Id;
+               return True;
+            end if;
+         end;
       end loop;
       return False;
    end Find_Available_Sequence_Frame;
@@ -492,6 +502,8 @@ package body Component.Simple_Command_Sequencer.Implementation is
             Self.Event_T_Send_If_Connected (Self.Events.No_Frame_Available (Time));
             return Failure;
          end if;
+         -- The next claim starts its search after this frame.
+         Self.Next_Frame_Hint := (if Available_Id = Self.Sequence_Frames.all'Last then Self.Sequence_Frames.all'First else Available_Id + 1);
 
          declare
             Frame : Sequence_Frame renames Self.Sequence_Frames.all (Available_Id);
