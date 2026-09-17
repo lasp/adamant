@@ -1,0 +1,180 @@
+---
+description: This is an assembly for testing the Simple Command Sequencer component.
+########################################
+components:
+########################################
+# Include some components so our assembly has commands.
+  - type: Test_Component
+    name: Component_A
+  - type: Test_Component
+    name: Component_B
+  - type: Test_Component
+    name: Component_C
+# The sequencer itself, so sequences can call other sequences as commands.
+# Declared after Component_A/B/C so their command id bases stay stable.
+  - type: Simple_Command_Sequencer
+    name: Sequencer
+    priority: 1
+    stack_size: 2000
+    secondary_stack_size: 1
+    init_base:
+      - "Queue_Size => Sequencer.Get_Max_Queue_Element_Size * 10"
+    init:
+      - "Config => Test_Assembly_Command_Sequences_Example_Sequences.Config"
+    # Explicit command id base equal to what auto-assignment would pick, so the
+    # deferred explicit-id-base path yields the same dictionary.
+    set_id_bases:
+      - "Command_Id_Base => 25"
+# A command router, so the assembly is wired the way a flight assembly is:
+# sub-commands leave the sequencer through the router and responses come back
+# through its per-frame forwarding indices. The unit test never drives this
+# wiring (the tester connects to the component directly); it exists so the
+# assembly model sees a complete system. Declared last so its auto-assigned
+# ids follow everything else.
+  - type: Command_Router
+    name: Router
+    priority: 2
+    stack_size: 2000
+    secondary_stack_size: 1
+    init_base:
+      - "Queue_Size => Router.Get_Max_Queue_Element_Size * 5"
+      # Index 1 loops back to the router for its noop test; 2 is the
+      # sequencer; 3-5 are the stub command receivers.
+      - "Command_T_Send_Count => 5"
+      # Index 1 loops back for the router's Noop_Response self test; indices
+      # 2-5 give each of the sequencer's four frames its Register_Source
+      # handshake and then its sub-command responses. The count must match
+      # the sequencer's frame count exactly.
+      - "Command_Response_T_To_Forward_Send_Count => 5"
+    init:
+      - "Max_Number_Of_Commands => Test_Assembly_Commands.Number_Of_Commands"
+connections:
+  # Commands: the sequencer's sub-commands enter the router, which routes each
+  # to its destination.
+  - from_component: Sequencer
+    from_connector: Command_T_Send
+    to_component: Router
+    to_connector: Command_T_To_Route_Recv_Async
+  - from_component: Router
+    from_connector: Command_T_Send
+    from_index: 1
+    to_component: Router
+    to_connector: Command_T_Recv_Async
+  - from_component: Router
+    from_connector: Command_T_Send
+    from_index: 2
+    to_component: Sequencer
+    to_connector: Command_T_Recv_Async
+  - from_component: Router
+    from_connector: Command_T_Send
+    from_index: 3
+    to_component: Component_A
+    to_connector: Command_T_Recv_Sync
+  - from_component: Router
+    from_connector: Command_T_Send
+    from_index: 4
+    to_component: Component_B
+    to_connector: Command_T_Recv_Sync
+  - from_component: Router
+    from_connector: Command_T_Send
+    from_index: 5
+    to_component: Component_C
+    to_connector: Command_T_Recv_Sync
+  # Responses: every commanded component replies to the router, which forwards
+  # each response to its source by source id.
+  - from_component: Router
+    from_connector: Command_Response_T_Send
+    to_component: Router
+    to_connector: Command_Response_T_Recv_Async
+  - from_component: Sequencer
+    from_connector: Command_Response_T_Send
+    to_component: Router
+    to_connector: Command_Response_T_Recv_Async
+  - from_component: Component_A
+    from_connector: Command_Response_T_Send
+    to_component: Router
+    to_connector: Command_Response_T_Recv_Async
+  - from_component: Component_B
+    from_connector: Command_Response_T_Send
+    to_component: Router
+    to_connector: Command_Response_T_Recv_Async
+  - from_component: Component_C
+    from_connector: Command_Response_T_Send
+    to_component: Router
+    to_connector: Command_Response_T_Recv_Async
+  - from_component: Router
+    from_connector: Command_Response_T_To_Forward_Send
+    from_index: 1
+    to_component: Router
+    to_connector: Command_Response_T_Recv_Async
+  # One forwarding index per sequencer frame (four: two waiting, two non-waiting).
+  - from_component: Router
+    from_connector: Command_Response_T_To_Forward_Send
+    from_index: 2
+    to_component: Sequencer
+    to_connector: Command_Response_T_Recv_Async
+  - from_component: Router
+    from_connector: Command_Response_T_To_Forward_Send
+    from_index: 3
+    to_component: Sequencer
+    to_connector: Command_Response_T_Recv_Async
+  - from_component: Router
+    from_connector: Command_Response_T_To_Forward_Send
+    from_index: 4
+    to_component: Sequencer
+    to_connector: Command_Response_T_Recv_Async
+  - from_component: Router
+    from_connector: Command_Response_T_To_Forward_Send
+    from_index: 5
+    to_component: Sequencer
+    to_connector: Command_Response_T_Recv_Async
+  # Sinks and sources with no consumer in this assembly: the unit test supplies
+  # time, ticks, and event/data product/packet sinks through the tester.
+  - from_component: ignore
+    from_connector: ignore
+    to_component: Sequencer
+    to_connector: Tick_T_Recv_Async
+  - from_component: Sequencer
+    from_connector: Sys_Time_T_Get
+    to_component: ignore
+    to_connector: ignore
+  - from_component: Sequencer
+    from_connector: Event_T_Send
+    to_component: ignore
+    to_connector: ignore
+  - from_component: Sequencer
+    from_connector: Data_Product_T_Send
+    to_component: ignore
+    to_connector: ignore
+  - from_component: Sequencer
+    from_connector: Packet_T_Send
+    to_component: ignore
+    to_connector: ignore
+  - from_component: ignore
+    from_connector: ignore
+    to_component: Router
+    to_connector: Command_T_To_Route_Recv_Sync
+  - from_component: Router
+    from_connector: Sys_Time_T_Get
+    to_component: ignore
+    to_connector: ignore
+  - from_component: Router
+    from_connector: Event_T_Send
+    to_component: ignore
+    to_connector: ignore
+  - from_component: Router
+    from_connector: Data_Product_T_Send
+    to_component: ignore
+    to_connector: ignore
+  - from_component: Component_A
+    from_connector: Data_Product_T_Send
+    to_component: ignore
+    to_connector: ignore
+  - from_component: Component_B
+    from_connector: Data_Product_T_Send
+    to_component: ignore
+    to_connector: ignore
+  - from_component: Component_C
+    from_connector: Data_Product_T_Send
+    to_component: ignore
+    to_connector: ignore

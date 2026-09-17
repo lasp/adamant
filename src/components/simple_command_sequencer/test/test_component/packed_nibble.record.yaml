@@ -1,0 +1,13 @@
+---
+description: A 4-bit value padded to one byte, used to exercise dynamic-arg repacking of sub-byte fields.
+preamble: |
+  type Four_Bit_Type is mod 2**4;
+fields:
+  - name: Value
+    description: The 4-bit value.
+    type: Four_Bit_Type
+    format: U4
+  - name: Reserved
+    description: Pad bits out to a byte boundary.
+    type: Four_Bit_Type
+    format: U4

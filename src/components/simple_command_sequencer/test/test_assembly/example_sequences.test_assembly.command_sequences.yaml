@@ -1,0 +1,144 @@
+# Command Sequences Definition
+# This file defines composite commands that execute sequences of sub-commands
+
+description: Example command sequences exercising the generator's features
+
+# Four frames in two pools: waiting sequences run on frames 0 and 1, non-waiting
+# sequences on frames 2 and 3, and the generated summary packet type carries
+# four frame summaries.
+num_waiting_frames: 2
+num_non_waiting_frames: 2
+
+command_timeout_ms: 10000  # default wait for sub-command responses
+
+sequences:
+  # Simple sequence with no arguments
+  - name: Sequence_A
+    description: Execute commands on component A
+    wait_for_command_completion: true
+    continue_on_failure: true
+
+    sequence:
+      - command: Component_A.Command_1
+      - command: Component_A.Command_2
+        arg: (Seconds => 3, Subseconds => 14)
+      - sleep_ms: 3000
+      - command: Component_A.Command_3
+        arg: (Value => 3)
+
+  - name: Sequence_B
+    description: Perform generic arguments with component A and B
+    wait_for_command_completion: true
+    continue_on_failure: false
+    arg_type: Sequence_B_Arg.T
+
+    sequence:
+      - command: Component_A.Command_3
+        arg: Arg.Component_A_Arg
+      - command: Component_B.Command_3
+        arg: Arg.Component_B_Arg
+
+  - name: Sequence_C
+    description: No-wait sequence for direct-dispatch testing
+    wait_for_command_completion: false
+
+    sequence:
+      - command: Component_A.Command_1
+      - command: Component_A.Command_1
+
+  - name: Sequence_D
+    description: Sequence with a dynamic sleep duration taken from the sequence argument
+    wait_for_command_completion: true
+    continue_on_failure: false
+    arg_type: Packed_Natural.T
+
+    sequence:
+      - sleep_ms: Arg
+
+  # Calls another sequence. Each sequence is a command on the sequencer, so a
+  # sub-sequence step is a command step targeting the sequencer's own command.
+  # Sequence_C replies on start, so this sequence resumes as soon as it starts.
+  - name: Sequence_E
+    description: Call Sequence_C as a sub-sequence, then run a regular command
+    wait_for_command_completion: true
+    continue_on_failure: false
+
+    sequence:
+      - command: Sequencer.Sequence_C
+      - command: Component_A.Command_1
+
+  # Command response deferred until completion: the operator's reply carries
+  # the final success/failure instead of a start acknowledgement.
+  - name: Sequence_F
+    description: No-wait sequence with a statically deferred command response
+    wait_for_command_completion: false
+    response_behavior: send_after_sequence_completion
+
+    sequence:
+      - command: Component_A.Command_1
+
+  # Deferred response and waits on its sub-command, so the reply arrives when
+  # the sub-command completes (or the sequence aborts, times out, or is killed).
+  - name: Sequence_G
+    description: Waiting sequence with a statically deferred command response
+    wait_for_command_completion: true
+    continue_on_failure: false
+    response_behavior: send_after_sequence_completion
+
+    sequence:
+      - command: Component_A.Command_1
+
+  # Dynamic-arg repacking: the argument's leading 4-bit pad puts both leaf
+  # fields at non-byte-aligned offsets, so byte-offset slicing would corrupt them.
+  - name: Sequence_H
+    description: Dynamic steps traversing misaligned 8-bit and 16-bit packed fields
+    wait_for_command_completion: true
+    continue_on_failure: false
+    arg_type: Nibble_Test_Args.T
+
+    sequence:
+      - command: Component_A.Command_8
+        arg: Arg.Wide
+      - command: Component_A.Command_7
+        arg: Arg.Nibble
+
+  # First step is a static sleep, so wake-time overflow can be exercised
+  # without a command step's response deadline overflowing first.
+  - name: Sequence_I
+    description: A lone static sleep, for wake-time overflow coverage
+    wait_for_command_completion: true
+    continue_on_failure: false
+
+    sequence:
+      - sleep_ms: 3000
+
+  # The two sequences below take Validated_Args, whose Mode enumeration can
+  # fail validation, for the invalid-dynamic-argument failure paths.
+  - name: Sequence_J
+    description: Dynamic command argument resolved from a validatable record
+    wait_for_command_completion: true
+    continue_on_failure: false
+    arg_type: Validated_Args.T
+
+    sequence:
+      - command: Component_A.Command_3
+        arg: Arg.Duration
+
+  - name: Sequence_K
+    description: Dynamic sleep resolved from a validatable record
+    wait_for_command_completion: true
+    continue_on_failure: false
+    arg_type: Validated_Args.T
+
+    sequence:
+      - sleep_ms: Arg.Sleep_Duration
+
+  # Non-waiting sequence that stays busy across a tick (the sleep parks it), so a
+  # test can fill the non-waiting pool.
+  - name: Sequence_L
+    description: Non-waiting sequence with a sleep, for non-waiting pool exhaustion coverage
+    wait_for_command_completion: false
+
+    sequence:
+      - sleep_ms: 3000
+      - command: Component_A.Command_1
