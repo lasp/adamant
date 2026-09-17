@@ -87,6 +87,8 @@ package Simple_Sequencer_Types is
    type Sequence_Frame is record
       Sequence_Id : Interfaces.Unsigned_16 := 0;
       Frame_Id : Frame_Id_Type := 0;
+      -- The step the frame is executing or parked on; one past the last step
+      -- once the sequence has completed.
       Step : Interfaces.Unsigned_16 := 0;
       Status : Sequence_Enums.Sequence_State.E := Sequence_Enums.Sequence_State.Not_Running;
       -- Wake time while Waiting_For_Time:
