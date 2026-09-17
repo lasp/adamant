@@ -5,8 +5,10 @@
 {% endif %}
 with Simple_Sequencer_Types; use Simple_Sequencer_Types;
 with {{ assembly_name }}_Commands; use {{ assembly_name }}_Commands;
+{% if needs_to_arg %}
 with Command_Types;
 with Basic_Types;
+{% endif %}
 with Sequence_Enums;
 with Ada.Real_Time;
 {% for include in includes %}
