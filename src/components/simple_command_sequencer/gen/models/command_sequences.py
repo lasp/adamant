@@ -303,7 +303,7 @@ class command_sequence(command):
         description=None,
         arg_type=None,
         wait_for_command_completion=True,
-        continue_on_failure=False,
+        continue_on_failure=None,
         command_timeout_ms=None,
         response_behavior=None,
         suite=None,
@@ -312,7 +312,10 @@ class command_sequence(command):
         self.description = description
         self.arg_type = arg_type
         self.wait_for_command_completion = wait_for_command_completion
-        self.continue_on_failure = continue_on_failure
+        # None means the key was omitted: the sequence aborts on failure, but
+        # the author promised nothing.
+        self.continue_on_failure = bool(continue_on_failure)
+        self._continue_on_failure_explicit = continue_on_failure is not None
         self._command_timeout_ms = command_timeout_ms
         self.suite = suite
         self.steps = sequence_steps
@@ -378,6 +381,24 @@ class command_sequence(command):
                     f"'{step.dynamic_sleep_arg}' but sequence '{self.name}' "
                     "has no arg_type defined"
                 )
+
+        # A sub-command failure is only ever seen when the sequence waits for
+        # its responses, so on a no-wait sequence continue_on_failure can never
+        # abort anything. Refuse an explicit false there rather than let the
+        # yaml promise an abort the sequencer cannot deliver. A sequence with
+        # no command steps has nothing to fail and is left alone.
+        if (
+            self._continue_on_failure_explicit
+            and not self.continue_on_failure
+            and not self.wait_for_command_completion
+            and any(step.command is not None for step in self.steps)
+        ):
+            raise ModelException(
+                f"Sequence '{self.name}' sets continue_on_failure: false but "
+                "wait_for_command_completion: false, so no sub-command failure "
+                "can ever be seen and the sequence could never abort. Remove "
+                "continue_on_failure, or wait for command completion."
+            )
         # The command's arg type is the sequence's own arg_type (or none), a
         # user-written, normally-registered type; nothing is generated for it.
         super(command_sequence, self).__init__(
@@ -408,7 +429,7 @@ class command_sequence(command):
         name = seq_data["name"]
         description = seq_data.get("description", None)
         wait_for_command_completion = seq_data.get("wait_for_command_completion", True)
-        continue_on_failure = seq_data.get("continue_on_failure", False)
+        continue_on_failure = seq_data.get("continue_on_failure", None)
         command_timeout_ms = seq_data.get("command_timeout_ms", None)
         response_behavior = seq_data.get("response_behavior", None)
         arg_type = seq_data.get("arg_type", None)

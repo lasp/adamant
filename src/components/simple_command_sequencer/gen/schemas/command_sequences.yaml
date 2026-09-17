@@ -99,6 +99,11 @@ mapping:
               If true, the sequence will continue executing even if a sub-command
               fails. If false, the sequence will abort on the first failure.
 
+              A sub-command failure is only visible when the sequence waits for
+              its responses, so setting this key to false on a sequence with
+              wait_for_command_completion: false is rejected: such a sequence
+              could never abort.
+
           response_behavior:
             required: false
             type: str
