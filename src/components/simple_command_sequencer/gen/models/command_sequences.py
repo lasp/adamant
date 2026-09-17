@@ -130,6 +130,17 @@ class sequence_step(object):
                     f"range 0 .. {self.MAX_STATIC_SLEEP_MS}"
                 )
             return
+        # A static arg is baked into the step table at build time, so it cannot
+        # carry a per-call value: any mention of Arg outside a pure reference
+        # would be emitted verbatim and fail to compile in the generated
+        # package, far from the yaml that caused it.
+        if self.arg and re.search(r"\bArg\b", self.arg):
+            raise ModelException(
+                f"Step {self.index} arg '{self.arg}' mixes a reference to the "
+                "sequence argument with other Ada. A step arg must be either "
+                "exactly 'Arg' or a field path 'Arg.Field[.Subfield]', or a "
+                "static Ada expression that does not mention Arg."
+            )
         # Command-form parenthesis sanity.
         if self.arg:
             if self.arg.count("(") != self.arg.count(")"):
@@ -227,10 +238,8 @@ class sequence_step(object):
         )
 
     def get_arg_expression(self):
-        """Replace bare 'Arg' references with 'Sequence_Arg' in the command arg expression."""
-        if not self.arg:
-            return None
-        return re.sub(r'\bArg\b', 'Sequence_Arg', self.arg)
+        """The static Ada expression baked into the step table, or None."""
+        return self.arg or None
 
     def get_sleep_expression(self):
         """Render the static sleep duration (a plain Natural) for the step table."""
@@ -361,7 +370,7 @@ class command_sequence(command):
             step.index = idx
             step.validate()
 
-            if step.arg and "Arg" in step.arg and not self.arg_type:
+            if step.is_dynamic() and not self.arg_type:
                 raise ModelException(
                     f"Step {idx} references 'Arg' but sequence '{self.name}' "
                     "has no arg_type defined"
