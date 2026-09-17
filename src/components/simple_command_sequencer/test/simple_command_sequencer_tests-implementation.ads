@@ -56,6 +56,8 @@ private
    overriding procedure Test_Invalid_Dynamic_Sleep_Argument (Self : in out Instance);
    overriding procedure Test_Ghost_Command_Rejections (Self : in out Instance);
    overriding procedure Test_Invalid_Sequence_Argument_Length (Self : in out Instance);
+   overriding procedure Test_Pool_Selection (Self : in out Instance);
+   overriding procedure Test_Non_Waiting_For_Response_Pool_Exhausted (Self : in out Instance);
 
    -- Test data and state:
    type Instance is new Simple_Command_Sequencer_Tests.Base_Instance with record

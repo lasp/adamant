@@ -10,3 +10,10 @@ enums:
     literals:
       - name: Send_After_Sequence_Start
       - name: Send_After_Sequence_Completion
+  - name: Frame_Pool
+    description: The two separate sets of sequence frames, split by whether the sequences they run wait for their sub-commands' responses. Keeping the pools separate means a response still in flight to a finished non-waiting-for-response run can never wake a frame parked waiting for a response. Frame ids are global across both pools, with the waiting-for-response frames registeredfirst, followed by the non-waiting-for-response frames.
+    literals:
+      - name: Waiting_For_Response_Frame
+        description: A frame for sequences declared with wait_for_command_completion true. The frame parks after each command step until that sub-command's response arrives or its timeout expires. The pool holds num_waiting_for_response_frames frames.
+      - name: Non_Waiting_For_Response_Frame
+        description: A frame for sequences declared with wait_for_command_completion false. Command steps are dispatched without awaiting their responses, though the frame still parks for sleep steps. The pool holds num_non_waiting_for_response_frames frames.

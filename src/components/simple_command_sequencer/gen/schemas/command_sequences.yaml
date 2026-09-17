@@ -16,18 +16,36 @@ mapping:
     desc: |
       Custom preamble text to include in the generated Ada package.
 
-  num_concurrent_sequences:
-    required: true
+  num_waiting_for_response_frames:
+    required: false
     type: int
-    range: { min: 1 }
+    range: { min: 0 }
+    default: 0
     desc: |
-      The number of sequence frames (concurrently running sequences) a
-      sequencer instance initialized with this suite allocates. This also
-      sizes the suite's generated summary packet ground type (one
-      Sequence_Frame_Summary per frame), so the frame pool and the packet
-      layout can never disagree. The upper bound -- how many frame
-      summaries fit in one packet buffer -- is enforced by the model
-      against the project configuration.
+      Frames for sequences that wait for their sub-commands' responses
+      (wait_for_command_completion true), one concurrently running sequence
+      per frame. These take frame ids 0 .. num_waiting_for_response_frames - 1. Must be
+      at least 1 if any sequence in the suite waits, and exactly 0 if none
+      does; both are enforced by the model. Defaults to 0.
+
+  num_non_waiting_for_response_frames:
+    required: false
+    type: int
+    range: { min: 0 }
+    default: 0
+    desc: |
+      Frames for sequences that do not wait for their sub-commands' responses
+      (wait_for_command_completion false), one concurrently running sequence
+      per frame. These take the frame ids after the waiting-for-response frames. Must be
+      at least 1 if any sequence in the suite does not wait, and exactly 0 if
+      none does; both are enforced by the model. Defaults to 0.
+
+      The pools are separate so a response still in flight to a finished
+      non-waiting-for-response run can never wake a frame that is parked waiting. The two
+      counts together size the suite's generated summary packet type (one
+      Sequence_Frame_Summary per frame); their sum must be at least 1 and at
+      most the number of summaries that fit one packet buffer, enforced by
+      the model.
 
   command_timeout_ms:
     required: false

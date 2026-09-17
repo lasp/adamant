@@ -18,46 +18,86 @@ package body Component.Simple_Command_Sequencer.Implementation is
    subtype Frame_Id_Type is Simple_Sequencer_Types.Frame_Id_Type;
 
    overriding procedure Init (Self : in out Instance; Config : in Simple_Sequencer_Types.Sequencer_Config) is
+      -- Re-checks at Init what the model guaranteed at build time: a total
+      -- outside 1 .. Num_Concurrent_Sequences_Type'Last fails here, on the
+      -- subtype, before either pool is allocated. The assertion at the end
+      -- confirms the two pools together hold exactly this many frames.
+      Num_Frames : constant Simple_Sequencer_Types.Num_Concurrent_Sequences_Type := Config.Num_Waiting_For_Response_Frames + Config.Num_Non_Waiting_For_Response_Frames;
+
+      -- Set up one pool of Count frames whose ids start at First, each frame
+      -- stamped with its id, with the search cursor on the first frame. A pool
+      -- with no frames gets an empty array (1 .. 0), never searched.
+      function Init_Pool (First : in Natural; Count : in Natural) return Frame_Pool is
+         Frames : constant Simple_Sequencer_Types.Sequence_Frame_Array_Access :=
+            (if Count = 0
+             then new Simple_Sequencer_Types.Sequence_Frame_Array (1 .. 0)
+             else new Simple_Sequencer_Types.Sequence_Frame_Array (Frame_Id_Type (First) .. Frame_Id_Type (First + Count - 1)));
+      begin
+         Frames.all := [for Id in Frames.all'Range => (Frame_Id => Id, others => <>)];
+         return (Frames => Frames, Next_Search_Start => Frames.all'First);
+      end Init_Pool;
    begin
-      Self.Sequence_Frames := new Simple_Sequencer_Types.Sequence_Frame_Array (0 .. Frame_Id_Type (Config.Num_Concurrent_Sequences - 1));
-      Self.Sequence_Frames.all := [for Id in Self.Sequence_Frames.all'Range => (Frame_Id => Id, others => <>)];
       Self.Sequences := Config.Sequences;
+      -- The waiting-for-response pool takes the first frame ids, the non-waiting-for-response pool the rest.
+      Self.Pools (Sequence_Enums.Frame_Pool.Waiting_For_Response_Frame) := Init_Pool (0, Natural (Config.Num_Waiting_For_Response_Frames));
+      Self.Pools (Sequence_Enums.Frame_Pool.Non_Waiting_For_Response_Frame) := Init_Pool (Natural (Config.Num_Waiting_For_Response_Frames), Natural (Config.Num_Non_Waiting_For_Response_Frames));
+      pragma Assert (Self.Pools (Sequence_Enums.Frame_Pool.Waiting_For_Response_Frame).Frames.all'Length + Self.Pools (Sequence_Enums.Frame_Pool.Non_Waiting_For_Response_Frame).Frames.all'Length = Natural (Num_Frames));
    end Init;
 
-   -- Scan from Next_Frame_Hint and wrap, so a frame is not reused until every
-   -- other idle frame has had a turn. Sub-command responses are matched to a
-   -- frame by source id alone, so a response still in flight to a frame that
-   -- just finished is least likely to meet a new run there.
-   function Find_Available_Sequence_Frame (Self : in Instance; Frame_Id : out Frame_Id_Type) return Boolean is
-      Frames : Simple_Sequencer_Types.Sequence_Frame_Array renames Self.Sequence_Frames.all;
-      Count : constant Natural := Frames'Length;
+   -- Find an idle, registered frame in one pool without changing any state.
+   -- Sequences that wait for sub-command responses draw from the
+   -- waiting-for-response pool and the rest from the non-waiting-for-response
+   -- pool: responses are matched to a frame by source id alone, and a
+   -- non-waiting-for-response frame never parks on one, so a response still in
+   -- flight when such a run ended has nothing to wake. Keeping the two kinds
+   -- of sequence on separate frames is what makes such a response harmless.
+   -- Within the pool the search starts at the pool's cursor and wraps, so a
+   -- frame is not reused until every other idle frame of its pool has had a
+   -- turn; the caller that takes the frame moves the cursor past it. Returns
+   -- False when the pool is empty or every frame in it is in use.
+   function Find_Available_Sequence_Frame (Self : in Instance; Pool_Kind : in Sequence_Enums.Frame_Pool.E; Frame_Id : out Frame_Id_Type) return Boolean is
+      Pool : Frame_Pool renames Self.Pools (Pool_Kind);
+      Frames : Simple_Sequencer_Types.Sequence_Frame_Array renames Pool.Frames.all;
+
+      function Is_Available (Id : in Frame_Id_Type) return Boolean is
+         (Frames (Id).Status = Not_Running and then Frames (Id).Has_Source_Id);
    begin
       Frame_Id := 0;
-
-      for Offset in 0 .. Count - 1 loop
-         declare
-            Id : constant Frame_Id_Type := Frames'First + Frame_Id_Type ((Natural (Self.Next_Frame_Hint - Frames'First) + Offset) mod Count);
-         begin
-            if Frames (Id).Status = Not_Running and then Frames (Id).Has_Source_Id then
-               Frame_Id := Id;
-               return True;
-            end if;
-         end;
+      -- From the cursor to the end of the pool, then from the start of the
+      -- pool back up to the cursor.
+      for Id in Pool.Next_Search_Start .. Frames'Last loop
+         if Is_Available (Id) then
+            Frame_Id := Id;
+            return True;
+         end if;
+      end loop;
+      for Id in Frames'Range loop
+         exit when Id = Pool.Next_Search_Start;
+         if Is_Available (Id) then
+            Frame_Id := Id;
+            return True;
+         end if;
       end loop;
       return False;
    end Find_Available_Sequence_Frame;
 
    -- Frame source ids are unique by design: registration refuses a duplicate
    -- (see Duplicate_Register_Source), so the first match here is the only match.
-   function Find_Sequence_Frame_Id_From_Source_Id (Self : in Instance; Source_Id : in Command_Source_Id; Frame_Id : out Frame_Id_Type) return Boolean is
+   -- Returns the pool holding the frame along with its id, since each pool
+   -- owns its own frame array.
+   function Find_Sequence_Frame_Id_From_Source_Id (Self : in Instance; Source_Id : in Command_Source_Id; Pool_Kind : out Sequence_Enums.Frame_Pool.E; Frame_Id : out Frame_Id_Type) return Boolean is
    begin
+      Pool_Kind := Sequence_Enums.Frame_Pool.E'First;
       Frame_Id := 0;
 
-      for Frame of Self.Sequence_Frames.all loop
-         if Frame.Has_Source_Id and then Frame.Source_Id = Source_Id then
-            Frame_Id := Frame.Frame_Id;
-            return True;
-         end if;
+      for Kind in Self.Pools'Range loop
+         for Frame of Self.Pools (Kind).Frames.all loop
+            if Frame.Has_Source_Id and then Frame.Source_Id = Source_Id then
+               Pool_Kind := Kind;
+               Frame_Id := Frame.Frame_Id;
+               return True;
+            end if;
+         end loop;
       end loop;
       return False;
    end Find_Sequence_Frame_Id_From_Source_Id;
@@ -100,10 +140,12 @@ package body Component.Simple_Command_Sequencer.Implementation is
    procedure Send_Frame_Count_Data_Products (Self : in out Instance; Time : in Sys_Time.T) is
       Count : Interfaces.Unsigned_16 := 0;
    begin
-      for Frame of Self.Sequence_Frames.all loop
-         if Frame.Status /= Not_Running then
-            Count := @ + 1;
-         end if;
+      for Pool of Self.Pools loop
+         for Frame of Pool.Frames.all loop
+            if Frame.Status /= Not_Running then
+               Count := @ + 1;
+            end if;
+         end loop;
       end loop;
       if Count > Self.Frame_Running_Hwm then
          Self.Frame_Running_Hwm := Count;
@@ -335,21 +377,27 @@ package body Component.Simple_Command_Sequencer.Implementation is
             -- shadowed: its responses would resolve to the other frame and it
             -- would only ever time out. Refusing registration keeps every
             -- assigned id unique, making that routing unambiguous.
-            for Frame of Self.Sequence_Frames.all loop
-               if Frame.Has_Source_Id and then Frame.Source_Id = Arg.Source_Id then
-                  Self.Event_T_Send_If_Connected (Self.Events.Duplicate_Register_Source (Time, Arg));
-                  return;
-               end if;
+            for Pool of Self.Pools loop
+               for Frame of Pool.Frames.all loop
+                  if Frame.Has_Source_Id and then Frame.Source_Id = Arg.Source_Id then
+                     Self.Event_T_Send_If_Connected (Self.Events.Duplicate_Register_Source (Time, Arg));
+                     return;
+                  end if;
+               end loop;
             end loop;
 
-            for Frame of Self.Sequence_Frames.all loop
-               if Frame.Has_Source_Id = False then
-                  Frame.Source_Id := Arg.Source_Id;
-                  Frame.Has_Source_Id := True;
-                  Source_Id_Set := True;
-                  exit;
-               end if;
-            end loop;
+            -- Ids are handed to frames in frame-id order, the waiting-for-response pool first.
+            Assign_Source_Id :
+            for Pool of Self.Pools loop
+               for Frame of Pool.Frames.all loop
+                  if Frame.Has_Source_Id = False then
+                     Frame.Source_Id := Arg.Source_Id;
+                     Frame.Has_Source_Id := True;
+                     Source_Id_Set := True;
+                     exit Assign_Source_Id;
+                  end if;
+               end loop;
+            end loop Assign_Source_Id;
 
             if not Source_Id_Set then
                Self.Event_T_Send_If_Connected (Self.Events.Unexpected_Register_Source (Time));
@@ -357,11 +405,12 @@ package body Component.Simple_Command_Sequencer.Implementation is
          end;
       else
          declare
+            Pool_Kind : Sequence_Enums.Frame_Pool.E;
             Frame_To_Wake_Id : Frame_Id_Type;
          begin
-            if Find_Sequence_Frame_Id_From_Source_Id (Self, Arg.Source_Id, Frame_To_Wake_Id) then
+            if Find_Sequence_Frame_Id_From_Source_Id (Self, Arg.Source_Id, Pool_Kind, Frame_To_Wake_Id) then
                declare
-                  Frame : Sequence_Frame renames Self.Sequence_Frames.all (Frame_To_Wake_Id);
+                  Frame : Sequence_Frame renames Self.Pools (Pool_Kind).Frames.all (Frame_To_Wake_Id);
                   Seq : Sequence_Type renames Self.Sequences.all (Frame.Sequence_Id);
                begin
                   -- Only the response the frame is parked on advances it. Anything
@@ -411,25 +460,27 @@ package body Component.Simple_Command_Sequencer.Implementation is
       end if;
       Self.Summary_Packet_Tick_Count := 0;
 
-      -- One Sequence_Frame_Summary per frame, in frame order. The packet's
-      -- ground type is generated per sequences suite; the FSW just fills the
-      -- buffer with the Sequence_Frame_Summary serializer.
+      -- One Sequence_Frame_Summary per frame, in frame order: the waiting-for-response pool
+      -- first, then the non-waiting-for-response pool. The packet's ground type is generated
+      -- per sequences suite; the FSW just fills the buffer with the
+      -- Sequence_Frame_Summary serializer.
       declare
          Pkt : Packet.T := Self.Packets.Summary_Packet_Empty (Time);
          Idx : Packet_Types.Packet_Buffer_Length_Type := Pkt.Buffer'First;
       begin
-         for Frame of Self.Sequence_Frames.all loop
-            Pkt.Buffer (Idx .. Idx + Sequence_Frame_Summary.Size_In_Bytes - 1) :=
-               Sequence_Frame_Summary.Serialization.To_Byte_Array ((
-                  Sequence_Id => Frame.Sequence_Id,
-                  Step => Frame.Step,
-                  Status => Frame.Status,
-                  Response_Behavior => Frame.Response_Behavior,
-                  Operator_Source_Id => Frame.Operator_Source_Id));
-            Idx := @ + Sequence_Frame_Summary.Size_In_Bytes;
+         for Pool of Self.Pools loop
+            for Frame of Pool.Frames.all loop
+               Pkt.Buffer (Idx .. Idx + Sequence_Frame_Summary.Size_In_Bytes - 1) :=
+                  Sequence_Frame_Summary.Serialization.To_Byte_Array ((
+                     Sequence_Id => Frame.Sequence_Id,
+                     Step => Frame.Step,
+                     Status => Frame.Status,
+                     Response_Behavior => Frame.Response_Behavior,
+                     Operator_Source_Id => Frame.Operator_Source_Id));
+               Idx := @ + Sequence_Frame_Summary.Size_In_Bytes;
+            end loop;
          end loop;
-         Pkt.Header.Buffer_Length := Self.Sequence_Frames.all'Length * Sequence_Frame_Summary.Size_In_Bytes;
-         pragma Assert (Pkt.Header.Buffer_Length = Idx - Pkt.Buffer'First);
+         Pkt.Header.Buffer_Length := Idx - Pkt.Buffer'First;
          Self.Packet_T_Send_If_Connected (Pkt);
       end;
    end Send_Summary_Packet_If_Due;
@@ -441,25 +492,27 @@ package body Component.Simple_Command_Sequencer.Implementation is
       Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
    begin
       -- Resume any parked frames whose wake condition has been met.
-      for Frame of Self.Sequence_Frames.all loop
-         case Frame.Status is
-            when Waiting_For_Time =>
-               if Time >= Frame.Wait_Until then
-                  Wake_And_Execute (Self, Frame, Time);
-               end if;
-            when Waiting_For_Cmd_Resp =>
-               -- The deadline was stamped at dispatch; only the comparison happens here.
-               if Time >= Frame.Timeout_Deadline then
-                  Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);
-                  Self.Event_T_Send_If_Connected (Self.Events.Sequence_Timeout (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Step => Frame.Step)));
-               end if;
-            when Not_Running =>
-               null;
-            when Running =>
-               -- Every path that sets Running executes the sequence to a parked
-               -- or idle state before returning.
-               pragma Assert (False, "Sequence frame found Running at tick, which should not be possible.");
-         end case;
+      for Pool of Self.Pools loop
+         for Frame of Pool.Frames.all loop
+            case Frame.Status is
+               when Waiting_For_Time =>
+                  if Time >= Frame.Wait_Until then
+                     Wake_And_Execute (Self, Frame, Time);
+                  end if;
+               when Waiting_For_Cmd_Resp =>
+                  -- The deadline was stamped at dispatch; only the comparison happens here.
+                  if Time >= Frame.Timeout_Deadline then
+                     Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);
+                     Self.Event_T_Send_If_Connected (Self.Events.Sequence_Timeout (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame.Frame_Id, Step => Frame.Step)));
+                  end if;
+               when Not_Running =>
+                  null;
+               when Running =>
+                  -- Every path that sets Running executes the sequence to a parked
+                  -- or idle state before returning.
+                  pragma Assert (False, "Sequence frame found Running at tick, which should not be possible.");
+            end case;
+         end loop;
       end loop;
 
       Send_Summary_Packet_If_Due (Self, Time);
@@ -497,22 +550,27 @@ package body Component.Simple_Command_Sequencer.Implementation is
 
       declare
          Seq : Sequence_Type renames Self.Sequences.all (Arg.Sequence_Id);
+         Pool_Kind : constant Sequence_Enums.Frame_Pool.E :=
+            (if Seq.Wait_For_Cmd_Resp then Sequence_Enums.Frame_Pool.Waiting_For_Response_Frame else Sequence_Enums.Frame_Pool.Non_Waiting_For_Response_Frame);
       begin
          if Arg.Arg_Length /= Seq.Arg_Length then
             Self.Event_T_Send_If_Connected (Self.Events.Invalid_Sequence_Argument_Length (Time,
                (Sequence_Id => Arg.Sequence_Id, Received_Length => Arg.Arg_Length, Expected_Length => Seq.Arg_Length)));
             return Failure;
          end if;
-         if not Find_Available_Sequence_Frame (Self, Available_Id) then
-            Self.Event_T_Send_If_Connected (Self.Events.No_Frame_Available (Time));
+         if not Find_Available_Sequence_Frame (Self, Pool_Kind, Available_Id) then
+            Self.Event_T_Send_If_Connected (Self.Events.No_Frame_Available (Time, (Sequence_Id => Arg.Sequence_Id, Pool => Pool_Kind)));
             return Failure;
          end if;
-         -- The next claim starts its search after this frame.
-         Self.Next_Frame_Hint := (if Available_Id = Self.Sequence_Frames.all'Last then Self.Sequence_Frames.all'First else Available_Id + 1);
 
          declare
-            Frame : Sequence_Frame renames Self.Sequence_Frames.all (Available_Id);
+            Pool : Frame_Pool renames Self.Pools (Pool_Kind);
+            Frame : Sequence_Frame renames Pool.Frames.all (Available_Id);
          begin
+            -- Taking the frame: the pool's next search starts after it, wrapping
+            -- to the pool's first frame after its last, so the frame released
+            -- most recently is the last one reused.
+            Pool.Next_Search_Start := (if Available_Id = Pool.Frames.all'Last then Pool.Frames.all'First else Available_Id + 1);
             -- Seed every per-run field; nothing may rely on state left from a
             -- previous run. Frame_Id and the registered source id are kept.
             Frame := (Frame_Id            => Frame.Frame_Id,
@@ -553,13 +611,15 @@ package body Component.Simple_Command_Sequencer.Implementation is
       Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
       Killed_Any : Boolean := False;
    begin
-      for Frame of Self.Sequence_Frames.all loop
-         if Frame.Status /= Not_Running then
-            -- Any deferred reply is sent now with Failure, so the operator's
-            -- command does not hang.
-            Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time, Update_Frame_Counts => False);
-            Killed_Any := True;
-         end if;
+      for Pool of Self.Pools loop
+         for Frame of Pool.Frames.all loop
+            if Frame.Status /= Not_Running then
+               -- Any deferred reply is sent now with Failure, so the operator's
+               -- command does not hang.
+               Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time, Update_Frame_Counts => False);
+               Killed_Any := True;
+            end if;
+         end loop;
       end loop;
       if Killed_Any then
          Send_Frame_Count_Data_Products (Self, Time);
@@ -575,23 +635,26 @@ package body Component.Simple_Command_Sequencer.Implementation is
       Frame_Id : constant Interfaces.Unsigned_16 := Arg.Value;
       Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
    begin
-      if Frame_Id not in Self.Sequence_Frames.all'Range then
-         Self.Event_T_Send_If_Connected (Self.Events.Invalid_Frame_Id (Time, (Value => Frame_Id)));
-         return Failure;
-      end if;
-      declare
-         Frame : Sequence_Frame renames Self.Sequence_Frames.all (Frame_Id);
-      begin
-         if Frame.Status = Not_Running then
-            Self.Event_T_Send_If_Connected (Self.Events.Frame_Not_Running (Time, (Value => Frame_Id)));
-            return Success;
+      -- Frame ids are global, so exactly one pool's array can hold this id.
+      for Pool of Self.Pools loop
+         if Frame_Id in Pool.Frames.all'Range then
+            declare
+               Frame : Sequence_Frame renames Pool.Frames.all (Frame_Id);
+            begin
+               if Frame.Status = Not_Running then
+                  Self.Event_T_Send_If_Connected (Self.Events.Frame_Not_Running (Time, (Value => Frame_Id)));
+                  return Success;
+               end if;
+               -- Any deferred reply is sent now with Failure, so the operator's
+               -- command does not hang.
+               Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);
+               Self.Event_T_Send_If_Connected (Self.Events.Killed_Frame (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame_Id)));
+               return Success;
+            end;
          end if;
-         -- Any deferred reply is sent now with Failure, so the operator's
-         -- command does not hang.
-         Finish_Sequence (Self, Frame, Command_Response_Status.Failure, Time);
-         Self.Event_T_Send_If_Connected (Self.Events.Killed_Frame (Time, (Sequence_Id => Frame.Sequence_Id, Frame_Id => Frame_Id)));
-         return Success;
-      end;
+      end loop;
+      Self.Event_T_Send_If_Connected (Self.Events.Invalid_Frame_Id (Time, (Value => Frame_Id)));
+      return Failure;
    end Kill_Frame;
 
    -- Set the summary packet period, in ticks. Zero disables emission.

@@ -5,12 +5,13 @@
 with Basic_Assertions; use Basic_Assertions;
 with Serializer_Types; use Serializer_Types;
 with Simple_Sequencer_Types; use Simple_Sequencer_Types;
-with Sequence_Enums; use Sequence_Enums.Sequence_Response_Behavior;
+with Sequence_Enums; use Sequence_Enums.Sequence_Response_Behavior; use Sequence_Enums.Frame_Pool;
 with Sequence_Event_Info.Assertion; use Sequence_Event_Info.Assertion;
 with Sequence_Step_Event_Info.Assertion; use Sequence_Step_Event_Info.Assertion;
 with Sequence_Sleep_Event_Info.Assertion; use Sequence_Sleep_Event_Info.Assertion;
 with Sequence_Step_Command_Event_Info.Assertion; use Sequence_Step_Command_Event_Info.Assertion;
 with Sequence_Argument_Length_Event_Info.Assertion; use Sequence_Argument_Length_Event_Info.Assertion;
+with No_Frame_Available_Info.Assertion; use No_Frame_Available_Info.Assertion;
 with Command_Response; use Command_Response;
 with Command_Enums; use Command_Enums.Command_Response_Status;
 with Command_Types;
@@ -53,21 +54,18 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       -- Call the component set up method that the assembly would normally call.
       T.Component_Instance.Set_Up;
 
-      T.Command_Response_T_Send ((
-         Source_Id => 0,
-         Registration_Id => 0,
-         Command_Id => 0,
-         Status => Register_Source
-      ));
+      -- One Register_Source per frame, in id order: the two waiting-for-response frames
+      -- (0, 1) then the two non-waiting-for-response frames (2, 3).
+      for Source in Command_Types.Command_Source_Id range 0 .. 3 loop
+         T.Command_Response_T_Send ((
+            Source_Id => Source,
+            Registration_Id => 0,
+            Command_Id => 0,
+            Status => Register_Source
+         ));
+      end loop;
 
-      T.Command_Response_T_Send ((
-         Source_Id => 1,
-         Registration_Id => 0,
-         Command_Id => 0,
-         Status => Register_Source
-      ));
-
-      Natural_Assert.Eq (T.Dispatch_All, 2);
+      Natural_Assert.Eq (T.Dispatch_All, 4);
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
    end Set_Up_Test;
 
@@ -314,7 +312,9 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 0);
    end Test_Invalid_Sequence_Id;
 
-   --  All frames are occupied -> third Run_Sequence fires No_Frame_Available.
+   --  Both waiting-for-response frames are occupied -> a third waiting Run_Sequence fires
+   --  No_Frame_Available naming the waiting-for-response pool, while the non-waiting-for-response pool still
+   --  serves a non-waiting-for-response sequence.
    overriding procedure Test_No_Frame_Available (Self : in out Instance) is
       T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
       Cmd : Command.T;
@@ -336,16 +336,27 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 2);
 
-      -- Both frames now in Running state; attempt a third sequence
+      -- Both waiting-for-response frames now in Running state; attempt a third waiting sequence
       Status := T.Commands.Run_Sequence (
          (Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
-      -- No_Frame_Available event; no additional Sequence_Started
+      -- No_Frame_Available names the waiting-for-response pool; no additional Sequence_Started
       Natural_Assert.Eq (T.No_Frame_Available_History.Get_Count, 1);
+      No_Frame_Available_Info_Assert.Eq (T.No_Frame_Available_History.Get (1), (Sequence_Id => 0, Pool => Waiting_For_Response_Frame));
       Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 2);
+
+      -- The non-waiting-for-response pool is untouched: non-waiting-for-response Sequence_C still starts, on frame 2.
+      Status := T.Commands.Run_Sequence (
+         (Sequence_Id => 2, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      pragma Assert (Status = Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.No_Frame_Available_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 3);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (3), (Sequence_Id => 2, Frame_Id => 2));
    end Test_No_Frame_Available;
 
    --  Sequence_B (abort_on_failure=true): a Failure response emits Command_Failure
@@ -503,7 +514,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       -- Each response already advanced its frame to step 1 (Command_2) inside
-      -- the response handler; the tick is a no-op on both waiting frames.
+      -- the response handler; the tick is a no-op on both waiting-for-response frames.
       T.Tick_T_Send (((0, 0), 0));
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 4);
@@ -715,7 +726,8 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Status : Serialization_Status;
    begin
       Component_A_Commands.Set_Id_Base (1);
-      Component_A_Commands.Set_Source_Id (0);
+      -- The non-waiting-for-response sequence runs on frame 2, so its sub-commands carry source id 2.
+      Component_A_Commands.Set_Source_Id (2);
 
       T.System_Time := (Seconds => 0, Subseconds => 0);
 
@@ -726,7 +738,8 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 1);
-      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (1), (Sequence_Id => 2, Frame_Id => 0));
+      -- A non-waiting-for-response sequence draws from the non-waiting-for-response pool, whose first frame is 2.
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (1), (Sequence_Id => 2, Frame_Id => 2));
 
       -- Single tick: Execute_Sequence loops through all steps without pausing,
       -- then crosses the end-of-sequence boundary in the same call.
@@ -740,14 +753,15 @@ package body Simple_Command_Sequencer_Tests.Implementation is
 
       -- Sequence_Completed also fires within the same Execute_Sequence call
       Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
-      Sequence_Event_Info_Assert.Eq (T.Sequence_Completed_History.Get (1), (Sequence_Id => 2, Frame_Id => 0));
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Completed_History.Get (1), (Sequence_Id => 2, Frame_Id => 2));
 
       -- Total events: Sequence_Started + Sequence_Completed
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
    end Test_No_Wait_Sequence;
 
    --  After a sequence completes, its frame returns to Not_Running with Has_Source_Id
-   --  still set. Find_Available_Sequence_Frame must rediscover it for the next run.
+   --  still set. Claim_Available_Sequence_Frame must rediscover it for the next run,
+   --  round robin within its pool.
    overriding procedure Test_Frame_Reuse_After_Completion (Self : in out Instance) is
       T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
       Cmd : Command.T;
@@ -755,21 +769,22 @@ package body Simple_Command_Sequencer_Tests.Implementation is
    begin
       T.System_Time := (Seconds => 0, Subseconds => 0);
 
-      -- Run Sequence_C (no-wait, completes in one tick) on Frame 0
+      -- Run Sequence_C (non-waiting-for-response, completes in one tick) on Frame 2, the first
+      -- frame of the non-waiting-for-response pool.
       Status := T.Commands.Run_Sequence (
          (Sequence_Id => 2, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
-      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (1), (Sequence_Id => 2, Frame_Id => 0));
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (1), (Sequence_Id => 2, Frame_Id => 2));
 
       T.Tick_T_Send (((0, 0), 0));
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
-      Sequence_Event_Info_Assert.Eq (T.Sequence_Completed_History.Get (1), (Sequence_Id => 2, Frame_Id => 0));
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Completed_History.Get (1), (Sequence_Id => 2, Frame_Id => 2));
 
-      -- Frame 0 is Not_Running again, but frames are handed out round robin:
-      -- the second run lands on Frame 1, the other idle frame.
+      -- Frame 2 is Not_Running again, but frames are handed out round robin
+      -- within the pool: the second run lands on Frame 3, the pool's other frame.
       Status := T.Commands.Run_Sequence (
          (Sequence_Id => 2, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
@@ -777,13 +792,13 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 2);
-      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (2), (Sequence_Id => 2, Frame_Id => 1));
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (2), (Sequence_Id => 2, Frame_Id => 3));
 
       T.Tick_T_Send (((0, 0), 0));
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 2);
 
-      -- Both frames idle again; the search wraps and the third run reuses Frame 0.
+      -- Both non-waiting-for-response frames idle again; the search wraps and the third run reuses Frame 2.
       Status := T.Commands.Run_Sequence (
          (Sequence_Id => 2, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
@@ -791,7 +806,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 3);
-      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (3), (Sequence_Id => 2, Frame_Id => 0));
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (3), (Sequence_Id => 2, Frame_Id => 2));
 
       T.Tick_T_Send (((0, 0), 0));
       Natural_Assert.Eq (T.Dispatch_All, 1);
@@ -974,8 +989,10 @@ package body Simple_Command_Sequencer_Tests.Implementation is
    overriding procedure Test_Unexpected_Register_Source (Self : in out Instance) is
       T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
    begin
+      --  Set_Up_Test registered all four frames (source ids 0 .. 3); a fifth
+      --  registration has no frame to land on.
       T.Command_Response_T_Send ((
-         Source_Id => 2,
+         Source_Id => 4,
          Registration_Id => 0,
          Command_Id => 0,
          Status => Register_Source
@@ -991,7 +1008,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
    overriding procedure Test_Duplicate_Register_Source (Self : in out Instance) is
       T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
    begin
-      --  Set_Up_Test registered source ids 0 and 1. Register id 1 again:
+      --  Set_Up_Test registered source ids 0 through 3. Register id 1 again:
       T.Command_Response_T_Send ((
          Source_Id => 1,
          Registration_Id => 0,
@@ -1008,7 +1025,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       --  A fresh id with every frame already registered is still the
       --  full-frames case:
       T.Command_Response_T_Send ((
-         Source_Id => 2,
+         Source_Id => 4,
          Registration_Id => 0,
          Command_Id => 0,
          Status => Register_Source
@@ -1301,7 +1318,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
    begin
       T.System_Time := (Seconds => 0, Subseconds => 0);
 
-      --  Occupy both frames with Sequence_A (each parks on its first command).
+      --  Occupy both waiting-for-response frames with Sequence_A (each parks on its first command).
       Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
@@ -1321,6 +1338,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       Natural_Assert.Eq (T.No_Frame_Available_History.Get_Count, 1);
+      No_Frame_Available_Info_Assert.Eq (T.No_Frame_Available_History.Get (1), (Sequence_Id => 6, Pool => Waiting_For_Response_Frame));
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 3);
       declare
          Cr : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (3);
@@ -1375,21 +1393,21 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       T.Command_T_Send (Sub_Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
-      --  Sequence_C claimed frame 1 and, being no-wait, completed inside the claim,
-      --  dispatching two Command_1s with frame 1's source id. Its Success reply is
-      --  the response frame 0 is waiting on.
+      --  Sequence_C, being non-waiting-for-response, claimed frame 2 (the first non-waiting-for-response frame) and
+      --  completed inside the claim, dispatching two Command_1s with frame 2's
+      --  source id. Its Success reply is the response frame 0 is waiting on.
       Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 2);
-      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (2), (Sequence_Id => 2, Frame_Id => 1));
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (2), (Sequence_Id => 2, Frame_Id => 2));
       Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
-      Sequence_Event_Info_Assert.Eq (T.Sequence_Completed_History.Get (1), (Sequence_Id => 2, Frame_Id => 1));
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Completed_History.Get (1), (Sequence_Id => 2, Frame_Id => 2));
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 3);
       declare
-         Frame_1_Commands : Test_Component_Commands.Instance;
+         Frame_2_Commands : Test_Component_Commands.Instance;
       begin
-         Frame_1_Commands.Set_Id_Base (1);
-         Frame_1_Commands.Set_Source_Id (1);
-         Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (2), Frame_1_Commands.Command_1);
-         Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (3), Frame_1_Commands.Command_1);
+         Frame_2_Commands.Set_Id_Base (1);
+         Frame_2_Commands.Set_Source_Id (2);
+         Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (2), Frame_2_Commands.Command_1);
+         Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (3), Frame_2_Commands.Command_1);
       end;
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 2);
       declare
@@ -1460,12 +1478,12 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       declare
          Pkt : constant Packet.T := T.Summary_Packet_History.Get (1);
       begin
-         --  Wire layout: Num_Frames contiguous per-frame entries, nothing else.
-         Natural_Assert.Eq (Natural (Pkt.Header.Buffer_Length), 2 * Entry_Length);
-         Sequence_Frame_Summary_Assert.Eq (Get_Frame_Summary (Pkt, 0),
-            (Sequence_Id => 0, Step => 0, Status => Not_Running, Response_Behavior => Send_After_Sequence_Start, Operator_Source_Id => 0));
-         Sequence_Frame_Summary_Assert.Eq (Get_Frame_Summary (Pkt, 1),
-            (Sequence_Id => 0, Step => 0, Status => Not_Running, Response_Behavior => Send_After_Sequence_Start, Operator_Source_Id => 0));
+         --  Wire layout: one entry per frame of both pools, nothing else.
+         Natural_Assert.Eq (Natural (Pkt.Header.Buffer_Length), 4 * Entry_Length);
+         for Frame in 0 .. 3 loop
+            Sequence_Frame_Summary_Assert.Eq (Get_Frame_Summary (Pkt, Frame),
+               (Sequence_Id => 0, Step => 0, Status => Not_Running, Response_Behavior => Send_After_Sequence_Start, Operator_Source_Id => 0));
+         end loop;
       end;
 
       --  Start the statically deferred, waiting Sequence_G (operator 100). The
@@ -1485,8 +1503,10 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       begin
          Sequence_Frame_Summary_Assert.Eq (Get_Frame_Summary (Pkt, 0),
             (Sequence_Id => 6, Step => 0, Status => Waiting_For_Cmd_Resp, Response_Behavior => Send_After_Sequence_Completion, Operator_Source_Id => 100));
-         Sequence_Frame_Summary_Assert.Eq (Get_Frame_Summary (Pkt, 1),
-            (Sequence_Id => 0, Step => 0, Status => Not_Running, Response_Behavior => Send_After_Sequence_Start, Operator_Source_Id => 0));
+         for Frame in 1 .. 3 loop
+            Sequence_Frame_Summary_Assert.Eq (Get_Frame_Summary (Pkt, Frame),
+               (Sequence_Id => 0, Step => 0, Status => Not_Running, Response_Behavior => Send_After_Sequence_Start, Operator_Source_Id => 0));
+         end loop;
 
          --  The generated per-suite ground type must match the wire layout exactly:
          --  the packet is one record's worth of bytes and decodes to the same summaries.
@@ -1500,6 +1520,10 @@ package body Simple_Command_Sequencer_Tests.Implementation is
             Sequence_Frame_Summary_Assert.Eq (Rec.Frame_0_Summary,
                (Sequence_Id => 6, Step => 0, Status => Waiting_For_Cmd_Resp, Response_Behavior => Send_After_Sequence_Completion, Operator_Source_Id => 100));
             Sequence_Frame_Summary_Assert.Eq (Rec.Frame_1_Summary,
+               (Sequence_Id => 0, Step => 0, Status => Not_Running, Response_Behavior => Send_After_Sequence_Start, Operator_Source_Id => 0));
+            Sequence_Frame_Summary_Assert.Eq (Rec.Frame_2_Summary,
+               (Sequence_Id => 0, Step => 0, Status => Not_Running, Response_Behavior => Send_After_Sequence_Start, Operator_Source_Id => 0));
+            Sequence_Frame_Summary_Assert.Eq (Rec.Frame_3_Summary,
                (Sequence_Id => 0, Step => 0, Status => Not_Running, Response_Behavior => Send_After_Sequence_Start, Operator_Source_Id => 0));
          end;
       end;
@@ -1539,7 +1563,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       T.Command_T_Send (Seq_Commands.Sequence_F);
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 1);
-      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (1), (Sequence_Id => 5, Frame_Id => 0));
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (1), (Sequence_Id => 5, Frame_Id => 2));
       Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 1);
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
       declare
@@ -1563,7 +1587,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Component_A_Commands.Set_Source_Id (0);
       T.System_Time := (Seconds => 0, Subseconds => 0);
 
-      --  Out of range frame id (only 2 frames configured).
+      --  Out of range frame id (only 4 frames configured).
       T.Command_T_Send (T.Commands.Kill_Frame ((Value => 99)));
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Invalid_Frame_Id_History.Get_Count, 1);
@@ -1604,13 +1628,13 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 3);
 
-      --  The killed frame remains claimable: a new sequence lands on frame 0.
-      Status := T.Commands.Run_Sequence ((Sequence_Id => 2, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+      --  The killed frame remains claimable: a new waiting sequence lands on frame 0.
+      Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 3);
-      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (3), (Sequence_Id => 2, Frame_Id => 0));
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (3), (Sequence_Id => 0, Frame_Id => 0));
    end Test_Kill_Frame;
 
    --  Data products: Set_Up seeds all nine with zero; a completed sequence updates
@@ -1656,8 +1680,8 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Packed_U16_Assert.Eq (T.Frame_Running_Count_History.Get (T.Frame_Running_Count_History.Get_Count), (Value => 1));
-      -- Round-robin allocation put this second run on Frame 1.
-      T.Command_T_Send (T.Commands.Kill_Frame ((Value => 1)));
+      -- Sequence_A waits, so it drew from the waiting-for-response pool: frame 0.
+      T.Command_T_Send (T.Commands.Kill_Frame ((Value => 0)));
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Packed_U32_Assert.Eq (T.Sequences_Failed_Count_History.Get (T.Sequences_Failed_Count_History.Get_Count), (Value => 1));
       Packed_U16_Assert.Eq (T.Last_Sequence_Failed_History.Get (T.Last_Sequence_Failed_History.Get_Count), (Value => 0));
@@ -1843,8 +1867,8 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       pragma Assert (T.Command_Response_T_Recv_Sync_History.Get (1).Status = Failure);
       Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 0);
 
-      --  Occupy both frames, then a ghost command cannot claim one: its
-      --  Failure execution status maps to a Failure reply to the operator.
+      --  Occupy both waiting-for-response frames, then a waiting ghost command cannot claim
+      --  one: its Failure execution status maps to a Failure reply to the operator.
       Status := T.Commands.Run_Sequence ((Sequence_Id => 0, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
       pragma Assert (Status = Success);
       T.Command_T_Send (Cmd);
@@ -1856,6 +1880,7 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       T.Command_T_Send (Seq_Commands.Sequence_A);
       Natural_Assert.Eq (T.Dispatch_All, 1);
       Natural_Assert.Eq (T.No_Frame_Available_History.Get_Count, 1);
+      No_Frame_Available_Info_Assert.Eq (T.No_Frame_Available_History.Get (1), (Sequence_Id => 0, Pool => Waiting_For_Response_Frame));
       Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 4);
       declare
          Cr : constant Command_Response.T := T.Command_Response_T_Recv_Sync_History.Get (4);
@@ -1900,5 +1925,91 @@ package body Simple_Command_Sequencer_Tests.Implementation is
       Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 0);
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
    end Test_Invalid_Sequence_Argument_Length;
+
+   --  A sequence's pool is chosen by whether it waits for command completion:
+   --  waiting sequences take frames 0 and 1, non-waiting-for-response sequences frames 2 and 3,
+   --  each pool handed out round robin independently of the other.
+   overriding procedure Test_Pool_Selection (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Cmd : Command.T;
+      Status : Serialization_Status;
+
+      procedure Run (Sequence_Id : in Interfaces.Unsigned_16) is
+      begin
+         Status := T.Commands.Run_Sequence ((Sequence_Id => Sequence_Id, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         pragma Assert (Status = Success);
+         T.Command_T_Send (Cmd);
+         Natural_Assert.Eq (T.Dispatch_All, 1);
+      end Run;
+   begin
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      --  Waiting Sequence_A parks on frame 0; non-waiting-for-response Sequence_C runs to
+      --  completion on frame 2, the first frame of the other pool.
+      Run (0);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (1), (Sequence_Id => 0, Frame_Id => 0));
+      Run (2);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (2), (Sequence_Id => 2, Frame_Id => 2));
+
+      --  Round robin inside each pool: the next waiting run takes frame 1, the
+      --  next non-waiting-for-response run frame 3, and a third non-waiting-for-response run wraps back to the
+      --  idle frame 2. Frame 0 and 1 stay parked throughout.
+      Run (0);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (3), (Sequence_Id => 0, Frame_Id => 1));
+      Run (2);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (4), (Sequence_Id => 2, Frame_Id => 3));
+      Run (2);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (5), (Sequence_Id => 2, Frame_Id => 2));
+
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 5);
+      Natural_Assert.Eq (T.No_Frame_Available_History.Get_Count, 0);
+   end Test_Pool_Selection;
+
+   --  A full non-waiting-for-response pool refuses a non-waiting-for-response sequence, naming the pool, while the
+   --  idle waiting-for-response pool still serves a waiting sequence.
+   overriding procedure Test_Non_Waiting_For_Response_Pool_Exhausted (Self : in out Instance) is
+      T : Component.Simple_Command_Sequencer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Cmd : Command.T;
+      Status : Serialization_Status;
+
+      procedure Run (Sequence_Id : in Interfaces.Unsigned_16) is
+      begin
+         Status := T.Commands.Run_Sequence ((Sequence_Id => Sequence_Id, Arg_Length => 0, Buffer_Arg => [others => 0]), Cmd);
+         pragma Assert (Status = Success);
+         T.Command_T_Send (Cmd);
+         Natural_Assert.Eq (T.Dispatch_All, 1);
+      end Run;
+   begin
+      T.System_Time := (Seconds => 0, Subseconds => 0);
+
+      --  Sequence_L is non-waiting-for-response but opens with a sleep, so each run parks its
+      --  frame: two runs fill frames 2 and 3.
+      Run (11);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (1), (Sequence_Id => 11, Frame_Id => 2));
+      Run (11);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (2), (Sequence_Id => 11, Frame_Id => 3));
+
+      --  A third non-waiting-for-response run is refused; the event names the non-waiting-for-response pool.
+      Run (2);
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 2);
+      Natural_Assert.Eq (T.No_Frame_Available_History.Get_Count, 1);
+      No_Frame_Available_Info_Assert.Eq (T.No_Frame_Available_History.Get (1), (Sequence_Id => 2, Pool => Non_Waiting_For_Response_Frame));
+
+      --  The waiting-for-response pool is untouched: Sequence_A still starts, on frame 0.
+      Run (0);
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 3);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (3), (Sequence_Id => 0, Frame_Id => 0));
+      Natural_Assert.Eq (T.No_Frame_Available_History.Get_Count, 1);
+
+      --  Once the sleeps expire the non-waiting-for-response runs finish and their frames free up
+      --  (5 s: past the 3 s sleeps, short of Sequence_A's 10 s command timeout).
+      T.System_Time := (Seconds => 5, Subseconds => 0);
+      T.Tick_T_Send (((5, 0), 0));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Sequence_Completed_History.Get_Count, 2);
+      Run (2);
+      Natural_Assert.Eq (T.Sequence_Started_History.Get_Count, 4);
+      Sequence_Event_Info_Assert.Eq (T.Sequence_Started_History.Get (4), (Sequence_Id => 2, Frame_Id => 2));
+   end Test_Non_Waiting_For_Response_Pool_Exhausted;
 
 end Simple_Command_Sequencer_Tests.Implementation;

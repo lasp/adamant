@@ -1,5 +1,5 @@
 ---
-description: Per-frame entry in the sequencer summary packet. One of these is produced for each sequence frame (Num_Concurrent_Sequences total) every time the summary packet is emitted.
+description: Per-frame entry in the sequencer summary packet. One of these is produced for each sequence frame in both pools, waiting-for-response frames first, every time the summary packet is emitted.
 fields:
   - name: Sequence_Id
     description: Id of the sequence running (or last run) on this frame. Only meaningful once a sequence has been started on the frame; check Status to disambiguate.

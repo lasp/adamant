@@ -64,20 +64,31 @@ package Simple_Sequencer_Types is
    type Sequences_Type is array (Interfaces.Unsigned_16 range <>) of Sequence_Type;
    type Sequences_Access is access constant Sequences_Type;
 
-   -- Frames per sequencer instance. The upper bound is the most
-   -- Sequence_Frame_Summary entries that fit in one summary packet.
+   -- Frames per sequencer instance, both pools together. The upper bound is
+   -- the most Sequence_Frame_Summary entries that fit in one summary packet.
    subtype Num_Concurrent_Sequences_Type is Interfaces.Unsigned_32 range 1 .. Interfaces.Unsigned_32 (Packet_Types.Packet_Buffer_Type'Length / Sequence_Frame_Summary.Size_In_Bytes);
+
+   -- Size of one frame pool. A pool may be empty when no sequence draws from
+   -- it; the two pools together must make a valid Num_Concurrent_Sequences_Type.
+   subtype Pool_Size_Type is Interfaces.Unsigned_32 range 0 .. Num_Concurrent_Sequences_Type'Last;
 
    -- Frame ids index the frame pool, so they are bounded by the frame cap
    -- above and fit 16 bits like the sequence and step ids on the wire.
    subtype Frame_Id_Type is Interfaces.Unsigned_16 range 0 .. Interfaces.Unsigned_16 (Natural (Num_Concurrent_Sequences_Type'Last) - 1);
 
    -- Exported as the Config constant by each generated sequences suite package.
-   -- Num_Concurrent_Sequences also sizes the suite's generated summary packet
-   -- type, so the frame pool and the packet layout cannot disagree.
+   -- Frames form two pools, split by whether their sequences wait for
+   -- sub-command responses: waiting sequences run on frames
+   -- 0 .. Num_Waiting_For_Response_Frames - 1, non-waiting-for-response sequences on the frames after them.
+   -- A non-waiting-for-response frame never parks on a response, so a response still in flight
+   -- when its run ended has nothing to wake there, and a waiting-for-response frame only
+   -- ever receives responses to dispatches that waited. The two sizes together
+   -- also size the suite's generated summary packet type, so the frame pools
+   -- and the packet layout cannot disagree.
    type Sequencer_Config is record
       Sequences : not null Sequences_Access;
-      Num_Concurrent_Sequences : Num_Concurrent_Sequences_Type;
+      Num_Waiting_For_Response_Frames : Pool_Size_Type;
+      Num_Non_Waiting_For_Response_Frames : Pool_Size_Type;
    end record;
 
    -- One running sequence. Internal state only, never serialized; the

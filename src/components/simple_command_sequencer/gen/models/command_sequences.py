@@ -462,7 +462,9 @@ class command_sequences(assembly_submodel):
         self.name = None
         self.description = None
         self.preamble = None
-        self.num_concurrent_sequences = None
+        self.num_waiting_for_response_frames = None
+        self.num_non_waiting_for_response_frames = None
+        self.num_frames = None
         self.command_timeout_ms = None
         self.includes = []
         self.sequences = OrderedDict()
@@ -479,13 +481,23 @@ class command_sequences(assembly_submodel):
         if "preamble" in self.data:
             self.preamble = self.data["preamble"]
 
-        # The suite owns the frame-pool size, which also sizes its summary packet
-        # type, so check it fits one packet buffer at model load.
-        self.num_concurrent_sequences = self.data["num_concurrent_sequences"]
+        # The suite owns the two frame pools: sequences that wait for their
+        # sub-command responses run on one, non-waiting-for-response sequences on the other, so
+        # a late response to a finished non-waiting-for-response run can never reach a frame that
+        # is parked waiting. Together the pools size the summary packet type, so
+        # check the total fits one packet buffer at model load.
+        self.num_waiting_for_response_frames = self.data.get("num_waiting_for_response_frames", 0)
+        self.num_non_waiting_for_response_frames = self.data.get("num_non_waiting_for_response_frames", 0)
+        self.num_frames = self.num_waiting_for_response_frames + self.num_non_waiting_for_response_frames
         max_frames = get_max_frames_per_packet()
-        if self.num_concurrent_sequences > max_frames:
+        if self.num_frames == 0:
             raise ModelException(
-                f"num_concurrent_sequences is {self.num_concurrent_sequences} "
+                "num_waiting_for_response_frames and num_non_waiting_for_response_frames are both 0; a "
+                "sequencer needs at least one frame."
+            )
+        if self.num_frames > max_frames:
+            raise ModelException(
+                f"num_waiting_for_response_frames + num_non_waiting_for_response_frames is {self.num_frames} "
                 f"but at most {max_frames} Sequence_Frame_Summary entries fit "
                 "in one summary packet with the project's configured packet "
                 "buffer size."
@@ -524,6 +536,8 @@ class command_sequences(assembly_submodel):
                 self.dependencies.append(seq.type_model.full_filename)
                 self.dependencies.extend(seq.type_model.get_dependencies())
         self.dependencies = list(dict.fromkeys(self.dependencies))
+
+        self._check_pool_sizes()
 
         # All sequences are now in place; populate template-context flags.
         self._compute_template_flags()
@@ -712,6 +726,35 @@ class command_sequences(assembly_submodel):
             if name not in finished:
                 visit(name)
 
+    def _check_pool_sizes(self):
+        """
+        A sequence draws its frame from the pool matching its
+        wait_for_command_completion setting, so each pool must be sized to
+        the sequences that use it: at least one frame when the suite has a
+        sequence of that kind, since otherwise the sequence could never be
+        started, and exactly zero when it has none, since no run could ever
+        claim those frames and they would only take memory and summary-packet
+        space.
+        """
+        pools = [
+            ("num_waiting_for_response_frames", self.num_waiting_for_response_frames, "waits for command completion", "no sequence in the suite waits for command completion", True),
+            ("num_non_waiting_for_response_frames", self.num_non_waiting_for_response_frames, "does not wait for command completion", "every sequence in the suite waits for command completion", False),
+        ]
+        for key, size, kind, none_of_kind, waits in pools:
+            users = [seq for seq in self.sequences.values() if seq.wait_for_command_completion == waits]
+            if users and size == 0:
+                raise ModelException(
+                    f"Sequence '{users[0].name}' {kind} but {key} is 0, so it could "
+                    "never claim a frame. Give that pool at least one frame.",
+                    lineno=users[0].lineno,
+                )
+            if not users and size != 0:
+                raise ModelException(
+                    f"{key} is {size} but {none_of_kind}, so no run could ever "
+                    f"claim those frames. Set {key} to 0 or leave "
+                    "it out."
+                )
+
     def _check_engine_connection_counts(self):
         """
         Each sequencer frame (engine) is claimed via a Register_Source reply
@@ -731,7 +774,7 @@ class command_sequences(assembly_submodel):
                 or config_value.split(".")[0].lower() != self.name.lower()
             ):
                 continue
-            num_engines = self.num_concurrent_sequences
+            num_engines = self.num_frames
             # On the invokee side each index of get_connections() is None,
             # "ignore", or the list of connections fanned into that index.
             inbound = []
@@ -744,7 +787,8 @@ class command_sequences(assembly_submodel):
             if len(inbound) != num_engines:
                 self.warn(
                     f"component '{comp.instance_name}' is configured with "
-                    f"Num_Concurrent_Sequences => {num_engines} but has "
+                    f"{num_engines} frames (num_waiting_for_response_frames + "
+                    f"num_non_waiting_for_response_frames) but has "
                     f"{len(inbound)} connection(s) into "
                     "Command_Response_T_Recv_Async. Each engine needs its own "
                     "inbound command-response connection (one command-router "

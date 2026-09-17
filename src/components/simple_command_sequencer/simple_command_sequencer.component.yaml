@@ -11,8 +11,9 @@ init:
     - name: Config
       type: Simple_Sequencer_Types.Sequencer_Config
       description: The sequencer's static configuration, exported as the Config constant by the generated
-        command sequences suite package. Carries the sequence table and the number of concurrent sequence
-        frames, which also sizes the suite's generated summary packet type.
+        command sequences suite package. Carries the sequence table and the sizes of the two frame pools
+        (for sequences that wait for sub-command responses and for those that do not), which together
+        also size the suite's generated summary packet type.
 connectors:
   - type: Command.T
     kind: recv_async
@@ -25,7 +26,7 @@ connectors:
     description: Sends the response to a Run_Sequence (or synthesised per-sequence) command back to the command router, either at dispatch or, for Send_After_Sequence_Completion sequences, when the sequence ends.
   - type: Command_Response.T
     kind: recv_async
-    description: Responses to sub-commands are received here, advancing the waiting sequence. At startup the command router sends a Register_Source message per frame via this connector with the source identifier the frame stamps into its commands. Include one arrayed connector entry per frame; a frame that never receives one can never be claimed.
+    description: Responses to sub-commands are received here, advancing the waiting sequence. At startup the command router sends a Register_Source message per frame via this connector with the source identifier the frame stamps into its commands. Include one arrayed connector entry per frame of either pool; a frame that never receives one can never be claimed.
   - description: The packet send connector, used for sending the periodic sequencer summary packet.
     type: Packet.T
     kind: send

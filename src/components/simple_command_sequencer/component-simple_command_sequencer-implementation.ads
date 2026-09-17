@@ -11,6 +11,7 @@ with Packed_U16;
 with Interfaces;
 with Basic_Types;
 with Simple_Sequencer_Types;
+with Sequence_Enums;
 
 -- The Command Sequencer component executes predefined sequences of commands.
 -- It receives high-level sequence commands and breaks them down into individual
@@ -28,8 +29,8 @@ package Component.Simple_Command_Sequencer.Implementation is
    -- Init Parameters:
    -- Config : Simple_Sequencer_Types.Sequencer_Config - The sequencer's static
    -- configuration, exported as the Config constant by the generated command
-   -- sequences suite package. Carries the sequence table and the number of
-   -- concurrent sequence frames.
+   -- sequences suite package. Carries the sequence table and the sizes of the
+   -- two frame pools.
    --
    overriding procedure Init (Self : in out Instance; Config : in Simple_Sequencer_Types.Sequencer_Config);
 
@@ -47,14 +48,25 @@ private
       Defer_Command_Response : Boolean := False;
    end record;
 
+   -- One frame pool. Each pool owns its frames as a separate array, so the
+   -- pools cannot overlap and the index subtype bounds every access; the
+   -- array is indexed by the pool's global frame ids. An empty pool holds
+   -- an empty array.
+   type Frame_Pool is record
+      Frames : Simple_Sequencer_Types.Sequence_Frame_Array_Access := null;
+      -- Index into Frames where the next search for an idle frame starts: one
+      -- past the frame Run_Sequence took most recently, so frames are handed
+      -- out round robin and the frame released most recently is the last reused.
+      Next_Search_Start : Simple_Sequencer_Types.Frame_Id_Type := 0;
+   end record;
+   type Frame_Pools is array (Sequence_Enums.Frame_Pool.E) of Frame_Pool;
+
    -- The component class instance record:
    type Instance is new Simple_Command_Sequencer.Base_Instance with record
-      Sequence_Frames : Simple_Sequencer_Types.Sequence_Frame_Array_Access := null;
       Sequences : Simple_Sequencer_Types.Sequences_Access := null;
-      -- Where the next frame search starts: one past the frame claimed most
-      -- recently, so frames are handed out round robin and the frame released
-      -- most recently is the last one reused.
-      Next_Frame_Hint : Simple_Sequencer_Types.Frame_Id_Type := 0;
+      -- The two frame pools, laid out by Init: the waiting-for-response pool takes the
+      -- first frame ids, the non-waiting-for-response pool the ids after them.
+      Pools : Frame_Pools;
       Summary_Packet_Period : Interfaces.Unsigned_16 := 0;
       -- Ticks since the last summary packet. Reset on emission and by
       -- Set_Summary_Packet_Period.

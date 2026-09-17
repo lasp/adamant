@@ -305,9 +305,8 @@ package body Component.Simple_Command_Sequencer.Implementation.Tester is
       Self.Duplicate_Register_Source_History.Push (Arg);
    end Duplicate_Register_Source;
 
-   -- A Run_Sequence command was received but all frames are in use
-   overriding procedure No_Frame_Available (Self : in out Instance) is
-      Arg : constant Natural := 0;
+   -- A Run_Sequence command was refused because every frame of the pool its sequence draws from is in use
+   overriding procedure No_Frame_Available (Self : in out Instance; Arg : in No_Frame_Available_Info.T) is
    begin
       -- Push the argument onto the test history for looking at later:
       Self.No_Frame_Available_History.Push (Arg);

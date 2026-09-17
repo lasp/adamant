@@ -16,6 +16,7 @@ with Sequence_Step_Event_Info.Representation;
 with Sequence_Sleep_Event_Info.Representation;
 with Sequence_Step_Command_Event_Info.Representation;
 with Sequence_Argument_Length_Event_Info.Representation;
+with No_Frame_Available_Info.Representation;
 with Packed_U32.Representation;
 with Packed_U16.Representation;
 with Command_Header.Representation;
@@ -50,7 +51,7 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    package Invalid_Sequence_Id_History_Package is new Printable_History (Packed_U16.T, Packed_U16.Representation.Image);
    package Unexpected_Register_Source_History_Package is new Printable_History (Natural, Natural'Image);
    package Duplicate_Register_Source_History_Package is new Printable_History (Command_Response.T, Command_Response.Representation.Image);
-   package No_Frame_Available_History_Package is new Printable_History (Natural, Natural'Image);
+   package No_Frame_Available_History_Package is new Printable_History (No_Frame_Available_Info.T, No_Frame_Available_Info.Representation.Image);
    package Dropped_Command_History_Package is new Printable_History (Command_Header.T, Command_Header.Representation.Image);
    package Dropped_Command_Response_History_Package is new Printable_History (Command_Response.T, Command_Response.Representation.Image);
    package Dropped_Tick_History_Package is new Printable_History (Tick.T, Tick.Representation.Image);
@@ -205,8 +206,8 @@ package Component.Simple_Command_Sequencer.Implementation.Tester is
    -- already have a source ID.
    overriding procedure Unexpected_Register_Source (Self : in out Instance);
    overriding procedure Duplicate_Register_Source (Self : in out Instance; Arg : in Command_Response.T);
-   -- A Run_Sequence command was received but all frames are in use
-   overriding procedure No_Frame_Available (Self : in out Instance);
+   -- A Run_Sequence command was refused because every frame of the pool its sequence draws from is in use
+   overriding procedure No_Frame_Available (Self : in out Instance; Arg : in No_Frame_Available_Info.T);
    -- A command was dropped due to a full queue
    overriding procedure Dropped_Command (Self : in out Instance; Arg : in Command_Header.T);
    -- A command response was dropped due to a full queue
