@@ -149,15 +149,18 @@ mapping:
                     required: false
                     type: str
                     desc: |
-                      An Ada expression that evaluates to the argument for this
-                      command. You can reference the parent sequence's argument
-                      using "Arg.field_name" syntax. If the command takes no
-                      argument, omit this field. Only valid alongside `command:`.
+                      The argument for this command: either a reference into the
+                      parent sequence's argument ("Arg", or a field path such as
+                      "Arg.Power_Mode"), resolved per call, or a static Ada
+                      expression that does not mention Arg, baked in at build
+                      time. Mixing the two in one expression is rejected. If the
+                      command takes no argument, omit this field. Only valid
+                      alongside `command:`.
 
                       Examples:
                         - "Arg" - pass through the entire sequence argument
                         - "Arg.Power_Mode" - pass a field from the sequence argument
-                        - "(Mode => Arg.Mode, Enable => True)" - construct a record
+                        - "(Mode => Low, Enable => True)" - construct a record from literals
                         - "42" - a literal value
 
                   sleep_ms:
