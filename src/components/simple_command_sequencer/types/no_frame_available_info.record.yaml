@@ -1,0 +1,11 @@
+---
+description: The sequence a Run_Sequence command asked for and the frame pool that had no idle frame for it. Sequences that wait for sub-command responses and sequences that do not draw from separate pools.
+fields:
+  - name: Sequence_Id
+    description: The ID of the sequence that could not be started
+    type: Interfaces.Unsigned_16
+    format: U16
+  - name: Pool
+    description: The frame pool the sequence draws from, chosen by whether it waits for sub-command responses
+    type: Sequence_Enums.Frame_Pool.E
+    format: E8

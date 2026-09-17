@@ -3,9 +3,11 @@
 
 description: Example command sequences exercising the generator's features
 
-# Two frames: two sequences may run concurrently, and the generated summary
-# packet type carries two frame summaries.
-num_concurrent_sequences: 2
+# Four frames in two pools: waiting sequences run on frames 0 and 1, non-waiting
+# sequences on frames 2 and 3, and the generated summary packet type carries
+# four frame summaries.
+num_waiting_frames: 2
+num_non_waiting_frames: 2
 
 command_timeout_ms: 10000  # default wait for sub-command responses
 
@@ -130,3 +132,13 @@ sequences:
 
     sequence:
       - sleep_ms: Arg.Sleep_Duration
+
+  # Non-waiting sequence that stays busy across a tick (the sleep parks it), so a
+  # test can fill the non-waiting pool.
+  - name: Sequence_L
+    description: Non-waiting sequence with a sleep, for non-waiting pool exhaustion coverage
+    wait_for_command_completion: false
+
+    sequence:
+      - sleep_ms: 3000
+      - command: Component_A.Command_1

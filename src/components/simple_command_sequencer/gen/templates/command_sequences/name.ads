@@ -107,10 +107,11 @@ package {{ name }} is
 
    Sequences : constant Sequences_Access := Sequences_Table'Access;
 
-   -- Passed to Simple_Command_Sequencer.Init. num_concurrent_sequences also
-   -- sizes the generated {{ name }}_Summary_Record packet type, so the frame
-   -- pool and the packet layout cannot disagree.
+   -- Passed to Simple_Command_Sequencer.Init. The {{ name }}_Summary_Record
+   -- packet type is generated from the same two pool sizes, so the frame pools
+   -- and the packet layout cannot disagree.
    Config : constant Sequencer_Config :=
       (Sequences => Sequences_Table'Access,
-       Num_Concurrent_Sequences => {{ num_concurrent_sequences }});
+       Num_Waiting_Frames => {{ num_waiting_frames }},
+       Num_Non_Waiting_Frames => {{ num_non_waiting_frames }});
 end {{ name }};

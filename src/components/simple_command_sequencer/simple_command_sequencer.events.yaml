@@ -45,7 +45,8 @@ events:
     param_type: Command_Response.T
 
   - name: No_Frame_Available
-    description: A Run_Sequence command was received but all frames are in use
+    description: A Run_Sequence command was refused because every frame of the pool its sequence draws from (waiting or non-waiting) is in use.
+    param_type: No_Frame_Available_Info.T
 
   - name: Dropped_Command
     description: A command was dropped due to a full queue

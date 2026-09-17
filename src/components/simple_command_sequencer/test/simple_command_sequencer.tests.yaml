@@ -43,3 +43,5 @@ tests:
   - name: Test_Invalid_Dynamic_Sleep_Argument
   - name: Test_Ghost_Command_Rejections
   - name: Test_Invalid_Sequence_Argument_Length
+  - name: Test_Pool_Selection
+  - name: Test_Non_Waiting_Pool_Exhausted

@@ -18,34 +18,58 @@ package body Component.Simple_Command_Sequencer.Implementation is
    subtype Frame_Id_Type is Simple_Sequencer_Types.Frame_Id_Type;
 
    overriding procedure Init (Self : in out Instance; Config : in Simple_Sequencer_Types.Sequencer_Config) is
+      -- Sizes the frame array, and re-checks at Init what the model guaranteed
+      -- at build time: a total outside 1 .. Num_Concurrent_Sequences_Type'Last
+      -- fails here, on the subtype, rather than as a wrapped modular value in
+      -- the allocation below.
+      Num_Frames : constant Simple_Sequencer_Types.Num_Concurrent_Sequences_Type := Config.Num_Waiting_Frames + Config.Num_Non_Waiting_Frames;
+
+      -- Lay one pool over Count frames starting at First, with its round-robin
+      -- cursor on its first frame. An empty pool is left at its defaults.
+      function Make_Pool (First : in Natural; Count : in Natural) return Frame_Pool_Range is
+      begin
+         if Count = 0 then
+            return (others => <>);
+         end if;
+         return (First => Frame_Id_Type (First), Last => Frame_Id_Type (First + Count - 1), Count => Count, Next_Hint => Frame_Id_Type (First));
+      end Make_Pool;
    begin
-      Self.Sequence_Frames := new Simple_Sequencer_Types.Sequence_Frame_Array (0 .. Frame_Id_Type (Config.Num_Concurrent_Sequences - 1));
+      Self.Sequence_Frames := new Simple_Sequencer_Types.Sequence_Frame_Array (0 .. Frame_Id_Type (Num_Frames - 1));
       Self.Sequence_Frames.all := [for Id in Self.Sequence_Frames.all'Range => (Frame_Id => Id, others => <>)];
       Self.Sequences := Config.Sequences;
+      -- The waiting pool takes the first frames, the non-waiting pool the rest.
+      Self.Pools (Sequence_Enums.Frame_Pool.Waiting_Frame) := Make_Pool (0, Natural (Config.Num_Waiting_Frames));
+      Self.Pools (Sequence_Enums.Frame_Pool.Non_Waiting_Frame) := Make_Pool (Natural (Config.Num_Waiting_Frames), Natural (Config.Num_Non_Waiting_Frames));
    end Init;
 
-   -- Scan from Next_Frame_Hint and wrap, so a frame is not reused until every
-   -- other idle frame has had a turn. Sub-command responses are matched to a
-   -- frame by source id alone, so a response still in flight to a frame that
-   -- just finished is least likely to meet a new run there.
-   function Find_Available_Sequence_Frame (Self : in Instance; Frame_Id : out Frame_Id_Type) return Boolean is
+   -- Claim an idle frame from one pool. Sequences that wait for sub-command
+   -- responses draw from the waiting pool and non-waiting sequences from the
+   -- non-waiting pool: responses are matched to a frame by source id alone, and a
+   -- non-waiting frame never parks on one, so a response still in flight when a
+   -- non-waiting run ended has nothing to wake. Keeping the two kinds of sequence
+   -- on separate frames is what makes such a response harmless. Within the
+   -- pool the search starts one past the frame claimed last and wraps, so a
+   -- frame is not reused until every other idle frame of its pool has had a
+   -- turn. Returns False when the pool is empty or every frame in it is in use.
+   function Claim_Available_Sequence_Frame (Self : in out Instance; Pool_Kind : in Sequence_Enums.Frame_Pool.E; Frame_Id : out Frame_Id_Type) return Boolean is
       Frames : Simple_Sequencer_Types.Sequence_Frame_Array renames Self.Sequence_Frames.all;
-      Count : constant Natural := Frames'Length;
+      Pool : Frame_Pool_Range renames Self.Pools (Pool_Kind);
    begin
       Frame_Id := 0;
-
-      for Offset in 0 .. Count - 1 loop
+      for Offset in 0 .. Pool.Count - 1 loop
          declare
-            Id : constant Frame_Id_Type := Frames'First + Frame_Id_Type ((Natural (Self.Next_Frame_Hint - Frames'First) + Offset) mod Count);
+            Id : constant Frame_Id_Type := Pool.First + Frame_Id_Type ((Natural (Pool.Next_Hint - Pool.First) + Offset) mod Pool.Count);
          begin
             if Frames (Id).Status = Not_Running and then Frames (Id).Has_Source_Id then
                Frame_Id := Id;
+               -- The pool's next claim starts its search after this frame.
+               Pool.Next_Hint := (if Id = Pool.Last then Pool.First else Id + 1);
                return True;
             end if;
          end;
       end loop;
       return False;
-   end Find_Available_Sequence_Frame;
+   end Claim_Available_Sequence_Frame;
 
    -- Frame source ids are unique by design: registration refuses a duplicate
    -- (see Duplicate_Register_Source), so the first match here is the only match.
@@ -498,12 +522,15 @@ package body Component.Simple_Command_Sequencer.Implementation is
                (Sequence_Id => Arg.Sequence_Id, Received_Length => Arg.Arg_Length, Expected_Length => Seq.Arg_Length)));
             return Failure;
          end if;
-         if not Find_Available_Sequence_Frame (Self, Available_Id) then
-            Self.Event_T_Send_If_Connected (Self.Events.No_Frame_Available (Time));
-            return Failure;
-         end if;
-         -- The next claim starts its search after this frame.
-         Self.Next_Frame_Hint := (if Available_Id = Self.Sequence_Frames.all'Last then Self.Sequence_Frames.all'First else Available_Id + 1);
+         declare
+            Pool_Kind : constant Sequence_Enums.Frame_Pool.E :=
+               (if Seq.Wait_For_Cmd_Resp then Sequence_Enums.Frame_Pool.Waiting_Frame else Sequence_Enums.Frame_Pool.Non_Waiting_Frame);
+         begin
+            if not Claim_Available_Sequence_Frame (Self, Pool_Kind, Available_Id) then
+               Self.Event_T_Send_If_Connected (Self.Events.No_Frame_Available (Time, (Sequence_Id => Arg.Sequence_Id, Pool => Pool_Kind)));
+               return Failure;
+            end if;
+         end;
 
          declare
             Frame : Sequence_Frame renames Self.Sequence_Frames.all (Available_Id);

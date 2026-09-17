@@ -10,3 +10,7 @@ enums:
     literals:
       - name: Send_After_Sequence_Start
       - name: Send_After_Sequence_Completion
+  - name: Frame_Pool
+    literals:
+      - name: Waiting_Frame
+      - name: Non_Waiting_Frame

@@ -128,10 +128,10 @@ class command_sequences_summary_record(command_sequences_gen, generator_base):
     """
     Generates <suite_package>_summary_record.record.yaml -- the summary
     packet's ground/documentation type for this suite: one
-    Sequence_Frame_Summary field per sequence frame (the suite's
-    num_concurrent_sequences, in frame order). Generated per suite, right
-    next to the suite's other outputs, so the frame pool and the packet
-    layout come from the same model value and can never disagree. The FSW
+    Sequence_Frame_Summary field per sequence frame (the suite's waiting
+    frames then its non-waiting frames, in frame order). Generated per suite,
+    right next to the suite's other outputs, so the frame pools and the
+    packet layout come from the same model values and can never disagree. The FSW
     never imports this type; the packets model resolves an instance's
     Summary_Packet type to it via the instance's Config init parameter.
     """
@@ -143,7 +143,7 @@ class command_sequences_summary_record(command_sequences_gen, generator_base):
 
     def generate(self, input_filename):
         # Load the suite without resolving against its assembly: the record depends
-        # only on num_concurrent_sequences, and the assembly load itself needs this
+        # only on the two pool sizes, and the assembly load itself needs this
         # record, so resolving here would be circular.
         cs = command_sequences(input_filename)
         print(cs.render(self.template, template_path=self.template_dir))
