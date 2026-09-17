@@ -11,7 +11,6 @@ from models.commands import (
     command
 )
 from models.simple_command_sequencer_packets import get_max_frames_per_packet
-from util import model_loader
 import re
 
 DEFAULT_COMMAND_TIMEOUT_MS = 30000
@@ -90,7 +89,6 @@ class sequence_step(object):
         self.traversal_path = None
         self.dynamic_arg_type_package = None
         self.resolver_type_name = None
-        self.resolver_instance_name = None
 
     def parse_command(self):
         if not re.match(
@@ -196,16 +194,7 @@ class sequence_step(object):
                 f"'{self.command}' has no argument type"
             )
         self.dynamic_arg_type_package = arg_type.package
-
-        # Resolver type/instance names are scoped to sequence + step index so
-        # that two steps in the same sequence targeting the same command never
-        # collide (e.g. Sequence_B_Step_0_Resolver_T vs _Step_1_Resolver_T).
-        self.resolver_type_name = (
-            f"{parent_sequence.name}_Step_{self.index}_Resolver_T"
-        )
-        self.resolver_instance_name = (
-            f"{parent_sequence.name}_Step_{self.index}_Resolver"
-        )
+        self.resolver_type_name = self._resolver_name(parent_sequence)
 
     def resolve_dynamic_sleep(self, parent_sequence):
         """
@@ -230,12 +219,12 @@ class sequence_step(object):
             else None
         )
         self.dynamic_arg_type_package = "Packed_Natural"
-        self.resolver_type_name = (
-            f"{parent_sequence.name}_Step_{self.index}_Resolver_T"
-        )
-        self.resolver_instance_name = (
-            f"{parent_sequence.name}_Step_{self.index}_Resolver"
-        )
+        self.resolver_type_name = self._resolver_name(parent_sequence)
+
+    def _resolver_name(self, parent_sequence):
+        # Scoped to sequence and step index so two steps of one sequence
+        # targeting the same command never collide.
+        return f"{parent_sequence.name}_Step_{self.index}_Resolver_T"
 
     def get_arg_expression(self):
         """The static Ada expression baked into the step table, or None."""
@@ -474,7 +463,6 @@ class command_sequences(assembly_submodel):
         self.command_timeout_ms = None
         self.includes = []
         self.sequences = OrderedDict()
-        self.sequence_names = []
 
         self.assembly_name = None
 
@@ -504,12 +492,12 @@ class command_sequences(assembly_submodel):
             self.command_timeout_ms = self.data["command_timeout_ms"]
 
         if "with" in self.data:
-            self.includes = self.data["with"]
-            for include in self.includes:
-                include = ada.formatType(include)
-            self.includes = list(set(self.includes))
             # The generated spec already has "with Sequence_Enums;"; drop it from user includes.
-            self.includes = [inc for inc in self.includes if inc != "Sequence_Enums"]
+            self.includes = [
+                inc
+                for inc in dict.fromkeys(ada.formatType(w) for w in self.data["with"])
+                if inc != "Sequence_Enums"
+            ]
 
         if "sequences" not in self.data or not self.data["sequences"]:
             raise ModelException("At least one sequence must be defined")
@@ -520,7 +508,6 @@ class command_sequences(assembly_submodel):
 
             if seq.name not in self.sequences:
                 self.sequences[seq.name] = seq
-                self.sequence_names.append(seq.name)
             else:
                 raise ModelException(
                     f'Duplicate sequence name found: "{seq.name}"',
@@ -762,6 +749,3 @@ class command_sequences(assembly_submodel):
                     "Register_Source reply; engines without one can never be "
                     "claimed."
                 )
-
-    def load_type(self, type_name):
-        return model_loader.try_load_model_by_name(type_name, model_types="type")
