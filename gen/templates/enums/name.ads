@@ -50,6 +50,35 @@ package {{ name }} is
          {{ "%-*s => %*d"|format(name_width, literal.name, value_width, literal.value) }}{{ "," if not loop.last }}
 {% endfor %}
       );
+
+      -- C version of E for passing across a C/C++ binding. C and Ada use
+      -- different sizes to hold an enumeration: C uses an int, Ada uses the
+      -- smallest size that fits the literals. E_C has the size of a C int and
+      -- the same literal names and values as E.
+      package C is
+         -- C enumeration type definition:
+         type E_C is (
+{% for literal in enum.literals %}
+            {{ literal.name }}{{ "," if not loop.last }}
+{% endfor %}
+         ) with Convention => C;
+         -- C enumeration type values:
+         for E_C use (
+{% for literal in enum.literals %}
+            {{ "%-*s => %*d"|format(name_width, literal.name, value_width, literal.value) }}{{ "," if not loop.last }}
+{% endfor %}
+         );
+
+         -- Conversions between E and E_C. Both map by literal value.
+         function To_C (Src : in E) return E_C is (E_C'Enum_Val (E'Enum_Rep (Src)))
+            with Inline => True;
+
+         -- A value that arrives from C may hold any int. To_Ada raises
+         -- Constraint_Error when Src is not a literal of E. Check Src'Valid
+         -- first to handle that case without an exception.
+         function To_Ada (Src : in E_C) return E is (E'Enum_Val (E_C'Enum_Rep (Src)))
+            with Inline => True;
+      end C;
    end {{ enum.name }};
 
 {% endfor %}
