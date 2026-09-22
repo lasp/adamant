@@ -27,6 +27,8 @@ package {{ name }} is
    --
 
 {% for enum in enums.values() %}
+{% set name_width = enum.literals|map(attribute='name')|map('length')|max %}
+{% set value_width = enum.literals|map(attribute='value')|map('string')|map('length')|max %}
    -- {{ enum.name }} Definition:
 {% if enum.description %}
 {{ printMultiLine(enum.description, '   -- ') }}
@@ -35,13 +37,17 @@ package {{ name }} is
       -- Enumeration type definition:
       type E is (
 {% for literal in enum.literals %}
-         {{ "%10s"|format(literal.name) }}{{ ", " if not loop.last else "   " }}{% if literal.description %} -- {{ literal.description + "\n" }}{% else %} --{{ "\n" }}{% endif %}
+{% if literal.description %}
+         {{ "%-*s"|format(name_width + 1, literal.name ~ ("," if not loop.last else "")) }} -- {{ literal.description }}
+{% else %}
+         {{ literal.name }}{{ "," if not loop.last }}
+{% endif %}
 {% endfor %}
       );
       -- Enumeration type values:
       for E use (
 {% for literal in enum.literals %}
-         {{ "%10s => %2d"|format(literal.name, literal.value) }}{{ "," if not loop.last }}
+         {{ "%-*s => %*d"|format(name_width, literal.name, value_width, literal.value) }}{{ "," if not loop.last }}
 {% endfor %}
       );
    end {{ enum.name }};
