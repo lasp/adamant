@@ -1850,6 +1850,12 @@ Below is the specification file produced, \textit{build/src/example\_enums.ads}.
 
 A package is produced with two internal packages named \texttt{First\_Enum} and \texttt{Second\_Enum} which both define an enumerations named \texttt{E} that describe the literals expressed in the YAML. Note that values are assigned to each literal explicitly. If literal values are left unspecified in the YAML file, Adamant assigns the lowest possible remaining unique positive integer (or zero) to each literal, as can be seen in the \texttt{First\_Enum} package.
 
+\subsubsection{C/C++ Enumerations}
+
+Each enumeration package also contains a nested package named \texttt{C} which holds a C version of \texttt{E} suitable for passing to a binded C or C++ function. See Section \ref{C Interfacing}. This is needed because C and Ada use different sizes to hold an enumeration. C stores an \texttt{enum} as an \texttt{int}, while Ada stores \texttt{E} in the smallest size that fits its literals, so passing \texttt{E} to C directly would be an error. The C version, \texttt{E\_C}, is declared with \texttt{Convention => C}, which gives it the size of a C \texttt{int}, and has the same literal names and values as \texttt{E}. \\
+
+Two functions are provided: \texttt{To\_C} to convert an \texttt{E} to an \texttt{E\_C} before calling into C or C++, and \texttt{To\_Ada} to convert an \texttt{E\_C} returned from C or C++ back to an \texttt{E}. Both map by literal value, so \texttt{To\_Ada} raises \texttt{Constraint\_Error} when given an integer that is not a literal of the enumeration. The \texttt{'Valid} attribute can be used on an \texttt{E\_C} to check for this first. Using these functions encapsulates the C type to the binding itself, so the rest of the Ada code can use \texttt{E} and everything Adamant generates for it.
+
 \subsubsection{Enumeration String Representation}
 
 During testing, it is often nice to print the value of an enumeration in a human readable form. Adamant has the ability to generate human readable string representations for enumerations. The string representation code for the \texttt{example\_enums} is included in two files, a specification \textit{build/src/example\_enums-representation.ads} and \textit{build/src/example\_enums-representation.adb} which can be generated and compiled using the following commands: 
