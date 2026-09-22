@@ -1,0 +1,9 @@
+---
+description: This is a unit test suite for the CCSDS Command Forwarder component.
+tests:
+  - name: Test_Nominal_Forwarding
+    description: This unit test tests that CCSDS packets received by command are forwarded out of the CCSDS space packet send connector with the expected contents, and that the appropriate event and data product are produced.
+  - name: Test_Max_Size_Packet
+    description: This unit test tests that a CCSDS packet with the maximum sized data field that fits within a command argument is forwarded correctly.
+  - name: Test_Invalid_Command
+    description: This unit test exercises that an invalid command throws the appropriate event.
