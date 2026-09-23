@@ -1,0 +1,15 @@
+---
+description: This is a packed record with a modeled enumeration field and a Boolean field, which cross to C as their C versions.
+fields:
+  - name: Mode
+    description: A modeled enumeration.
+    type: Test_Enums.Second_Enum.E
+    format: E8
+  - name: Flag
+    description: A Boolean.
+    type: Boolean
+    format: E8
+  - name: Count
+    description: A signed integer.
+    type: Interfaces.Integer_32
+    format: I32

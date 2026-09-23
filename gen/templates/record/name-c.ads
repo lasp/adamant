@@ -3,11 +3,11 @@
 --
 -- Generated from {{ filename }} on {{ time }}.
 --------------------------------------------------------------------------------
-{% if type_includes %}
+{% if c_type_includes %}
 
 -- Record Component Includes:
-{% for include in packed_type_includes %}
-with {{ include }}.C;
+{% for include in c_type_includes %}
+with {{ include }};
 {% endfor %}
 {% endif %}
 
@@ -24,6 +24,10 @@ package {{ name }}.C is
 {% endif %}
 {% if field.is_packed_type %}
       {{ field.name }} : aliased {{ field.type_package }}.C.U_C{% if field.default_value %} := {{ field.default_value }}{% endif %};
+{% elif field.is_modeled_enum and not (field.format.length and field.format.length > 1) %}
+      {{ field.name }} : aliased {{ field.type_package }}.{{ field.type_model.name }}.C.E_C{% if field.default_value %} := {{ field.type_package }}.{{ field.type_model.name }}.C.To_C ({{ field.default_value }}){% endif %};
+{% elif field.type == "Boolean" %}
+      {{ field.name }} : aliased Interfaces.C.C_bool{% if field.default_value %} := Interfaces.C.C_bool ({{ field.default_value }}){% endif %};
 {% else %}
       {{ field.name }} : aliased {{ field.type }}{% if field.default_value %} := {{ field.default_value }}{% endif %};
 {% endif %}

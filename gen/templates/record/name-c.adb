@@ -12,6 +12,10 @@ package body {{ name }}.C is
 {% for field in fields.values() %}
 {% if field.is_packed_type %}
          {{ field.name }} => {{ field.type_package }}.C.To_Ada (Src.{{ field.name }}){{ "," if not loop.last }}
+{% elif field.is_modeled_enum and not (field.format.length and field.format.length > 1) %}
+         {{ field.name }} => {{ field.type_package }}.{{ field.type_model.name }}.C.To_Ada (Src.{{ field.name }}){{ "," if not loop.last }}
+{% elif field.type == "Boolean" %}
+         {{ field.name }} => Boolean (Src.{{ field.name }}){{ "," if not loop.last }}
 {% else %}
          {{ field.name }} => Src.{{ field.name }}{{ "," if not loop.last }}
 {% endif %}
@@ -25,6 +29,10 @@ package body {{ name }}.C is
 {% for field in fields.values() %}
 {% if field.is_packed_type %}
          {{ field.name }} => {{ field.type_package }}.C.To_C (Src.{{ field.name }}){{ "," if not loop.last }}
+{% elif field.is_modeled_enum and not (field.format.length and field.format.length > 1) %}
+         {{ field.name }} => {{ field.type_package }}.{{ field.type_model.name }}.C.To_C (Src.{{ field.name }}){{ "," if not loop.last }}
+{% elif field.type == "Boolean" %}
+         {{ field.name }} => Interfaces.C.C_bool (Src.{{ field.name }}){{ "," if not loop.last }}
 {% else %}
          {{ field.name }} => Src.{{ field.name }}{{ "," if not loop.last }}
 {% endif %}
@@ -39,6 +47,10 @@ package body {{ name }}.C is
 {% for field in fields.values() %}
 {% if field.is_packed_type %}
          {{ field.name }} => {{ field.type_package }}.C.Pack (Src.{{ field.name }}){{ "," if not loop.last }}
+{% elif field.is_modeled_enum and not (field.format.length and field.format.length > 1) %}
+         {{ field.name }} => {{ field.type_package }}.{{ field.type_model.name }}.C.To_Ada (Src.{{ field.name }}){{ "," if not loop.last }}
+{% elif field.type == "Boolean" %}
+         {{ field.name }} => Boolean (Src.{{ field.name }}){{ "," if not loop.last }}
 {% else %}
          {{ field.name }} => Src.{{ field.name }}{{ "," if not loop.last }}
 {% endif %}
@@ -54,6 +66,10 @@ package body {{ name }}.C is
 {% for field in fields.values() %}
 {% if field.is_packed_type %}
          {{ field.name }} => {{ field.type_package }}.C.Pack (Src.{{ field.name }}){{ "," if not loop.last }}
+{% elif field.is_modeled_enum and not (field.format.length and field.format.length > 1) %}
+         {{ field.name }} => {{ field.type_package }}.{{ field.type_model.name }}.C.To_Ada (Src.{{ field.name }}){{ "," if not loop.last }}
+{% elif field.type == "Boolean" %}
+         {{ field.name }} => Boolean (Src.{{ field.name }}){{ "," if not loop.last }}
 {% else %}
          {{ field.name }} => Src.{{ field.name }}{{ "," if not loop.last }}
 {% endif %}
@@ -69,6 +85,10 @@ package body {{ name }}.C is
 {% for field in fields.values() %}
 {% if field.is_packed_type %}
          {{ field.name }} => {{ field.type_package }}.C.Unpack (Src.{{ field.name }}){{ "," if not loop.last }}
+{% elif field.is_modeled_enum and not (field.format.length and field.format.length > 1) %}
+         {{ field.name }} => {{ field.type_package }}.{{ field.type_model.name }}.C.To_C (Src.{{ field.name }}){{ "," if not loop.last }}
+{% elif field.type == "Boolean" %}
+         {{ field.name }} => Interfaces.C.C_bool (Src.{{ field.name }}){{ "," if not loop.last }}
 {% else %}
          {{ field.name }} => Src.{{ field.name }}{{ "," if not loop.last }}
 {% endif %}
@@ -84,6 +104,10 @@ package body {{ name }}.C is
 {% for field in fields.values() %}
 {% if field.is_packed_type %}
          {{ field.name }} => {{ field.type_package }}.C.Unpack (Src.{{ field.name }}){{ "," if not loop.last }}
+{% elif field.is_modeled_enum and not (field.format.length and field.format.length > 1) %}
+         {{ field.name }} => {{ field.type_package }}.{{ field.type_model.name }}.C.To_C (Src.{{ field.name }}){{ "," if not loop.last }}
+{% elif field.type == "Boolean" %}
+         {{ field.name }} => Interfaces.C.C_bool (Src.{{ field.name }}){{ "," if not loop.last }}
 {% else %}
          {{ field.name }} => Src.{{ field.name }}{{ "," if not loop.last }}
 {% endif %}
