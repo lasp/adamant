@@ -35,6 +35,10 @@ with String_Util;
 with Register_Array.Representation;
 with Interfaces; use Interfaces;
 with Test_Enums; use Test_Enums;
+with Enum_Array.C;
+with Boolean_Array;
+with Boolean_Array.C;
+with Interfaces.C;
 
 procedure Test is
    -- Helper packages:
@@ -877,6 +881,53 @@ begin
    end;
    Put_Line ("passed.");
    Put_Line ("");
+   Put_Line ("C version of enumeration and Boolean arrays test: ");
+   -- The C version of an enumeration array holds each element as the
+   -- enumeration's C version, the size of a C int, and the C version of a
+   -- Boolean array holds each element as a C bool.
+   declare
+      use type Interfaces.C.C_bool;
+      use type Enum_Array.U;
+      use type Enum_Array.C.U_C;
+      use type Boolean_Array.U;
+      use type Boolean_Array.C.U_C;
+      Enum_C : Enum_Array.C.U_C;
+      Enum_U : Enum_Array.U := [First_Enum.Red, First_Enum.Green, First_Enum.Blue, First_Enum.Black, First_Enum.Red];
+      Bool_C : Boolean_Array.C.U_C;
+      Enum_T : Enum_Array.T;
+      Bool_T : Boolean_Array.T;
+      Bool_U : constant Boolean_Array.U := [True, False, True];
+   begin
+      pragma Assert (Enum_Array.C.U_C'Component_Size = Interfaces.C.int'Size);
+      pragma Assert (Boolean_Array.C.U_C'Component_Size = 8);
+      Enum_C := Enum_Array.C.To_C (Enum_U);
+      for I in Enum_C'Range loop
+         pragma Assert (First_Enum.C.E_C'Enum_Rep (Enum_C (I)) = First_Enum.E'Enum_Rep (Enum_U (I)));
+      end loop;
+      pragma Assert (Enum_Array.C.To_Ada (Enum_C) = Enum_U);
+      Enum_T := Enum_Array.C.Pack (Enum_C);
+      pragma Assert (Enum_Array.C.Unpack (Enum_T) = Enum_C);
+      Bool_C := Boolean_Array.C.To_C (Bool_U);
+      pragma Assert (Bool_C (0) and then not Bool_C (1) and then Bool_C (2));
+      pragma Assert (Boolean_Array.C.To_Ada (Bool_C) = Bool_U);
+      Bool_T := Boolean_Array.C.Pack (Bool_C);
+      pragma Assert (Boolean_Array.C.Unpack (Bool_T) = Bool_C);
+      -- A C int that is not a literal of the enumeration is rejected by To_Ada:
+      declare
+         Raw : aliased Interfaces.C.int := 7;
+         Bad : First_Enum.C.E_C with Import, Address => Raw'Address;
+      begin
+         Enum_C (2) := Bad;
+         Enum_U := Enum_Array.C.To_Ada (Enum_C);
+         Put_Line ("FAIL: To_Ada accepted an undefined enumeration value.");
+      exception
+         when Constraint_Error =>
+            Put_Line ("To_Ada rejected an undefined enumeration value.");
+      end;
+   end;
+   Put_Line ("passed.");
+   Put_Line ("");
+
    --  Sentinel for the cross test runner.
    Put_Line ("=== ALL TESTS PASSED ===");
 end Test;
