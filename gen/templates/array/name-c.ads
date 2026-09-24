@@ -3,11 +3,11 @@
 --
 -- Generated from {{ filename }} on {{ time }}.
 --------------------------------------------------------------------------------
-{% if type_includes %}
+{% if c_type_includes %}
 
 -- Record Component Includes:
-{% for include in packed_type_includes %}
-with {{ include }}.C;
+{% for include in c_type_includes %}
+with {{ include }};
 {% endfor %}
 {% endif %}
 
@@ -19,6 +19,12 @@ package {{ name }}.C is
    -- Unpacked C/C++ compatible type:
 {% if element.is_packed_type %}
    type Unconstrained_C is array (Unconstrained_Index_Type range <>) of aliased {{ element.type_package }}.C.U_C
+      with Convention => C;
+{% elif element.is_modeled_enum %}
+   type Unconstrained_C is array (Unconstrained_Index_Type range <>) of aliased {{ element.type_package }}.{{ element.type_model.name }}.C.E_C
+      with Convention => C;
+{% elif element.type == "Boolean" %}
+   type Unconstrained_C is array (Unconstrained_Index_Type range <>) of aliased Interfaces.C.C_bool
       with Convention => C;
 {% else %}
    type Unconstrained_C is array (Unconstrained_Index_Type range <>) of aliased {{ element.type }}

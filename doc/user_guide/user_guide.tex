@@ -1700,7 +1700,9 @@ This generates the source file \textit{build/src/example\_record-c.ads}. The aut
 
 The type is declared with the name \texttt{U\_C} as in unpacked C/C++ native representation. Notice that all the field members include the \texttt{aliased} keyword to indicate that any field in the record might be dereferenced at any time, following C/C++ semantics. Appropriate pragmas are also included to specify that the value will be passed to C/C++ functions in the proper way. \\
 
-Two functions are also provided: \texttt{To\_C} to convert an unpacked Ada type, \texttt{U}, to the unpacked C/C++ type, \texttt{U\_C}, and \texttt{To\_Ada} to convert an unpacked C/C++ type to the unpacked Ada type. These functions can be used before or after calling into a binded C/C++ function. Doing so encapsulates the usage of the C and C++ type to only where it is needed. This allows the user to utilize all the features of Adamant packed types in the rest of the Ada-based code.
+Two functions are also provided: \texttt{To\_C} to convert an unpacked Ada type, \texttt{U}, to the unpacked C/C++ type, \texttt{U\_C}, and \texttt{To\_Ada} to convert an unpacked C/C++ type to the unpacked Ada type. These functions can be used before or after calling into a binded C/C++ function. Doing so encapsulates the usage of the C and C++ type to only where it is needed. This allows the user to utilize all the features of Adamant packed types in the rest of the Ada-based code. \\
+
+Each field of \texttt{U\_C} uses the C version of its type, so the record lays out like a C struct declared with the same members. A nested packed type appears as its own \texttt{U\_C}. A modeled enumeration appears as its C version, \texttt{E\_C}, which has the size of a C \texttt{int} (see Section \ref{C Enumerations}). A \texttt{Boolean} appears as \texttt{Interfaces.C.C\_bool}, the Ada standard type for a C \texttt{bool}. The conversion functions convert each of these fields along with the rest of the record, so a C struct with an \texttt{enum} or \texttt{bool} member can be modeled directly with the enumeration or \texttt{Boolean} type in the YAML.
 
 \subsection{Packed Arrays} \label{Packed Arrays}
 
@@ -1821,7 +1823,7 @@ Packed arrays with elements of type packed arrays or packed records are allowed.
 
 \subsubsection{C/C++ Packed Arrays}
 
-Packed arrays can be converted to a C/C++ type in a similar way to packed records. See Section \ref{C Packed Records} for details.
+Packed arrays can be converted to a C/C++ type in a similar way to packed records. See Section \ref{C Packed Records} for details. An element of \texttt{U\_C} uses the C version of its type in the same way as a record field: a packed type as its own \texttt{U\_C}, a modeled enumeration as \texttt{E\_C}, and a \texttt{Boolean} as \texttt{Interfaces.C.C\_bool}.
 
 \subsection{Enumerations}
 
@@ -1850,7 +1852,7 @@ Below is the specification file produced, \textit{build/src/example\_enums.ads}.
 
 A package is produced with two internal packages named \texttt{First\_Enum} and \texttt{Second\_Enum} which both define an enumerations named \texttt{E} that describe the literals expressed in the YAML. Note that values are assigned to each literal explicitly. If literal values are left unspecified in the YAML file, Adamant assigns the lowest possible remaining unique positive integer (or zero) to each literal, as can be seen in the \texttt{First\_Enum} package.
 
-\subsubsection{C/C++ Enumerations}
+\subsubsection{C/C++ Enumerations} \label{C Enumerations}
 
 Each enumeration package also contains a nested package named \texttt{C} which holds a C version of \texttt{E} suitable for passing to a binded C or C++ function. See Section \ref{C Interfacing}. This is needed because C and Ada use different sizes to hold an enumeration. C stores an \texttt{enum} as an \texttt{int}, while Ada stores \texttt{E} in the smallest size that fits its literals, so passing \texttt{E} to C directly would be an error. The C version, \texttt{E\_C}, is declared with \texttt{Convention => C}, which gives it the size of a C \texttt{int}, and has the same literal names and values as \texttt{E}. \\
 

@@ -102,6 +102,12 @@ class type(packed_type):
             [self.element.type_package] if not self.element.is_packed_type else []
         )
 
+        # Store the includes for the C version of the array. A packed element uses
+        # its own C version, and a Boolean element uses Interfaces.C.C_bool:
+        self.c_type_includes = [p + ".C" for p in self.packed_type_includes]
+        if self.element.type == "Boolean":
+            self.c_type_includes.append("Interfaces.C")
+
     def get_all_types_recursive(self):
         """Get the model types, recursively delving into any types that are of record type."""
         types = []

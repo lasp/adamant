@@ -21,6 +21,9 @@ with Ee.Representation;
 with Ee.Assertion; use Ee.Assertion;
 with Ff.Assertion; use Ff.Assertion;
 with Gg.Assertion; use Gg.Assertion;
+with Hh.Assertion; use Hh.Assertion;
+with Hh.C; use Hh.C;
+with Interfaces.C;
 with Simple_Variable.Representation;
 with Simple_Variable.Validation;
 with Simple_Variable.Assertion; use Simple_Variable.Assertion;
@@ -68,7 +71,10 @@ procedure Test is
    B_Le : constant Bb.T_Le := (Element => 8, Element2 => 9);
    C : Cc.T := (C => Second_Enum.Yellow, A => A, B => B);
    C_Unpacked : Cc.U := (C => Second_Enum.Yellow, A => (One => 4, Two => 20, Three => 101), B => (Element => 8, Element2 => 9));
-   C_C : Cc.C.U_C := (C => Second_Enum.Hola, A => (One => 5, Two => 21, Three => 102), B => (Element => 9, Element2 => 10));
+   H : Hh.T;
+   H_Unpacked : Hh.U;
+   H_C : Hh.C.U_C := (Mode => Second_Enum.C.Hola, Flag => Interfaces.C.C_bool (False), Count => 0);
+   C_C : Cc.C.U_C := (C => Second_Enum.C.Hola, A => (One => 5, Two => 21, Three => 102), B => (Element => 9, Element2 => 10));
    E : Ee.T_Le := (A => A_Le, B => B_Le, C => -5);
    E_Unpacked : Ee.U;
    V : Simple_Variable.T := (Length => 3, Buffer => [250, 249, 248, others => 0]);
@@ -750,7 +756,7 @@ begin
    Put_Line (Cc.Representation.Image (C_Unpacked));
    Put_Line ("C_C:");
    Put_Line (C_C'Image);
-   C_C := (C => Second_Enum.Hola, A => (One => 5, Two => 21, Three => 102), B => (Element => 9, Element2 => 10));
+   C_C := (C => Second_Enum.C.Hola, A => (One => 5, Two => 21, Three => 102), B => (Element => 9, Element2 => 10));
    C_Unpacked := To_Ada (C_C);
    Put_Line ("C_Unpacked:");
    Put_Line (Cc.Representation.Image (C_Unpacked));
@@ -933,6 +939,44 @@ begin
    Gg_Assert.Eq (G, (17, (5, 15.2, 45.3)), Epsilon => 50.0);
    Gg_U_Assert.Eq (G_U, (17, (5, 21.5, 50.2)), Epsilon => 0.1);
    Gg_Assert.Eq (G, (17, (5, 21.5, 50.2)), Epsilon => 0.1);
+   Put_Line ("passed.");
+   Put_Line ("");
+
+   Put_Line ("C conversion test 3 (enumeration and Boolean fields): ");
+   -- The C version of the record holds the enumeration as its C version and
+   -- the Boolean as a C bool, so it lays out like the C struct
+   -- { int mode; bool flag; int32_t count; }: 4 + 1 (+ 3 padding) + 4 bytes.
+   pragma Assert (Hh.C.U_C'Object_Size = 96);
+   pragma Assert (H_C.Mode'Position = 0 and then H_C.Flag'Position = 4 and then H_C.Count'Position = 8);
+   pragma Assert (Hh.C.U_C'Size /= Hh.T'Size);
+   -- Round trip every literal of the enumeration and both Boolean values:
+   for Literal in Second_Enum.E loop
+      H_Unpacked := (Mode => Literal, Flag => True, Count => -7);
+      H_C := To_C (H_Unpacked);
+      pragma Assert (Second_Enum.C.E_C'Enum_Rep (H_C.Mode) = Second_Enum.E'Enum_Rep (Literal));
+      pragma Assert (Boolean (H_C.Flag));
+      Hh_U_Assert.Eq (To_Ada (H_C), H_Unpacked);
+      H := Pack (H_C);
+      Hh_Assert.Eq (H, (Mode => Literal, Flag => True, Count => -7));
+      H_C := Unpack (H);
+      Hh_U_Assert.Eq (To_Ada (H_C), H_Unpacked);
+   end loop;
+   H_C := (Mode => Second_Enum.C.Yellow, Flag => Interfaces.C.C_bool (False), Count => 12);
+   Hh_U_Assert.Eq (To_Ada (H_C), (Mode => Second_Enum.Yellow, Flag => False, Count => 12));
+   Put_Line ("H_C:");
+   Put_Line (H_C'Image);
+   -- A C int that is not a literal of the enumeration is rejected by To_Ada:
+   declare
+      Raw : aliased Interfaces.C.int := 3;
+      Bad_Mode : Second_Enum.C.E_C with Import, Address => Raw'Address;
+   begin
+      H_C.Mode := Bad_Mode;
+      H_Unpacked := To_Ada (H_C);
+      Put_Line ("FAIL: To_Ada accepted an undefined enumeration value.");
+   exception
+      when Constraint_Error =>
+         Put_Line ("To_Ada rejected an undefined enumeration value.");
+   end;
    Put_Line ("passed.");
    Put_Line ("");
 end Test;

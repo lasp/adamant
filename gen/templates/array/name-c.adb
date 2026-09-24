@@ -12,6 +12,10 @@ package body {{ name }}.C is
       return [for J in Src'Range => {{ element.type_package }}.C.To_Ada (Src (J))];
       pragma Annotate (GNATSAS, False_Positive, "precondition",
          "The element conversion preconditions require each source component to be initialized. Callers initialize the source before this call, typically on the other side of the foreign-function boundary, which the analyzer cannot trace.");
+{% elif element.is_modeled_enum %}
+      return [for J in Src'Range => {{ element.type_package }}.{{ element.type_model.name }}.C.To_Ada (Src (J))];
+{% elif element.type == "Boolean" %}
+      return [for J in Src'Range => Boolean (Src (J))];
 {% else %}
       return [for J in Src'Range => Src (J)];
 {% endif %}
@@ -23,6 +27,10 @@ package body {{ name }}.C is
       return [for J in Src'Range => {{ element.type_package }}.C.To_C (Src (J))];
       pragma Annotate (GNATSAS, False_Positive, "precondition",
          "The element conversion preconditions require each source component to be initialized. Callers initialize the source before this call, typically on the other side of the foreign-function boundary, which the analyzer cannot trace.");
+{% elif element.is_modeled_enum %}
+      return [for J in Src'Range => {{ element.type_package }}.{{ element.type_model.name }}.C.To_C (Src (J))];
+{% elif element.type == "Boolean" %}
+      return [for J in Src'Range => Interfaces.C.C_bool (Src (J))];
 {% else %}
       return [for J in Src'Range => Src (J)];
 {% endif %}

@@ -1,0 +1,5 @@
+---
+type: Boolean
+format: E8
+description: A simple array of Booleans.
+length: 3

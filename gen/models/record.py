@@ -445,6 +445,12 @@ class record(packed_type):
             )
         )
 
+        # Store the includes for the C version of the record. Packed fields use
+        # their own C version, and Boolean fields use Interfaces.C.C_bool:
+        self.c_type_includes = [p + ".C" for p in self.packed_type_includes]
+        if any(f.type == "Boolean" for f in self.fields.values()):
+            self.c_type_includes.append("Interfaces.C")
+
         # Store the includes necessary to include the field types:
         self.variable_length_type_includes = list(
             OrderedDict.fromkeys(
