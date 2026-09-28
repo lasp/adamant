@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
 
 # Unit test for the python import scanning in redo/util/pydep.py: which
-# names a file imports, which files an import loads, what is left out
-# (standard library, installed packages, ignored names, build machinery).
-# The fixture is a
-# small module tree written to a temporary directory and put on sys.path.
-# Building generated modules is exercised by the python tests in gen/test/.
+# names a file imports, which files an import loads, what is a dependency,
+# what is left to the build database (standard library, installed
+# packages) and what is left out (ignored names, build machinery), the
+# shared walk over several seed files, and the build of a generated
+# module. The fixture is a small module tree written to a temporary
+# directory and put on sys.path, plus the record model beside this test,
+# whose python module the session's build database knows how to generate.
+import importlib
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
 
+import database.setup
 from util import pydep
 
 
@@ -54,6 +59,7 @@ fixture = {
     "redo/build_rule.py": "import only_via_build_rule\n",
     "redo/only_via_build_rule.py": "",
     "gen/generator.py": "",
+    "seed_e.py": "import generated_record\n",
 }
 
 
@@ -72,7 +78,9 @@ def run_cases(root):
     write_tree(root, fixture)
     fixture_path = [root] + paths(root, "tools", "site-packages", "redo", "gen")
     sys.path[:0] = fixture_path
-    seed_a, seed_b, seed_c, seed_d = paths(root, "seed_a.py", "seed_b.py", "seed_c.py", "seed_d.py")
+    seed_a, seed_b, seed_c, seed_d, seed_e = paths(
+        root, "seed_a.py", "seed_b.py", "seed_c.py", "seed_d.py", "seed_e.py"
+    )
 
     # seed_a holds one import of every form. A from-import is reported as
     # both the module and the dotted submodule, a relative import is left
@@ -174,16 +182,97 @@ def run_cases(root):
     )
     check_equal(
         "the walk neither reports nor follows one",
-        pydep._build_pydeps(seed_c),
-        ([], paths(root, "helper.py")),
+        pydep._build_pydeps([seed_c]),
+        {os.path.join(root, "helper.py"): False},
+    )
+
+    # seed_a and seed_b both import pkg.mod, and ns.other reaches
+    # tools/build_tool.py through a second sys.path entry. One walk over
+    # both seeds returns the union of what they reach.
+    print("testing the shared walk:", file=sys.stderr)
+    check_equal(
+        "one walk over two seeds reaches the union of their imports",
+        pydep._build_pydeps([seed_a, seed_b], ignore_list=["runtime_only"]),
+        {
+            path: False
+            for path in paths(
+                root, "pkg/__init__.py", "pkg/mod.py", "ns/leaf.py", "ns/other.py", "tools/build_tool.py"
+            )
+        },
+    )
+
+    # generated_record is the record model beside this test, so its python
+    # module is in the session's build database and nowhere on sys.path.
+    # The walk asks the database, builds the module, reports it as
+    # generated whether or not an earlier run left it built, and follows
+    # its imports: the packed type base class is the one project file.
+    print("testing generated modules:", file=sys.stderr)
+    this_dir = os.path.dirname(os.path.realpath(__file__))
+    adamant = os.path.dirname(os.path.dirname(os.path.dirname(this_dir)))
+    generated = os.path.join(this_dir, "build", "py", "generated_record.py")
+    base_class = os.path.join(adamant, "gnd", "base_classes", "packed_type_base.py")
+    check_equal(
+        "an unbuilt generated module is left to the build database",
+        pydep.pydep(seed_e),
+        ([], ["generated_record"]),
+    )
+    check_equal(
+        "the walk builds it, reports it as generated, and follows its imports",
+        pydep._build_pydeps([seed_e]),
+        {generated: True, base_class: False},
+    )
+    check_equal("the built module exists", os.path.isfile(generated), True)
+
+    # The command line walks the same seeds through build_py_deps and prints
+    # every dependency path, sorted, one per line.
+    print("testing the command line:", file=sys.stderr)
+    env = dict(os.environ)
+    env["PYTHONPATH"] = os.pathsep.join(fixture_path + [env.get("PYTHONPATH", "")])
+    output = subprocess.run(
+        [
+            sys.executable, pydep.__file__, seed_a, seed_b,
+            "-p", "-i", "runtime_only",
+        ],
+        check=True, capture_output=True, text=True, env=env,
+    ).stdout
+    check_equal(
+        "paths are printed sorted",
+        output.splitlines(),
+        sorted(paths(root, "pkg/__init__.py", "pkg/mod.py", "ns/leaf.py", "ns/other.py", "tools/build_tool.py")),
+    )
+
+    # seed_e adds the one generated module, which comes back in the built
+    # list with its directory put on sys.path, so the record imports.
+    print("testing build_py_deps:", file=sys.stderr)
+    check_equal(
+        "a list of seeds yields the built and existing lists",
+        pydep.build_py_deps([seed_a, seed_b, seed_e], ignore_list=["runtime_only"]),
+        (
+            [generated],
+            paths(root, "pkg/__init__.py", "pkg/mod.py", "ns/leaf.py", "ns/other.py")
+            + [base_class]
+            + paths(root, "tools/build_tool.py"),
+        ),
+    )
+    check_equal(
+        "the built module is importable",
+        importlib.import_module("generated_record").__file__,
+        generated,
     )
 
     print("passed.\n", file=sys.stderr)
 
 
 if __name__ == "__main__":
+    # The walk looks unresolved names up in the session's python source
+    # database, so the test runs inside one session, established here from
+    # this file as the top-level target.
+    session = (__file__, os.path.splitext(__file__)[0], __file__ + ".out")
+    established = database.setup.setup(*session)
     root = tempfile.mkdtemp()
     try:
         run_cases(root)
     finally:
         shutil.rmtree(root)
+        if established:
+            database.setup.cleanup(*session)

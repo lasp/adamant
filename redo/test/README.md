@@ -10,5 +10,5 @@ The following is a description of what you can expect to find in the subdirector
 
 * `aspect_compile/` - a test which makes sure a child package declared with an aspect specification (which puts the `is` keyword on its own line) still has its implicit parent-package dependency discovered
 * `c_compile/` - a test which makes sure the compilation of c source code and linking with an ada main file is working properly
-* `pydep/` - a unit test for the python import scanning and dependency walk in `redo/util/pydep.py`: the names a file imports, the files an import loads, what is left out, and that the build system and code generators are never reported or followed; runs under `redo test` like the python tests in `gen/test/`
+* `pydep/` - a unit test for the python import scanning and dependency walk in `redo/util/pydep.py`: the names a file imports, the files an import loads, what is left out, that the build system and code generators are never reported or followed, and that a generated module is built from its model and put on the path; runs under `redo test` like the python tests in `gen/test/`
 * `source_dependencies/` - a unit test for the Ada source scanning in `redo/util/ada.py`, locking in the dependency extraction and body-dependency heuristics over a set of declaration shapes; runs under `redo test` like the python tests in `gen/test/`

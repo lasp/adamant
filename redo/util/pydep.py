@@ -111,104 +111,95 @@ def pydep(source_file, ignore_list=()):
     return list(dict.fromkeys(files)), list(dict.fromkeys(unresolved))
 
 
-def _build_pydeps(source_file, path=[]):
+def _build_pydeps(seeds, ignore_list=()):
     """
-    Recursively build any missing python module dependencies for
-    a given source file.
-    Collect any static existing dependencies.
-    Track processed files to guard against circular imports.
+    Walk the imports of the seed files together, building every generated
+    module the walk reaches, and return {source file: generated} for each
+    file the seeds transitively import, in discovery order. One visited set
+    serves all seeds, so a file reached from several seeds is parsed once.
     """
-    built_deps = []
-    all_existing_deps = []
-    deps_not_in_path = []
-    processed_files = set()
+    seeds = [os.path.abspath(seed) for seed in seeds]
+    seen = set(seeds)
+    dependencies = {}
+    built = set()
+    to_scan = list(seeds)
 
-    def _inner_build_pydeps(source_file):
-        # Skip if already processed:
-        if source_file in processed_files:
-            return
-        processed_files.add(source_file)
-        # Find the python dependencies:
-        existing_deps, nonexistent_deps = pydep(source_file)
-        all_existing_deps.extend(existing_deps)
+    while to_scan:
+        resolved = []
+        unresolved = []
+        for source_file in to_scan:
+            files, missing = pydep(source_file, ignore_list)
+            resolved.extend(files)
+            unresolved.extend(missing)
 
-        # Collect dependencies to recurse on
-        deps_to_recurse = list(existing_deps)
-
-        # For the nonexistent dependencies, see if we have a rule
-        # to build those:
-        deps_to_build = []
-        if nonexistent_deps:
+        generated = []
+        wanted = list(dict.fromkeys(unresolved))
+        if wanted:
             with py_source_database() as db:
-                deps_to_build = db.try_get_sources(nonexistent_deps)
+                generated = [os.path.abspath(g) for g in db.try_get_sources(wanted)]
+            to_build = [g for g in generated if g not in built]
+            if to_build:
+                redo.redo_ifchange(to_build)
+                built.update(to_build)
 
-            deps_not_in_path.extend(deps_to_build)
+        to_scan = []
+        for path in generated + [os.path.abspath(f) for f in resolved]:
+            if path not in seen:
+                seen.add(path)
+                to_scan.append(path)
+            dependencies[path] = path in built
 
-            # Don't rebuild anything we have already built:
-            deps_to_build = [d for d in deps_to_build if d not in built_deps]
-
-            # Build the deps:
-            if deps_to_build:
-                redo.redo_ifchange(deps_to_build)
-                built_deps.extend(deps_to_build)
-                deps_to_recurse.extend(deps_to_build)
-
-        # Recurse on all dependencies to collect their transitive deps
-        for dep in deps_to_recurse:
-            _inner_build_pydeps(dep)
-
-    _inner_build_pydeps(source_file)
-    return list(dict.fromkeys(deps_not_in_path)), list(dict.fromkeys(all_existing_deps))
+    return dependencies
 
 
-class _build_python_no_update(build_rule_base):
-    """
-    Class which helps us build the dependencies of a python file using
-    the build system.
-    """
-    def _build(self, redo_1, redo_2, redo_3):
-        # Build any dependencies:
-        return _build_pydeps(redo_1)
+def _directories_of(files):
+    return list(dict.fromkeys(os.path.dirname(f) for f in files))
 
 
 class _build_python(build_rule_base):
     """
-    Class which helps us build the dependencies of a python file using
-    the build system.
+    Build rule which builds the python dependencies of a set of seed files
+    within a build system session and, when asked, puts the directories of
+    the built modules on sys.path so the caller can import them.
     """
+    def __init__(self, seeds=(), update_path=True, ignore_list=()):
+        self.seeds = seeds
+        self.update_path = update_path
+        self.ignore_list = ignore_list
+
     def _build(self, redo_1, redo_2, redo_3):
-        # Build any dependencies:
-        deps_not_in_path, existing_deps = _build_pydeps(redo_1)
-
-        # Figure out what we need to add to the path:
-        paths_to_add = list(dict.fromkeys([os.path.dirname(d) for d in deps_not_in_path]))
-
-        # Add the paths to the path:
-        sys.path.extend(paths_to_add)
-
-        return deps_not_in_path, existing_deps
+        dependencies = _build_pydeps(self.seeds, self.ignore_list)
+        built_deps = [path for path, generated in dependencies.items() if generated]
+        existing_deps = [path for path, generated in dependencies.items() if not generated]
+        if self.update_path:
+            sys.path.extend(_directories_of(built_deps))
+        return built_deps, existing_deps
 
 
 class _run_python(build_rule_base):
     """
-    Class which helps us run a python file using the build system.
-    This has the major benefit of building all python dependencies that
-    are autogenerated prior to running the actual python file to be executed.
+    Build rule which runs a python file with its generated dependencies built
+    and on the python path.
     """
     def _build(self, redo_1, redo_2, redo_3):
-        # Build any dependencies:
-        deps_not_in_path = _build_pydeps(redo_1)
-
-        # Figure out what we need to add to the path:
-        paths_to_add = list(dict.fromkeys([os.path.dirname(d) for d in deps_not_in_path]))
-
-        # Run the python script:
+        dependencies = _build_pydeps([redo_1])
+        built_deps = [path for path, generated in dependencies.items() if generated]
         shell.run_command(
-            "PYTHONPATH=$PYTHONPATH:" + ":".join(paths_to_add) + " python " + redo_1
+            "PYTHONPATH=$PYTHONPATH:" + ":".join(_directories_of(built_deps)) + " python " + redo_1
         )
 
 
-def build_py_deps(source_file=None, update_path=True):
+def build_py_deps(source_file=None, update_path=True, ignore_list=()):
+    """
+    Build the generated python modules that a source file, or a list of
+    source files, transitively imports, and return two lists: the built
+    modules and the existing source files the imports resolve to. Without a
+    source file, the caller's own module is used. The build session is
+    established from the first seed. With update_path, the
+    directories of the built modules are appended to sys.path so the caller
+    can import them. Names in ignore_list, and their submodules, are not
+    followed.
+    """
     # If the source file is none, then use the source file of this function caller:
     if not source_file:
         import inspect
@@ -216,14 +207,12 @@ def build_py_deps(source_file=None, update_path=True):
         frame = inspect.stack()[1]
         module = inspect.getmodule(frame[0])
         source_file = module.__file__
-    if update_path:
-        rule = _build_python()
-    else:
-        rule = _build_python_no_update()
+    seeds = [source_file] if isinstance(source_file, str) else list(source_file)
+    rule = _build_python(seeds, update_path, ignore_list)
     built_deps, existing_deps = rule.build(
-        redo_1=source_file,
-        redo_2=os.path.splitext(source_file)[0],
-        redo_3=source_file + ".out",
+        redo_1=seeds[0],
+        redo_2=os.path.splitext(seeds[0])[0],
+        redo_3=seeds[0] + ".out",
     )
 
     # Reset the database, so that this function can be run again, if warranted.
@@ -267,44 +256,38 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "-i", "--ignore",
-        nargs="+",
+        action="append",
         default=[],
-        help="Strings to ignore in dependency names"
+        help="Module name to leave unresolved and unfollowed, along with its submodules; repeatable"
     )
 
     parser.add_argument(
         "file_args",
-        nargs="*",
+        nargs="+",
         help="Paths to Python files"
     )
 
     args = parser.parse_args()
 
-    all_static_deps = set()
-
-    for source_file in args.file_args:
-        existing_deps, nonexistent_deps = pydep(source_file, args.ignore)
-
-        if args.verbose:
+    if args.verbose:
+        for source_file in args.file_args:
+            existing_deps, unresolved = pydep(source_file, args.ignore)
             print(f"\nFinding dependencies for: {source_file}")
             print("\nExisting dependencies:")
             for dep in existing_deps:
                 print(dep)
 
             print("\nUnresolved dependencies:")
-            for dep in nonexistent_deps:
+            for dep in unresolved:
                 print(dep)
 
-            print("\nBuilding nonexistent dependencies:")
+        print("\nBuilding unresolved dependencies:")
 
-        built_deps, static_existing_deps = build_py_deps(source_file)
-        # Collect all existing dependencies:
-        all_static_deps.update(built_deps)
-        all_static_deps.update(static_existing_deps)
+    built_deps, existing_deps = build_py_deps(args.file_args, ignore_list=args.ignore)
 
     # print full paths on mode flag
     if args.paths:
         if args.verbose:
-            print("\nAll static dependency paths:")
+            print("\nAll dependency paths:")
 
-        print("\n".join(sorted(all_static_deps)))
+        print("\n".join(sorted(built_deps + existing_deps)))
