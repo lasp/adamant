@@ -6,19 +6,65 @@ A script that imports generated modules calls build_py_deps on itself: the
 imports that resolve to existing files are its static dependencies, and the
 ones that do not are looked up in the build database and built. The build
 system and the code generators are never dependencies. A script imports
-them to run the build, not because its logic needs them, so a file under a
-sys.path entry named redo or gen, which is where every build tree in the
-workspace lives, is neither reported nor followed.
+them to run the build, not because its logic needs them, so the walk
+neither follows nor reports a file under a sys.path entry named redo or
+gen, which is where every build tree in the workspace lives.
 """
 import os
 import sys
+import sysconfig
 import ast
-import importlib.util
 import argparse
+from importlib.machinery import PathFinder
 from util import redo
 from database.py_source_database import py_source_database
 from base_classes.build_rule_base import build_rule_base
 from util import shell
+
+
+def imported_names(source_file):
+    """
+    Return the module names a python source file imports, in source order.
+    `from X import Y` yields both X and X.Y, since Y is either an attribute
+    of X or the submodule X.Y and only the dotted form distinguishes them.
+    A star import yields only X. Relative imports are left out.
+    """
+    with open(source_file, "r") as f:
+        root = ast.parse(f.read(), filename=source_file)
+
+    names = []
+    for node in ast.walk(root):
+        if isinstance(node, ast.Import):
+            names.extend(alias.name for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+            names.append(node.module)
+            names.extend(node.module + "." + alias.name for alias in node.names if alias.name != "*")
+    return list(dict.fromkeys(names))
+
+
+def locate_module(name):
+    """
+    Return the files that an import of a dotted name loads, in load order,
+    found on sys.path without importing anything. A regular package
+    contributes its __init__.py and a module contributes itself; a
+    namespace package contributes nothing. The search stops at the first
+    module, since anything after it is an attribute, not a submodule.
+    Returns None when a component of the name does not exist.
+    """
+    files = []
+    path = None
+    parts = name.split(".")
+    for depth in range(1, len(parts) + 1):
+        spec = PathFinder.find_spec(".".join(parts[:depth]), path)
+        if spec is None:
+            return None
+        if spec.submodule_search_locations is None:
+            files.append(spec.origin)
+            return files
+        if spec.has_location:
+            files.append(spec.origin)
+        path = list(spec.submodule_search_locations)
+    return files
 
 
 def build_machinery_roots():
@@ -31,67 +77,38 @@ def _under(path, roots):
     return any(path == root or path.startswith(root + os.sep) for root in roots)
 
 
-def pydep(source_file, path=[], ignore_list=[]):
-    """
-    Return dependencies for a given python source file.
-    Two lists are returned to the user. The first list is
-    the modules found whose source files actually exist on
-    the system. The second list includes modules
-    that were found in the source file, but could not be
-    found on the file system. A module of the build
-    machinery is in neither list.
-    """
-    # If a path is not provided than just use the python
-    # path variable:
-    if not path:
-        path = os.environ["PYTHONPATH"].split(":")
+_stdlib_roots = [sysconfig.get_paths()[key] for key in ("stdlib", "platstdlib")]
 
-    with open(source_file, "r") as f:
-        root = ast.parse(f.read())
 
-    existing_deps = []
-    nonexistent_deps = []
+def _installed(path):
+    """A file of the standard library or of an installed package."""
+    path = os.path.abspath(path)
+    return _under(path, _stdlib_roots) or "site-packages" in path or "dist-packages" in path
+
+
+def pydep(source_file, ignore_list=()):
+    """
+    Return the dependencies of a python source file as two lists: the
+    project files its imports load, and the imported names that load no
+    project file, which the build database may know how to generate. An
+    import that resolves only to the standard library or to an installed
+    package is reported in the second list rather than dropped, since the
+    project may generate a module of the same name and the name alone
+    cannot tell. Imports of the build machinery and of names in ignore_list
+    (or their submodules) appear in neither list.
+    """
+    files = []
+    unresolved = []
     machinery = build_machinery_roots()
-
-    def is_system_spec(spec):
-        # Must be string, must be a file path, and must not be a system package
-        return spec.origin is None or \
-               os.sep not in spec.origin or \
-               "/usr/lib/python" in spec.origin or \
-               "site-packages/" in spec.origin
-
-    for node in ast.walk(root):
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                name = alias.name  # name of the module
-                if any(ignored in name for ignored in ignore_list):
-                    continue
-                try:
-                    spec = importlib.util.find_spec(name)
-                except ModuleNotFoundError:
-                    nonexistent_deps.append(name)
-                    continue
-                if spec is None or is_system_spec(spec):
-                    nonexistent_deps.append(name)
-                elif not _under(os.path.abspath(spec.origin), machinery):
-                    existing_deps.append(spec.origin)
-
-        if isinstance(node, ast.ImportFrom):
-            name = node.module  # name of the module
-            if name:
-                if any(ignored in name for ignored in ignore_list):
-                    continue
-                try:
-                    spec = importlib.util.find_spec(name)
-                except ModuleNotFoundError:
-                    nonexistent_deps.append(name)
-                    continue
-                if spec is None or is_system_spec(spec):
-                    nonexistent_deps.append(name)
-                elif not _under(os.path.abspath(spec.origin), machinery):
-                    existing_deps.append(spec.origin)
-
-    return list(dict.fromkeys(existing_deps)), nonexistent_deps
+    for name in imported_names(source_file):
+        if any(name == i or name.startswith(i + ".") for i in ignore_list):
+            continue
+        loaded = locate_module(name)
+        if loaded is None or any(_installed(f) for f in loaded):
+            unresolved.append(name)
+        elif not any(_under(os.path.abspath(f), machinery) for f in loaded):
+            files.extend(loaded)
+    return list(dict.fromkeys(files)), list(dict.fromkeys(unresolved))
 
 
 def _build_pydeps(source_file, path=[]):
@@ -112,7 +129,7 @@ def _build_pydeps(source_file, path=[]):
             return
         processed_files.add(source_file)
         # Find the python dependencies:
-        existing_deps, nonexistent_deps = pydep(source_file, path)
+        existing_deps, nonexistent_deps = pydep(source_file)
         all_existing_deps.extend(existing_deps)
 
         # Collect dependencies to recurse on
@@ -266,7 +283,7 @@ if __name__ == "__main__":
     all_static_deps = set()
 
     for source_file in args.file_args:
-        existing_deps, nonexistent_deps = pydep(source_file, ignore_list=set(args.ignore))
+        existing_deps, nonexistent_deps = pydep(source_file, args.ignore)
 
         if args.verbose:
             print(f"\nFinding dependencies for: {source_file}")
@@ -274,7 +291,7 @@ if __name__ == "__main__":
             for dep in existing_deps:
                 print(dep)
 
-            print("\nNonexistent dependencies:")
+            print("\nUnresolved dependencies:")
             for dep in nonexistent_deps:
                 print(dep)
 
