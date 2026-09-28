@@ -42,6 +42,6 @@ package body {{ name }} is
 {% endfor %}
 {% endfor %}
 end {{ name }};
-{% else %}
+{%- else %}
 pragma No_Body;
-{% endif %}
+{%- endif %}
