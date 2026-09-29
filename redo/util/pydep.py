@@ -1,3 +1,15 @@
+"""
+Find the python source files a script depends on, and build the ones the
+build system generates before the script needs them.
+
+A script that imports generated modules calls build_py_deps on itself: the
+imports that resolve to existing files are its static dependencies, and the
+ones that do not are looked up in the build database and built. The build
+system and the code generators are never dependencies. A script imports
+them to run the build, not because its logic needs them, so a file under a
+sys.path entry named redo or gen, which is where every build tree in the
+workspace lives, is neither reported nor followed.
+"""
 import os
 import sys
 import ast
@@ -9,6 +21,16 @@ from base_classes.build_rule_base import build_rule_base
 from util import shell
 
 
+def build_machinery_roots():
+    """The sys.path entries that hold the build system and code generators."""
+    entries = [os.path.abspath(entry) for entry in sys.path]
+    return [entry for entry in entries if os.path.basename(entry) in ("redo", "gen")]
+
+
+def _under(path, roots):
+    return any(path == root or path.startswith(root + os.sep) for root in roots)
+
+
 def pydep(source_file, path=[], ignore_list=[]):
     """
     Return dependencies for a given python source file.
@@ -16,7 +38,8 @@ def pydep(source_file, path=[], ignore_list=[]):
     the modules found whose source files actually exist on
     the system. The second list includes modules
     that were found in the source file, but could not be
-    found on the file system.
+    found on the file system. A module of the build
+    machinery is in neither list.
     """
     # If a path is not provided than just use the python
     # path variable:
@@ -28,6 +51,7 @@ def pydep(source_file, path=[], ignore_list=[]):
 
     existing_deps = []
     nonexistent_deps = []
+    machinery = build_machinery_roots()
 
     def is_system_spec(spec):
         # Must be string, must be a file path, and must not be a system package
@@ -47,14 +71,10 @@ def pydep(source_file, path=[], ignore_list=[]):
                 except ModuleNotFoundError:
                     nonexistent_deps.append(name)
                     continue
-                # if module (and its origin file) exists, append to the existing_deps
-                if spec is not None:
-                    if is_system_spec(spec):
-                        nonexistent_deps.append(name)
-                    else:
-                        existing_deps.append(spec.origin)
-                else:
+                if spec is None or is_system_spec(spec):
                     nonexistent_deps.append(name)
+                elif not _under(os.path.abspath(spec.origin), machinery):
+                    existing_deps.append(spec.origin)
 
         if isinstance(node, ast.ImportFrom):
             name = node.module  # name of the module
@@ -66,13 +86,10 @@ def pydep(source_file, path=[], ignore_list=[]):
                 except ModuleNotFoundError:
                     nonexistent_deps.append(name)
                     continue
-                if spec is not None:
-                    if is_system_spec(spec):
-                        nonexistent_deps.append(name)
-                    else:
-                        existing_deps.append(spec.origin)
-                else:
+                if spec is None or is_system_spec(spec):
                     nonexistent_deps.append(name)
+                elif not _under(os.path.abspath(spec.origin), machinery):
+                    existing_deps.append(spec.origin)
 
     return list(dict.fromkeys(existing_deps)), nonexistent_deps
 
