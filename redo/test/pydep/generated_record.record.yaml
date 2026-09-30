@@ -1,0 +1,9 @@
+---
+description: A record beside the pydep unit test, so the session's build database holds a python module the test can ask the walk to generate.
+with:
+  - Interfaces
+fields:
+  - name: Value
+    description: The one field.
+    type: Interfaces.Unsigned_8
+    format: U8
