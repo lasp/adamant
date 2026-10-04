@@ -26,13 +26,13 @@ def __divide_chunks(things, num):
         yield things[i:i + num]
 
 
-def __invoke_redo_subprocess(command, args=None, prefix_args=None):
-    """Private function which invokes a redo-like command.
+def __redo_calls(command, args=None, prefix_args=None):
+    """Yield the command strings that invoke a redo-like command on args.
 
     When the argument list exceeds _MAX_ARGS, it is split into chunks and
-    each chunk is invoked separately. If prefix_args is provided, those
-    arguments are prepended to EVERY chunk (not just the first). This is
-    critical for commands like redo-done where the first argument (the
+    one command string is yielded per chunk. If prefix_args is provided,
+    those arguments are prepended to EVERY chunk (not just the first). This
+    is critical for commands like redo-done where the first argument (the
     target) must appear in every invocation.
     """
     if args is None:
@@ -51,11 +51,37 @@ def __invoke_redo_subprocess(command, args=None, prefix_args=None):
         # every invocation, not just the first.
         chunk_size = max(1, _MAX_ARGS - len(prefix_args))
         for chunk in __divide_chunks(args, chunk_size):
-            call_str = __form_call_args(command, prefix_args + chunk)
-            shell.run_command(call_str)
+            yield __form_call_args(command, prefix_args + chunk)
     else:
-        call_str = __form_call_args(command, all_args)
+        yield __form_call_args(command, all_args)
+
+
+def __invoke_redo_subprocess(command, args=None, prefix_args=None):
+    """Private function which invokes a redo-like command, in chunks when
+    the argument list is long. Output goes to the terminal and a failing
+    invocation aborts."""
+    for call_str in __redo_calls(command, args, prefix_args):
         shell.run_command(call_str)
+
+
+def __invoke_redo_subprocess_capture_output(command, args=None, prefix_args=None):
+    """Private function which invokes a redo-like command, in chunks when
+    the argument list is long, capturing its output. Returns the
+    concatenated (stdout, stderr) of every invocation. A failing invocation
+    prints what it captured and aborts."""
+    stdout_all = []
+    stderr_all = []
+    for call_str in __redo_calls(command, args, prefix_args):
+        status, stdout, stderr = shell.try_run_command_capture_output(call_str)
+        if status != 0:
+            if stdout.strip():
+                sys.stderr.write(stdout.strip() + "\n")
+            if stderr.strip():
+                sys.stderr.write(stderr.strip() + "\n")
+            error.abort(status)
+        stdout_all.append(stdout)
+        stderr_all.append(stderr)
+    return "\n".join(stdout_all), "\n".join(stderr_all)
 
 
 def redo(args):
@@ -95,29 +121,9 @@ def redo_ood(args):
     Call redo-ood with a list of targets. This call returns the
     targets that are out of date as a list.
     """
-    if args:
-        call_str = __form_call_args("redo-ood", args)
-        (
-            status,
-            stdout,
-            stderr,
-        ) = shell.try_run_command_capture_output(call_str)
-        stdout = stdout.strip()
-        stderr = stderr.strip()
-
-        if status != 0:
-            import sys
-
-            if stdout:
-                sys.stderr.write(stdout + "\n")
-            if stderr:
-                sys.stderr.write(stderr + "\n")
-            error.abort(status)
-
-        # Filter any warnings out of the output. We only want file paths.
-        to_ret = [path for path in stderr.split("\n") if path.startswith(os.sep)]
-        return to_ret
-    return []
+    _, stderr = __invoke_redo_subprocess_capture_output("redo-ood", args)
+    # Filter any warnings out of the output. We only want file paths.
+    return [path for path in stderr.strip().split("\n") if path.startswith(os.sep)]
 
 
 def info_print(string):
