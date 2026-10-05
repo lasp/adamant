@@ -95,6 +95,11 @@ class renderable_object(object):
         )
 
 
+# Models already loaded by this process whose class marks them
+# immutable_after_load, by class and file; see base.
+_loaded_models = {}
+
+
 class base_meta(abc.ABCMeta):
     """
     We use this meta class to intercept calls to create a new "base" object. It
@@ -111,6 +116,8 @@ class base_meta(abc.ABCMeta):
         ignore_cache = kwargs.pop("ignore_cache", False)
         instance = cls.__new__(cls, *args, **kwargs, ignore_cache=ignore_cache)
         cls.__init__(instance, *args, **kwargs)
+        if cls.immutable_after_load:
+            _loaded_models[(cls, instance.full_filename)] = instance
         return instance
 
 
@@ -119,6 +126,15 @@ class base(renderable_object, metaclass=base_meta):
     The model base class. All python models that load yaml files should
     inherit from this class.
     """
+    # A model class marked immutable_after_load promises that nothing writes
+    # into its objects once their load finishes, beyond completing them the
+    # same way for every user (a record fills in its fields' type ranges on
+    # first request). One object can then serve every reference to its file
+    # within a process: base keeps it and hands the same object back on each
+    # load. A model that is filled in after it loads cannot make that promise:
+    # the assembly writes instance data into every component it loads, and a
+    # component or assembly writes itself into each of its submodels.
+    immutable_after_load = False
     #################################################
     # Model Caching:
     #################################################
@@ -235,7 +251,9 @@ class base(renderable_object, metaclass=base_meta):
             full_filename = os.path.abspath(filename)
             model = None
             if not ignore_cache:
-                model = cls.load_from_cache(cls, full_filename)
+                model = _loaded_models.get((cls, full_filename))
+                if model is None:
+                    model = cls.load_from_cache(cls, full_filename)
 
             # If we are not ignoring the cache, and the model was found in
             # the cache, then use it, otherwise create the model from scratch
