@@ -107,6 +107,8 @@ class enums(base):
     This is the object model for a suite of enumerations. It extracts data from an
     input file and stores the data as object member variables.
     """
+    shareable = True
+
     def __init__(self, filename):
         """
         Initialize the packed type object, ingest data, and check it by

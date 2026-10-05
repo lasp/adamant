@@ -119,6 +119,14 @@ class base(renderable_object, metaclass=base_meta):
     The model base class. All python models that load yaml files should
     inherit from this class.
     """
+    # A shareable model is only ever completed after it loads (a record fills
+    # in its fields' type ranges on first request), never altered, so one
+    # object can serve every reference to its file within a process:
+    # model_loader keeps it and hands the same object back on each load. A
+    # model that its loader goes on to fill in must stay unshared: the
+    # assembly writes instance data into every component it loads, and a
+    # component or assembly writes itself into each of its submodels.
+    shareable = False
     #################################################
     # Model Caching:
     #################################################
