@@ -1,4 +1,5 @@
 with Ada.Real_Time; use Ada.Real_Time;
+with Interfaces;
 
 -- Arithmetic package for Sys_Time
 package Sys_Time.Arithmetic is
@@ -18,6 +19,16 @@ package Sys_Time.Arithmetic is
 
    -- Convert a Sys_Time to an Ada.Real_Time.Time
    function To_Time (Arg : in Sys_Time.T) return Time;
+
+   -- Convert a Sys_Time to a count of whole milliseconds, microseconds, or
+   -- nanoseconds since the epoch. Any fraction of the unit is truncated. The
+   -- largest Sys_Time fits in 64 bits for every unit.
+   function To_Milliseconds (Arg : in Sys_Time.T) return Interfaces.Unsigned_64
+      with Inline => True;
+   function To_Microseconds (Arg : in Sys_Time.T) return Interfaces.Unsigned_64
+      with Inline => True;
+   function To_Nanoseconds (Arg : in Sys_Time.T) return Interfaces.Unsigned_64
+      with Inline => True;
 
    -- Add a system time and a time span and return a system time
    function Add (Left : in Sys_Time.T; Right : in Time_Span; Result : out Sys_Time.T) return Sys_Time_Status;

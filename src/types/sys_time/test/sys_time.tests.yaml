@@ -9,3 +9,5 @@ tests:
     description: This unit test makes sure that subtracting two times produces the correct results.
   - name: Additional_Tests
     description: This unit test adds some additional testing.
+  - name: Unit_Conversions
+    description: This unit test makes sure that converting a time to whole milliseconds, microseconds, and nanoseconds produces the correct results.
