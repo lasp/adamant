@@ -47,6 +47,7 @@ private
    overriding procedure Subtract_Time (Self : in out Instance);
    -- This unit test adds some additional testing.
    overriding procedure Additional_Tests (Self : in out Instance);
+   overriding procedure Unit_Conversions (Self : in out Instance);
 
    -- Test data and state:
    type Instance is new Sys_Time_Tests.Base_Instance with record

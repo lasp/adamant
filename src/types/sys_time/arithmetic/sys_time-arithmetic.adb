@@ -11,8 +11,10 @@ package body Sys_Time.Arithmetic is
 
    -- Define the number of subseconds ticks that exist in a second.
    Subseconds_In_Second : constant Unsigned_64 := Unsigned_64 (Subseconds_Type'Last) + Unsigned_64 (1);
-   -- Define the number of nanoseconds that exist in a second.
+   -- Define the number of nanoseconds, microseconds, and milliseconds that exist in a second.
    Nanoseconds_In_Second : constant Unsigned_64 := 1_000_000_000;
+   Microseconds_In_Second : constant Unsigned_64 := 1_000_000;
+   Milliseconds_In_Second : constant Unsigned_64 := 1_000;
 
    -- Convert an Ada.Real_Time.Time to a Sys_Time
    -- This can result in an under_flow if the Time sent is negative. In that case an under_flow status will be sent and with a time of zero which is the earliest time available
@@ -84,6 +86,22 @@ package body Sys_Time.Arithmetic is
    exception
       when Constraint_Error => return Underflow;
    end To_Sys_Time;
+
+   -- Convert a Sys_Time to a count of whole units since the epoch, truncating any
+   -- fraction of a unit. The subseconds term is at most 2**32 * 10**9, so it cannot
+   -- overflow for any subseconds width Sys_Time can have.
+   function To_Units (Arg : in Sys_Time.T; Units_In_Second : in Unsigned_64) return Unsigned_64 is
+      (Unsigned_64 (Arg.Seconds) * Units_In_Second + (Unsigned_64 (Arg.Subseconds) * Units_In_Second) / Subseconds_In_Second)
+      with Inline => True;
+
+   function To_Milliseconds (Arg : in Sys_Time.T) return Unsigned_64 is
+      (To_Units (Arg, Milliseconds_In_Second));
+
+   function To_Microseconds (Arg : in Sys_Time.T) return Unsigned_64 is
+      (To_Units (Arg, Microseconds_In_Second));
+
+   function To_Nanoseconds (Arg : in Sys_Time.T) return Unsigned_64 is
+      (To_Units (Arg, Nanoseconds_In_Second));
 
    -- Convert a Sys_Time to an Ada.Real_Time.Time
    function To_Time (Arg : in Sys_Time.T) return Time is

@@ -9,6 +9,7 @@ with Signed_Delta_Time.Representation;
 with Ada.Text_IO; use Ada.Text_IO;
 with Ada.Numerics.Float_Random; use Ada.Numerics.Float_Random;
 with Interfaces; use Interfaces;
+with Basic_Assertions; use Basic_Assertions;
 
 package body Sys_Time_Tests.Implementation is
    --
@@ -646,5 +647,42 @@ package body Sys_Time_Tests.Implementation is
       -- Run additional test:
       Test_Subtract_Problematic;
    end Additional_Tests;
+
+   overriding procedure Unit_Conversions (Self : in out Instance) is
+      Ignore_Self : Instance renames Self;
+      -- The subseconds width is a power of two, so half a second is exact:
+      Half_Second : constant Subseconds_Type := Subseconds_Type'Last / 2 + 1;
+      Max_Time : constant Sys_Time.T := (Seconds_Type'Last, Subseconds_Type'Last);
+      Max_Seconds : constant Unsigned_64 := Unsigned_64 (Seconds_Type'Last);
+   begin
+      -- Zero:
+      Unsigned_64_Assert.Eq (To_Milliseconds ((0, 0)), 0);
+      Unsigned_64_Assert.Eq (To_Microseconds ((0, 0)), 0);
+      Unsigned_64_Assert.Eq (To_Nanoseconds ((0, 0)), 0);
+
+      -- Whole seconds:
+      Unsigned_64_Assert.Eq (To_Milliseconds ((7, 0)), 7_000);
+      Unsigned_64_Assert.Eq (To_Microseconds ((7, 0)), 7_000_000);
+      Unsigned_64_Assert.Eq (To_Nanoseconds ((7, 0)), 7_000_000_000);
+
+      -- Seconds and subseconds together:
+      Unsigned_64_Assert.Eq (To_Milliseconds ((3, Half_Second)), 3_500);
+      Unsigned_64_Assert.Eq (To_Microseconds ((3, Half_Second)), 3_500_000);
+      Unsigned_64_Assert.Eq (To_Nanoseconds ((3, Half_Second)), 3_500_000_000);
+
+      -- A fraction of a unit truncates. One subsecond is shorter than a
+      -- millisecond for any subseconds width, and just under half a second
+      -- stays under it in every unit:
+      Unsigned_64_Assert.Eq (To_Milliseconds ((0, 1)), 0);
+      Unsigned_64_Assert.Eq (To_Milliseconds ((0, Half_Second - 1)), 499);
+      Boolean_Assert.Eq (To_Microseconds ((0, Half_Second - 1)) < 500_000, True);
+      Boolean_Assert.Eq (To_Nanoseconds ((0, Half_Second - 1)) < 500_000_000, True);
+
+      -- The largest time fits without overflow and keeps every unit consistent:
+      Unsigned_64_Assert.Eq (To_Milliseconds (Max_Time), Max_Seconds * 1_000 + 999);
+      Unsigned_64_Assert.Eq (To_Microseconds (Max_Time) / 1_000, To_Milliseconds (Max_Time));
+      Unsigned_64_Assert.Eq (To_Nanoseconds (Max_Time) / 1_000, To_Microseconds (Max_Time));
+      Boolean_Assert.Eq (To_Nanoseconds (Max_Time) < (Max_Seconds + 1) * 1_000_000_000, True);
+   end Unit_Conversions;
 
 end Sys_Time_Tests.Implementation;
