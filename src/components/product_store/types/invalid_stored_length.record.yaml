@@ -1,0 +1,18 @@
+---
+description: A packed record which holds data related to an invalid stored data product length found in the store on restore.
+with:
+  - Data_Product_Types
+  - Interfaces
+fields:
+  - name: Id
+    description: The data product identifier of the store entry.
+    type: Data_Product_Types.Data_Product_Id
+    format: U16
+  - name: Stored_Length
+    description: The length found in the store for this entry. A value that is neither zero (never saved) nor the expected length indicates that the stored products model has changed since the store was written.
+    type: Interfaces.Unsigned_8
+    format: U8
+  - name: Expected_Length
+    description: The length that the stored length was expected to match.
+    type: Data_Product_Types.Data_Product_Buffer_Length_Type
+    format: U8

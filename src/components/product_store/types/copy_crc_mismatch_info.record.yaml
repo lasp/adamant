@@ -1,0 +1,19 @@
+---
+description: A packed record which holds a computed CRC alongside the CRC that was expected for one copy of the double-buffered data product store, used for reporting a CRC mismatch on that copy.
+fields:
+  - name: Copy
+    description: The store copy whose CRC did not validate.
+    type: Product_Store_Enums.Store_Copy.E
+    format: E8
+  - name: Computed_Crc
+    description: The CRC computed over the contents of the store copy.
+    type: Crc_16.Crc_16_Type
+    format: U16
+    skip_validation: True
+    byte_image: True
+  - name: Expected_Crc
+    description: The CRC held in the store copy's header, which the computed CRC was expected to match.
+    type: Crc_16.Crc_16_Type
+    format: U16
+    skip_validation: True
+    byte_image: True

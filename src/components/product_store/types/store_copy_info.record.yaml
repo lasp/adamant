@@ -1,0 +1,13 @@
+---
+description: A packed record identifying a copy of the double-buffered data product store and the save counter it holds, used for reporting the copy written by a save or read by a restore.
+with:
+  - Interfaces
+fields:
+  - name: Copy
+    description: The store copy that was written or read.
+    type: Product_Store_Enums.Store_Copy.E
+    format: E8
+  - name: Save_Counter
+    description: The monotonic save counter held in the store copy. The copy holding the larger counter holds the more recent save.
+    type: Interfaces.Unsigned_32
+    format: U32
