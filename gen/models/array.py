@@ -9,6 +9,8 @@ class array(type):
     This is the object model for a packed array. It extracts data from a
     input file and stores the data as object member variables.
     """
+    shareable = True
+
     def __init__(self, filename):
         """
         Initialize the packed array object, ingest data, and check it by
