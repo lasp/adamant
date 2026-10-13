@@ -1,0 +1,2 @@
+redo-ifchange build/pdf/architecture_description_document.pdf
+cp -f build/pdf/architecture_description_document.pdf architecture_description_document.pdf
