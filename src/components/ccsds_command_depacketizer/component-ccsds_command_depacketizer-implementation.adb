@@ -19,10 +19,28 @@ package body Component.Ccsds_Command_Depacketizer.Implementation is
    -- Check_Checksum : Boolean - If True, a packet whose 8-bit checksum in the
    -- secondary header does not verify is rejected. By default the checksum is not
    -- checked.
+   -- Trailing_Bytes_Source : Ccsds_Command_Depacketizer_Enums.Trailing_Bytes_Sources.E -
+   -- Where the number of trailing bytes at the end of each packet that are not part
+   -- of the command comes from. Init_Parameter, the default, takes
+   -- Num_Trailing_Bytes_To_Ignore for every packet and leaves the secondary header
+   -- function code uninterpreted. Function_Code takes the secondary header function
+   -- code of each packet.
+   -- Num_Trailing_Bytes_To_Ignore : Natural - The number of bytes at the end of each
+   -- packet, as sized by the CCSDS length field, that are not part of the command,
+   -- such as a link CRC verified before the packet reaches this component. Used only
+   -- when Trailing_Bytes_Source is Init_Parameter, and must be zero otherwise.
    --
-   overriding procedure Init (Self : in out Instance; Check_Checksum : in Boolean := False) is
+   overriding procedure Init (Self : in out Instance; Check_Checksum : in Boolean := False; Trailing_Bytes_Source : in Trailing_Bytes_Sources.E := Trailing_Bytes_Sources.Init_Parameter; Num_Trailing_Bytes_To_Ignore : in Natural := 0) is
+      use Trailing_Bytes_Sources;
    begin
+      -- The two ways of counting trailing bytes are mutually exclusive: a configured
+      -- count only applies when the function code is not interpreted.
+      if Trailing_Bytes_Source = Function_Code then
+         pragma Assert (Num_Trailing_Bytes_To_Ignore = 0);
+      end if;
       Self.Check_Checksum := Check_Checksum;
+      Self.Trailing_Bytes_Source := Trailing_Bytes_Source;
+      Self.Num_Trailing_Bytes_To_Ignore := Num_Trailing_Bytes_To_Ignore;
    end Init;
 
    overriding procedure Set_Up (Self : in out Instance) is
@@ -59,6 +77,7 @@ package body Component.Ccsds_Command_Depacketizer.Implementation is
       use Ccsds_Enums;
       use Ccsds_Enums.Ccsds_Secondary_Header_Indicator;
       use Ccsds_Enums.Ccsds_Packet_Type;
+      use Trailing_Bytes_Sources;
 
       -- Extract data from packet:
       Data_Length : constant Natural := Natural (Arg.Header.Packet_Length) + 1;
@@ -66,9 +85,6 @@ package body Component.Ccsds_Command_Depacketizer.Implementation is
       -- Packet secondary header deserialization stuff:
       Ccsds_Command_Secondary_Header_Length : constant Natural := Ccsds_Command_Secondary_Header.Serialization.Serialized_Length;
       Next_Index : Natural := Arg.Data'First;
-
-      -- Checksum value:
-      Checksum : Xor_8.Xor_8_Type;
 
       -- Create a buffer and command type:
       The_Command : Command.T;
@@ -86,71 +102,75 @@ package body Component.Ccsds_Command_Depacketizer.Implementation is
          -- packet is valid, since the checksum within the packet itself should zero out
          -- the rest of the computed checksum.
          if Self.Check_Checksum then
-            Checksum := Xor_8.Compute_Xor_8 (Ccsds_Primary_Header.Serialization.To_Byte_Array (Arg.Header)); -- checksum header
-            Checksum := Xor_8.Compute_Xor_8 (Arg.Data (Arg.Data'First .. Arg.Data'First + Data_Length - 1), @); -- checksum data
-         else
-            Checksum := 0;
+            declare
+               Checksum : Xor_8.Xor_8_Type;
+            begin
+               Checksum := Xor_8.Compute_Xor_8 (Ccsds_Primary_Header.Serialization.To_Byte_Array (Arg.Header)); -- checksum header
+               Checksum := Xor_8.Compute_Xor_8 (Arg.Data (Arg.Data'First .. Arg.Data'First + Data_Length - 1), @); -- checksum data
+               if Checksum /= 0 then
+                  Self.Drop_Packet (Arg, Self.Events.Invalid_Packet_Checksum (Self.Sys_Time_T_Get, (
+                        Ccsds_Header => (
+                           Primary_Header => Arg.Header,
+                           Secondary_Header => Secondary_Header
+                        ),
+                        Computed_Checksum => Checksum,
+                        Expected_Checksum => Secondary_Header.Checksum
+                  )));
+                  return;
+               end if;
+            end;
          end if;
-         if Checksum /= 0 then
-            Self.Drop_Packet (Arg, Self.Events.Invalid_Packet_Checksum (Self.Sys_Time_T_Get, (
-                  Ccsds_Header => (
-                     Primary_Header => Arg.Header,
-                     Secondary_Header => Secondary_Header
-                  ),
-                  Computed_Checksum => Checksum,
-                  Expected_Checksum => Secondary_Header.Checksum
-            )));
+
+         -- Check packet type and make sure it is set for CCSDS_Packet_Type.Telecommand:
+         if Arg.Header.Packet_Type /= Ccsds_Packet_Type.Telecommand then
+            Self.Drop_Packet (Arg, Self.Events.Invalid_Packet_Type (Self.Sys_Time_T_Get, Arg.Header));
          else
-            -- Check packet type and make sure it is set for CCSDS_Packet_Type.Telecommand:
-            if Arg.Header.Packet_Type /= Ccsds_Packet_Type.Telecommand then
-               Self.Drop_Packet (Arg, Self.Events.Invalid_Packet_Type (Self.Sys_Time_T_Get, Arg.Header));
+            -- Make sure that there is a secondary header:
+            if Arg.Header.Secondary_Header /= Ccsds_Secondary_Header_Indicator.Secondary_Header_Present then
+               Self.Drop_Packet (Arg, Self.Events.No_Secondary_Header (Self.Sys_Time_T_Get, Arg.Header));
             else
-               -- Make sure that there is a secondary header:
-               if Arg.Header.Secondary_Header /= Ccsds_Secondary_Header_Indicator.Secondary_Header_Present then
-                  Self.Drop_Packet (Arg, Self.Events.No_Secondary_Header (Self.Sys_Time_T_Get, Arg.Header));
-               else
-                  declare
-                     Num_Pad_Bytes : constant Natural := Natural (Secondary_Header.Function_Code);
-                     Command_Id_Length : constant Natural := Command_Id.Serialization.Serialized_Length;
-                     Meta_Data_Length : constant Natural := Ccsds_Command_Secondary_Header_Length + Command_Id_Length;
-                     Adjusted_Data_Length : constant Integer := Data_Length - Num_Pad_Bytes;
-                     Argument_Data_Length : constant Integer := Adjusted_Data_Length - Meta_Data_Length;
-                  begin
-                     -- Make sure that the buffer is big enough to contain a CCSDS command secondary header and
-                     -- a command identifier.
-                     if Adjusted_Data_Length < Meta_Data_Length then
-                        Self.Drop_Packet (Arg, Self.Events.Packet_Too_Small (Self.Sys_Time_T_Get, (Arg.Header, Length => Adjusted_Data_Length, Length_Bound => Meta_Data_Length)));
+               declare
+                  -- The trailing bytes are not part of the command:
+                  Num_Trailing_Bytes : constant Natural := (case Self.Trailing_Bytes_Source is when Init_Parameter => Self.Num_Trailing_Bytes_To_Ignore, when Function_Code => Natural (Secondary_Header.Function_Code));
+                  Command_Id_Length : constant Natural := Command_Id.Serialization.Serialized_Length;
+                  Meta_Data_Length : constant Natural := Ccsds_Command_Secondary_Header_Length + Command_Id_Length;
+                  Adjusted_Data_Length : constant Integer := Data_Length - Num_Trailing_Bytes;
+                  Argument_Data_Length : constant Integer := Adjusted_Data_Length - Meta_Data_Length;
+               begin
+                  -- Make sure that the buffer is big enough to contain a CCSDS command secondary header and
+                  -- a command identifier.
+                  if Adjusted_Data_Length < Meta_Data_Length then
+                     Self.Drop_Packet (Arg, Self.Events.Packet_Too_Small (Self.Sys_Time_T_Get, (Arg.Header, Length => Adjusted_Data_Length, Length_Bound => Meta_Data_Length)));
+                  else
+                     -- Make sure that the argument data length is not too big to fit into a command:
+                     if Argument_Data_Length > The_Command.Arg_Buffer'Length then
+                        Self.Drop_Packet (Arg, Self.Events.Packet_Too_Large (Self.Sys_Time_T_Get, (Arg.Header, Length => Argument_Data_Length, Length_Bound => The_Command.Arg_Buffer'Length)));
                      else
-                        -- Make sure that the argument data length is not too big to fit into a command:
-                        if Argument_Data_Length > The_Command.Arg_Buffer'Length then
-                           Self.Drop_Packet (Arg, Self.Events.Packet_Too_Large (Self.Sys_Time_T_Get, (Arg.Header, Length => Argument_Data_Length, Length_Bound => The_Command.Arg_Buffer'Length)));
-                        else
-                           -- We don't need anything else out of the secondary header, unless an error
-                           -- occurs, so just skip right over it.
-                           Next_Index := @ + Ccsds_Command_Secondary_Header_Length;
+                        -- We don't need anything else out of the secondary header, unless an error
+                        -- occurs, so just skip right over it.
+                        Next_Index := @ + Ccsds_Command_Secondary_Header_Length;
 
-                           -- Set the command header arg buffer length:
-                           The_Command.Header.Arg_Buffer_Length := Argument_Data_Length;
+                        -- Set the command header arg buffer length:
+                        The_Command.Header.Arg_Buffer_Length := Argument_Data_Length;
 
-                           -- Extract command id:
-                           The_Command.Header.Id := Command_Id.Serialization.From_Byte_Array (Arg.Data (Next_Index .. Next_Index + Command_Id_Length - 1)).Id;
-                           Next_Index := @ + Command_Id_Length;
+                        -- Extract command id:
+                        The_Command.Header.Id := Command_Id.Serialization.From_Byte_Array (Arg.Data (Next_Index .. Next_Index + Command_Id_Length - 1)).Id;
+                        Next_Index := @ + Command_Id_Length;
 
-                           -- Copy argument buffer:
-                           The_Command.Arg_Buffer (The_Command.Arg_Buffer'First .. The_Command.Arg_Buffer'First + Argument_Data_Length - 1) := Arg.Data (Next_Index .. Next_Index + Argument_Data_Length - 1);
+                        -- Copy argument buffer:
+                        The_Command.Arg_Buffer (The_Command.Arg_Buffer'First .. The_Command.Arg_Buffer'First + Argument_Data_Length - 1) := Arg.Data (Next_Index .. Next_Index + Argument_Data_Length - 1);
 
-                           -- Send out the command:
-                           Self.Command_T_Send (The_Command);
+                        -- Send out the command:
+                        Self.Command_T_Send (The_Command);
 
-                           -- Send out updated packet accept count:
-                           if Self.Is_Data_Product_T_Send_Connected then
-                              Self.Accepted_Packet_Count.Increment_Count;
-                              Self.Data_Product_T_Send (Self.Data_Products.Accepted_Packet_Count (Self.Sys_Time_T_Get, (Value => Self.Accepted_Packet_Count.Get_Count)));
-                           end if;
+                        -- Send out updated packet accept count:
+                        if Self.Is_Data_Product_T_Send_Connected then
+                           Self.Accepted_Packet_Count.Increment_Count;
+                           Self.Data_Product_T_Send (Self.Data_Products.Accepted_Packet_Count (Self.Sys_Time_T_Get, (Value => Self.Accepted_Packet_Count.Get_Count)));
                         end if;
                      end if;
-                  end;
-               end if;
+                  end if;
+               end;
             end if;
          end if;
       end if;

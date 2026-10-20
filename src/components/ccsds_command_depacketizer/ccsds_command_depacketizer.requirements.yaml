@@ -6,4 +6,4 @@ requirements:
   - text: The component shall reject CCSDS packets that do not contain a secondary header.
   - text: The component shall reject CCSDS packets that are not marked as telecommand packets in the secondary header.
   - text: When configured to check the command checksum, the component shall reject CCSDS packets whose 8-bit checksum in the secondary header does not verify. By default the checksum is not checked.
-  - text: The component shall calculate the actual command packet length by subtracting the number stored in the secondary header function code from the CCSDS header length.
+  - text: The component shall leave trailing bytes at the end of each packet out of the command argument data, taking their number from a configured value or, when selected at initialization, from the secondary header function code.

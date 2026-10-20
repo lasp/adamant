@@ -3,6 +3,7 @@
 --------------------------------------------------------------------------------
 
 -- Includes:
+with Ccsds_Command_Depacketizer_Enums; use Ccsds_Command_Depacketizer_Enums;
 with Ccsds_Space_Packet;
 with Command;
 with Interfaces;
@@ -23,8 +24,18 @@ package Component.Ccsds_Command_Depacketizer.Implementation is
    -- Check_Checksum : Boolean - If True, a packet whose 8-bit checksum in the
    -- secondary header does not verify is rejected. By default the checksum is not
    -- checked.
+   -- Trailing_Bytes_Source : Ccsds_Command_Depacketizer_Enums.Trailing_Bytes_Sources.E -
+   -- Where the number of trailing bytes at the end of each packet that are not part
+   -- of the command comes from. Init_Parameter, the default, takes
+   -- Num_Trailing_Bytes_To_Ignore for every packet and leaves the secondary header
+   -- function code uninterpreted. Function_Code takes the secondary header function
+   -- code of each packet.
+   -- Num_Trailing_Bytes_To_Ignore : Natural - The number of bytes at the end of each
+   -- packet, as sized by the CCSDS length field, that are not part of the command,
+   -- such as a link CRC verified before the packet reaches this component. Used only
+   -- when Trailing_Bytes_Source is Init_Parameter, and must be zero otherwise.
    --
-   overriding procedure Init (Self : in out Instance; Check_Checksum : in Boolean := False);
+   overriding procedure Init (Self : in out Instance; Check_Checksum : in Boolean := False; Trailing_Bytes_Source : in Trailing_Bytes_Sources.E := Trailing_Bytes_Sources.Init_Parameter; Num_Trailing_Bytes_To_Ignore : in Natural := 0);
 
 private
 
@@ -37,6 +48,8 @@ private
       Accepted_Packet_Count : Sixteen_Counter.Counter;
       -- Configuration:
       Check_Checksum : Boolean := False;
+      Trailing_Bytes_Source : Trailing_Bytes_Sources.E := Trailing_Bytes_Sources.Init_Parameter;
+      Num_Trailing_Bytes_To_Ignore : Natural := 0;
    end record;
 
    ---------------------------------------
