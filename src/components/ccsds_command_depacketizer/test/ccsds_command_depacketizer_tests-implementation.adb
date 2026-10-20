@@ -38,6 +38,9 @@ package body Ccsds_Command_Depacketizer_Tests.Implementation is
 
       -- Make necessary connections between tester and component:
       Self.Tester.Connect;
+
+      -- Call component init with its defaults:
+      Self.Tester.Component_Instance.Init;
    end Set_Up_Test;
 
    overriding procedure Tear_Down_Test (Self : in out Instance) is
@@ -144,6 +147,9 @@ package body Ccsds_Command_Depacketizer_Tests.Implementation is
       Packet : constant Ccsds_Space_Packet.T := Construct_Command_Packet (17, [0 => 16], Checksum_Seed => 0);
       Invalid_Checksum_Info : constant Invalid_Packet_Xor8_Info.T := (Ccsds_Header => (Packet.Header, (0, 0, 221)), Computed_Checksum => 255, Expected_Checksum => 221);
    begin
+      -- Configure the component to check the checksum:
+      T.Component_Instance.Init (Check_Checksum => True);
+
       -- Send the packet many times:
       T.Ccsds_Space_Packet_T_Send (Packet);
       T.Ccsds_Space_Packet_T_Send (Packet);
@@ -171,6 +177,28 @@ package body Ccsds_Command_Depacketizer_Tests.Implementation is
       Packed_U16_Assert.Eq (T.Rejected_Packet_Count_History.Get (2), (Value => 2));
       Packed_U16_Assert.Eq (T.Rejected_Packet_Count_History.Get (3), (Value => 3));
    end Test_Invalid_Packet_Checksum;
+
+   overriding procedure Test_Unchecked_Checksum (Self : in out Instance) is
+      T : Component.Ccsds_Command_Depacketizer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Packet : constant Ccsds_Space_Packet.T := Construct_Command_Packet (17, [0 => 16], Checksum_Seed => 0);
+      Cmd : constant Command.T := Construct_Command (Id => 17, Arg_Buffer => [Command_Types.Command_Arg_Buffer_Type'First => 16]);
+   begin
+      -- Send the packet with the bad checksum:
+      T.Ccsds_Space_Packet_T_Send (Packet);
+
+      -- Expect the command to have been sent out, since the checksum is not checked:
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 1);
+      Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (1), Cmd);
+
+      -- Expect no events or error packets:
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
+
+      -- Expect a single data product to be sent:
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Accepted_Packet_Count_History.Get_Count, 1);
+      Packed_U16_Assert.Eq (T.Accepted_Packet_Count_History.Get (1), (Value => 1));
+   end Test_Unchecked_Checksum;
 
    overriding procedure Test_Invalid_Packet_Type (Self : in out Instance) is
       T : Component.Ccsds_Command_Depacketizer.Implementation.Tester.Instance_Access renames Self.Tester;

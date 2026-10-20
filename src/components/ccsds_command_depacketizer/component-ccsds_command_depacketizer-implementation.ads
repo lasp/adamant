@@ -14,6 +14,18 @@ package Component.Ccsds_Command_Depacketizer.Implementation is
    -- The component class instance record:
    type Instance is new Ccsds_Command_Depacketizer.Base_Instance with private;
 
+   --------------------------------------------------
+   -- Subprogram for implementation init method:
+   --------------------------------------------------
+   -- Initialization parameters for the CCSDS Command Depacketizer.
+   --
+   -- Init Parameters:
+   -- Check_Checksum : Boolean - If True, a packet whose 8-bit checksum in the
+   -- secondary header does not verify is rejected. By default the checksum is not
+   -- checked.
+   --
+   overriding procedure Init (Self : in out Instance; Check_Checksum : in Boolean := False);
+
 private
 
    -- Instantiate protected 8 bit counter:
@@ -23,6 +35,8 @@ private
    type Instance is new Ccsds_Command_Depacketizer.Base_Instance with record
       Rejected_Packet_Count : Sixteen_Counter.Counter;
       Accepted_Packet_Count : Sixteen_Counter.Counter;
+      -- Configuration:
+      Check_Checksum : Boolean := False;
    end record;
 
    ---------------------------------------
