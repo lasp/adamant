@@ -13,6 +13,17 @@ package body Component.Ccsds_Command_Depacketizer.Implementation is
    ---------------------------------------
    -- Initialization:
    ---------------------------------------
+   -- Initialization parameters for the CCSDS Command Depacketizer.
+   --
+   -- Init Parameters:
+   -- Check_Checksum : Boolean - If True, a packet whose 8-bit checksum in the
+   -- secondary header does not verify is rejected. By default the checksum is not
+   -- checked.
+   --
+   overriding procedure Init (Self : in out Instance; Check_Checksum : in Boolean := False) is
+   begin
+      Self.Check_Checksum := Check_Checksum;
+   end Init;
 
    overriding procedure Set_Up (Self : in out Instance) is
       The_Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
@@ -71,10 +82,15 @@ package body Component.Ccsds_Command_Depacketizer.Implementation is
       if Data_Length > Arg.Data'Length then
          Self.Drop_Packet (Arg, Self.Events.Packet_Too_Large (Self.Sys_Time_T_Get, (Arg.Header, Length => Data_Length, Length_Bound => Arg.Data'Length)));
       else
-         -- First check the checksum. If the checksum is not zero, then it is invalid, since the checksum within
-         -- the packet itself should zero out the rest of the computed checksum.
-         Checksum := Xor_8.Compute_Xor_8 (Ccsds_Primary_Header.Serialization.To_Byte_Array (Arg.Header)); -- checksum header
-         Checksum := Xor_8.Compute_Xor_8 (Arg.Data (Arg.Data'First .. Arg.Data'First + Data_Length - 1), @); -- checksum data
+         -- Check the checksum, when configured to. A computed checksum of zero means the
+         -- packet is valid, since the checksum within the packet itself should zero out
+         -- the rest of the computed checksum.
+         if Self.Check_Checksum then
+            Checksum := Xor_8.Compute_Xor_8 (Ccsds_Primary_Header.Serialization.To_Byte_Array (Arg.Header)); -- checksum header
+            Checksum := Xor_8.Compute_Xor_8 (Arg.Data (Arg.Data'First .. Arg.Data'First + Data_Length - 1), @); -- checksum data
+         else
+            Checksum := 0;
+         end if;
          if Checksum /= 0 then
             Self.Drop_Packet (Arg, Self.Events.Invalid_Packet_Checksum (Self.Sys_Time_T_Get, (
                   Ccsds_Header => (
