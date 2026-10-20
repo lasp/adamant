@@ -28,6 +28,9 @@ private
    -- Send a single Unsegmented packet for a known table ID. Verify events and data
    -- products.
    overriding procedure Test_Unsegmented_Upload (Self : in out Instance);
+   -- Init with Num_Trailing_Bytes_To_Ignore and send First + Continuation + Last, each
+   -- with trailing bytes. Verify the staged table excludes them.
+   overriding procedure Test_Trailing_Bytes (Self : in out Instance);
    -- Verify non-Load_From destinations sent first in YAML order, Load_From last.
    overriding procedure Test_Multi_Destination_Order (Self : in out Instance);
    -- Continuation and Last without prior First produce Packet_Ignored events.

@@ -282,14 +282,19 @@ package body Component.Ccsds_Parameter_Table_Router.Implementation is
    -- Load_All_Parameter_Tables_On_Set_Up : Boolean - If True, all parameter tables
    -- that have a load_from source will be loaded from persistent storage during
    -- Set_Up.
+   -- Num_Trailing_Bytes_To_Ignore : Natural - The number of bytes at the end of each
+   -- packet, as sized by the CCSDS length field, that are not table data, such as a
+   -- link CRC verified before the packet reaches this component. They are left out of
+   -- the staged table.
    --
-   overriding procedure Init (Self : in out Instance; Table : in Ccsds_Parameter_Table_Router_Types.Router_Table; Buffer_Size : in Positive; Ticks_Until_Timeout : in Natural; Load_All_Parameter_Tables_On_Set_Up : in Boolean := False) is
+   overriding procedure Init (Self : in out Instance; Table : in Ccsds_Parameter_Table_Router_Types.Router_Table; Buffer_Size : in Positive; Ticks_Until_Timeout : in Natural; Load_All_Parameter_Tables_On_Set_Up : in Boolean := False; Num_Trailing_Bytes_To_Ignore : in Natural := 0) is
    begin
       -- Set timeout limit:
       Self.Sync_Object.Set_Timeout_Limit (Ticks_Until_Timeout);
 
       -- Store configuration:
       Self.Load_All_On_Set_Up := Load_All_Parameter_Tables_On_Set_Up;
+      Self.Num_Trailing_Bytes_To_Ignore := Num_Trailing_Bytes_To_Ignore;
 
       -- Create staging buffer:
       Self.Staging_Buffer.Create (Buffer_Size);
@@ -398,10 +403,10 @@ package body Component.Ccsds_Parameter_Table_Router.Implementation is
          Self.Data_Product_T_Send_If_Connected (Self.Data_Products.Num_Tables_Invalid (The_Time, (Value => Self.Invalid_Table_Count)));
       end Reject_Table;
 
-      -- Note: CCSDS Packet_Length field value is one less than the actual data
-      -- length per the CCSDS standard, hence the seemingly missing "-1" in the
-      -- slice below.
-      Data : Basic_Types.Byte_Array renames Arg.Data (Arg.Data'First .. Arg.Data'First + Natural (Arg.Header.Packet_Length));
+      -- The CCSDS Packet_Length field value is one less than the actual data length
+      -- per the CCSDS standard. The configured trailing bytes are not table data.
+      Data_Length : constant Natural := Integer'Max (0, Natural (Arg.Header.Packet_Length) + 1 - Self.Num_Trailing_Bytes_To_Ignore);
+      Data : Basic_Types.Byte_Array renames Arg.Data (Arg.Data'First .. Arg.Data'First + Data_Length - 1);
       -- Append to staging buffer:
       Status : constant Append_Status := Self.Staging_Buffer.Append (Data => Data, Sequence_Flag => Arg.Header.Sequence_Flag);
    begin

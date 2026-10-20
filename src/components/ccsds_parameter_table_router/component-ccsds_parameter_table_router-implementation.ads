@@ -41,8 +41,12 @@ package Component.Ccsds_Parameter_Table_Router.Implementation is
    -- Load_All_Parameter_Tables_On_Set_Up : Boolean - If True, all parameter tables
    -- that have a load_from source will be loaded from persistent storage during
    -- Set_Up.
+   -- Num_Trailing_Bytes_To_Ignore : Natural - The number of bytes at the end of each
+   -- packet, as sized by the CCSDS length field, that are not table data, such as a
+   -- link CRC verified before the packet reaches this component. They are left out of
+   -- the staged table.
    --
-   overriding procedure Init (Self : in out Instance; Table : in Ccsds_Parameter_Table_Router_Types.Router_Table; Buffer_Size : in Positive; Ticks_Until_Timeout : in Natural; Load_All_Parameter_Tables_On_Set_Up : in Boolean := False);
+   overriding procedure Init (Self : in out Instance; Table : in Ccsds_Parameter_Table_Router_Types.Router_Table; Buffer_Size : in Positive; Ticks_Until_Timeout : in Natural; Load_All_Parameter_Tables_On_Set_Up : in Boolean := False; Num_Trailing_Bytes_To_Ignore : in Natural := 0);
    not overriding procedure Final (Self : in out Instance);
 
 private
@@ -75,6 +79,7 @@ private
       Sync_Object : Task_Synchronization.Wait_Release_Timeout_Counter_Object;
       -- Configuration:
       Load_All_On_Set_Up : Boolean := False;
+      Num_Trailing_Bytes_To_Ignore : Natural := 0;
       -- Data product counters (Reject_Count is protected since
       -- Ccsds_Space_Packet_T_Recv_Async_Dropped runs in the sender's context):
       Packet_Count : Interfaces.Unsigned_32 := 0;
