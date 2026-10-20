@@ -8,7 +8,9 @@ gitpython
 yamllint
 filelock
 pyparsing
-bitstring
+# bitstring 5.0 removed the stream classes that the packed type base class and the
+# generated record modules use. Drop the pin once they are moved to the 5.0 API.
+bitstring<5
 gcovr
 pyinstaller
 Pygments
