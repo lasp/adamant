@@ -1,0 +1,12 @@
+---
+description: Enumerations for the CCSDS Command Depacketizer component.
+enums:
+  - name: Trailing_Bytes_Sources
+    description: Where the component takes the number of trailing bytes at the end of each packet that are not part of the command.
+    literals:
+      - name: Init_Parameter
+        value: 0
+        description: The Num_Trailing_Bytes_To_Ignore initialization parameter names the number for every packet, and the secondary header function code is not interpreted.
+      - name: Function_Code
+        value: 1
+        description: The secondary header function code of each packet names the number for that packet.

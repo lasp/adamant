@@ -8,6 +8,14 @@ init:
       type: Boolean
       default: "False"
       description: If True, a packet whose 8-bit checksum in the secondary header does not verify is rejected. By default the checksum is not checked.
+    - name: Trailing_Bytes_Source
+      type: Ccsds_Command_Depacketizer_Enums.Trailing_Bytes_Sources.E
+      default: "Ccsds_Command_Depacketizer_Enums.Trailing_Bytes_Sources.Init_Parameter"
+      description: Where the number of trailing bytes at the end of each packet that are not part of the command comes from. Init_Parameter, the default, takes Num_Trailing_Bytes_To_Ignore for every packet and leaves the secondary header function code uninterpreted. Function_Code takes the secondary header function code of each packet.
+    - name: Num_Trailing_Bytes_To_Ignore
+      type: Natural
+      default: "0"
+      description: The number of bytes at the end of each packet, as sized by the CCSDS length field, that are not part of the command, such as a link CRC verified before the packet reaches this component. Used only when Trailing_Bytes_Source is Init_Parameter, and must be zero otherwise.
 connectors:
   - description: The ccsds packet receive connector.
     type: Ccsds_Space_Packet.T

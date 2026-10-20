@@ -35,10 +35,14 @@ private
    -- This unit test makes sure that packets that do not include a secondary header
    -- are reported and dropped.
    overriding procedure Test_Packet_Without_Secondary_Header (Self : in out Instance);
-   -- This unit test makes use of the function code in the secondary header to denote
-   -- a different number of pad bytes. It makes sure the component responds
-   -- appropriately.
+   -- This unit test configures the component to take the number of pad bytes from
+   -- the function code in the secondary header, and makes sure the component
+   -- responds appropriately to different values.
    overriding procedure Test_Pad_Bytes (Self : in out Instance);
+   -- This unit test configures the number of trailing bytes at initialization, the
+   -- default, and makes sure that number of bytes is left out of each command
+   -- whatever the function code holds.
+   overriding procedure Test_Trailing_Bytes (Self : in out Instance);
    -- This unit test tests the reset data products command.
    overriding procedure Test_Reset_Counts (Self : in out Instance);
    -- This unit test makes sure the component handles an invalid command
