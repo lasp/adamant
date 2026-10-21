@@ -27,6 +27,10 @@ init:
       type: Boolean
       default: "False"
       description: If True, all parameter tables that have a load_from source will be loaded from persistent storage during Set_Up.
+    - name: Num_Trailing_Bytes_To_Ignore
+      type: Natural
+      default: "0"
+      description: The number of bytes at the end of each packet, as sized by the CCSDS length field, that are not table data, such as a link CRC verified before the packet reaches this component. They are left out of the staged table.
 connectors:
   - description: Receives segmented CCSDS packets containing parameter table data.
     type: Ccsds_Space_Packet.T

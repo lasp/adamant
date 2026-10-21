@@ -1,6 +1,21 @@
 ---
 description: This component receives CCSDS packets, validates the data within them, and converts them into Adamant commands. Note that the only internal state that this component contains is a packet accept and packet reject count. The component assumes that only a single task is attached to its CCSDS Space Packet invokee connector, and thus these counters are unprotected. If more than one task is attached to the input, a race condition arises around the counters, which may need to become protected.
 execution: passive
+init:
+  description: Initialization parameters for the CCSDS Command Depacketizer.
+  parameters:
+    - name: Check_Checksum
+      type: Boolean
+      default: "False"
+      description: If True, a packet whose 8-bit checksum in the secondary header does not verify is rejected. By default the checksum is not checked.
+    - name: Trailing_Bytes_Source
+      type: Ccsds_Command_Depacketizer_Enums.Trailing_Bytes_Sources.E
+      default: "Ccsds_Command_Depacketizer_Enums.Trailing_Bytes_Sources.Init_Parameter"
+      description: Where the number of trailing bytes at the end of each packet that are not part of the command comes from. Init_Parameter, the default, takes Num_Trailing_Bytes_To_Ignore for every packet and leaves the secondary header function code uninterpreted. Function_Code takes the secondary header function code of each packet.
+    - name: Num_Trailing_Bytes_To_Ignore
+      type: Natural
+      default: "0"
+      description: The number of bytes at the end of each packet, as sized by the CCSDS length field, that are not part of the command, such as a link CRC verified before the packet reaches this component. Used only when Trailing_Bytes_Source is Init_Parameter, and must be zero otherwise.
 connectors:
   - description: The ccsds packet receive connector.
     type: Ccsds_Space_Packet.T

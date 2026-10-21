@@ -16,6 +16,7 @@ with Interfaces; use Interfaces;
 with Packed_U16;
 with Packed_U32.Assertion; use Packed_U32.Assertion;
 with Parameter_Enums; use Parameter_Enums.Parameter_Table_Update_Status;
+with Parameter_Enums.Assertion; use Parameter_Enums.Assertion;
 with Parameter_Table_Id.Assertion; use Parameter_Table_Id.Assertion;
 with Parameter_Table_Operation_Failure_Info.Assertion; use Parameter_Table_Operation_Failure_Info.Assertion;
 with Parameter_Table_Timeout_Info.Assertion; use Parameter_Table_Timeout_Info.Assertion;
@@ -357,6 +358,93 @@ package body Ccsds_Parameter_Table_Router_Tests.Implementation is
 
       Simulator.Disarm;
    end Test_Unsegmented_Upload;
+
+   -- Test_Trailing_Bytes: Init with Num_Trailing_Bytes_To_Ignore and send a segmented upload
+   -- whose packets each carry trailing bytes. Verify the staged table excludes them.
+   overriding procedure Test_Trailing_Bytes (Self : in out Instance) is
+      use type Basic_Types.Byte_Array;
+      T : Component.Ccsds_Parameter_Table_Router.Implementation.Tester.Instance_Access renames Self.Tester;
+      Payload : constant Basic_Types.Byte_Array (0 .. 9) := [others => 16#AA#];
+      Trailer : constant Basic_Types.Byte_Array (0 .. 1) := [others => 16#FF#];
+      -- Table ID 10: Working_Params (idx 1, no load_from) + Primary_Param_Store (idx 2, load_from)
+      -- That means 2 responses needed (1 non-load_from + 1 load_from).
+   begin
+      -- Re-init with two trailing bytes to leave out of every packet.
+      -- Final the previous Init, then re-Init with the new value:
+      T.Component_Instance.Final;
+      T.Component_Instance.Init (
+         Table => Test_Assembly_Parameter_Table_Router_Table.Router_Table_Entries,
+         Buffer_Size => 1024,
+         Ticks_Until_Timeout => 3,
+         Num_Trailing_Bytes_To_Ignore => 2
+      );
+
+      Simulator.Arm (Self'Unchecked_Access);
+
+      -- Send FirstSegment with the trailer behind the payload:
+      T.Ccsds_Space_Packet_T_Send (Make_Table_Packet (
+         Ccsds_Enums.Ccsds_Sequence_Flag.Firstsegment,
+         Table_Id => 10,
+         Payload => Payload & Trailer
+      ));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      -- Verify Receiving_New_Table event:
+      Natural_Assert.Eq (T.Receiving_New_Table_History.Get_Count, 1);
+      Parameter_Table_Id_Assert.Eq (T.Receiving_New_Table_History.Get (1), (Id => 10));
+
+      -- Send Continuation with the trailer behind the payload:
+      T.Ccsds_Space_Packet_T_Send (Make_Packet (
+         Ccsds_Enums.Ccsds_Sequence_Flag.Continuationsegment,
+         Payload & Trailer
+      ));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      -- Send Last segment with the trailer behind the payload. This completes the
+      -- table and triggers distribution:
+      Simulator.Task_Responses_To_Send := 2;
+      Simulator.Task_Send_Response := True;
+
+      T.Ccsds_Space_Packet_T_Send (Make_Packet (
+         Ccsds_Enums.Ccsds_Sequence_Flag.Lastsegment,
+         Payload & Trailer
+      ));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+
+      -- Verify Table_Received and Table_Updated events:
+      Natural_Assert.Eq (T.Table_Received_History.Get_Count, 1);
+      Parameter_Table_Id_Assert.Eq (T.Table_Received_History.Get (1), (Id => 10));
+      Natural_Assert.Eq (T.Table_Updated_History.Get_Count, 1);
+      Parameter_Table_Id_Assert.Eq (T.Table_Updated_History.Get (1), (Id => 10));
+
+      -- Total events: 1 Receiving_New_Table + 1 Table_Received + 1 Table_Updated = 3
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 3);
+
+      -- Verify data products: 3 packets received, 1 table updated.
+      Natural_Assert.Eq (T.Num_Packets_Received_History.Get_Count, 3);
+      Packed_U32_Assert.Eq (T.Num_Packets_Received_History.Get (3), (Value => 3));
+      Natural_Assert.Eq (T.Num_Tables_Updated_History.Get_Count, 1);
+      Packed_U32_Assert.Eq (T.Num_Tables_Updated_History.Get (1), (Value => 1));
+
+      -- Total DPs: 3 Num_Packets_Received + 1 Num_Tables_Updated + 3 Last_Table_Received = 7
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 7);
+
+      -- Verify the staged table holds the three payloads and none of the trailers.
+      -- The region address is the staging buffer's and cannot be predicted, so the
+      -- region is checked field by field and its bytes are read through the address.
+      Natural_Assert.Eq (T.Parameters_Memory_Region_T_Recv_Sync_History.Get_Count, 2);
+      declare
+         use Parameter_Enums.Parameter_Table_Operation_Type;
+         Region : constant Parameters_Memory_Region.T := T.Parameters_Memory_Region_T_Recv_Sync_History.Get (1);
+         Table : constant Basic_Types.Byte_Array (0 .. Region.Region.Length - 1) with Import, Convention => Ada, Address => Region.Region.Address;
+      begin
+         Parameter_Table_Operation_Type_Assert.Eq (Region.Operation, Set);
+         Natural_Assert.Eq (Region.Region.Length, 30);
+         Byte_Array_Assert.Eq (Table, Payload & Payload & Payload);
+      end;
+
+      Simulator.Disarm;
+   end Test_Trailing_Bytes;
 
    -- Test_Multi_Destination_Order: Verify non-Load_From destinations sent first, Load_From last.
    overriding procedure Test_Multi_Destination_Order (Self : in out Instance) is

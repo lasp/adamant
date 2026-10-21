@@ -13,6 +13,8 @@ tests:
     description: Send First + Continuation + Last for a known table ID. Verify events and data products.
   - name: Test_Unsegmented_Upload
     description: Send a single Unsegmented packet for a known table ID. Verify events and data products.
+  - name: Test_Trailing_Bytes
+    description: Init with Num_Trailing_Bytes_To_Ignore and send First + Continuation + Last, each with trailing bytes. Verify the staged table excludes them.
   - name: Test_Multi_Destination_Order
     description: Verify non-Load_From destinations sent first in YAML order, Load_From last.
   # Packet reception - errors:

@@ -6,6 +6,7 @@ with Ccsds_Space_Packet.Assertion; use Ccsds_Space_Packet.Assertion;
 with Ccsds_Primary_Header.Assertion; use Ccsds_Primary_Header.Assertion;
 use Ccsds_Primary_Header;
 with Ccsds_Command_Secondary_Header;
+with Ccsds_Command_Depacketizer_Enums; use Ccsds_Command_Depacketizer_Enums;
 with Interfaces; use Interfaces;
 with Packet_Types;
 with Basic_Types; use Basic_Types;
@@ -38,6 +39,9 @@ package body Ccsds_Command_Depacketizer_Tests.Implementation is
 
       -- Make necessary connections between tester and component:
       Self.Tester.Connect;
+
+      -- Call component init with its defaults:
+      Self.Tester.Component_Instance.Init;
    end Set_Up_Test;
 
    overriding procedure Tear_Down_Test (Self : in out Instance) is
@@ -61,11 +65,11 @@ package body Ccsds_Command_Depacketizer_Tests.Implementation is
    end Construct_Packet;
 
    -- Construct a CCSDS command packet with the given variable parameters:
-   function Construct_Command_Packet (Cmd_Id : Command_Types.Command_Id; Data : Byte_Array := [1 .. 0 => 0]; Packet_Type : Ccsds_Packet_Type.E := Ccsds_Packet_Type.Telecommand; Secondary_Header : Ccsds_Secondary_Header_Indicator.E := Ccsds_Secondary_Header_Indicator.Secondary_Header_Present; Apid : Ccsds_Apid_Type := 0; Sequence_Count : Ccsds_Sequence_Count_Type := 0; Checksum_Seed : Xor_8.Xor_8_Type := 255; Function_Code : Ccsds_Command_Secondary_Header.Function_Code_Type := 0; Packet_Length_Adjustment : Integer := 0) return Ccsds_Space_Packet.T is
+   function Construct_Command_Packet (Cmd_Id : Command_Types.Command_Id; Data : Byte_Array := [1 .. 0 => 0]; Packet_Type : Ccsds_Packet_Type.E := Ccsds_Packet_Type.Telecommand; Secondary_Header : Ccsds_Secondary_Header_Indicator.E := Ccsds_Secondary_Header_Indicator.Secondary_Header_Present; Apid : Ccsds_Apid_Type := 0; Sequence_Count : Ccsds_Sequence_Count_Type := 0; Checksum_Seed : Xor_8.Xor_8_Type := 255; Function_Code : Ccsds_Command_Secondary_Header.Function_Code_Type := 0; Trailing_Bytes : Natural := 0; Packet_Length_Adjustment : Integer := 0) return Ccsds_Space_Packet.T is
       -- Define secondary header:
       The_Secondary_Header : Ccsds_Command_Secondary_Header.T := (Reserved => 0, Function_Code => Function_Code, Checksum => 0);
       -- Construct packet:
-      Packet : Ccsds_Space_Packet.T := Construct_Packet (Ccsds_Command_Secondary_Header.Serialization.To_Byte_Array (The_Secondary_Header) & Command_Id.Serialization.To_Byte_Array ((Id => Cmd_Id)) & Data & (1 .. Natural (Function_Code) => 0), Packet_Type, Secondary_Header, Apid, Sequence_Count);
+      Packet : Ccsds_Space_Packet.T := Construct_Packet (Ccsds_Command_Secondary_Header.Serialization.To_Byte_Array (The_Secondary_Header) & Command_Id.Serialization.To_Byte_Array ((Id => Cmd_Id)) & Data & (1 .. Natural (Function_Code) + Trailing_Bytes => 0), Packet_Type, Secondary_Header, Apid, Sequence_Count);
    begin
       -- Adjust packet length if requested:
       Packet.Header.Packet_Length := Unsigned_16 (Natural (@) + Packet_Length_Adjustment);
@@ -144,6 +148,9 @@ package body Ccsds_Command_Depacketizer_Tests.Implementation is
       Packet : constant Ccsds_Space_Packet.T := Construct_Command_Packet (17, [0 => 16], Checksum_Seed => 0);
       Invalid_Checksum_Info : constant Invalid_Packet_Xor8_Info.T := (Ccsds_Header => (Packet.Header, (0, 0, 221)), Computed_Checksum => 255, Expected_Checksum => 221);
    begin
+      -- Configure the component to check the checksum:
+      T.Component_Instance.Init (Check_Checksum => True);
+
       -- Send the packet many times:
       T.Ccsds_Space_Packet_T_Send (Packet);
       T.Ccsds_Space_Packet_T_Send (Packet);
@@ -171,6 +178,28 @@ package body Ccsds_Command_Depacketizer_Tests.Implementation is
       Packed_U16_Assert.Eq (T.Rejected_Packet_Count_History.Get (2), (Value => 2));
       Packed_U16_Assert.Eq (T.Rejected_Packet_Count_History.Get (3), (Value => 3));
    end Test_Invalid_Packet_Checksum;
+
+   overriding procedure Test_Unchecked_Checksum (Self : in out Instance) is
+      T : Component.Ccsds_Command_Depacketizer.Implementation.Tester.Instance_Access renames Self.Tester;
+      Packet : constant Ccsds_Space_Packet.T := Construct_Command_Packet (17, [0 => 16], Checksum_Seed => 0);
+      Cmd : constant Command.T := Construct_Command (Id => 17, Arg_Buffer => [Command_Types.Command_Arg_Buffer_Type'First => 16]);
+   begin
+      -- Send the packet with the bad checksum:
+      T.Ccsds_Space_Packet_T_Send (Packet);
+
+      -- Expect the command to have been sent out, since the checksum is not checked:
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 1);
+      Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (1), Cmd);
+
+      -- Expect no events or error packets:
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
+
+      -- Expect a single data product to be sent:
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Accepted_Packet_Count_History.Get_Count, 1);
+      Packed_U16_Assert.Eq (T.Accepted_Packet_Count_History.Get (1), (Value => 1));
+   end Test_Unchecked_Checksum;
 
    overriding procedure Test_Invalid_Packet_Type (Self : in out Instance) is
       T : Component.Ccsds_Command_Depacketizer.Implementation.Tester.Instance_Access renames Self.Tester;
@@ -239,7 +268,9 @@ package body Ccsds_Command_Depacketizer_Tests.Implementation is
       Packed_U16_Assert.Eq (T.Rejected_Packet_Count_History.Get (2), (Value => 2));
       Packed_U16_Assert.Eq (T.Rejected_Packet_Count_History.Get (3), (Value => 3));
 
-      -- Set packet length of packet 2 to be smaller than function code. This makes sure that the FSW can handle a negative length:
+      -- Take the pad byte count from the function code, and set packet length of packet 2 to be smaller than
+      -- function code. This makes sure that the FSW can handle a negative length:
+      T.Component_Instance.Init (Trailing_Bytes_Source => Trailing_Bytes_Sources.Function_Code);
       Packet_2.Header.Packet_Length := 15;
       Packet_2.Data (1) := 82; -- set the checksum so it gets through
 
@@ -383,6 +414,9 @@ package body Ccsds_Command_Depacketizer_Tests.Implementation is
       Packet_3 : constant Ccsds_Space_Packet.T := Construct_Command_Packet (17, [0 => 16], Sequence_Count => 2, Function_Code => 20);
       Cmd : constant Command.T := Construct_Command (Id => 17, Arg_Buffer => [Command_Types.Command_Arg_Buffer_Type'First => 16]);
    begin
+      -- Take the pad byte count from the function code:
+      T.Component_Instance.Init (Trailing_Bytes_Source => Trailing_Bytes_Sources.Function_Code);
+
       -- Send the packet:
       T.Ccsds_Space_Packet_T_Send (Packet_1);
 
@@ -416,6 +450,44 @@ package body Ccsds_Command_Depacketizer_Tests.Implementation is
       Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
       Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
    end Test_Pad_Bytes;
+
+   overriding procedure Test_Trailing_Bytes (Self : in out Instance) is
+      T : Component.Ccsds_Command_Depacketizer.Implementation.Tester.Instance_Access renames Self.Tester;
+      -- Five trailing bytes behind the command, with and without a function code claiming otherwise:
+      Packet_1 : constant Ccsds_Space_Packet.T := Construct_Command_Packet (17, [0 => 16], Sequence_Count => 0, Trailing_Bytes => 5);
+      Packet_2 : constant Ccsds_Space_Packet.T := Construct_Command_Packet (17, [0 => 16], Sequence_Count => 1, Function_Code => 3, Trailing_Bytes => 2);
+      Cmd : constant Command.T := Construct_Command (Id => 17, Arg_Buffer => [Command_Types.Command_Arg_Buffer_Type'First => 16]);
+   begin
+      -- Configure the component to leave five trailing bytes out of every command:
+      T.Component_Instance.Init (Num_Trailing_Bytes_To_Ignore => 5);
+
+      -- Send the packet:
+      T.Ccsds_Space_Packet_T_Send (Packet_1);
+
+      -- Expect one command to have been sent out without the trailing bytes:
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 1);
+      Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (1), Cmd);
+
+      -- Expect no events to be thrown:
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
+
+      -- Send the packet whose function code does not match the trailing bytes:
+      T.Ccsds_Space_Packet_T_Send (Packet_2);
+
+      -- Expect the same command, since the function code is not interpreted:
+      Natural_Assert.Eq (T.Command_T_Recv_Sync_History.Get_Count, 2);
+      Command_Assert.Eq (T.Command_T_Recv_Sync_History.Get (2), Cmd);
+
+      -- Expect no events to be thrown:
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 0);
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
+
+      -- Expect a data product per accepted packet:
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Accepted_Packet_Count_History.Get_Count, 2);
+      Packed_U16_Assert.Eq (T.Accepted_Packet_Count_History.Get (2), (Value => 2));
+   end Test_Trailing_Bytes;
 
    overriding procedure Test_Reset_Counts (Self : in out Instance) is
       T : Component.Ccsds_Command_Depacketizer.Implementation.Tester.Instance_Access renames Self.Tester;

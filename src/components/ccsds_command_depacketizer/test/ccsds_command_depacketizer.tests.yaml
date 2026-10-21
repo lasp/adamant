@@ -4,7 +4,9 @@ tests:
   - name: Test_Nominal_Depacketization
     description: This unit test exercises the nominal behavior of the ccsds command depacketizer.
   - name: Test_Invalid_Packet_Checksum
-    description: This unit test makes sure that packets with invalid checksums are reported and dropped.
+    description: This unit test makes sure that packets with invalid checksums are reported and dropped when the component is configured to check the checksum.
+  - name: Test_Unchecked_Checksum
+    description: This unit test makes sure that a packet with an invalid checksum is converted to a command when the component is not configured to check the checksum.
   - name: Test_Invalid_Packet_Type
     description: This unit test makes sure that packets with invalid packet types are reported and dropped.
   - name: Test_Packet_Too_Small
@@ -14,7 +16,9 @@ tests:
   - name: Test_Packet_Without_Secondary_Header
     description: This unit test makes sure that packets that do not include a secondary header are reported and dropped.
   - name: Test_Pad_Bytes
-    description: This unit test makes use of the function code in the secondary header to denote a different number of pad bytes. It makes sure the component responds appropriately.
+    description: This unit test configures the component to take the number of pad bytes from the function code in the secondary header, and makes sure the component responds appropriately to different values.
+  - name: Test_Trailing_Bytes
+    description: This unit test configures the number of trailing bytes at initialization, the default, and makes sure that number of bytes is left out of each command whatever the function code holds.
   - name: Test_Reset_Counts
     description: This unit test tests the reset data products command.
   - name: Test_Invalid_Command
