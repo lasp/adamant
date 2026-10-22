@@ -94,14 +94,42 @@ def _get_model_class(model_filename):
     return getattr(module, model_type)
 
 
+# Shareable models already loaded by this process, by file and load
+# arguments. A model class opts in with its shareable attribute; see base.
+_shared_models = {}
+
+
 def load_model(model_filename, *args, **kwargs):
     """
     Load a model from a given yaml file name. The extension on the filename is used
     to figure out which model class to use. The file extension must match the model
     class name.
+
+    A shareable model (one its class marks as never altered after loading, such
+    as a record or enumeration type) is loaded once per process and the same
+    object returned for every later load of the same file with the same
+    arguments. A load that asks to ignore the model cache always builds a fresh
+    object, which then becomes the shared one, so the flag is honored rather
+    than quietly served from memory.
     """
     model_class = _get_model_class(model_filename)
-    return model_class(model_filename, *args, **kwargs)
+    if not getattr(model_class, "shareable", False):
+        return model_class(model_filename, *args, **kwargs)
+    key = (os.path.abspath(model_filename), args, tuple(sorted((k, v) for k, v in kwargs.items() if k != "ignore_cache")))
+    if not kwargs.get("ignore_cache", False):
+        try:
+            return _shared_models[key]
+        except KeyError:
+            pass
+        except TypeError:
+            # Unhashable load arguments: load without sharing.
+            return model_class(model_filename, *args, **kwargs)
+    model = model_class(model_filename, *args, **kwargs)
+    try:
+        _shared_models[key] = model
+    except TypeError:
+        pass
+    return model
 
 
 def try_load_model_of_subclass(model_filename, parent_class, *args, **kwargs):
