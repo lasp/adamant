@@ -1,6 +1,17 @@
 ---
-description: This component converts Adamant packets into CCSDS packets, synchronously, and sends them out. Using the CCSDS standard is not required by Adamant. The primary purpose of this component is to add CCSDS packet downlink within an assembly. The conversion process includes calculating a 16-bit CRC which is appended to the end of the CCSDS packet data. Emitted CCSDS packets also include a secondary header with an 8 byte timestamp.
+description: This component converts Adamant packets into CCSDS packets, synchronously, and sends them out. Using the CCSDS standard is not required by Adamant. The primary purpose of this component is to add CCSDS packet downlink within an assembly. Emitted CCSDS packets include a secondary header with an 8 byte timestamp. By default the conversion also calculates a 16-bit CRC which is appended to the end of the CCSDS packet data. The CRC can be disabled at initialization and a number of zero bytes appended in its place, inside the packet length, for a transmitter that computes the CRC in hardware and overwrites the last bytes of each packet it sends.
 execution: passive
+init:
+  description: Initialization parameters for the CCSDS Packetizer. The defaults produce the standard packet, the Adamant packet data followed by a 16-bit CRC.
+  parameters:
+    - name: Crc_Enabled
+      type: Boolean
+      default: "True"
+      description: If True, the default, a 16-bit CRC-CCITT computed over the CCSDS primary header and data is placed as the last two bytes of each packet's data section, inside the packet length. If False no CRC is computed and the packet ends with the Adamant packet data, or with the trailing bytes when Num_Trailing_Bytes_To_Add is non-zero.
+    - name: Num_Trailing_Bytes_To_Add
+      type: Natural
+      default: "0"
+      description: The number of zero bytes appended after the Adamant packet data, inside the packet length, so that a transmitter which computes the CRC in hardware and overwrites the last bytes of each packet it sends has a slot to fill. Must be zero when Crc_Enabled is True, since the CRC occupies the end of the packet.
 connectors:
   - description: The packet receive connector.
     type: Packet.T
