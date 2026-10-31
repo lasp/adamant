@@ -38,6 +38,21 @@ package body Component.{{ name }} is
          Params_Ready_To_Update := True;
       end Set_Ready_To_Update;
 
+      -- Discard any parameters staged by this table that have not been set ready to update.
+      -- This returns the staged store to the state it had before the table started staging,
+      -- so that an abandoned staging sequence cannot be applied by a later update.
+      procedure Discard_Staged (Table_Id : in Parameter_Types.Parameter_Table_Id) is
+         Staged_By_This_Table : constant Parameter_Status := (State => Staged, Staged_By => Table_Id);
+         Updated_Status : constant Parameter_Status := (State => Updated, Staged_By => 0);
+      begin
+{% for par in parameters %}
+         if {{ par.name }}_Status = Staged_By_This_Table then
+            {{ par.name }}_Status := Updated_Status;
+         end if;
+
+{% endfor %}
+      end Discard_Staged;
+
       -- Returns true if the parameters are ready to update:
       function Is_Ready_To_Update return Boolean is
       begin
@@ -1122,6 +1137,9 @@ package body Component.{{ name }} is
          when Update =>
             -- All parameters have been staged, we can now update our local parameters:
             Self.Staged_Parameters.Set_Ready_To_Update (Par_Update.Table_Id);
+         when Discard =>
+            -- The staging sequence was abandoned, so forget anything this table staged:
+            Self.Staged_Parameters.Discard_Staged (Par_Update.Table_Id);
          when Fetch =>
             -- Fetch the value of the requested parameter:
             Status := Self.Fetch_Parameter (Par_Update.Param);

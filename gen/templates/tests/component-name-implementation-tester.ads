@@ -292,6 +292,9 @@ package Component.{{ name }}.Implementation.Tester is
    -- Tell the component it is OK to atomically update all of its
    -- working parameter values with the staged values.
    not overriding function Update_Parameters (Self : in out Instance) return Parameter_Update_Status.E;
+   -- Tell the component to forget any staged parameter values that
+   -- have not yet been marked for update.
+   not overriding function Discard_Parameters (Self : in out Instance) return Parameter_Update_Status.E;
 
 {% endif %}
 end Component.{{ name }}.Implementation.Tester;
