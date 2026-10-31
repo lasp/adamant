@@ -13,6 +13,7 @@ with Parameter_Table_Entry_Id.Assertion; use Parameter_Table_Entry_Id.Assertion;
 with Packet;
 with Interfaces; use Interfaces;
 with Serializer_Types; use Serializer_Types;
+with Smart_Assert;
 with Memory_Region.Assertion; use Memory_Region.Assertion;
 with Parameters_Memory_Region_Release.Assertion; use Parameters_Memory_Region_Release.Assertion;
 with Parameter_Enums;
@@ -51,6 +52,8 @@ package body Parameters_Grouped_Tests.Implementation is
    -------------------------------------------------------------------------
    -- Tests:
    -------------------------------------------------------------------------
+
+   package Ser_Status_Assert is new Smart_Assert.Discrete (Serializer_Types.Serialization_Status, Serializer_Types.Serialization_Status'Image);
 
    overriding procedure Test_Grouped_Dump_Parameters (Self : in out Instance) is
       T : Component.Parameters.Implementation.Tester.Instance_Access renames Self.Tester;
@@ -333,6 +336,67 @@ package body Parameters_Grouped_Tests.Implementation is
       -- Turn off the override.
       T.Component_A.Disable_Parameter_Return_Override;
    end Test_Grouped_Update_Parameters_Error;
+
+   overriding procedure Test_Grouped_Update_Validation_Error (Self : in out Instance) is
+      use Parameter_Enums.Parameter_Update_Status;
+      use Parameter_Enums.Parameter_Operation_Type;
+      T : Component.Parameters.Implementation.Tester.Instance_Access renames Self.Tester;
+      -- Entry 0 is the grouped I32 parameter held by Component_A and Component_B.
+      I32_Entry : constant Parameter_Table_Entry.T := (Header => (Id => 0, Buffer_Length => 4), Buffer => [0 => 0, 1 => 0, 2 => 0, 3 => 99, others => 0]);
+      -- Entry 1 is the grouped U16 parameter held by the same two components.
+      U16_Entry : constant Parameter_Table_Entry.T := (Header => (Id => 1, Buffer_Length => 2), Buffer => [0 => 0, 1 => 20, others => 0]);
+      Cmd : Command.T;
+      Pkt : Packet.T;
+      Table_Bytes : Test_Grouped_Params_Record.Serialization.Byte_Array;
+      Crc : Crc_16.Crc_16_Type;
+   begin
+      -- Stage the grouped value in both components, with Component_A rejecting it at validation:
+      T.Component_A.Override_Parameter_Return (Status => Validation_Error, Length => 0, Only_On_Validate => True);
+      Ser_Status_Assert.Eq (T.Commands.Update_Parameter (I32_Entry, Cmd), Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      T.Component_A.Disable_Parameter_Return_Override;
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
+      Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Update_Parameter_Id, Status => Failure));
+
+      -- Check events:
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Parameter_Validation_Failed_History.Get_Count, 1);
+      Parameter_Operation_Status_Assert.Eq (T.Parameter_Validation_Failed_History.Get (1), (Operation => Validate, Status => Validation_Error, Id => 0));
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
+
+      -- Update the other grouped entry. Both components take it, and neither may bring the
+      -- rejected I32 value along. If Component_B still held it, the dump below would find
+      -- its value differing from Component_A's and report a mismatch.
+      Ser_Status_Assert.Eq (T.Commands.Update_Parameter (U16_Entry, Cmd), Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 2);
+      Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (2), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Update_Parameter_Id, Status => Success));
+
+      -- Check events:
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 4);
+      Natural_Assert.Eq (T.Dumping_Parameters_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Finished_Dumping_Parameters_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Parameter_Update_Success_History.Get_Count, 1);
+      Parameter_Table_Entry_Id_Assert.Eq (T.Parameter_Update_Success_History.Get (1), (Id => 1));
+      Boolean_Assert.Eq (T.Parameter_Fetch_Value_Mismatch_History.Is_Empty, True);
+
+      -- Check packet contents:
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
+      Pkt := T.Packet_T_Recv_Sync_History.Get (1);
+      Natural_Assert.Eq (Pkt.Header.Buffer_Length, Test_Grouped_Params_Record.Size_In_Bytes);
+      Table_Bytes :=
+         Test_Grouped_Params_Record.Serialization.To_Byte_Array
+            ((Crc_Calculated => [0, 0], Header => (Crc_Table => [0, 0], Version => 0.0), Component_A_Parameter_I32 => (Value => -56), Component_A_Parameter_U16 => (Value => 20),
+               Component_C_The_Tick => ((1, 2), 3)));
+      Crc := Crc_16.Compute_Crc_16 (Table_Bytes (Table_Bytes'First + Crc_16.Crc_16_Type'Length + Parameter_Table_Header.Crc_Section_Length .. Table_Bytes'Last));
+      Table_Bytes :=
+         Test_Grouped_Params_Record.Serialization.To_Byte_Array
+            ((Crc_Calculated => Crc, Header => (Crc_Table => [0, 0], Version => 0.0), Component_A_Parameter_I32 => (Value => -56), Component_A_Parameter_U16 => (Value => 20),
+               Component_C_The_Tick => ((1, 2), 3)));
+      Byte_Array_Assert.Eq (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1), Table_Bytes);
+   end Test_Grouped_Update_Validation_Error;
 
    overriding procedure Test_Grouped_Table_Upload_Error (Self : in out Instance) is
       use Parameter_Enums.Parameter_Update_Status;

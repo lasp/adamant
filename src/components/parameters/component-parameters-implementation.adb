@@ -825,6 +825,27 @@ package body Component.Parameters.Implementation is
          return Failure;
       end if;
 
+      -- Validate every component that had parameters staged before updating any of them,
+      -- so that a rejected value never leaves a component partially updated.
+      declare
+         Validation_Passed : Boolean := True;
+      begin
+         for Component_Id in Components_To_Update'Range loop
+            if Components_To_Update (Component_Id) then
+               if Self.Validate_Parameters (Component_Id => Component_Id) /= Success then
+                  -- No need to throw an event, because an event is thrown in the function above
+                  -- if something doesn't go well.
+                  Validation_Passed := False;
+               end if;
+            end if;
+         end loop;
+
+         if not Validation_Passed then
+            Discard_Staged_Components;
+            return Failure;
+         end if;
+      end;
+
       -- Now update all components that had parameters staged.
       for Component_Id in Components_To_Update'Range loop
          if Components_To_Update (Component_Id) then

@@ -33,6 +33,9 @@ private
    -- This unit test tests error handling when updating grouped parameters by command
    -- fails.
    overriding procedure Test_Grouped_Update_Parameters_Error (Self : in out Instance);
+   -- This unit test tests that a grouped parameter update by command that fails
+   -- validation in one component is discarded from every component it was staged in.
+   overriding procedure Test_Grouped_Update_Validation_Error (Self : in out Instance);
    -- This unit test tests error handling when updating grouped parameters by memory
    -- region upload fails.
    overriding procedure Test_Grouped_Table_Upload_Error (Self : in out Instance);

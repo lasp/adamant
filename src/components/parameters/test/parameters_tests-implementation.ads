@@ -39,6 +39,10 @@ private
    -- This unit test tests the behavior when validation of the parameter table by
    -- memory region upload fails.
    overriding procedure Test_Table_Validate_Error (Self : in out Instance);
+   -- This unit test tests the behavior when a parameter updated by command fails the
+   -- component's parameter validation. The command fails, the active value is
+   -- unchanged, and the rejected value is not applied by a later update.
+   overriding procedure Test_Update_Parameter_Validation_Error (Self : in out Instance);
    -- This unit test tests that values staged by a validate-only table operation or a
    -- failed table upload are discarded, so a later parameter update by command does
    -- not apply them.

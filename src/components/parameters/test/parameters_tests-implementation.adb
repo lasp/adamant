@@ -1279,6 +1279,91 @@ package body Parameters_Tests.Implementation is
       Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Dump_Parameters_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 22]));
    end Test_Invalid_Command;
 
+   overriding procedure Test_Update_Parameter_Validation_Error (Self : in out Instance) is
+      use Parameter_Enums.Parameter_Update_Status;
+      use Parameter_Enums.Parameter_Operation_Type;
+      use Parameter_Enums.Parameter_Table_Update_Status;
+      T : Component.Parameters.Implementation.Tester.Instance_Access renames Self.Tester;
+      -- Entry 2 is Component_A's 16-bit parameter. This value fails that component's validation.
+      Invalid_Entry : constant Parameter_Table_Entry.T := (Header => (Id => 2, Buffer_Length => 2), Buffer => [0 => 16#DE#, 1 => 16#AD#, others => 0]);
+      -- Entry 0 is Component_A's 32-bit parameter.
+      Valid_Entry : constant Parameter_Table_Entry.T := (Header => (Id => 0, Buffer_Length => 4), Buffer => [0 => 0, 1 => 0, 2 => 0, 3 => 99, others => 0]);
+      Cmd : Command.T;
+      Pkt : Packet.T;
+   begin
+      -- Send a command with a value that stages fine but fails the component's validation:
+      Ser_Status_Assert.Eq (T.Commands.Update_Parameter (Invalid_Entry, Cmd), Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
+      Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Update_Parameter_Id, Status => Failure));
+
+      -- Check events:
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Parameter_Validation_Failed_History.Get_Count, 1);
+      Parameter_Operation_Status_Assert.Eq (T.Parameter_Validation_Failed_History.Get (1), (Operation => Validate, Status => Validation_Error, Id => 0));
+      Boolean_Assert.Eq (T.Parameter_Discard_Failed_History.Is_Empty, True);
+
+      -- Nothing was applied, so no packet and no data product:
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 0);
+
+      -- Update a different parameter of the same component. This must apply only the new
+      -- value, not the one rejected above.
+      Ser_Status_Assert.Eq (T.Commands.Update_Parameter (Valid_Entry, Cmd), Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 2);
+      Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (2), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Update_Parameter_Id, Status => Success));
+
+      -- Check events:
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 4);
+      Natural_Assert.Eq (T.Dumping_Parameters_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Finished_Dumping_Parameters_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Parameter_Update_Success_History.Get_Count, 1);
+      Parameter_Table_Entry_Id_Assert.Eq (T.Parameter_Update_Success_History.Get (1), (Id => 0));
+      T.Component_A.Apply_Parameters;
+
+      -- Check the dumped packet. The 16-bit parameter still holds its default.
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
+      Pkt := T.Packet_T_Recv_Sync_History.Get (1);
+      Natural_Assert.Eq (Pkt.Header.Buffer_Length, Test_Parameter_Table_Record.Size_In_Bytes);
+      Byte_Array_Assert.Eq (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1), Expected_Table_Bytes ((
+         Crc_Calculated => [0, 0], Header => (Crc_Table => [0, 0], Version => 0.0), Component_A_Parameter_I32 => (Value => 99), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 15),
+         Component_B_Parameter_I32 => (Value => -56)
+      )));
+
+      -- Check data product:
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Table_Status_History.Get_Count, 1);
+      Packed_Table_Operation_Status_Assert.Eq (T.Table_Status_History.Get (1), (
+         Active_Table_Version_Number => 0.0,
+         Active_Table_Update_Time => 0,
+         Active_Table_Crc => [0, 0],
+         Last_Table_Operation_Status => Individual_Parameter_Modified
+      ));
+
+      -- Reject the value again, this time with the component refusing the discard that follows:
+      T.Component_A.Override_Parameter_Return (Status => Id_Error, Length => 0, Only_On_Discard => True);
+      Ser_Status_Assert.Eq (T.Commands.Update_Parameter (Invalid_Entry, Cmd), Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 3);
+      Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (3), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Update_Parameter_Id, Status => Failure));
+      T.Component_A.Disable_Parameter_Return_Override;
+
+      -- Check events:
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 6);
+      Natural_Assert.Eq (T.Parameter_Validation_Failed_History.Get_Count, 2);
+      Parameter_Operation_Status_Assert.Eq (T.Parameter_Validation_Failed_History.Get (2), (Operation => Validate, Status => Validation_Error, Id => 0));
+      Natural_Assert.Eq (T.Parameter_Discard_Failed_History.Get_Count, 1);
+      Parameter_Operation_Status_Assert.Eq (T.Parameter_Discard_Failed_History.Get (1), (Operation => Discard, Status => Id_Error, Id => 0));
+
+      -- Still nothing new applied:
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
+   end Test_Update_Parameter_Validation_Error;
+
    overriding procedure Test_Abandoned_Table_Discarded (Self : in out Instance) is
       use Parameter_Enums.Parameter_Update_Status;
       use Parameter_Enums.Parameter_Operation_Type;
