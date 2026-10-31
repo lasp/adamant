@@ -31,6 +31,7 @@ package body Component.Parameters.Implementation.Tester is
       Self.Parameter_Update_Failed_History.Init (Depth => 100);
       Self.Parameter_Validation_Failed_History.Init (Depth => 100);
       Self.Parameter_Fetch_Failed_History.Init (Depth => 100);
+      Self.Parameter_Discard_Failed_History.Init (Depth => 100);
       Self.Parameter_Fetch_Length_Mismatch_History.Init (Depth => 100);
       Self.Parameter_Fetch_Value_Mismatch_History.Init (Depth => 100);
       Self.Parameter_Update_Length_Mismatch_History.Init (Depth => 100);
@@ -77,6 +78,7 @@ package body Component.Parameters.Implementation.Tester is
       Self.Parameter_Update_Failed_History.Destroy;
       Self.Parameter_Validation_Failed_History.Destroy;
       Self.Parameter_Fetch_Failed_History.Destroy;
+      Self.Parameter_Discard_Failed_History.Destroy;
       Self.Parameter_Fetch_Length_Mismatch_History.Destroy;
       Self.Parameter_Fetch_Value_Mismatch_History.Destroy;
       Self.Parameter_Update_Length_Mismatch_History.Destroy;
@@ -260,6 +262,14 @@ package body Component.Parameters.Implementation.Tester is
       -- Push the argument onto the test history for looking at later:
       Self.Parameter_Fetch_Failed_History.Push (Arg);
    end Parameter_Fetch_Failed;
+
+   -- A component did not discard its staged parameters after a staging sequence was
+   -- abandoned.
+   overriding procedure Parameter_Discard_Failed (Self : in out Instance; Arg : in Parameter_Operation_Status.T) is
+   begin
+      -- Push the argument onto the test history for looking at later:
+      Self.Parameter_Discard_Failed_History.Push (Arg);
+   end Parameter_Discard_Failed;
 
    -- A parameter was fetched but contained an unexpected length.
    overriding procedure Parameter_Fetch_Length_Mismatch (Self : in out Instance; Arg : in Invalid_Parameter_Length.T) is

@@ -21,6 +21,8 @@ tests:
     description: This unit test tests the behavior when updating of the parameter table by memory region upload fails.
   - name: Test_Table_Validate_Error
     description: This unit test tests the behavior when validation of the parameter table by memory region upload fails.
+  - name: Test_Abandoned_Table_Discarded
+    description: This unit test tests that values staged by a validate-only table operation or a failed table upload are discarded, so a later parameter update by command does not apply them.
   - name: Test_Table_Fetch_Error
     description: This unit test tests the behavior when fetching of the parameter table into a memory region fails.
   - name: Test_Table_Fetch_Pointer_Unsupported

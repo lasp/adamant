@@ -360,12 +360,14 @@ package body Parameters_Grouped_Tests.Implementation is
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       -- Check events:
-      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 5);
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 6);
       Natural_Assert.Eq (T.Parameter_Stage_Failed_History.Get_Count, 2);
       Parameter_Operation_Status_Assert.Eq (T.Parameter_Stage_Failed_History.Get (1), (Operation => Stage, Status => Validation_Error, Id => 2));
       Parameter_Operation_Status_Assert.Eq (T.Parameter_Stage_Failed_History.Get (2), (Operation => Stage, Status => Validation_Error, Id => 1));
       Natural_Assert.Eq (T.Parameter_Validation_Failed_History.Get_Count, 1);
       Parameter_Operation_Status_Assert.Eq (T.Parameter_Validation_Failed_History.Get (1), (Operation => Validate, Status => Validation_Error, Id => 0));
+      Natural_Assert.Eq (T.Parameter_Discard_Failed_History.Get_Count, 1);
+      Parameter_Operation_Status_Assert.Eq (T.Parameter_Discard_Failed_History.Get (1), (Operation => Discard, Status => Validation_Error, Id => 0));
       Natural_Assert.Eq (T.Starting_Parameter_Table_Update_History.Get_Count, 1);
       Memory_Region_Assert.Eq (T.Starting_Parameter_Table_Update_History.Get (1), Region);
       Natural_Assert.Eq (T.Finished_Parameter_Table_Update_History.Get_Count, 1);

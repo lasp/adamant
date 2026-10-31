@@ -3,6 +3,7 @@ description: The requirements for the Parameters component are specified below.
 requirements:
   - text: The component shall update the values of parameters in the system through a parameter table upload.
   - text: The component shall update the values of parameters in the system individually by command.
+  - text: The component shall discard staged parameter values that are not applied. This covers a validate-only table operation, a table upload that fails to stage, validate, or update, and an Update_Parameter command that fails to stage, validate, or update.
   - text: The component shall produce a packet reflecting the current values of all parameters in the system (parameter table packet).
   - text: The component shall produce a parameter table packet upon command.
   - text: The component shall produce a parameter table packet whenever a parameter value has been changed.

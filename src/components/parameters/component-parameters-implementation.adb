@@ -455,6 +455,45 @@ package body Component.Parameters.Implementation is
       return Status;
    end Update_Parameters;
 
+   -- Helper function to tell a single component to discard the parameters this table staged. Called
+   -- when a staging sequence is abandoned, so that an uncommitted value cannot be applied by a later update.
+   function Discard_Parameters (Self : in out Instance; Component_Id : in Connector_Types.Connector_Index_Type) return Parameter_Enums.Parameter_Update_Status.E is
+      use Parameter_Enums.Parameter_Update_Status;
+      use Parameter_Enums.Parameter_Operation_Type;
+
+      Return_Id : Parameter_Types.Parameter_Id;
+      Status : constant Parameter_Enums.Parameter_Update_Status.E := Self.Send_Parameter_Operation (Component_Id, Discard, Return_Id);
+   begin
+      -- Make sure the status is successful. If it is not, then produce an event.
+      if Status /= Success then
+         Self.Event_T_Send_If_Connected (Self.Events.Parameter_Discard_Failed (Self.Sys_Time_T_Get, (
+            Operation => Discard,
+            Status => Status,
+            Id => Return_Id
+         )));
+      end if;
+
+      return Status;
+   end Discard_Parameters;
+
+   -- Helper function to tell every connected component to discard the parameters this table staged.
+   -- Returns the first failing status, if any.
+   function Discard_Parameter_Table (Self : in out Instance) return Parameter_Enums.Parameter_Update_Status.E is
+      use Parameter_Enums.Parameter_Update_Status;
+      To_Return : Parameter_Enums.Parameter_Update_Status.E := Success;
+   begin
+      for Idx in Self.Connector_Parameter_Update_T_Provide'Range loop
+         declare
+            Status : constant Parameter_Enums.Parameter_Update_Status.E := Self.Discard_Parameters (Component_Id => Idx);
+         begin
+            if Status /= Success and then To_Return = Success then
+               To_Return := Status;
+            end if;
+         end;
+      end loop;
+      return To_Return;
+   end Discard_Parameter_Table;
+
    -- Helper function to stage all connected component's parameter tables from data within a provided memory region.
    function Stage_Parameter_Table (Self : in out Instance; Region : in Memory_Region.T) return Parameter_Enums.Parameter_Table_Update_Status.E is
       use Parameter_Enums.Parameter_Update_Status;
@@ -512,6 +551,11 @@ package body Component.Parameters.Implementation is
          end if;
       end loop;
 
+      -- The table is never applied by this operation, so discard what was staged.
+      if Self.Discard_Parameter_Table /= Success then
+         Status_To_Return := Parameter_Error;
+      end if;
+
       -- Send info event:
       Self.Event_T_Send_If_Connected (Self.Events.Finished_Parameter_Table_Validate (Self.Sys_Time_T_Get, (
          Region => Region,
@@ -554,6 +598,12 @@ package body Component.Parameters.Implementation is
             Set_Status (Self.Update_Parameters (Component_Id => Idx));
          end loop;
 
+         -- A component that refused the update still holds what was staged for it, so
+         -- discard that. Components that took the update have nothing staged.
+         if Status_To_Return /= Success then
+            Set_Status (Self.Discard_Parameter_Table);
+         end if;
+
          -- At this point the table is committed to the components, so we need
          -- to update our meta data. This is required prior to dumping parameters,
          -- below, to ensure the dumped table reflects this new meta data.
@@ -571,6 +621,9 @@ package body Component.Parameters.Implementation is
             -- Send the packet:
             Set_Status (Self.Send_Parameters_Packet);
          end if;
+      else
+         -- The table is not applied, so discard what was staged.
+         Set_Status (Self.Discard_Parameter_Table);
       end if;
 
       -- Send info event:
@@ -711,6 +764,22 @@ package body Component.Parameters.Implementation is
       -- Track which components we need to update (to avoid duplicate updates)
       Components_To_Update : array (Self.Connector_Parameter_Update_T_Provide'Range) of Boolean := [others => False];
       Time : constant Sys_Time.T := Self.Sys_Time_T_Get;
+
+      -- Tell every component with a staged value to forget it. Called on any failure
+      -- after staging, so that the rejected value cannot be applied by a later update.
+      procedure Discard_Staged_Components is
+      begin
+         for Component_Id in Components_To_Update'Range loop
+            if Components_To_Update (Component_Id) then
+               declare
+                  -- The command is already failing, so the discard status is only reported by event.
+                  Ignore : constant Parameter_Enums.Parameter_Update_Status.E := Self.Discard_Parameters (Component_Id => Component_Id);
+               begin
+                  null;
+               end;
+            end if;
+         end loop;
+      end Discard_Staged_Components;
    begin
       -- Search through our entries linearly to find all parameters with matching Entry_ID.
       -- For grouped parameters, multiple parameters may share the same Entry_ID.
@@ -731,12 +800,14 @@ package body Component.Parameters.Implementation is
                         Header => Arg.Header,
                         Expected_Length => Param_Length)
                      ));
+                     Discard_Staged_Components;
                      return Failure;
                   else
                      -- OK everything looks good, let's stage the parameter.
                      if Self.Stage_Parameter (Param_Entry => Param_Entry, Value => Arg.Buffer) /= Success then
                         -- No need to throw an event, because an event is thrown in the function above
                         -- if something doesn't go well.
+                        Discard_Staged_Components;
                         return Failure;
                      end if;
 
@@ -760,6 +831,7 @@ package body Component.Parameters.Implementation is
             if Self.Update_Parameters (Component_Id => Component_Id) /= Success then
                -- No need to throw an event, because an event is thrown in the function above
                -- if something doesn't go well.
+               Discard_Staged_Components;
                return Failure;
             end if;
          end if;
