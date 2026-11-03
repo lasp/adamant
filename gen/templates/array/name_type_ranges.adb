@@ -40,7 +40,7 @@ begin
    Put_Line ("  - name: {{ element.type }}");
    Put_Line ("    literals:");
    for Val in {{ element.type }} loop
-      Put_Line ("      - name: " & String_Util.Trim_Both ({{ element.type }}'Image (Val)));
+      Put_Line ("      - name: """ & String_Util.Trim_Both ({{ element.type }}'Image (Val)) & """");
       Put_Line ("        value: " & String_Util.Trim_Both (Integer'Image ({{ element.type }}'Enum_Rep (Val))));
    end loop;
 {% elif element.format.length and element.format.length > 1 %}
