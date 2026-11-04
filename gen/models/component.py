@@ -897,22 +897,6 @@ class component(base):
         elif self.connectors.requires_queue():
             self.instance_queue_size = self.init_base.get_parameter_value("Queue_Size")
 
-        # Set the id bases, for any that were set in the assembly:
-        if self.set_id_bases:
-            for par in self.set_id_bases.parameters:
-                if par.value is not None:
-                    for suite in self.ided_suites.values():
-                        if suite.id_base_parameter_name() == par.name:
-                            # Store the explicit id base now, but defer stamping
-                            # ids onto the entities until the assembly-wide id
-                            # pass (assembly._generate_component_ids). Stamping
-                            # here would freeze ids before set_assembly() can
-                            # inject additional entities into the suite (e.g. the
-                            # simple_command_sequencer's per-sequence commands),
-                            # leaving those injected entities id-less and dropped.
-                            suite.set_id_base(int(par.value), assign_entity_ids=False)
-                            # Conflicts will be checked at the assembly level.
-
     def set_assembly(self, assembly):
         self.instance_assembly_model = assembly
 
