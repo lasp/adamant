@@ -26,6 +26,15 @@ package {{ name }}_Packets is
    Number_Of_Packets : constant Natural := {{ packets|length }};
    Number_Of_Components_With_Packets : constant Natural := {{ component_kind_dict['packets']|length }};
 
+{% set based_components = component_kind_dict['packets']|rejectattr('packets.id_base', 'none')|list %}
+{% if based_components %}
+   -- The packet id base of each component. A component whose packets
+   -- carry static ids has no base and is not listed here:
+{% for component in based_components %}
+   {{ component.instance_name }}_Packet_Id_Base : constant Packet_Id := {{ component.packets.id_base }};
+{% endfor %}
+
+{% endif %}
    -- List of Packet ids:
 {% for id, packet in packets.items() %}
    {{ packet.full_name|replace(".","_") }} : constant Packet_Id := {{ packet.id }}; -- 0x{{ '%04x' % packet.id }}

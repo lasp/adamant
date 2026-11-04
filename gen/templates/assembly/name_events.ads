@@ -26,6 +26,11 @@ package {{ name }}_Events is
    Number_Of_Events : constant Natural := {{ events|length }};
    Number_Of_Components_With_Events : constant Natural := {{ component_kind_dict['events']|length }};
 
+   -- The event id base of each component:
+{% for component in component_kind_dict['events'] %}
+   {{ component.instance_name }}_Event_Id_Base : constant Event_Id := {{ component.events.id_base }};
+{% endfor %}
+
    -- List of event ids:
 {% for id, evt in events.items() %}
    {{ evt.suite.component.instance_name }}_{{ evt.name }} : constant Event_Id := {{ evt.id }}; -- 0x{{ '%04x' % id }}

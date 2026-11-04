@@ -63,6 +63,9 @@ package body Component.{{ name }}_Reciprocal is
    function {{ connector.tester_name }}_Hook (Class_Self : in out Component.Core_Instance'Class; Arg : {{ connector.mode }} {{ connector.type }}; Index : in Connector_Index_Type := Connector_Index_Type'First; Ignore : in Full_Queue_Action := Drop) return Connector_Types.Connector_Status is
 {% endif %}
       Self : Base_Instance renames Base_Instance (Class_Self);
+{% if connector.kind == "provide" and connector.type_package in ["Parameter_Update"] and parameters and parameters.parameters %}
+      use Parameter_Operation_Type;
+{% endif %}
 {% if connector.kind in ["get", "request"] %}
       Return_Type : {{ connector.return_type }};
 {% endif %}
@@ -153,10 +156,10 @@ package body Component.{{ name }}_Reciprocal is
          end if;
 {% else %}
 {% if type_package in ["Parameter_Update"] and parameters and parameters.parameters %}
-      -- Log parameter value
-      if Arg.Operation /= Parameter_Enums.Parameter_Operation_Type.Update then
-         Self.Log_Incoming_Parameter (Arg.Param);
-      end if;
+         -- Log parameter value
+         if Arg.Operation /= Parameter_Enums.Parameter_Operation_Type.Update then
+            Self.Log_Incoming_Parameter (Arg.Param);
+         end if;
 {% endif %}
 {% if connector.return_type_package in ["Data_Product_Return"] and connector.type_package in ["Data_Product_Fetch"] and data_dependencies %}
          -- Now data dependency value
