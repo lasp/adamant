@@ -18,6 +18,9 @@ events:
   - name: Parameter_Fetch_Failed
     description: A parameter value could not be updated.
     param_type: Parameter_Operation_Status.T
+  - name: Parameter_Discard_Failed
+    description: A component did not discard its staged parameters after a staging sequence was abandoned.
+    param_type: Parameter_Operation_Status.T
   - name: Parameter_Fetch_Length_Mismatch
     description: A parameter was fetched but contained an unexpected length.
     param_type: Invalid_Parameter_Length.T

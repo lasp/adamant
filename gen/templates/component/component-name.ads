@@ -588,8 +588,8 @@ private
    not overriding procedure Update_Parameters (Self : in out Base_Instance);
 
    -- Procedure meant to be called by implementation package to process an
-   -- incoming Parameter_Update record. This call will stage or fetch
-   -- a parameter according to the operation set.
+   -- incoming Parameter_Update record. This call will stage, validate,
+   -- update, discard, or fetch parameters according to the operation set.
    not overriding procedure Process_Parameter_Update (Self : in out Base_Instance; Par_Update : in out Parameter_Update.T);
 
    -- Dispatch parameter to correct staging procedure:
@@ -645,6 +645,9 @@ private
    protected type Protected_Staged_Parameters is
       -- Set all parameters staged by Table_Id as ready to be updated by the component:
       procedure Set_Ready_To_Update (Table_Id : in Parameter_Types.Parameter_Table_Id);
+
+      -- Discard all parameters staged by Table_Id that have not been set ready to update:
+      procedure Discard_Staged (Table_Id : in Parameter_Types.Parameter_Table_Id);
 
       -- Returns True if the parameters are ready to update:
       function Is_Ready_To_Update return Boolean;

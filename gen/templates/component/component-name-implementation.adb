@@ -79,7 +79,7 @@ package body Component.{{ name }}.Implementation is
       -- end if;
       null;
 {% elif connector.kind in ["modify"] and connector.type == "Parameter_Update.T" and parameters %}
-      -- Process the parameter update, staging or fetching parameters as requested.
+      -- Process the parameter update, staging, validating, updating, discarding, or fetching parameters as requested.
       Self.Process_Parameter_Update (Arg);
 {% else %}
 {% if connector.return_type %}

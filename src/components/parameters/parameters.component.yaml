@@ -17,7 +17,7 @@ init:
       description: "If set to True, the component will dump the current parameter values any time a command or memory region is received to alter one or more parameter values. If set to False, parameters will only be dumped when requested by command."
       default: "False"
 connectors:
-  - description: The arrayed parameter request connector. Parameters stages, updates, and fetches are sent out this connector and a status is returned.
+  - description: The arrayed parameter request connector. Parameter stages, validates, updates, discards, and fetches are sent out this connector and a status is returned.
     type: Parameter_Update.T
     kind: provide
     count: 0

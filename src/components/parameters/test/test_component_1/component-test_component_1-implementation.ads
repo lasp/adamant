@@ -6,15 +6,22 @@
 with Parameter_Update;
 with Parameter_Enums; use Parameter_Enums.Parameter_Update_Status;
 
--- A simple component which has a parameter receive connector.
+-- A simple component which has a parameter receive connector. Its parameter
+-- validation rejects any Parameter_U16 value equal to Invalid_U16_Value.
 package Component.Test_Component_1.Implementation is
+
+   -- A Parameter_U16 value that fails the component's parameter validation.
+   Invalid_U16_Value : constant Packed_U16.U := (Value => 16#DEAD#);
 
    -- The component class instance record:
    type Instance is new Test_Component_1.Base_Instance with private;
 
    -- Public subprograms to help simulate error conditions during unit testing.
-   procedure Override_Parameter_Return (Self : in out Instance; Status : in Parameter_Enums.Parameter_Update_Status.E; Length : in Natural; Only_On_Update : in Boolean := False; Only_On_Fetch : in Boolean := False);
+   procedure Override_Parameter_Return (Self : in out Instance; Status : in Parameter_Enums.Parameter_Update_Status.E; Length : in Natural; Only_On_Update : in Boolean := False; Only_On_Fetch : in Boolean := False; Only_On_Validate : in Boolean := False; Only_On_Discard : in Boolean := False);
    procedure Disable_Parameter_Return_Override (Self : in out Instance);
+   -- Copy any parameters that are ready to update into the active parameters, as the
+   -- component would do on its next cycle.
+   procedure Apply_Parameters (Self : in out Instance);
 
 private
 
@@ -23,6 +30,8 @@ private
       Do_Override : Boolean := False;
       Only_On_Update : Boolean := False;
       Only_On_Fetch : Boolean := False;
+      Only_On_Validate : Boolean := False;
+      Only_On_Discard : Boolean := False;
       Override_Parameter_Update_Status : Parameter_Enums.Parameter_Update_Status.E := Success;
       Override_Parameter_Length : Natural := 0;
    end record;
@@ -69,6 +78,6 @@ private
       Self : in out Instance;
       Parameter_U16 : in Packed_U16.U;
       Parameter_I32 : in Packed_I32.U
-   ) return Parameter_Validation_Status.E is (Parameter_Validation_Status.Valid);
+   ) return Parameter_Validation_Status.E;
 
 end Component.Test_Component_1.Implementation;

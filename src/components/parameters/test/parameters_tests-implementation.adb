@@ -14,8 +14,10 @@ with Parameter_Table_Entry;
 with Parameter_Table_Entry_Id.Assertion; use Parameter_Table_Entry_Id.Assertion;
 with Invalid_Parameter_Table_Entry_Length.Assertion; use Invalid_Parameter_Table_Entry_Length.Assertion;
 with Packet;
+with Tick;
 with Interfaces; use Interfaces;
 with Serializer_Types; use Serializer_Types;
+with Smart_Assert;
 with Memory_Region.Assertion; use Memory_Region.Assertion;
 with Parameters_Memory_Region.Assertion; use Parameters_Memory_Region.Assertion;
 with Parameters_Memory_Region_Release.Assertion; use Parameters_Memory_Region_Release.Assertion;
@@ -60,6 +62,8 @@ package body Parameters_Tests.Implementation is
    -------------------------------------------------------------------------
    -- Tests:
    -------------------------------------------------------------------------
+
+   package Ser_Status_Assert is new Smart_Assert.Discrete (Serializer_Types.Serialization_Status, Serializer_Types.Serialization_Status'Image);
 
    overriding procedure Test_Init (Self : in out Instance) is
       T : Component.Parameters.Implementation.Tester.Instance_Access renames Self.Tester;
@@ -620,6 +624,16 @@ package body Parameters_Tests.Implementation is
       T.Component_A.Disable_Parameter_Return_Override;
    end Test_Dump_Parameters_Error;
 
+   -- Serialize a parameter table record with the CRC over its contents filled in, as the
+   -- component produces in its parameter packet.
+   function Expected_Table_Bytes (Table : in Test_Parameter_Table_Record.T) return Test_Parameter_Table_Record.Serialization.Byte_Array is
+      Bytes : Test_Parameter_Table_Record.Serialization.Byte_Array := Test_Parameter_Table_Record.Serialization.To_Byte_Array (Table);
+      Crc : constant Crc_16.Crc_16_Type := Crc_16.Compute_Crc_16 (Bytes (Bytes'First + Crc_16.Crc_16_Type'Length + Parameter_Table_Header.Crc_Section_Length .. Bytes'Last));
+   begin
+      Bytes (Bytes'First .. Bytes'First + Crc_16.Crc_16_Type'Length - 1) := Crc;
+      return Bytes;
+   end Expected_Table_Bytes;
+
    overriding procedure Test_Update_Parameters_Error (Self : in out Instance) is
       use Parameter_Enums.Parameter_Update_Status;
       use Parameter_Enums.Parameter_Operation_Type;
@@ -703,36 +717,64 @@ package body Parameters_Tests.Implementation is
       -- No data product.
       Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 0);
 
+      -- Update the other parameter of the same component. The value refused at update
+      -- above must not come along with it.
+      T.Component_A.Disable_Parameter_Return_Override;
+      Param_Entry := (Header => (Id => 2, Buffer_Length => 2), Buffer => [0 => 0, 1 => 20, others => 0]);
+      Ser_Status_Assert.Eq (T.Commands.Update_Parameter (Param_Entry, Cmd), Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 5);
+      Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (5), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Update_Parameter_Id, Status => Success));
+
+      -- Check events:
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 7);
+      Natural_Assert.Eq (T.Dumping_Parameters_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Finished_Dumping_Parameters_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Parameter_Update_Success_History.Get_Count, 1);
+      Parameter_Table_Entry_Id_Assert.Eq (T.Parameter_Update_Success_History.Get (1), (Id => 2));
+
+      -- The dumped packet holds the new value only:
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
+      Pkt := T.Packet_T_Recv_Sync_History.Get (1);
+      Natural_Assert.Eq (Pkt.Header.Buffer_Length, Test_Parameter_Table_Record.Size_In_Bytes);
+      Byte_Array_Assert.Eq (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1), Expected_Table_Bytes ((
+         Crc_Calculated => [0, 0], Header => (Crc_Table => [0, 0], Version => 0.0), Component_A_Parameter_I32 => (Value => -56), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 20), Component_B_Parameter_U16 => (Value => 15),
+         Component_B_Parameter_I32 => (Value => -56)
+      )));
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
+
       -- Send a command to update a parameter value with good values. This time we make a component return a bad status on fetch:
+      Param_Entry := (Header => (Id => 0, Buffer_Length => 4), Buffer => [0 => 0, 1 => 0, 2 => 0, 3 => 99, others => 0]);
       -- Set A to return a bad status:
       T.Component_A.Override_Parameter_Return (Status => Id_Error, Length => 0, Only_On_Fetch => True);
       pragma Assert (T.Commands.Update_Parameter (Param_Entry, Cmd) = Success);
       T.Command_T_Send (Cmd);
       Natural_Assert.Eq (T.Dispatch_All, 1);
-      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 5);
-      Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (5), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Update_Parameter_Id, Status => Failure));
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 6);
+      Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (6), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Update_Parameter_Id, Status => Failure));
 
       -- Check events:
-      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 8);
-      Natural_Assert.Eq (T.Dumping_Parameters_History.Get_Count, 1);
-      Natural_Assert.Eq (T.Finished_Dumping_Parameters_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 11);
+      Natural_Assert.Eq (T.Dumping_Parameters_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Finished_Dumping_Parameters_History.Get_Count, 2);
       Natural_Assert.Eq (T.Parameter_Fetch_Failed_History.Get_Count, 2);
       Parameter_Operation_Status_Assert.Eq (T.Parameter_Fetch_Failed_History.Get (1), (Operation => Fetch, Status => Id_Error, Id => 2));
       Parameter_Operation_Status_Assert.Eq (T.Parameter_Fetch_Failed_History.Get (2), (Operation => Fetch, Status => Id_Error, Id => 1));
 
       -- A packet should have been automatically dumped.
-      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 2);
 
       -- Check packet length and contents:
-      Pkt := T.Packet_T_Recv_Sync_History.Get (1);
+      Pkt := T.Packet_T_Recv_Sync_History.Get (2);
       Natural_Assert.Eq (Pkt.Header.Buffer_Length, Test_Parameter_Table_Record.Size_In_Bytes);
-      Natural_Assert.Eq (Natural (Pkt.Header.Sequence_Count), 0);
+      Natural_Assert.Eq (Natural (Pkt.Header.Sequence_Count), 1);
       Natural_Assert.Eq (Natural (Pkt.Header.Id), 0);
 
       -- Check data product.
-      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
-      Natural_Assert.Eq (T.Table_Status_History.Get_Count, 1);
-      Packed_Table_Operation_Status_Assert.Eq (T.Table_Status_History.Get (1), (
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Table_Status_History.Get_Count, 2);
+      Packed_Table_Operation_Status_Assert.Eq (T.Table_Status_History.Get (2), (
          Active_Table_Version_Number => 0.0,
          Active_Table_Update_Time => 0,
          Active_Table_Crc => [0, 0],
@@ -746,6 +788,8 @@ package body Parameters_Tests.Implementation is
       use Parameter_Enums.Parameter_Table_Operation_Type;
       use Parameter_Enums.Parameter_Operation_Type;
       T : Component.Parameters.Implementation.Tester.Instance_Access renames Self.Tester;
+      Pkt : Packet.T;
+      Cmd : Command.T;
       -- Create a memory region that holds the parameter table data.
       Dump : constant Test_Parameter_Table_Record.Serialization.Byte_Array :=
          Test_Parameter_Table_Record.Serialization.To_Byte_Array
@@ -766,12 +810,14 @@ package body Parameters_Tests.Implementation is
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       -- Check events:
-      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 5);
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 6);
       Natural_Assert.Eq (T.Parameter_Stage_Failed_History.Get_Count, 2);
       Parameter_Operation_Status_Assert.Eq (T.Parameter_Stage_Failed_History.Get (1), (Operation => Stage, Status => Validation_Error, Id => 2));
       Parameter_Operation_Status_Assert.Eq (T.Parameter_Stage_Failed_History.Get (2), (Operation => Stage, Status => Validation_Error, Id => 1));
       Natural_Assert.Eq (T.Parameter_Validation_Failed_History.Get_Count, 1);
       Parameter_Operation_Status_Assert.Eq (T.Parameter_Validation_Failed_History.Get (1), (Operation => Validate, Status => Validation_Error, Id => 0));
+      Natural_Assert.Eq (T.Parameter_Discard_Failed_History.Get_Count, 1);
+      Parameter_Operation_Status_Assert.Eq (T.Parameter_Discard_Failed_History.Get (1), (Operation => Discard, Status => Validation_Error, Id => 0));
       Natural_Assert.Eq (T.Starting_Parameter_Table_Update_History.Get_Count, 1);
       Memory_Region_Assert.Eq (T.Starting_Parameter_Table_Update_History.Get (1), Region);
       Natural_Assert.Eq (T.Finished_Parameter_Table_Update_History.Get_Count, 1);
@@ -802,7 +848,7 @@ package body Parameters_Tests.Implementation is
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       -- Check events:
-      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 6);
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 7);
       Natural_Assert.Eq (T.Memory_Region_Crc_Invalid_History.Get_Count, 1);
       Invalid_Parameters_Memory_Region_Crc_Assert.Eq
          (T.Memory_Region_Crc_Invalid_History.Get (1), (Parameters_Region => (Region => (Address => Table'Address, Length => Table'Length), Operation => Set), Header => (Crc_Table => [6, 7], Version => 1.0), Computed_Crc => Crc));
@@ -823,6 +869,68 @@ package body Parameters_Tests.Implementation is
       -- Make sure the memory location was released with the proper status:
       Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 2);
       Parameters_Memory_Region_Release_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get (2), ((Address => Table'Address, Length => Table'Length), Crc_Error));
+
+      --
+      -- Send a good table with Component_A refusing the update. The other components take
+      -- the table and the refused one discards what was staged for it.
+      --
+      Table (Table'First .. Table'First + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => Crc, Version => 1.0));
+      T.Component_A.Override_Parameter_Return (Status => Id_Error, Length => 0, Only_On_Update => True);
+      T.Parameters_Memory_Region_T_Send ((Region => Region, Operation => Set));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      T.Component_A.Disable_Parameter_Return_Override;
+
+      -- Check events:
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 12);
+      Natural_Assert.Eq (T.Parameter_Update_Failed_History.Get_Count, 1);
+      Parameter_Operation_Status_Assert.Eq (T.Parameter_Update_Failed_History.Get (1), (Operation => Update, Status => Id_Error, Id => 0));
+      Natural_Assert.Eq (T.Parameter_Discard_Failed_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Dumping_Parameters_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Finished_Dumping_Parameters_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Starting_Parameter_Table_Update_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Finished_Parameter_Table_Update_History.Get_Count, 2);
+      Parameters_Memory_Region_Release_Assert.Eq (T.Finished_Parameter_Table_Update_History.Get (2), (Region, Parameter_Error));
+
+      -- The dumped packet holds the table for the components that took it and defaults for Component_A:
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
+      Pkt := T.Packet_T_Recv_Sync_History.Get (1);
+      Natural_Assert.Eq (Pkt.Header.Buffer_Length, Test_Parameter_Table_Record.Size_In_Bytes);
+      Byte_Array_Assert.Eq (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1), Expected_Table_Bytes ((
+         Crc_Calculated => [0, 0], Header => (Crc_Table => Crc, Version => 1.0), Component_A_Parameter_I32 => (Value => -56), Component_C_The_Tick => ((3, 2), 8), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 12),
+         Component_B_Parameter_I32 => (Value => -22)
+      )));
+
+      -- Check data products:
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 3);
+      Natural_Assert.Eq (T.Table_Status_History.Get_Count, 3);
+      Packed_Table_Operation_Status_Assert.Eq (T.Table_Status_History.Get (3), (
+         Active_Table_Version_Number => 1.0,
+         Active_Table_Update_Time => 0,
+         Active_Table_Crc => Crc,
+         Last_Table_Operation_Status => Parameter_Error
+      ));
+
+      -- Make sure the memory location was released with the proper status:
+      Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 3);
+      Parameters_Memory_Region_Release_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get (3), (Region, Parameter_Error));
+
+      -- Update one of Component_A's parameters by command. Its share of the refused table must not come along.
+      Ser_Status_Assert.Eq (T.Commands.Update_Parameter ((Header => (Id => 2, Buffer_Length => 2), Buffer => [0 => 0, 1 => 20, others => 0]), Cmd), Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
+      Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Update_Parameter_Id, Status => Success));
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 15);
+      Natural_Assert.Eq (T.Parameter_Update_Success_History.Get_Count, 1);
+      Parameter_Table_Entry_Id_Assert.Eq (T.Parameter_Update_Success_History.Get (1), (Id => 2));
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 2);
+      Pkt := T.Packet_T_Recv_Sync_History.Get (2);
+      Natural_Assert.Eq (Pkt.Header.Buffer_Length, Test_Parameter_Table_Record.Size_In_Bytes);
+      Byte_Array_Assert.Eq (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1), Expected_Table_Bytes ((
+         Crc_Calculated => [0, 0], Header => (Crc_Table => Crc, Version => 1.0), Component_A_Parameter_I32 => (Value => -56), Component_C_The_Tick => ((3, 2), 8), Component_A_Parameter_U16 => (Value => 20), Component_B_Parameter_U16 => (Value => 12),
+         Component_B_Parameter_I32 => (Value => -22)
+      )));
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 4);
    end Test_Table_Upload_Error;
 
    overriding procedure Test_Table_Validate_Error (Self : in out Instance) is
@@ -851,12 +959,14 @@ package body Parameters_Tests.Implementation is
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       -- Check events:
-      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 5);
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 6);
       Natural_Assert.Eq (T.Parameter_Stage_Failed_History.Get_Count, 2);
       Parameter_Operation_Status_Assert.Eq (T.Parameter_Stage_Failed_History.Get (1), (Operation => Stage, Status => Validation_Error, Id => 2));
       Parameter_Operation_Status_Assert.Eq (T.Parameter_Stage_Failed_History.Get (2), (Operation => Stage, Status => Validation_Error, Id => 1));
       Natural_Assert.Eq (T.Parameter_Validation_Failed_History.Get_Count, 1);
       Parameter_Operation_Status_Assert.Eq (T.Parameter_Validation_Failed_History.Get (1), (Operation => Validate, Status => Validation_Error, Id => 0));
+      Natural_Assert.Eq (T.Parameter_Discard_Failed_History.Get_Count, 1);
+      Parameter_Operation_Status_Assert.Eq (T.Parameter_Discard_Failed_History.Get (1), (Operation => Discard, Status => Validation_Error, Id => 0));
       Natural_Assert.Eq (T.Starting_Parameter_Table_Validate_History.Get_Count, 1);
       Memory_Region_Assert.Eq (T.Starting_Parameter_Table_Validate_History.Get (1), Region);
       Natural_Assert.Eq (T.Finished_Parameter_Table_Validate_History.Get_Count, 1);
@@ -884,7 +994,7 @@ package body Parameters_Tests.Implementation is
       Natural_Assert.Eq (T.Dispatch_All, 1);
 
       -- Check events:
-      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 6);
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 7);
       Natural_Assert.Eq (T.Memory_Region_Crc_Invalid_History.Get_Count, 1);
       Invalid_Parameters_Memory_Region_Crc_Assert.Eq
          (T.Memory_Region_Crc_Invalid_History.Get (1), (Parameters_Region => (Region => (Address => Table'Address, Length => Table'Length), Operation => Validate), Header => (Crc_Table => [6, 7], Version => 1.0), Computed_Crc => Crc));
@@ -1168,5 +1278,220 @@ package body Parameters_Tests.Implementation is
       Natural_Assert.Eq (T.Invalid_Command_Received_History.Get_Count, 1);
       Invalid_Command_Info_Assert.Eq (T.Invalid_Command_Received_History.Get (1), (Id => T.Commands.Get_Dump_Parameters_Id, Errant_Field_Number => Interfaces.Unsigned_32'Last, Errant_Field => [0, 0, 0, 0, 0, 0, 0, 22]));
    end Test_Invalid_Command;
+
+   overriding procedure Test_Update_Parameter_Validation_Error (Self : in out Instance) is
+      use Parameter_Enums.Parameter_Update_Status;
+      use Parameter_Enums.Parameter_Operation_Type;
+      use Parameter_Enums.Parameter_Table_Update_Status;
+      T : Component.Parameters.Implementation.Tester.Instance_Access renames Self.Tester;
+      -- Entry 2 is Component_A's 16-bit parameter. This value fails that component's validation.
+      Invalid_Entry : constant Parameter_Table_Entry.T := (Header => (Id => 2, Buffer_Length => 2), Buffer => [0 => 16#DE#, 1 => 16#AD#, others => 0]);
+      -- Entry 0 is Component_A's 32-bit parameter.
+      Valid_Entry : constant Parameter_Table_Entry.T := (Header => (Id => 0, Buffer_Length => 4), Buffer => [0 => 0, 1 => 0, 2 => 0, 3 => 99, others => 0]);
+      Cmd : Command.T;
+      Pkt : Packet.T;
+   begin
+      -- Send a command with a value that stages fine but fails the component's validation:
+      Ser_Status_Assert.Eq (T.Commands.Update_Parameter (Invalid_Entry, Cmd), Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
+      Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Update_Parameter_Id, Status => Failure));
+
+      -- Check events:
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Parameter_Validation_Failed_History.Get_Count, 1);
+      Parameter_Operation_Status_Assert.Eq (T.Parameter_Validation_Failed_History.Get (1), (Operation => Validate, Status => Validation_Error, Id => 0));
+      Boolean_Assert.Eq (T.Parameter_Discard_Failed_History.Is_Empty, True);
+
+      -- Nothing was applied, so no packet and no data product:
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 0);
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 0);
+
+      -- Update a different parameter of the same component. This must apply only the new
+      -- value, not the one rejected above.
+      Ser_Status_Assert.Eq (T.Commands.Update_Parameter (Valid_Entry, Cmd), Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 2);
+      Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (2), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Update_Parameter_Id, Status => Success));
+
+      -- Check events:
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 4);
+      Natural_Assert.Eq (T.Dumping_Parameters_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Finished_Dumping_Parameters_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Parameter_Update_Success_History.Get_Count, 1);
+      Parameter_Table_Entry_Id_Assert.Eq (T.Parameter_Update_Success_History.Get (1), (Id => 0));
+      T.Component_A.Apply_Parameters;
+
+      -- Check the dumped packet. The 16-bit parameter still holds its default.
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
+      Pkt := T.Packet_T_Recv_Sync_History.Get (1);
+      Natural_Assert.Eq (Pkt.Header.Buffer_Length, Test_Parameter_Table_Record.Size_In_Bytes);
+      Byte_Array_Assert.Eq (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1), Expected_Table_Bytes ((
+         Crc_Calculated => [0, 0], Header => (Crc_Table => [0, 0], Version => 0.0), Component_A_Parameter_I32 => (Value => 99), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 15),
+         Component_B_Parameter_I32 => (Value => -56)
+      )));
+
+      -- Check data product:
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Table_Status_History.Get_Count, 1);
+      Packed_Table_Operation_Status_Assert.Eq (T.Table_Status_History.Get (1), (
+         Active_Table_Version_Number => 0.0,
+         Active_Table_Update_Time => 0,
+         Active_Table_Crc => [0, 0],
+         Last_Table_Operation_Status => Individual_Parameter_Modified
+      ));
+
+      -- Reject the value again, this time with the component refusing the discard that follows:
+      T.Component_A.Override_Parameter_Return (Status => Id_Error, Length => 0, Only_On_Discard => True);
+      Ser_Status_Assert.Eq (T.Commands.Update_Parameter (Invalid_Entry, Cmd), Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 3);
+      Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (3), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Update_Parameter_Id, Status => Failure));
+      T.Component_A.Disable_Parameter_Return_Override;
+
+      -- Check events:
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 6);
+      Natural_Assert.Eq (T.Parameter_Validation_Failed_History.Get_Count, 2);
+      Parameter_Operation_Status_Assert.Eq (T.Parameter_Validation_Failed_History.Get (2), (Operation => Validate, Status => Validation_Error, Id => 0));
+      Natural_Assert.Eq (T.Parameter_Discard_Failed_History.Get_Count, 1);
+      Parameter_Operation_Status_Assert.Eq (T.Parameter_Discard_Failed_History.Get (1), (Operation => Discard, Status => Id_Error, Id => 0));
+
+      -- Still nothing new applied:
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
+   end Test_Update_Parameter_Validation_Error;
+
+   overriding procedure Test_Abandoned_Table_Discarded (Self : in out Instance) is
+      use Parameter_Enums.Parameter_Update_Status;
+      use Parameter_Enums.Parameter_Operation_Type;
+      use Parameter_Enums.Parameter_Table_Update_Status;
+      use Parameter_Enums.Parameter_Table_Operation_Type;
+      T : Component.Parameters.Implementation.Tester.Instance_Access renames Self.Tester;
+      -- Create a memory region that holds a parameter table that changes every value.
+      Table : aliased Test_Parameter_Table_Record.Serialization.Byte_Array :=
+         Test_Parameter_Table_Record.Serialization.To_Byte_Array
+            ((Crc_Calculated => [0, 0], Header => (Crc_Table => [0, 0], Version => 1.0), Component_A_Parameter_I32 => (Value => 99), Component_C_The_Tick => ((3, 2), 8), Component_A_Parameter_U16 => (Value => 19), Component_B_Parameter_U16 => (Value => 12),
+               Component_B_Parameter_I32 => (Value => -22)));
+      Crc : constant Crc_16.Crc_16_Type := Crc_16.Compute_Crc_16 (Table (Table'First + Crc_16.Crc_16_Type'Length + Parameter_Table_Header.Crc_Section_Length .. Table'Last));
+      Region : constant Memory_Region.T := (Address => Table'Address + Crc_16.Crc_16_Type'Length, Length => Test_Parameter_Table_Record.Serialization.Serialized_Length - Crc_16.Crc_16_Type'Length);
+      -- Entries 3 and 4 are Component_B's 16-bit and 32-bit parameters.
+      B_U16_Entry : constant Parameter_Table_Entry.T := (Header => (Id => 3, Buffer_Length => 2), Buffer => [0 => 0, 1 => 17, others => 0]);
+      B_I32_Entry : constant Parameter_Table_Entry.T := (Header => (Id => 4, Buffer_Length => 4), Buffer => [0 => 0, 1 => 0, 2 => 0, 3 => 33, others => 0]);
+      -- Entries 0 and 1 are Component_A's 32-bit parameter and Component_C's tick.
+      A_I32_Entry : constant Parameter_Table_Entry.T := (Header => (Id => 0, Buffer_Length => 4), Buffer => [0 => 0, 1 => 0, 2 => 0, 3 => 44, others => 0]);
+      C_Tick_Entry : Parameter_Table_Entry.T := (Header => (Id => 1, Buffer_Length => Tick.Size_In_Bytes), Buffer => [others => 0]);
+      Cmd : Command.T;
+      Pkt : Packet.T;
+   begin
+      -- Set the CRC:
+      Table (Table'First + Crc_16.Crc_16_Type'Length .. Table'First + Crc_16.Crc_16_Type'Length + Parameter_Table_Header.Size_In_Bytes - 1) := Parameter_Table_Header.Serialization.To_Byte_Array ((Crc_Table => Crc, Version => 1.0));
+      C_Tick_Entry.Buffer (0 .. Tick.Size_In_Bytes - 1) := Tick.Serialization.To_Byte_Array (((4, 5), 6));
+
+      -- Validate the table without applying it. Every component now holds the table's values staged.
+      T.Parameters_Memory_Region_T_Send ((Region => Region, Operation => Validate));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 2);
+      Natural_Assert.Eq (T.Finished_Parameter_Table_Validate_History.Get_Count, 1);
+      Parameters_Memory_Region_Release_Assert.Eq (T.Finished_Parameter_Table_Validate_History.Get (1), (Region, Success));
+      Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 1);
+      Parameters_Memory_Region_Release_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get (1), (Region, Success));
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 1);
+
+      -- Update one of Component_B's parameters by command. Only that value may change.
+      Ser_Status_Assert.Eq (T.Commands.Update_Parameter (B_U16_Entry, Cmd), Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 1);
+      Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (1), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Update_Parameter_Id, Status => Success));
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 5);
+      Natural_Assert.Eq (T.Parameter_Update_Success_History.Get_Count, 1);
+      Parameter_Table_Entry_Id_Assert.Eq (T.Parameter_Update_Success_History.Get (1), (Id => 3));
+      T.Component_B.Apply_Parameters;
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
+      Pkt := T.Packet_T_Recv_Sync_History.Get (1);
+      Natural_Assert.Eq (Pkt.Header.Buffer_Length, Test_Parameter_Table_Record.Size_In_Bytes);
+      Byte_Array_Assert.Eq (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1), Expected_Table_Bytes ((
+         Crc_Calculated => [0, 0], Header => (Crc_Table => [0, 0], Version => 0.0), Component_A_Parameter_I32 => (Value => -56), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 17),
+         Component_B_Parameter_I32 => (Value => -56)
+      )));
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 2);
+
+      -- Upload the table with Component_A rejecting it at validation. The upload fails and
+      -- every component discards what was staged.
+      T.Component_A.Override_Parameter_Return (Status => Validation_Error, Length => 0, Only_On_Validate => True);
+      T.Parameters_Memory_Region_T_Send ((Region => Region, Operation => Set));
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      T.Component_A.Disable_Parameter_Return_Override;
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 8);
+      Natural_Assert.Eq (T.Parameter_Validation_Failed_History.Get_Count, 1);
+      Parameter_Operation_Status_Assert.Eq (T.Parameter_Validation_Failed_History.Get (1), (Operation => Validate, Status => Validation_Error, Id => 0));
+      Boolean_Assert.Eq (T.Parameter_Discard_Failed_History.Is_Empty, True);
+      Natural_Assert.Eq (T.Finished_Parameter_Table_Update_History.Get_Count, 1);
+      Parameters_Memory_Region_Release_Assert.Eq (T.Finished_Parameter_Table_Update_History.Get (1), (Region, Parameter_Error));
+      Natural_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get_Count, 2);
+      Parameters_Memory_Region_Release_Assert.Eq (T.Parameters_Memory_Region_Release_T_Recv_Sync_History.Get (2), (Region, Parameter_Error));
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 1);
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 3);
+
+      -- Update Component_B's other parameter by command. Component_B passed validation during the
+      -- failed upload, but its share of that table must not come along.
+      Ser_Status_Assert.Eq (T.Commands.Update_Parameter (B_I32_Entry, Cmd), Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 2);
+      Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (2), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Update_Parameter_Id, Status => Success));
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 11);
+      Natural_Assert.Eq (T.Parameter_Update_Success_History.Get_Count, 2);
+      Parameter_Table_Entry_Id_Assert.Eq (T.Parameter_Update_Success_History.Get (2), (Id => 4));
+      T.Component_B.Apply_Parameters;
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 2);
+      Pkt := T.Packet_T_Recv_Sync_History.Get (2);
+      Natural_Assert.Eq (Pkt.Header.Buffer_Length, Test_Parameter_Table_Record.Size_In_Bytes);
+      Byte_Array_Assert.Eq (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1), Expected_Table_Bytes ((
+         Crc_Calculated => [0, 0], Header => (Crc_Table => [0, 0], Version => 0.0), Component_A_Parameter_I32 => (Value => -56), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 17),
+         Component_B_Parameter_I32 => (Value => 33)
+      )));
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 4);
+
+      -- Component_A rejected the upload and Component_C passed it. Neither may carry its share
+      -- of that table along with a later single update.
+      Ser_Status_Assert.Eq (T.Commands.Update_Parameter (A_I32_Entry, Cmd), Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 3);
+      Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (3), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Update_Parameter_Id, Status => Success));
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 14);
+      Natural_Assert.Eq (T.Parameter_Update_Success_History.Get_Count, 3);
+      Parameter_Table_Entry_Id_Assert.Eq (T.Parameter_Update_Success_History.Get (3), (Id => 0));
+      T.Component_A.Apply_Parameters;
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 3);
+      Pkt := T.Packet_T_Recv_Sync_History.Get (3);
+      Natural_Assert.Eq (Pkt.Header.Buffer_Length, Test_Parameter_Table_Record.Size_In_Bytes);
+      Byte_Array_Assert.Eq (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1), Expected_Table_Bytes ((
+         Crc_Calculated => [0, 0], Header => (Crc_Table => [0, 0], Version => 0.0), Component_A_Parameter_I32 => (Value => 44), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 17),
+         Component_B_Parameter_I32 => (Value => 33)
+      )));
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 5);
+
+      Ser_Status_Assert.Eq (T.Commands.Update_Parameter (C_Tick_Entry, Cmd), Success);
+      T.Command_T_Send (Cmd);
+      Natural_Assert.Eq (T.Dispatch_All, 1);
+      Natural_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get_Count, 4);
+      Command_Response_Assert.Eq (T.Command_Response_T_Recv_Sync_History.Get (4), (Source_Id => 0, Registration_Id => 0, Command_Id => T.Commands.Get_Update_Parameter_Id, Status => Success));
+      Natural_Assert.Eq (T.Event_T_Recv_Sync_History.Get_Count, 17);
+      Natural_Assert.Eq (T.Parameter_Update_Success_History.Get_Count, 4);
+      Parameter_Table_Entry_Id_Assert.Eq (T.Parameter_Update_Success_History.Get (4), (Id => 1));
+      Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, 4);
+      Pkt := T.Packet_T_Recv_Sync_History.Get (4);
+      Natural_Assert.Eq (Pkt.Header.Buffer_Length, Test_Parameter_Table_Record.Size_In_Bytes);
+      Byte_Array_Assert.Eq (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1), Expected_Table_Bytes ((
+         Crc_Calculated => [0, 0], Header => (Crc_Table => [0, 0], Version => 0.0), Component_A_Parameter_I32 => (Value => 44), Component_C_The_Tick => ((4, 5), 6), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => (Value => 17),
+         Component_B_Parameter_I32 => (Value => 33)
+      )));
+      Natural_Assert.Eq (T.Data_Product_T_Recv_Sync_History.Get_Count, 6);
+   end Test_Abandoned_Table_Discarded;
 
 end Parameters_Tests.Implementation;

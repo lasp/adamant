@@ -4,8 +4,11 @@
 
 -- This is a unit test suite for the Parameters component.
 package Parameters_Tests.Implementation is
+
    -- Test data and state:
    type Instance is new Parameters_Tests.Base_Instance with private;
+   type Class_Access is access all Instance'Class;
+
 private
    -- Fixture procedures:
    overriding procedure Set_Up_Test (Self : in out Instance);
@@ -17,27 +20,45 @@ private
    overriding procedure Test_Nominal_Dump_Parameters (Self : in out Instance);
    -- This unit test tests the nominal updating of the parameter table by command.
    overriding procedure Test_Nominal_Update_Parameters (Self : in out Instance);
-   -- This unit test tests the nominal updating of the parameter table by memory region upload.
+   -- This unit test tests the nominal updating of the parameter table by memory
+   -- region upload.
    overriding procedure Test_Nominal_Table_Upload (Self : in out Instance);
-   -- This unit test tests the nominal validation of the parameter table by memory region upload.
+   -- This unit test tests the nominal validation of the parameter table by memory
+   -- region upload.
    overriding procedure Test_Nominal_Table_Validate (Self : in out Instance);
-   -- This unit test tests the nominal fetching of the parameter table into a provided memory region.
+   -- This unit test tests the nominal fetching of the parameter table into a
+   -- provided memory region.
    overriding procedure Test_Nominal_Table_Fetch (Self : in out Instance);
    -- This unit test tests the behavior when dumping the parameter table fails.
    overriding procedure Test_Dump_Parameters_Error (Self : in out Instance);
    -- This unit test tests the behavior when updating of the parameter table fails.
    overriding procedure Test_Update_Parameters_Error (Self : in out Instance);
-   -- This unit test tests the behavior when updating of the parameter table by memory region upload fails.
+   -- This unit test tests the behavior when updating of the parameter table by
+   -- memory region upload fails.
    overriding procedure Test_Table_Upload_Error (Self : in out Instance);
-   -- This unit test tests the behavior when validation of the parameter table by memory region upload fails.
+   -- This unit test tests the behavior when validation of the parameter table by
+   -- memory region upload fails.
    overriding procedure Test_Table_Validate_Error (Self : in out Instance);
-   -- This unit test tests the behavior when fetching of the parameter table into a memory region fails.
+   -- This unit test tests the behavior when a parameter updated by command fails the
+   -- component's parameter validation. The command fails, the active value is
+   -- unchanged, and the rejected value is not applied by a later update.
+   overriding procedure Test_Update_Parameter_Validation_Error (Self : in out Instance);
+   -- This unit test tests that values staged by a validate-only table operation or a
+   -- failed table upload are discarded, so a later parameter update by command does
+   -- not apply them.
+   overriding procedure Test_Abandoned_Table_Discarded (Self : in out Instance);
+   -- This unit test tests the behavior when fetching of the parameter table into a
+   -- memory region fails.
    overriding procedure Test_Table_Fetch_Error (Self : in out Instance);
-   -- This unit test tests that the Get_Pointer operation is rejected with Parameter_Error since the parameters component has no contiguous serialized snapshot buffer to point at.
+   -- This unit test tests that the Get_Pointer operation is rejected with
+   -- Parameter_Error since the parameters component has no contiguous serialized
+   -- snapshot buffer to point at.
    overriding procedure Test_Table_Fetch_Pointer_Unsupported (Self : in out Instance);
-   -- This unit test tests the no-dump-on-change configuration for the Init function and makes sure the component behaves as expected.
+   -- This unit test tests the no-dump-on-change configuration for the Init function
+   -- and makes sure the component behaves as expected.
    overriding procedure Test_No_Dump_On_Change (Self : in out Instance);
-   -- This unit test tests a command or memory region being dropped due to a full queue.
+   -- This unit test tests a command or memory region being dropped due to a full
+   -- queue.
    overriding procedure Test_Full_Queue (Self : in out Instance);
    -- This unit test exercises that an invalid command throws the appropriate event.
    overriding procedure Test_Invalid_Command (Self : in out Instance);

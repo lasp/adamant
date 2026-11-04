@@ -4536,7 +4536,9 @@ To handle parameter updating, the component base package autocode is altered to 
 \vspace{5mm} %5mm vertical space
 \begin{spaceditemize}
   \item \textbf{\texttt{Stage}} - The incoming parameter value is checked for validity in ID, length, and range and then stored within a temporary \textit{staged} variable within the component.
+  \item \textbf{\texttt{Validate}} - The \textit{staged} values are passed to the component's \texttt{Validate\_Parameters} function, which can check relationships between parameters that range checks on individual values cannot.
   \item \textbf{\texttt{Update}} - This operation indicates that all new parameter values have been \textit{staged} and are ready to be copied to the \textit{working} variables within the component.
+  \item \textbf{\texttt{Discard}} - This operation indicates that the staging sequence was abandoned. Any values \textit{staged} by the invoker that have not yet been marked for update are forgotten, so a later \texttt{Update} cannot apply them.
   \item \textbf{\texttt{Fetch}} - The \textit{staged} value of the parameter with the indicated ID is returned to the invoker.
 \end{spaceditemize}
 \vspace{5mm} %5mm vertical space

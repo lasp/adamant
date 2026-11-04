@@ -16,6 +16,9 @@ enums:
       - name: Validate
         value: 3
         description: Validate all the parameters.
+      - name: Discard
+        value: 4
+        description: Discard any parameters staged by this table that have not been updated.
   - name: Parameter_Update_Status
     description: This status enumeration provides information on the success/failure of a parameter operation.
     literals:

@@ -15,6 +15,8 @@ tests:
     description: This unit test tests error handling when dumping grouped parameters fails.
   - name: Test_Grouped_Update_Parameters_Error
     description: This unit test tests error handling when updating grouped parameters by command fails.
+  - name: Test_Grouped_Update_Validation_Error
+    description: This unit test tests that a grouped parameter update by command that fails validation in one component is discarded from every component it was staged in.
   - name: Test_Grouped_Table_Upload_Error
     description: This unit test tests error handling when updating grouped parameters by memory region upload fails.
   - name: Test_Grouped_Fetch_Value_Mismatch
