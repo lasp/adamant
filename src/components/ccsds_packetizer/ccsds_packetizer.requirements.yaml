@@ -3,4 +3,5 @@ description: The requirements for the CCSDS Packetizer component are specified b
 requirements:
   - text: The component shall convert Adamant packets to CCSDS telemetry packets.
   - text: The component shall produce CCSDS packets that include a secondary header with an 8 byte timestamp.
-  - text: The component shall produce CCSDS packets that include a 16-bit CRC-CCITT ($x^{16} + x^{12} +x^{5} + 1$) as the last two bytes of the data section.
+  - text: The component shall, when configured with the CRC enabled, produce CCSDS packets that include a 16-bit CRC-CCITT ($x^{16} + x^{12} +x^{5} + 1$) as the last two bytes of the data section.
+  - text: The component shall, when configured with the CRC disabled, produce CCSDS packets that end with a configurable number of zero bytes inside the packet length, reserving space for a CRC computed by the transmitting hardware.

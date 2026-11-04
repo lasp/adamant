@@ -7,3 +7,7 @@ tests:
     description: This unit test exercises the packetization of a maximum sized Adamant packet into a CCSDS packet, which should succeed without issue.
   - name: Test_Min_Size_Packetization
     description: This unit test exercises the packetization of a minimum sized Adamant packet into a CCSDS packet, which should succeed without issue.
+  - name: Test_Crc_Disabled
+    description: This unit test exercises packetization with the CRC disabled and no trailing bytes, checking that each emitted CCSDS packet ends with the Adamant packet data and its length field counts no CRC.
+  - name: Test_Trailing_Bytes
+    description: This unit test exercises packetization with the CRC disabled and trailing bytes configured, checking that each emitted CCSDS packet ends with the configured number of zero bytes inside its packet length, at minimum and maximum Adamant packet sizes.
