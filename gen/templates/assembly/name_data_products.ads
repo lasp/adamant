@@ -26,6 +26,11 @@ package {{ name }}_Data_Products is
    Number_Of_Data_Products : constant Natural := {{ data_products|length }};
    Number_Of_Components_With_Data_Products : constant Natural := {{ component_kind_dict['data_products']|length }};
 
+   -- The data product id base of each component:
+{% for component in component_kind_dict['data_products'] %}
+   {{ component.instance_name }}_Data_Product_Id_Base : constant Data_Product_Id := {{ component.data_products.id_base }};
+{% endfor %}
+
    -- List of data product ids:
 {% for id, dp in data_products.items() %}
    {{ dp.suite.component.instance_name }}_{{ dp.name }} : constant Data_Product_Id := {{ dp.id }}; -- 0x{{ '%04x' % id }}

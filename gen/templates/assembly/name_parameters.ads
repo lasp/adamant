@@ -26,6 +26,11 @@ package {{ name }}_Parameters is
    Number_Of_Parameters : constant Natural := {{ parameters|length }};
    Number_Of_Components_With_Parameters : constant Natural := {{ component_kind_dict['parameters']|length }};
 
+   -- The parameter id base of each component:
+{% for component in component_kind_dict['parameters'] %}
+   {{ component.instance_name }}_Parameter_Id_Base : constant Parameter_Id := {{ component.parameters.id_base }};
+{% endfor %}
+
    -- List of Parameter ids:
 {% for id, param in parameters.items() %}
    {{ param.suite.component.instance_name }}_{{ param.name }} : constant Parameter_Id := {{ param.id }}; -- 0x{{ '%04x' % id }}
