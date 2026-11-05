@@ -1241,6 +1241,12 @@ class assembly(subassembly):
         # not total data dependency count):
         self.num_data_dependencies = sum(len(dd_list) for dd_list in self.data_dependencies.values())
 
+        # The assembly body maps each data dependency by the constants of the data
+        # dependency package:
+        if self.data_dependency_suites:
+            self.id_packages.append(self.name + "_Data_Dependencies")
+            self.adb_includes = list(OrderedDict.fromkeys(self.adb_includes + self.id_packages))
+
         # Call the final function:
         self.final()
 

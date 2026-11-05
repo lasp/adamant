@@ -51,7 +51,7 @@ package body {{ name }} is
       -- Data dependency ID Mapping:
       -----------------------------------
 {% for component in component_kind_dict["data_dependencies"] %}
-      {{ component.instance_name }}.Map_Data_Dependencies{% if component.map_data_dependencies.parameter_call_string() %} ({{ component.map_data_dependencies.parameter_call_string() }}){% endif %};
+      {{ component.instance_name }}.Map_Data_Dependencies ({% for dd in component.data_dependencies.entities.values() %}{{ dd.name }}_Id => {{ component.instance_name }}_{{ dd.name }}, {{ dd.name }}_Stale_Limit => {{ component.instance_name }}_{{ dd.name }}_Stale_Limit{{ ", " if not loop.last }}{% endfor %});
 {% endfor %}
    end Set_Id_Bases;
 

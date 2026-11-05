@@ -6,6 +6,7 @@
 {% if data_dependencies %}
 
 with Data_Product_Types; use Data_Product_Types;
+with Ada.Real_Time; use Ada.Real_Time;
 {% endif %}
 
 -- Data dependency related constants for the {{ name }} assembly.
@@ -20,6 +21,13 @@ package {{ name }}_Data_Dependencies is
 {% for id, dd_list in data_dependencies.items() %}
 {% for dd in dd_list %}
    {{ dd.suite.component.instance_name }}_{{ dd.name }} : constant Data_Product_Id := {{ dd.id }}; -- 0x{{ '%04x' % id }}
+{% endfor %}
+{% endfor %}
+
+   -- The stale limit of each data dependency:
+{% for id, dd_list in data_dependencies.items() %}
+{% for dd in dd_list %}
+   {{ dd.suite.component.instance_name }}_{{ dd.name }}_Stale_Limit : constant Time_Span := Microseconds ({{ dd.stale_limit }});
 {% endfor %}
 {% endfor %}
 {% else %}
