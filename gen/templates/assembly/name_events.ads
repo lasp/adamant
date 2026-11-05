@@ -28,7 +28,7 @@ package {{ name }}_Events is
 
    -- The event id base of each component:
 {% for component in component_kind_dict['events'] %}
-   {{ component.instance_name }}_Event_Id_Base : constant Event_Id := {{ component.events.id_base }};
+   {{ component.instance_name }}_Event_Id_Base : constant Event_Id := {{ component.events.id_base }}; -- 0x{{ '%04x' % component.events.id_base }}
 {% endfor %}
 
    -- List of event ids:
