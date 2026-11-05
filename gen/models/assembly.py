@@ -611,6 +611,7 @@ class assembly(subassembly):
         self.interrupt_list = None  # list of interrupts in assembly
         self.ads_includes = []
         self.adb_includes = []
+        self.id_packages = []
         self.components_ads_includes = []
         self.task_dict = {}  # Tasks indexed by priority
         self.task_list = []  # Tasks in order of task number (and priority rank)
@@ -1192,6 +1193,15 @@ class assembly(subassembly):
         for component in self.components.values():
             if component.set_id_bases:
                 component.set_id_bases.check_for_missing_parameter_values()
+
+        # The assembly body names each id base by its constant, so it uses the id
+        # package of every suite type that has a base:
+        self.id_packages = sorted(
+            self.name + "_" + ada.formatVariable(suite_type)
+            for suite_type, suite_list in self.ided_suites.items()
+            if any(suite.id_base is not None for suite in suite_list)
+        )
+        self.adb_includes = list(OrderedDict.fromkeys(self.adb_includes + self.id_packages))
 
         # Sort the dictionaries:
         for suite_type, entities in self.entity_dict.items():

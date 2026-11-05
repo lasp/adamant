@@ -21,6 +21,9 @@ pragma Warnings (On, "unit ""{{ include }}"" is not referenced");
 package body {{ name }} is
 
    use {{ name }}_Components;
+{% for package in id_packages %}
+   use {{ package }};
+{% endfor %}
 
 {% if component_kind_dict["init_base"] %}
    procedure Init_Base is
@@ -41,7 +44,7 @@ package body {{ name }} is
       -- ID Base Initialization:
       -----------------------------------
 {% for component in component_kind_dict["set_id_bases"] %}
-      {{ component.instance_name }}.Set_Id_Bases{% if component.set_id_bases.parameter_call_string() %} ({{ component.set_id_bases.parameter_call_string() }}){% endif %};
+      {{ component.instance_name }}.Set_Id_Bases{% if component.set_id_bases.parameters %} ({% for par in component.set_id_bases.parameters %}{{ par.name }} => {{ component.instance_name }}_{{ par.name }}{{ ", " if not loop.last }}{% endfor %}){% endif %};
 {% endfor %}
 
       -----------------------------------

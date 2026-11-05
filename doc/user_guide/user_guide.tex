@@ -3463,9 +3463,17 @@ This procedure is called by the assembly autocode in the following way:
 \vspace{5mm} %5mm vertical space
 \begin{adacode}
   Example_Component_Instance.Set_Id_Bases (
-    Command_Id_Base => 17,
-    Event_Id_Base => 1
+    Command_Id_Base => Example_Component_Instance_Command_Id_Base,
+    Event_Id_Base => Example_Component_Instance_Event_Id_Base
   );
+\end{adacode}
+\vspace{5mm} %5mm vertical space
+
+Each id base is a constant declared in the assembly's id package for that entity, for example \texttt{Example\_Assembly\_Commands} for commands, which the assembly body names in its with and use clauses:
+
+\vspace{5mm} %5mm vertical space
+\begin{adacode}
+  Example_Component_Instance_Command_Id_Base : constant Command_Id := 17; -- 0x0011
 \end{adacode}
 \vspace{5mm} %5mm vertical space
 
