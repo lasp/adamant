@@ -238,11 +238,16 @@ class _types(object):
 
 
 def _layout(a):
-    """The graphviz layout of this assembly's own dot diagram, as -Tjson, with the draw operations."""
+    """The graphviz layout of this assembly's own dot diagram, as -Tjson, with the draw
+    operations. A diagram with clusters that dot cannot rank is ranked again with newrank."""
     dot_source = a.render("/assembly/name.dot")
     result = subprocess.run(
         ["dot", "-Tjson"], input=dot_source, capture_output=True, text=True
     )
+    if result.returncode != 0 and getattr(a, "groups", None):
+        result = subprocess.run(
+            ["dot", "-Gnewrank=true", "-Tjson"], input=dot_source, capture_output=True, text=True
+        )
     if result.returncode != 0:
         error.error_abort("dot failed on the assembly diagram: " + result.stderr)
     return json.loads(result.stdout, object_pairs_hook=OrderedDict)
