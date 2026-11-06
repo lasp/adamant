@@ -58,6 +58,12 @@ def _is_bounds(die):
     return bool(names) and all(re.match(r"^(LB|UB)\d+$", n) for n in names)
 
 
+def _static(member):
+    """A C++ static data member: declared in the class, stored elsewhere."""
+    a = member.attributes
+    return "DW_AT_external" in a or ("DW_AT_declaration" in a and "DW_AT_data_member_location" not in a)
+
+
 def _count(array_die):
     n = 1
     for c in array_die.iter_children():
@@ -135,6 +141,8 @@ class _Mapper(object):
     def fields(self, die, depth):
         out = []
         for c in die.iter_children():
+            if c.tag == "DW_TAG_member" and _static(c):
+                continue
             if c.tag == "DW_TAG_member":
                 out.append(self.member(c, depth, False))
             elif c.tag == "DW_TAG_inheritance":
