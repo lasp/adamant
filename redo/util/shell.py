@@ -43,6 +43,27 @@ def try_run_command_capture_output(command_string, debug=True):
     return process.returncode, stdout, stderr
 
 
+def try_run_program_capture_output(args, debug=True):
+    """
+    Try to run a program directly, without a shell, passing each element
+    of args as its own argument, and return the resulting return code as
+    well as all captured output on both stdout and stderr.
+    """
+    if debug:
+        debug_module.debug_print(" ".join(shlex.quote(arg) for arg in args))
+    # close_fds must be "False" otherwise the file descriptors used by redo
+    # are closed. This causes lots of terrible things to happen.
+    process = subprocess.Popen(
+        args,
+        close_fds=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        universal_newlines=True,
+    )
+    stdout, stderr = process.communicate()
+    return process.returncode, stdout, stderr
+
+
 def run_program(args, cwd=None, stdout=None, debug=True):
     """
     Run a program directly, without a shell, passing each element of
