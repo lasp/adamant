@@ -6,34 +6,47 @@ import os
 # This module provides python bindings for the redo
 # commandline program.
 
-# Maximum number of arguments per subprocess invocation. When the argument
+# Maximum number of arguments per shell invocation of redo. When the argument
 # list exceeds this, it is split into chunks to avoid OS limits.
-_MAX_ARGS = 1000
+_MAX_SHELL_ARGS = 1000
 
 
-def __form_call_args(command, args):
-    """Form call args."""
+def __redo_shell_calls(command, args):
+    """Yield the command strings that invoke a redo-like command on args
+    through the shell, in chunks of _MAX_SHELL_ARGS arguments."""
     if isinstance(args, str):
         args = [args]
-    call = [command] + args
-    call_str = " ".join(call)
-    return call_str
+    for i in range(0, len(args), _MAX_SHELL_ARGS):
+        yield " ".join([command] + args[i:i + _MAX_SHELL_ARGS])
 
 
-def __divide_chunks(things, num):
-    """Yield successive num-sized chunks from a list."""
-    for i in range(0, len(things), num):
-        yield things[i:i + num]
+def __argument_budget():
+    """
+    The number of bytes the arguments of one redo invocation may take.
+    Linux limits all arguments and the environment of a program together to
+    ARG_MAX, a quarter of the stack size limit, counting each argument's
+    bytes, its terminating null, and its pointer. Half of what the
+    environment leaves is used, as a margin.
+    """
+    environment = sum(len(key) + len(value) + 2 + 8 for key, value in os.environ.items())
+    return (os.sysconf("SC_ARG_MAX") - environment) // 2
+
+
+def __argument_size(arg):
+    """The bytes one argument takes against ARG_MAX."""
+    return len(arg.encode()) + 1 + 8
 
 
 def __redo_calls(command, args=None, prefix_args=None):
-    """Yield the command strings that invoke a redo-like command on args.
+    """Yield the argument lists that invoke a redo-like command on args.
 
-    When the argument list exceeds _MAX_ARGS, it is split into chunks and
-    one command string is yielded per chunk. If prefix_args is provided,
-    those arguments are prepended to EVERY chunk (not just the first). This
-    is critical for commands like redo-done where the first argument (the
-    target) must appear in every invocation.
+    Each invocation runs directly, without a shell, so every target is its
+    own argument. When the arguments exceed what one invocation may take,
+    they are split into chunks and one argument list is yielded per chunk.
+    If prefix_args is provided, those arguments are prepended to EVERY
+    chunk (not just the first). This is critical for commands like
+    redo-done where the first argument (the target) must appear in every
+    invocation.
     """
     if args is None:
         args = []
@@ -41,38 +54,41 @@ def __redo_calls(command, args=None, prefix_args=None):
         args = [args]
     if prefix_args is None:
         prefix_args = []
-    all_args = prefix_args + args
-    if not all_args:
+    if not prefix_args + args:
         return
-    if len(all_args) > _MAX_ARGS:
-        # Chunk only the args, not the prefix. Each invocation becomes:
-        #   command <prefix_args> <chunk_of_args>
-        # This ensures prefix_args (e.g. redo-done's target) appear in
-        # every invocation, not just the first.
-        chunk_size = max(1, _MAX_ARGS - len(prefix_args))
-        for chunk in __divide_chunks(args, chunk_size):
-            yield __form_call_args(command, prefix_args + chunk)
-    else:
-        yield __form_call_args(command, all_args)
+    budget = __argument_budget()
+    base = [command] + prefix_args
+    base_size = sum(__argument_size(arg) for arg in base)
+    chunk = []
+    chunk_size = base_size
+    for arg in args:
+        size = __argument_size(arg)
+        if chunk and chunk_size + size > budget:
+            yield base + chunk
+            chunk = []
+            chunk_size = base_size
+        chunk.append(arg)
+        chunk_size += size
+    yield base + chunk
 
 
 def __invoke_redo_subprocess(command, args=None, prefix_args=None):
     """Private function which invokes a redo-like command, in chunks when
-    the argument list is long. Output goes to the terminal and a failing
-    invocation aborts."""
-    for call_str in __redo_calls(command, args, prefix_args):
-        shell.run_command(call_str)
+    the arguments are too long for one invocation. Output goes to the
+    terminal and a failing invocation aborts."""
+    for call in __redo_calls(command, args, prefix_args):
+        shell.run_program(call)
 
 
 def __invoke_redo_subprocess_capture_output(command, args=None, prefix_args=None):
     """Private function which invokes a redo-like command, in chunks when
-    the argument list is long, capturing its output. Returns the
-    concatenated (stdout, stderr) of every invocation. A failing invocation
-    prints what it captured and aborts."""
+    the arguments are too long for one invocation, capturing its output.
+    Returns the concatenated (stdout, stderr) of every invocation. A failing
+    invocation prints what it captured and aborts."""
     stdout_all = []
     stderr_all = []
-    for call_str in __redo_calls(command, args, prefix_args):
-        status, stdout, stderr = shell.try_run_command_capture_output(call_str)
+    for call in __redo_calls(command, args, prefix_args):
+        status, stdout, stderr = shell.try_run_program_capture_output(call)
         if status != 0:
             if stdout.strip():
                 sys.stderr.write(stdout.strip() + "\n")
@@ -85,8 +101,13 @@ def __invoke_redo_subprocess_capture_output(command, args=None, prefix_args=None
 
 
 def redo(args):
-    """Call redo with a list of targets."""
-    __invoke_redo_subprocess("redo", args)
+    """
+    Call redo with a list of targets. This call runs through the shell, so
+    args may end with shell redirections, such as "1>&2" or "2>" + log, to
+    direct the output of redo.
+    """
+    for call_str in __redo_shell_calls("redo", args):
+        shell.run_command(call_str)
 
 
 def redo_ifchange(args):
