@@ -5,6 +5,7 @@ from util import error
 from models import assembly
 from models import view
 from collections import OrderedDict
+import re
 import subprocess
 import json
 import os.path
@@ -253,6 +254,50 @@ def _layout(a):
     return json.loads(result.stdout, object_pairs_hook=OrderedDict)
 
 
+def _subassembly_groups(a):
+    """An assembly's own components and each subassembly's, as groups."""
+    subassemblies = getattr(a, "subassemblies", None) or {}
+    if not subassemblies:
+        return []
+    out = []
+    taken = set()
+    for name, sub in subassemblies.items():
+        members = [c for c in sub.components.keys() if c in a.components]
+        taken.update(members)
+        out.append(OrderedDict([("name", name), ("members", members)]))
+    own = [c for c in a.components.keys() if c not in taken]
+    if own:
+        out.insert(0, OrderedDict([("name", a.name), ("members", own)]))
+    return out
+
+
+def _groups(a):
+    """A view's groups as name and member instance names, in the order of the
+    group operators in its rule. A group named for a component_name include
+    filter takes that filter's components, each in its first group only; Adamant
+    itself keeps in a group only the components connected inside it. An
+    assembly without view groups is grouped by its subassemblies."""
+    if not getattr(a, "is_view", False):
+        return _subassembly_groups(a)
+    filters = getattr(a, "view_filters", {}) or {}
+    names = [n.lower() for n in re.findall(r"@\s*(\w+)", getattr(a, "view_rule", "") or "")]
+    out = []
+    claimed = set()
+    for i, group in enumerate(getattr(a, "groups", None) or []):
+        name = names[i] if i < len(names) else "group_" + str(i + 1)
+        f = filters.get(name)
+        if f is not None and f.type == "component_name" and f.list_type == "include":
+            members = [c for c in f.item_list if c in a.components]
+        else:
+            members = list(group.keys())
+        members = [m for m in members if m not in claimed]
+        if not members:
+            continue
+        claimed.update(members)
+        out.append(OrderedDict([("name", name), ("members", members)]))
+    return out
+
+
 def build_bundle(a, kind, view_name=None):
     assembly_dir = os.path.dirname(a.full_filename)
     ids = _assembly_ids(a)
@@ -270,6 +315,7 @@ def build_bundle(a, kind, view_name=None):
             ("description", a.description),
             ("rankdir", getattr(a, "layout", "TB")),
             ("show_switches", OrderedDict(getattr(a, "show_switches", {}))),
+            ("groups", _groups(a)),
             ("style", STYLE),
             ("components", components),
             ("connections", [_connection(c) for c in a.connections]),
@@ -327,6 +373,8 @@ class assembly_view_visual_json(basic_generator, generator_base):
         a = assembly.assembly(assembly_model_name)
         v = view.view(input_filename)
         a = v.apply(a)
+        a.view_filters = v.filters
+        a.view_rule = v.rule
         a.visual_bundle = build_bundle(a, "view", view_name)
         print(a.render(self.template))
 
