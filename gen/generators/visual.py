@@ -238,10 +238,21 @@ class _types(object):
                     self.add(e.type, e.type_model)
 
 
+# An edge statement of the dot template: connections first, then data dependencies.
+_EDGE = re.compile(r"^(\s*\S+ -> \S+ \[)$", re.M)
+
+
+def _with_edge_ids(dot_source):
+    """Tags each edge with id e<k> in declaration order. Graphviz lists a layout's edges in
+    its own order; the id lets a reader match each edge to its connection or dependency."""
+    count = iter(range(1 << 30))
+    return _EDGE.sub(lambda m: m.group(1) + '\n    id="e%d",' % next(count), dot_source)
+
+
 def _layout(a):
     """The graphviz layout of this assembly's own dot diagram, as -Tjson, with the draw
     operations. A diagram with clusters that dot cannot rank is ranked again with newrank."""
-    dot_source = a.render("/assembly/name.dot")
+    dot_source = _with_edge_ids(a.render("/assembly/name.dot"))
     result = subprocess.run(
         ["dot", "-Tjson"], input=dot_source, capture_output=True, text=True
     )
