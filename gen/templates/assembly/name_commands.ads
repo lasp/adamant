@@ -28,7 +28,7 @@ package {{ name }}_Commands is
 
    -- The command id base of each component:
 {% for component in component_kind_dict['commands'] %}
-   {{ component.instance_name }}_Command_Id_Base : constant Command_Id := {{ component.commands.id_base }};
+   {{ component.instance_name }}_Command_Id_Base : constant Command_Id := {{ component.commands.id_base }}; -- 0x{{ '%04x' % component.commands.id_base }}
 {% endfor %}
 
    -- List of command ids:

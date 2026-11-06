@@ -28,7 +28,7 @@ package {{ name }}_Data_Products is
 
    -- The data product id base of each component:
 {% for component in component_kind_dict['data_products'] %}
-   {{ component.instance_name }}_Data_Product_Id_Base : constant Data_Product_Id := {{ component.data_products.id_base }};
+   {{ component.instance_name }}_Data_Product_Id_Base : constant Data_Product_Id := {{ component.data_products.id_base }}; -- 0x{{ '%04x' % component.data_products.id_base }}
 {% endfor %}
 
    -- List of data product ids:

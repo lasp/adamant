@@ -28,7 +28,7 @@ package {{ name }}_Parameters is
 
    -- The parameter id base of each component:
 {% for component in component_kind_dict['parameters'] %}
-   {{ component.instance_name }}_Parameter_Id_Base : constant Parameter_Id := {{ component.parameters.id_base }};
+   {{ component.instance_name }}_Parameter_Id_Base : constant Parameter_Id := {{ component.parameters.id_base }}; -- 0x{{ '%04x' % component.parameters.id_base }}
 {% endfor %}
 
    -- List of Parameter ids:

@@ -219,12 +219,3 @@ class data_dependencies(component_submodel, ided_suite):
 
         # Error checking:
         self.component.map_data_dependencies.check_for_missing_parameter_values()
-
-    # Overriding this so that we can make sure the assembly .adb includes Ada.Real_Time
-    def set_assembly(self, assembly):
-        # Call the base:
-        super(data_dependencies, self).set_assembly(assembly)
-
-        # Ok, add on to with list:
-        if "Ada.Real_Time" not in self.assembly.adb_includes:
-            self.assembly.adb_includes.append("Ada.Real_Time")

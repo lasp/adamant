@@ -31,7 +31,7 @@ package {{ name }}_Packets is
    -- The packet id base of each component. A component whose packets
    -- carry static ids has no base and is not listed here:
 {% for component in based_components %}
-   {{ component.instance_name }}_Packet_Id_Base : constant Packet_Id := {{ component.packets.id_base }};
+   {{ component.instance_name }}_Packet_Id_Base : constant Packet_Id := {{ component.packets.id_base }}; -- 0x{{ '%04x' % component.packets.id_base }}
 {% endfor %}
 
 {% endif %}

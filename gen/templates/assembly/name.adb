@@ -21,6 +21,9 @@ pragma Warnings (On, "unit ""{{ include }}"" is not referenced");
 package body {{ name }} is
 
    use {{ name }}_Components;
+{% for package in id_packages %}
+   use {{ package }};
+{% endfor %}
 
 {% if component_kind_dict["init_base"] %}
    procedure Init_Base is
@@ -41,14 +44,14 @@ package body {{ name }} is
       -- ID Base Initialization:
       -----------------------------------
 {% for component in component_kind_dict["set_id_bases"] %}
-      {{ component.instance_name }}.Set_Id_Bases{% if component.set_id_bases.parameter_call_string() %} ({{ component.set_id_bases.parameter_call_string() }}){% endif %};
+      {{ component.instance_name }}.Set_Id_Bases{% if component.set_id_bases.parameters %} ({% for par in component.set_id_bases.parameters %}{{ par.name }} => {{ component.instance_name }}_{{ par.name }}{{ ", " if not loop.last }}{% endfor %}){% endif %};
 {% endfor %}
 
       -----------------------------------
       -- Data dependency ID Mapping:
       -----------------------------------
 {% for component in component_kind_dict["data_dependencies"] %}
-      {{ component.instance_name }}.Map_Data_Dependencies{% if component.map_data_dependencies.parameter_call_string() %} ({{ component.map_data_dependencies.parameter_call_string() }}){% endif %};
+      {{ component.instance_name }}.Map_Data_Dependencies ({% for dd in component.data_dependencies.entities.values() %}{{ dd.name }}_Id => {{ component.instance_name }}_{{ dd.name }}, {{ dd.name }}_Stale_Limit => {{ component.instance_name }}_{{ dd.name }}_Stale_Limit{{ ", " if not loop.last }}{% endfor %});
 {% endfor %}
    end Set_Id_Bases;
 

@@ -611,6 +611,7 @@ class assembly(subassembly):
         self.interrupt_list = None  # list of interrupts in assembly
         self.ads_includes = []
         self.adb_includes = []
+        self.id_packages = []
         self.components_ads_includes = []
         self.task_dict = {}  # Tasks indexed by priority
         self.task_list = []  # Tasks in order of task number (and priority rank)
@@ -1065,18 +1066,13 @@ class assembly(subassembly):
             if suite_type not in self.entity_dict:
                 self.entity_dict[suite_type] = {}
 
-            # Stamp ids for any suite whose explicit id base was stored with
-            # set_id_base(..., assign_entity_ids=False) at component-instance
-            # setup. Assignment is deferred to here so that entities injected
-            # during set_assembly() (e.g. the simple_command_sequencer's
-            # per-sequence commands) are present before the suite's ids are
-            # assigned. This runs before the reservation/auto-base passes below,
-            # so explicitly-based suites reserve their ids first, exactly as
-            # they did when set_id_base() stamped them at instance setup --
-            # every other component's ids come out identical.
+            # Set the bases given in the assembly first, so they reserve their ids
+            # before any base is chosen below:
             for suite in suite_list:
-                if suite.id_base is not None:
-                    suite.assign_entity_ids()
+                if suite.component.set_id_bases:
+                    par = suite.component.set_id_bases.get_parameter(suite.id_base_parameter_name())
+                    if par and par.value:
+                        suite.set_id_base(int(par.value))
 
             # Reserve any entities that already have static ids set:
             for suite in suite_list:
@@ -1198,6 +1194,15 @@ class assembly(subassembly):
             if component.set_id_bases:
                 component.set_id_bases.check_for_missing_parameter_values()
 
+        # The assembly body names each id base by its constant, so it uses the id
+        # package of every suite type that has a base:
+        self.id_packages = sorted(
+            self.name + "_" + ada.formatVariable(suite_type)
+            for suite_type, suite_list in self.ided_suites.items()
+            if any(suite.id_base is not None for suite in suite_list)
+        )
+        self.adb_includes = list(OrderedDict.fromkeys(self.adb_includes + self.id_packages))
+
         # Sort the dictionaries:
         for suite_type, entities in self.entity_dict.items():
             self.entity_dict[suite_type] = OrderedDict(sorted(entities.items()))
@@ -1235,6 +1240,12 @@ class assembly(subassembly):
         # Store total count for templates (dict length gives unique data product count,
         # not total data dependency count):
         self.num_data_dependencies = sum(len(dd_list) for dd_list in self.data_dependencies.values())
+
+        # The assembly body maps each data dependency by the constants of the data
+        # dependency package:
+        if self.data_dependency_suites:
+            self.id_packages.append(self.name + "_Data_Dependencies")
+            self.adb_includes = list(OrderedDict.fromkeys(self.adb_includes + self.id_packages))
 
         # Call the final function:
         self.final()

@@ -31,7 +31,7 @@ package {{ name }}_Faults is
    -- The fault id base of each component. A component whose faults
    -- carry static ids has no base and is not listed here:
 {% for component in based_components %}
-   {{ component.instance_name }}_Fault_Id_Base : constant Fault_Id := {{ component.faults.id_base }};
+   {{ component.instance_name }}_Fault_Id_Base : constant Fault_Id := {{ component.faults.id_base }}; -- 0x{{ '%04x' % component.faults.id_base }}
 {% endfor %}
 
 {% endif %}
