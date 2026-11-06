@@ -58,6 +58,21 @@ def _is_bounds(die):
     return bool(names) and all(re.match(r"^(LB|UB)\d+$", n) for n in names)
 
 
+# DW_AT_language values of C and C++ compile units, where algorithm classes live.
+_C_LANGUAGES = {0x01, 0x02, 0x04, 0x0C, 0x1A, 0x1D, 0x21, 0x2A, 0x2B, 0x2C}
+
+
+def _complete(die):
+    """A defined record: it has a size and members, not a forward declaration."""
+    if "DW_AT_declaration" in die.attributes or _size(die) in (None, 0):
+        return False
+    return any(c.tag in ("DW_TAG_member", "DW_TAG_inheritance") for c in die.iter_children())
+
+
+def _normal(name):
+    return (name or "").replace("_", "").lower()
+
+
 def _static(member):
     """A C++ static data member: declared in the class, stored elsewhere."""
     a = member.attributes
@@ -85,6 +100,38 @@ class _Mapper(object):
     def __init__(self, dwarfinfo):
         self.dwarf = dwarfinfo
         self.types = OrderedDict()  # DIE offset -> type entry, for sharing
+        self._classes = None  # normalized name -> complete C or C++ class or struct DIE
+
+    def classes(self):
+        if self._classes is None:
+            self._classes = {}
+            for cu in self.dwarf.iter_CUs():
+                top = cu.get_top_DIE()
+                lang = top.attributes.get("DW_AT_language")
+                if lang is None or lang.value not in _C_LANGUAGES:
+                    continue
+                self._index(top)
+        return self._classes
+
+    def _index(self, scope):
+        for d in scope.iter_children():
+            if d.tag == "DW_TAG_namespace":
+                self._index(d)
+            elif d.tag in ("DW_TAG_class_type", "DW_TAG_structure_type") and _complete(d):
+                self._classes.setdefault(_normal(_name(d)), d)
+
+    def handle_class(self, target):
+        """The class behind an opaque handle: an empty record named Name or Name_Handle stands for the
+        defined C or C++ class Name, compared without case or underscores."""
+        if target.tag != "DW_TAG_structure_type" or _complete(target):
+            return None
+        key = _normal((_name(target) or "").split("__")[-1])
+        if not key:
+            return None
+        found = self.classes().get(key)
+        if found is None and key.endswith("handle") and len(key) > len("handle"):
+            found = self.classes().get(key[: -len("handle")])
+        return found
 
     def type_entry(self, die, depth=0):
         die = _strip(die)
@@ -121,6 +168,14 @@ class _Mapper(object):
             if target is not None and depth < 12:
                 if target.tag == "DW_TAG_array_type" or _is_bounds(target):
                     entry["target_type"] = self.type_entry(target, depth + 1)
+                else:
+                    # An algorithm object behind an opaque handle, allocated at init: keep its class
+                    # layout so a reader can follow the pointer and decode the object.
+                    cls = self.handle_class(target)
+                    if cls is not None:
+                        entry["target"] = _name(cls)
+                        entry["object"] = True
+                        entry["target_type"] = self.type_entry(cls, depth + 1)
             return entry
         if tag == "DW_TAG_array_type":
             el = self.type_entry(_type(die), depth + 1) if depth < 12 else OrderedDict([("kind", "other")])
