@@ -125,7 +125,8 @@ class build_analyze_all(build_rule_base):
             database.setup.reset()
             try:
                 analysis_log = os.path.join(log_dir, rel_test.replace(os.sep, "_") + ".log")
-                redo.redo([os.path.join(test, "analyze"), "1>&2", "2>" + analysis_log])
+                with open(analysis_log, "w") as log:
+                    redo.redo(os.path.join(test, "analyze"), stdout=sys.stderr, stderr=log)
 
                 # Parse the analysis report to determine severity
                 report_path = os.path.join(test, "build", "analyze", "report.txt")

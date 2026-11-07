@@ -114,10 +114,11 @@ class build_coverage_all(build_rule_base):
                 # possible (no test.elf for gcov). Fall back to running the test only.
                 # Also fall back to test-only if .skip_coverage is present.
                 has_ada_test = os.path.exists(os.path.join(test, "test.adb")) or os.path.exists(os.path.join(test, "test.adb.do"))
-                if has_ada_test and test not in skip_coverage_tests:
-                    redo.redo([os.path.join(test, "coverage"), "1>&2", "2>" + coverage_log])
-                else:
-                    redo.redo([os.path.join(test, "test"), "1>&2", "2>" + coverage_log])
+                with open(coverage_log, "w") as log:
+                    if has_ada_test and test not in skip_coverage_tests:
+                        redo.redo(os.path.join(test, "coverage"), stdout=sys.stderr, stderr=log)
+                    else:
+                        redo.redo(os.path.join(test, "test"), stdout=sys.stderr, stderr=log)
                 self._write_to_both(" " + PASSED + "\n")
             except BaseException:
                 exit_code = 1
