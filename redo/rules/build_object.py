@@ -1,5 +1,8 @@
 import os.path
 import glob
+import shlex
+import subprocess
+import sys
 from shutil import move
 from shutil import rmtree
 from os import environ
@@ -283,44 +286,34 @@ def _run_gprbuild_command(build_target_instance, sources_to_compile, source_depe
     dep_dirs = list(dict.fromkeys([os.path.dirname(f) for f in source_dependencies]))
 
     # Set the verbosity level to low if debug is on:
-    verbosity = ""
-    direct = " >/dev/null"
+    verbosity = []
+    output = subprocess.DEVNULL
     if "DEBUG" in os.environ and os.environ["DEBUG"]:
-        verbosity = " -vl"
-        direct = " >&2"
+        verbosity = ["-vl"]
+        output = sys.stderr
 
-    # Construct the command string:
-    sources_to_compile_str = " ".join(sources_to_compile)
+    # gprbuild runs directly rather than through a shell, so each source is its
+    # own argument. Linux limits any single argument to 128 KiB, and a shell
+    # takes the whole command as one argument, which the source list of a large
+    # executable exceeds. The longest single argument here is SOURCE_DIRS, which
+    # lists every source directory. All arguments and the environment together
+    # are limited to a quarter of the stack size limit, 2 MB by default.
     compile_cmd = (
-        "gprbuild"
+        ["gprbuild"]
         + verbosity
-        + " -ws -f -u --relocate-build-tree -aP "
-        + os.environ["ADAMANT_DIR"]
-        + os.sep
-        + "redo"
-        + os.sep
-        + "targets"
-        + os.sep
-        + "gpr"
-        + " -P "
-        + gpr_project_file
-        + " -c "
-        + sources_to_compile_str
-        + " -XADAMANT_DIR="
-        + os.environ["ADAMANT_DIR"]
-        + " -XOBJECT_DIR="
-        + object_dir
-        + " -XSOURCE_DIRS="
-        + ",".join(dep_dirs)
-        + ((" " + gprbuild_flags.strip()) if gprbuild_flags else "")
-        + direct
+        + ["-ws", "-f", "-u", "--relocate-build-tree"]
+        + ["-aP", os.path.join(os.environ["ADAMANT_DIR"], "redo", "targets", "gpr")]
+        + ["-P", gpr_project_file]
+        + ["-c"]
+        + sources_to_compile
+        + ["-XADAMANT_DIR=" + os.environ["ADAMANT_DIR"]]
+        + ["-XOBJECT_DIR=" + object_dir]
+        + ["-XSOURCE_DIRS=" + ",".join(dep_dirs)]
+        + (shlex.split(gprbuild_flags) if gprbuild_flags else [])
     )
 
     # Run the compile command in .gpr directory:
-    cwd = os.getcwd()
-    os.chdir(gpr_project_file_dir)
-    shell.run_command(compile_cmd)
-    os.chdir(cwd)
+    shell.run_program(compile_cmd, cwd=gpr_project_file_dir, stdout=output)
 
 
 ####################################################

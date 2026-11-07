@@ -5,6 +5,7 @@ from util import filesystem
 from util import shell
 from util import model_loader
 from base_classes.build_rule_base import build_rule_base
+import subprocess
 import sys
 import re
 import glob
@@ -55,14 +56,16 @@ class build_style(build_rule_base):
         os.environ["CHECK_STYLE"] = "True"
 
         # Simply force recompile all the objects in this directory with style checking enabled
-        # and we will get nice style check messages.
+        # and we will get nice style check messages. Both output streams of redo go through
+        # tee to the terminal and the temporary log. The rule carries on when the compile
+        # fails, since the compiler's messages are what style.log collects.
         filesystem.safe_makedir(style_directory)
         style_log_file = style_directory + os.sep + "style.log"
         style_log_file_temp = style_directory + os.sep + "style.log.temp"
-        redo.redo(
-            objects
-            + ["2>&1", "|",  "tee", style_log_file_temp, ">&2"]
-        )
+        tee = subprocess.Popen(["tee", style_log_file_temp], stdin=subprocess.PIPE, stdout=sys.stderr)
+        redo.try_redo(objects, stdout=tee.stdin, stderr=subprocess.STDOUT)
+        tee.stdin.close()
+        tee.wait()
 
         # Filter to real diagnostics (file:line:...) only, and drop the benign
         # gcc note that large generated functions can trigger:

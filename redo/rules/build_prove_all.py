@@ -131,7 +131,8 @@ class build_prove_all(build_rule_base):
             database.setup.reset()
             try:
                 prove_log = os.path.join(log_dir, rel_dir.replace(os.sep, "_") + ".log")
-                redo.redo([os.path.join(prove_dir, "prove"), "1>&2", "2>" + prove_log])
+                with open(prove_log, "w") as log:
+                    redo.redo(os.path.join(prove_dir, "prove"), stdout=sys.stderr, stderr=log)
                 self._write_to_both(" " + PASSED + "\n")
             except BaseException:
                 exit_code = 1

@@ -111,7 +111,8 @@ class build_style_all(build_rule_base):
             database.setup.reset()
             try:
                 style_run_log = os.path.join(log_dir, rel_test.replace(os.sep, "_") + ".log")
-                redo.redo([os.path.join(test, "style"), "1>&2", "2>" + style_run_log])
+                with open(style_run_log, "w") as log:
+                    redo.redo(os.path.join(test, "style"), stdout=sys.stderr, stderr=log)
 
                 # See if there is anything in the log file:
                 style_log = os.path.join(
