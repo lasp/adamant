@@ -82,9 +82,6 @@ class assembly_submodel(base):
                         self.assembly.submodels[self.full_filename].__dict__
                     )
 
-                # Update cache for speed next time this is loaded:
-                self.save_to_cache()
-
     @throw_exception_with_filename
     def set_assembly(self, assembly):
         """
