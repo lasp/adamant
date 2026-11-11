@@ -26,14 +26,15 @@ package body Component.Simple_Command_Sequencer.Implementation is
 
       -- Set up one pool of Count frames whose ids start at First, each frame
       -- stamped with its id, with the search cursor on the first frame. A pool
-      -- with no frames gets an empty array (1 .. 0), never searched.
+      -- with no frames gets an empty array (1 .. 0), never searched. Both
+      -- arrays come from initialized allocators, so the array type's default
+      -- initialization never runs on an empty array.
       function Init_Pool (First : in Natural; Count : in Natural) return Frame_Pool is
          Frames : constant Simple_Sequencer_Types.Sequence_Frame_Array_Access :=
             (if Count = 0
-             then new Simple_Sequencer_Types.Sequence_Frame_Array (1 .. 0)
-             else new Simple_Sequencer_Types.Sequence_Frame_Array (Frame_Id_Type (First) .. Frame_Id_Type (First + Count - 1)));
+             then new Simple_Sequencer_Types.Sequence_Frame_Array'([1 .. 0 => <>])
+             else new Simple_Sequencer_Types.Sequence_Frame_Array'([for Id in Frame_Id_Type (First) .. Frame_Id_Type (First + Count - 1) => (Frame_Id => Id, others => <>)]));
       begin
-         Frames.all := [for Id in Frames.all'Range => (Frame_Id => Id, others => <>)];
          return (Frames => Frames, Next_Search_Start => Frames.all'First);
       end Init_Pool;
    begin
