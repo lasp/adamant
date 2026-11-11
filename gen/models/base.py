@@ -223,8 +223,9 @@ class base(renderable_object, metaclass=base_meta):
         # This cached model has been fully validated for this session. So if we use it again
         # during the session, we can short circuit the full validation and return from
         # is_model_cached_this_session()
-        with model_cache_database(mode=DATABASE_MODE.READ_WRITE) as db:
-            mark_model_cached_this_session(db, filename)
+        if model is not None:
+            with model_cache_database(mode=DATABASE_MODE.READ_WRITE) as db:
+                mark_model_cached_this_session(db, filename)
 
         return model
 
