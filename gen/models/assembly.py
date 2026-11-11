@@ -1288,7 +1288,6 @@ class assembly(subassembly):
 
         for submodel in self.submodels.values():
             submodel.final()
-            submodel.save_to_cache()
 
     def _load_complex_types(self):
         """
