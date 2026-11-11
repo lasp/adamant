@@ -16,6 +16,10 @@ class assembly_submodel(base):
     This is the submodel class for an assembly . All assembly submodels
     should inherit from this model.
     """
+    def save_to_cache(self):
+        """An assembly submodel is saved to the model cache as part of its assembly."""
+        pass
+
     def load_from_cache(cls, filename):
         """
         The model cache stores an assembly submodel inside its assembly. Return the
