@@ -16,6 +16,23 @@ class assembly_submodel(base):
     This is the submodel class for an assembly . All assembly submodels
     should inherit from this model.
     """
+    def save_to_cache(self):
+        """An assembly submodel is saved to the model cache as part of its assembly."""
+        pass
+
+    def load_from_cache(cls, filename):
+        """
+        The model cache stores an assembly submodel inside its assembly. Return the
+        submodel that the cached assembly holds, or None if the assembly is not cached.
+        """
+        dirname, specific_name, assembly_name, *ignore = redo_arg.split_model_filename(filename)
+        assembly_filename = model_loader.get_model_file_path(assembly_name, model_types="assembly")
+        if assembly_filename:
+            cached_assembly = assembly.load_from_cache(assembly, assembly_filename)
+            if cached_assembly is not None and cached_assembly.submodels:
+                return cached_assembly.submodels.get(filename)
+        return None
+
     def load(self):
         """
         Initialize some members. This base method should be called by inheriting classes
@@ -68,9 +85,6 @@ class assembly_submodel(base):
                     self.__dict__.update(
                         self.assembly.submodels[self.full_filename].__dict__
                     )
-
-                # Update cache for speed next time this is loaded:
-                self.save_to_cache()
 
     @throw_exception_with_filename
     def set_assembly(self, assembly):
@@ -1275,7 +1289,6 @@ class assembly(subassembly):
 
         for submodel in self.submodels.values():
             submodel.final()
-            submodel.save_to_cache()
 
     def _load_complex_types(self):
         """
