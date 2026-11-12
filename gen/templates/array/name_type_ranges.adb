@@ -45,6 +45,16 @@ begin
    end loop;
 {% elif element.format.length and element.format.length > 1 %}
    Put_Line ("  - name: {{ element.type }}");
+{% elif element.format.type[0] == "F" %}
+   Put_Line ("  - name: {{ element.type }}");
+   declare
+      -- 'Image of this type prints too few digits to read the bounds
+      -- back, so they are printed with the digits of a wider type:
+      function Image is new String_Util.Full_Precision_Image ({{ element.type }});
+   begin
+      Put_Line ("    min: " & Image ({{ element.type }}'First));
+      Put_Line ("    max: " & Image ({{ element.type }}'Last));
+   end;
 {% else %}
    Put_Line ("  - name: {{ element.type }}");
    Put_Line ("    min: " & String_Util.Trim_Both ({{ element.type }}'Image ({{ element.type }}'First)));

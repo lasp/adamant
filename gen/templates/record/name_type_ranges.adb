@@ -46,6 +46,16 @@ begin
    end loop;
 {% elif unpacked_type_field.format.length and unpacked_type_field.format.length > 1 %}
    Put_Line ("  - name: {{ unpacked_type_field.type }}");
+{% elif unpacked_type_field.format.type[0] == "F" %}
+   Put_Line ("  - name: {{ unpacked_type_field.type }}");
+   declare
+      -- 'Image of this type prints too few digits to read the bounds
+      -- back, so they are printed with the digits of a wider type:
+      function Image is new String_Util.Full_Precision_Image ({{ unpacked_type_field.type }});
+   begin
+      Put_Line ("    min: " & Image ({{ unpacked_type_field.type }}'First));
+      Put_Line ("    max: " & Image ({{ unpacked_type_field.type }}'Last));
+   end;
 {% else %}
    Put_Line ("  - name: {{ unpacked_type_field.type }}");
    Put_Line ("    min: " & String_Util.Trim_Both ({{ unpacked_type_field.type }}'Image ({{ unpacked_type_field.type }}'First)));
