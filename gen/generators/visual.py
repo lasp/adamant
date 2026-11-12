@@ -3,6 +3,7 @@ from generators.basic import basic_generator
 from util import model_loader
 from util import error
 from models import assembly
+from models import component
 from models import view
 from collections import OrderedDict
 import re
@@ -393,3 +394,100 @@ class assembly_view_visual_json(basic_generator, generator_base):
         assembly_model_name, view_name = self._assembly(input_filename)
         a = assembly.assembly(assembly_model_name)
         return a.get_dependencies() + [assembly_model_name]
+
+
+# An edge statement of the component dot template: one per connector, on one line.
+_COMPONENT_EDGE = re.compile(r"^(\s*\S+:\S+ -> \S+:\S+)\[", re.M)
+
+
+def _component_layout(comp):
+    """The graphviz layout of the component's own dot diagram, as -Tjson, with each edge
+    tagged e<k> in declaration order: invokee connectors, then invoker connectors."""
+    count = iter(range(1 << 30))
+    dot_source = _COMPONENT_EDGE.sub(
+        lambda m: m.group(1) + '[id="e%d", ' % next(count), comp.render("/component/name.dot")
+    )
+    result = subprocess.run(["dot", "-Tjson"], input=dot_source, capture_output=True, text=True)
+    if result.returncode != 0:
+        error.error_abort("dot failed on the component diagram: " + result.stderr)
+    return json.loads(result.stdout, object_pairs_hook=OrderedDict)
+
+
+def _component_type(comp):
+    """The component as the one instance of its own diagram, named for the dot node."""
+    invokee_names = set(c.name for c in comp.connectors.invokee())
+    return OrderedDict(
+        [
+            ("instance", "component"),
+            ("type", comp.name),
+            ("execution", comp.execution),
+            ("instance_execution", comp.execution),
+            ("priority", None),
+            ("has_queue", bool(comp.connectors.of_kind("recv_async"))),
+            ("description", comp.description),
+            ("model_file", os.path.basename(comp.full_filename)),
+            ("connectors", [_connector(c, invokee_names) for c in comp.connectors]),
+            ("data_products", _ided_entities(comp.data_products, "data_products", None, {})),
+            ("events", _ided_entities(comp.events, "events", None, {})),
+            ("commands", _ided_entities(comp.commands, "commands", None, {})),
+            ("parameters", _ided_entities(comp.parameters, "parameters", None, {})),
+            ("packets", _ided_entities(comp.packets, "packets", None, {})),
+            ("faults", _ided_entities(comp.faults, "faults", None, {})),
+        ]
+    )
+
+
+def _connector_edge(conn, invokee):
+    """A connector as the edge the component diagram draws for it, between the component
+    and the block that lists its invokee or invoker connectors."""
+    inner = OrderedDict([("component", "component"), ("connector", conn.name), ("index", 1)])
+    outer = OrderedDict(
+        [("component", "invokee" if invokee else "invoker"), ("connector", conn.name), ("index", 1)]
+    )
+    return OrderedDict(
+        [
+            ("from", outer if invokee else inner),
+            ("to", inner if invokee else outer),
+            ("kind", conn.kind),
+            ("type", conn.type),
+            ("return_type", getattr(conn, "return_type", None)),
+            ("description", getattr(conn, "description", None)),
+        ]
+    )
+
+
+def build_component_bundle(comp):
+    types = _types()
+    types.add_component(comp)
+    edges = [_connector_edge(c, True) for c in comp.connectors.invokee()]
+    edges += [_connector_edge(c, False) for c in comp.connectors.invoker()]
+    return OrderedDict(
+        [
+            ("schema_version", SCHEMA_VERSION),
+            ("kind", "component"),
+            ("assembly", comp.name),
+            ("view", None),
+            ("description", comp.description),
+            ("rankdir", "LR"),
+            ("show_switches", OrderedDict()),
+            ("groups", []),
+            ("style", STYLE),
+            ("components", [_component_type(comp)]),
+            ("connections", edges),
+            ("data_dependencies", []),
+            ("types", types.types),
+            ("layout", _component_layout(comp)),
+        ]
+    )
+
+
+class component_visual_json(basic_generator, generator_base):
+    def __init__(self):
+        basic_generator.__init__(
+            self, model_class=component.component, template_filename="/component/name.visual.json"
+        )
+
+    def generate(self, input_filename):
+        c = self.model_object(input_filename)
+        c.visual_bundle = build_component_bundle(c)
+        print(c.render(self.template))
