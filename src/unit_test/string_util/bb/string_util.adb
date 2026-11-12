@@ -56,6 +56,13 @@ package body String_Util is
       return R'Image;
    end To_Array_String;
 
+   function Full_Precision_Image (Value : in T) return String is
+   begin
+      -- The conversion is exact. It is here so that 'Image prints the digits
+      -- of Long_Long_Float instead of the fewer digits of T:
+      return Trim_Both (Long_Long_Float'Image (Long_Long_Float (Value)));
+   end Full_Precision_Image;
+
    function Trim_Both (Input : in String) return String is
       -- Variables to store the indices of the first non-space character and the last non-space character
       Start_Index : Natural := Input'First;

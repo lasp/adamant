@@ -24,7 +24,11 @@
   } &
 %- else
 %- if element.range_min != None and element.range_max != None
+%- if (element.range_min|string|length + element.range_max|string|length) > 23
+  \makecell[l]{\texttt{\VAR{element.range_min} to} \\ \texttt{\VAR{element.range_max}}} &
+%- else
   \texttt{\VAR{element.range_min} to \VAR{element.range_max}} &
+%- endif
 %- else
   - &
 %- endif
