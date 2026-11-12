@@ -310,8 +310,9 @@ def _groups(a):
     return out
 
 
-def build_bundle(a, kind, view_name=None):
-    assembly_dir = os.path.dirname(a.full_filename)
+def build_bundle(a, kind, view_name=None, assembly_dir=None):
+    # A view's assembly has no file of its own, so its generator names the directory.
+    assembly_dir = assembly_dir or os.path.dirname(a.full_filename)
     ids = _assembly_ids(a)
     types = _types()
     components = []
@@ -387,7 +388,8 @@ class assembly_view_visual_json(basic_generator, generator_base):
         a = v.apply(a)
         a.view_filters = v.filters
         a.view_rule = v.rule
-        a.visual_bundle = build_bundle(a, "view", view_name)
+        assembly_dir = os.path.dirname(os.path.abspath(assembly_model_name))
+        a.visual_bundle = build_bundle(a, "view", view_name, assembly_dir)
         print(a.render(self.template))
 
     def depends_on(self, input_filename):
