@@ -1,0 +1,6 @@
+---
+description: These are the commands for the CCSDS command forwarder component.
+commands:
+  - name: Forward_Packet
+    description: Forward the provided CCSDS packet out of the CCSDS space packet send connector.
+    arg_type: Ccsds_Command_Space_Packet.T
