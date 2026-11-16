@@ -6715,7 +6715,7 @@ which when opened with your favorite web browser looks something like this:
 
 \subsection{Creating a Memory Map} \label{Creating a Memory Map}
 
-A \textit{memory map} in Adamant is similar to a \textit{register map}, discussed in Section \ref{Creating a Register Map}, however, instead of defining the address for each item individually, items are laid out contiguously (packed tightly) at a given starting address. The common use case for a \textit{memory map} is when defining a set of data that needs to be saved in nonvolatile memory located at a specific hardware address. \\
+A \textit{memory map} in Adamant is similar to a \textit{register map}, discussed in Section \ref{Creating a Register Map}, however, instead of defining the address for each item individually, items are by default laid out contiguously (packed tightly) at a given starting address. The common use case for a \textit{memory map} is when defining a set of data that needs to be saved in nonvolatile memory located at a specific hardware address. \\
 
 Often in embedded systems, data needs to be stored persistently, across reboots. This data is usually stored in some kind of nonvolatile memory, such as MRAM, commonly without aid of a file system. In such a case, important variables are stored at predetermined static addresses. In Adamant, we refer to this as a \textit{memory map}. \\
 
@@ -6725,6 +6725,10 @@ Adamant provides a generator tailored to creating memory maps of packed types (\
 \yamlcodef{../example_architecture/memory_map/nonvolatile_store.memory_map.yaml}
 
 As can be seen, we provide a \texttt{start\_address} and a \texttt{length} for the memory region devoted to this memory map. Following, we specify each item to include in the store by denoting its \texttt{name}, \texttt{type}, and an optional \texttt{description}. Creating this model file provides us with many new build targets which can be seen by running \texttt{redo what}.
+
+The layout of the items can be controlled with a few optional fields. An item with an \texttt{offset} is placed that many bytes from the \texttt{start\_address}, which keeps its address from moving when the items listed before it are added, removed, or change size. An item without an \texttt{offset} is placed at the first aligned address after the item listed before it. The \texttt{alignment} of the memory map, or of an individual item, sets the number of bytes that an item's address must be a multiple of. An item can also reserve more bytes than its type needs by providing a \texttt{size}, which leaves room for the type to grow without moving the items that follow it. \\
+
+Items are usually packed types, but any other Ada type that is declared in the \texttt{preamble}, or in a package listed in \texttt{with}, may be used. The size of such a type is not known to the model, so a \texttt{size} must be provided for the item, and the compiler checks that the type fits in it. Only packed types are checked for bit-constrained fields, as described below. The memory map model schema describes each of these fields. \\
 
 \vspace{5mm} %5mm vertical space
 \begin{minted}{text}
@@ -6767,7 +6771,7 @@ The generated specification files is shown below: \\
 \textit{nonvolatile\_store.ads}:
 \adacodef{../example_architecture/memory_map/build/src/nonvolatile_store.ads}
 
-In the package, many useful constants are declared at the top which specify the boundaries of the memory map. The second section declares each item. The address of each item is based off of the address of the item previous to it. The third second declares a set of access types that refer to the types declared in the second section. These types of accesses are not allowed within SPARK, so they are declared with \texttt{SPARK\_Mode => Off}. The final section specifies a myriad of \texttt{Compile\_Time\_Error} calls which employs the compiler to check the work of the generator to make sure that no memory regions overlap or exceed the region bounds. These global variables may now be safely used within the system, usually provided to components as part of their initialization. \\
+In the package, many useful constants are declared at the top which specify the boundaries of the memory map. One of these is the \texttt{Layout\_Id}, a value that changes whenever the region, or the name, address, size, or type of any item changes. Storing it alongside the data allows software to detect data that was stored using a different layout. The second section declares each item. The address of each item is based off of the address of the item previous to it. The third second declares a set of access types that refer to the types declared in the second section. These types of accesses are not allowed within SPARK, so they are declared with \texttt{SPARK\_Mode => Off}. The final section specifies a myriad of \texttt{Compile\_Time\_Error} calls which employs the compiler to check the work of the generator to make sure that no memory regions overlap or exceed the region bounds. These global variables may now be safely used within the system, usually provided to components as part of their initialization. \\
 
 We can also build PDF and HTML documentation to view the memory map definition in a human readable manner. To build HTML documentation run:
 

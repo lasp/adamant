@@ -1,0 +1,38 @@
+---
+description: A memory map that places items using offsets, alignment, and reserved sizes, and that holds a type which is not a packed type. This should compile without error.
+with:
+  - Basic_Types
+preamble: |
+  subtype Raw_Bytes is Basic_Types.Byte_Array (0 .. 9);
+start_address: 0x3000000
+length: 256
+alignment: 4
+items:
+  - name: First
+    description: An item with no offset. It is placed at the start of the memory map.
+    type: Always_Valid_Simple.T
+  - name: Second
+    description: An item with no offset that reserves more bytes than its type needs. It is placed at the first aligned address after the item before it.
+    type: Always_Valid_Simple.T
+    size: 16
+  - name: Pinned
+    description: An item placed at an offset.
+    type: Always_Valid_Nested.T
+    offset: 0x80
+  - name: Raw
+    description: An item whose type is not a packed type, so its size is given.
+    type: Raw_Bytes
+    size: 12
+  - name: Unaligned
+    description: An item with its own alignment. It is placed on the byte after the item before it.
+    type: Always_Valid_Simple.T
+    alignment: 1
+  - name: Final
+    description: An item that ends on the last byte of the memory map.
+    type: Always_Valid_Simple.T
+    offset: 249
+    alignment: 1
+  - name: Early
+    description: An item listed last that is placed before items listed ahead of it.
+    type: Always_Valid_Simple.T
+    offset: 0x40

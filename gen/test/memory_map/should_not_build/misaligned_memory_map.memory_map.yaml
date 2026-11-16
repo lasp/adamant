@@ -1,0 +1,9 @@
+---
+description: A memory map with an item whose offset does not meet the alignment. This should fail to generate.
+start_address: 0x2000000
+length: 1024
+alignment: 4
+items:
+  - name: First_Item
+    type: Always_Valid_Simple.T
+    offset: 6

@@ -75,6 +75,12 @@ is
    Used_Bytes : constant Unsigned_32 := Last_Used_Offset - Start_Offset + 1; -- {{ last_used_address - start_address + 1 }} bytes
    Unused_Bytes : constant Unsigned_32 := Last_Offset - Last_Used_Offset; -- {{ start_address + length - 1 - last_used_address }} bytes
 
+   -- Memory map layout identifier. This value changes whenever the region, or the
+   -- name, address, size, or type of any item in the memory map changes. Data that
+   -- was stored using a memory map with a different identifier may not be laid out
+   -- the way this memory map expects.
+   Layout_Id : constant Unsigned_32 := 16#{{ '%08X' % layout_id }}#;
+
    --
    -- Memory map items:
    --
@@ -85,7 +91,11 @@ is
 {{ printMultiLine(item.description, '   -- ') }}
 {% endif %}
    {{ item.name }}_Offset : constant Unsigned_32 := 16#{{ '%08X' % item.address }}#; -- 0x{{ '%08X' % item.address }}
+{% if item.is_packed_type and not item.size_specified %}
    {{ item.name }}_Size : constant Unsigned_32 := Unsigned_32 ({{ item.type_package }}.Size_In_Bytes); -- {{ item.size }} bytes
+{% else %}
+   {{ item.name }}_Size : constant Unsigned_32 := {{ item.size }}; -- {{ item.size }} bytes reserved
+{% endif %}
    {{ item.name }}_End : constant Unsigned_32 := {{ item.name }}_Offset + {{ item.name }}_Size - 1; -- 0x{{ '%08X' % (item.address + item.size - 1) }}
    {{ item.name }}_Address : constant System.Address := To_Address (Integer_Address ({{ item.name }}_Offset));
 
@@ -110,7 +120,9 @@ is
       with SPARK_Mode => Off
    is
 {% for item_name, item in items.items() %}
+{% if item.is_packed_type %}
       {{ item.name }}_Access : constant {{ item.type }}_Access := {{ item.name }}'Access;
+{% endif %}
 {% endfor %}
    end Accesses;
 
@@ -129,11 +141,18 @@ is
 
 {% for item_name, item in items.items() %}
    -- 0x{{'%08X' % item.address}} - {{'%08X' % (item.address + item.size - 1)}}: {{ item.name }} Checks
+{% if item.is_packed_type %}
    pragma Compile_Time_Error (not {{ item.type_package }}.Always_Valid, "{{ item.name }} ({{ item.type }}) contains bit-constrained fields and is not safe for use in a memory map. A corrupted read could produce an out-of-range value and raise Constraint_Error.");
+{% if item.size_specified %}
+   pragma Compile_Time_Error (Unsigned_32 ({{ item.type_package }}.Size_In_Bytes) > {{ item.name }}_Size, "{{ item.name }} ({{ item.type }}) does not fit in the {{ item.size }} bytes reserved for it in the memory map.");
+{% endif %}
+{% else %}
+   pragma Compile_Time_Error ({{ item.name }}'Size > {{ item.size * 8 }}, "{{ item.name }} ({{ item.type }}) does not fit in the {{ item.size }} bytes reserved for it in the memory map.");
+{% endif %}
    pragma Compile_Time_Error ({{ item.name }}_Offset /= 16#{{ '%08X' % item.address }}#, "Unexpected autocoder error. Item start address not as expected.");
    pragma Compile_Time_Error ({{ item.name }}_Size /= {{ item.size }}, "Unexpected autocoder error. Item size not as expected.");
    pragma Compile_Time_Error ({{ item.name }}_End /= 16#{{ '%08X' % (item.address + item.size - 1) }}#, "Unexpected autocoder error. Item end address not as expected.");
-   pragma Compile_Time_Error ({{ item.name }}_Offset >= {{ item.name }}_End, "Unexpected autocoder error. Item end address less than start address.");
+   pragma Compile_Time_Error ({{ item.name }}_Offset > {{ item.name }}_End, "Unexpected autocoder error. Item end address less than start address.");
    pragma Compile_Time_Error ({{ item.name }}_Offset < Start_Offset, "Unexpected autocoder error. Item starts before first address.");
    pragma Compile_Time_Error ({{ item.name }}_End > Last_Offset, "Unexpected autocoder error. Item ends after last address.");
 {% if item.prev_item %}

@@ -1,0 +1,12 @@
+---
+description: A memory map with an item that is not a packed type and reserves fewer bytes than its type needs. This should fail to compile.
+with:
+  - Basic_Types
+preamble: |
+  subtype Raw_Bytes is Basic_Types.Byte_Array (0 .. 15);
+start_address: 0x2000000
+length: 1024
+items:
+  - name: Raw
+    type: Raw_Bytes
+    size: 12

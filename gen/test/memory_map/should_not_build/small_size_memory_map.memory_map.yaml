@@ -1,0 +1,8 @@
+---
+description: A memory map with a packed type item that reserves fewer bytes than its type needs. This should fail to generate.
+start_address: 0x2000000
+length: 1024
+items:
+  - name: First_Item
+    type: Always_Valid_Simple.T
+    size: 4

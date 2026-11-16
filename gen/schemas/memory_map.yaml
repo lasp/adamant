@@ -27,6 +27,13 @@ mapping:
   length:
     type: int
     required: True
+  # The alignment, in bytes, of items that do not specify their own. An item
+  # is placed at an address that is a multiple of its alignment. If not
+  # specified the default value is an alignment of 1, which means items are
+  # laid out contiguously, each starting on the byte after the previous one.
+  alignment:
+    type: int
+    required: False
   # List of items to include in the memory map.
   items:
     seq:
@@ -41,17 +48,36 @@ mapping:
             type: str
             required: False
           # The type of the item. Using a packed record or packed
-          # array type is recommended here.
+          # array type is recommended here. The size of a packed type
+          # is known to the model, and the type is checked to make sure
+          # every bit pattern it can hold is valid. Any other Ada type
+          # may be used if it is declared in the preamble or in a package
+          # listed in "with". The size of such a type is not known to the
+          # model, so a "size" must be provided for the item.
           type:
             type: str
             required: True
-          # The alignment of an item. If not specified the default
-          # value is an alignment of 1, which means the item starts
-          # on a byte boundary.
-          #alignment:
-          #  type: int
-          #  required: False
-          #  default: 1
+          # The offset of the item, in bytes, from the start address of
+          # the memory map. If not specified the item is placed at the
+          # first aligned address after the item listed before it. Giving
+          # an item an offset keeps its address from moving when items
+          # listed before it are added, removed, or change size.
+          offset:
+            type: int
+            required: False
+          # The number of bytes reserved for the item. This must be at
+          # least the size of the type, and is required for a type that is
+          # not a packed type. If not specified the size of the type is
+          # reserved. Reserving more than the size of the type leaves room
+          # for the type to grow without moving the items that follow it.
+          size:
+            type: int
+            required: False
+          # The alignment of the item, in bytes. If not specified the
+          # alignment of the memory map is used.
+          alignment:
+            type: int
+            required: False
           # The value of the item. This is usually left unspecified, but may
           # be required in special circumstances where you want to initialize
           # some value in non-volatile storage at every boot.

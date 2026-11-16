@@ -45,7 +45,7 @@ class register_map(base):
         for item_data in self.data["items"]:
             try:
                 # Create item from yaml:
-                item = map_item.from_item_data(item_data)
+                item = map_item.from_item_data(item_data, packed_types_only=True)
                 # Make sure item has a unique name:
                 if item.name in unsorted_items:
                     raise ModelException(
