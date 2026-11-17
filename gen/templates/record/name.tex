@@ -35,7 +35,11 @@
   } &
 %- else
 %- if field.range_min != None and field.range_max != None
+%- if (field.range_min|string|length + field.range_max|string|length) > 23
+  \makecell[l]{\texttt{\VAR{field.range_min} to} \\ \texttt{\VAR{field.range_max}}} &
+%- else
   \texttt{\VAR{field.range_min} to \VAR{field.range_max}} &
+%- endif
 %- else
   - &
 %- endif
