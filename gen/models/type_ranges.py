@@ -1,8 +1,21 @@
 from models.exceptions import ModelException, throw_exception_with_lineno
 from util import ada
 from collections import OrderedDict
+import math
 import os
+import sys
 from models.base import base
+
+
+def _finite(bound):
+    """
+    The bounds are printed with the digits of their type. A bound at the
+    edge of a 64-bit float is rounded past the largest float by that and
+    is read back as infinity. Return the largest float in its place.
+    """
+    if isinstance(bound, float) and math.isinf(bound):
+        return math.copysign(sys.float_info.max, bound)
+    return bound
 
 
 class type_literal(object):
@@ -48,8 +61,8 @@ class type_number(object):
     @throw_exception_with_lineno
     def from_number_data(cls, number_data):
         name = number_data["name"]
-        min = number_data["min"]
-        max = number_data["max"]
+        min = _finite(number_data["min"])
+        max = _finite(number_data["max"])
         return cls(name=name, min=min, max=max)
 
 
