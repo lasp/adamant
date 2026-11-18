@@ -583,9 +583,24 @@ filter_type_dict = {
 
 
 def _copy_to_filter(assm):
-    """A copy of an assembly for a filter to work on. A filter replaces the copy's
-    component, connection and data dependency collections and never changes what
-    they hold, so the copy shares those members with the assembly it came from."""
+    """
+    Return a copy of an assembly for a filter to work on.
+
+    The copy is shallow. It is a new assembly object, but its components,
+    connections and data dependencies are the same objects the original
+    holds. That is safe because of how filters work. A filter never removes
+    items from a collection it is given, and never changes a component or
+    connection. It builds a new collection of the items it keeps and assigns
+    that to the assembly. Assigning a new collection to the copy leaves the
+    original pointing at its own, so the original is unchanged.
+
+    Every filter must follow that rule. One that edits a collection in
+    place, or changes a component or connection, would change the original
+    assembly as well.
+
+    show_switches is the one member edited in place, when a view is applied,
+    so the copy gets its own.
+    """
     assm_copy = copy.copy(assm)
     assm_copy.show_switches = dict(assm.show_switches)
     return assm_copy
