@@ -7,6 +7,8 @@ from models.exceptions import (
 from util import ada
 from util import model_loader
 from util import redo_arg
+from database.model_cache_database import model_cache_database
+from database.database import DATABASE_MODE
 import os
 from collections import OrderedDict
 
@@ -539,6 +541,50 @@ class assembly(subassembly):
     .assembly.yaml input file and stores the data as object member
     variables for use in file generation using templates.
     """
+    def __new__(
+        cls,
+        filename=None,
+        is_subassembly=False,
+        shallow_load=False,
+        shallow_load_component_list=[],
+        **kwargs
+    ):
+        """
+        Create an assembly object. The base class returns the full load of the
+        assembly from the model cache when there is one. Only when there is not, and
+        a shallow load was asked for, this returns the shallow load from the model
+        cache if one has been written there.
+
+        A shallow load is asked for by generators whose output the full load of the
+        assembly depends on, so they run before the full load is in the cache. Without
+        this, each of them builds the assembly from its files again. Instead the first
+        one builds it and __init__ writes it to the model cache as the "shallow"
+        variant of the model, apart from the full load, and the rest read it here.
+
+        This is done in __new__ because that is where the base class decides whether
+        an object comes from the cache, and it is the only place that sees every load
+        argument.
+        """
+        self = super(assembly, cls).__new__(cls, filename, **kwargs)
+        if filename and not self.from_cache:
+            # Only a shallow load of the whole assembly is cached, and not when
+            # asked to ignore the cache.
+            self.cache_shallow_load = bool(
+                shallow_load
+                and not shallow_load_component_list
+                and not is_subassembly
+                and not kwargs.get("ignore_cache")
+            )
+            if self.cache_shallow_load:
+                with model_cache_database() as db:
+                    model = db.get_model(self.full_filename, variant="shallow")
+                if model:
+                    model.from_cache = True
+                    model.filename = self.filename
+                    model.full_filename = self.full_filename
+                    return model
+        return self
+
     def __init__(
         self,
         filename=None,
@@ -565,6 +611,14 @@ class assembly(subassembly):
 
         # Call the base class initialization:
         super(assembly, self).__init__(filename)
+
+        # Write the shallow load to the model cache. This is the only place it is
+        # written, and only when it was just built from its files because none was
+        # in the cache. Every later shallow load reads this one, so it is written
+        # once, unless two processes build it at the same time.
+        if filename and not self.from_cache and self.cache_shallow_load:
+            with model_cache_database(mode=DATABASE_MODE.READ_WRITE) as db:
+                db.store_model(self.full_filename, self, variant="shallow")
 
     def load(self):
         # Initialize the subassemblies dictionary:
