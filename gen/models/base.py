@@ -100,6 +100,12 @@ class renderable_object(object):
 _loaded_models = {}
 
 
+# Schemas already parsed by this process, by schema file. This is an
+# in-memory cache: many models share one schema, so base.validate() parses
+# each schema file once and reuses the result.
+_loaded_schemas = {}
+
+
 class base_meta(abc.ABCMeta):
     """
     We use this meta class to intercept calls to create a new "base" object. It
@@ -405,7 +411,16 @@ class base(renderable_object, metaclass=base_meta):
                 # Pykwalify writes the schema's default values into the data it
                 # validates, and the model reads self.data after this. So pykwalify
                 # is given a copy, and self.data stays as it was read from the file.
-                c = Core(source_data=copy_yaml_data(self.data), schema_files=[self.full_schema])
+                data = copy_yaml_data(self.data)
+
+                # Parse the schema file the first time it is needed, and reuse
+                # the parsed schema for every later model that uses it.
+                schema = _loaded_schemas.get(self.full_schema)
+                if schema is None:
+                    c = Core(source_data=data, schema_files=[self.full_schema])
+                    _loaded_schemas[self.full_schema] = c.schema
+                else:
+                    c = Core(source_data=data, schema_data=schema)
                 c.validate(raise_exception=True)
             except BaseException as e:
                 raise ModelException(

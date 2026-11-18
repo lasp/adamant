@@ -2,14 +2,16 @@
 
 # Unit test for schema validation in gen/models/base.py: that a well formed
 # model loads, that a model with an unknown key, a missing required key, or a
-# value of the wrong type is rejected with an error naming the model file, and
-# that validation leaves the model's parsed contents as they were read. The
-# fixtures are record models written to a temporary directory.
+# value of the wrong type is rejected with an error naming the model file,
+# that validation leaves the model's parsed contents as they were read, and
+# that a schema is parsed once per process and reused. The fixtures are
+# record models written to a temporary directory.
 import os
 import sys
 import tempfile
 
 import database.setup
+from models import base
 from models import record
 from models.exceptions import ModelException
 
@@ -73,6 +75,12 @@ def run_cases(directory):
         rejected(directory, "anchored_integer", GOOD + "    variable_length_offset: &flag true\n"),
     )
 
+    schema = base._loaded_schemas.get(good.full_schema)
+    check("a schema is cached after its first use", schema is not None)
+    load(directory, "another", GOOD)
+    check("a later model reuses the cached schema", base._loaded_schemas[good.full_schema] is schema)
+    check("one schema was parsed for all of the records", len(base._loaded_schemas) == 1)
+    check("a model is still rejected against a cached schema", rejected(directory, "unknown_key_again", GOOD + "bogus: 1\n"))
     print("passed.", file=sys.stderr)
 
 
