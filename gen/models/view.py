@@ -582,6 +582,30 @@ filter_type_dict = {
 }
 
 
+def _copy_to_filter(assm):
+    """
+    Return a copy of an assembly for a filter to work on.
+
+    The copy is shallow. It is a new assembly object, but its components,
+    connections and data dependencies are the same objects the original
+    holds. That is safe because of how filters work. A filter never removes
+    items from a collection it is given, and never changes a component or
+    connection. It builds a new collection of the items it keeps and assigns
+    that to the assembly. Assigning a new collection to the copy leaves the
+    original pointing at its own, so the original is unchanged.
+
+    Every filter must follow that rule. One that edits a collection in
+    place, or changes a component or connection, would change the original
+    assembly as well.
+
+    show_switches is the one member edited in place, when a view is applied,
+    so the copy gets its own.
+    """
+    assm_copy = copy.copy(assm)
+    assm_copy.show_switches = dict(assm.show_switches)
+    return assm_copy
+
+
 def prune(assm_to_filter):
     component_names = [x.instance_name for x in assm_to_filter.components.values()]
 
@@ -633,7 +657,7 @@ def prune(assm_to_filter):
 def assembly_not(filter1):
     def f(assm_to_filter):
         # Run the assembly through both filters to obtain new modified assemblies:
-        assm_to_filter1 = prune(filter1.apply(copy.deepcopy(assm_to_filter)))
+        assm_to_filter1 = prune(filter1.apply(_copy_to_filter(assm_to_filter)))
 
         # Union all component and connector names between two assemblies:
         component_names1 = {
@@ -683,7 +707,7 @@ def assembly_not(filter1):
 def assembly_group(filter1, self):
     def f(assm_to_filter):
         # Run the assembly through both filters to obtain new modified assemblies:
-        assm_to_filter1 = prune(filter1.apply(copy.deepcopy(assm_to_filter)))
+        assm_to_filter1 = prune(filter1.apply(_copy_to_filter(assm_to_filter)))
 
         # Save off the connections into a group:
         self.groups.append(
@@ -697,8 +721,8 @@ def assembly_group(filter1, self):
 def assembly_intersection(filter1, filter2):
     def f(assm_to_filter):
         # Run the assembly through both filters to obtain new modified assemblies:
-        assm_to_filter1 = prune(filter1.apply(copy.deepcopy(assm_to_filter)))
-        assm_to_filter2 = prune(filter2.apply(copy.deepcopy(assm_to_filter)))
+        assm_to_filter1 = prune(filter1.apply(_copy_to_filter(assm_to_filter)))
+        assm_to_filter2 = prune(filter2.apply(_copy_to_filter(assm_to_filter)))
 
         # Union all component and connector names between two assemblies:
         component_names1 = {
@@ -752,8 +776,8 @@ def assembly_intersection(filter1, filter2):
 def assembly_union(filter1, filter2):
     def f(assm_to_filter):
         # Run the assembly through both filters to obtain new modified assemblies:
-        assm_to_filter1 = prune(filter1.apply(copy.deepcopy(assm_to_filter)))
-        assm_to_filter2 = prune(filter2.apply(copy.deepcopy(assm_to_filter)))
+        assm_to_filter1 = prune(filter1.apply(_copy_to_filter(assm_to_filter)))
+        assm_to_filter2 = prune(filter2.apply(_copy_to_filter(assm_to_filter)))
 
         # Union all component and connector names between two assemblies:
         component_names1 = {
@@ -1191,7 +1215,7 @@ class view(models.base.base):
 
         # We will apply changes to only the assm.data object and then we will
         # refresh the assembly object with this new data later.
-        assm_copy = copy.deepcopy(assm)
+        assm_copy = _copy_to_filter(assm)
         # Parse the rule to obtain a filter function:
         filt = self._parseRule(assm)
         # Allow prune to respect show/hide data_dependencies
@@ -1210,18 +1234,20 @@ class view(models.base.base):
         # Creating a "data" dictionary allows us to simulate the
         # loading of a YAML file from scratch with only the filtered
         # data in it.
-        new_data = new_assm.data
+        # The filtered assembly shares its data with the assembly the view was
+        # applied to, so the new dictionary and each entry put into it are copies.
+        new_data = copy.copy(new_assm.data)
 
         # Stuff filtered component data:
         new_component_data = []
         for component in new_assm.components.values():
-            new_component_data.append(component.instance_data)
+            new_component_data.append(copy.copy(component.instance_data))
         new_data["components"] = new_component_data
 
         # Stuff filtered connection data:
         new_connection_data = []
         for connection in new_assm.connections:
-            new_connection_data.append(connection.data)
+            new_connection_data.append(copy.copy(connection.data))
         new_data["connections"] = new_connection_data
 
         # Remove any subassemblies, since our new data will already
