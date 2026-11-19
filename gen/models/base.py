@@ -100,6 +100,12 @@ class renderable_object(object):
 _loaded_models = {}
 
 
+# Schemas already parsed by this process, by schema file. This is an
+# in-memory cache: many models share one schema, so base.validate() parses
+# each schema file once and reuses the result.
+_loaded_schemas = {}
+
+
 class base_meta(abc.ABCMeta):
     """
     We use this meta class to intercept calls to create a new "base" object. It
@@ -372,24 +378,49 @@ class base(renderable_object, metaclass=base_meta):
 
     def validate(self):
         """Validate the yaml file against a schema to make sure it is formatted correctly."""
-        if self.full_schema:
-            # Pykwalify requires a the yaml be stored in a file prior to validation. We may
-            # have altered the contents of the yaml based on the adamant global configuration
-            # variables. So save the (possibly modified) file contents to a temp file, and then
-            # pass that into Pykwalify.
-            import os
-            import tempfile
+        from ruamel.yaml.scalarbool import ScalarBoolean
 
-            temp_fd, temp_file = tempfile.mkstemp(suffix=".yaml")
+        def copy_yaml_data(data):
+            """
+            Return a copy of parsed yaml data: new dictionaries and lists, at
+            every level, that hold the same values.
+
+            This is a deep copy minus two things pykwalify does not need. It
+            does not copy the values themselves (strings, numbers, and so on),
+            and it does not copy the comments and line numbers that the parse
+            keeps alongside the data. Leaving those out makes it far faster
+            than copy.deepcopy, which is why it is written by hand.
+            """
+            if isinstance(data, dict):
+                return {key: copy_yaml_data(value) for key, value in data.items()}
+            if isinstance(data, list):
+                return [copy_yaml_data(value) for value in data]
+            # The parse holds a boolean that has an anchor, or is an alias of
+            # one, as a ScalarBoolean, which is an integer. Pykwalify needs a
+            # bool to accept it where the schema asks for one.
+            if isinstance(data, ScalarBoolean):
+                return bool(data)
+            return data
+
+        if self.full_schema:
             try:
-                # Create an object and validate against the schema
                 from pykwalify.core import Core
 
-                with os.fdopen(temp_fd, "w") as tmp:
-                    # Write model file contents to temp file
-                    tmp.write(self.file_contents)
-                # Perform Pykwalify model validation against the schema
-                c = Core(source_file=temp_file, schema_files=[self.full_schema])
+                # Validate the contents openYaml() already parsed, which include
+                # any changes made from the adamant global configuration variables.
+                # Pykwalify writes the schema's default values into the data it
+                # validates, and the model reads self.data after this. So pykwalify
+                # is given a copy, and self.data stays as it was read from the file.
+                data = copy_yaml_data(self.data)
+
+                # Parse the schema file the first time it is needed, and reuse
+                # the parsed schema for every later model that uses it.
+                schema = _loaded_schemas.get(self.full_schema)
+                if schema is None:
+                    c = Core(source_data=data, schema_files=[self.full_schema])
+                    _loaded_schemas[self.full_schema] = c.schema
+                else:
+                    c = Core(source_data=data, schema_data=schema)
                 c.validate(raise_exception=True)
             except BaseException as e:
                 raise ModelException(
@@ -401,9 +432,6 @@ class base(renderable_object, metaclass=base_meta):
                     + str(e)
                     + "\n"
                 )
-            finally:
-                # Make sure we clean up the temp file.
-                os.remove(temp_file)
 
     def openYaml(self):
         """Open the yaml file, parse it, and store its contents in self.data."""
