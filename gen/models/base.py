@@ -5,6 +5,7 @@ from util import ada
 from util import shell
 from util import jinja
 from util import redo_arg
+from util import yaml_loader
 import os.path
 import abc
 import datetime
@@ -444,8 +445,7 @@ class base(renderable_object, metaclass=base_meta):
 
             warnings.simplefilter("ignore", yaml.error.UnsafeLoaderWarning)
             try:
-                yml = yaml.YAML(typ='rt')
-                return yml.load(yaml_text)
+                return yaml_loader.load(yaml_text)
             except yaml.YAMLError as exc:
                 raise ModelException(str(exc))
 
