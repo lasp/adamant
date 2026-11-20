@@ -54,10 +54,8 @@ def run_cases():
 
 if __name__ == "__main__":
     # The cases need a model cache that no earlier build has written to, so they
-    # run in a sandbox and without the persistent model cache. The fixture's
-    # env.py puts its components on the build path, so the sandbox is created
-    # from a target in the fixture's directory.
-    os.environ.pop("ENABLE_PERSISTENT_MODEL_CACHE", None)
+    # run in a sandbox. The fixture's env.py puts its components on the build
+    # path, so the sandbox is created from a target in the fixture's directory.
     target = os.path.join(FIXTURE, "assembly_submodel_cache_test")
     session = (target, target, target + ".out")
     environment = database.setup.create_sandbox(*session)[1]
