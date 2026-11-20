@@ -1,5 +1,6 @@
 wheel
 ruamel.yaml
+ruamel.yaml.clib
 pykwalify[ruamel]
 Jinja2
 latex
