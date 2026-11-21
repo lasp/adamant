@@ -175,7 +175,7 @@ private
    -- overridden if something special needs to happen to further validate a parameter. Examples of this might be validation of
    -- certain parameters beyond individual type ranges, or performing other special functionality that only needs to be
    -- performed after parameters have been validated. Note that range checking is performed during staging, and does not need
-   -- to be implemented here. This function is also called through Assert_Valid_Parameter_Defaults from Set_Id_Bases and from
+   -- to be implemented here. This function is also called through Assert_Valid_Parameter_Defaults from Set_Parameter_Defaults and from
    -- unit test setup, before the component is connected or initialized, to check the compiled-in default parameter values. The
    -- implementation must therefore be a pure function of the passed-in parameter values, with no dependence on Init state and
    -- no connector invocations.

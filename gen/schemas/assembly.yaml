@@ -132,6 +132,15 @@ mapping:
             seq:
               - type: str
             required: False
+          # Values that replace the default values of the component's parameters for this
+          # instance. They are listed here as name value pairs, ie.
+          #   "Parameter_Name => Value"
+          # Any parameter not listed keeps the default value declared in the component's
+          # parameters model.
+          set_parameter_defaults:
+            seq:
+              - type: str
+            required: False
           # If the component needs to map data dependencies to an external component's data product then
           # the data dependencies should be listed here with the corresponding data products and stale
           # limits. The IDs and stale limits for each data dependency will then be correctly set up at assembly

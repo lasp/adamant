@@ -109,6 +109,19 @@ package Component.{{ name }} is
 {% endif %}
 
 {% endif %}
+{% if set_parameter_defaults %}
+   -----------------------------------------------------------------------
+   -- Replace the default values of the component's parameters:
+   -----------------------------------------------------------------------
+{{ printMultiLine(set_parameter_defaults.description, '   -- ') }}
+   not overriding procedure Set_Parameter_Defaults (
+      Self : in out Base_Instance;
+{% for p in set_parameter_defaults.parameters %}
+      {{ p.declaration_string() }}{{ ";" if not loop.last }}
+{% endfor %}
+   );
+
+{% endif %}
 {% if set_id_bases %}
    -----------------------------------------------------------------------
    -- Initialize the Id_Bases for any commands, data products, or events:
@@ -274,7 +287,7 @@ package Component.{{ name }} is
    -- overridden if something special needs to happen to further validate a parameter. Examples of this might be validation of
    -- certain parameters beyond individual type ranges, or performing other special functionality that only needs to be
    -- performed after parameters have been validated. Note that range checking is performed during staging, and does not need
-   -- to be implemented here. This function is also called through Assert_Valid_Parameter_Defaults from Set_Id_Bases and from
+   -- to be implemented here. This function is also called through Assert_Valid_Parameter_Defaults from Set_Parameter_Defaults and from
    -- unit test setup, before the component is connected or initialized, to check the compiled-in default parameter values. The
    -- implementation must therefore be a pure function of the passed-in parameter values, with no dependence on Init state and
    -- no connector invocations.
@@ -288,9 +301,9 @@ package Component.{{ name }} is
    -- This procedure asserts that the component's working parameter values, which
    -- hold the defaults declared in the component model until the first parameter
    -- update, are valid according to the component's Validate_Parameters function.
-   -- Set_Id_Bases calls it at startup and the generated unit test infrastructure
-   -- calls it during test setup, checking the model defaults against any custom
-   -- validation.
+   -- Set_Parameter_Defaults calls it at startup and the generated unit test
+   -- infrastructure calls it during test setup, checking the defaults against
+   -- any custom validation.
    not overriding procedure Assert_Valid_Parameter_Defaults (Self : in out Base_Instance);
 
 {% endif %}
