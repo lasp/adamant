@@ -287,8 +287,10 @@ class subprogram(object):
                     + param.name
                     + "' does not exist in '"
                     + self._name
-                    + "'. The following parameters are expected: "
+                    + "'. The following parameters are required: "
                     + str(list(self.required_parameter_names))
-                    + " and these were provided: "
+                    + " and these additional parameters are optional: "
+                    + str(list(self.not_required_parameter_names))
+                    + ". These were provided: "
                     + str(list(nv_subp.parameter_names))
                 )
