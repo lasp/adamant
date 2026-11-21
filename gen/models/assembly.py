@@ -997,6 +997,17 @@ class assembly(subassembly):
                     )
                 )
             )
+            # The assembly body sets the default parameter values that the model
+            # provides, so it uses any packages those values name:
+            for component in self.components.values():
+                if component.set_parameter_defaults:
+                    for par in component.set_parameter_defaults.parameters:
+                        if par.value:
+                            self.adb_includes.extend(
+                                pkg
+                                for pkg in ada.packages_in_value(par.value)
+                                if pkg not in self.includes
+                            )
             self.adb_includes = list(OrderedDict.fromkeys(self.adb_includes))
             self.components_ads_includes.extend(
                 list(

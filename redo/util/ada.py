@@ -26,6 +26,20 @@ def is_valid_variable_name(string):
         return False
 
 
+def packages_in_value(value):
+    """
+    Return the packages named by an Ada value expression, in the order they first
+    appear. The name before the first '.' of each dotted name is taken to be a
+    package, so "(Value => My_Enums.Mode.On)" returns ["My_Enums"].
+    """
+    packages = []
+    for match in re.finditer(r"(?<![\w.])([a-zA-Z][_a-zA-Z0-9]*)\.[a-zA-Z]", str(value)):
+        package = formatType(match.group(1))
+        if package not in packages:
+            packages.append(package)
+    return packages
+
+
 def adaCamelCase(string):
     """
     Return an ada-camel-case-ified string, which would
