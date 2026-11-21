@@ -16,6 +16,7 @@ begin
    -- phases in the correct order:
    Science_Assembly.Init_Base;
    Science_Assembly.Set_Id_Bases;
+   Science_Assembly.Set_Parameter_Defaults;
    Science_Assembly.Connect_Components;
    Science_Assembly.Init_Components;
 
