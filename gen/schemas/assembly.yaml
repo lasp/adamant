@@ -18,6 +18,14 @@ mapping:
     seq:
       - type: str
     required: False
+  # If True, every component listed in this file that has parameters must set the
+  # default value of every one of its parameters with set_parameter_defaults. The
+  # assembly then never relies on the default values declared in the components'
+  # parameters models. This applies only to the components listed in this file, not
+  # to those of an assembly that includes this one or of a subassembly it includes.
+  require_set_parameter_defaults:
+    type: bool
+    required: False
   # Any useful handcode to include in the .ads file can be included here.
   # You can think of this as inline Ada, which might be useful for declaring
   # custom enum types and the like. The code here is copied immediately
@@ -129,6 +137,15 @@ mapping:
           # listed here as name value pairs, ie.
           #   "Name => Value"
           set_id_bases:
+            seq:
+              - type: str
+            required: False
+          # Values that replace the default values of the component's parameters for this
+          # instance. They are listed here as name value pairs, ie.
+          #   "Parameter_Name => Value"
+          # Any parameter not listed keeps the default value declared in the component's
+          # parameters model.
+          set_parameter_defaults:
             seq:
               - type: str
             required: False

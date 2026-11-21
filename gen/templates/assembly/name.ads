@@ -28,6 +28,12 @@ package {{ name }} is
    -- dependencies.
    procedure Set_Id_Bases;
 {% endif %}
+{% if component_kind_dict["parameters"] %}
+   -- Set the default parameter values in all the components that have parameters,
+   -- replacing any default that the assembly model provides a value for, and check
+   -- the resulting values against each component's parameter validation.
+   procedure Set_Parameter_Defaults;
+{% endif %}
 {% if connections %}
    -- Attach the connectors for all the components in the assembly
    procedure Connect_Components;

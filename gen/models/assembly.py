@@ -732,6 +732,26 @@ class assembly(subassembly):
         # the components and connections of this assembly model (not including subassemblies).
         super(assembly, self).load()
 
+        # This assembly model can require each of its own components to set the
+        # default value of every one of its parameters:
+        if "require_set_parameter_defaults" in self.data and self.data["require_set_parameter_defaults"]:
+            for component in self.components.values():
+                if component.set_parameter_defaults:
+                    not_set = [
+                        par.name
+                        for par in component.set_parameter_defaults.parameters
+                        if not par.value
+                    ]
+                    if not_set:
+                        raise ModelException(
+                            "Component '"
+                            + component.instance_name
+                            + "' does not set the default value of parameters "
+                            + str(not_set)
+                            + ". This assembly requires every parameter to be listed in "
+                            + '"set_parameter_defaults".'
+                        )
+
         def load_subassembly(name):
             """Helper function for loading a subassembly into the subassembly dictionary."""
             subassembly = name.lower()
@@ -997,6 +1017,17 @@ class assembly(subassembly):
                     )
                 )
             )
+            # The assembly body sets the default parameter values that the model
+            # provides, so it uses any packages those values name:
+            for component in self.components.values():
+                if component.set_parameter_defaults:
+                    for par in component.set_parameter_defaults.parameters:
+                        if par.value:
+                            self.adb_includes.extend(
+                                pkg
+                                for pkg in ada.packages_in_value(par.value)
+                                if pkg not in self.includes
+                            )
             self.adb_includes = list(OrderedDict.fromkeys(self.adb_includes))
             self.components_ads_includes.extend(
                 list(

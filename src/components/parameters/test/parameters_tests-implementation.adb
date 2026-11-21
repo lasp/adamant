@@ -14,6 +14,9 @@ with Parameter_Table_Entry;
 with Parameter_Table_Entry_Id.Assertion; use Parameter_Table_Entry_Id.Assertion;
 with Invalid_Parameter_Table_Entry_Length.Assertion; use Invalid_Parameter_Table_Entry_Length.Assertion;
 with Packet;
+with Packed_U16;
+with Component.Test_Component_1.Implementation;
+with Packed_I32;
 with Tick;
 with Interfaces; use Interfaces;
 with Serializer_Types; use Serializer_Types;
@@ -297,6 +300,54 @@ package body Parameters_Tests.Implementation is
       Natural_Assert.Eq (T.Dumping_Parameters_History.Get_Count, 2);
       Natural_Assert.Eq (T.Finished_Dumping_Parameters_History.Get_Count, 2);
    end Test_Nominal_Dump_Parameters;
+
+   overriding procedure Test_Parameter_Defaults (Self : in out Instance) is
+      T : Component.Parameters.Implementation.Tester.Instance_Access renames Self.Tester;
+
+      -- Dump the parameter table and check that it holds the expected values for Component_B.
+      procedure Check_Component_B (Dump_Number : in Positive; Parameter_U16 : in Packed_U16.T; Parameter_I32 : in Packed_I32.T) is
+         Pkt : Packet.T;
+         Table_Bytes : Test_Parameter_Table_Record.Serialization.Byte_Array;
+         Crc : Crc_16.Crc_16_Type;
+      begin
+         T.Command_T_Send (T.Commands.Dump_Parameters);
+         Natural_Assert.Eq (T.Dispatch_All, 1);
+         Natural_Assert.Eq (T.Packet_T_Recv_Sync_History.Get_Count, Dump_Number);
+         Pkt := T.Packet_T_Recv_Sync_History.Get (Dump_Number);
+         Table_Bytes :=
+            Test_Parameter_Table_Record.Serialization.To_Byte_Array
+               ((Crc_Calculated => [0, 0], Header => (Crc_Table => [0, 0], Version => 0.0), Component_A_Parameter_I32 => (Value => -56), Component_C_The_Tick => ((1, 2), 3), Component_A_Parameter_U16 => (Value => 15), Component_B_Parameter_U16 => Parameter_U16,
+                  Component_B_Parameter_I32 => Parameter_I32));
+         Crc := Crc_16.Compute_Crc_16 (Table_Bytes (Table_Bytes'First + Crc_16.Crc_16_Type'Length + Parameter_Table_Header.Crc_Section_Length .. Table_Bytes'Last));
+         Table_Bytes (Table_Bytes'First .. Table_Bytes'First + Crc_16.Crc_16_Type'Length - 1) := Crc;
+         Byte_Array_Assert.Eq (Pkt.Buffer (0 .. Pkt.Header.Buffer_Length - 1), Table_Bytes);
+      end Check_Component_B;
+   begin
+      -- Replace one default. The other keeps the default from the model:
+      T.Component_B.Set_Parameter_Defaults (Parameter_U16 => (Value => 33));
+      Check_Component_B (Dump_Number => 1, Parameter_U16 => (Value => 33), Parameter_I32 => (Value => -56));
+
+      -- Replace both defaults:
+      T.Component_B.Set_Parameter_Defaults (Parameter_U16 => (Value => 34), Parameter_I32 => (Value => 77));
+      Check_Component_B (Dump_Number => 2, Parameter_U16 => (Value => 34), Parameter_I32 => (Value => 77));
+
+      -- A value that fails the component's parameter validation is rejected:
+      declare
+         Rejected : Boolean := False;
+      begin
+         begin
+            T.Component_B.Set_Parameter_Defaults (Parameter_U16 => Component.Test_Component_1.Implementation.Invalid_U16_Value);
+         exception
+            when others =>
+               Rejected := True;
+         end;
+         Assert (Rejected, "An invalid default parameter value was not rejected!");
+      end;
+
+      -- Providing no values restores the defaults from the model:
+      T.Component_B.Set_Parameter_Defaults;
+      Check_Component_B (Dump_Number => 3, Parameter_U16 => (Value => 15), Parameter_I32 => (Value => -56));
+   end Test_Parameter_Defaults;
 
    overriding procedure Test_Nominal_Update_Parameters (Self : in out Instance) is
       use Parameter_Enums.Parameter_Table_Update_Status;

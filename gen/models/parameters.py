@@ -57,27 +57,9 @@ class parameters(component_submodel, ided_suite):
         # finds any packages that need to be withed.
         defaults_includes = []
         for e in self.entities.values():
-            # Get default value and split name and value.
-            dv = e.default_value
-            split_dv = dv.split("=>")
-            tokens = []
-            # Split on comma:
-            for item in split_dv:
-                split_item = item.split(",")
-                tokens.extend(split_item)
-            # For each string clean it from extraneous characters
-            for item in tokens:
-                cleaned_item = item.replace("(", "").replace(")", "").strip()
-                # If there is a '.' then this might be a package
-                split_item = cleaned_item.split(".")
-                if len(split_item) > 1:
-                    pkg = split_item[0].strip()
-                    # If the first part of the string beore the '.' is
-                    # a valid variable name then append it to our list
-                    if ada.is_valid_variable_name(pkg):
-                        pkg = ada.formatType(pkg)
-                        if pkg not in defaults_includes:
-                            defaults_includes.append(pkg)
+            for pkg in ada.packages_in_value(e.default_value):
+                if pkg not in defaults_includes:
+                    defaults_includes.append(pkg)
 
         # Store all includes for the component:
         component.base_ads_includes.extend(

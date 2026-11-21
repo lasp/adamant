@@ -214,6 +214,28 @@ package body Component.{{ name }} is
 {% endif %}
 
 {% endif %}
+{% if set_parameter_defaults %}
+   -----------------------------------------------------------------------
+   -- Replace the default values of the component's parameters:
+   -----------------------------------------------------------------------
+{{ printMultiLine(set_parameter_defaults.description, '   -- ') }}
+   not overriding procedure Set_Parameter_Defaults (
+      Self : in out Base_Instance;
+{% for p in set_parameter_defaults.parameters %}
+      {{ p.declaration_string() }}{{ ";" if not loop.last }}
+{% endfor %}
+   ) is
+   begin
+      -- Only the working values are set. A staged value is never read before
+      -- it has been staged by a parameter update.
+{% for p in set_parameter_defaults.parameters %}
+      Self.{{ p.name }} := {{ p.name }};
+{% endfor %}
+      -- Check the resulting values against the component's parameter validation:
+      Self.Assert_Valid_Parameter_Defaults;
+   end Set_Parameter_Defaults;
+
+{% endif %}
 {% if set_id_bases %}
    -----------------------------------------------------------------------
    -- Initialize the Id_Bases for any commands, data products, or events:
@@ -256,9 +278,6 @@ package body Component.{{ name }} is
       pragma Assert (Natural (Parameter_Id_Base) + {{ (parameters|length) - 1 }} <= Natural (Parameter_Types.Parameter_Id'Last));
 {% endif %}
       Self.Parameter_Id_Base := Parameter_Id_Base;
-      -- Check the component's compiled-in default parameter values against the
-      -- component's parameter validation:
-      Self.Assert_Valid_Parameter_Defaults;
 {% endif %}
    end Set_Id_Bases;
 
