@@ -10,8 +10,9 @@ The table below shows the parameters for the \VAR{prettyname|e} assembly.
   \texttt{0x\VAR{"%04x" % id } (\VAR{ param.id })} &
   \texttt{\url{\VAR{param.suite.component.instance_name}.\VAR{param.name}}} &
   \texttt{\url{\VAR{param.type}}} &
-%- if param.default_value
-  \texttt{\url{\VAR{param.default_value}}}
+%- set default_value = param.suite.component.set_parameter_defaults.get_parameter_value(param.name) or param.default_value
+%- if default_value
+  \texttt{\url{\VAR{default_value}}}
 %- else
   \textit{None}
 %- endif
