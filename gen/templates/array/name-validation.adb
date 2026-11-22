@@ -66,7 +66,9 @@ package body {{ name }}.Validation is
    -- "{{ required_alignment }} is a multiple of T'Alignment" -- i.e. our
    -- aligned local copies satisfy T's alignment requirement and the
    -- typed overlays in the helpers below are non-erroneous per RM
-   -- 13.3(13/3).
+   -- 13.3(13/3). The runtime checks below compare against the literal
+   -- rather than T'Alignment: it is a known multiple of T'Alignment, so
+   -- the check is at least as strict, and it is a compile-time constant.
 {% if endianness in ["either", "big"] %}
    pragma Compile_Time_Error (
       T'Alignment > {{ required_alignment }},
@@ -94,11 +96,13 @@ package body {{ name }}.Validation is
       -- handler per RM 13.9.2. We walk the elements through R and
       -- set Errant_Field on the first invalid one.
       function Valid_Through (Aligned : in Serialization.Byte_Array) return Boolean is
-         -- Alignment of Aligned should be made compatible by called.
+{% if required_alignment > 1 %}
+         -- Alignment of Aligned is made compatible by the caller.
          pragma Assert (
-            To_Integer (Aligned'Address) mod T'Alignment = 0,
-            "Valid_Through: caller passed buffer not aligned to T'Alignment"
+            To_Integer (Aligned'Address) mod {{ required_alignment }} = 0,
+            "Valid_Through: caller passed buffer not aligned to {{ required_alignment }}"
          );
+{% endif %}
 
          -- Overlay T. We know alignment is good so ignore warnings.
          pragma Warnings (Off, "specified address*may be inconsistent with alignment");
@@ -186,7 +190,7 @@ package body {{ name }}.Validation is
 {% else %}
       -- If alignment of bytes is already compatible, then we are safe to
       -- validate right now.
-      if To_Integer (Bytes'Address) mod T'Alignment = 0 then
+      if To_Integer (Bytes'Address) mod {{ required_alignment }} = 0 then
          return Valid_Through (Bytes);
       else
          -- The alignment of bytes is not compatible so we need to
@@ -217,11 +221,13 @@ package body {{ name }}.Validation is
       -- handler per RM 13.9.2. We walk the elements through R and
       -- set Errant_Field on the first invalid one.
       function Valid_Le_Through (Aligned : in Serialization_Le.Byte_Array) return Boolean is
-         -- Alignment of Aligned should be made compatible by called.
+{% if required_alignment > 1 %}
+         -- Alignment of Aligned is made compatible by the caller.
          pragma Assert (
-            To_Integer (Aligned'Address) mod T_Le'Alignment = 0,
-            "Valid_Le_Through: caller passed buffer not aligned to T_Le'Alignment"
+            To_Integer (Aligned'Address) mod {{ required_alignment }} = 0,
+            "Valid_Le_Through: caller passed buffer not aligned to {{ required_alignment }}"
          );
+{% endif %}
 
          -- Overlay T. We know alignment is good so ignore warnings.
          pragma Warnings (Off, "specified address*may be inconsistent with alignment");
@@ -309,7 +315,7 @@ package body {{ name }}.Validation is
 {% else %}
       -- If alignment of bytes is already compatible, then we are safe to
       -- validate right now.
-      if To_Integer (Bytes'Address) mod T_Le'Alignment = 0 then
+      if To_Integer (Bytes'Address) mod {{ required_alignment }} = 0 then
          return Valid_Le_Through (Bytes);
       else
          -- The alignment of bytes is not compatible so we need to
