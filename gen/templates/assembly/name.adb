@@ -56,6 +56,18 @@ package body {{ name }} is
    end Set_Id_Bases;
 
 {% endif %}
+{% if component_kind_dict["parameters"] %}
+   procedure Set_Parameter_Defaults is
+   begin
+      -----------------------------------
+      -- Parameter Default Initialization:
+      -----------------------------------
+{% for component in component_kind_dict["parameters"] %}
+      {{ component.instance_name }}.Set_Parameter_Defaults{% if component.set_parameter_defaults.parameter_call_string() %} ({{ component.set_parameter_defaults.parameter_call_string() }}){% endif %};
+{% endfor %}
+   end Set_Parameter_Defaults;
+
+{% endif %}
 {% if connections %}
    procedure Connect_Components is
    begin

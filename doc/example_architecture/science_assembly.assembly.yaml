@@ -52,6 +52,12 @@ components:
     # available.
     set_id_bases:
       - "Data_Product_Id_Base => 100"
+    # Optional (only for components that have a parameters
+    # model) - replace the default value of a parameter for
+    # this instance. A parameter that is omitted keeps the
+    # default value declared in the parameters model.
+    set_parameter_defaults:
+      - "Calibration_Coefficient_2 => (Value => 2.0)"
     # Required (only for components that have a data_dependencies
     # model) - specify the data products that map to the data
     # dependencies

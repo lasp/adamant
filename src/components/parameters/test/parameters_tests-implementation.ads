@@ -18,6 +18,11 @@ private
    overriding procedure Test_Init (Self : in out Instance);
    -- This unit test tests the nominal dumping of the parameter table by command.
    overriding procedure Test_Nominal_Dump_Parameters (Self : in out Instance);
+   -- This unit test tests that a component's default parameter values can be
+   -- replaced before startup, that a parameter not provided keeps the default
+   -- value from its model, and that a value failing the component's parameter
+   -- validation is rejected.
+   overriding procedure Test_Parameter_Defaults (Self : in out Instance);
    -- This unit test tests the nominal updating of the parameter table by command.
    overriding procedure Test_Nominal_Update_Parameters (Self : in out Instance);
    -- This unit test tests the nominal updating of the parameter table by memory

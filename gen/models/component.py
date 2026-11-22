@@ -132,6 +132,7 @@ class component(base):
         self.init = None
         self.set_id_bases = None
         self.set_id_bases_parameters = []
+        self.set_parameter_defaults = None
         self.map_data_dependencies = None
         self.ided_suites = []
         self.generic = None
@@ -373,6 +374,29 @@ class component(base):
             )
         else:
             self.set_id_bases = None
+
+        # Handle parameter default initialization:
+        # Every parameter is an optional argument that defaults to the value
+        # declared in the parameters model.
+        if self.parameters:
+            self.set_parameter_defaults = subprogram(
+                name="Set_Parameter_Defaults",
+                description=("This procedure replaces the default values of the component's parameters. "
+                             "Any parameter not provided keeps the default value declared in the "
+                             "component's parameters model. The resulting values are asserted to be "
+                             "valid according to the component's Validate_Parameters function."),
+                parameters=[
+                    parameter(
+                        name=par.name,
+                        type=(par.type_package + ".U") if par.type_package else par.type,
+                        description=par.description,
+                        default_value=par.default_value,
+                    )
+                    for par in self.parameters
+                ],
+            )
+        else:
+            self.set_parameter_defaults = None
 
         # Load all complex types used in the component. This includes any records or
         # arrays used in the components connectors, events, data products
@@ -806,6 +830,9 @@ class component(base):
         load_subprogram_values(
             self.set_id_bases, "set_id_bases", check_missing=False
         )  # Missing IDs are OK, since we will generate them if they are not set
+        load_subprogram_values(
+            self.set_parameter_defaults, "set_parameter_defaults", check_missing=False
+        )  # Missing values are OK, since the model defaults are used for them
 
         # Check data dependencies:
         if "map_data_dependencies" in self.instance_data and not self.data_dependencies:
