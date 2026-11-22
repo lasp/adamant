@@ -6,10 +6,10 @@ from database.model_cache_database import model_cache_database
 
 class build_clear_cache(build_rule_base):
     """
-    This build rule remove the model cache from the filesystem
-    so it will need to be recreated from scratch for the next build.
-    This can be useful if an output is not generating correctly, and
-    a dependency is missing to the yaml file being modified.
+    This build rule removes the model cache from the filesystem. The model
+    cache lasts for one redo session, so there is nothing left to remove
+    between builds. The rule is kept so that "redo clear_cache" and the
+    projects that name this rule keep working.
     """
     def build(self, redo_1, redo_2, redo_3):
         """

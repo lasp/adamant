@@ -487,7 +487,7 @@ In addition to specific commands, Adamant also provides a set of build commands 
   \item \textbf{\texttt{redo recursive}} - runs \texttt{redo all} from this directory and all below it
   \item \textbf{\texttt{redo clean}} - removes all \textit{build/} directories from this directory and all below it
   \item \textbf{\texttt{redo clean\_all}} - removes all \textit{build/} directories from this entire repository
-  \item \textbf{\texttt{redo clear\_cache}} - remove the persistent model cache that the build system uses to increase performance, see Section \ref{The Model Cache}
+  \item \textbf{\texttt{redo clear\_cache}} - remove the model cache that the build system uses to increase performance. The model cache only lasts for one call to redo, so there is normally nothing to remove, see Section \ref{The Model Cache}
   \item \textbf{\texttt{redo templates}} - finds and builds all autocoded templates (in \textit{build/template/}) that can be built from this directory
   \item \textbf{\texttt{redo test\_all}} - finds and runs all unit tests from this directory and all below it. Note: Add a \textit{.skip\_test} file to a directory to exclude it from being run by \texttt{redo test\_all}.
   \item \textbf{\texttt{redo coverage\_all}} - finds and runs all unit tests from this directory and all below it and generates coverage reports for each. Note: Add a \textit{.skip\_test} or \textit{.skip\_coverage} file to a directory to exclude it from being run by \texttt{redo coverage\_all}.
@@ -554,7 +554,6 @@ Very rarely, \texttt{redo} can get itself into an unknown state. If things are n
 \begin{minted}{text}
 > rm -rf ~/.redo      # remove the redo database
 > redo clean_all      # clean the entire repository
-> redo clear_cache    # remove the model cache if ENABLE_PERSISTENT_MODEL_CACHE is set
 > redo <your_command> # retry the redo command that was not working
 \end{minted}
 \vspace{5mm} %5mm vertical space
@@ -6929,28 +6928,9 @@ Note that adding some build rules, such as compiling for a new programming langu
 
 \subsubsection{Model Caching} \label{The Model Cache}
 
-\textit{Note: The Adamant persistent model cache is currently disabled by default due to some instability in its behavior. If you want to use this experimental feature you can enable it via:}
+When building a target, the Adamant build system spends a lot of time reading YAML models from the file system, validating them, and then using them to generate outputs. Many models are used more than once during a build, so the build system caches each model it loads in a database in \textit{/tmp} for the rest of that build. The cache lasts for one call to redo. It is created when the build starts and removed when it finishes, so a build never uses a model cached by an earlier one. \\
 
-\vspace{5mm} %5mm vertical space
-\begin{minted}{text}
-> export ENABLE_PERSISTENT_MODEL_CACHE=1
-\end{minted}
-\vspace{5mm} %5mm vertical space
-
-\textit{but be aware that sometimes the cache may not always be refreshed correctly when dependencies change, and clearing the cache manually might be needed (see below). The description below applies if this feature is enabled.}
-\vspace{5mm} %5mm vertical space
-
-When building a target, the Adamant build system spends a lot of time reading YAML models from the file system, validating them, and then using them to generate outputs. Since most of these models do not change often on disk, the build system caches them in a database in \textit{/temp} to speed up build times. It is important when designing python models to correctly track the dependencies so that cached entries can be refreshed when a YAML model, or a YAML model's dependency, has changed. To do this, ensure that your python model correctly implements the \texttt{get\_dependencies} method, which should return a list of all YAML files that the current YAML file depends on. For example, a \texttt{*.component.yaml} always depends on its IDed entity models: \texttt{*.data\_products.yaml}, \texttt{*.data\_commands.yaml}, etc. \\
-
-If you suspect that the cache is messed up, or you want to ensure a completely clean build, you can clear the cache by running:
-
-\vspace{5mm} %5mm vertical space
-\begin{minted}{text}
-> redo clear_cache
-\end{minted}
-\vspace{5mm} %5mm vertical space
-
-which will remove the entire cache database from the system. It will be recreated next time you build a new target.
+It is still important when designing python models to correctly track dependencies, so that redo rebuilds an output when a YAML model, or a YAML model's dependency, has changed. To do this, ensure that your python model correctly implements the \texttt{get\_dependencies} method, which should return a list of all YAML files that the current YAML file depends on. For example, a \texttt{*.component.yaml} always depends on its IDed entity models: \texttt{*.data\_products.yaml}, \texttt{*.data\_commands.yaml}, etc.
 
 \subsection{The Generator System} \label{Adding Generators}
 
